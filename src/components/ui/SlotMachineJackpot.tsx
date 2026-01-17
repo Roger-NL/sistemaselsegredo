@@ -206,17 +206,62 @@ export function SlotMachineJackpot({ completedPillarNumber, onComplete, isVisibl
                             )}
 
                             {(phase === "jackpot" || phase === "resgate") && (
-                                <motion.div key="jackpot" initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-center mb-6 md:mb-12 relative w-full">
-                                    <h1 className="text-5xl md:text-[8rem] lg:text-[10rem] font-black text-transparent bg-clip-text bg-gradient-to-b from-[#fff] via-[#f1c40f] to-[#b45309] drop-shadow-[0_0_20px_rgba(212,175,55,0.8)] z-20 relative break-words leading-none">
-                                        JACKPOT
-                                    </h1>
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[#f1c40f]/20 blur-[60px] md:blur-[100px] z-0" />
+                                <motion.div
+                                    key="jackpot"
+                                    initial={{ scale: 0.9, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    transition={{ type: "spring", damping: 20 }}
+                                    className="w-full max-w-sm md:max-w-md mx-auto px-2"
+                                >
+                                    {/* Single Unified Box */}
+                                    <div className="bg-gradient-to-b from-[#1c1c1c] to-[#0a0a0a] border-4 border-[#d4af37] rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(212,175,55,0.15)]">
+
+                                        {/* Title Section */}
+                                        <div className="bg-gradient-to-b from-[#d4af37]/20 to-transparent pt-6 pb-4 px-4 relative">
+                                            {/* Glow Effect */}
+                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[200%] bg-[#f1c40f]/20 blur-[60px] pointer-events-none" />
+
+                                            <h1 className="text-3xl md:text-5xl font-black text-center leading-tight relative z-10">
+                                                <span className="text-transparent bg-clip-text bg-gradient-to-b from-[#fff] to-[#f1c40f] drop-shadow-[0_0_20px_rgba(241,196,15,0.5)]">NÍVEL</span>
+                                                <br />
+                                                <span className="text-transparent bg-clip-text bg-gradient-to-b from-[#f1c40f] to-[#b45309] drop-shadow-[0_0_20px_rgba(212,175,55,0.5)]">DOMINADO!</span>
+                                            </h1>
+                                        </div>
+
+                                        {/* Module Info Section */}
+                                        <div className="px-4 pb-4">
+                                            <div className="bg-black/50 border border-[#d4af37]/40 rounded-xl p-3 mb-4">
+                                                <p className="text-[9px] md:text-[10px] text-[#d4af37]/60 tracking-[0.15em] uppercase text-center mb-2">
+                                                    ES ENGLISH ACADEMY
+                                                </p>
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <span className="text-xs md:text-sm text-[#d4af37] font-bold tracking-wider uppercase">MÓDULO</span>
+                                                    <span className="text-4xl md:text-5xl font-black text-[#f1c40f] drop-shadow-[0_0_10px_rgba(241,196,15,0.5)]">
+                                                        {String(completedPillarNumber).padStart(2, '0')}
+                                                    </span>
+                                                    <span className="text-xs md:text-sm text-[#d4af37] font-bold tracking-wider uppercase">CONCLUÍDO</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Button */}
+                                            {phase === "resgate" && (
+                                                <motion.button
+                                                    onClick={onComplete}
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    className="w-full py-3 md:py-4 rounded-xl bg-[#d4af37] text-black font-black text-base md:text-lg uppercase tracking-widest"
+                                                >
+                                                    PRÓXIMO NÍVEL →
+                                                </motion.button>
+                                            )}
+                                        </div>
+                                    </div>
                                 </motion.div>
                             )}
                         </AnimatePresence>
 
-                        {/* SLOT MACHINE CHASSIS */}
-                        {["ready", "spinning", "bonus", "jackpot", "resgate", "answering"].includes(phase) && (
+                        {/* SLOT MACHINE CHASSIS - Hidden during jackpot/resgate */}
+                        {["ready", "spinning", "bonus", "answering"].includes(phase) && (
                             <motion.div
                                 initial={{ y: 100, opacity: 0 }}
                                 animate={{ y: 0, opacity: 1, scale: screenShake ? [1, 1.02, 0.98, 1] : 1 }}
