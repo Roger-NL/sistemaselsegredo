@@ -14,34 +14,57 @@ export function SolarSystem() {
     const planets = getPlanetsWithStatus();
 
     return (
-        <div className="relative w-full h-[600px] md:h-[800px] flex items-center justify-center overflow-hidden">
+        <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
             {/* 
                Mobile Scaling Wrapper 
-               "O Sistema Solar 'encolhe' (Scale 0.55) para caber na largura do celular."
+               "O Sistema Solar 'encolhe' para caber na largura do celular."
              */}
-            <div className="md:scale-100 scale-[0.55] origin-center w-full h-full flex items-center justify-center">
+            <div className="w-full h-full flex items-center justify-center transform scale-[0.45] md:scale-65 lg:scale-75 transition-transform duration-500">
 
-                {/* Orbital Rings (Golden Optical Fiber) */}
-                {planets.map((planet) => (
-                    <div
-                        key={`orbit-${planet.id}`}
-                        className="absolute rounded-full border border-[#d4af37]/20 shadow-[0_0_15px_rgba(212,175,55,0.05)]"
-                        style={{
-                            width: planet.orbitDistance * 2,
-                            height: planet.orbitDistance * 2,
-                        }}
-                    />
-                ))}
-
-                {/* Sun (Center) */}
+                {/* Sun (Center) - Z-Index alto para ficar por cima das órbitas internas se sobreporem */}
                 <div className="absolute z-20">
                     <Sun />
                 </div>
 
-                {/* Planets (Orbiting) */}
-                {planets.map((planet, index) => (
-                    <Planet key={planet.id} planet={planet} index={index} />
-                ))}
+                {/* Rotating Rings with Planets attached */}
+                {planets.map((planet, index) => {
+                    // Cada planeta tem sua própria órbita (anel)
+                    // O anel gira, carregando o planeta
+                    const duration = 30 + index * 15; // Mais lento para órbitas externas
+                    const size = planet.orbitDistance * 2;
+
+                    return (
+                        <motion.div
+                            key={planet.id}
+                            className="absolute rounded-full border border-[#d4af37]/20 shadow-[0_0_15px_rgba(212,175,55,0.05)] flex items-start justify-center pointer-events-none"
+                            style={{
+                                width: size,
+                                height: size,
+                            }}
+                            animate={{ rotate: 360 }}
+                            transition={{
+                                duration: duration,
+                                repeat: Infinity,
+                                ease: "linear"
+                            }}
+                        >
+                            {/* O Planeta - Fixado no topo do anel (top-0) */}
+                            {/* Precisamos de um wrapper para contra-rotacionar o planeta para ele ficar em pé */}
+                            <div className="absolute -top-0 -translate-y-1/2 pointer-events-auto z-30">
+                                <motion.div
+                                    animate={{ rotate: -360 }}
+                                    transition={{
+                                        duration: duration,
+                                        repeat: Infinity,
+                                        ease: "linear"
+                                    }}
+                                >
+                                    <Planet planet={planet} index={index} />
+                                </motion.div>
+                            </div>
+                        </motion.div>
+                    );
+                })}
             </div>
 
             {/* Background Gold Dust Particles */}

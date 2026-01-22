@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, CheckCircle, XCircle, Sparkles } from "lucide-react";
 import { useProgress } from "@/context/ProgressContext";
 import { getQuizByPillarNumber } from "@/data/quizzes";
-import { SlotMachineJackpot } from "@/components/ui/SlotMachineJackpot";
+import { SystemIntegrationModal } from "@/components/ui/SystemIntegrationModal";
 import { DecisionMatrix } from "@/components/quiz/DecisionMatrix";
 
 // ============================================================================
@@ -33,7 +33,7 @@ export function QuizClient({ pillarId }: QuizClientProps) {
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [correctAnswers, setCorrectAnswers] = useState(0);
-    const [showSlotMachine, setShowSlotMachine] = useState(false);
+    const [showSystemIntegration, setShowSystemIntegration] = useState(false);
     const [showDecisionMatrix, setShowDecisionMatrix] = useState(false);
     const [quizCompleted, setQuizCompleted] = useState(false);
     const [isNavigating, setIsNavigating] = useState(false);
@@ -104,19 +104,19 @@ export function QuizClient({ pillarId }: QuizClientProps) {
             if (finalCorrect >= questions.length / 2) {
                 // Marca pilar como completado ANTES de mostrar slot machine
                 completePillar(pillarNumber);
-                setShowSlotMachine(true);
+                setShowSystemIntegration(true);
             }
         }
     };
 
     // Função chamada quando slot machine completa
-    const handleSlotMachineComplete = () => {
+    const handleSystemIntegrationComplete = () => {
         // NÃO fecha o modal visualmente para evitar flash da tela de fundo
         // setShowSlotMachine(false); 
 
         // Se for o Pilar 9, abre a Matrix de Decisão
         if (pillarNumber === 9) {
-            setShowSlotMachine(false); // Aqui fechamos para mostrar a Matrix
+            setShowSystemIntegration(false); // Aqui fechamos para mostrar a Matrix
             setShowDecisionMatrix(true);
             return;
         }
@@ -165,7 +165,7 @@ export function QuizClient({ pillarId }: QuizClientProps) {
     }
 
     // Tela de resultado final (se não passou OU se passou mas fechou a roleta sem ação - fallback)
-    if (quizCompleted && !showSlotMachine) {
+    if (quizCompleted && !showSystemIntegration) {
         const finalCorrect = correctAnswers;
         const passed = finalCorrect >= questions.length / 2;
 
@@ -197,7 +197,7 @@ export function QuizClient({ pillarId }: QuizClientProps) {
 
                         <div className="space-y-3">
                             <button
-                                onClick={() => setShowSlotMachine(true)}
+                                onClick={() => setShowSystemIntegration(true)}
                                 className="w-full py-4 px-6 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold rounded-xl flex items-center justify-center gap-2"
                             >
                                 <Sparkles className="w-5 h-5" />
@@ -266,11 +266,10 @@ export function QuizClient({ pillarId }: QuizClientProps) {
                 <DecisionMatrix onSelect={handleDecisionMade} />
             )}
 
-            {/* Slot Machine Jackpot - Experiência Vegas */}
-            <SlotMachineJackpot
-                isVisible={showSlotMachine}
+            <SystemIntegrationModal
+                isVisible={showSystemIntegration}
                 completedPillarNumber={pillarNumber}
-                onComplete={handleSlotMachineComplete}
+                onComplete={handleSystemIntegrationComplete}
             />
 
             <main className="min-h-screen bg-[#050505] text-white">

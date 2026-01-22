@@ -30,6 +30,8 @@ interface ProgressContextType {
     resetProgress: () => void;
     /** Desbloqueia uma especialização específica */
     unlockSpecialization: (planetId: string) => void;
+    /** Define o progresso até um pilar específico (Dev Mode) */
+    setPillarLevel: (level: number) => void;
     /** ID da especialização escolhida (ou null) */
     chosenSpecialization: string | null;
 }
@@ -102,6 +104,22 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
             return newStatus;
         });
+    };
+
+    // Define nível específico (Dev Mode)
+    const setPillarLevel = (level: number) => {
+        const newStatus: Record<string, PillarStatus> = {};
+        PILLARS.forEach((pillar, index) => {
+            const pillarNum = index + 1;
+            if (pillarNum < level) {
+                newStatus[pillar.id] = "completed";
+            } else if (pillarNum === level) {
+                newStatus[pillar.id] = "unlocked";
+            } else {
+                newStatus[pillar.id] = "locked";
+            }
+        });
+        setPillarStatus(newStatus);
     };
 
     // Retorna número do pilar atual
@@ -178,6 +196,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             value={{
                 pillarStatus,
                 completePillar,
+                setPillarLevel,
                 getCurrentPillarNumber,
                 getCompletedCount,
                 areAllPillarsComplete,

@@ -3,29 +3,38 @@
 import { SolarSystem } from "@/components/solar/SolarSystem";
 import { useProgress } from "@/context/ProgressContext";
 import { RefreshCcw } from "lucide-react";
-
-// ============================================================================
-// DASHBOARD PAGE
-// A tela principal do Sistema Solar onde o aluno visualiza seu progresso
-// ============================================================================
+import { getRank } from "@/utils/ranks";
 
 export default function DashboardPage() {
     const { getCompletedCount, areAllPillarsComplete, resetProgress } = useProgress();
     const completedCount = getCompletedCount();
     const allComplete = areAllPillarsComplete();
+    const currentRank = getRank(completedCount);
 
     return (
-        <main className="min-h-screen bg-[#050505] text-white overflow-hidden">
+        <main className="h-screen w-screen bg-[#050505] text-white overflow-hidden flex flex-col">
             {/* Header simples - Responsivo Compacto */}
-            <header className="fixed top-0 left-0 right-0 z-[100] px-4 py-2 bg-black/80 backdrop-blur-md border-b border-[#d4af37]/20">
-                <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+            <header className="flex-none px-4 py-3 bg-black/80 backdrop-blur-md border-b border-[#d4af37]/20 z-[100]">
+                <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 w-full">
                     {/* Logo Mobile: Esquerda, menor */}
-                    <h1 className="text-lg font-bold tracking-tight flex flex-col leading-none">
-                        <span><span className="text-[#d4af37]">ES</span> English</span>
-                        <span className="text-xs text-zinc-500 font-normal tracking-widest">Academy</span>
-                    </h1>
+                    <div className="flex flex-col">
+                        <h1 className="text-lg font-bold tracking-tight flex flex-col leading-none">
+                            <span><span className="text-[#d4af37]">ES</span> English</span>
+                            <span className="text-xs text-zinc-500 font-normal tracking-widest">Academy</span>
+                        </h1>
+                        {/* Rank Display Mobile */}
+                        <span className="text-[10px] text-[#d4af37] font-mono uppercase tracking-widest mt-1 md:hidden">
+                            {currentRank}
+                        </span>
+                    </div>
 
                     <div className="flex items-center gap-3">
+                        {/* Rank Display Desktop */}
+                        <div className="hidden md:flex flex-col items-end mr-4 border-r border-[#d4af37]/20 pr-4">
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-widest">Patente Atual</span>
+                            <span className="text-sm text-[#d4af37] font-bold uppercase tracking-wider">{currentRank}</span>
+                        </div>
+
                         {/* Progresso Compacto */}
                         <div className="flex flex-col items-end">
                             <div className="flex items-center gap-1.5">
@@ -54,23 +63,40 @@ export default function DashboardPage() {
                 </div>
             </header>
 
-            {/* Área do Sistema Solar */}
-            <div className="pt-20 px-4">
-                {/* Título da seção */}
-                <div className="text-center mb-4 md:mb-8">
-                    <h2 className="text-3xl md:text-5xl font-serif font-black mb-2 text-white">
-                        O SEU <span className="text-[#d4af37] text-bevel">IMPÉRIO</span>
-                    </h2>
-                    <p className="text-zinc-500 max-w-md mx-auto uppercase tracking-widest text-xs">
-                        {allComplete
-                            ? "Domínio Total Conquistado. Escolha sua Especialização."
-                            : "Acesse o Núcleo de Energia (Sol) para expandir seu território."
-                        }
+            {/* Área do Sistema Solar - Flex Grow para ocupar o resto */}
+            <div className="flex-1 relative flex flex-col items-center justify-center overflow-hidden">
+                {/* Título da seção (Estilo HUD Tático Premium) */}
+                <div className="absolute top-8 left-0 right-0 flex flex-col items-center justify-center z-10 pointer-events-none select-none">
+                    <div className="flex items-center gap-4 opacity-80">
+                        {/* Linha Decorativa Esquerda */}
+                        <div className="h-px w-16 md:w-32 bg-gradient-to-r from-transparent via-[#d4af37]/50 to-[#d4af37]" />
+
+                        <div className="relative px-4 py-1">
+                            {/* Bordas do HUD */}
+                            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#d4af37]" />
+                            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#d4af37]" />
+                            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#d4af37]" />
+                            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#d4af37]" />
+
+                            <h2 className="text-lg md:text-xl font-bold text-white uppercase tracking-[0.25em] text-center">
+                                Mapa de <span className="text-[#d4af37]">Conquista</span>
+                            </h2>
+                        </div>
+
+                        {/* Linha Decorativa Direita */}
+                        <div className="h-px w-16 md:w-32 bg-gradient-to-l from-transparent via-[#d4af37]/50 to-[#d4af37]" />
+                    </div>
+
+                    {/* Subtítulo Técnico */}
+                    <p className="text-[10px] text-[#d4af37]/60 font-mono tracking-[0.4em] mt-2 uppercase">
+                        Sistema Operacional V4.0
                     </p>
                 </div>
 
                 {/* O Sistema Solar */}
-                <SolarSystem />
+                <div className="w-full h-full flex items-center justify-center z-0">
+                    <SolarSystem />
+                </div>
             </div>
         </main>
     );
