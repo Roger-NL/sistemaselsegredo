@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useProgress } from "@/context/ProgressContext";
+import { useSunSettings } from "@/context/SunSettingsContext";
 import { ExplorerHUD } from "./ExplorerHUD";
+import { SunShader } from "./SunShader";
 import type { Pillar } from "@/data/curriculum";
 
 // ============================================================================
@@ -13,6 +15,7 @@ import type { Pillar } from "@/data/curriculum";
 export function Sun() {
     const [isOpen, setIsOpen] = useState(false);
     const { getPillarsWithStatus, getCompletedCount, getCurrentPillarNumber } = useProgress();
+    const { settings } = useSunSettings();
 
     const pillars = getPillarsWithStatus();
     const completedCount = getCompletedCount();
@@ -23,7 +26,7 @@ export function Sun() {
             {/* O Sol (Célula de Energia Dourada) */}
             <motion.button
                 onClick={() => setIsOpen(true)}
-                className="relative w-28 h-28 md:w-40 md:h-40 rounded-full cursor-pointer z-10 flex items-center justify-center group"
+                className="relative w-28 h-28 md:w-40 md:h-40 aspect-square rounded-full cursor-pointer z-10 flex items-center justify-center group"
                 animate={{
                     boxShadow: [
                         "0 0 60px rgba(245, 158, 11, 0.4), 0 0 100px rgba(245, 158, 11, 0.0)",
@@ -96,27 +99,36 @@ export function Sun() {
                     ))}
                 </div>
 
-                {/* Núcleo de Ouro Fundido */}
+                {/* Núcleo de Sol 3D com Shaders */}
+                {/* Wrapper de posição - só translate */}
                 <div
-                    className="absolute inset-2 rounded-full overflow-hidden shadow-inner"
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
                     style={{
-                        background: "radial-gradient(circle at 35% 35%, #fffbeb 0%, #fbbf24 20%, #d97706 60%, #78350f 100%)",
-                        boxShadow: "inset 0 0 40px rgba(0,0,0,0.5)"
+                        transform: `translate(${Math.round(settings.offsetX)}px, ${Math.round(settings.offsetY)}px)`
                     }}
                 >
-                    {/* Brilho Especular */}
-                    <div className="absolute top-[10%] left-[10%] w-[30%] h-[20%] bg-white/40 blur-xl rounded-[100%] transform -rotate-45" />
-
-                    {/* Texto Central */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pt-2">
-                        <span className="text-4xl md:text-5xl font-serif font-black text-[#451a03] text-bevel tracking-tighter"
-                            style={{ textShadow: "0 2px 0 rgba(255,255,255,0.4)" }}>
-                            {completedCount}<span className="text-2xl md:text-3xl">/9</span>
-                        </span>
-                        <span className="text-xs md:text-sm font-bold text-[#78350f] uppercase tracking-[0.2em] mt-1 border-t border-[#78350f]/30 pt-1">
-                            Pilares
-                        </span>
+                    {/* Wrapper de escala - só scale */}
+                    <div
+                        style={{
+                            transform: `scale(${settings.scale})`,
+                            transformOrigin: "center center"
+                        }}
+                    >
+                        <SunShader />
                     </div>
+                </div>
+
+                {/* Pillar Counter - Static at center, clickable */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                    <span
+                        className="text-4xl md:text-5xl font-serif font-black text-white/90 tracking-tighter drop-shadow-lg"
+                        style={{ textShadow: "0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(251,191,36,0.5)" }}
+                    >
+                        {completedCount}<span className="text-2xl md:text-3xl">/9</span>
+                    </span>
+                    <span className="text-xs md:text-sm font-bold text-white/80 uppercase tracking-[0.2em] mt-1 border-t border-white/30 pt-1 drop-shadow-md">
+                        Pilares
+                    </span>
                 </div>
             </motion.button>
 
