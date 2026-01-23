@@ -26,7 +26,7 @@ export function Sun() {
             {/* O Sol (Célula de Energia Dourada) */}
             <motion.button
                 onClick={() => setIsOpen(true)}
-                className="relative w-28 h-28 md:w-40 md:h-40 aspect-square rounded-full cursor-pointer z-10 flex items-center justify-center group"
+                className="relative w-28 h-28 md:w-40 md:h-40 min-w-[7rem] min-h-[7rem] md:min-w-[10rem] md:min-h-[10rem] aspect-square rounded-full cursor-pointer z-10 flex items-center justify-center group flex-shrink-0"
                 animate={{
                     boxShadow: [
                         "0 0 60px rgba(245, 158, 11, 0.4), 0 0 100px rgba(245, 158, 11, 0.0)",
@@ -101,20 +101,26 @@ export function Sun() {
 
                 {/* Núcleo de Sol 3D com Shaders */}
                 {/* Wrapper de posição - só translate */}
+                {/* Núcleo de Sol 3D com Shaders */}
+                {/* Wrapper de posição - só translate */}
                 <div
                     className="absolute inset-0 flex items-center justify-center pointer-events-none"
                     style={{
                         transform: `translate(${Math.round(settings.offsetX)}px, ${Math.round(settings.offsetY)}px)`
                     }}
                 >
-                    {/* Wrapper de escala - só scale */}
+                    {/* Wrapper de escala - PRECISA ter tamanho para os filhos w-full funcionarem */}
                     <div
+                        className="w-full h-full flex items-center justify-center"
                         style={{
                             transform: `scale(${settings.scale})`,
                             transformOrigin: "center center"
                         }}
                     >
-                        <SunShader />
+                        {/* Clip circular - W-FULL H-FULL relativo ao botão pai */}
+                        <div className="w-full h-full rounded-full overflow-hidden will-change-transform">
+                            <SunShader />
+                        </div>
                     </div>
                 </div>
 

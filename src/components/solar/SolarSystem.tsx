@@ -19,24 +19,48 @@ export function SolarSystem() {
                Mobile Scaling Wrapper 
                "O Sistema Solar 'encolhe' para caber na largura do celular."
              */}
-            <div className="w-full h-full flex items-center justify-center transform scale-[0.45] md:scale-65 lg:scale-75 transition-transform duration-500">
+            {/* 
+               Mobile Scaling Wrapper REMOVED
+               Now using direct size calculation for better quality and no distortion
+             */}
+            <div className="w-full h-full flex items-center justify-center">
 
-                {/* Sun (Center) - Z-Index alto para ficar por cima das órbitas internas se sobreporem */}
-                <div className="absolute z-20">
+                {/* LAYER 1: Orbit Rings (Background) - Z-INDEX 10 */}
+                {planets.map((planet, index) => {
+                    // Add gap booster: increased spacing per orbit level
+                    // Increased base distance (+80) so the first planet clears the sun
+                    // Increased index spacing (+50) to spread lines out more
+                    const adjustedDistance = planet.orbitDistance + 80 + (index * 50);
+                    const size = (adjustedDistance * 2) * 0.45;
+
+                    return (
+                        <div
+                            key={`ring-${planet.id}`}
+                            className="absolute rounded-full border border-[#d4af37]/20 shadow-[0_0_15px_rgba(212,175,55,0.05)] pointer-events-none z-10"
+                            style={{
+                                width: size,
+                                height: size,
+                            }}
+                        />
+                    );
+                })}
+
+                {/* LAYER 2: Sun (Middle) - Z-INDEX 20 */}
+                <div className="absolute z-20 flex items-center justify-center">
                     <Sun />
                 </div>
 
-                {/* Rotating Rings with Planets attached */}
+                {/* LAYER 3: Planets (Foreground) - Z-INDEX 30 */}
                 {planets.map((planet, index) => {
-                    // Cada planeta tem sua própria órbita (anel)
-                    // O anel gira, carregando o planeta
-                    const duration = 30 + index * 15; // Mais lento para órbitas externas
-                    const size = planet.orbitDistance * 2;
+                    const duration = 30 + index * 15;
+                    // Match the same distance calc
+                    const adjustedDistance = planet.orbitDistance + 80 + (index * 50);
+                    const size = (adjustedDistance * 2) * 0.45;
 
                     return (
                         <motion.div
-                            key={planet.id}
-                            className="absolute rounded-full border border-[#d4af37]/20 shadow-[0_0_15px_rgba(212,175,55,0.05)] flex items-start justify-center pointer-events-none"
+                            key={`planet-${planet.id}`}
+                            className="absolute flex items-start justify-center pointer-events-none z-30"
                             style={{
                                 width: size,
                                 height: size,
@@ -48,9 +72,8 @@ export function SolarSystem() {
                                 ease: "linear"
                             }}
                         >
-                            {/* O Planeta - Fixado no topo do anel (top-0) */}
-                            {/* Precisamos de um wrapper para contra-rotacionar o planeta para ele ficar em pé */}
-                            <div className="absolute -top-0 -translate-y-1/2 pointer-events-auto z-30">
+                            {/* Planet anchored to top of the ring */}
+                            <div className="absolute -top-0 -translate-y-1/2 pointer-events-auto">
                                 <motion.div
                                     animate={{ rotate: -360 }}
                                     transition={{
@@ -59,7 +82,9 @@ export function SolarSystem() {
                                         ease: "linear"
                                     }}
                                 >
-                                    <Planet planet={planet} index={index} />
+                                    <div className="transform scale-[0.6]">
+                                        <Planet planet={planet} index={index} />
+                                    </div>
                                 </motion.div>
                             </div>
                         </motion.div>

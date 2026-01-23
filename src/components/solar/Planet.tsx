@@ -26,42 +26,55 @@ export function Planet({ planet, index }: PlanetProps) {
                    PLANET VISUALS 
                 */}
                 {isUnlocked ? (
-                    // UNLOCKED: Sphere of Crystal/Energy
+                    // UNLOCKED: Premium Apple Aero Glass (Vibrant)
                     <div
-                        className="absolute inset-0 rounded-full glass-elite overflow-hidden"
+                        className="absolute inset-0 rounded-full overflow-hidden"
                         style={{
-                            boxShadow: `0 0 20px ${planet.color}40, inset 0 0 20px ${planet.color}20`,
-                            border: `1px solid ${planet.color}60`
+                            // More vibrant gradient (60% to 10%) for better visibility
+                            background: `linear-gradient(135deg, ${planet.color}99 0%, ${planet.color}20 100%)`,
+                            backdropFilter: "blur(6px)",
+                            boxShadow: `
+                                0 4px 15px 0 rgba(0, 0, 0, 0.4),                 /* Deep soft shadow */
+                                inset 0 0 0 1px rgba(255, 255, 255, 0.4),        /* Stronger sharp rim */
+                                inset 0 0 20px ${planet.color}60                 /* Strong inner color glow */
+                            `
                         }}
                     >
-                        {/* Inner glow pulse */}
+                        {/* Stronger Specular Highlight */}
+                        <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/40 to-transparent opacity-100 rounded-t-full" />
+
+                        {/* Inner subtle pulse */}
                         <motion.div
                             className="absolute inset-0 bg-white/10"
-                            animate={{ opacity: [0.1, 0.3, 0.1] }}
-                            transition={{ duration: 3, repeat: Infinity }}
+                            animate={{ opacity: [0, 0.2, 0] }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                         />
                     </div>
                 ) : (
-                    // LOCKED: Onyx Sphere
+                    // LOCKED: Frosted White/Gray Glass (Clean, No Inner Lock)
                     <div
-                        className="absolute inset-0 rounded-full"
+                        className="absolute inset-0 rounded-full overflow-hidden"
                         style={{
-                            background: "radial-gradient(circle at 30% 30%, #3f3f46 0%, #09090b 60%, #000000 100%)",
-                            boxShadow: "inset 0 2px 10px rgba(255,255,255,0.1), 0 10px 20px rgba(0,0,0,0.8)"
+                            background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 100%)",
+                            backdropFilter: "blur(6px)", // Less blur to avoid artifacts
+                            border: "1px solid rgba(255,255,255,0.15)",
+                            boxShadow: "inset 0 0 15px rgba(0,0,0,0.5)"
                         }}
                     >
                         {/* Metallic sheen */}
-                        <div className="absolute top-2 left-4 w-6 h-3 bg-white/5 blur-sm rounded-full rotate-[-20deg]" />
-
-                        {/* Embossed Lock */}
-                        <div className="absolute inset-0 flex items-center justify-center text-black/50 drop-shadow-[0_1px_0_rgba(255,255,255,0.1)]">
-                            <Lock className="w-8 h-8 opacity-40 mix-blend-overlay" />
-                        </div>
+                        <div className="absolute top-0 left-0 right-0 h-[40%] bg-gradient-to-b from-white/10 to-transparent rounded-t-full" />
                     </div>
                 )}
 
                 {/* ICON (Floating inside) */}
-                <div className={`relative z-10 text-4xl filter drop-shadow-lg transform transition-transform group-hover:scale-110 ${!isUnlocked && "opacity-20 grayscale"}`}>
+                <div className={`
+                    relative z-10 text-3xl md:text-4xl 
+                    transform transition-transform group-hover:scale-110 
+                    ${isUnlocked
+                        ? "text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" // Bright glow for unlocked
+                        : "opacity-40 grayscale text-zinc-400" // Dim for locked
+                    }
+                `}>
                     {planet.icon}
                 </div>
             </Link>

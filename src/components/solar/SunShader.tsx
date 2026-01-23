@@ -232,13 +232,9 @@ function GlowSphere() {
 // MAIN EXPORT - SUN SHADER COMPONENT
 // ============================================================================
 
-interface SunShaderProps {
-  // No props needed - transforms handled by parent wrappers
-}
-
 export function SunShader() {
   return (
-    <div className="w-28 h-28 md:w-40 md:h-40 rounded-full overflow-hidden">
+    <div className="w-full h-full">
       <Canvas
         camera={{ position: [0, 0, 2.5], fov: 50 }}
         style={{ background: "transparent", width: "100%", height: "100%" }}

@@ -41,9 +41,9 @@ export function SunSettingsProvider({ children }: { children: ReactNode }) {
             if (stored) {
                 const parsed = JSON.parse(stored);
                 setSettings({
-                    offsetX: parsed.offsetX ?? 0,
-                    offsetY: parsed.offsetY ?? 0,
-                    scale: parsed.scale ?? 1,
+                    offsetX: Number(parsed.offsetX) || 0,
+                    offsetY: Number(parsed.offsetY) || 0,
+                    scale: Number(parsed.scale) || 1,
                 });
             }
         } catch {
@@ -59,19 +59,36 @@ export function SunSettingsProvider({ children }: { children: ReactNode }) {
         }
     }, [settings, isHydrated]);
 
+    // Helper: clamp value between min and max
+    const clamp = (v: number, min: number, max: number) =>
+        Math.max(min, Math.min(max, v));
+
+    // Helper: snap small values to 0 (dead zone)
+    const deadZone = (v: number) => (Math.abs(v) < 0.5 ? 0 : v);
+
     const setOffsetX = (value: number) => {
-        setSettings((prev) => ({ ...prev, offsetX: Math.max(-50, Math.min(50, value)) }));
+        setSettings((prev) => ({
+            ...prev,
+            offsetX: deadZone(clamp(Math.round(value), -50, 50)),
+        }));
     };
 
     const setOffsetY = (value: number) => {
-        setSettings((prev) => ({ ...prev, offsetY: Math.max(-50, Math.min(50, value)) }));
+        setSettings((prev) => ({
+            ...prev,
+            offsetY: deadZone(clamp(Math.round(value), -50, 50)),
+        }));
     };
 
     const setScale = (value: number) => {
-        setSettings((prev) => ({ ...prev, scale: Math.max(0.5, Math.min(2, value)) }));
+        setSettings((prev) => ({
+            ...prev,
+            scale: clamp(Number(value.toFixed(2)), 0.5, 2),
+        }));
     };
 
     const resetSettings = () => {
+        localStorage.removeItem(STORAGE_KEY);
         setSettings(DEFAULT_SETTINGS);
     };
 
