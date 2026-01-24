@@ -3,10 +3,12 @@
 import { useProgress } from "@/context/ProgressContext";
 import { Planet } from "./Planet";
 import { Sun } from "./Sun";
+import { useIsMobile } from "@/utils/performance";
 import { motion } from "framer-motion";
 
 export function SolarSystem() {
     const { getCompletedCount, getPillarsWithStatus, getPlanetsWithStatus } = useProgress();
+    const isMobile = useIsMobile();
 
     // Get updated status
     const completedCount = getCompletedCount();
@@ -14,7 +16,7 @@ export function SolarSystem() {
     const planets = getPlanetsWithStatus();
 
     return (
-        <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+        <div className="relative w-full h-full flex items-center justify-center overflow-visible">
             {/* 
                Mobile Scaling Wrapper 
                "O Sistema Solar 'encolhe' para caber na largura do celular."
@@ -30,7 +32,9 @@ export function SolarSystem() {
                     // Add gap booster: increased spacing per orbit level
                     // Increased base distance (+80) so the first planet clears the sun
                     // Increased index spacing (+50) to spread lines out more
-                    const adjustedDistance = planet.orbitDistance + 80 + (index * 50);
+                    const baseOffset = 80 + (index * 50);
+                    const mobileOffset = isMobile ? 30 : 0;
+                    const adjustedDistance = planet.orbitDistance + baseOffset + mobileOffset;
                     const size = (adjustedDistance * 2) * 0.45;
 
                     return (
@@ -54,7 +58,9 @@ export function SolarSystem() {
                 {planets.map((planet, index) => {
                     const duration = 30 + index * 15;
                     // Match the same distance calc
-                    const adjustedDistance = planet.orbitDistance + 80 + (index * 50);
+                    const baseOffset = 80 + (index * 50);
+                    const mobileOffset = isMobile ? 30 : 0;
+                    const adjustedDistance = planet.orbitDistance + baseOffset + mobileOffset;
                     const size = (adjustedDistance * 2) * 0.45;
 
                     return (
@@ -94,7 +100,7 @@ export function SolarSystem() {
 
             {/* Background Gold Dust Particles */}
             <div className="absolute inset-0 pointer-events-none">
-                {[...Array(30)].map((_, i) => (
+                {[...Array(isMobile ? 15 : 30)].map((_, i) => (
                     <motion.div
                         key={i}
                         className="absolute rounded-full"

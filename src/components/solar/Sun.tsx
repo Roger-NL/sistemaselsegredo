@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import { useProgress } from "@/context/ProgressContext";
-import { useSunSettings } from "@/context/SunSettingsContext";
-import { ExplorerHUD } from "./ExplorerHUD";
-import { SunShader } from "./SunShader";
+
+import { useReducedMotion, useIsMobile } from "@/utils/performance";
 import type { Pillar } from "@/data/curriculum";
+import { SunShader } from "./SunShader";
+
+// Lazy load heavy HUD component
+const ExplorerHUD = lazy(() => import("./ExplorerHUD").then(mod => ({ default: mod.ExplorerHUD })));
 
 // ============================================================================
 // SUN COMPONENT - MOLTEN GOLD ENERGY CORE
@@ -15,7 +18,9 @@ import type { Pillar } from "@/data/curriculum";
 export function Sun() {
     const [isOpen, setIsOpen] = useState(false);
     const { getPillarsWithStatus, getCompletedCount, getCurrentPillarNumber } = useProgress();
-    const { settings } = useSunSettings();
+    const isMobile = useIsMobile();
+    const reduced = useReducedMotion();
+    const effectiveScale = 1; // Fixed scale to keep Sun perfectly circular
 
     const pillars = getPillarsWithStatus();
     const completedCount = getCompletedCount();
@@ -26,15 +31,15 @@ export function Sun() {
             {/* O Sol (Célula de Energia Dourada) */}
             <motion.button
                 onClick={() => setIsOpen(true)}
-                className="relative w-28 h-28 md:w-40 md:h-40 min-w-[7rem] min-h-[7rem] md:min-w-[10rem] md:min-h-[10rem] aspect-square rounded-full cursor-pointer z-10 flex items-center justify-center group flex-shrink-0"
-                animate={{
+                className="relative w-[280px] h-[280px] md:w-[250px] md:h-[250px] rounded-full cursor-pointer z-10 flex items-center justify-center group flex-shrink-0"
+                animate={reduced ? {} : {
                     boxShadow: [
                         "0 0 60px rgba(245, 158, 11, 0.4), 0 0 100px rgba(245, 158, 11, 0.0)",
                         "0 0 80px rgba(245, 158, 11, 0.6), 0 0 140px rgba(245, 158, 11, 0.2)",
                         "0 0 60px rgba(245, 158, 11, 0.4), 0 0 100px rgba(245, 158, 11, 0.0)",
                     ],
                 }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                transition={reduced ? {} : { duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
             >
@@ -55,7 +60,8 @@ export function Sun() {
                     />
 
                     {/* Random Solar Flares */}
-                    {[...Array(3)].map((_, i) => (
+                    {/* Reduce flares on reduced motion or mobile for performance */}
+                    {(!reduced && !isMobile) && [...Array(3)].map((_, i) => (
                         <motion.div
                             key={i}
                             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-500/30"
@@ -106,14 +112,14 @@ export function Sun() {
                 <div
                     className="absolute inset-0 flex items-center justify-center pointer-events-none"
                     style={{
-                        transform: `translate(${Math.round(settings.offsetX)}px, ${Math.round(settings.offsetY)}px)`
+                        transform: "translate(0, 0)"
                     }}
                 >
                     {/* Wrapper de escala - PRECISA ter tamanho para os filhos w-full funcionarem */}
                     <div
                         className="w-full h-full flex items-center justify-center"
                         style={{
-                            transform: `scale(${settings.scale})`,
+                            transform: "scale(1)",
                             transformOrigin: "center center"
                         }}
                     >
@@ -138,12 +144,14 @@ export function Sun() {
                 </div>
             </motion.button>
 
-            <ExplorerHUD
-                isOpen={isOpen}
-                onClose={() => setIsOpen(false)}
-                pillars={pillars}
-                currentPillarNumber={currentPillarNumber}
-            />
+            <Suspense fallback={null}>
+                <ExplorerHUD
+                    isOpen={isOpen}
+                    onClose={() => setIsOpen(false)}
+                    pillars={pillars}
+                    currentPillarNumber={currentPillarNumber}
+                />
+            </Suspense>
         </>
     );
 }

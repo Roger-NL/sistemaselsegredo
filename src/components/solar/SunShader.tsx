@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import React, { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -233,17 +233,53 @@ function GlowSphere() {
 // ============================================================================
 
 export function SunShader() {
+  // ---------------------------------------------------------------------
+  // 1️⃣  Keep the canvas perfectly square regardless of zoom/resize
+  // ---------------------------------------------------------------------
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [size, setSize] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        // Use the smaller dimension, round to whole pixels to avoid sub‑pixel jitter
+        const newSize = Math.round(Math.min(rect.width, rect.height));
+        // Update only if the change is significant (>=1px) to avoid flicker
+        if (Math.abs(newSize - size) >= 1) {
+          setSize(newSize);
+        }
+      }
+    };
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, [size]);
+  // ---------------------------------------------------------------------
+  // 2️⃣  Render the Canvas only after we know a concrete size (avoids
+  //     fractional‑pixel issues that cause the sphere to look stretched).
+  // ---------------------------------------------------------------------
   return (
-    <div className="w-full h-full">
-      <Canvas
-        camera={{ position: [0, 0, 2.5], fov: 50 }}
-        style={{ background: "transparent", width: "100%", height: "100%" }}
-        gl={{ alpha: true, antialias: true }}
-      >
-        <ambientLight intensity={0.1} />
-        <GlowSphere />
-        <SunSphere />
-      </Canvas>
+    <div
+      ref={containerRef}
+      className="w-full h-full flex items-center justify-center overflow-visible"
+    >
+      {size > 0 && (
+        <Canvas
+          camera={{ position: [0, 0, 2.28], fov: 50 }}
+          // Explicit pixel dimensions – no % values, so the canvas gets an
+          // exact integer size and stays perfectly square.
+          style={{ width: size, height: size, background: "transparent" }}
+          // Use the device pixel ratio for crisp rendering but keep the
+          // aspect ratio 1:1 because width === height.
+          dpr={window.devicePixelRatio || 1}
+          gl={{ alpha: true, antialias: true }}
+        >
+          <ambientLight intensity={0.1} />
+          <GlowSphere />
+          <SunSphere />
+        </Canvas>
+      )}
     </div>
   );
 }
