@@ -32,7 +32,7 @@ export function Sun() {
             <motion.button
                 onClick={() => setIsOpen(true)}
                 className="relative w-[280px] h-[280px] md:w-[250px] md:h-[250px] rounded-full cursor-pointer z-10 flex items-center justify-center group flex-shrink-0"
-                animate={reduced ? {} : {
+                animate={(reduced || isMobile) ? {} : {
                     boxShadow: [
                         "0 0 60px rgba(245, 158, 11, 0.4), 0 0 100px rgba(245, 158, 11, 0.0)",
                         "0 0 80px rgba(245, 158, 11, 0.6), 0 0 140px rgba(245, 158, 11, 0.2)",

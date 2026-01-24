@@ -91,7 +91,7 @@ const fragmentShader = `
   }
 
   // Fractal Brownian Motion
-  #define NUM_OCTAVES 5
+  #define NUM_OCTAVES 4
   float fBm(in vec3 _pos, in float sz) {
     float v = 0.0;
     float a = 0.25;
@@ -171,7 +171,7 @@ function SunSphere() {
 
   return (
     <mesh ref={meshRef}>
-      <sphereGeometry args={[1, 64, 64]} />
+      <sphereGeometry args={[1, 32, 32]} />
       <shaderMaterial
         uniforms={uniforms}
         vertexShader={vertexShader}
@@ -215,7 +215,7 @@ function GlowSphere() {
 
   return (
     <mesh scale={1.15}>
-      <sphereGeometry args={[1, 32, 32]} />
+      <sphereGeometry args={[1, 24, 24]} />
       <shaderMaterial
         uniforms={glowUniforms}
         vertexShader={glowVertexShader}
@@ -272,7 +272,7 @@ export function SunShader() {
           style={{ width: size, height: size, background: "transparent" }}
           // Use the device pixel ratio for crisp rendering but keep the
           // aspect ratio 1:1 because width === height.
-          dpr={window.devicePixelRatio || 1}
+          dpr={Math.min(window.devicePixelRatio || 1, 1.5)}
           gl={{ alpha: true, antialias: true }}
         >
           <ambientLight intensity={0.1} />
