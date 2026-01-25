@@ -4,6 +4,7 @@ import "./globals.css";
 import { ProgressProvider } from "@/context/ProgressContext";
 
 import { DevMenu } from "@/components/dev/DevMenu";
+import { BackgroundVideo } from "@/components/BackgroundVideo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ProgressProvider>
+          <BackgroundVideo />
           {children}
           <DevMenu />
 

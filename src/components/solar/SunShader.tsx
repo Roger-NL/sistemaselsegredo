@@ -185,43 +185,39 @@ function SunSphere() {
 // GLOW SPHERE (Outer atmosphere)
 // ============================================================================
 
-const glowVertexShader = `
-  varying vec3 vNormalView;
-  varying vec3 vPosition;
+// ============================================================================
+// ATMOSPHERE SPHERE (Volumetric Glow)
+// ============================================================================
 
+const atmosphereVertexShader = `
+  varying vec3 vNormal;
   void main() {
-    vNormalView = normalize(normalMatrix * normal);
-    vPosition = normalize(vec3(modelViewMatrix * vec4(position, 1.0)).xyz);
+    vNormal = normalize(normalMatrix * normal);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
 
-const glowFragmentShader = `
-  uniform vec3 u_color;
-  varying vec3 vPosition;
-  varying vec3 vNormalView;
-
+const atmosphereFragmentShader = `
+  varying vec3 vNormal;
   void main() {
-    float raw_intensity = max(dot(vPosition, vNormalView), 0.);
-    float intensity = pow(raw_intensity, 3.5);
-    gl_FragColor = vec4(u_color, intensity * 0.6);
+    // Soft falloff
+    float intensity = pow(0.35 - dot(vNormal, vec3(0, 0, 1.0)), 3.0);
+    // Subtle golden glow, not solid wall
+    gl_FragColor = vec4(1.0, 0.7, 0.2, 0.6) * intensity; 
   }
 `;
 
-function GlowSphere() {
-  const glowUniforms = useMemo(() => ({
-    u_color: { value: new THREE.Color("#fbbf24") },
-  }), []);
-
+function AtmosphereSphere() {
   return (
-    <mesh scale={1.15}>
-      <sphereGeometry args={[1, 24, 24]} />
+    // Reduced Scale (1.35x) - Just a corona/rim, not a supernova
+    <mesh scale={[1.35, 1.35, 1.35]}>
+      <sphereGeometry args={[1, 32, 32]} />
       <shaderMaterial
-        uniforms={glowUniforms}
-        vertexShader={glowVertexShader}
-        fragmentShader={glowFragmentShader}
-        transparent
+        vertexShader={atmosphereVertexShader}
+        fragmentShader={atmosphereFragmentShader}
         blending={THREE.AdditiveBlending}
+        side={THREE.BackSide}
+        transparent
         depthWrite={false}
       />
     </mesh>
@@ -243,40 +239,40 @@ export function SunShader() {
     const updateSize = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        // Use the smaller dimension, round to whole pixels to avoid sub‑pixel jitter
         const newSize = Math.round(Math.min(rect.width, rect.height));
-        // Update only if the change is significant (>=1px) to avoid flicker
         if (Math.abs(newSize - size) >= 1) {
           setSize(newSize);
         }
       }
     };
     updateSize();
+    // Add resize listener
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
   }, [size]);
+
   // ---------------------------------------------------------------------
-  // 2️⃣  Render the Canvas only after we know a concrete size (avoids
-  //     fractional‑pixel issues that cause the sphere to look stretched).
+  // 2️⃣  Render the Canvas with Atmospheric Layer
   // ---------------------------------------------------------------------
   return (
     <div
       ref={containerRef}
-      className="w-full h-full flex items-center justify-center overflow-visible"
+      className="w-full h-full flex items-center justify-center overflow-visible transition-all duration-700 ease-in-out"
     >
       {size > 0 && (
         <Canvas
-          camera={{ position: [0, 0, 2.28], fov: 50 }}
-          // Explicit pixel dimensions – no % values, so the canvas gets an
-          // exact integer size and stays perfectly square.
+          // Move camera back to ~7.0 to compensate for the 3x canvas expansion
+          // This keeps the "Sun Core" the same visual size (matching the button)
+          // but allows the "Atmosphere" to spill into the extra space.
+          camera={{ position: [0, 0, 7.0], fov: 45 }}
           style={{ width: size, height: size, background: "transparent" }}
-          // Use the device pixel ratio for crisp rendering but keep the
-          // aspect ratio 1:1 because width === height.
           dpr={Math.min(window.devicePixelRatio || 1, 1.5)}
           gl={{ alpha: true, antialias: true }}
         >
           <ambientLight intensity={0.1} />
-          <GlowSphere />
+          {/* Atmosphere Layer (Back) */}
+          <AtmosphereSphere />
+          {/* Main Sun Sphere */}
           <SunSphere />
         </Canvas>
       )}

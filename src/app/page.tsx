@@ -11,7 +11,7 @@ import { Rocket } from "lucide-react";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6">
+    <main className="min-h-screen text-white flex flex-col items-center justify-center p-6">
       {/* Background decorativo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Círculos decorativos que simulam órbitas */}

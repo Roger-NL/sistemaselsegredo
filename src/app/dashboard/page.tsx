@@ -12,7 +12,7 @@ export default function DashboardPage() {
     const currentRank = getRank(completedCount);
 
     return (
-        <main className="h-screen w-screen bg-[#050505] text-white overflow-hidden flex flex-col">
+        <main className="h-screen w-screen text-white overflow-hidden flex flex-col">
             {/* Header simples - Responsivo Compacto */}
             <header className="flex-none px-4 py-3 bg-black/80 backdrop-blur-md border-b border-[#d4af37]/20 z-[100]">
                 <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 w-full">

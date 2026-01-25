@@ -31,7 +31,7 @@ export function Sun() {
             {/* O Sol (Célula de Energia Dourada) */}
             <motion.button
                 onClick={() => setIsOpen(true)}
-                className="relative w-[280px] h-[280px] md:w-[250px] md:h-[250px] rounded-full cursor-pointer z-10 flex items-center justify-center group flex-shrink-0"
+                className="relative w-[280px] h-[280px] md:w-[250px] md:h-[250px] rounded-full cursor-pointer z-10 flex items-center justify-center group flex-shrink-0 transition-all duration-700 ease-in-out"
                 animate={(reduced || isMobile) ? {} : {
                     boxShadow: [
                         "0 0 60px rgba(245, 158, 11, 0.4), 0 0 100px rgba(245, 158, 11, 0.0)",
@@ -46,6 +46,7 @@ export function Sun() {
                 {/* SOLAR FLARES & GLOW (Organic Effect) */}
                 <div className="absolute inset-0 z-[-1]">
                     {/* Breathing Glow Background */}
+                    {/* Breathing Glow Background - DISABLED to let 3D Atmosphere shine
                     <motion.div
                         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] rounded-full bg-amber-500/20 blur-[80px]"
                         animate={{
@@ -58,6 +59,7 @@ export function Sun() {
                             ease: "easeInOut",
                         }}
                     />
+                    */}
 
                     {/* Random Solar Flares */}
                     {/* Reduce flares on reduced motion or mobile for performance */}
@@ -116,15 +118,21 @@ export function Sun() {
                     }}
                 >
                     {/* Wrapper de escala - PRECISA ter tamanho para os filhos w-full funcionarem */}
+                    {/* Wrapper de escala - PRECISA ter tamanho para os filhos w-full funcionarem */}
                     <div
-                        className="w-full h-full flex items-center justify-center"
+                        className="w-full h-full flex items-center justify-center relative"
                         style={{
                             transform: "scale(1)",
                             transformOrigin: "center center"
                         }}
                     >
-                        {/* Clip circular - W-FULL H-FULL relativo ao botão pai */}
-                        <div className="w-full h-full rounded-full overflow-hidden will-change-transform">
+                        {/* 
+                           EXPANDED RENDERING STAGE 
+                           We make this container 300% larger than the button and center it.
+                           This gives the canvas room to render the glow/atmosphere OUTSIDE 
+                           the clickable button area without being clipped.
+                        */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] pointer-events-none">
                             <SunShader />
                         </div>
                     </div>
