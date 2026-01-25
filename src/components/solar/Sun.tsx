@@ -4,9 +4,11 @@ import React, { lazy, Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import { useProgress } from "@/context/ProgressContext";
 
-import { useReducedMotion, useIsMobile } from "@/utils/performance";
+// Updated performance hooks import
+import { useReducedMotion, useIsMobile, useLowPerformance } from "@/utils/performance";
 import type { Pillar } from "@/data/curriculum";
 import { SunShader } from "./SunShader";
+import { LightSun } from "./LightSun";
 
 // Lazy load heavy HUD component
 const ExplorerHUD = lazy(() => import("./ExplorerHUD").then(mod => ({ default: mod.ExplorerHUD })));
@@ -19,6 +21,7 @@ export function Sun() {
     const [isOpen, setIsOpen] = useState(false);
     const { getPillarsWithStatus, getCompletedCount, getCurrentPillarNumber } = useProgress();
     const isMobile = useIsMobile();
+    const lowPerf = useLowPerformance();
     const reduced = useReducedMotion();
     const effectiveScale = 1; // Fixed scale to keep Sun perfectly circular
 
@@ -133,7 +136,7 @@ export function Sun() {
                            the clickable button area without being clipped.
                         */}
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] pointer-events-none">
-                            <SunShader />
+                            <SunShader isMobile={isMobile} />
                         </div>
                     </div>
                 </div>

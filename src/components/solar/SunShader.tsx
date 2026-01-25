@@ -25,6 +25,7 @@ const vertexShader = `
   }
 `;
 
+// Desktop Quality Shader (High Fidelity)
 const fragmentShader = `
   uniform float u_time;
   uniform vec3 u_colorHot;
@@ -147,11 +148,90 @@ const fragmentShader = `
   }
 `;
 
+// Mobile Optimized Shader (Reduced Instructions)
+const fragmentShaderMobile = `
+  uniform float u_time;
+  uniform vec3 u_colorHot;
+  uniform vec3 u_colorMid;
+  uniform vec3 u_colorCold;
+
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  varying vec3 vNormalView;
+  varying vec3 vPosition;
+  varying vec3 vWorldPosition;
+
+  // Simplified Noise (2D based or simpler 3D)
+  // Reusing 3D noise but less steps
+  float random(in vec3 st) {
+    return fract(sin(dot(st, vec3(12.9898, 78.233, 23.112))) * 12943.145);
+  }
+
+  // Simpler noise without time interpolation
+  float noise(in vec3 _pos) {
+    vec3 i_pos = floor(_pos);
+    vec3 f_pos = fract(_pos);
+    
+    // No time mixing in noise base to save ops
+    // Just offset by time in calling function
+    
+    float aa = random(i_pos);
+    float ab = random(i_pos + vec3(1., 0., 0.));
+    float ac = random(i_pos + vec3(0., 1., 0.));
+    float ad = random(i_pos + vec3(1., 1., 0.));
+    float ae = random(i_pos + vec3(0., 0., 1.));
+    float af = random(i_pos + vec3(1., 0., 1.));
+    float ag = random(i_pos + vec3(0., 1., 1.));
+    float ah = random(i_pos + vec3(1., 1., 1.));
+    
+    vec3 t = smoothstep(0., 1., f_pos);
+    
+    return mix(
+             mix(mix(aa, ab, t.x), mix(ac, ad, t.x), t.y),
+             mix(mix(ae, af, t.x), mix(ag, ah, t.x), t.y),
+             t.z
+           );
+  }
+
+  // Reduced Octaves (2 instead of 4)
+  #define NUM_OCTAVES 2
+  float fBm(in vec3 _pos, in float sz) {
+    float v = 0.0;
+    float a = 0.5; // Stronger initial amp
+    _pos *= sz;
+    // Simple rotation
+    _pos += u_time * 0.1; 
+    
+    for (int i = 0; i < NUM_OCTAVES; ++i) {
+      v += a * noise(_pos);
+      _pos = _pos * 2.0;
+      a *= 0.5;
+    }
+    return v;
+  }
+
+  void main() {
+    vec3 st = vWorldPosition;
+    
+    // Single domain warp instead of 3
+    float n = fBm(st + vec3(0.0), 3.0);
+    
+    // Simple color mix
+    vec3 color = mix(u_colorMid, u_colorHot, n);
+    
+    // Simple Fresnel
+    float fresnel = pow(1.0 + dot(normalize(vPosition), normalize(vNormalView)), 3.0);
+    
+    vec3 finalColor = color + fresnel * u_colorHot * 0.2;
+    gl_FragColor = vec4(finalColor, 1.0);
+  }
+`;
+
 // ============================================================================
 // SUN SPHERE COMPONENT
 // ============================================================================
 
-function SunSphere() {
+function SunSphere({ isMobile }: { isMobile: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
 
   const uniforms = useMemo(() => ({
@@ -171,11 +251,12 @@ function SunSphere() {
 
   return (
     <mesh ref={meshRef}>
-      <sphereGeometry args={[1, 32, 32]} />
+      {/* Reduce geometry segments on mobile */}
+      <sphereGeometry args={[1, isMobile ? 24 : 32, isMobile ? 24 : 32]} />
       <shaderMaterial
         uniforms={uniforms}
         vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
+        fragmentShader={isMobile ? fragmentShaderMobile : fragmentShader}
       />
     </mesh>
   );
@@ -207,11 +288,14 @@ const atmosphereFragmentShader = `
   }
 `;
 
-function AtmosphereSphere() {
+function AtmosphereSphere({ isMobile }: { isMobile: boolean }) {
+  // Mobile: 1.3x scale (requested)
+  // Desktop: 1.35x scale (existing)
+  const scale = isMobile ? 1.3 : 1.35;
+
   return (
-    // Reduced Scale (1.35x) - Just a corona/rim, not a supernova
-    <mesh scale={[1.35, 1.35, 1.35]}>
-      <sphereGeometry args={[1, 32, 32]} />
+    <mesh scale={[scale, scale, scale]}>
+      <sphereGeometry args={[1, isMobile ? 24 : 32, isMobile ? 24 : 32]} />
       <shaderMaterial
         vertexShader={atmosphereVertexShader}
         fragmentShader={atmosphereFragmentShader}
@@ -228,7 +312,11 @@ function AtmosphereSphere() {
 // MAIN EXPORT - SUN SHADER COMPONENT
 // ============================================================================
 
-export function SunShader() {
+interface SunShaderProps {
+  isMobile?: boolean;
+}
+
+export function SunShader({ isMobile = false }: SunShaderProps) {
   // ---------------------------------------------------------------------
   // 1️⃣  Keep the canvas perfectly square regardless of zoom/resize
   // ---------------------------------------------------------------------
@@ -262,18 +350,17 @@ export function SunShader() {
       {size > 0 && (
         <Canvas
           // Move camera back to ~7.0 to compensate for the 3x canvas expansion
-          // This keeps the "Sun Core" the same visual size (matching the button)
-          // but allows the "Atmosphere" to spill into the extra space.
           camera={{ position: [0, 0, 7.0], fov: 45 }}
           style={{ width: size, height: size, background: "transparent" }}
-          dpr={Math.min(window.devicePixelRatio || 1, 1.5)}
-          gl={{ alpha: true, antialias: true }}
+          // Cap DPR at 1.0 for mobile to prevent heating
+          dpr={isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5)}
+          gl={{ alpha: true, antialias: !isMobile }} // Disable antialias on mobile
         >
           <ambientLight intensity={0.1} />
           {/* Atmosphere Layer (Back) */}
-          <AtmosphereSphere />
+          <AtmosphereSphere isMobile={isMobile} />
           {/* Main Sun Sphere */}
-          <SunSphere />
+          <SunSphere isMobile={isMobile} />
         </Canvas>
       )}
     </div>

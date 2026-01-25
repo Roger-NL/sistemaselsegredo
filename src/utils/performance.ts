@@ -34,3 +34,14 @@ export const useIsMobile = (breakpoint = 768): boolean => {
     }, []);
     return isMobile;
 };
+
+/** Detect low‑performance devices (e.g., low memory or few CPU cores) */
+export const useLowPerformance = (memoryThresholdGB = 4, coresThreshold = 4): boolean => {
+    const [lowPerf, setLowPerf] = React.useState(false);
+    React.useEffect(() => {
+        const mem = (navigator as any).deviceMemory || 8; // assume decent if unknown
+        const cores = navigator.hardwareConcurrency || 8;
+        setLowPerf(mem < memoryThresholdGB || cores <= coresThreshold);
+    }, []);
+    return lowPerf;
+};
