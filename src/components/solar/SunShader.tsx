@@ -25,8 +25,8 @@ const vertexShader = `
   }
 `;
 
-// Desktop Quality Shader (High Fidelity)
-const fragmentShader = `
+// Unified Shader Generator - High Fidelity with Octave Control
+const getFragmentShader = (isMobile: boolean) => `
   uniform float u_time;
   uniform vec3 u_colorHot;
   uniform vec3 u_colorMid;
@@ -92,7 +92,9 @@ const fragmentShader = `
   }
 
   // Fractal Brownian Motion
-  #define NUM_OCTAVES 4
+  // Use 3 octaves on mobile for better performance while keeping the look similar
+  #define NUM_OCTAVES ${isMobile ? 3 : 4}
+  
   float fBm(in vec3 _pos, in float sz) {
     float v = 0.0;
     float a = 0.25;
@@ -148,90 +150,11 @@ const fragmentShader = `
   }
 `;
 
-// Mobile Optimized Shader (Reduced Instructions)
-const fragmentShaderMobile = `
-  uniform float u_time;
-  uniform vec3 u_colorHot;
-  uniform vec3 u_colorMid;
-  uniform vec3 u_colorCold;
-
-  varying vec2 vUv;
-  varying vec3 vNormal;
-  varying vec3 vNormalView;
-  varying vec3 vPosition;
-  varying vec3 vWorldPosition;
-
-  // Simplified Noise (2D based or simpler 3D)
-  // Reusing 3D noise but less steps
-  float random(in vec3 st) {
-    return fract(sin(dot(st, vec3(12.9898, 78.233, 23.112))) * 12943.145);
-  }
-
-  // Simpler noise without time interpolation
-  float noise(in vec3 _pos) {
-    vec3 i_pos = floor(_pos);
-    vec3 f_pos = fract(_pos);
-    
-    // No time mixing in noise base to save ops
-    // Just offset by time in calling function
-    
-    float aa = random(i_pos);
-    float ab = random(i_pos + vec3(1., 0., 0.));
-    float ac = random(i_pos + vec3(0., 1., 0.));
-    float ad = random(i_pos + vec3(1., 1., 0.));
-    float ae = random(i_pos + vec3(0., 0., 1.));
-    float af = random(i_pos + vec3(1., 0., 1.));
-    float ag = random(i_pos + vec3(0., 1., 1.));
-    float ah = random(i_pos + vec3(1., 1., 1.));
-    
-    vec3 t = smoothstep(0., 1., f_pos);
-    
-    return mix(
-             mix(mix(aa, ab, t.x), mix(ac, ad, t.x), t.y),
-             mix(mix(ae, af, t.x), mix(ag, ah, t.x), t.y),
-             t.z
-           );
-  }
-
-  // Reduced Octaves (2 instead of 4)
-  #define NUM_OCTAVES 2
-  float fBm(in vec3 _pos, in float sz) {
-    float v = 0.0;
-    float a = 0.5; // Stronger initial amp
-    _pos *= sz;
-    // Simple rotation
-    _pos += u_time * 0.1; 
-    
-    for (int i = 0; i < NUM_OCTAVES; ++i) {
-      v += a * noise(_pos);
-      _pos = _pos * 2.0;
-      a *= 0.5;
-    }
-    return v;
-  }
-
-  void main() {
-    vec3 st = vWorldPosition;
-    
-    // Single domain warp instead of 3
-    float n = fBm(st + vec3(0.0), 3.0);
-    
-    // Simple color mix
-    vec3 color = mix(u_colorMid, u_colorHot, n);
-    
-    // Simple Fresnel
-    float fresnel = pow(1.0 + dot(normalize(vPosition), normalize(vNormalView)), 3.0);
-    
-    vec3 finalColor = color + fresnel * u_colorHot * 0.2;
-    gl_FragColor = vec4(finalColor, 1.0);
-  }
-`;
-
 // ============================================================================
 // SUN SPHERE COMPONENT
 // ============================================================================
 
-function SunSphere({ isMobile }: { isMobile: boolean }) {
+function SunSphere({ madeForMobile }: { madeForMobile: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
 
   const uniforms = useMemo(() => ({
@@ -240,6 +163,9 @@ function SunSphere({ isMobile }: { isMobile: boolean }) {
     u_colorMid: { value: new THREE.Color("#f59e0b") },  // Amber
     u_colorCold: { value: new THREE.Color("#b45309") }, // Dark orange
   }), []);
+
+  // Generate shader based on platform
+  const fragmentShader = useMemo(() => getFragmentShader(madeForMobile), [madeForMobile]);
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -251,20 +177,21 @@ function SunSphere({ isMobile }: { isMobile: boolean }) {
 
   return (
     <mesh ref={meshRef}>
-      {/* Reduce geometry segments on mobile */}
-      <sphereGeometry args={[1, isMobile ? 24 : 32, isMobile ? 24 : 32]} />
+      {/* 
+          Keep geometry segments high enough on mobile to avoid faceting. 
+          32 is standard default, 48 is high quality. 
+          24/24 might be too low for a "perfect circle" especially with displacement or fresnel.
+          We'll use 32 for mobile instead of 24.
+      */}
+      <sphereGeometry args={[1, madeForMobile ? 32 : 48, madeForMobile ? 32 : 48]} />
       <shaderMaterial
         uniforms={uniforms}
         vertexShader={vertexShader}
-        fragmentShader={isMobile ? fragmentShaderMobile : fragmentShader}
+        fragmentShader={fragmentShader}
       />
     </mesh>
   );
 }
-
-// ============================================================================
-// GLOW SPHERE (Outer atmosphere)
-// ============================================================================
 
 // ============================================================================
 // ATMOSPHERE SPHERE (Volumetric Glow)
@@ -289,19 +216,21 @@ const atmosphereFragmentShader = `
 `;
 
 function AtmosphereSphere({ isMobile }: { isMobile: boolean }) {
-  // Mobile: 1.3x scale (requested)
-  // Desktop: 1.35x scale (existing)
+  // Mobile: 1.3x scale 
+  // Desktop: 1.35x scale
+  // Minor difference, keeping it for fit
   const scale = isMobile ? 1.3 : 1.35;
 
   return (
     <mesh scale={[scale, scale, scale]}>
-      <sphereGeometry args={[1, isMobile ? 24 : 32, isMobile ? 24 : 32]} />
+      <sphereGeometry args={[1, isMobile ? 32 : 48, isMobile ? 32 : 48]} />
       <shaderMaterial
         vertexShader={atmosphereVertexShader}
         fragmentShader={atmosphereFragmentShader}
         blending={THREE.AdditiveBlending}
         side={THREE.BackSide}
         transparent
+        // depthWrite false matches standard atmosphere practices
         depthWrite={false}
       />
     </mesh>
@@ -327,14 +256,16 @@ export function SunShader({ isMobile = false }: SunShaderProps) {
     const updateSize = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
+        // Use the smallest dimension to ensure it fits in container
         const newSize = Math.round(Math.min(rect.width, rect.height));
         if (Math.abs(newSize - size) >= 1) {
           setSize(newSize);
         }
       }
     };
+    // Initial size
     updateSize();
-    // Add resize listener
+
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
   }, [size]);
@@ -342,28 +273,40 @@ export function SunShader({ isMobile = false }: SunShaderProps) {
   // ---------------------------------------------------------------------
   // 2️⃣  Render the Canvas with Atmospheric Layer
   // ---------------------------------------------------------------------
+
+  // High quality DPR for mobile (up to 2.0 or 1.5) to fix "blurriness"
+  // If device is retina (DPR 2 or 3), we want at least 1.5 or 2.
+  // Previous code had 1.0 strict for mobile.
+  const dpr = isMobile ? Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.5) : Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.5);
+  // Actually we can just use 1.5-2.0 generally capped. 
+  // Let's use 1.5 cap for safety on both to balance performance/quality.
+  const finalDPR = Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 2.0);
+
   return (
     <div
       ref={containerRef}
-      className="w-full h-full flex items-center justify-center overflow-visible transition-all duration-700 ease-in-out"
+      className="w-full h-full flex items-center justify-center overflow-visible"
     >
       {size > 0 && (
         <Canvas
           // Move camera back to ~7.0 to compensate for the 3x canvas expansion
           camera={{ position: [0, 0, 7.0], fov: 45 }}
           style={{ width: size, height: size, background: "transparent" }}
-          // Cap DPR at 1.0 for mobile to prevent heating
-          dpr={isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 1.5)}
-          gl={{ alpha: true, antialias: !isMobile }} // Disable antialias on mobile
+          // Boost DPR for sharpness. 2.0 is usually plenty.
+          dpr={finalDPR}
+          gl={{
+            alpha: true,
+            antialias: true, // Enable antialias for smooth edges
+            powerPreference: "high-performance" // Request better GPU if available
+          }}
         >
           <ambientLight intensity={0.1} />
           {/* Atmosphere Layer (Back) */}
           <AtmosphereSphere isMobile={isMobile} />
           {/* Main Sun Sphere */}
-          <SunSphere isMobile={isMobile} />
+          <SunSphere madeForMobile={isMobile} />
         </Canvas>
       )}
     </div>
   );
 }
-

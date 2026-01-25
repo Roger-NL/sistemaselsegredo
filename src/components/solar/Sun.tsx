@@ -35,7 +35,7 @@ export function Sun() {
             <motion.button
                 onClick={() => setIsOpen(true)}
                 className="relative w-[280px] h-[280px] md:w-[250px] md:h-[250px] rounded-full cursor-pointer z-10 flex items-center justify-center group flex-shrink-0 transition-all duration-700 ease-in-out"
-                animate={(reduced || isMobile) ? {} : {
+                animate={reduced ? {} : {
                     boxShadow: [
                         "0 0 60px rgba(245, 158, 11, 0.4), 0 0 100px rgba(245, 158, 11, 0.0)",
                         "0 0 80px rgba(245, 158, 11, 0.6), 0 0 140px rgba(245, 158, 11, 0.2)",
@@ -66,7 +66,7 @@ export function Sun() {
 
                     {/* Random Solar Flares */}
                     {/* Reduce flares on reduced motion or mobile for performance */}
-                    {(!reduced && !isMobile) && [...Array(3)].map((_, i) => (
+                    {(!reduced) && [...Array(3)].map((_, i) => (
                         <motion.div
                             key={i}
                             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-500/30"
