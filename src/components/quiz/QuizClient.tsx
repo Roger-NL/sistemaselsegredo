@@ -112,7 +112,7 @@ export function QuizClient({ pillarId }: QuizClientProps) {
     // Função chamada quando slot machine completa
     const handleSystemIntegrationComplete = () => {
         // NÃO fecha o modal visualmente para evitar flash da tela de fundo
-        // setShowSlotMachine(false); 
+
 
         // Se for o Pilar 9, abre a Matrix de Decisão
         if (pillarNumber === 9) {

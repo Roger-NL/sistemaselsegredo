@@ -22,6 +22,7 @@ export interface Planet {
     orbitDistance: number; // px - distância do centro para posicionamento visual
     color: string;
     icon: string; // emoji ou ícone para representação visual
+    imagePath?: string; // Optional path for custom image icon (overrides emoji)
 }
 
 // ============================================================================
@@ -100,12 +101,40 @@ export const PILLARS: Pillar[] = [
 // ============================================================================
 export const PLANETS: Planet[] = [
     {
+        id: "spec-tech",
+        title: "Carreira Tech & Dev",
+        status: "locked",
+        orbitDistance: 360,
+        color: "#6366f1", // Indigo
+        icon: "💻",
+        imagePath: "/assets/icons/tecnologia.png"
+    },
+    {
+        id: "spec-academic",
+        title: "Mestrado Acadêmico",
+        status: "locked",
+        orbitDistance: 420,
+        color: "#8b5cf6", // Violet
+        icon: "🎓",
+        imagePath: "/assets/icons/academico.png"
+    },
+    {
+        id: "spec-finance",
+        title: "Finanças Globais",
+        status: "locked",
+        orbitDistance: 480,
+        color: "#10b981", // Emerald
+        icon: "📈",
+        imagePath: "/assets/icons/financas.png"
+    },
+    {
         id: "spec-interview",
         title: "Entrevistas de Emprego",
         status: "locked",
         orbitDistance: 180, // Órbita mais próxima
         color: "#06b6d4", // Cyan
         icon: "💼",
+        imagePath: "/assets/icons/entrevista.png"
     },
     {
         id: "spec-travel",
@@ -114,6 +143,7 @@ export const PLANETS: Planet[] = [
         orbitDistance: 240, // Órbita média
         color: "#22c55e", // Green
         icon: "✈️",
+        imagePath: "/assets/icons/viagem.png"
     },
     {
         id: "spec-business",
@@ -122,6 +152,7 @@ export const PLANETS: Planet[] = [
         orbitDistance: 300, // Órbita mais distante
         color: "#f59e0b", // Amber
         icon: "📊",
+        imagePath: "/assets/icons/negocios.png"
     },
 ];
 

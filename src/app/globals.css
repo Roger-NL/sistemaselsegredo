@@ -74,12 +74,7 @@
     color: var(--foreground);
     overflow-x: hidden;
     /* Luxury Gradients */
-    /* Luxury Gradients - Removed for Video Background */
-    /* background-image: url('/background-galaxy-v3.png?v=1'); */
-    /* background-size: cover; */
-    /* background-position: center; */
-    /* background-attachment: fixed; */
-    /* background-repeat: no-repeat; */
+
   }
 
   h1,

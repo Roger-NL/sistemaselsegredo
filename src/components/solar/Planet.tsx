@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { Lock } from "lucide-react";
 import { type Planet as PlanetType } from "@/data/curriculum";
 
@@ -23,67 +24,79 @@ export function Planet({ planet, index }: PlanetProps) {
                 `}
             >
                 {/* 
-                   PLANET VISUALS 
+                   PLANET ICONS ONLY (No backgrounds, radial fade, glow) 
                 */}
-                {isUnlocked ? (
-                    // UNLOCKED: Premium Apple Aero Glass (Vibrant)
+                <div
+                    className="relative w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-110"
+                >
+                    {/* Neon Blue Ring Container */}
                     <div
-                        className="absolute inset-0 rounded-full overflow-hidden"
+                        className="relative w-full h-full flex items-center justify-center rounded-full overflow-hidden"
                         style={{
-                            // More vibrant gradient (60% to 10%) for better visibility
-                            background: `linear-gradient(135deg, ${planet.color}99 0%, ${planet.color}20 100%)`,
-                            backdropFilter: "blur(6px)",
+                            // Neon Blue Border & Glow - EXTRA BOLD
+                            border: "4px solid rgba(6, 182, 212, 1)", // Solid Cyan
                             boxShadow: `
-                                0 4px 15px 0 rgba(0, 0, 0, 0.4),                 /* Deep soft shadow */
-                                inset 0 0 0 1px rgba(255, 255, 255, 0.4),        /* Stronger sharp rim */
-                                inset 0 0 20px ${planet.color}60                 /* Strong inner color glow */
-                            `
+                                0 0 25px rgba(6, 182, 212, 0.9),     /* Intense Outer Glow */
+                                inset 0 0 15px rgba(6, 182, 212, 0.5) /* Inner Glow */
+                            `,
+                            backgroundColor: "#000" // Black background to prevent bleeding
                         }}
                     >
-                        {/* Stronger Specular Highlight */}
-                        <div className="absolute top-0 left-0 right-0 h-[45%] bg-gradient-to-b from-white/40 to-transparent opacity-100 rounded-t-full" />
-
-                        {/* Inner subtle pulse */}
-                        <motion.div
-                            className="absolute inset-0 bg-white/10"
-                            animate={{ opacity: [0, 0.2, 0] }}
-                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                        />
+                        {planet.imagePath ? (
+                            <div
+                                className="w-full h-full relative"
+                                style={{
+                                    // Keep the inner color glow for the icon itself if unlocked
+                                    filter: isUnlocked ? `drop-shadow(0 0 10px ${planet.color})` : "none"
+                                }}
+                            >
+                                <Image
+                                    src={planet.imagePath}
+                                    alt={planet.title}
+                                    fill
+                                    className="object-cover rounded-full transition-all duration-500"
+                                    style={{
+                                        // Force strict grayscale/darkness for locked state via inline style
+                                        filter: !isUnlocked ? "grayscale(100%) brightness(30%)" : "none"
+                                    }}
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                />
+                            </div>
+                        ) : (
+                            <span
+                                className={`text-3xl md:text-4xl transition-all duration-500 ${!isUnlocked ? "opacity-40 grayscale" : ""}`}
+                                style={{
+                                    color: "white",
+                                    textShadow: !isUnlocked ? "none" : `0 0 15px ${planet.color}, 0 0 30px ${planet.color}`
+                                }}
+                            >
+                                {planet.icon}
+                            </span>
+                        )}
                     </div>
-                ) : (
-                    // LOCKED: Frosted White/Gray Glass (Clean, No Inner Lock)
-                    <div
-                        className="absolute inset-0 rounded-full overflow-hidden"
-                        style={{
-                            background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 100%)",
-                            backdropFilter: "blur(6px)", // Less blur to avoid artifacts
-                            border: "1px solid rgba(255,255,255,0.15)",
-                            boxShadow: "inset 0 0 15px rgba(0,0,0,0.5)"
-                        }}
-                    >
-                        {/* Metallic sheen */}
-                        <div className="absolute top-0 left-0 right-0 h-[40%] bg-gradient-to-b from-white/10 to-transparent rounded-t-full" />
-                    </div>
-                )}
-
-                {/* ICON (Floating inside) */}
-                <div className={`
-                    relative z-10 text-3xl md:text-4xl 
-                    transform transition-transform group-hover:scale-110 
-                    ${isUnlocked
-                        ? "text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" // Bright glow for unlocked
-                        : "opacity-40 grayscale text-zinc-400" // Dim for locked
-                    }
-                `}>
-                    {planet.icon}
                 </div>
             </Link>
 
             {/* LABEL (Floating below) */}
-            <span className={`text-xs md:text-sm font-bold uppercase tracking-wider text-bevel px-2 py-1 rounded bg-black/40 backdrop-blur-sm border border-white/5 
-                ${isUnlocked ? "text-white" : "text-zinc-600"}`}>
-                {planet.title}
-            </span>
+            {/* LABEL (Floating below) */}
+            <div className={`
+                mt-3 px-3 py-1.5 rounded-lg
+                bg-black/80 backdrop-blur-md border border-white/10 shadow-xl
+                flex flex-col items-center justify-center
+                transform transition-all duration-300
+                group-hover:scale-105 group-hover:border-amber-500/30
+            `}>
+                <span className={`
+                    text-[10px] md:text-xs font-black uppercase tracking-widest leading-tight text-center
+                    ${isUnlocked
+                        ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]"
+                        : "text-zinc-500"
+                    }
+                    max-w-[120px]
+                `}>
+                    {planet.title}
+                </span>
+            </div>
         </div>
     );
 }
