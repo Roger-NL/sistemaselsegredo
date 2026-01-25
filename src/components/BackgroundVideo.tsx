@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-const FRAME_COUNT = 150;
+const FRAME_COUNT = 192;
 const FRAME_RATE = 24; // Standard Cinematic FPS
 const FRAME_INTERVAL = 1000 / FRAME_RATE;
-const PATH_PREFIX = '/fundo/frame_';
+const PATH_PREFIX = '/ceularanja/frame_';
 
 export function BackgroundVideo() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -33,7 +33,7 @@ export function BackgroundVideo() {
 
     // 2. Animation Loop
 
-    const CROSSFADE_FRAMES = 45; // Increased overlap for smoother transition
+    const CROSSFADE_FRAMES = 64; // Increased overlap (approx 2.6s) for imperceptible loop
 
     const animate = (time: number) => {
         if (!lastTimeRef.current) lastTimeRef.current = time;
@@ -48,8 +48,8 @@ export function BackgroundVideo() {
                 const w = canvas.width;
                 const h = canvas.height;
                 const totalFrames = FRAME_COUNT;
-                const loopStartFrame = CROSSFADE_FRAMES; // 30
-                const blendStartFrame = totalFrames - CROSSFADE_FRAMES; // 120
+                const loopStartFrame = CROSSFADE_FRAMES; // 64
+                const blendStartFrame = totalFrames - CROSSFADE_FRAMES; // 128
 
                 // Helper to draw an image covering the canvas
                 const drawFrame = (img: HTMLImageElement, opacity: number = 1) => {
@@ -79,8 +79,8 @@ export function BackgroundVideo() {
 
                 // Handle Blending
                 if (currentFrameIdx >= blendStartFrame) {
-                    // We are in the end zone (e.g., 120 to 149)
-                    // We want to fade in frames 0 to 29
+                    // We are in the end zone
+                    // We want to fade in frames 0 to CROSSFADE_FRAMES
                     const overlayFrameIdx = currentFrameIdx - blendStartFrame;
                     // Smoothstep Interpolation: t * t * (3 - 2 * t)
                     const t = (overlayFrameIdx + 1) / CROSSFADE_FRAMES;
@@ -96,9 +96,7 @@ export function BackgroundVideo() {
 
                 // Loop Logic
                 if (nextFrame >= totalFrames) {
-                    // We have finished blending (frame 149 -> 150).
-                    // At this point, the overlay (frame 29) was at 100% opacity.
-                    // So we seamless jump to frame 30.
+                    // We have finished blending. Seamless jump.
                     nextFrame = loopStartFrame;
                 }
 
@@ -148,20 +146,20 @@ export function BackgroundVideo() {
                 ref={canvasRef}
                 className="absolute top-0 left-0 w-full h-full object-cover"
                 style={{
-                    // Cinematic Color Grading:
+                    // Cinematic Color Grading - DARKENED
                     // Contrast pulls details out.
                     // Saturation makes it look 'expensive'.
-                    // Brightness compensates for the contrast crush.
-                    filter: 'contrast(1.2) saturate(1.2) brightness(1.1)'
+                    // Brightness reduced to 0.7 for darker ambiance.
+                    filter: 'contrast(1.2) saturate(1.2) brightness(0.7)'
                 }}
             />
             {/* 
                GLASS FILM OVERLAY 
                Separates the busy background from content.
-               - backdrop-blur-sm: Subtle blur (4px) to reduce high-frequency noise.
-               - bg-black/20: Dims it slightly to improve text contrast.
+               - backdrop-blur-sm: Subtle blur to reduce high-frequency noise.
+               - bg-black/60: Darkened significantly (was 20%) to dim the bright orange sky.
             */}
-            <div className="absolute inset-0 backdrop-blur-[3px] bg-black/20 pointer-events-none" />
+            <div className="absolute inset-0 backdrop-blur-[3px] bg-black/60 pointer-events-none" />
 
             {/* Vignette Overlay for Depth and Focus */}
             <div
