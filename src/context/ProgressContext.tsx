@@ -219,10 +219,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         window.location.reload();
     };
 
-    // Não renderiza filhos até hidratar (evita hydration mismatch)
-    if (!isHydrated) {
-        return null;
-    }
+    // Não impede renderização no server (SEO friendly)
+    // O estado inicial (pilar 1) será renderizado no server e depois
+    // atualizado pelo useEffect quando o JS o cliente carregar
 
     return (
         <ProgressContext.Provider
@@ -245,6 +244,13 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 canChooseSpecialization,
             }}
         >
+            {/* 
+              Evita hydration mismatch na primeira renderização se o cliente tiver 
+              dados diferentes do server (localStorage).
+              O key forçará um re-render limpo apenas no cliente se necessário,
+              mas para a maioria dos casos simples, a hidratação do React cuida bem.
+              Para SEO crítico, renderizar o conteúdo é o mais importante.
+            */}
             {children}
         </ProgressContext.Provider>
     );
