@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TacticalCard, TacticalButton } from "@/components/ui/TacticalCard"; // Import correto
 import { useProgress } from "@/context/ProgressContext";
 import { PLANETS } from "@/data/curriculum";
-import { Shield, Target, Map, Cpu, Zap, Activity, Lock, ArrowLeft, BookOpen, Briefcase, Plane, BarChart3 } from "lucide-react";
+import { Shield, Target, Map, Cpu, Zap, Activity, Lock, ArrowLeft, BookOpen, Briefcase, Plane, BarChart3, ShoppingBag, Heart, Clapperboard, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export const DecisionMatrix = () => {
@@ -15,7 +15,8 @@ export const DecisionMatrix = () => {
     chosenSpecialization,
     areAllPillarsComplete,
     canChooseSpecialization,
-    getCompletedCount
+    getCompletedCount,
+    isSpecializationComplete
   } = useProgress();
 
   const allComplete = areAllPillarsComplete();
@@ -28,12 +29,12 @@ export const DecisionMatrix = () => {
   // Retorna ícone apropriado para cada especialidade
   const getSpecIcon = (id: string) => {
     switch (id) {
-      case "spec-tech": return <Cpu className="w-6 h-6" />;
-      case "spec-academic": return <BookOpen className="w-6 h-6" />;
-      case "spec-finance": return <BarChart3 className="w-6 h-6" />;
+      case "spec-popculture": return <Clapperboard className="w-6 h-6" />;
+      case "spec-health": return <Heart className="w-6 h-6" />;
+      case "spec-shopping": return <ShoppingBag className="w-6 h-6" />;
       case "spec-interview": return <Briefcase className="w-6 h-6" />;
       case "spec-travel": return <Plane className="w-6 h-6" />;
-      case "spec-business": return <Activity className="w-6 h-6" />;
+      case "spec-business": return <BarChart3 className="w-6 h-6" />;
       default: return <Target className="w-6 h-6" />;
     }
   };
@@ -148,38 +149,43 @@ export const DecisionMatrix = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {PLANETS.map((planet) => (
-                <div key={planet.id} className={`h-full ${!canSelect ? "opacity-60" : ""}`}>
-                  <TacticalCard
-                    systemId={`OP-${planet.id.toUpperCase()}`}
-                    status={canSelect ? "CLASSIFIED" : "ENCRYPTED"}
-                    variant="default"
-                    hoverable={canSelect}
-                    onClick={() => handleManualChoice(planet.id)}
-                    className={`h-full flex flex-col justify-between p-6 ${!canSelect ? "cursor-not-allowed" : ""}`}
-                  >
-                    <div className="space-y-4">
-                      <div className={`w-12 h-12 rounded flex items-center justify-center border ${canSelect ? "bg-white/5 border-white/10 text-[#EEF4D4]" : "bg-violet-500/5 border-violet-500/20 text-violet-400/50"}`}>
-                        {!canSelect ? (
-                          <Lock className="w-5 h-5" />
-                        ) : (
-                          getSpecIcon(planet.id)
-                        )}
+              {PLANETS.map((planet) => {
+                const isCompleted = isSpecializationComplete(planet.id);
+                return (
+                  <div key={planet.id} className={`h-full ${!canSelect ? "opacity-60" : ""}`}>
+                    <TacticalCard
+                      systemId={`OP-${planet.id.toUpperCase()}`}
+                      status={isCompleted ? "COMPLETED" : (canSelect ? "CLASSIFIED" : "ENCRYPTED")}
+                      variant={isCompleted ? "success" : "default"}
+                      hoverable={canSelect}
+                      onClick={() => handleManualChoice(planet.id)}
+                      className={`h-full flex flex-col justify-between p-6 ${!canSelect ? "cursor-not-allowed" : ""}`}
+                    >
+                      <div className="space-y-4">
+                        <div className={`w-12 h-12 rounded flex items-center justify-center border ${isCompleted ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" : (canSelect ? "bg-white/5 border-white/10 text-[#EEF4D4]" : "bg-violet-500/5 border-violet-500/20 text-violet-400/50")}`}>
+                          {!canSelect ? (
+                            <Lock className="w-5 h-5" />
+                          ) : isCompleted ? (
+                            <CheckCircle2 className="w-5 h-5" />
+                          ) : (
+                            getSpecIcon(planet.id)
+                          )}
+                        </div>
+                        <h4 className={`text-xl font-bold tracking-tight uppercase ${isCompleted ? "text-emerald-400" : (canSelect ? "text-[#EEF4D4]" : "text-[#EEF4D4]/50")}`}>
+                          {planet.title}
+                        </h4>
+                        <p className="text-xs text-gray-500 font-mono leading-relaxed">
+                          Desbloqueia protocolos de comunicação avançados para {planet.title.toLowerCase()}.
+                        </p>
                       </div>
-                      <h4 className={`text-xl font-bold tracking-tight uppercase ${canSelect ? "text-[#EEF4D4]" : "text-[#EEF4D4]/50"}`}>
-                        {planet.title}
-                      </h4>
-                      <p className="text-xs text-gray-500 font-mono leading-relaxed">
-                        Desbloqueia protocolos de comunicação avançados para {planet.title.toLowerCase()}.
-                      </p>
-                    </div>
-                    <div className="pt-6 flex justify-between items-center text-[10px] font-mono text-gray-600">
-                      <span>STATUS: {canSelect ? "READY" : "LOCKED"}</span>
-                      <span>0% DECODED</span>
-                    </div>
-                  </TacticalCard>
-                </div>
-              ))}
+                      <div className="pt-6 flex justify-between items-center text-[10px] font-mono text-gray-600">
+                        <span>STATUS: {isCompleted ? "MISSION ACCOMPLISHED" : (canSelect ? "READY" : "LOCKED")}</span>
+                        {isCompleted && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
+                      </div>
+                    </TacticalCard>
+                  </div>
+                );
+              })}
             </div>
 
             {canSelect && (

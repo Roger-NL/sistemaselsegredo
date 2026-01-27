@@ -101,31 +101,31 @@ export const PILLARS: Pillar[] = [
 // ============================================================================
 export const PLANETS: Planet[] = [
     {
-        id: "spec-tech",
-        title: "Carreira Tech & Dev",
+        id: "spec-popculture",
+        title: "Cultura Pop",
         status: "locked",
         orbitDistance: 360,
         color: "#6366f1", // Indigo
-        icon: "💻",
-        imagePath: "/assets/icons/tecnologia.png"
+        icon: "🎬",
+        imagePath: "/assets/icons/pop.png"
     },
     {
-        id: "spec-academic",
-        title: "Mestrado Acadêmico",
+        id: "spec-health",
+        title: "Inglês para Saúde",
         status: "locked",
         orbitDistance: 420,
-        color: "#8b5cf6", // Violet
-        icon: "🎓",
-        imagePath: "/assets/icons/academico.png"
+        color: "#ef4444", // Red
+        icon: "🩺",
+        imagePath: "/assets/icons/saude.png"
     },
     {
-        id: "spec-finance",
-        title: "Finanças Globais",
+        id: "spec-shopping",
+        title: "Compras & Consumo",
         status: "locked",
         orbitDistance: 480,
         color: "#10b981", // Emerald
-        icon: "📈",
-        imagePath: "/assets/icons/financas.png"
+        icon: "🛍️",
+        imagePath: "/assets/icons/shopping.png"
     },
     {
         id: "spec-interview",
@@ -147,7 +147,7 @@ export const PLANETS: Planet[] = [
     },
     {
         id: "spec-business",
-        title: "Inglês para Negócios",
+        title: "Reuniões e Apresentações",
         status: "locked",
         orbitDistance: 300, // Órbita mais distante
         color: "#f59e0b", // Amber

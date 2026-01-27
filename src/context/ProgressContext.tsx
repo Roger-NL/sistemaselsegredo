@@ -42,6 +42,14 @@ interface ProgressContextType {
     getCurrentSpecialization: () => Planet | null;
     /** Verifica se pode escolher nova especialização */
     canChooseSpecialization: () => boolean;
+    /** Marca um módulo de especialização como completado */
+    completeModule: (specId: string, moduleIndex: number) => void;
+    /** Verifica se um módulo específico está completado */
+    isModuleCompleted: (specId: string, moduleIndex: number) => boolean;
+    /** Retorna porcentagem global de conclusão (0-100) */
+    getGlobalProgress: () => number;
+    /** Finaliza a especialização atual, marca tudo como completo e volta para o menu */
+    finishCurrentSpecialization: () => void;
 }
 
 const ProgressContext = createContext<ProgressContextType | null>(null);
@@ -64,6 +72,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const [chosenSpecialization, setChosenSpecialization] = useState<string | null>(null);
     const [specializationStatus, setSpecializationStatus] = useState<'studying' | 'pending_approval' | 'completed' | null>(null);
     const [completedSpecializations, setCompletedSpecializations] = useState<string[]>([]);
+    const [completedModules, setCompletedModules] = useState<Record<string, number[]>>({});
     const [isHydrated, setIsHydrated] = useState(false);
 
     // Carrega progresso do localStorage na montagem
@@ -78,6 +87,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                     setChosenSpecialization(parsed.chosenSpecialization || null);
                     setSpecializationStatus(parsed.specializationStatus || null);
                     setCompletedSpecializations(parsed.completedSpecializations || []);
+                    setCompletedModules(parsed.completedModules || {});
                 } else {
                     // Formato antigo (apenas status)
                     setPillarStatus(parsed);
@@ -96,10 +106,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 pillarStatus,
                 chosenSpecialization,
                 specializationStatus,
-                completedSpecializations
+                completedSpecializations,
+                completedModules
             }));
         }
-    }, [pillarStatus, chosenSpecialization, specializationStatus, completedSpecializations, isHydrated]);
+    }, [pillarStatus, chosenSpecialization, specializationStatus, completedSpecializations, completedModules, isHydrated]);
 
     // Marca pilar como completado e desbloqueia próximo
     const completePillar = (pillarNumber: number) => {
@@ -184,16 +195,71 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     };
 
     // Verifica se pode escolher nova especialização
-    // Por enquanto: pode escolher se completou todos os pilares
-    // TODO: Depois implementar bloqueio quando tiver sistema de provas/aprovação
     const canChooseSpecialization = (): boolean => {
         const allPillarsComplete = areAllPillarsComplete();
         return allPillarsComplete;
     };
 
+    // Marca módulo como completo
+    const completeModule = (specId: string, moduleIndex: number) => {
+        setCompletedModules(prev => {
+            const current = prev[specId] || [];
+            if (!current.includes(moduleIndex)) {
+                return { ...prev, [specId]: [...current, moduleIndex] };
+            }
+            return prev;
+        });
+    };
+
+    // Verifica se módulo está completo
+    const isModuleCompleted = (specId: string, moduleIndex: number) => {
+        return completedModules[specId]?.includes(moduleIndex) || false;
+    };
+
+    // Verifica se uma especialização específica está completa
+    const isSpecializationComplete = (specId: string) => {
+        const count = completedModules[specId]?.length || 0;
+        return count >= 5; // Assumindo 5 módulos
+    };
+
+    // Verifica conclusão total (Base + Especialização)
+    const isCourseFullyComplete = () => {
+        if (!areAllPillarsComplete()) return false;
+        if (!chosenSpecialization) return false;
+        return isSpecializationComplete(chosenSpecialization);
+    };
+
+    // Finaliza a especialização atual (marca como completa e sai)
+    const finishCurrentSpecialization = () => {
+        if (chosenSpecialization) {
+            // Marca todos os 5 módulos como completos
+            setCompletedModules(prev => ({
+                ...prev,
+                [chosenSpecialization]: [1, 2, 3, 4, 5]
+            }));
+            // Sai da especialização (volta para o menu de escolha)
+            setChosenSpecialization(null);
+        }
+    };
+
+    // Calcula progresso global (0-100)
+    const getGlobalProgress = () => {
+        const baseWeight = 0.7; // 70% Base
+        const specWeight = 0.3; // 30% Especialização
+
+        const baseProgress = getCompletedCount() / 9;
+
+        let specProgress = 0;
+        if (chosenSpecialization) {
+             const completedCount = completedModules[chosenSpecialization]?.length || 0;
+             specProgress = Math.min(completedCount / 5, 1);
+        }
+
+        const total = (baseProgress * baseWeight) + (specProgress * specWeight);
+        return Math.min(Math.round(total * 100), 100);
+    };
+
     // Retorna planetas com status atualizado
-    // Ghost (locked visível) se não completou pilares
-    // Unlocked APENAS se completou pilares E foi escolhido
     const getPlanetsWithStatus = (): Planet[] => {
         const allComplete = areAllPillarsComplete();
         return PLANETS.map((planet) => ({
@@ -209,19 +275,16 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setChosenSpecialization(null);
         setSpecializationStatus(null);
         setCompletedSpecializations([]);
+        setCompletedModules({});
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
             pillarStatus: initial,
             chosenSpecialization: null,
             specializationStatus: null,
-            completedSpecializations: []
+            completedSpecializations: [],
+            completedModules: {}
         }));
-        // Force reload para garantir limpeza visual
         window.location.reload();
     };
-
-    // Não impede renderização no server (SEO friendly)
-    // O estado inicial (pilar 1) será renderizado no server e depois
-    // atualizado pelo useEffect quando o JS o cliente carregar
 
     return (
         <ProgressContext.Provider
@@ -242,15 +305,14 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 completedSpecializations,
                 getCurrentSpecialization,
                 canChooseSpecialization,
+                completeModule,
+                isModuleCompleted,
+                isCourseFullyComplete,
+                isSpecializationComplete,
+                finishCurrentSpecialization,
+                getGlobalProgress,
             }}
         >
-            {/* 
-              Evita hydration mismatch na primeira renderização se o cliente tiver 
-              dados diferentes do server (localStorage).
-              O key forçará um re-render limpo apenas no cliente se necessário,
-              mas para a maioria dos casos simples, a hidratação do React cuida bem.
-              Para SEO crítico, renderizar o conteúdo é o mais importante.
-            */}
             {children}
         </ProgressContext.Provider>
     );

@@ -5,7 +5,9 @@ import { useProgress } from "@/context/ProgressContext";
 import { PILLARS } from "@/data/curriculum";
 import { TubesBackground } from "@/components/ui/neon-flow";
 import { TacticalCard, TacticalButton } from "@/components/ui/TacticalCard";
-import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Lock, PlayCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Lock } from "lucide-react";
+import { PILLARS_CONTENT } from "@/data/pillars-content";
+import { StudyViewer } from "@/components/features/study/StudyViewer";
 
 export default function PilarPage() {
     const router = useRouter();
@@ -62,24 +64,27 @@ export default function PilarPage() {
         );
     }
 
+    // Selecionar conteúdo baseado no ID do Map
+    const activeContent = PILLARS_CONTENT[pillarId] || null;
+
     return (
         <TubesBackground className="min-h-screen">
             <div className="min-h-screen w-full overflow-y-auto pointer-events-auto">
                 <main className="w-full p-4 md:p-8 pb-20">
-                    <div className="max-w-3xl mx-auto">
+                    <div className="max-w-4xl mx-auto">
 
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-6 relative z-50">
+                        {/* Header Navigation */}
+                        <div className="flex items-center justify-between mb-8 relative z-50">
                             <button
                                 onClick={handleBack}
                                 className="flex items-center gap-2 text-white/50 hover:text-white transition-colors py-2 px-3 -ml-3 rounded-md hover:bg-white/5"
                             >
                                 <ArrowLeft className="w-4 h-4" />
-                                Dashboard
+                                <span className="hidden md:inline">Global Command</span>
                             </button>
 
-                            {/* Progresso */}
-                            <div className="flex gap-1">
+                            {/* Progresso Visual */}
+                            <div className="flex gap-1.5">
                                 {PILLARS.map((_, idx) => {
                                     const num = idx + 1;
                                     const done = num < currentPillarNumber;
@@ -88,115 +93,73 @@ export default function PilarPage() {
                                     return (
                                         <div
                                             key={num}
-                                            className={`w-3 h-3 rounded-sm ${done
-                                                ? "bg-emerald-500/50"
-                                                : current
-                                                    ? "bg-violet-500"
-                                                    : "bg-white/10"
-                                                }`}
+                                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                                                current ? "w-8 bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]" : 
+                                                done ? "w-4 bg-emerald-500/50" : "w-2 bg-white/10"
+                                            }`}
                                         />
                                     );
                                 })}
                             </div>
                         </div>
 
-                        {/* Card do Pilar */}
-                        <TacticalCard
-                            systemId={`PILAR-${pillarId.toString().padStart(2, "0")}`}
-                            status={isCompleted ? "SECURE" : isCurrent ? "LIVE" : "ENCRYPTED"}
-                            variant={isCompleted ? "success" : "neon"}
-                            className="mb-6"
-                        >
-                            {/* Status badge */}
-                            {isCompleted && (
-                                <div className="px-6 py-3 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center gap-2">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                                    <span className="text-emerald-400 text-sm font-medium">Pilar Concluído com sucesso</span>
-                                </div>
-                            )}
-
-                            <div className="p-6">
-                                {/* Título */}
-                                <div className="flex items-start gap-4 mb-6">
-                                    <div className="w-12 h-12 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0">
-                                        <BookOpen className="w-6 h-6 text-violet-400" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h1 className="text-xl md:text-2xl font-bold text-[#EEF4D4] mb-1">
-                                            {pillar.title}
-                                        </h1>
-                                        <p className="text-white/50 text-sm">{pillar.description}</p>
-                                    </div>
-                                </div>
-
-                                {/* Conteúdo do Pilar */}
-                                <div className="bg-black/30 rounded-lg p-4 mb-6 border border-white/5">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <PlayCircle className="w-5 h-5 text-violet-400" />
-                                        <div className="flex flex-col">
-                                            <span className="text-white/70 text-sm font-medium uppercase tracking-wider">
-                                                Conteúdo do Pilar
-                                            </span>
-                                            <span className="text-[10px] text-white/40 font-mono">
-                                                Este pilar desenvolve fundamentos essenciais para sua evolução no idioma.
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Placeholder para vídeo */}
-                                    <div className="aspect-video bg-slate-900/50 rounded-lg flex items-center justify-center border border-white/10 mb-4">
-                                        <div className="text-center">
-                                            <PlayCircle className="w-12 h-12 text-violet-400/50 mx-auto mb-2" />
-                                            <p className="text-white/30 text-sm">Vídeo do Pilar {pillarId}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Texto */}
-                                    <p className="text-white/60 text-sm">
-                                        Estude o conteúdo acima. Quando estiver pronto, clique abaixo para testar seus conhecimentos.
-                                    </p>
-                                </div>
-
-                                {/* Ação: Fazer Quiz */}
-                                {isCurrent && (
+                        {/* ÁREA DE ESTUDO */}
+                        {activeContent ? (
+                            <div className="animate-in fade-in duration-700 slide-in-from-bottom-4">
+                                <StudyViewer data={activeContent} />
+                                
+                                {/* Ação Final do Pilar */}
+                                <div className="mt-12 flex justify-center pb-20">
                                     <TacticalButton
                                         variant="neon"
                                         onClick={handleStartQuiz}
-                                        className="w-full justify-center py-3"
+                                        className="py-4 px-8 text-lg"
                                     >
-                                        <span className="flex items-center gap-2">
-                                            Estou Pronto - Fazer Avaliação
+                                        <span className="flex items-center gap-3">
+                                            <CheckCircle2 className="w-6 h-6" />
+                                            Confirmar Leitura e Iniciar Missão
                                             <ArrowRight className="w-5 h-5" />
                                         </span>
                                     </TacticalButton>
-                                )}
-
-                                {isCompleted && (
-                                    <div className="text-center text-emerald-400/70 text-sm py-2">
-                                        ✓ Você já completou este pilar
-                                    </div>
-                                )}
+                                </div>
                             </div>
-                        </TacticalCard>
+                        ) : (
+                            // Fallback para pilares sem conteúdo ainda
+                            <TacticalCard
+                                systemId={`PILAR-${pillarId.toString().padStart(2, "0")}`}
+                                status="CONSTRUCTION"
+                                variant="neon"
+                                className="mb-6 min-h-[50vh] flex flex-col items-center justify-center text-center p-12"
+                            >
+                                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                                    <BookOpen className="w-10 h-10 text-white/20" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-white mb-2">Conteúdo em Descriptografia</h2>
+                                <p className="text-white/50 max-w-md mx-auto">
+                                    Os dados deste pilar estão sendo processados pelo sistema central.
+                                    O Pilar 1 já está totalmente operacional.
+                                </p>
+                            </TacticalCard>
+                        )}
 
-                        {/* Navegação entre pilares */}
-                        <div className="flex justify-between items-center">
+                        {/* Navegação de Rodapé */}
+                        <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/80 backdrop-blur-md border-t border-white/10 z-40 md:static md:bg-transparent md:border-0 md:p-0 flex justify-between items-center mt-12">
                             {pillarId > 1 ? (
                                 <button
                                     onClick={() => router.push(`/pilar/${pillarId - 1}`)}
-                                    className="text-white/40 hover:text-white/70 transition-colors text-sm flex items-center gap-1"
+                                    className="text-white/40 hover:text-white/70 transition-colors text-sm flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/5"
                                 >
                                     <ArrowLeft className="w-4 h-4" />
-                                    Pilar {pillarId - 1}
+                                    Anterior
                                 </button>
                             ) : <div />}
 
                             {pillarId < 9 && isPillarUnlocked(pillarId + 1) && (
                                 <button
                                     onClick={() => router.push(`/pilar/${pillarId + 1}`)}
-                                    className="text-white/40 hover:text-white/70 transition-colors text-sm flex items-center gap-1"
+                                    className="text-white/40 hover:text-white/70 transition-colors text-sm flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/5"
                                 >
-                                    Pilar {pillarId + 1}
+                                    Próximo
                                     <ArrowRight className="w-4 h-4" />
                                 </button>
                             )}

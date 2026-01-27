@@ -10,6 +10,7 @@ import { TubesBackground } from "@/components/ui/neon-flow";
 import { PILLARS } from "@/data/curriculum";
 import { DecisionMatrix } from "@/components/features/decision/DecisionMatrix";
 import { TheHUD } from "@/components/core/TheHUD";
+import { GlobalStatusPanel } from "@/components/features/dashboard/GlobalStatusPanel";
 
 export default function Page() {
   const router = useRouter();
@@ -47,6 +48,11 @@ export default function Page() {
       className="min-h-[100dvh]"
     >
       <main className="relative min-h-[100dvh] w-full overflow-hidden text-white selection:bg-[#EEF4D4] selection:text-black flex items-center justify-center pointer-events-none">
+
+        {/* Global Status Panel (Lateral) */}
+        <div className="pointer-events-auto">
+            <GlobalStatusPanel />
+        </div>
 
         {/* Renderiza Matrix de Decisão se necessário */}
         {showDecisionMatrix && <DecisionMatrix />}

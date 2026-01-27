@@ -59,17 +59,17 @@ export default function QuizPage() {
             // Mostra transição
             setShowTransition(true);
 
-            // Após 1.5s, avança para o próximo pilar
+            // Após 1.5s, executa a ação de conclusão
             setTimeout(() => {
                 if (activePillar >= 9) {
                     // Era o último - mostrar DecisionMatrix para escolher especialização
                     setShowTransition(false);
                     setShowDecisionMatrix(true);
                 } else {
-                    // Avança para próximo pilar
-                    setActivePillar(activePillar + 1);
-                    setKey(prev => prev + 1); // Força remount do QuizInterface
-                    setShowTransition(false);
+                    // NÃO avança para o próximo quiz automaticamente.
+                    // Redireciona de volta para a página de estudo do pilar que acabou de ser concluído.
+                    // O usuário verá o status de completado e poderá navegar para o próximo manualmente.
+                    router.push(`/pilar/${activePillar}`);
                 }
             }, 1500);
         }
