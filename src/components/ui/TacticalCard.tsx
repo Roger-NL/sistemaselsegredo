@@ -15,7 +15,7 @@ interface TacticalCardProps {
 
     // Header técnico opcional
     systemId?: string;
-    status?: "ENCRYPTED" | "LIVE" | "PROCESSING" | "SECURE" | "CLASSIFIED";
+    status?: "ENCRYPTED" | "LIVE" | "PROCESSING" | "SECURE" | "CLASSIFIED" | "CONSTRUCTION" | "COMPLETED";
 
     // Variante visual
     variant?: "default" | "neon" | "danger" | "success";
