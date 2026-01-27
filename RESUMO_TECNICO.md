@@ -1,72 +1,29 @@
 # RESUMO TÉCNICO E DIÁRIO DE BORDO - ES ACADEMY
 
-**Última Atualização:** 27/01/2026 - 18:40
-**Status:** Dashboard Estável / Redesign "Cosmos Wireframe" Completo / Interatividade Ajustada
+**Última Atualização:** 27/01/2026 - 20:45
+**Status:** Dashboard Estável / Sistema de Especialidades (Pilar 10) Implementado / Fluxo Acadêmico Completo
 
 ---
 
-## 🎨 ATUALIZAÇÃO VISUAL MAIOR (27/01/2026)
+## 🚀 5. SISTEMA DE ESPECIALIDADES (PILAR 10) [NOVO]
 
-### Nova Identidade Visual: "Cosmos Wireframe"
+Implementamos a fase final da jornada do aluno, onde após completar a base (9 pilares), ele escolhe uma trilha operacional específica.
 
-Implementamos uma reformulação visual completa transformando o dashboard de um tema "solar dourado" para uma estética **Cosmos Wireframe Neon** - um visual minimalista, futurista e tecnológico.
+### Decision Matrix (`DecisionMatrix.tsx`)
+Uma interface de interface de "Painel de Comando" para escolha da especialidade.
+- **Lógica de Bloqueio:** As seleções permanecem em estado `ENCRYPTED` (bloqueadas) até que todos os 9 pilares do currículo base sejam concluídos.
+- **Diagnóstico Tático:** Sistema de "Análise de Perfil" que simula uma recomendação baseada em IA para o aluno.
+- **Acesso Antecipado:** Alunos em progresso podem visualizar as especialidades no HUD (Pilar 10), mas não podem selecioná-las.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                 │
-│   ES Academy                                    Patente Atual   │
-│   System V4.0                                   ┌──────────┐    │
-│                                                 │ RECRUTA  │    │
-│                                                 └──────────┘    │
-│                                                                 │
-│         ╭─────────╮    ← Tubos Neon flutuantes                  │
-│        ╱           ╲      seguindo o cursor                     │
-│       │   ┌─────┐   │                                           │
-│       │   │  0  │   │  ← Globo 3D Wireframe                     │
-│       │   │ /9  │   │     rotação automática                    │
-│       │   │PILAR│   │     pontos nos continentes                │
-│        ╲  └─────┘  ╱                                            │
-│         ╰─────────╯                                             │
-│                                                                 │
-│       ← Cores: #EEF4D4 (creme) + Neon (roxo, rosa, azul)        │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+### Páginas de Estudo Dinâmicas (`/especialidade/[id]`)
+Cada trilha possui sua própria área de treinamento avançado:
+- **ID's Implementados:** `spec-tech`, `spec-academic`, `spec-finance`, `spec-interview`, `spec-travel`, `spec-business`.
+- **Interface:** Mostra Hero Section com descrição, barra de progresso em violeta e grid de módulos (5 módulos p/ especialidade).
+- **Interatividade:** Botões de "Iniciar" e "Revisar" módulos.
 
----
-
-## 🌐 1. O Globo Wireframe (`wireframe-dotted-globe.tsx`)
-*Ver documentação anterior*
-
----
-
-## ✨ 2. Fundo Neon Flow (`neon-flow.tsx` + `neon-tubes.html`)
-*Ver documentação anterior (Idle Animation, Monkey Patching)*
-
----
-
-## 🎛️ 3. Interface de Sistema (`TheHUD.tsx`) [NOVO]
-
-### Redesign Completo
-O antigo menu de seleção foi substituído por uma **interface de sistema avançado** (HUD).
-
-**Características:**
-- **Estilo:** Fundo preto absoluto com linhas finas creme (#EEF4D4).
-- **Tipografia:** Mono (dados técnicos) + Serif (títulos elegates).
-- **Layout:** Grid de duas colunas com cards de pilares.
-- **Feedback:** 
-    - Ativo: Fundo preenchido creme (destaque).
-    - Bloqueado: Opacidade reduzida, ícone de cadeado.
-    - Completo: Ícone de check, borsa sutil.
-
----
-
-## 🧭 4. Navegação e Quiz (`/pilar/[id]` e `/quiz`)
-
-### Melhorias de Usabilidade:
-1. **Navegação de Revisão:** Usuários que já completaram todos os pilares agora podem navegar livremente para rever conteúdos, sem bloqueio.
-2. **Scroll em Telas Pequenas:** O Quiz agora usa `overflow-y-auto` em vez de `hidden`, garantindo que perguntas longas ou as últimas alternativas sejam sempre acessíveis.
-3. **Botões de Ação:** Reativação de `pointer-events-auto` nas páginas internas para garantir funcionamento dos botões de "Voltar" e "Fazer Avaliação".
+### Integração Dashboard (`page.tsx`)
+- **Upgrade do CTA:** Quando uma especialidade está ativa, o botão central do globo muda de cor (#EEF4D4 -> Violeta) e texto ("Acessar Missão" -> "Continuar Estudo").
+- **Barra de Progresso:** Adição de barra de progresso tática e porcentagem de conclusão diretamente no centro do dashboard para a especialização ativa.
 
 ---
 
@@ -75,59 +32,50 @@ O antigo menu de seleção foi substituído por uma **interface de sistema avan�
 ```
 src/
 ├── app/
-│   ├── page.tsx              ← Dashboard principal (Globo + HUD)
-│   ├── pilar/[id]/page.tsx   ← Página de conteúdo do pilar
-│   └── quiz/page.tsx         ← Interface de avaliação
+│   ├── page.tsx                    ← Dashboard principal
+│   ├── pilar/[id]/page.tsx         ← Conteúdo currículo base
+│   ├── quiz/page.tsx               ← Avaliação dos pilares
+│   ├── especialidades/page.tsx     ← Rota direta Decision Matrix
+│   └── especialidade/[id]/page.tsx ← [NOVO] Área de treinamento avançado
 │
 ├── components/
 │   ├── core/
-│   │   ├── TheHUD.tsx        ← [REDESIGN] Seletor de pilares
-│   │   └── DevControls.tsx   ← Controles de dev
+│   │   ├── TheHUD.tsx              ← Seletor de pilares (Incluso Pilar 10)
+│   │   └── DevControls.tsx         ← Controles de dev
 │   │
 │   ├── features/
-│   │   └── quiz/
-│   │       └── QuizInterface.tsx ← Componente de perguntas
+│   │   ├── quiz/                   ← Sistema de perguntas
+│   │   └── decision/
+│   │       └── DecisionMatrix.tsx  ← [NOVO] Interface de seleção
+│   │
 │   └── ui/
-│       ├── neon-flow.tsx     ← Wrapper do fundo neon
-│       ├── wireframe-dotted-globe.tsx  ← NOVO: Globo 3D
-│       └── [outros componentes shadcn]
-│
-├── public/
-│   └── neon-tubes.html       ← Iframe com efeito neon
-│
-└── context/
-    └── ProgressContext.tsx   ← Estado dos pilares
+│       ├── TacticalCard.tsx        ← Componente base da UI tática
+│       ├── neon-flow.tsx           ← Background dinâmico
+│       └── wireframe-dotted-globe.tsx
 ```
 
 ---
 
-## 📋 Histórico de Mudanças (27/01/2026)
+## 📋 Histórico de Mudanças (27/01/2026 - Continuação)
 
 | Horário | Mudança |
 |---------|---------|
-| 13:24 | Início: Integração do neon-flow background |
-| 13:35 | Correção Turbopack: Migração para iframe |
-| 14:09 | **MAJOR:** Substituição do Sol pelo Globo Wireframe |
-| 16:49 | **FEATURE:** Movimento automático quando mouse inativo |
-| 17:05 | **FIX:** Corrigido seguir mouse + clique para trocar cores |
-| 18:12 | **FIX:** Desbloqueio de navegação para usuários "Graduados" (revisão) |
-| 18:16 | **FEATURE:** Integração do TheHUD ao clicar no Globo |
-| 18:20 | **DESIGN:** Redesign completo do TheHUD (Estilo Cosmos) |
-| 18:25 | **FIX:** Correção de pointer-events na página do Pilar (botão dashboard) |
-| 18:35 | **FIX:** Correção de scroll/overflow no Quiz (botões cortados) |
-| 18:40 | Documentação Final |
+| 19:55 | **MAJOR:** Implementação do Pilar 10 (Especialidades) no HUD |
+| 20:05 | **FEATURE:** Criação do Decision Matrix com lógica de bloqueio |
+| 20:15 | **FEATURE:** Criação das rotas dinâmicas de especialidade `/especialidade/[id]` |
+| 20:25 | **UI:** Barra de progresso e CTA violeta no Dashboard para especialidades |
+| 20:35 | **FIX:** Correção de `pointer-events-auto` em botões de navegação |
+| 20:42 | **GIT:** Registro e Push do sistema de especialidades |
+| 20:45 | Documentação Atualizada |
 
 ---
 
 ## 🎯 Próximos Passos
 
 ### Backlog Imediato:
-- [ ] **Conteúdo Real:** Inserir os vídeos e textos reais dos 9 pilares.
-- [ ] **Mobile:** Refinar margens e tamanhos de fonte em telas muito pequenas.
-
-### Mantidos:
-- [ ] **Persistência:** Migrar de LocalStorage para banco (Supabase/Firebase).
+- [ ] **Data Sync:** Conectar o progresso real dos módulos das especialidades ao `ProgressContext`.
+- [ ] **Conteúdo Especializado:** Popular os módulos das trilhas (tech, finance, etc) com conteúdo real.
 
 ---
 
-**Nota do Engenheiro:** O sistema agora está completamente funcional e com a nova identidade visual aplicada consistentemente em todas as telas (Dashboard, HUD, Pilares, Quiz). A interatividade foi restaurada e melhorada. O foco agora deve mudar para a inserção do conteúdo educacional real (vídeos e textos).
+**Nota do Engenheiro:** O ecossistema completo de um curso gamificado agora está de pé. O aluno tem uma jornada clara: 9 Pilares de Base -> Seleção de Especialidade -> Trilha de Carreira. A estética Cosmos Wireframe foi mantida e reforçada com os gradientes violetas nas áreas de elite (especialidades).
