@@ -157,8 +157,8 @@ export default function EspecialidadePage() {
                                                 className="h-full bg-gradient-to-r from-violet-500 to-purple-500"
                                             />
                                         </div>
-                                        <p className="text-[10px] text-gray-500 font-mono">
-                                            {completedModules} de {totalModules} módulos completados
+                                        <p className="text-[12px] text-violet-400 font-mono mt-1">
+                                            {completedModules}/{totalModules} concluídos ({progressPercent}%)
                                         </p>
                                     </div>
                                 </div>
@@ -186,7 +186,8 @@ export default function EspecialidadePage() {
                                     status={module.completed ? "SECURE" : "PROCESSING"}
                                     variant="default"
                                     hoverable
-                                    className="cursor-pointer"
+                                    className={`cursor-pointer transition-all duration-300 ${!module.completed ? "hover:shadow-[0_0_15px_rgba(238,244,212,0.1)] hover:border-[#EEF4D4]/30" : ""}`}
+                                    onClick={() => router.push(`/especialidade/${specId}/modulo/${index + 1}`)}
                                 >
                                     <div className="p-6 flex items-center justify-between">
                                         <div className="flex items-center gap-4">
@@ -197,7 +198,7 @@ export default function EspecialidadePage() {
                                                 {module.completed ? (
                                                     <CheckCircle className="w-5 h-5" />
                                                 ) : (
-                                                    <span className="font-mono text-sm">{String(index + 1).padStart(2, '0')}</span>
+                                                    <span className={`font-mono text-sm ${!module.completed ? "text-[#EEF4D4] drop-shadow-[0_0_5px_rgba(238,244,212,0.5)]" : ""}`}>{String(index + 1).padStart(2, '0')}</span>
                                                 )}
                                             </div>
                                             <div>
@@ -209,10 +210,14 @@ export default function EspecialidadePage() {
                                         </div>
 
                                         <TacticalButton
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                router.push(`/especialidade/${specId}/modulo/${index + 1}`);
+                                            }}
                                             variant={module.completed ? "default" : "neon"}
                                             className="text-xs"
                                         >
-                                            {module.completed ? "Revisar" : "Iniciar"}
+                                            {module.completed ? "Missão Cumprida" : "Iniciar Missão"}
                                         </TacticalButton>
                                     </div>
                                 </TacticalCard>

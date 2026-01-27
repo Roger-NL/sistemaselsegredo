@@ -81,7 +81,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                     onClick={onClose}
                                     className="group flex items-center gap-2 text-[#EEF4D4]/60 hover:text-[#EEF4D4] transition-colors"
                                 >
-                                    <span className="text-[10px] font-mono uppercase tracking-widest group-hover:tracking-[0.2em] transition-all">Close</span>
+                                    <span className="text-[10px] font-mono uppercase tracking-widest group-hover:tracking-[0.2em] transition-all">Encerrar Acesso</span>
                                     <X className="w-5 h-5" />
                                 </button>
                                 <div className="text-right">
@@ -155,7 +155,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                                             text-[10px] font-mono uppercase tracking-[0.2em] mb-1 transition-colors
                                                             ${isActive ? "text-black/60" : "text-[#EEF4D4]/60"}
                                                         `}>
-                                                            {isCompleted ? "Completado" : "Disponível"}
+                                                            {isCompleted ? "Concluído com sucesso" : "Desbloqueado"}
                                                         </span>
                                                         <span className={`
                                                             font-serif text-lg tracking-wide transition-colors

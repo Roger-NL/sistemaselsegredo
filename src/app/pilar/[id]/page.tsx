@@ -111,7 +111,7 @@ export default function PilarPage() {
                             {isCompleted && (
                                 <div className="px-6 py-3 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center gap-2">
                                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                                    <span className="text-emerald-400 text-sm font-medium">Pilar Completado</span>
+                                    <span className="text-emerald-400 text-sm font-medium">Pilar Concluído com sucesso</span>
                                 </div>
                             )}
 
@@ -133,9 +133,14 @@ export default function PilarPage() {
                                 <div className="bg-black/30 rounded-lg p-4 mb-6 border border-white/5">
                                     <div className="flex items-center gap-3 mb-3">
                                         <PlayCircle className="w-5 h-5 text-violet-400" />
-                                        <span className="text-white/70 text-sm font-medium uppercase tracking-wider">
-                                            Conteúdo do Pilar
-                                        </span>
+                                        <div className="flex flex-col">
+                                            <span className="text-white/70 text-sm font-medium uppercase tracking-wider">
+                                                Conteúdo do Pilar
+                                            </span>
+                                            <span className="text-[10px] text-white/40 font-mono">
+                                                Este pilar desenvolve fundamentos essenciais para sua evolução no idioma.
+                                            </span>
+                                        </div>
                                     </div>
 
                                     {/* Placeholder para vídeo */}

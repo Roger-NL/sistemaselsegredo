@@ -197,7 +197,7 @@ interface TacticalButtonProps {
     variant?: "default" | "neon" | "danger" | "success";
     selected?: boolean;
     disabled?: boolean;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent) => void;
 }
 
 export function TacticalButton({
