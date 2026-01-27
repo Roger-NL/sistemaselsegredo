@@ -28,12 +28,20 @@ interface ProgressContextType {
     getPlanetsWithStatus: () => Planet[];
     /** Reseta todo o progresso (para testes) */
     resetProgress: () => void;
-    /** Desbloqueia uma especialização específica */
+    /** Desbloqueia uma especialização específica (inicia estudo) */
     unlockSpecialization: (planetId: string) => void;
     /** Define o progresso até um pilar específico (Dev Mode) */
     setPillarLevel: (level: number) => void;
-    /** ID da especialização escolhida (ou null) */
+    /** ID da especialização escolhida/ativa (ou null se nenhuma) */
     chosenSpecialization: string | null;
+    /** Status da especialização atual: 'studying' | 'pending_approval' | 'completed' | null */
+    specializationStatus: 'studying' | 'pending_approval' | 'completed' | null;
+    /** Lista de IDs de especializações já completadas */
+    completedSpecializations: string[];
+    /** Retorna o objeto da especialização atual com nome e dados */
+    getCurrentSpecialization: () => Planet | null;
+    /** Verifica se pode escolher nova especialização */
+    canChooseSpecialization: () => boolean;
 }
 
 const ProgressContext = createContext<ProgressContextType | null>(null);
@@ -54,6 +62,8 @@ function getInitialStatus(): Record<string, PillarStatus> {
 export function ProgressProvider({ children }: { children: ReactNode }) {
     const [pillarStatus, setPillarStatus] = useState<Record<string, PillarStatus>>(getInitialStatus);
     const [chosenSpecialization, setChosenSpecialization] = useState<string | null>(null);
+    const [specializationStatus, setSpecializationStatus] = useState<'studying' | 'pending_approval' | 'completed' | null>(null);
+    const [completedSpecializations, setCompletedSpecializations] = useState<string[]>([]);
     const [isHydrated, setIsHydrated] = useState(false);
 
     // Carrega progresso do localStorage na montagem
@@ -66,6 +76,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 if (parsed.pillarStatus) {
                     setPillarStatus(parsed.pillarStatus);
                     setChosenSpecialization(parsed.chosenSpecialization || null);
+                    setSpecializationStatus(parsed.specializationStatus || null);
+                    setCompletedSpecializations(parsed.completedSpecializations || []);
                 } else {
                     // Formato antigo (apenas status)
                     setPillarStatus(parsed);
@@ -82,10 +94,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         if (isHydrated) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify({
                 pillarStatus,
-                chosenSpecialization
+                chosenSpecialization,
+                specializationStatus,
+                completedSpecializations
             }));
         }
-    }, [pillarStatus, chosenSpecialization, isHydrated]);
+    }, [pillarStatus, chosenSpecialization, specializationStatus, completedSpecializations, isHydrated]);
 
     // Marca pilar como completado e desbloqueia próximo
     const completePillar = (pillarNumber: number) => {
@@ -157,9 +171,24 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         }));
     };
 
-    // Desbloqueia especialização
+    // Desbloqueia especialização - inicia estudo dela
     const unlockSpecialization = (planetId: string) => {
         setChosenSpecialization(planetId);
+        setSpecializationStatus('studying');
+    };
+
+    // Retorna o objeto da especialização atual
+    const getCurrentSpecialization = (): Planet | null => {
+        if (!chosenSpecialization) return null;
+        return PLANETS.find(p => p.id === chosenSpecialization) || null;
+    };
+
+    // Verifica se pode escolher nova especialização
+    // Por enquanto: pode escolher se completou todos os pilares
+    // TODO: Depois implementar bloqueio quando tiver sistema de provas/aprovação
+    const canChooseSpecialization = (): boolean => {
+        const allPillarsComplete = areAllPillarsComplete();
+        return allPillarsComplete;
     };
 
     // Retorna planetas com status atualizado
@@ -178,9 +207,13 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         const initial = getInitialStatus();
         setPillarStatus(initial);
         setChosenSpecialization(null);
+        setSpecializationStatus(null);
+        setCompletedSpecializations([]);
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
             pillarStatus: initial,
-            chosenSpecialization: null
+            chosenSpecialization: null,
+            specializationStatus: null,
+            completedSpecializations: []
         }));
         // Force reload para garantir limpeza visual
         window.location.reload();
@@ -206,6 +239,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 resetProgress,
                 unlockSpecialization,
                 chosenSpecialization,
+                specializationStatus,
+                completedSpecializations,
+                getCurrentSpecialization,
+                canChooseSpecialization,
             }}
         >
             {children}

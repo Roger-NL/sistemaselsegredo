@@ -1,96 +1,204 @@
-import Link from "next/link";
-import { ArrowLeft, Play, BookOpen } from "lucide-react";
+"use client";
+
+import { useRouter, useParams } from "next/navigation";
+import { useProgress } from "@/context/ProgressContext";
 import { PILLARS } from "@/data/curriculum";
-import { notFound } from "next/navigation";
+import { TubesBackground } from "@/components/ui/neon-flow";
+import { TacticalCard, TacticalButton } from "@/components/ui/TacticalCard";
+import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Lock, PlayCircle } from "lucide-react";
 
-// ============================================================================
-// PILAR PAGE (SALA DE AULA)
-// Onde o conteúdo acontece: player de áudio + área de leitura
-// ============================================================================
+export default function PilarPage() {
+    const router = useRouter();
+    const params = useParams();
+    const pillarId = Number(params.id) || 1;
 
-interface PageProps {
-    params: Promise<{ id: string }>;
-}
+    const { isPillarUnlocked, getCurrentPillarNumber } = useProgress();
 
-export default async function PilarPage({ params }: PageProps) {
-    const { id } = await params;
-    const pillarIndex = parseInt(id) - 1;
-    const pillar = PILLARS[pillarIndex];
+    const pillar = PILLARS[pillarId - 1];
+    const isUnlocked = isPillarUnlocked(pillarId);
+    const currentPillarNumber = getCurrentPillarNumber();
+    const isCompleted = pillarId < currentPillarNumber;
+    const isCurrent = pillarId === currentPillarNumber;
 
+    const handleStartQuiz = () => {
+        router.push("/quiz");
+    };
+
+    const handleBack = () => {
+        router.push("/");
+    };
+
+    // Se o pilar não existe
     if (!pillar) {
-        notFound();
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center p-4">
+                <TacticalCard variant="danger" className="p-8 text-center max-w-md">
+                    <h1 className="text-2xl font-bold text-[#EEF4D4] mb-4">Pilar não encontrado</h1>
+                    <TacticalButton onClick={() => router.push("/")}>
+                        <ArrowLeft className="w-4 h-4 mr-2 inline" />
+                        Voltar ao Dashboard
+                    </TacticalButton>
+                </TacticalCard>
+            </div>
+        );
+    }
+
+    // Se o pilar está bloqueado
+    if (!isUnlocked) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center p-4">
+                <TacticalCard variant="default" className="p-8 text-center max-w-md">
+                    <Lock className="w-16 h-16 text-white/30 mx-auto mb-4" />
+                    <h1 className="text-2xl font-bold text-[#EEF4D4] mb-2">{pillar.title}</h1>
+                    <p className="text-white/50 mb-6">
+                        Complete o Pilar {pillarId - 1} primeiro para desbloquear este conteúdo.
+                    </p>
+                    <TacticalButton variant="neon" onClick={() => router.push(`/pilar/${currentPillarNumber}`)}>
+                        Ir para Pilar {currentPillarNumber}
+                        <ArrowRight className="w-4 h-4 ml-2 inline" />
+                    </TacticalButton>
+                </TacticalCard>
+            </div>
+        );
     }
 
     return (
-        <main className="min-h-screen bg-[#050505] text-white">
-            {/* Header fixo */}
-            <header className="fixed top-0 left-0 right-0 z-40 px-6 py-4 backdrop-blur-sm bg-black/50 border-b border-zinc-800">
-                <div className="max-w-4xl mx-auto flex items-center gap-4">
-                    <Link
-                        href="/dashboard"
-                        className="p-2 rounded-full hover:bg-zinc-800 transition-colors"
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </Link>
-                    <div>
-                        <h1 className="font-bold">{pillar.title}</h1>
-                        <p className="text-xs text-zinc-500">{pillar.description}</p>
-                    </div>
-                </div>
-            </header>
+        <TubesBackground className="min-h-screen">
+            <div className="min-h-screen w-full overflow-y-auto pointer-events-auto">
+                <main className="w-full p-4 md:p-8 pb-20">
+                    <div className="max-w-3xl mx-auto">
 
-            {/* Conteúdo */}
-            <div className="pt-24 pb-32 px-6">
-                <div className="max-w-4xl mx-auto">
-                    {/* Player de Áudio Placeholder */}
-                    <section className="mb-8 p-6 rounded-2xl bg-zinc-900/50 border border-zinc-800">
-                        <div className="flex items-center gap-4">
-                            <button className="w-14 h-14 rounded-full bg-amber-500 flex items-center justify-center hover:bg-amber-400 transition-colors">
-                                <Play className="w-6 h-6 text-black ml-1" />
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-6 relative z-50">
+                            <button
+                                onClick={handleBack}
+                                className="flex items-center gap-2 text-white/50 hover:text-white transition-colors py-2 px-3 -ml-3 rounded-md hover:bg-white/5"
+                            >
+                                <ArrowLeft className="w-4 h-4" />
+                                Dashboard
                             </button>
-                            <div className="flex-1">
-                                <h3 className="font-medium text-white mb-1">Áudio da Aula</h3>
-                                <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                                    <div className="h-full w-0 bg-amber-500 rounded-full" />
-                                </div>
-                                <p className="text-xs text-zinc-500 mt-1">0:00 / --:--</p>
+
+                            {/* Progresso */}
+                            <div className="flex gap-1">
+                                {PILLARS.map((_, idx) => {
+                                    const num = idx + 1;
+                                    const done = num < currentPillarNumber;
+                                    const current = num === pillarId;
+
+                                    return (
+                                        <div
+                                            key={num}
+                                            className={`w-3 h-3 rounded-sm ${done
+                                                ? "bg-emerald-500/50"
+                                                : current
+                                                    ? "bg-violet-500"
+                                                    : "bg-white/10"
+                                                }`}
+                                        />
+                                    );
+                                })}
                             </div>
                         </div>
-                    </section>
 
-                    {/* Área de Leitura Placeholder */}
-                    <section className="p-8 rounded-2xl bg-zinc-900/30 border border-zinc-800">
-                        <div className="flex items-center gap-2 mb-6 text-zinc-400">
-                            <BookOpen className="w-5 h-5" />
-                            <span className="text-sm font-medium">Material de Leitura</span>
+                        {/* Card do Pilar */}
+                        <TacticalCard
+                            systemId={`PILAR-${pillarId.toString().padStart(2, "0")}`}
+                            status={isCompleted ? "SECURE" : isCurrent ? "LIVE" : "ENCRYPTED"}
+                            variant={isCompleted ? "success" : "neon"}
+                            className="mb-6"
+                        >
+                            {/* Status badge */}
+                            {isCompleted && (
+                                <div className="px-6 py-3 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center gap-2">
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                    <span className="text-emerald-400 text-sm font-medium">Pilar Completado</span>
+                                </div>
+                            )}
+
+                            <div className="p-6">
+                                {/* Título */}
+                                <div className="flex items-start gap-4 mb-6">
+                                    <div className="w-12 h-12 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+                                        <BookOpen className="w-6 h-6 text-violet-400" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h1 className="text-xl md:text-2xl font-bold text-[#EEF4D4] mb-1">
+                                            {pillar.title}
+                                        </h1>
+                                        <p className="text-white/50 text-sm">{pillar.description}</p>
+                                    </div>
+                                </div>
+
+                                {/* Conteúdo do Pilar */}
+                                <div className="bg-black/30 rounded-lg p-4 mb-6 border border-white/5">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <PlayCircle className="w-5 h-5 text-violet-400" />
+                                        <span className="text-white/70 text-sm font-medium uppercase tracking-wider">
+                                            Conteúdo do Pilar
+                                        </span>
+                                    </div>
+
+                                    {/* Placeholder para vídeo */}
+                                    <div className="aspect-video bg-slate-900/50 rounded-lg flex items-center justify-center border border-white/10 mb-4">
+                                        <div className="text-center">
+                                            <PlayCircle className="w-12 h-12 text-violet-400/50 mx-auto mb-2" />
+                                            <p className="text-white/30 text-sm">Vídeo do Pilar {pillarId}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Texto */}
+                                    <p className="text-white/60 text-sm">
+                                        Estude o conteúdo acima. Quando estiver pronto, clique abaixo para testar seus conhecimentos.
+                                    </p>
+                                </div>
+
+                                {/* Ação: Fazer Quiz */}
+                                {isCurrent && (
+                                    <TacticalButton
+                                        variant="neon"
+                                        onClick={handleStartQuiz}
+                                        className="w-full justify-center py-3"
+                                    >
+                                        <span className="flex items-center gap-2">
+                                            Estou Pronto - Fazer Avaliação
+                                            <ArrowRight className="w-5 h-5" />
+                                        </span>
+                                    </TacticalButton>
+                                )}
+
+                                {isCompleted && (
+                                    <div className="text-center text-emerald-400/70 text-sm py-2">
+                                        ✓ Você já completou este pilar
+                                    </div>
+                                )}
+                            </div>
+                        </TacticalCard>
+
+                        {/* Navegação entre pilares */}
+                        <div className="flex justify-between items-center">
+                            {pillarId > 1 ? (
+                                <button
+                                    onClick={() => router.push(`/pilar/${pillarId - 1}`)}
+                                    className="text-white/40 hover:text-white/70 transition-colors text-sm flex items-center gap-1"
+                                >
+                                    <ArrowLeft className="w-4 h-4" />
+                                    Pilar {pillarId - 1}
+                                </button>
+                            ) : <div />}
+
+                            {pillarId < 9 && isPillarUnlocked(pillarId + 1) && (
+                                <button
+                                    onClick={() => router.push(`/pilar/${pillarId + 1}`)}
+                                    className="text-white/40 hover:text-white/70 transition-colors text-sm flex items-center gap-1"
+                                >
+                                    Pilar {pillarId + 1}
+                                    <ArrowRight className="w-4 h-4" />
+                                </button>
+                            )}
                         </div>
-
-                        <article className="prose prose-invert prose-zinc max-w-none">
-                            <h2>{pillar.title}</h2>
-                            <p className="text-zinc-400">
-                                O conteúdo deste pilar será carregado aqui. Este é um placeholder para
-                                demonstrar a estrutura da página de sala de aula.
-                            </p>
-                            <p className="text-zinc-500">
-                                Aqui você encontrará textos, explicações e exemplos práticos para
-                                dominar este módulo do curso.
-                            </p>
-                        </article>
-                    </section>
-                </div>
+                    </div>
+                </main>
             </div>
-
-            {/* Footer fixo com botão de ação */}
-            <footer className="fixed bottom-0 left-0 right-0 p-4 backdrop-blur-sm bg-black/80 border-t border-zinc-800">
-                <div className="max-w-4xl mx-auto">
-                    <Link
-                        href={`/quiz/${id}`}
-                        className="block w-full text-center py-4 px-6 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold rounded-xl hover:opacity-90 transition-opacity"
-                    >
-                        Ir para o Desafio →
-                    </Link>
-                </div>
-            </footer>
-        </main>
+        </TubesBackground>
     );
 }

@@ -22,110 +22,74 @@
   --color-ring: var(--ring);
 }
 
-/* 
-   OBSIDIAN & GOLD THEME 
-   Hex values used directly or via vars for compatibility
-*/
 :root {
-  --background: #050505;
-  /* Obsidian */
-  --foreground: #d4af37;
-  /* Champagne Gold */
-
-  --card: #0a0a0a;
-  --card-foreground: #d4af37;
-
-  --popover: #0a0a0a;
-  --popover-foreground: #d4af37;
-
-  --primary: #f1c40f;
-  /* Bright Gold */
-  --primary-foreground: #000000;
-
-  --secondary: #1a1a1a;
-  --secondary-foreground: #d4af37;
-
-  --muted: #1a1a1a;
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #09090b;
+  --card-foreground: #ffffff;
+  --popover: #09090b;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #09090b;
+  --secondary: #27272a;
+  --secondary-foreground: #ffffff;
+  --muted: #27272a;
   --muted-foreground: #a1a1aa;
-
   --accent: #d4af37;
-  --accent-foreground: #000000;
-
+  --accent-foreground: #ffffff;
   --destructive: #7f1d1d;
-  --destructive-foreground: #d4af37;
-
-  --border: #451a03;
-  /* Dark Gold/Bronze Border */
-  --input: #451a03;
-  --ring: #f1c40f;
-
+  --destructive-foreground: #ffffff;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #d4af37;
   --radius: 0.5rem;
 }
 
-/* Base Styles */
 @layer base {
   * {
     border-color: var(--border);
-    /* Direct CSS instead of @apply to avoid lookup issues */
+  }
+
+  html {
+    height: 100%;
+    overflow-x: hidden;
+    background-color: var(--background);
+    color: var(--foreground);
   }
 
   body {
-    background-color: transparent;
+    min-height: 100%;
+    background-color: var(--background);
     color: var(--foreground);
-    overflow-x: hidden;
-    /* Luxury Gradients */
-
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    letter-spacing: -0.025em;
   }
 }
 
-/* Utilities */
 @layer utilities {
   .glow-gold {
     filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
-  }
-
-  .glow-gold-intense {
-    filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 30px rgba(241, 196, 15, 0.2));
-  }
-
-  .glass-elite {
-    background-color: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(24px);
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.05), 0 10px 40px rgba(0, 0, 0, 0.8);
   }
 
   .text-bevel {
     text-shadow: 0px 2px 3px rgba(0, 0, 0, 0.8), 0px -1px 1px rgba(255, 255, 255, 0.1);
   }
 
-  .bg-gold-gradient {
-    background: linear-gradient(135deg, #b45309 0%, #d4af37 25%, #f1c40f 50%, #d4af37 75%, #b45309 100%);
-    background-size: 200% 200%;
-    animation: shimmer 4s infinite linear;
+  /* Animação de fade-in suave */
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
   }
 
-  @keyframes shimmer {
-    0% {
-      background-position: 0% 50%;
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
     }
 
-    100% {
-      background-position: 100% 50%;
+    to {
+      opacity: 1;
     }
   }
 }
 
-/* Scrollbar */
+/* Scrollbar Customizada */
 ::-webkit-scrollbar {
   width: 8px;
 }

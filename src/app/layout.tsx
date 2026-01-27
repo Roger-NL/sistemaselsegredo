@@ -3,9 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ProgressProvider } from "@/context/ProgressContext";
 
-import { DevMenu } from "@/components/dev/DevMenu";
-import { BackgroundVideo } from "@/components/BackgroundVideo";
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -29,16 +26,12 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
       >
         <ProgressProvider>
-          <BackgroundVideo />
           {children}
-          <DevMenu />
-
         </ProgressProvider>
       </body>
     </html>
   );
 }
-
