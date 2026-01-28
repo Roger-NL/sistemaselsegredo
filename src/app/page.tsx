@@ -10,6 +10,7 @@ import { TubesBackground } from "@/components/ui/neon-flow";
 import { PILLARS } from "@/data/curriculum";
 import { TheHUD } from "@/components/core/TheHUD";
 import { GlobalStatusPanel } from "@/components/features/dashboard/GlobalStatusPanel";
+import { Typewriter } from "@/components/ui/typewriter";
 
 export default function Page() {
   const router = useRouter();
@@ -82,6 +83,80 @@ export default function Page() {
 
         {/* Center Stage (The Globe) */}
         <div className="relative z-10 flex items-center justify-center w-full h-full">
+          {/* Typewriter Effect - Hero Left (Desktop) */}
+          <div className="absolute left-[5%] xl:left-[10%] top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-start z-0 pointer-events-none select-none max-w-[600px]">
+            <h2 className="text-3xl xl:text-4xl font-bold text-white/40 tracking-widest font-mono mb-4 uppercase">
+              Your Mission Is To
+            </h2>
+            <div className="min-h-[120px]">
+              <Typewriter
+                text={[
+                  "UNLOCK\nFLUENCY",
+                  "MASTER\nTHE CODE",
+                  "BREAK\nBARRIERS",
+                  "ACCESS\nTHE WORLD",
+                  "THINK\nIN ENGLISH",
+                  "LIVE\nTHE DREAM",
+                  "EARN\nMORE",
+                  "TRAVEL\nFREELY",
+                  "BE\nUNSTOPPABLE",
+                  "CREATE\nYOUR FUTURE",
+                  "SPEAK\nBOLDLY",
+                  "LEAD\nWITH POWER",
+                  "CHANGE\nYOUR LIFE",
+                  "NO MORE\nFEAR",
+                  "TOTAL\nCONTROL",
+                  "HACK\nTHE SYSTEM",
+                  "GLOBAL\nMINDSET",
+                  "PURE\nCONFIDENCE",
+                  "ZERO\nHESITATION",
+                  "BECOME\nA LEGEND",
+                  "THE TIME\nIS NOW",
+                  "EVOLVE\nFASTER",
+                  "DECODE\nREALITY",
+                  "CONNECT\nPEOPLE",
+                  "INSPIRE\nOTHERS",
+                  "BUILD\nLEGACY",
+                  "MASTER\nYOURSELF",
+                  "EXPAND\nVISION",
+                  "REWRITE\nSTORY",
+                  "ACHIEVE\nGLORY",
+                  "UNLEASH\nPOWER",
+                  "DOMINATE\nTHE GAME"
+                ]}
+                speed={80}
+                className="text-5xl xl:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#EEF4D4] via-emerald-400 to-cyan-400 tracking-tighter drop-shadow-[0_0_30px_rgba(238,244,212,0.3)] leading-[0.9] uppercase whitespace-pre-line"
+                waitTime={4000}
+                deleteSpeed={40}
+                cursorChar={"_"}
+                cursorClassName="text-[#EEF4D4] ml-2 animate-pulse text-5xl xl:text-7xl align-baseline"
+              />
+            </div>
+          </div>
+
+          {/* Typewriter Effect - Mobile (Topo) */}
+          <div className="absolute top-[15%] left-0 right-0 flex lg:hidden flex-col items-center z-0 pointer-events-none select-none px-4 text-center">
+            <h2 className="text-[10px] font-bold text-white/40 tracking-[0.2em] font-mono mb-1 uppercase">
+              MISSION:
+            </h2>
+            <div className="h-[40px] flex items-center justify-center">
+              <Typewriter
+                text={[
+                  "UNLOCK FLUENCY",
+                  "MASTER ENGLISH",
+                  "NO BARRIERS",
+                  "ACCESS WORLD"
+                ]}
+                speed={60}
+                className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#EEF4D4] via-emerald-400 to-cyan-400 tracking-tighter drop-shadow-[0_0_10px_rgba(238,244,212,0.2)] leading-none uppercase"
+                waitTime={2000}
+                deleteSpeed={30}
+                cursorChar={"_"}
+                cursorClassName="text-[#EEF4D4] ml-1 animate-pulse text-2xl"
+              />
+            </div>
+          </div>
+
           <div
             onClick={handleGlobeClick}
             className={`relative group flex items-center justify-center pointer-events-auto cursor-pointer`}
@@ -169,11 +244,9 @@ export default function Page() {
                         <span className="text-4xl md:text-6xl align-top ml-2 opacity-80" style={{ color: '#EEF4D4' }}>/9</span>
                       </span>
 
-                      {/* Anel animado sutil - indicação de clicável */}
-                      <span
-                        className="absolute -inset-4 md:-inset-6 rounded-full border-2 border-dashed animate-spin-slow opacity-20 group-hover:opacity-50 transition-opacity pointer-events-none"
-                        style={{ borderColor: '#EEF4D4' }}
-                      />
+                      {/* Glow Radial Atrás - Clean Tech */}
+                      <div className="absolute -inset-8 bg-[#EEF4D4]/5 rounded-full blur-2xl group-hover:bg-[#EEF4D4]/15 transition-all duration-500 pointer-events-none" />
+                      <div className="absolute -inset-1 rounded-full border border-white/5 opacity-50 group-hover:border-white/20 transition-all duration-500" />
                     </div>
 
                     {/* Texto PILARES + dica de clique */}
@@ -212,7 +285,7 @@ export default function Page() {
                       router.push("/especialidades");
                     }
                   }}
-                  className="mt-6 md:mt-8 transition-all duration-300 group-hover:translate-y-1 pointer-events-auto cursor-pointer relative z-50 hover:scale-110 active:scale-95"
+                  className="mt-16 md:mt-24 transition-all duration-300 group-hover:translate-y-1 pointer-events-auto cursor-pointer relative z-50 hover:scale-110 active:scale-95"
                 >
                   <span
                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm ${currentSpec
