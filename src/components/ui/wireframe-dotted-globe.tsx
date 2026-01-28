@@ -53,9 +53,12 @@ function RotatingEarthComponent({
         const context = canvas.getContext("2d")
         if (!context) return
 
-        const size = Math.min(width, height, window.innerWidth - 40, window.innerHeight - 100)
+        // Calcular tamanho seguro para mobile (85vw máximo, respeitando safe areas)
+        const safeWidth = window.innerWidth * 0.85
+        const safeHeight = window.innerHeight * 0.7 // Deixa espaço para header e CTA
+        const size = Math.min(width, height, safeWidth, safeHeight)
 
-        // Force square to prevent distortion
+        // Force square to prevent distortion - crítico para iPhones
         const containerWidth = size
         const containerHeight = size
         const radius = size / 2.5
@@ -63,8 +66,10 @@ function RotatingEarthComponent({
         const dpr = Math.min(window.devicePixelRatio || 1, 2)
         canvas.width = size * dpr
         canvas.height = size * dpr
+        // Forçar aspect ratio 1:1 com object-fit
         canvas.style.width = `${size}px`
         canvas.style.height = `${size}px`
+        canvas.style.aspectRatio = '1 / 1'
         context.scale(dpr, dpr)
 
         const projection = d3
@@ -240,7 +245,7 @@ function RotatingEarthComponent({
             <canvas
                 ref={canvasRef}
                 className="w-full h-auto"
-                style={{ maxWidth: "100%", height: "auto", background: "transparent" }}
+                style={{ maxWidth: "100%", height: "auto", background: "transparent", objectFit: "contain" }}
             />
             {isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center">

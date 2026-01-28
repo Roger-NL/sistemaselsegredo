@@ -61,7 +61,7 @@ function TubesBackgroundComponent({
     }, []);
 
     return (
-        <div className={cn("relative w-full min-h-screen bg-black", className)}>
+        <div className={cn("relative w-full min-h-screen min-h-[100dvh] bg-black", className)}>
             {/* Fundo gradiente fixo - clique aqui randomiza cores */}
             <div
                 className="fixed inset-0 bg-gradient-to-br from-violet-950/40 via-black to-pink-950/30 pointer-events-auto cursor-crosshair"
@@ -84,7 +84,7 @@ function TubesBackgroundComponent({
             )}
 
             {/* Conteúdo - z-10 para ficar acima do fundo */}
-            <div className="relative z-10 w-full min-h-screen pointer-events-none">
+            <div className="relative z-10 w-full min-h-screen min-h-[100dvh] pointer-events-none">
                 {/* Cada filho com pointer-events-auto pode capturar cliques */}
                 {children}
             </div>

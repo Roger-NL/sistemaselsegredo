@@ -46,6 +46,14 @@
 }
 
 @layer base {
+
+  /* Universal box-sizing - Critical for consistent layouts */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
   * {
     border-color: var(--border);
   }
@@ -55,12 +63,37 @@
     overflow-x: hidden;
     background-color: var(--background);
     color: var(--foreground);
+    /* Firefox scrollbar support */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 175, 55, 0.15) #050505;
   }
 
   body {
     min-height: 100%;
     background-color: var(--background);
     color: var(--foreground);
+  }
+
+  /* Safe image/media defaults - prevent overflow */
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Focus visible styles for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Remove default focus for non-keyboard users */
+  :focus:not(:focus-visible) {
+    outline: none;
   }
 }
 
@@ -101,6 +134,31 @@
     to {
       transform: rotate(360deg);
     }
+  }
+
+  /* Safe minimum touch target - WCAG 2.5.5 compliance */
+  .touch-target-safe {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Safe full-height utility with iOS Safari fallback */
+  .safe-h-screen {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* Clamp-based responsive text utilities */
+  .text-responsive-xl {
+    font-size: clamp(2rem, 5vw, 4rem);
+  }
+
+  .text-responsive-2xl {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+  }
+
+  .text-responsive-hero {
+    font-size: clamp(3rem, 8vw, 7rem);
   }
 }
 

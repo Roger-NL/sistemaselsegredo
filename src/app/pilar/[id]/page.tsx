@@ -73,9 +73,9 @@ export default function PilarPage() {
     const activeContent = PILLARS_CONTENT[pillarId] || null;
 
     return (
-        <TubesBackground className="min-h-screen">
-            <div className="min-h-screen w-full overflow-y-auto pointer-events-auto">
-                <main className="w-full p-4 md:p-8 pb-20">
+        <TubesBackground className="min-h-screen min-h-[100dvh]">
+            <div className="min-h-screen min-h-[100dvh] w-full overflow-y-auto pointer-events-auto">
+                <main className="w-full p-4 md:p-8 pb-24 md:pb-8">
                     <div className="max-w-4xl mx-auto">
 
                         {/* Header Navigation */}
@@ -109,7 +109,7 @@ export default function PilarPage() {
                                         <div
                                             key={num}
                                             className={`h-1.5 rounded-full transition-all duration-300 ${current ? "w-8 bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]" :
-                                                    done ? "w-4 bg-emerald-500/50" : "w-2 bg-white/10"
+                                                done ? "w-4 bg-emerald-500/50" : "w-2 bg-white/10"
                                                 }`}
                                         />
                                     );
@@ -156,8 +156,8 @@ export default function PilarPage() {
                             </TacticalCard>
                         )}
 
-                        {/* Navegação de Rodapé */}
-                        <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/80 backdrop-blur-md border-t border-white/10 z-40 md:static md:bg-transparent md:border-0 md:p-0 flex justify-between items-center mt-12">
+                        {/* Navegação de Rodapé - Mobile: fixed, Desktop: inline */}
+                        <div className="fixed bottom-0 left-0 right-0 p-3 bg-black/90 backdrop-blur-md border-t border-white/10 z-40 md:relative md:bg-transparent md:border-0 md:p-0 md:mt-12 flex justify-between items-center">
                             {pillarId > 1 ? (
                                 <button
                                     onClick={() => router.push(`/pilar/${pillarId - 1}`)}

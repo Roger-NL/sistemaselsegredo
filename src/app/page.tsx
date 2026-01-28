@@ -41,19 +41,23 @@ export default function Page() {
     console.log("Opening HUD");
     setIsHUDOpen(true);
   };
+  // Controle manual removido - valores fixados em 36px/20px no desktop
+
 
   // Pegar pilares com status para o HUD
   const pillarsWithStatus = useProgress().getPillarsWithStatus();
 
   return (
     <TubesBackground
-      className="min-h-[100dvh]"
+      className="min-h-screen min-h-[100dvh]"
     >
-      <main className="relative min-h-[100dvh] w-full overflow-hidden text-white selection:bg-[#EEF4D4] selection:text-black flex items-center justify-center pointer-events-none">
+      <main className="relative min-h-screen min-h-[100dvh] w-full overflow-hidden text-white selection:bg-[#EEF4D4] selection:text-black flex items-center justify-center pointer-events-none">
 
-        {/* Global Status Panel (Lateral) */}
-        <div className="pointer-events-auto">
-          <GlobalStatusPanel />
+        {/* Global Status Panel (Lateral) - Absolute para não afetar centralização */}
+        <div className="absolute inset-0 pointer-events-none z-30">
+          <div className="pointer-events-auto">
+            <GlobalStatusPanel />
+          </div>
         </div>
 
         {/* HUD - Menu de Pilares */}
@@ -82,24 +86,24 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Mobile Progress Bar - Enhanced HUD Style */}
+            {/* Mobile Progress Bar - Enhanced HUD Style - Mais visível */}
             <div className="flex md:hidden flex-col items-end w-[180px] relative z-50">
-              <div className="flex justify-between w-full mb-1 px-1 items-end">
-                <span className="text-[8px] text-violet-300 uppercase tracking-[0.2em] font-mono shadow-black drop-shadow-md opacity-80">System Progress</span>
-                <span className="text-[10px] text-[#EEF4D4] font-mono font-bold tracking-wider">{globalProgress}%</span>
+              <div className="flex justify-between w-full mb-1.5 px-1 items-end">
+                <span className="text-[9px] text-violet-300 uppercase tracking-[0.15em] font-mono shadow-black drop-shadow-md">Progress</span>
+                <span className="text-xs text-[#EEF4D4] font-mono font-bold tracking-wider">{globalProgress}%</span>
               </div>
 
-              {/* Sleek Line Design */}
-              <div className="w-full h-[2px] bg-white/5 relative">
+              {/* Barra mais grossa e visível */}
+              <div className="w-full h-[4px] bg-white/10 relative rounded-full overflow-hidden">
                 {/* Barra de Progresso */}
                 <div
-                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-transparent via-[#EEF4D4] to-emerald-400"
-                  style={{ width: `${globalProgress}%`, boxShadow: '0 0 10px rgba(238, 244, 212, 0.5)' }}
+                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-violet-500 via-[#EEF4D4] to-emerald-400 rounded-full"
+                  style={{ width: `${globalProgress}%`, boxShadow: '0 0 12px rgba(238, 244, 212, 0.6)' }}
                 />
-                {/* Marcador na posição atual */}
+                {/* Marcador na posição atual - maior */}
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 w-1 h-2 bg-white shadow-[0_0_5px_white]"
-                  style={{ left: `${globalProgress}%`, transition: 'left 1s ease-out' }}
+                  className="absolute top-1/2 -translate-y-1/2 w-2 h-3 bg-white rounded-sm shadow-[0_0_8px_white]"
+                  style={{ left: `calc(${globalProgress}% - 4px)`, transition: 'left 1s ease-out' }}
                 />
               </div>
             </div>
@@ -107,9 +111,9 @@ export default function Page() {
         </header>
 
         {/* Center Stage (The Globe) */}
-        <div className="relative z-10 flex items-center justify-center w-full h-full">
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
           {/* Typewriter Effect - Hero Left (Desktop) */}
-          <div className="absolute left-[5%] xl:left-[10%] top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-start z-0 pointer-events-none select-none max-w-[600px]">
+          <div className="absolute left-4 xl:left-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-start z-0 pointer-events-none select-none max-w-[500px]">
             <h2 className="text-3xl xl:text-4xl font-bold text-white/40 tracking-widest font-mono mb-4 uppercase">
               Your Mission Is To
             </h2>
@@ -159,12 +163,12 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Typewriter Effect - Mobile (Topo) */}
-          <div className="absolute top-[4%] left-0 right-0 flex lg:hidden flex-col items-center z-0 pointer-events-none select-none px-4 text-center">
+          {/* Typewriter Effect - Mobile (ACIMA do globo, não sobreposto) */}
+          <div className="absolute top-[15%] left-0 right-0 flex lg:hidden flex-col items-center z-30 pointer-events-none select-none px-4 text-center">
             <h2 className="text-[10px] font-bold text-white/40 tracking-[0.2em] font-mono mb-1 uppercase">
               MISSION:
             </h2>
-            <div className="h-[40px] flex items-center justify-center">
+            <div className="h-[32px] flex items-center justify-center">
               <Typewriter
                 text={[
                   "UNLOCK FLUENCY",
@@ -173,124 +177,73 @@ export default function Page() {
                   "ACCESS WORLD"
                 ]}
                 speed={60}
-                className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#EEF4D4] via-emerald-400 to-cyan-400 tracking-tighter drop-shadow-[0_0_10px_rgba(238,244,212,0.2)] leading-none uppercase"
+                className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-[#EEF4D4] via-emerald-400 to-cyan-400 tracking-tighter drop-shadow-[0_0_10px_rgba(238,244,212,0.2)] leading-none uppercase"
                 waitTime={2000}
                 deleteSpeed={30}
                 cursorChar={"_"}
-                cursorClassName="text-[#EEF4D4] ml-1 animate-pulse text-2xl"
+                cursorClassName="text-[#EEF4D4] ml-1 animate-pulse text-lg"
               />
             </div>
           </div>
 
           <div
+            className="absolute z-10 pointer-events-auto"
+            style={{
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)"
+            }}
             onClick={handleGlobeClick}
-            className={`relative group flex items-center justify-center pointer-events-auto cursor-pointer`}
           >
-            <RotatingEarth
-              width={500}
-              height={500}
-              className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] transition-transform duration-700 ease-out group-hover:scale-105"
-            />
+            {/* Globo (com ajuste fino isolado - 36px X, 20px Y no Desktop) */}
+            <div className="transform transition-transform duration-300 lg:translate-x-[36px] lg:translate-y-[20px]">
+              <RotatingEarth
+                width={500}
+                height={500}
+                className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] transition-transform duration-700 ease-out group-hover:scale-105"
+              />
+            </div>
 
-            {/* Center Content - Pillar Counter + CTA */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
-              <div className="text-center flex flex-col items-center pt-64 md:pt-0">
+            {/* Conteúdo central sobre o globo */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+
+              {/* Número de pilares ou progresso da especialização */}
+              <div className="flex flex-col items-center">
                 {completedCount === 9 ? (
-                  /* MODO ESPECIALIZAÇÃO (PILARES COMPLETOS) */
-                  <div className="relative flex flex-col items-center animate-in fade-in duration-1000">
-                    <div className="relative">
-                      {/* Número Gigante com Glow Violeta */}
-                      <span
-                        className="block text-8xl md:text-[8rem] leading-none font-serif font-black tracking-tighter transition-all duration-500"
-                        style={{
-                          color: '#ddd6fe', // violet-200
-                          textShadow: '0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3)'
-                        }}
-                      >
-                        {currentSpec ? (
-                          /* Se tem especialização, mostra % ou Módulo atual? Vamos manter o 9/9 mas evoluído ou o progresso?
-                             User disse: "comecar encher uma barrinha". 
-                             Vou mostrar o PROGRESSO da spec em % grande.
-                          */
-                          Math.max(0, Math.round((globalProgress - 50) * 2)) + "%"
-                        ) : (
-                          "9/9"
-                        )}
-                      </span>
-
-                      {/* Subtítulo Estilizado */}
-                      <span
-                        className="absolute -bottom-4 left-0 right-0 text-center text-[10px] md:text-xs font-mono font-bold uppercase tracking-[0.4em]"
-                        style={{ color: '#a78bfa' }}
-                      >
-                        {currentSpec ? "Especialização" : "Masterizado"}
-                      </span>
-                    </div>
-
-                    {/* Barra de Progresso Estilizada (TECH BAR) */}
-                    <div className="mt-8 relative w-48 md:w-64 group cursor-pointer" onClick={(e) => {
-                      e.stopPropagation();
-                      if (currentSpec) router.push(`/especialidade/${currentSpec.id}`);
-                      else router.push("/especialidades");
-                    }}>
-                      {/* Background da barra */}
-                      <div className="h-2 w-full bg-gray-900/80 rounded-full border border-violet-500/30 backdrop-blur-sm overflow-hidden shadow-[0_0_15px_rgba(139,92,246,0.2)]">
-                        {/* Fill da barra */}
-                        <div
-                          className="h-full bg-gradient-to-r from-violet-800 via-purple-500 to-fuchsia-400 relative transition-all duration-1000 ease-out"
-                          style={{ width: currentSpec ? `${Math.max(5, (globalProgress - 50) * 2)}%` : '100%' }}
-                        >
-                          {/* Efeito de brilho na ponta */}
-                          <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/80 blur-[2px] shadow-[0_0_10px_white]" />
-                          {/* Scanline na barra */}
-                          <div className="absolute inset-0 bg-[url('/assets/noise.png')] opacity-30 mix-blend-overlay" />
-                        </div>
-                      </div>
-
-                      {/* Labels da barra */}
-                      <div className="flex justify-between items-center mt-2 text-[9px] font-mono text-violet-400/80">
-                        <span>{currentSpec ? "PROGRESSO OPERACIONAL" : "AGUARDANDO SELEÇÃO"}</span>
-                        <span>{currentSpec ? "EM ANDAMENTO" : "COMPLETO"}</span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  /* MODO PADRÃO (PILARES EM ANDAMENTO) */
-                  <div className="relative">
-                    <div className="relative">
-                      <span
-                        className="block text-7xl md:text-9xl font-serif font-black tracking-tighter"
-                        style={{
-                          color: '#EEF4D4',
-                          textShadow: '0 0 30px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)'
-                        }}
-                      >
-                        {completedCount}
-                        <span className="text-4xl md:text-6xl align-top ml-2 opacity-80" style={{ color: '#EEF4D4' }}>/9</span>
-                      </span>
-
-                      {/* Glow Radial Atrás - Clean Tech */}
-                      <div className="absolute -inset-8 bg-[#EEF4D4]/5 rounded-full blur-2xl group-hover:bg-[#EEF4D4]/15 transition-all duration-500 pointer-events-none" />
-                      <div className="absolute -inset-1 rounded-full border border-white/5 opacity-50 group-hover:border-white/20 transition-all duration-500" />
-                    </div>
-
-                    {/* Texto PILARES + dica de clique */}
+                  <div className="flex flex-col items-center">
                     <span
-                      className="block text-[10px] md:text-xs font-mono font-bold uppercase tracking-[0.5em] mt-[-5px] md:mt-[-8px]"
+                      className="text-8xl md:text-[8rem] font-serif font-black"
                       style={{
-                        color: '#EEF4D4',
-                        textShadow: '0 2px 8px rgba(0,0,0,0.7)'
+                        color: '#ddd6fe',
+                        textShadow: '0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3)'
                       }}
                     >
-                      PILARES
+                      {currentSpec ? Math.min(100, Math.max(0, Math.round((globalProgress - 50) * 2))) + "%" : "9/9"}
                     </span>
-
-                    {/* Indicação de clique sutil */}
                     <span
-                      className="block text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-2 animate-pulse opacity-60 group-hover:opacity-100 transition-opacity"
-                      style={{ color: '#EEF4D4' }}
+                      className="text-xs md:text-sm font-mono font-bold uppercase tracking-widest mt-2"
+                      style={{ color: '#a78bfa' }}
                     >
-                      ↑ toque para explorar ↑
+                      {currentSpec ? "Especialização" : "Masterizado"}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <span
+                      className="text-7xl md:text-9xl font-serif font-black tracking-tighter"
+                      style={{
+                        color: '#EEF4D4',
+                        textShadow: '0 0 30px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)'
+                      }}
+                    >
+                      {completedCount}
+                      <span className="text-4xl md:text-6xl align-top ml-2 opacity-80">/9</span>
+                    </span>
+                    <span
+                      className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-[0.5em] mt-2"
+                      style={{ color: '#EEF4D4', textShadow: '0 2px 8px rgba(0,0,0,0.7)' }}
+                    >
+                      PILARES
                     </span>
                   </div>
                 )}
@@ -299,18 +252,11 @@ export default function Page() {
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (currentSpec) {
-                      // Se tem especialização, vai para a página da especialidade
-                      router.push(`/especialidade/${currentSpec.id}`);
-                    } else if (completedCount < 9) {
-                      // Se não completou todos pilares, vai direto pro pilar atual
-                      router.push(`/pilar/${currentPillarNumber}`);
-                    } else {
-                      // Se completou tudo mas não tem especialidade, vai para seleção
-                      router.push("/especialidades");
-                    }
+                    if (currentSpec) router.push(`/especialidade/${currentSpec.id}`);
+                    else if (completedCount < 9) router.push(`/pilar/${currentPillarNumber}`);
+                    else router.push("/especialidades");
                   }}
-                  className="mt-10 md:mt-24 transition-all duration-300 group-hover:translate-y-1 pointer-events-auto cursor-pointer relative z-50 hover:scale-110 active:scale-95"
+                  className="mt-6 md:mt-10 pointer-events-auto cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95"
                 >
                   <span
                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm ${currentSpec
@@ -325,48 +271,56 @@ export default function Page() {
                   >
                     <span className={`w-2 h-2 rounded-full animate-pulse ${currentSpec ? "bg-violet-400" : "bg-[#EEF4D4]"}`} />
                     <span className={`text-xs md:text-sm font-medium uppercase tracking-wider ${currentSpec ? "text-violet-300" : "text-[#EEF4D4]"}`}>
-                      {currentSpec ? "Continuar Estudo" : (completedCount === 9 ? "Escolher Especialidade" : (completedCount === 0 ? "Começar os Estudos" : "Continuar Estudo"))}
+                      {currentSpec
+                        ? "Continuar Estudo"
+                        : completedCount === 9
+                          ? "Escolher Especialidade"
+                          : completedCount === 0
+                            ? "Começar os Estudos"
+                            : "Continuar Estudo"
+                      }
                     </span>
                   </span>
+                </div>
 
-                  {/* Nome do pilar atual OU especialização */}
-                  <div className="mt-3 text-center">
-                    {currentSpec ? (
-                      <>
-                        <p
-                          className="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full"
-                          style={{
-                            color: '#c4b5fd',
-                            backgroundColor: 'rgba(139, 92, 246, 0.25)',
-                            textShadow: '0 0 10px rgba(139, 92, 246, 0.5)'
-                          }}
-                        >
-                          {currentSpec.title}
-                        </p>
-                        <div className="mt-2 w-32 mx-auto">
-                          <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-500"
-                              style={{ width: `${Math.max(globalProgress - 50, 0) * 2}%` }}
-                            />
-                          </div>
-                          <p className="text-[9px] text-violet-300 mt-1 font-mono font-bold">{globalProgress}% concluído</p>
-                        </div>
-                      </>
-                    ) : (
+                {/* Nome do pilar atual OU especialização (RESTAURADO) */}
+                <div className="mt-3 text-center">
+                  {currentSpec ? (
+                    <>
                       <p
-                        className="text-[10px] md:text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full"
+                        className="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full"
                         style={{
-                          color: '#EEF4D4',
-                          backgroundColor: 'rgba(238, 244, 212, 0.15)',
-                          textShadow: '0 1px 4px rgba(0,0,0,0.5)'
+                          color: '#c4b5fd',
+                          backgroundColor: 'rgba(139, 92, 246, 0.25)',
+                          textShadow: '0 0 10px rgba(139, 92, 246, 0.5)'
                         }}
                       >
-                        {completedCount === 9 ? "Escolher Especialidade" : `Pilar ${currentPillarNumber}: ${currentPillar?.title || "Pilar 1"}`}
+                        {currentSpec.title}
                       </p>
-                    )}
-                  </div>
+                      <div className="mt-2 w-32 mx-auto">
+                        <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-500"
+                            style={{ width: `${Math.max(globalProgress - 50, 0) * 2}%` }}
+                          />
+                        </div>
+                        <p className="text-[9px] text-violet-300 mt-1 font-mono font-bold">{globalProgress}% concluído</p>
+                      </div>
+                    </>
+                  ) : (
+                    <p
+                      className="text-[10px] md:text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full"
+                      style={{
+                        color: '#EEF4D4',
+                        backgroundColor: 'rgba(238, 244, 212, 0.15)',
+                        textShadow: '0 1px 4px rgba(0,0,0,0.5)'
+                      }}
+                    >
+                      {completedCount === 9 ? "Escolher Especialidade" : `Pilar ${currentPillarNumber}: ${currentPillar?.title || "Pilar 1"}`}
+                    </p>
+                  )}
                 </div>
+
               </div>
             </div>
           </div>
@@ -377,6 +331,8 @@ export default function Page() {
           <DevControls />
         </div>
       </main>
+
+
     </TubesBackground>
   );
 }

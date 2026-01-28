@@ -217,7 +217,7 @@ export function TacticalButton({
                 "relative w-full text-left",
                 "font-mono text-sm",
                 // Layout
-                "px-4 py-3 rounded-sm",
+                "px-4 py-3 rounded-sm min-h-[44px]",
                 // Bordas
                 "border transition-all duration-200",
                 colors.border,

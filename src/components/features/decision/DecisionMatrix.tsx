@@ -66,7 +66,7 @@ export const DecisionMatrix = () => {
 
   return (
     <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-3xl overflow-y-auto pointer-events-auto custom-scrollbar">
-      <div className="min-h-full w-full flex flex-col items-center justify-center p-4 py-24 md:p-8">
+      <div className="min-h-full w-full flex flex-col items-center justify-start md:justify-center p-4 py-16 md:py-8 md:p-8">
         {/* Navegação Fixa */}
         <div className="fixed top-6 left-6 z-[200] flex items-center gap-4 pointer-events-auto">
           <button
@@ -210,7 +210,7 @@ export const DecisionMatrix = () => {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
                 {PLANETS.map((planet) => {
                   const isCompleted = isSpecializationComplete(planet.id);
                   return (
@@ -233,7 +233,7 @@ export const DecisionMatrix = () => {
                       />
 
                       <div className={cn(
-                        "relative flex h-full flex-col justify-between overflow-hidden rounded-lg border-[0.75px] bg-[#050505] p-4 sm:p-5 shadow-sm transition-all",
+                        "relative flex h-full flex-col justify-between overflow-hidden rounded-lg border-[0.75px] bg-[#050505] p-3 sm:p-5 shadow-sm transition-all",
                         isCompleted ? "border-emerald-500/30 bg-emerald-950/10" :
                           canSelect ? "border-white/10 group-hover:border-violet-500/30 bg-black" :
                             "border-white/5 bg-black"
@@ -269,19 +269,19 @@ export const DecisionMatrix = () => {
                             )}
                           </div>
                           <h4 className={cn(
-                            "text-lg font-bold tracking-tight uppercase transition-colors leading-tight",
+                            "text-sm md:text-lg font-bold tracking-tight uppercase transition-colors leading-tight",
                             isCompleted ? "text-emerald-400" :
                               canSelect ? "text-[#EEF4D4] group-hover:text-violet-200" :
                                 "text-[#EEF4D4]/50"
                           )}>
                             {planet.title}
                           </h4>
-                          <p className="text-xs text-gray-500 font-mono leading-relaxed">
+                          <p className="text-[10px] md:text-xs text-gray-500 font-mono leading-relaxed hidden sm:block">
                             Desbloqueia protocolos de comunicação avançados para {planet.title.toLowerCase()}.
                           </p>
                         </div>
 
-                        <div className="pt-4 flex justify-between items-center text-[9px] sm:text-[10px] font-mono text-gray-600 border-t border-white/5 mt-3">
+                        <div className="pt-2 md:pt-4 flex justify-between items-center text-[8px] sm:text-[10px] font-mono text-gray-600 border-t border-white/5 mt-2 md:mt-3">
                           <span>STATUS: {isCompleted ? "MISSION ACCOMPLISHED" : (canSelect ? "READY" : "LOCKED")}</span>
                           {isCompleted && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
                         </div>

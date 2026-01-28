@@ -23,7 +23,7 @@ export default function ModulePage() {
     };
 
     return (
-        <TubesBackground className="min-h-screen">
+        <TubesBackground className="min-h-screen min-h-[100dvh]">
             <main className="min-h-screen w-full p-6 md:p-12 pointer-events-auto flex flex-col items-center">
 
                 {/* Header Navigation */}

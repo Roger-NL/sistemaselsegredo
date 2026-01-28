@@ -47,10 +47,10 @@ export default function EspecialidadePage() {
     };
 
     return (
-        <TubesBackground className="min-h-screen">
-            <main className="min-h-screen w-full p-6 md:p-12 pointer-events-auto">
+        <TubesBackground className="min-h-screen min-h-[100dvh]">
+            <main className="min-h-screen w-full p-4 md:p-12 pointer-events-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-12 relative z-50 pointer-events-auto">
+                <div className="flex items-center justify-between mb-6 md:mb-12 relative z-50 pointer-events-auto">
                     <div className="flex items-center gap-4">
                         <button
                             type="button"
@@ -85,7 +85,7 @@ export default function EspecialidadePage() {
                         className="mb-8"
                     >
                         <div className="flex items-center gap-6 mb-8 border-b border-white/10 pb-8">
-                            <div className="w-20 h-20 rounded-2xl bg-violet-500/10 border border-violet-500/30 flex items-center justify-center text-violet-400 shadow-[0_0_30px_rgba(139,92,246,0.1)]">
+                            <div className="w-14 h-14 md:w-20 md:h-20 rounded-2xl bg-violet-500/10 border border-violet-500/30 flex items-center justify-center text-violet-400 shadow-[0_0_30px_rgba(139,92,246,0.1)]">
                                 {SPEC_ICONS[specId] || <Target className="w-10 h-10" />}
                             </div>
                             <div>

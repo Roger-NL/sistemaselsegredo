@@ -65,7 +65,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                         <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-[#EEF4D4]" />
 
                         {/* Header Técnico */}
-                        <div className="flex items-start justify-between p-8 border-b border-[#EEF4D4]/10 bg-[#EEF4D4]/5">
+                        <div className="flex items-start justify-between p-4 md:p-8 border-b border-[#EEF4D4]/10 bg-[#EEF4D4]/5">
                             <div>
                                 <div className="flex items-center gap-3 mb-2">
                                     <span className="w-2 h-2 bg-[#EEF4D4] animate-pulse" />
@@ -76,15 +76,26 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                 </h2>
                             </div>
 
-                            <div className="flex flex-col items-end gap-4">
-                                <button
-                                    onClick={onClose}
-                                    className="group flex items-center gap-2 text-[#EEF4D4]/60 hover:text-[#EEF4D4] transition-colors"
-                                >
-                                    <span className="text-[10px] font-mono uppercase tracking-widest group-hover:tracking-[0.2em] transition-all">Encerrar Acesso</span>
-                                    <X className="w-5 h-5" />
-                                </button>
-                                <div className="text-right">
+                            <div className="flex flex-col items-end gap-2 md:gap-4">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            onClose();
+                                            window.location.href = "/";
+                                        }}
+                                        className="text-[#EEF4D4]/40 hover:text-[#EEF4D4]/80 transition-colors text-[10px] font-mono uppercase tracking-widest"
+                                    >
+                                        Menu Principal
+                                    </button>
+                                    <button
+                                        onClick={onClose}
+                                        className="group flex items-center gap-1 text-[#EEF4D4]/60 hover:text-[#EEF4D4] transition-colors"
+                                    >
+                                        <span className="text-[10px] font-mono uppercase tracking-widest hidden md:inline">Fechar</span>
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <div className="text-right hidden md:block">
                                     <div className="text-[10px] text-[#EEF4D4]/40 font-mono uppercase tracking-widest">Patente</div>
                                     <div className="text-sm font-bold text-[#EEF4D4] uppercase tracking-wider border border-[#EEF4D4]/20 px-3 py-1 mt-1 bg-black">
                                         {currentRank}
@@ -94,8 +105,8 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                         </div>
 
                         {/* Lista de Pilares Grid */}
-                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                                 {pillars.map((pillar, index) => {
                                     const isLocked = pillar.status === "locked";
                                     const isCompleted = pillar.status === "completed";
