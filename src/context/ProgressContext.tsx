@@ -59,7 +59,7 @@ interface ProgressContextType {
 const ProgressContext = createContext<ProgressContextType | null>(null);
 
 // Key para localStorage
-const STORAGE_KEY = "es-english-progress";
+const STORAGE_KEY = "es-english-progress-v2";
 
 // Estado inicial: apenas pilar 1 desbloqueado
 function getInitialStatus(): Record<string, PillarStatus> {
