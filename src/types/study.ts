@@ -1,4 +1,4 @@
-export type ContentBlockType = 'paragraph' | 'h2' | 'h3' | 'list' | 'box-goal' | 'box-insight' | 'box-warning' | 'box-action' | 'pillar-end';
+export type ContentBlockType = 'paragraph' | 'h2' | 'h3' | 'list' | 'box-goal' | 'box-insight' | 'box-warning' | 'box-action' | 'pillar-end' | 'video' | 'table' | 'dialogue';
 
 export interface ContentBlock {
   type: ContentBlockType;

@@ -50,6 +50,10 @@ interface ProgressContextType {
     getGlobalProgress: () => number;
     /** Finaliza a especialização atual, marca tudo como completo e volta para o menu */
     finishCurrentSpecialization: () => void;
+    /** Verifica se o curso inteiro está completo (pilares + especialização) */
+    isCourseFullyComplete: () => boolean;
+    /** Verifica se uma especialização específica está completa */
+    isSpecializationComplete: (specId: string) => boolean;
 }
 
 const ProgressContext = createContext<ProgressContextType | null>(null);
@@ -251,8 +255,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
         let specProgress = 0;
         if (chosenSpecialization) {
-             const completedCount = completedModules[chosenSpecialization]?.length || 0;
-             specProgress = Math.min(completedCount / 5, 1);
+            const completedCount = completedModules[chosenSpecialization]?.length || 0;
+            specProgress = Math.min(completedCount / 5, 1);
         }
 
         const total = (baseProgress * baseWeight) + (specProgress * specWeight);
