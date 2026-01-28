@@ -76,6 +76,15 @@ export default function QuizPage() {
     }, [activePillar, completePillar]);
 
     const handleBack = () => {
+        // Voltar para a página de estudo do pilar atual
+        if (activePillar) {
+            router.push(`/pilar/${activePillar}`);
+        } else {
+            router.push("/");
+        }
+    };
+
+    const handleGoToMenu = () => {
         router.push("/");
     };
 
@@ -154,15 +163,25 @@ export default function QuizPage() {
             <main className="h-screen w-full flex flex-col items-center justify-center p-4 pointer-events-none overflow-y-auto">
                 <div className="w-full max-w-2xl pointer-events-auto relative z-50 my-auto">
 
-                    {/* Header com progresso */}
+                    {/* Header com navegação */}
                     <div className="mb-6 flex items-center justify-between">
-                        <button
-                            onClick={handleBack}
-                            className="flex items-center gap-2 text-white/50 hover:text-white/80 transition-colors text-sm"
-                        >
-                            <ArrowLeft className="w-4 h-4" />
-                            Voltar
-                        </button>
+                        <div className="flex items-center gap-4">
+                            <button
+                                type="button"
+                                onClick={handleBack}
+                                className="flex items-center gap-2 text-white/50 hover:text-white/80 transition-colors text-sm bg-white/5 px-3 py-2 rounded border border-white/10 hover:border-white/30"
+                            >
+                                <ArrowLeft className="w-4 h-4" />
+                                Voltar
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleGoToMenu}
+                                className="flex items-center gap-2 text-white/30 hover:text-white/60 transition-colors text-xs"
+                            >
+                                Menu Principal
+                            </button>
+                        </div>
 
                         <div className="flex items-center gap-3">
                             <span className="text-white/40 text-xs font-mono uppercase">Progresso</span>

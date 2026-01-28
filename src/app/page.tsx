@@ -8,7 +8,6 @@ import { useProgress } from "@/context/ProgressContext";
 import { getRank } from "@/utils/ranks";
 import { TubesBackground } from "@/components/ui/neon-flow";
 import { PILLARS } from "@/data/curriculum";
-import { DecisionMatrix } from "@/components/features/decision/DecisionMatrix";
 import { TheHUD } from "@/components/core/TheHUD";
 import { GlobalStatusPanel } from "@/components/features/dashboard/GlobalStatusPanel";
 
@@ -20,7 +19,8 @@ export default function Page() {
     areAllPillarsComplete,
     chosenSpecialization,
     getCurrentSpecialization,
-    canChooseSpecialization
+    canChooseSpecialization,
+    getGlobalProgress
   } = useProgress();
 
   const completedCount = getCompletedCount();
@@ -28,10 +28,11 @@ export default function Page() {
   const currentPillarNumber = getCurrentPillarNumber();
   const currentPillar = PILLARS[currentPillarNumber - 1];
   const currentSpec = getCurrentSpecialization();
+  const globalProgress = getGlobalProgress();
 
-  // Mostra Matrix APENAS se completou tudo E NÃO tem especialização escolhida ainda
-  // Se já tem especialização, o usuário acessa via HUD ou botão "Continuar Estudo"
-  const showDecisionMatrix = areAllPillarsComplete() && !chosenSpecialization;
+  // NÃO mostrar DecisionMatrix automaticamente
+  // O usuário acessa via HUD clicando no Pilar 10 (Especialidades)
+  // Isso resolve o problema do botão "Voltar" não funcionar
 
   const [isHUDOpen, setIsHUDOpen] = useState(false);
 
@@ -51,11 +52,8 @@ export default function Page() {
 
         {/* Global Status Panel (Lateral) */}
         <div className="pointer-events-auto">
-            <GlobalStatusPanel />
+          <GlobalStatusPanel />
         </div>
-
-        {/* Renderiza Matrix de Decisão se necessário */}
-        {showDecisionMatrix && <DecisionMatrix />}
 
         {/* HUD - Menu de Pilares */}
         <TheHUD
@@ -97,18 +95,27 @@ export default function Page() {
             {/* Center Content - Pillar Counter + CTA */}
             <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
               <div className="text-center flex flex-col items-center">
-                {/* Contador de Pilares */}
-                <span
-                  className="block text-7xl md:text-9xl font-serif font-black tracking-tighter"
-                  style={{
-                    color: '#EEF4D4',
-                    textShadow: '0 0 30px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)'
-                  }}
-                >
-                  {completedCount}
-                  <span className="text-4xl md:text-6xl align-top ml-2 opacity-80" style={{ color: '#EEF4D4' }}>/9</span>
-                </span>
+                {/* Contador de Pilares - com indicação de clique */}
+                <div className="relative">
+                  <span
+                    className="block text-7xl md:text-9xl font-serif font-black tracking-tighter"
+                    style={{
+                      color: '#EEF4D4',
+                      textShadow: '0 0 30px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)'
+                    }}
+                  >
+                    {completedCount}
+                    <span className="text-4xl md:text-6xl align-top ml-2 opacity-80" style={{ color: '#EEF4D4' }}>/9</span>
+                  </span>
 
+                  {/* Anel animado sutil - indicação de clicável */}
+                  <span
+                    className="absolute -inset-4 md:-inset-6 rounded-full border-2 border-dashed animate-spin-slow opacity-20 group-hover:opacity-50 transition-opacity pointer-events-none"
+                    style={{ borderColor: '#EEF4D4' }}
+                  />
+                </div>
+
+                {/* Texto PILARES + dica de clique */}
                 <span
                   className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-[0.5em] mt-[-5px] md:mt-[-8px]"
                   style={{
@@ -119,13 +126,26 @@ export default function Page() {
                   PILARES
                 </span>
 
+                {/* Indicação de clique sutil */}
+                <span
+                  className="text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-2 animate-pulse opacity-60 group-hover:opacity-100 transition-opacity"
+                  style={{ color: '#EEF4D4' }}
+                >
+                  ↑ toque para explorar ↑
+                </span>
+
                 {/* CTA Button */}
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
                     if (currentSpec) {
+                      // Se tem especialização, vai para a página da especialidade
                       router.push(`/especialidade/${currentSpec.id}`);
+                    } else if (completedCount < 9) {
+                      // Se não completou todos pilares, vai direto pro pilar atual
+                      router.push(`/pilar/${currentPillarNumber}`);
                     } else {
+                      // Se completou tudo mas não tem especialidade, abre HUD
                       handleGlobeClick();
                     }
                   }}
@@ -144,7 +164,7 @@ export default function Page() {
                   >
                     <span className={`w-2 h-2 rounded-full animate-pulse ${currentSpec ? "bg-violet-400" : "bg-[#EEF4D4]"}`} />
                     <span className={`text-xs md:text-sm font-medium uppercase tracking-wider ${currentSpec ? "text-violet-300" : "text-[#EEF4D4]"}`}>
-                      {currentSpec ? "Continuar Estudo" : (completedCount === 9 ? "Acessar Sistema" : "Acessar Missão")}
+                      {currentSpec ? "Continuar Estudo" : (completedCount === 9 ? "Acessar Sistema" : "Continuar Estudo")}
                     </span>
                   </span>
 
@@ -152,22 +172,36 @@ export default function Page() {
                   <div className="mt-3 text-center">
                     {currentSpec ? (
                       <>
-                        <p className="text-violet-400 text-xs uppercase tracking-wider font-medium">
+                        <p
+                          className="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full"
+                          style={{
+                            color: '#c4b5fd',
+                            backgroundColor: 'rgba(139, 92, 246, 0.25)',
+                            textShadow: '0 0 10px rgba(139, 92, 246, 0.5)'
+                          }}
+                        >
                           {currentSpec.title}
                         </p>
                         <div className="mt-2 w-32 mx-auto">
                           <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-gradient-to-r from-violet-500 to-purple-500"
-                              style={{ width: '0%' }} // TODO: Conectar progresso real
+                              className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-500"
+                              style={{ width: `${Math.max(globalProgress - 50, 0) * 2}%` }}
                             />
                           </div>
-                          <p className="text-[9px] text-violet-400/60 mt-1 font-mono">0% concluído</p>
+                          <p className="text-[9px] text-violet-300 mt-1 font-mono font-bold">{globalProgress}% concluído</p>
                         </div>
                       </>
                     ) : (
-                      <p className="text-white/50 text-[10px] md:text-xs uppercase tracking-tighter">
-                        {completedCount === 9 ? "Sistema Operacional" : (currentPillar?.title || "Pilar 1")}
+                      <p
+                        className="text-[10px] md:text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full"
+                        style={{
+                          color: '#EEF4D4',
+                          backgroundColor: 'rgba(238, 244, 212, 0.15)',
+                          textShadow: '0 1px 4px rgba(0,0,0,0.5)'
+                        }}
+                      >
+                        {completedCount === 9 ? "Escolher Especialidade" : `Pilar ${currentPillarNumber}: ${currentPillar?.title || "Pilar 1"}`}
                       </p>
                     )}
                   </div>

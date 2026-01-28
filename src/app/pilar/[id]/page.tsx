@@ -27,6 +27,11 @@ export default function PilarPage() {
     };
 
     const handleBack = () => {
+        // Usa router.back() para voltar à página anterior
+        router.back();
+    };
+
+    const handleGoToMenu = () => {
         router.push("/");
     };
 
@@ -75,13 +80,23 @@ export default function PilarPage() {
 
                         {/* Header Navigation */}
                         <div className="flex items-center justify-between mb-8 relative z-50">
-                            <button
-                                onClick={handleBack}
-                                className="flex items-center gap-2 text-white/50 hover:text-white transition-colors py-2 px-3 -ml-3 rounded-md hover:bg-white/5"
-                            >
-                                <ArrowLeft className="w-4 h-4" />
-                                <span className="hidden md:inline">Global Command</span>
-                            </button>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    type="button"
+                                    onClick={handleBack}
+                                    className="flex items-center gap-2 text-white/50 hover:text-white transition-colors py-2 px-3 rounded-md hover:bg-white/5 border border-white/10 hover:border-white/30"
+                                >
+                                    <ArrowLeft className="w-4 h-4" />
+                                    <span className="hidden md:inline">Voltar</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleGoToMenu}
+                                    className="flex items-center gap-2 text-white/30 hover:text-white/60 transition-colors text-xs"
+                                >
+                                    Menu Principal
+                                </button>
+                            </div>
 
                             {/* Progresso Visual */}
                             <div className="flex gap-1.5">
@@ -93,10 +108,9 @@ export default function PilarPage() {
                                     return (
                                         <div
                                             key={num}
-                                            className={`h-1.5 rounded-full transition-all duration-300 ${
-                                                current ? "w-8 bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]" : 
-                                                done ? "w-4 bg-emerald-500/50" : "w-2 bg-white/10"
-                                            }`}
+                                            className={`h-1.5 rounded-full transition-all duration-300 ${current ? "w-8 bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]" :
+                                                    done ? "w-4 bg-emerald-500/50" : "w-2 bg-white/10"
+                                                }`}
                                         />
                                     );
                                 })}
@@ -107,7 +121,7 @@ export default function PilarPage() {
                         {activeContent ? (
                             <div className="animate-in fade-in duration-700 slide-in-from-bottom-4">
                                 <StudyViewer data={activeContent} />
-                                
+
                                 {/* Ação Final do Pilar */}
                                 <div className="mt-12 flex justify-center pb-20">
                                     <TacticalButton

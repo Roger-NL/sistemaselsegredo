@@ -143,19 +143,31 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                                     : "bg-black border-[#EEF4D4]/40 hover:border-[#EEF4D4] hover:bg-[#EEF4D4]/5"}
                                             `}>
                                                 <div className="flex items-center gap-6 z-10">
-                                                    <span className={`
-                                                        text-2xl font-mono font-bold tracking-tighter transition-colors
-                                                        ${isActive ? "text-black" : "text-[#EEF4D4] group-hover:text-[#EEF4D4]"}
-                                                    `}>
-                                                        {pillarNum}
-                                                    </span>
+                                                    {/* Número do pilar com indicação de clique */}
+                                                    <div className="relative">
+                                                        <span className={`
+                                                            text-2xl font-mono font-bold tracking-tighter transition-colors
+                                                            ${isActive ? "text-black" : "text-[#EEF4D4] group-hover:text-[#EEF4D4]"}
+                                                        `}>
+                                                            {pillarNum}
+                                                        </span>
+                                                        {/* Anel pulsante sutil para indicar que é clicável */}
+                                                        {!isCompleted && (
+                                                            <span className="absolute -inset-2 rounded-full border border-dashed animate-spin-slow opacity-30 group-hover:opacity-60 transition-opacity"
+                                                                style={{
+                                                                    borderColor: isActive ? '#000' : '#EEF4D4',
+                                                                    animationDuration: '8s'
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </div>
 
                                                     <div className="flex flex-col">
                                                         <span className={`
                                                             text-[10px] font-mono uppercase tracking-[0.2em] mb-1 transition-colors
                                                             ${isActive ? "text-black/60" : "text-[#EEF4D4]/60"}
                                                         `}>
-                                                            {isCompleted ? "Concluído com sucesso" : "Desbloqueado"}
+                                                            {isCompleted ? "Concluído com sucesso" : "Clique para acessar →"}
                                                         </span>
                                                         <span className={`
                                                             font-serif text-lg tracking-wide transition-colors

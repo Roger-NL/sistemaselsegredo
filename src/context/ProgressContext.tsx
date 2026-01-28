@@ -247,20 +247,20 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     };
 
     // Calcula progresso global (0-100)
+    // Nova lógica: 50% = pilares completos, 50% = especialização completa
     const getGlobalProgress = () => {
-        const baseWeight = 0.7; // 70% Base
-        const specWeight = 0.3; // 30% Especialização
+        // Pilares valem 50% do total
+        const pillarProgress = (getCompletedCount() / 9) * 50;
 
-        const baseProgress = getCompletedCount() / 9;
-
+        // Especialização vale os outros 50%
         let specProgress = 0;
         if (chosenSpecialization) {
-            const completedCount = completedModules[chosenSpecialization]?.length || 0;
-            specProgress = Math.min(completedCount / 5, 1);
+            const completedModulesCount = completedModules[chosenSpecialization]?.length || 0;
+            // Cada módulo (de 5) vale 10% do total (50% / 5 = 10%)
+            specProgress = Math.min(completedModulesCount * 10, 50);
         }
 
-        const total = (baseProgress * baseWeight) + (specProgress * specWeight);
-        return Math.min(Math.round(total * 100), 100);
+        return Math.min(Math.round(pillarProgress + specProgress), 100);
     };
 
     // Retorna planetas com status atualizado

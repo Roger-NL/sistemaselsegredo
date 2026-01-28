@@ -64,14 +64,32 @@ export const DecisionMatrix = () => {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-3xl p-4 pointer-events-auto">
-      {/* Botão Voltar */}
-      <button
-        onClick={handleBack}
-        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-[#EEF4D4]/60 hover:text-[#EEF4D4] transition-colors font-mono text-sm"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Voltar</span>
-      </button>
+      {/* Navegação - Voltar (página anterior) + Menu Principal (dashboard) */}
+      <div className="absolute top-6 left-6 z-[200] flex items-center gap-4 pointer-events-auto">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            router.back();
+          }}
+          className="flex items-center gap-2 text-[#EEF4D4]/60 hover:text-[#EEF4D4] transition-colors font-mono text-sm cursor-pointer bg-black/50 px-3 py-2 rounded border border-[#EEF4D4]/20 hover:border-[#EEF4D4]/50"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Voltar</span>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = "/";
+          }}
+          className="flex items-center gap-2 text-[#EEF4D4]/30 hover:text-[#EEF4D4]/60 transition-colors font-mono text-xs cursor-pointer"
+        >
+          Menu Principal
+        </button>
+      </div>
 
       <AnimatePresence mode="wait">
         {step === "intro" && (

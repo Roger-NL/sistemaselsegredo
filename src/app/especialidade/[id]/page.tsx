@@ -51,13 +51,23 @@ export default function EspecialidadePage() {
             <main className="min-h-screen w-full p-6 md:p-12 pointer-events-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-12 relative z-50 pointer-events-auto">
-                    <button
-                        onClick={() => router.push("/")}
-                        className="flex items-center gap-2 text-[#EEF4D4]/60 hover:text-[#EEF4D4] transition-colors font-mono text-sm px-4 py-2 border border-[#EEF4D4]/20 rounded hover:border-[#EEF4D4]/40 hover:bg-[#EEF4D4]/5"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        <span>Global Command</span>
-                    </button>
+                    <div className="flex items-center gap-4">
+                        <button
+                            type="button"
+                            onClick={() => router.back()}
+                            className="flex items-center gap-2 text-[#EEF4D4]/60 hover:text-[#EEF4D4] transition-colors font-mono text-sm px-4 py-2 border border-[#EEF4D4]/20 rounded hover:border-[#EEF4D4]/40 hover:bg-[#EEF4D4]/5"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            <span>Voltar</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => router.push("/")}
+                            className="flex items-center gap-2 text-[#EEF4D4]/30 hover:text-[#EEF4D4]/60 transition-colors font-mono text-xs"
+                        >
+                            Menu Principal
+                        </button>
+                    </div>
 
                     <div className="text-right">
                         <span className="text-[10px] text-violet-400 font-mono uppercase tracking-widest">
