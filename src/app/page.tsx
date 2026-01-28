@@ -95,44 +95,107 @@ export default function Page() {
             {/* Center Content - Pillar Counter + CTA */}
             <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
               <div className="text-center flex flex-col items-center">
-                {/* Contador de Pilares - com indicação de clique */}
-                <div className="relative">
-                  <span
-                    className="block text-7xl md:text-9xl font-serif font-black tracking-tighter"
-                    style={{
-                      color: '#EEF4D4',
-                      textShadow: '0 0 30px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)'
-                    }}
-                  >
-                    {completedCount}
-                    <span className="text-4xl md:text-6xl align-top ml-2 opacity-80" style={{ color: '#EEF4D4' }}>/9</span>
-                  </span>
+                {completedCount === 9 ? (
+                  /* MODO ESPECIALIZAÇÃO (PILARES COMPLETOS) */
+                  <div className="relative flex flex-col items-center animate-in fade-in duration-1000">
+                    <div className="relative">
+                      {/* Número Gigante com Glow Violeta */}
+                      <span
+                        className="block text-8xl md:text-[8rem] leading-none font-serif font-black tracking-tighter transition-all duration-500"
+                        style={{
+                          color: '#ddd6fe', // violet-200
+                          textShadow: '0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3)'
+                        }}
+                      >
+                        {currentSpec ? (
+                          /* Se tem especialização, mostra % ou Módulo atual? Vamos manter o 9/9 mas evoluído ou o progresso?
+                             User disse: "comecar encher uma barrinha". 
+                             Vou mostrar o PROGRESSO da spec em % grande.
+                          */
+                          Math.max(0, Math.round((globalProgress - 50) * 2)) + "%"
+                        ) : (
+                          "9/9"
+                        )}
+                      </span>
 
-                  {/* Anel animado sutil - indicação de clicável */}
-                  <span
-                    className="absolute -inset-4 md:-inset-6 rounded-full border-2 border-dashed animate-spin-slow opacity-20 group-hover:opacity-50 transition-opacity pointer-events-none"
-                    style={{ borderColor: '#EEF4D4' }}
-                  />
-                </div>
+                      {/* Subtítulo Estilizado */}
+                      <span
+                        className="absolute -bottom-4 left-0 right-0 text-center text-[10px] md:text-xs font-mono font-bold uppercase tracking-[0.4em]"
+                        style={{ color: '#a78bfa' }}
+                      >
+                        {currentSpec ? "Especialização" : "Masterizado"}
+                      </span>
+                    </div>
 
-                {/* Texto PILARES + dica de clique */}
-                <span
-                  className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-[0.5em] mt-[-5px] md:mt-[-8px]"
-                  style={{
-                    color: '#EEF4D4',
-                    textShadow: '0 2px 8px rgba(0,0,0,0.7)'
-                  }}
-                >
-                  PILARES
-                </span>
+                    {/* Barra de Progresso Estilizada (TECH BAR) */}
+                    <div className="mt-8 relative w-48 md:w-64 group cursor-pointer" onClick={(e) => {
+                      e.stopPropagation();
+                      if (currentSpec) router.push(`/especialidade/${currentSpec.id}`);
+                      else router.push("/especialidades");
+                    }}>
+                      {/* Background da barra */}
+                      <div className="h-2 w-full bg-gray-900/80 rounded-full border border-violet-500/30 backdrop-blur-sm overflow-hidden shadow-[0_0_15px_rgba(139,92,246,0.2)]">
+                        {/* Fill da barra */}
+                        <div
+                          className="h-full bg-gradient-to-r from-violet-800 via-purple-500 to-fuchsia-400 relative transition-all duration-1000 ease-out"
+                          style={{ width: currentSpec ? `${Math.max(5, (globalProgress - 50) * 2)}%` : '100%' }}
+                        >
+                          {/* Efeito de brilho na ponta */}
+                          <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/80 blur-[2px] shadow-[0_0_10px_white]" />
+                          {/* Scanline na barra */}
+                          <div className="absolute inset-0 bg-[url('/assets/noise.png')] opacity-30 mix-blend-overlay" />
+                        </div>
+                      </div>
 
-                {/* Indicação de clique sutil */}
-                <span
-                  className="text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-2 animate-pulse opacity-60 group-hover:opacity-100 transition-opacity"
-                  style={{ color: '#EEF4D4' }}
-                >
-                  ↑ toque para explorar ↑
-                </span>
+                      {/* Labels da barra */}
+                      <div className="flex justify-between items-center mt-2 text-[9px] font-mono text-violet-400/80">
+                        <span>{currentSpec ? "PROGRESSO OPERACIONAL" : "AGUARDANDO SELEÇÃO"}</span>
+                        <span>{currentSpec ? "EM ANDAMENTO" : "COMPLETO"}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* MODO PADRÃO (PILARES EM ANDAMENTO) */
+                  <div className="relative">
+                    <div className="relative">
+                      <span
+                        className="block text-7xl md:text-9xl font-serif font-black tracking-tighter"
+                        style={{
+                          color: '#EEF4D4',
+                          textShadow: '0 0 30px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)'
+                        }}
+                      >
+                        {completedCount}
+                        <span className="text-4xl md:text-6xl align-top ml-2 opacity-80" style={{ color: '#EEF4D4' }}>/9</span>
+                      </span>
+
+                      {/* Anel animado sutil - indicação de clicável */}
+                      <span
+                        className="absolute -inset-4 md:-inset-6 rounded-full border-2 border-dashed animate-spin-slow opacity-20 group-hover:opacity-50 transition-opacity pointer-events-none"
+                        style={{ borderColor: '#EEF4D4' }}
+                      />
+                    </div>
+
+                    {/* Texto PILARES + dica de clique */}
+                    <span
+                      className="block text-[10px] md:text-xs font-mono font-bold uppercase tracking-[0.5em] mt-[-5px] md:mt-[-8px]"
+                      style={{
+                        color: '#EEF4D4',
+                        textShadow: '0 2px 8px rgba(0,0,0,0.7)'
+                      }}
+                    >
+                      PILARES
+                    </span>
+
+                    {/* Indicação de clique sutil */}
+                    <span
+                      className="block text-[9px] md:text-[10px] font-mono uppercase tracking-widest mt-2 animate-pulse opacity-60 group-hover:opacity-100 transition-opacity"
+                      style={{ color: '#EEF4D4' }}
+                    >
+                      ↑ toque para explorar ↑
+                    </span>
+                  </div>
+                )}
 
                 {/* CTA Button */}
                 <div
@@ -145,8 +208,8 @@ export default function Page() {
                       // Se não completou todos pilares, vai direto pro pilar atual
                       router.push(`/pilar/${currentPillarNumber}`);
                     } else {
-                      // Se completou tudo mas não tem especialidade, abre HUD
-                      handleGlobeClick();
+                      // Se completou tudo mas não tem especialidade, vai para seleção
+                      router.push("/especialidades");
                     }
                   }}
                   className="mt-6 md:mt-8 transition-all duration-300 group-hover:translate-y-1 pointer-events-auto cursor-pointer relative z-50 hover:scale-110 active:scale-95"
@@ -164,7 +227,7 @@ export default function Page() {
                   >
                     <span className={`w-2 h-2 rounded-full animate-pulse ${currentSpec ? "bg-violet-400" : "bg-[#EEF4D4]"}`} />
                     <span className={`text-xs md:text-sm font-medium uppercase tracking-wider ${currentSpec ? "text-violet-300" : "text-[#EEF4D4]"}`}>
-                      {currentSpec ? "Continuar Estudo" : (completedCount === 9 ? "Acessar Sistema" : "Continuar Estudo")}
+                      {currentSpec ? "Continuar Estudo" : (completedCount === 9 ? "Escolher Especialidade" : (completedCount === 0 ? "Começar os Estudos" : "Continuar Estudo"))}
                     </span>
                   </span>
 

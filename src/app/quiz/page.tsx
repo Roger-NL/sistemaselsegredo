@@ -66,10 +66,8 @@ export default function QuizPage() {
                     setShowTransition(false);
                     setShowDecisionMatrix(true);
                 } else {
-                    // NÃO avança para o próximo quiz automaticamente.
-                    // Redireciona de volta para a página de estudo do pilar que acabou de ser concluído.
-                    // O usuário verá o status de completado e poderá navegar para o próximo manualmente.
-                    router.push(`/pilar/${activePillar}`);
+                    // Avança para o próximo pilar automaticamente
+                    router.push(`/pilar/${activePillar + 1}`);
                 }
             }, 1500);
         }

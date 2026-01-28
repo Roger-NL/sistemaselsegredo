@@ -13,6 +13,9 @@ Focamos em refinar a experiência do usuário (UX) no dashboard e padronizar a n
 - **Indicação de Clique:** Adicionado anel tracejado animado e texto "↑ toque para explorar ↑" no número "9/9" para deixar claro que é clicável.
 - **Botão Continuar Estudo:** Lógica inteligente que direciona o usuário para onde parou (Pilar, Especialidade ou Menu de Escolha).
 - **Visibilidade:** Melhorado contraste e legibilidade dos textos de status das especialidades (fundo roxo semi-transparente, shadows, bold).
+- **Efeitos Visuais:**
+    - Implementado **GlowingEffect** nos quizzes e na seleção de especialidades.
+    - Mix de estilos (Neon/Tático + Glow Suave) para feedback de seleção, erro e sucesso.
 
 ### Navegação Padronizada
 Unificamos o comportamento dos botões de voltar em todas as páginas internas (`/pilar`, `/quiz`, `/especialidade`, `/decision-matrix`):
