@@ -74,9 +74,26 @@ export default function Page() {
           </div>
 
           <div className="flex flex-col items-end text-right">
-            <span className="text-[10px] text-[#EEF4D4] uppercase tracking-widest font-mono mb-1">Patente Atual</span>
-            <div className="bg-white/5 border border-white/10 px-3 py-1 rounded backdrop-blur-sm">
-              <span className="font-bold text-sm uppercase text-white">{currentRank}</span>
+            {/* Desktop/Tablet Rank Display */}
+            <div className="hidden md:flex flex-col items-end">
+              <span className="text-[10px] text-[#EEF4D4] uppercase tracking-widest font-mono mb-1">Patente Atual</span>
+              <div className="bg-white/5 border border-white/10 px-3 py-1 rounded backdrop-blur-sm">
+                <span className="font-bold text-sm uppercase text-white">{currentRank}</span>
+              </div>
+            </div>
+
+            {/* Mobile Progress Bar */}
+            <div className="flex md:hidden flex-col items-end w-[140px]">
+              <div className="flex justify-between w-full mb-1">
+                <span className="text-[9px] text-[#EEF4D4] uppercase tracking-widest font-mono">Progresso</span>
+                <span className="text-[9px] text-white font-mono">{globalProgress}%</span>
+              </div>
+              <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
+                <div
+                  className="h-full bg-gradient-to-r from-[#EEF4D4] to-emerald-400 transition-all duration-1000 ease-out"
+                  style={{ width: `${globalProgress}%` }}
+                />
+              </div>
             </div>
           </div>
         </header>
@@ -135,7 +152,7 @@ export default function Page() {
           </div>
 
           {/* Typewriter Effect - Mobile (Topo) */}
-          <div className="absolute top-[15%] left-0 right-0 flex lg:hidden flex-col items-center z-0 pointer-events-none select-none px-4 text-center">
+          <div className="absolute top-[12%] left-0 right-0 flex lg:hidden flex-col items-center z-0 pointer-events-none select-none px-4 text-center">
             <h2 className="text-[10px] font-bold text-white/40 tracking-[0.2em] font-mono mb-1 uppercase">
               MISSION:
             </h2>
@@ -169,7 +186,7 @@ export default function Page() {
 
             {/* Center Content - Pillar Counter + CTA */}
             <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
-              <div className="text-center flex flex-col items-center">
+              <div className="text-center flex flex-col items-center pt-20 md:pt-0">
                 {completedCount === 9 ? (
                   /* MODO ESPECIALIZAÇÃO (PILARES COMPLETOS) */
                   <div className="relative flex flex-col items-center animate-in fade-in duration-1000">

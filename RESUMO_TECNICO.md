@@ -53,3 +53,37 @@ Atualizamos o cálculo da porcentagem global (`getGlobalProgress`) no `ProgressC
 ---
 
 **Nota do Engenheiro:** O sistema agora está muito mais fluido e intuitivo. Eliminamos pontos de fricção onde o usuário não sabia onde clicar ou ficava preso em loops de navegação. A sensação "premium" foi reforçada com animações sutis e feedbacks visuais claros.
+
+---
+
+## 🎨 7. REFINAMENTO VISUAL E MOBILE (28/01) [TARDE]
+
+Atendendo a feedbacks visuais específicos para elevar o nível "premium" e resolver distorções.
+
+### Visual do Dashboard
+- **Typewriter Effect:** 
+    - **Desktop:** Adicionado à esquerda, com frases de impacto em inglês ("UNLOCK FLUENCY", "MASTER THE CODE") em fonte neon gigante.
+    - **Mobile:** Versão compacta adicionada ao topo da tela para manter a identidade visual.
+- **Globo Interativo:**
+    - **Fix Proporção (Bug do Ovo):** Implementada lógica no `RotatingEarth` que força proporção 1:1, eliminando distorções em janelas retangulares.
+    - **Limpeza Visual:** Removido anel giratório tracejado (feedback negativo) e substituído por um **Glow Radial** suave e elegante.
+- **CTA Button:** Aumentado espaçamento vertical para evitar sobreposição com o contador central.
+
+### Otimização do Quiz (UI/UX)
+- **Layout "Wide & Short":** Reestruturação completa para evitar rolagem.
+    - Opções dispostas em grid de 2 colunas (Desktop).
+    - Redução de paddings e tamanhos de fonte para caber em uma única tela.
+- **Fluxo de Navegação:** Corrigido bug onde completar o Pilar 1 redirecionava para o próprio Pilar 1. Agora avança automaticamente para o próximo (N -> N+1).
+
+---
+
+## 📋 Histórico de Mudanças (Continuação)
+
+| Horário | Mudança |
+|---------|---------|
+| 16:30 | **UI:** Quiz redesign (Compacto, 2 colunas, No-Scroll) |
+| 16:45 | **FIX:** Navegação pós-quiz (Auto-advance pilar) |
+| 17:00 | **FEAT:** Adição do Typewriter Effect (Desktop) |
+| 17:15 | **UI:** Ajuste "Imponente" do Typewriter (Fonte Gigante, Cores Neon) |
+| 17:30 | **FIX:** Correção da proporção do Globo (Bug do "Ovo") |
+| 17:40 | **POLISH:** Typewriter Mobile + Remoção de Anel + Ajuste de Espaçamento |
