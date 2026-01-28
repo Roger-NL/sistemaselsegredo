@@ -53,21 +53,24 @@ function RotatingEarthComponent({
         const context = canvas.getContext("2d")
         if (!context) return
 
-        const containerWidth = Math.min(width, window.innerWidth - 40)
-        const containerHeight = Math.min(height, window.innerHeight - 100)
-        const radius = Math.min(containerWidth, containerHeight) / 2.5
+        const size = Math.min(width, height, window.innerWidth - 40, window.innerHeight - 100)
+
+        // Force square to prevent distortion
+        const containerWidth = size
+        const containerHeight = size
+        const radius = size / 2.5
 
         const dpr = Math.min(window.devicePixelRatio || 1, 2)
-        canvas.width = containerWidth * dpr
-        canvas.height = containerHeight * dpr
-        canvas.style.width = `${containerWidth}px`
-        canvas.style.height = `${containerHeight}px`
+        canvas.width = size * dpr
+        canvas.height = size * dpr
+        canvas.style.width = `${size}px`
+        canvas.style.height = `${size}px`
         context.scale(dpr, dpr)
 
         const projection = d3
             .geoOrthographic()
             .scale(radius)
-            .translate([containerWidth / 2, containerHeight / 2])
+            .translate([size / 2, size / 2])
             .clipAngle(90)
 
         const path = d3.geoPath().projection(projection).context(context)

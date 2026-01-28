@@ -82,25 +82,25 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Mobile Progress Bar - Enhanced */}
-            <div className="flex md:hidden flex-col items-end w-[160px] relative z-50">
-              <div className="flex justify-between w-full mb-1 px-1">
-                <span className="text-[9px] text-violet-300 uppercase tracking-[0.2em] font-mono shadow-black drop-shadow-md">Progresso</span>
-                <span className="text-[9px] text-[#EEF4D4] font-mono font-bold">{globalProgress}%</span>
+            {/* Mobile Progress Bar - Enhanced HUD Style */}
+            <div className="flex md:hidden flex-col items-end w-[180px] relative z-50">
+              <div className="flex justify-between w-full mb-1 px-1 items-end">
+                <span className="text-[8px] text-violet-300 uppercase tracking-[0.2em] font-mono shadow-black drop-shadow-md opacity-80">System Progress</span>
+                <span className="text-[10px] text-[#EEF4D4] font-mono font-bold tracking-wider">{globalProgress}%</span>
               </div>
 
-              {/* Container da Barra */}
-              <div className="w-full h-2 bg-gray-900/60 rounded-full overflow-hidden backdrop-blur-md border border-white/10 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
-                {/* Barra com Gradiente e Glow */}
+              {/* Sleek Line Design */}
+              <div className="w-full h-[2px] bg-white/5 relative">
+                {/* Barra de Progresso */}
                 <div
-                  className="h-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-emerald-400 relative"
-                  style={{ width: `${globalProgress}%`, transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }}
-                >
-                  {/* Brilho Superior */}
-                  <div className="absolute inset-x-0 top-0 h-[1px] bg-white/40" />
-                  {/* Glow na ponta */}
-                  <div className="absolute right-0 top-0 bottom-0 w-[2px] bg-white shadow-[0_0_8px_white]" />
-                </div>
+                  className="absolute top-0 left-0 h-full bg-gradient-to-r from-transparent via-[#EEF4D4] to-emerald-400"
+                  style={{ width: `${globalProgress}%`, boxShadow: '0 0 10px rgba(238, 244, 212, 0.5)' }}
+                />
+                {/* Marcador na posição atual */}
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 w-1 h-2 bg-white shadow-[0_0_5px_white]"
+                  style={{ left: `${globalProgress}%`, transition: 'left 1s ease-out' }}
+                />
               </div>
             </div>
           </div>
@@ -160,7 +160,7 @@ export default function Page() {
           </div>
 
           {/* Typewriter Effect - Mobile (Topo) */}
-          <div className="absolute top-[8%] left-0 right-0 flex lg:hidden flex-col items-center z-0 pointer-events-none select-none px-4 text-center">
+          <div className="absolute top-[4%] left-0 right-0 flex lg:hidden flex-col items-center z-0 pointer-events-none select-none px-4 text-center">
             <h2 className="text-[10px] font-bold text-white/40 tracking-[0.2em] font-mono mb-1 uppercase">
               MISSION:
             </h2>
@@ -310,7 +310,7 @@ export default function Page() {
                       router.push("/especialidades");
                     }
                   }}
-                  className="mt-16 md:mt-24 transition-all duration-300 group-hover:translate-y-1 pointer-events-auto cursor-pointer relative z-50 hover:scale-110 active:scale-95"
+                  className="mt-10 md:mt-24 transition-all duration-300 group-hover:translate-y-1 pointer-events-auto cursor-pointer relative z-50 hover:scale-110 active:scale-95"
                 >
                   <span
                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm ${currentSpec
