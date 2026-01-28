@@ -82,17 +82,25 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Mobile Progress Bar */}
-            <div className="flex md:hidden flex-col items-end w-[140px]">
-              <div className="flex justify-between w-full mb-1">
-                <span className="text-[9px] text-[#EEF4D4] uppercase tracking-widest font-mono">Progresso</span>
-                <span className="text-[9px] text-white font-mono">{globalProgress}%</span>
+            {/* Mobile Progress Bar - Enhanced */}
+            <div className="flex md:hidden flex-col items-end w-[160px] relative z-50">
+              <div className="flex justify-between w-full mb-1 px-1">
+                <span className="text-[9px] text-violet-300 uppercase tracking-[0.2em] font-mono shadow-black drop-shadow-md">Progresso</span>
+                <span className="text-[9px] text-[#EEF4D4] font-mono font-bold">{globalProgress}%</span>
               </div>
-              <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
+
+              {/* Container da Barra */}
+              <div className="w-full h-2 bg-gray-900/60 rounded-full overflow-hidden backdrop-blur-md border border-white/10 shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                {/* Barra com Gradiente e Glow */}
                 <div
-                  className="h-full bg-gradient-to-r from-[#EEF4D4] to-emerald-400 transition-all duration-1000 ease-out"
-                  style={{ width: `${globalProgress}%` }}
-                />
+                  className="h-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-emerald-400 relative"
+                  style={{ width: `${globalProgress}%`, transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                >
+                  {/* Brilho Superior */}
+                  <div className="absolute inset-x-0 top-0 h-[1px] bg-white/40" />
+                  {/* Glow na ponta */}
+                  <div className="absolute right-0 top-0 bottom-0 w-[2px] bg-white shadow-[0_0_8px_white]" />
+                </div>
               </div>
             </div>
           </div>
@@ -152,7 +160,7 @@ export default function Page() {
           </div>
 
           {/* Typewriter Effect - Mobile (Topo) */}
-          <div className="absolute top-[12%] left-0 right-0 flex lg:hidden flex-col items-center z-0 pointer-events-none select-none px-4 text-center">
+          <div className="absolute top-[8%] left-0 right-0 flex lg:hidden flex-col items-center z-0 pointer-events-none select-none px-4 text-center">
             <h2 className="text-[10px] font-bold text-white/40 tracking-[0.2em] font-mono mb-1 uppercase">
               MISSION:
             </h2>
@@ -186,7 +194,7 @@ export default function Page() {
 
             {/* Center Content - Pillar Counter + CTA */}
             <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
-              <div className="text-center flex flex-col items-center pt-20 md:pt-0">
+              <div className="text-center flex flex-col items-center pt-64 md:pt-0">
                 {completedCount === 9 ? (
                   /* MODO ESPECIALIZAÇÃO (PILARES COMPLETOS) */
                   <div className="relative flex flex-col items-center animate-in fade-in duration-1000">
