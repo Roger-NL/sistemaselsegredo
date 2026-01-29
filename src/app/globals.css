@@ -179,3 +179,161 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(212, 175, 55, 0.3);
 }
+
+/* ============================================================
+   TRANSLATABLE PHRASE - English to Portuguese Tooltip System
+   ============================================================ */
+
+.translatable-phrase {
+  position: relative;
+  display: inline;
+  cursor: help;
+}
+
+.translatable-text {
+  position: relative;
+  color: #67e8f9;
+  /* cyan-300 */
+  font-weight: 500;
+  text-decoration: none;
+  background: linear-gradient(90deg, #06b6d4, #22d3ee) no-repeat;
+  background-size: 100% 2px;
+  background-position: 0 100%;
+  padding-bottom: 2px;
+  transition: all 0.3s ease;
+  /* Neon glow effect */
+  text-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+}
+
+.translatable-text::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #06b6d4, #22d3ee, #06b6d4);
+  background-size: 200% 100%;
+  animation: neonPulse 2s ease-in-out infinite;
+  box-shadow:
+    0 0 4px rgba(6, 182, 212, 0.8),
+    0 0 8px rgba(6, 182, 212, 0.6),
+    0 0 16px rgba(6, 182, 212, 0.4);
+}
+
+@keyframes neonPulse {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+    opacity: 0.8;
+  }
+
+  50% {
+    background-position: 100% 50%;
+    opacity: 1;
+  }
+}
+
+.translatable-phrase:hover .translatable-text {
+  color: #a5f3fc;
+  /* cyan-200 */
+  text-shadow: 0 0 12px rgba(6, 182, 212, 0.9);
+}
+
+.translatable-phrase:hover .translatable-text::after {
+  box-shadow:
+    0 0 6px rgba(6, 182, 212, 1),
+    0 0 12px rgba(6, 182, 212, 0.8),
+    0 0 24px rgba(6, 182, 212, 0.6);
+}
+
+/* Tooltip */
+.translatable-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border: 1px solid rgba(6, 182, 212, 0.5);
+  border-radius: 8px;
+  padding: 8px 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  animation: tooltipFadeIn 0.2s ease-out;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(6, 182, 212, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.translatable-tooltip::before {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(6, 182, 212, 0.5);
+}
+
+.translatable-tooltip::after {
+  content: "";
+  position: absolute;
+  top: calc(100% - 1px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1e293b;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.tooltip-label {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #06b6d4;
+  background: rgba(6, 182, 212, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 8px;
+  text-transform: uppercase;
+}
+
+.tooltip-text {
+  font-size: 14px;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+/* Mobile touch support */
+@media (max-width: 768px) {
+  .translatable-tooltip {
+    position: fixed;
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90vw;
+    white-space: normal;
+    text-align: center;
+    padding: 16px 20px;
+  }
+
+  .translatable-tooltip::before,
+  .translatable-tooltip::after {
+    display: none;
+  }
+}

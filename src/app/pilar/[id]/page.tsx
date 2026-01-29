@@ -8,6 +8,7 @@ import { TacticalCard, TacticalButton } from "@/components/ui/TacticalCard";
 import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Lock } from "lucide-react";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
 import { StudyViewer } from "@/components/features/study/StudyViewer";
+import { PillarOperationalView } from "@/components/features/study/PillarOperationalView";
 
 export default function PilarPage() {
     const router = useRouter();
@@ -120,9 +121,13 @@ export default function PilarPage() {
                         {/* ÁREA DE ESTUDO */}
                         {activeContent ? (
                             <div className="animate-in fade-in duration-700 slide-in-from-bottom-4">
-                                <StudyViewer data={activeContent} />
+                                {activeContent.modules ? (
+                                    <PillarOperationalView data={activeContent} />
+                                ) : (
+                                    <StudyViewer data={activeContent} />
+                                )}
 
-                                {/* Ação Final do Pilar */}
+                                {/* Ação Final do Pilar (Legacy or Global) */}
                                 <div className="mt-12 flex justify-center pb-20">
                                     <TacticalButton
                                         variant="neon"

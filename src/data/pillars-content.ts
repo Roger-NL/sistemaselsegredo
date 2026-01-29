@@ -1,2091 +1,1746 @@
 import { PillarData } from "@/types/study";
 
+// ==============================================================================
+// PILAR 1: INTRODUÇÃO & MINDSET (EXPANDED ELITE VERSION)
+// ==============================================================================
 export const PILAR_1_DATA: PillarData = {
     id: 1,
-    title: "Pilar 1: Introdução",
-    subtitle: "A filosofia da ES English Academy e a promessa de um método que funciona.",
-    blocks: [
+    title: "Pilar 1: Protocolo de Iniciação",
+    subtitle: "A reconfiguração completa da sua mentalidade e a ciência por trás da fluência.",
+    modules: [
         {
-            type: "box-goal",
-            title: "Objetivo do Pilar",
-            content: "Entender por que os métodos tradicionais falham e qual é a abordagem da ES English Academy, focada em comunicação real e confiança."
-        },
-        {
-            type: "h2",
-            content: "Parte 1: Boas-vindas à ES English Academy"
-        },
-        {
-            type: "paragraph",
-            content: "Olá e seja muito bem-vindo(a) à ES English Academy!"
-        },
-        {
-            type: "paragraph",
-            content: "Se você está com este material em mãos, provavelmente já percorreu um longo caminho na sua jornada com o inglês. Você talvez já tenha assistido a inúmeros vídeos, baixado aplicativos, frequentado escolas de franquia famosas e até decorado regras gramaticais como o \"Verb to Be\" que, na hora de conversar, simplesmente não saem."
-        },
-        {
-            type: "paragraph",
-            content: "Você trava. A mente fica em branco. O coração acelera."
-        },
-        {
-            type: "paragraph",
-            content: "Quero te dizer uma coisa fundamental agora: **Você não está sozinho(a) nessa.** A frustração que você sente não é culpa sua, e é exatamente o motivo pelo qual esta escola existe."
-        },
-        {
-            type: "paragraph",
-            content: "Imagine tentar aprender a dirigir um carro apenas lendo o manual do proprietário. Você decora o funcionamento do motor, a taxa de compressão dos pistões e o sistema elétrico. Mas, quando senta no banco do motorista e o carro começa a se mover, você entra em pânico. Por quê? Porque **teoria não é prática**."
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Esqueça os livros didáticos tradicionais cheios de exercícios de preencher lacunas. A partir de agora, nosso foco está 100% na comunicação. Prepare-se para uma abordagem direta ao ponto, onde o erro é parte do processo, não um motivo de punição."
-        },
-        {
-            type: "paragraph",
-            content: "Nossa filosofia é invertida. Em vez de começar com regras complexas, começamos com o **inglês real, o \"inglês de rua\"**. Queremos que você tenha uma vitória logo na primeira aula."
-        },
-        {
-            type: "paragraph",
-            content: "Queremos que você ouça uma gíria ou uma contração num filme ou numa música, a entenda e pense: \"Uau, é assim que as pessoas falam, e eu entendi!\". A gramática e a estrutura técnica virão depois, naturalmente, apenas para dar suporte a algo que você já começou a usar na prática."
-        },
-        {
-            type: "h2",
-            content: "Parte 2: A Minha História e a Dor Que Também é Sua"
-        },
-        {
-            type: "paragraph",
-            content: "Meu nome é Roger. Eu não sou um professor que viveu a vida toda dentro de uma sala de aula acadêmica. Eu não aprendi inglês em curso tradicional. Eu aprendi inglês porque precisei sobreviver."
-        },
-        {
-            type: "paragraph",
-            content: "No Brasil, eu tentei do jeito \"certo\", assim como você. Fiz quatro anos de um curso de inglês renomado. Ia duas vezes por semana, fazia os deveres de casa, passava nas provas escritas. O resultado? **Zero.** Absolutamente nada funcional."
-        },
-        {
-            type: "paragraph",
-            content: "Eu sabia as regras, mas não sabia falar. E eu sei que isso não aconteceu só comigo. Faltou incentivo. Faltou sentido. Faltou conexão com a vida real. O ensino era mecânico, chato e desconectado da realidade."
-        },
-        {
-            type: "h3",
-            content: "O Choque de Realidade na Europa"
-        },
-        {
-            type: "paragraph",
-            content: "Quando cheguei à Europa, essa falha no meu aprendizado ficou escancarada da pior maneira possível. A minha primeira namorada em Portugal era húngara. Ela não falava português. Eu não falava húngaro. Nossa única ponte possível era o inglês."
-        },
-        {
-            type: "paragraph",
-            content: "Lembro-me vivamente de tentar explicar sentimentos simples ou resolver problemas do dia a dia e travar. Tentávamos nos comunicar com gestos, sons, apontando coisas, usando o Google Tradutor a cada 5 segundos."
-        },
-        {
-            type: "paragraph",
-            content: "Era limitante. Era frustrante. E, acima de tudo, era **constrangedor**. Eu me sentia uma criança no corpo de um adulto, incapaz de expressar quem eu realmente era."
-        },
-        {
-            type: "paragraph",
-            content: "Foi ali, na pressão da necessidade, que a chave virou. Parei de tentar conjugar verbos na minha cabeça antes de falar. Parei de ter medo de errar a preposição. Meu inglês foi construído como o de um bebê:"
-        },
-        {
-            type: "list",
-            content: [
-                "**Observando**: Como eles reagem quando falo isso?",
-                "**Associando**: Essa palavra parece ser usada nessa situação específica.",
-                "**Errando**: Falei errado, fui corrigido (ou não entendido), e ajustei.",
-                "**Repetindo**: Usei o que funcionou de novo e de novo."
+            id: "p1-m1",
+            title: "Módulo 1: A Biologia do Travamento & O Filtro Afetivo",
+            subtitle: "Hackear o sistema de defesa do seu cérebro para desativar o modo de pânico.",
+            status: "active",
+            blocks: [
+                {
+                    type: "system-status",
+                    content: "{{NEURAL SCAN|Escaneamento Neural}}: {{INITIATED|Iniciado}}. {{ANALYZING COGNITIVE BLOCKS|Analisando Bloqueios Cognitivos}}..."
+                },
+                {
+                    type: "box-goal",
+                    title: "Objetivo do Módulo",
+                    content: "Hackear o sistema de defesa do seu cérebro. Antes de aprender a falar, você precisa entender por que o seu hardware (biologia) está sabotando o seu software (aprendizado). Vamos desativar o modo de pânico e instalar o modo de processamento de elite."
+                },
+                {
+                    type: "h2",
+                    content: "1.1 A Anatomia do \"Branco\" Mental"
+                },
+                {
+                    type: "paragraph",
+                    content: "Você já esteve em uma situação onde precisava falar uma frase simples em inglês, mas sua mente se transformou em uma tela estática de TV antiga? Isso não é falta de inteligência; é o seu **Sistema Límbico** assumindo o controle da aeronave."
+                },
+                {
+                    type: "brain-diagram",
+                    content: JSON.stringify({
+                        title: "🧠 CAMADA NEUROCIENTÍFICA: O SEQUESTRO DA AMÍGDALA",
+                        steps: [
+                            "No centro do seu cérebro existe uma estrutura chamada Amígdala. Ela é o seu radar tático para ameaças. Para o seu cérebro primitivo, não existe diferença entre um leão faminto e o julgamento social de falar \"wrong\" em uma reunião.",
+                            "O Curto-Circuito: Quando o nível de estresse sobe (Filtro Afetivo), a Amígdala dispara cortisol. Este hormônio bloqueia as sinapses no Córtex Pré-Frontal (a sede do pensamento lógico e da gramática).",
+                            "A Paralisia: O acesso à memória de longo prazo é cortado. Você \"sabe\" o conteúdo, mas o cabo está desconectado."
+                        ]
+                    })
+                },
+                {
+                    type: "reveal-box",
+                    title: "🔬 A CIÊNCIA DA MIELINA (Clique para expandir)",
+                    content: "Nas escolas comuns, você estuda para a Memória Declarativa (saber sobre algo). Aqui, treinamos para a Mielinização. A mielina é uma camada de gordura que isola os neurônios; quanto mais você pratica um som real, mais espessa fica essa camada, tornando o impulso elétrico até 100x mais rápido."
+                },
+                {
+                    type: "elite-insight",
+                    title: "💡 INSIGHT DE ELITE",
+                    content: "A fluência não é o tamanho do seu dicionário mental, mas a espessura da sua camada de mielina nos circuitos da fala."
+                },
+                {
+                    type: "h2",
+                    content: "1.2 Camada Cultural: O Complexo do \"Pajancu\" Brasileiro"
+                },
+                {
+                    type: "paragraph",
+                    content: "O aluno brasileiro médio sofre de uma síndrome cultural destrutiva: a necessidade de ser perfeito antes de ser funcional. Fomos ensinados a rir de quem erra a pronúncia, e isso criou uma geração de \"mudos alfabetizados\"."
+                },
+                {
+                    type: "comparison-table",
+                    content: JSON.stringify({
+                        headers: ["Perfil", "Foco Principal", "Resultado na Crise", "Mentalidade"],
+                        rows: [
+                            ["O Acadêmico", "Perfeição Gramatical", "Travamento Total", "\"Se não for perfeito, não falo.\""],
+                            ["O Operador ES", "Eficiência na Entrega", "Autonomia Tática", "\"A mensagem chegou? Missão cumprida.\""]
+                        ]
+                    })
+                },
+                {
+                    type: "paragraph",
+                    content: "**A Realidade do Nativo:** O falante nativo de inglês é, por natureza, preguiçoso e focado em eficiência. Ele não está analisando se você usou o {{Gerund|Gerúndio}} corretamente; ele quer saber se o café vai chegar quente ou frio. O erro é apenas um ruído na linha; o travamento é a queda total do sinal."
+                },
+                {
+                    type: "h2",
+                    content: "🛠️ Engenharia Reversa: O Desmonte do \"{{I Don't Know|Eu Não Sei}}\""
+                },
+                {
+                    type: "paragraph",
+                    content: "Vamos analisar como o cérebro processa uma das frases mais comuns do mundo e por que a forma como te ensinaram é um convite ao erro sob pressão."
+                },
+                {
+                    type: "phonetic-breakdown",
+                    content: JSON.stringify({
+                        formal: {
+                            text: "I do not know.",
+                            analysis: "4 unidades de processamento: I + do + not + know"
+                        },
+                        combat: {
+                            text: "I dunno.",
+                            analysis: "1 unidade sonora: /aj-dã-nou/"
+                        },
+                        explanation: "Economia Glótica: No \"I do not know\", sua língua precisa tocar o céu da boca duas vezes (no 'd' e no 'n'). Isso exige coordenação motora fina que desaparece sob estresse. O Schwa (/ə/): No \"dunno\", o som do 'o' é substituído pelo som mais comum do inglês: o Schwa. É um som neutro, de relaxamento total da mandíbula. Intenção: Falar \"I do not know\" soa robótico ou excessivamente enfático. Falar \"I dunno\" sinaliza que você é parte do grupo, baixando a guarda do interlocutor."
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "⚔️ Cenário de Combate: O Labirinto do Aeroporto"
+                },
+                {
+                    type: "scenario-card",
+                    content: JSON.stringify({
+                        context: "Você acabou de desembarcar em Chicago. Está atrasado para a conexão. Um funcionário da companhia aérea te para e fala em velocidade 1.5x.",
+                        situation: "Sir, ya needa check ya gate 'cause it changed t'B12, got it?",
+                        wrong: {
+                            action: "O cérebro tenta traduzir \"Sir... you... need... to...\". Enquanto você traduz o \"need\", o funcionário já terminou a frase. O Filtro Afetivo sobe. Suor frio. Amígdala sequestra o cérebro.",
+                            result: "\"Yes... sorry... my English is bad.\" (Missão Fracassada)"
+                        },
+                        right: {
+                            action: "Ignore as \"Glue Words\": Você não precisa entender o \"ya\", \"needa\", \"'cause\". Foque nos \"Content Words\": Você ouviu GATE, CHANGE, B12.",
+                            result: "\"Gate B12? Okay, thanks!\" — Você usou o Mínimo Viável de Comunicação. Cortisol baixo, confiança alta."
+                        }
+                    })
+                },
+                {
+                    type: "box-warning",
+                    title: "⚠️ VÍCIO BRASILEIRO DETECTADO",
+                    content: "Pare de pedir desculpas pelo seu inglês. Cada vez que você diz \"{{Sorry for my English|Desculpe pelo meu inglês}}\", você está reafirmando para o seu subconsciente que você é um intruso. Operadores de elite não pedem desculpas; eles ajustam a frequência do rádio."
+                }
             ]
         },
         {
-            type: "paragraph",
-            content: "Sem gramática no início. Sem medo. Sem vergonha. Apenas comunicação pura."
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "O problema nunca foi o aluno. O problema é o sistema que prioriza regras em vez de comunicação. O sistema tradicional quer que você seja um linguista; nós queremos que você seja um comunicador."
-        },
-        {
-            type: "h3",
-            content: "Por que Eu Criei Esta Escola"
-        },
-        {
-            type: "paragraph",
-            content: "Antes de existir esta escola, eu criei e-books de inglês. Tivemos milhares de downloads. Mas percebi algo importante: um e-book é passivo. Ele fica lá, parado no seu computador. Eu nunca quis só vender um produto. Eu queria ver evolução real na vida das pessoas."
-        },
-        {
-            type: "paragraph",
-            content: "Eu queria resgatar algo que o sistema educacional destruiu em muitos de nós: **a confiança do adulto em aprender.**"
-        },
-        {
-            type: "paragraph",
-            content: "Então eu transformei toda a minha experiência pessoal, meus erros e meus acertos, em uma escola viva. Uma escola que acompanha, interage e ensina inglês como língua viva, ferramenta de trabalho e conexão, não como matéria escolar para passar numa prova."
-        },
-        {
-            type: "box-warning",
-            title: "Erro comum",
-            content: "Acreditar que a falha em aprender inglês é uma incapacidade pessoal (\"eu não levo jeito para línguas\"). Na verdade, é quase sempre o resultado de um método ineficiente, lento e engessado."
-        },
-        {
-            type: "paragraph",
-            content: "Essa escola existe para quebrar esse ciclo. A minha missão é clara: provar que o inglês é acessível, lógico e até divertido quando ensinado da forma certa."
-        },
-        {
-            type: "h3",
-            content: "A Armadilha da Fluência"
-        },
-        {
-            type: "paragraph",
-            content: "Muitos alunos chegam até mim perguntando: \"Roger, em quanto tempo eu fico fluente?\" Essa é a pergunta errada. A busca pela \"fluência perfeita\" é o que paralisa a maioria dos adultos. Eles acham que só podem abrir a boca quando souberem todas as palavras do dicionário."
-        },
-        {
-            type: "paragraph",
-            content: "A verdade é que até nativos cometem erros. A meta não é ser um dicionário ambulante, mas ser **funcional**."
-        },
-        {
-            type: "list",
-            content: [
-                "**Fluência Acadêmica**: Saber regras, passar em provas, mas travar na hora de pedir um café.",
-                "**Fluência Operacional**: Conseguir resolver problemas, fazer amigos e fechar negócios, mesmo com um vocabulário limitado. **Este é o nosso foco.**"
+            id: "p1-m2",
+            title: "Parte 2: O Batismo de Fogo — A História de Roger",
+            subtitle: "A 'Ponte Húngara' e a prova de que a necessidade extrema vence qualquer método tradicional.",
+            status: "locked",
+            blocks: [
+                {
+                    type: "system-status",
+                    content: "{{CASE STUDY|Estudo de Caso}}: ROGER_ORIGIN.log {{LOADING|Carregando}}..."
+                },
+                {
+                    type: "box-goal",
+                    title: "Objetivo Tático",
+                    content: "Analisar o estudo de caso real da 'Ponte Húngara'. Vamos decompor como a necessidade extrema de conexão e a falha do ensino tradicional brasileiro forçaram o cérebro a abandonar a gramática de livro em favor da sobrevivência funcional."
+                },
+                {
+                    type: "h2",
+                    content: "2.1 O Grande Blefe: 4 Anos de Investimento, Retorno Zero"
+                },
+                {
+                    type: "paragraph",
+                    content: "No Brasil, eu fui o \"estudante modelo\". Segui o script das grandes franquias por quatro anos. Frequentei aulas duas vezes por semana, fiz todos os {{homeworks|tarefas de casa}} e tirei notas máximas nas provas de gramática. No papel, eu era um \"sucesso\". Na vida real, ao desembarcar na Europa, eu descobri que era um **analfabeto funcional**."
+                },
+                {
+                    type: "paragraph",
+                    content: "O sistema tradicional é desenhado para criar **Linguistas de Auditório**, não **Operadores de Campo**. Eles te ensinam a anatomia da arma, mas nunca te levam para o estande de tiro."
+                },
+                {
+                    type: "memory-diagram",
+                    content: JSON.stringify({
+                        title: "🧠 CAMADA NEUROCIENTÍFICA: Memória Declarativa vs. Procedural",
+                        declarative: {
+                            title: "Memória Declarativa",
+                            icon: "📚",
+                            description: "É o foco das escolas tradicionais. Armazena fatos e regras (ex: 'A estrutura do Present Perfect é have + particípio'). É um processo lento, consciente e exige que o Córtex Pré-Frontal 'calcule' a frase antes de falar. Sob estresse, esse cálculo trava."
+                        },
+                        procedural: {
+                            title: "Memória Procedural",
+                            icon: "🎯",
+                            description: "É a memória de habilidades motoras (como dirigir ou lutar). Ela reside nos Gânglios da Base. É automática, rápida e não requer pensamento consciente. É a base da fluência real."
+                        },
+                        diagnosis: "No Brasil, o Roger tinha muita informação declarativa, mas zero treino procedural. Quando a pressão subiu, o cérebro dele tentou calcular a regra, gerou um erro de processamento e ele travou. O aprendizado real só acontece quando a língua migra da regra (declarativa) para o reflexo (procedural)."
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "2.2 O Choque de Realidade: A 'Ponte Húngara'"
+                },
+                {
+                    type: "paragraph",
+                    content: "A minha história mudou por causa de uma necessidade visceral. Em Portugal, conheci minha primeira namorada, uma húngara. Ela não falava português. Eu não falava húngaro. O inglês era nossa **única ponte possível**."
+                },
+                {
+                    type: "box-warning",
+                    title: "⚠️ A Dor Mais Profunda",
+                    content: "Foi ali que senti a dor mais profunda do adulto que não fala inglês: a perda da identidade. Em português, eu sou inteligente, articulado e engraçado. Em inglês, eu me sentia uma criança de 5 anos em um corpo de adulto, incapaz de expressar por que estava chateado ou o que eu realmente sentia. Essa humilhação foi o que me fez resetar o método."
+                },
+                {
+                    type: "comparison-table",
+                    content: JSON.stringify({
+                        headers: ["Situação", "Inglês de Livro (Engessado)", "Inglês de Combate (Real)", "Análise de Eficiência"],
+                        rows: [
+                            ["Expressar Sentimento", "I am very happy to be here.", "I'm so glad I made it.", "Glad é mais orgânico; Made it foca no esforço."],
+                            ["Dificuldade de Entendimento", "Could you repeat that slowly?", "Wait, I'm lost. Come again?", "Metáforas de movimento são 10x mais comuns."],
+                            ["Sair de Casa", "We must go to the restaurant.", "Let's head out. I'm starving.", "Head out é um phrasal verb vital."],
+                            ["Resolver Conflito", "I do not agree with your opinion.", "I don't see it that way.", "Menos agressivo, mais tático."]
+                        ]
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "🛠️ Engenharia Reversa: O Aprendizado Estilo 'Bebê'"
+                },
+                {
+                    type: "paragraph",
+                    content: "Sob a pressão do relacionamento, meu cérebro parou de tentar 'estudar' e começou a **adquirir** o idioma através de quatro fases táticas:"
+                },
+                {
+                    type: "baby-learning",
+                    content: JSON.stringify({
+                        title: "As 4 Fases de Aquisição Tática",
+                        phases: [
+                            {
+                                name: "Observação",
+                                icon: "👁️",
+                                description: "Reconhecimento de Padrão: Eu não focava nas palavras, mas nas reações dela. Se eu falava de um jeito e ela sorria, o padrão era validado. O feedback emocional é mais poderoso que qualquer correção gramatical."
+                            },
+                            {
+                                name: "Associação",
+                                icon: "🔗",
+                                description: "Âncora Química: Eu não traduzia a palavra 'Missed'. Eu associava o som /míst/ ao sentimento de saudade quando ela viajava. Isso criou uma âncora dopaminérgica — a palavra virou sensação, não tradução."
+                            },
+                            {
+                                name: "Erro",
+                                icon: "⚡",
+                                description: "Calibragem de Mira: Eu falava errado, era corrigido ou não era entendido, e meu cérebro ajustava o som. O erro era apenas um dado técnico de ajuste de mira, não uma falha moral."
+                            },
+                            {
+                                name: "Repetição",
+                                icon: "🔄",
+                                description: "Mielinização: O que funcionava, eu usava de novo e de novo até que os músculos da minha boca não precisassem mais de comando consciente. O reflexo substituiu o cálculo."
+                            }
+                        ]
+                    })
+                },
+                {
+                    type: "phrase-analysis",
+                    content: JSON.stringify({
+                        phrase: "I'm not sure I follow you.",
+                        phonetic: "/aim-nó-ʃôr/ — O 't' final desaparece para dar lugar ao 'f'. Ninguém diz /ai/ /æm/ /nɒt/. O som real é um bloco único.",
+                        grammarNote: "Eu removi o 'that' (I'm not sure THAT I...). No método operacional, se uma palavra não adiciona significado, ela é descartada para economizar largura de banda cerebral."
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "⚔️ Cenário de Combate: A 'DR' sem Google Tradutor"
+                },
+                {
+                    type: "scenario-card",
+                    content: JSON.stringify({
+                        context: "Você e sua parceira/o estão em um restaurante. Houve um mal-entendido sobre o horário. O clima está pesado. Você precisa resolver isso sem parecer um robô ou um dicionário ambulante.",
+                        situation: "Você chegou atrasado e precisa se desculpar e resolver a situação.",
+                        wrong: {
+                            action: "O Recruta (Mentalidade de Franquia): Tenta montar a frase perfeita na cabeça antes de falar. Fica calculando preposições.",
+                            result: "\"I apologize. I arrived late because the traffic was very intense. Please, do not be angry.\" — Soa frio, distante e mecânico."
+                        },
+                        right: {
+                            action: "O Operador (Mentalidade ES): Usa linguagem real com expressões de nativo. Admite o erro com naturalidade. Oferece solução prática.",
+                            result: "\"Hey, my bad. I messed up with the time. Traffic was a total nightmare, seriously. Let's just eat, okay? My treat.\" — Humano, tático, resolve o conflito."
+                        }
+                    })
+                },
+                {
+                    type: "reveal-box",
+                    title: "🔍 Análise do Sucesso (Clique para expandir)",
+                    content: "'My bad / I messed up': Admite o erro de forma humana e rápida. Baixa o cortisol do interlocutor. 'Total nightmare': Usa uma imagem mental forte em vez de adjetivos técnicos (intense traffic). 'My treat': Resolve o conflito com uma ação prática (eu pago). A frase do Operador tem 15 palavras vs 21 do Recruta, e comunica 3x mais emoção."
+                },
+                {
+                    type: "h2",
+                    content: "🎙️ Tom e Voz: A Mentalidade de Elite"
+                },
+                {
+                    type: "paragraph",
+                    content: "**Pare de se desculpar.** O vício brasileiro de dizer \"Sorry for my bad English\" é um sinal de submissão que sabota sua autoridade. Na \"Ponte Húngara\", eu entendi que se eu ficasse me desculpando, eu nunca lideraria a conversa. O inglês é apenas o cabo que conecta dois computadores; se o sinal tiver ruído, você não joga o computador fora, você apenas **ajusta a frequência**."
+                },
+                {
+                    type: "elite-insight",
+                    title: "💡 INSIGHT DE ELITE",
+                    content: "Eu não criei a ES Academy porque sou um gênio das línguas. Eu a criei porque eu senti a humilhação de ser um adulto 'mudo'. Minha missão é garantir que você não precise passar por quatro anos de mentiras para só então começar a viver o idioma na prática."
+                }
             ]
         },
         {
-            type: "h2",
-            content: "Parte 3: Nossa Promessa e Próximos Passos"
-        },
-        {
-            type: "paragraph",
-            content: "Nosso compromisso aqui na ES English Academy é radicalmente diferente do que você encontra no mercado. Nós não vendemos fluência em 3 meses (isso não existe). Nós vendemos **autonomia**."
-        },
-        {
-            type: "paragraph",
-            content: "Nosso compromisso é com o **inglês prático e real**. Nosso objetivo **não é** a perfeição gramatical de um poeta britânico do século 19, mas sim que você consiga:"
-        },
-        {
-            type: "list",
-            content: [
-                "Participar de uma reunião de trabalho e entender o que está sendo dito.",
-                "Viajar para o exterior e resolver problemas no aeroporto ou hotel sem suar frio.",
-                "Consumir conteúdo em inglês (filmes, vídeos, artigos) e absorver conhecimento direto da fonte."
+            id: "p1-m3",
+            title: "Parte 3: O Necrotério do Ensino Tradicional",
+            subtitle: "Por que o Sistema foi Desenhado para Você Falhar — uma autópsia no método das grandes franquias.",
+            status: "locked",
+            blocks: [
+                {
+                    type: "system-status",
+                    content: "{{AUTOPSY REPORT|Relatório de Autópsia}}: {{TRADITIONAL_METHOD.exe INITIATED|MÉTODO_TRADICIONAL.exe INICIADO}}..."
+                },
+                {
+                    type: "box-goal",
+                    title: "Objetivo Tático",
+                    content: "Realizar uma autópsia no método das grandes franquias e escolas tradicionais. Vamos identificar os 'vírus' pedagógicos que infectaram seu aprendizado e substituí-los por uma mentalidade de ROI (Retorno sobre Investimento) Linguístico."
+                },
+                {
+                    type: "h2",
+                    content: "3.1 A Anatomia do Fracasso Programado"
+                },
+                {
+                    type: "paragraph",
+                    content: "Você já se perguntou por que as grandes escolas de inglês ocupam os prédios mais caros e gastam milhões em marketing com celebridades, mas o Brasil continua no topo dos rankings de pior proficiência do mundo?"
+                },
+                {
+                    type: "paragraph",
+                    content: "A resposta é brutal: **O modelo de negócio deles depende do seu fracasso.** Se você aprender inglês em 1 ano, eles perdem 4 anos de mensalidade. O sistema tradicional foi desenhado para ser um labirinto, não uma linha reta."
+                },
+                {
+                    type: "brain-diagram",
+                    content: JSON.stringify({
+                        title: "🧠 CAMADA NEUROCIENTÍFICA: A Armadilha do Input Passivo",
+                        steps: [
+                            "A Curva de Esquecimento (Ebbinghaus): Se você estuda uma regra gramatical e preenche lacunas em um livro, seu cérebro descarta 80% dessa informação em 24 horas. Por quê? Porque não houve 'Saliência de Sobrevivência'.",
+                            "O Erro das Sinapses Isoladas: No método antigo, você aprende 'palavras soltas'. No seu cérebro, isso cria sinapses fracas e isoladas. Para falar, o cérebro precisa de uma rede densa.",
+                            "O Método Elite: Nós usamos {{Active Recall|Recuperação Ativa}}. Em vez de você ler uma regra, nós te jogamos em um cenário onde você precisa daquela estrutura para sobreviver. Isso força o cérebro a fortalecer a bainha de mielina instantaneamente."
+                        ]
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "3.2 Camada Cultural: O 'Inglês de Laboratório' vs. O Mundo Cão"
+                },
+                {
+                    type: "paragraph",
+                    content: "O inglês dos livros didáticos é o que chamamos de **Inglês de Laboratório**: estéril, sem sotaque, sem ruído e sem pressa. No entanto, o mundo real é um 'zoológico'."
+                },
+                {
+                    type: "comparison-table",
+                    content: JSON.stringify({
+                        headers: ["Elemento", "Método Tradicional (Necrotério)", "Método Elite (Operacional)", "Impacto no Campo"],
+                        rows: [
+                            ["Foco", "Gramática Prescritiva (Regras)", "Gramática Funcional (Uso)", "O tradicional te faz um revisor; o Elite te faz um líder."],
+                            ["Velocidade", "Lenta e Articulada (Robótica)", "Velocidade Real ({{Connected Speech|Fala Conectada}})", "O tradicional te deixa surdo para nativos."],
+                            ["Erro", "Punido com notas e vergonha", "Usado como dado de calibragem", "O tradicional cria medo; o Elite cria audácia."],
+                            ["Vocabulário", "Geral e Inútil (Cores, Animais)", "Alta Frequência (Pareto 80/20)", "O tradicional gasta seu tempo; o Elite gera ROI."]
+                        ]
+                    })
+                },
+                {
+                    type: "reveal-box",
+                    title: "📝 Nota do Instrutor (Clique para expandir)",
+                    content: "Aprender inglês com livro de franquia é como tentar aprender a lutar MMA jogando 'Street Fighter' no videogame. Você conhece os golpes, mas a primeira vez que levar um soco (ouvir um nativo rápido), você vai desmaiar."
+                },
+                {
+                    type: "h2",
+                    content: "🛠️ Engenharia Reversa: Desmontando o 'I am going to'"
+                },
+                {
+                    type: "paragraph",
+                    content: "Vamos pegar o exemplo clássico que as escolas ensinam por meses: o futuro com 'going to'."
+                },
+                {
+                    type: "phonetic-breakdown",
+                    content: JSON.stringify({
+                        formal: {
+                            text: "{{I am going to travel next year|Vou viajar ano que vem}}.",
+                            analysis: "Pronunciando cada sílaba: I-am-go-ing-to — 5 unidades de processamento"
+                        },
+                        combat: {
+                            text: "{{I'm gonna travel nex' year|Vou viajar ano que vem}}.",
+                            analysis: "Bloco único: /aim-gâ-na/ — 1 unidade sonora"
+                        },
+                        explanation: "A Fusão (Gonna): O cérebro do nativo funde going + to para liberar espaço de processamento para a informação principal (travel). Se você tenta falar o 'going to' completo, você soa como um robô e perde o ritmo da conversa. Omissão do T Final: Em 'next year', o 't' de next desaparece porque a próxima palavra começa com uma consoante. É uma regra de Sandwich de Consoantes. No tradicional, ninguém te conta isso, e você fica tentando pronunciar o 't' e trava a língua. Intenção: O 'I am going to' formal é usado em documentos. Se você usa isso no bar ou em uma reunião de negócios informal, você cria uma barreira social. Você soa 'estrangeiro demais'."
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "⚔️ Cenário de Combate: A Reunião de 'Briefing' (The Corporate Trap)"
+                },
+                {
+                    type: "scenario-card",
+                    content: JSON.stringify({
+                        context: "Você está em uma reunião via Zoom com a equipe dos EUA. O seu chefe americano diz:",
+                        situation: "\"{{Guys, we gotta pivot the strategy 'cause the numbers ain't lookin' good. Whad'ya reckon?|Pessoal, temos que mudar a estratégia porque os números não parecem bons. O que vocês acham?}}\"",
+                        wrong: {
+                            action: "O Aluno Tradicional: Ele tenta processar: 'We got... to? Pivot? Cause? Ain't?'. Ele trava no Ain't porque o livro disse que isso é errado e não deve ser usado. O filtro afetivo sobe.",
+                            result: "Ele gagueja e perde a oportunidade de dar sua opinião. Silêncio constrangedor."
+                        },
+                        right: {
+                            action: "O Operador Elite: Filtro de Ruído — ignora ain't e gotta. Captura de Palavras-Chave: {{PIVOT|MUDAR}}, {{STRATEGY|ESTRATÉGIA}}, {{NUMBERS|NÚMEROS}}, {{NOT GOOD|NADA BOM}}.",
+                            result: "\"{{I'm with you. Let's change the plan. I have an idea.|Estou com você. Vamos mudar o plano. Tenho uma ideia.}}\" — Simples, direto e operacional. O chefe quer soluções, não poesia."
+                        }
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "🎙️ Tom e Voz: O Despertar da Raiva Produtiva"
+                },
+                {
+                    type: "paragraph",
+                    content: "**Sinta raiva.** Sinta raiva dos anos perdidos preenchendo lacunas. Essa raiva é o que vai te impulsionar a não aceitar mais o método medíocre. O brasileiro médio tem 'trauma' de inglês porque foi tratado como uma criança incapaz. Aqui, você é um adulto com objetivos claros."
+                },
+                {
+                    type: "box-warning",
+                    title: "⚠️ VÍCIO BRASILEIRO DETECTADO",
+                    content: "O medo de parecer 'grosseiro' por ser direto. No inglês de elite, ser direto é ser respeitoso com o tempo do outro. O excesso de palavras (polidez excessiva de livro) soa como insegurança."
+                },
+                {
+                    type: "elite-insight",
+                    title: "💡 INSIGHT DE ELITE",
+                    content: "O método tradicional é uma dieta de 500 calorias para quem quer correr uma maratona. Ele te mantém vivo, mas nunca te permite vencer. Estamos aqui para te dar o banquete da fluência real."
+                }
             ]
         },
         {
-            type: "h3",
-            content: "O Que Esperar Desta Jornada"
-        },
-        {
-            type: "paragraph",
-            content: "Para alinhar nossas expectativas, veja o que vamos priorizar:"
-        },
-        {
-            type: "list",
-            content: [
-                "**Foco na Escuta (Listening)**: Você vai treinar seu ouvido para entender diferentes sotaques e velocidades.",
-                "**Vocabulário de Alta Frequência**: Vamos focar nas 20% das palavras que são usadas em 80% das conversas. Princípio de Pareto aplicado ao idioma.",
-                "**Confiança Psicológica**: Vamos trabalhar para desmontar seus bloqueios mentais sobre falar errado."
+            id: "p1-m4",
+            title: "Parte 4: A Lei de Pareto e a Fluência Operacional",
+            subtitle: "O Segredo dos 20% — como resolver 80% das situações com vocabulário cirúrgico.",
+            status: "locked",
+            blocks: [
+                {
+                    type: "system-status",
+                    content: "{{PARETO ANALYSIS|Análise de Pareto}}: {{VOCABULARY_OPTIMIZATION.exe LOADING|OTIMIZAÇÃO_DE_VOCABULÁRIO.exe CARREGANDO}}..."
+                },
+                {
+                    type: "box-goal",
+                    title: "Objetivo Tático",
+                    content: "Aplicar o Princípio de Pareto (80/20) ao idioma. Vamos identificar as armas de alto calibre (vocabulário de alta frequência) que permitem que você resolva 80% das situações do mundo real com apenas 20% do esforço linguístico. Chega de carregar peso morto."
+                },
+                {
+                    type: "h2",
+                    content: "4.1 A Ditadura do Dicionário vs. A Eficiência do Operador"
+                },
+                {
+                    type: "paragraph",
+                    content: "O maior erro do aluno brasileiro é acreditar que 'saber inglês' é saber **todas** as palavras. Um nativo médio utiliza cerca de 3.000 palavras no seu dia a dia, embora conheça 20.000. No entanto, com apenas **800 a 1.200 palavras bem aplicadas**, você já é capaz de operar em nível de elite em reuniões, viagens e negociações."
+                },
+                {
+                    type: "brain-diagram",
+                    content: JSON.stringify({
+                        title: "🧠 CAMADA NEUROCIENTÍFICA: O SAR e a Sobrecarga Cognitiva",
+                        steps: [
+                            "O SAR: O seu cérebro possui um filtro chamado Sistema de Ativação Reticular. Ele decide o que é importante e o que é ruído. Se você tenta aprender palavras obscuras (como '{{nevertheless|no entanto}}' ou '{{furthermore|além disso}}'), seu SAR as descarta por falta de uso prático.",
+                            "Custo de Processamento ({{Cognitive Load|Carga Cognitiva}}): Cada palavra que você tenta 'escolher' na hora de falar consome energia do Córtex Pré-Frontal. Se você tem um dicionário imenso mas pouco treinado, seu cérebro sofre de Paralisia por Análise.",
+                            "Poda Neuronal ({{Synaptic Pruning|Poda Sináptica}}): O cérebro é eficiente. Ele fortalece as conexões que você usa sempre e 'poda' as que não usa. Ao focar nos 20% (Pareto), você cria super-rodovias neurais (mielinização pesada) para os termos que realmente importam."
+                        ]
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "4.2 Camada Cultural: Vocabulário de Luxo vs. Vocabulário de ROI"
+                },
+                {
+                    type: "paragraph",
+                    content: "Muitos alunos tentam impressionar usando palavras complexas e acabam soando como um livro didático antigo. No 'Global Command', a moeda de troca é a **clareza**."
+                },
+                {
+                    type: "comparison-table",
+                    content: JSON.stringify({
+                        headers: ["Conceito", "Palavra de Livro (Baixo ROI)", "Palavra de Elite (Alto ROI)", "Por que o ROI é maior?"],
+                        rows: [
+                            ["Executar", "To implement/execute", "{{To get it done|Fazer acontecer}}", "Get é o 'coringa' do inglês. Serve para 1000 situações."],
+                            ["Entender", "To comprehend", "{{To get it / To follow|Entender / Acompanhar}}", "Curto, rítmico e demonstra conexão imediata."],
+                            ["Ajudar", "To assist", "{{To help out / give a hand|Dar uma força}}", "Phrasal verbs geram proximidade e fluidez natural."],
+                            ["Compensar", "To compensate", "{{To make up for|Compensar por}}", "Soa menos corporativo e mais humano/operacional."],
+                            ["Descobrir", "To discover", "{{To find out|Descobrir}}", "É o termo padrão em 90% das conversas de negócios."]
+                        ]
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "🛠️ Engenharia Reversa: O Poder do 'GET' (A Ferramenta Universal)"
+                },
+                {
+                    type: "paragraph",
+                    content: "Se o inglês fosse uma caixa de ferramentas, o verbo **GET** seria a chave inglesa que ajusta qualquer parafuso. Se você domina o Get, sua autonomia operacional sobe 40% instantaneamente."
+                },
+                {
+                    type: "phrase-analysis",
+                    content: JSON.stringify({
+                        phrase: "{{I'll get it to you by tomorrow.|Eu entrego para você amanhã.}}",
+                        phonetic: "/ail-gué-rit-tchu-bai-tu-már-rou/ — O 't' de get vira um 'r' suave (Flap T) porque está entre duas vogais. O 'to you' vira /tchu/.",
+                        grammarNote: "Multifuncionalidade: Nessa frase, GET substitui 'send', 'deliver', 'bring' ou 'email'. Ao usar Get, você simplifica a tarefa no cérebro do ouvinte. Você está prometendo um resultado, não descrevendo o processo técnico."
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "⚔️ Cenário de Combate: A Negociação de Prazo (The Deadline War)"
+                },
+                {
+                    type: "scenario-card",
+                    content: JSON.stringify({
+                        context: "Você é o gerente de um projeto. Um cliente internacional quer saber por que o relatório não chegou. Você está sob pressão (Amígdala em alerta).",
+                        situation: "O cliente pergunta: '{{Where is the report? We were expecting it yesterday.|Cadê o relatório? Esperávamos isso ontem.}}'",
+                        wrong: {
+                            action: "O Recruta (Mentalidade Dicionário): Tenta montar uma frase complexa para parecer profissional.",
+                            result: "\"{{I apologize for the delay. We are experiencing some technical difficulties, but we will provide the document as soon as possible.|Peço desculpas pelo atraso. Estamos com dificuldades técnicas, mas entregaremos o documento assim que possível.}}\" — Muito longo, chances imensas de errar 'difficulties' ou 'provide'."
+                        },
+                        right: {
+                            action: "O Operador (Pareto 80/20): Usa palavras de alta frequência e foca no resultado.",
+                            result: "\"{{Sorry about that. We're running a bit late, but I'll get it done today. I'll send it over in an hour. Is that okay?|Desculpe por isso. Estamos um pouco atrasados, mas vou resolver hoje. Te envio em uma hora. Tudo bem?}}\" — 'Running late' + 'Get it done' + 'Send it over' + pergunta tática."
+                        }
+                    })
+                },
+                {
+                    type: "reveal-box",
+                    title: "🔍 Análise do Sucesso (Clique para expandir)",
+                    content: "'Running late': Expressão de alta frequência para atrasos. 'Get it done': Foca no resultado, não no problema. 'Send it over': Phrasal verb que demonstra agilidade. 'Is that okay?': Devolve a bola para o cliente, ganhando tempo e controle da conversa."
+                },
+                {
+                    type: "h2",
+                    content: "🎙️ Tom e Voz: A Mentalidade de 'Menos é Mais'"
+                },
+                {
+                    type: "paragraph",
+                    content: "Muitos brasileiros têm vergonha de falar 'simples'. Eles acham que falar simples é sinal de ignorância. A verdade é o oposto: no mundo executivo global, **quem fala difícil geralmente é quem não sabe o que está fazendo**."
+                },
+                {
+                    type: "paragraph",
+                    content: "**Humor Tático:** Se você tentar usar uma palavra de 5 sílabas e gaguejar, você parece um amador. Se você usar uma palavra de 1 sílaba com a entonação correta e confiança de um operador, você parece o dono da empresa."
+                },
+                {
+                    type: "box-warning",
+                    title: "⚠️ VÍCIO BRASILEIRO DETECTADO",
+                    content: "Tentar traduzir expressões idiomáticas do português literalmente (ex: 'The cow went to the swamp' para 'A vaca foi pro brejo'). Pare. No Método Pareto, usamos as expressões de alta frequência do inglês, como 'It's going south' (Está dando errado)."
+                },
+                {
+                    type: "elite-insight",
+                    title: "💡 INSIGHT DE ELITE",
+                    content: "A fluência operacional não é sobre o quanto você sabe, mas sobre o quão pouco você precisa para resolver um problema. Se você pode derrubar o alvo com uma pistola (palavras simples), por que carregar um canhão (vocabulário complexo) que você mal consegue levantar?"
+                }
             ]
         },
         {
-            type: "paragraph",
-            content: "Ao final de cada pilar, aqui no material, você encontrará um convite para testar seu conhecimento em nossa plataforma interativa. Isso não é uma prova valendo nota. É uma ferramenta de **gamificação** para você mesmo ver sua evolução e celebrar suas pequenas vitórias."
+            id: "p1-m5",
+            title: "Parte 5: Anatomia do Som Real",
+            subtitle: "Decodificando a 'Metralhadora' Nativa — hackear o seu sistema auditivo.",
+            status: "locked",
+            blocks: [
+                {
+                    type: "system-status",
+                    content: "{{AUDIO DECODER|DECODIFICADOR DE ÁUDIO}}: {{CONNECTED_SPEECH.wav ANALYZING|FALA_CONECTADA.wav ANALISANDO}}..."
+                },
+                {
+                    type: "box-goal",
+                    title: "Objetivo Tático",
+                    content: "Hackear o seu sistema auditivo. Vamos entender por que os nativos parecem falar 'rápido demais' e como desativar a 'Vogal Fantasma' (o vício nº 1 dos brasileiros) que destrói sua inteligência percebida em campo."
+                },
+                {
+                    type: "h2",
+                    content: "5.1 O Mito do 'Eles Falam Rápido Demais'"
+                },
+                {
+                    type: "paragraph",
+                    content: "A maior reclamação dos operadores novatos é: 'Eu entendo o professor, mas não entendo o nativo na rua'. O problema **não é a velocidade, é o ritmo**. O português é uma língua Syllable-timed (cada sílaba tem o mesmo peso); o inglês é Stress-timed (nós 'atropelamos' as sílabas fracas para enfatizar as fortes)."
+                },
+                {
+                    type: "brain-diagram",
+                    content: JSON.stringify({
+                        title: "🧠 CAMADA NEUROCIENTÍFICA: Percepção Categórica e o Filtro Fonético",
+                        steps: [
+                            "Percepção Categórica: Seu cérebro foi treinado para ignorar sons que não existem no português. Quando um nativo usa um som que você não conhece (como o Schwa ou o Short I), seu cérebro tenta 'encaixar' esse som na gaveta mais próxima.",
+                            "O Erro de Processamento: O cérebro brasileiro ouve '{{Bit|Pouco}}' (pouco) e processa como '{{Beat|Bater}}' (bater). Essa confusão gera um delay de processamento no Córtex Auditivo, fazendo com que você perca o resto da frase enquanto tenta decodificar a primeira palavra.",
+                            "Mapeamento Fonético: Para entender o inglês real, precisamos 're-mapear' os neurônios auditivos para reconhecer o {{Connected Speech|Fala Conectada}} (fala conectada) como uma unidade única de som, e não como palavras separadas."
+                        ]
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "5.2 A Batalha contra a 'Vogal Fantasma' (Epêntese)"
+                },
+                {
+                    type: "paragraph",
+                    content: "O maior inimigo da sua fluência é o som que você **adiciona** onde ele não existe. No Brasil, toda consoante 'quer' ser seguida de uma vogal. No inglês, consoantes podem ser secas e mortas."
+                },
+                {
+                    type: "comparison-table",
+                    content: JSON.stringify({
+                        headers: ["Palavra", "O Erro (Vogal Fantasma)", "O Som Elite", "Impacto Tático"],
+                        rows: [
+                            ["Facebook", "Face-bu-qui", "/feis-buk/", "O 'i' final sinaliza amadorismo e quebra o ritmo."],
+                            ["Like", "Lai-qui", "/laik/", "Matar o som no 'k' economiza 0.5s de processamento."],
+                            ["Red", "He-di", "/red/", "Se você disser 'Redi', o nativo pode entender 'Ready'."],
+                            ["Stop", "Es-tó-pi", "/stɑːp/", "Adicionar um 'e' antes do 's' é o 'dedo-duro' do brasileiro."]
+                        ]
+                    })
+                },
+                {
+                    type: "box-action",
+                    title: "🎯 Ação Corretiva",
+                    content: "Imagine que o final da palavra é um penhasco. Você deve parar exatamente na consoante final. Não deixe sua língua 'escorregar' para um som de 'i'."
+                },
+                {
+                    type: "h2",
+                    content: "🛠️ Engenharia Reversa: Desmontando o 'What do you...'"
+                },
+                {
+                    type: "paragraph",
+                    content: "Vamos analisar a frase que você mais vai ouvir em campo e como ela realmente soa quando disparada por um nativo."
+                },
+                {
+                    type: "phonetic-breakdown",
+                    content: JSON.stringify({
+                        formal: {
+                            text: "{{What do you want to eat?|O que você quer comer?}}",
+                            analysis: "6 palavras separadas — processamento lento e artificial"
+                        },
+                        combat: {
+                            text: "{{Whaddya wanna eat?|O que você quer comer?}}",
+                            analysis: "/wʌ-djə-wɑː-nə-it/ — 3 blocos sonoros"
+                        },
+                        explanation: "Redução Tática: O 'do you' funde-se com 'what', transformando-se em um som de 'dj' suave = /wʌ-djə/. O Schwa (/ə/): O som do 'o' em 'do' e do 'u' em 'you' morre, virando um som neutro e relaxado. O Flap T: Se a próxima palavra começar com vogal, o 't' vira um som de 'r' rápido. Wanna: O 'want to' é fundido para manter a velocidade."
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "🌍 Camada Cultural: O Inglês 'Mascado' vs. O Inglês 'Cantado'"
+                },
+                {
+                    type: "paragraph",
+                    content: "No Brasil, falamos com a boca muito aberta e articulada. O inglês é falado no fundo da garganta, com a mandíbula mais relaxada."
+                },
+                {
+                    type: "comparison-table",
+                    content: JSON.stringify({
+                        headers: ["Elemento", "Formal (Acadêmico)", "Street (Operacional)", "Por que fazem isso?"],
+                        rows: [
+                            ["Got to", "{{I have got to go.|Eu tenho que ir.}}", "{{I gotta split.|Eu tenho que vazar.}}", "Eficiência máxima de movimento."],
+                            ["Could have", "{{I could have done it.|Eu poderia ter feito.}}", "{{I coulda dunnit.|Eu podia ter feito.}}", "Redução de 4 sílabas para 2."],
+                            ["Out of", "{{Get out of here.|Saia daqui.}}", "{{Outta here!|Zarpa daqui!}}", "O 't' vira 'r' e as palavras se fundem."]
+                        ]
+                    })
+                },
+                {
+                    type: "reveal-box",
+                    title: "📝 Nota do Instrutor (Clique para expandir)",
+                    content: "O nativo não fala 'errado', ele fala de forma econômica. Tentar falar o inglês de livro em um bar ou em uma reunião informal é como ir de terno e gravata para a praia: você é o único que não está confortável."
+                },
+                {
+                    type: "h2",
+                    content: "⚔️ Cenário de Combate: O Pedido sob Pressão (Coffee Shop)"
+                },
+                {
+                    type: "scenario-card",
+                    content: JSON.stringify({
+                        context: "Você está em uma cafeteria em Londres. Há uma fila enorme atrás de você. O atendente, com sotaque forte e pressa, dispara:",
+                        situation: "\"{{Whaddya-havin? Need-any-thin-else?|O que vai querer? Precisa de mais alguma coisa?}}\"",
+                        wrong: {
+                            action: "O Aluno Tradicional: Tenta separar as palavras: 'What... do... you... having?'. Ele se confunde com o 'ing' no final e trava na gramática.",
+                            result: "O atendente perde a paciência. A fila cresce. Pânico."
+                        },
+                        right: {
+                            action: "O Operador Elite: Reconhece /whaddya/ como unidade de pergunta. Foca na entonação e na palavra HAVING.",
+                            result: "\"{{A black coffee, please. That's it.|Um café preto, por favor. Só isso.}}\" — Curto, grosso e funcional. Missão cumprida sem estresse."
+                        }
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "🎙️ Tom e Voz: A Autoridade do Silêncio"
+                },
+                {
+                    type: "paragraph",
+                    content: "Muitas vezes, a melhor pronúncia é o **silêncio entre as palavras**. O brasileiro tem medo do silêncio e preenche com 'éééé...' ou 'humm...'."
+                },
+                {
+                    type: "paragraph",
+                    content: "**Técnica de Elite:** Se você esquecer uma palavra, faça uma pausa silenciosa. Isso demonstra controle e autoridade. Preencher com sons de vogais brasileiras (o 'humm' com som de 'u') quebra sua imagem de operador."
+                },
+                {
+                    type: "elite-insight",
+                    title: "💡 INSIGHT DE ELITE",
+                    content: "O seu ouvido é um músculo. Se você só treina ouvindo áudio lento de livro didático, você está treinando para perder. A partir de agora, você vai consumir o som real, com todas as suas 'sujeiras' e contrações. É assim que o mundo fala."
+                }
+            ]
         },
         {
-            type: "pillar-end",
-            title: "Parabéns por iniciar sua jornada!",
-            content: "Você agora entende nossa filosofia e sabe que está em um ambiente seguro para aprender e errar. Nos próximos pilares, vamos sair da teoria e mergulhar nos fundamentos práticos que vão destravar sua comunicação. Prepare seus ouvidos e sua voz. Vamos juntos?"
+            id: "p1-m6",
+            title: "Parte 6: O Elo Final — A Aliança do Operador",
+            subtitle: "O Nascimento da sua Liberdade — selar a conexão emocional e ativar o Modo de Operação Total.",
+            status: "locked",
+            blocks: [
+                {
+                    type: "system-status",
+                    content: "{{IDENTITY PROTOCOL|PROTOCOLO DE IDENTIDADE}}: {{OPERATOR_ALLIANCE.exe INITIALIZING|ALIANÇA_DO_OPERADOR.exe INICIALIZANDO}}..."
+                },
+                {
+                    type: "box-goal",
+                    title: "Objetivo Tático",
+                    content: "Selar a conexão emocional entre a sua história e a sua nova identidade. Este não é um contrato de estudos; é um pacto de sobrevivência. Vamos converter a sua frustração em combustível e ativar o 'Modo de Operação Total'."
+                },
+                {
+                    type: "h2",
+                    content: "6.1 A Conclusão da Jornada de Roger: O Fim do Silêncio"
+                },
+                {
+                    type: "paragraph",
+                    content: "A minha história (Parte 2) não terminou apenas com um vocabulário novo. Ela terminou quando eu percebi que o inglês era a única coisa que me separava da pessoa que eu amava. Eu me lembro vividamente de estar em uma mesa, querendo dizer algo profundo, algo que fizesse os olhos dela brilharem, e a gramática de livro ser uma **mordaça na minha boca**."
+                },
+                {
+                    type: "paragraph",
+                    content: "A ES Academy nasceu desse grito contido. Ela nasceu para que você nunca mais sinta que é 'menos' só porque não consegue conjugar o Present Perfect. **A fluência não é um troféu; é a sua voz sendo devolvida a você.** Quando eu finalmente consegui rir, chorar e brigar em inglês, eu não era apenas um 'falante', eu era **eu mesmo em outra língua**. E é essa liberdade que eu estou te entregando agora."
+                },
+                {
+                    type: "brain-diagram",
+                    content: JSON.stringify({
+                        title: "🧠 CAMADA NEUROCIENTÍFICA: O Valor da Sobrevivência e o Sistema de Recompensa",
+                        steps: [
+                            "O Eixo Hipotálamo-Hipófise-Adrenal (HPA): O seu cérebro prioriza o que é vital. Se você estuda por 'obrigação', seu cérebro descarta. Se você estuda por CONEXÃO (para salvar seu emprego, para falar com seu parceiro, para ser livre), seu cérebro entende que o inglês é uma ferramenta de sobrevivência.",
+                            "Ocitocina e Aprendizado Social: Ao se conectar com a minha história e com os outros operadores, seu cérebro libera ocitocina. Esse hormônio REDUZ o medo (Filtro Afetivo) e abre as portas para a plasticidade neural.",
+                            "A Mudança de Identidade: O seu Córtex Cingulado Anterior monitora conflitos. Se você diz 'eu sou péssimo em inglês', ele vai sabotar seus treinos. Ao assinar este protocolo, você está instalando uma nova identidade: 'Eu sou um comunicador de elite em treinamento'. O cérebro trabalhará para manter essa nova imagem."
+                        ]
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "6.2 A Aliança de Elite (O Teu Novo DNA)"
+                },
+                {
+                    type: "paragraph",
+                    content: "Para cruzar a fronteira para o Pilar 2, você precisa aceitar as leis que regem o nosso território. No 'Global Command', não há espaço para vítimas, apenas para **protagonistas**."
+                },
+                {
+                    type: "comparison-table",
+                    content: JSON.stringify({
+                        headers: ["Lei", "O Princípio", "O Impacto na Sua Vida"],
+                        rows: [
+                            ["🔗 Lei da Conexão Humana", "Você nunca mais verá o inglês como 'matéria'. Você verá como o cabo que te liga ao mundo.", "Se o cabo tiver ruído, você não desiste; você ajusta a frequência."],
+                            ["⚡ Lei da Vulnerabilidade Tática", "Você admite que vai errar. E você vai rir disso.", "O erro é o sinal de que você está na fronteira do seu território, expandindo-o."],
+                            ["🗽 Lei da Liberdade Absoluta", "Você estuda hoje para ser o dono da sua narrativa amanhã.", "Sem tradutores, sem intermediários, sem mordaças."]
+                        ]
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "🛠️ Engenharia Reversa: O 'I Got This' (A Postura de Comando)"
+                },
+                {
+                    type: "paragraph",
+                    content: "Analise o peso emocional desta frase curta. É o mantra do operador."
+                },
+                {
+                    type: "phrase-analysis",
+                    content: JSON.stringify({
+                        phrase: "{{I got this.|Deixa comigo.}}",
+                        phonetic: "/ai-gót-thís/ — O 't' de got é seco, quase um estalo. São três batidas fortes que acalmam o sistema nervoso.",
+                        grammarNote: "Propriedade (Ownership): O uso do 'Got' indica posse imediata da situação. Não é 'Eu tentarei'. É 'Está sob meu controle'. O som do 'th' em 'this' exige que você coloque a língua entre os dentes — é um gesto físico de afirmação que o sistema tradicional ignora, mas que nós usamos para ancorar a confiança."
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "⚔️ Cenário de Combate: O Fantasma do Passado"
+                },
+                {
+                    type: "scenario-card",
+                    content: JSON.stringify({
+                        context: "Você abre o próximo pilar. A velha voz da insegurança sussurra:",
+                        situation: "\"Isso é muito difícil. Você nunca vai conseguir falar como o Roger.\"",
+                        wrong: {
+                            action: "O Recruta: Fica triste, fecha a plataforma.",
+                            result: "Volta para a zona de conforto da mediocridade. Mais um ano perdido."
+                        },
+                        right: {
+                            action: "O Operador Elite (Conexão Total): Responde ao Fantasma: 'Eu não quero falar como o Roger. Eu quero falar como EU mesmo. E o Roger está aqui para me dar o mapa que ele suou sangue para desenhar.'",
+                            result: "Ativação: Bata no peito e diga: '{{I got this. One step at a time.|Eu dou conta. Um passo de cada vez.}}' O medo é um passageiro, mas VOCÊ é o piloto."
+                        }
+                    })
+                },
+                {
+                    type: "h2",
+                    content: "🎙️ Tom e Voz: O Convite ao Próximo Nível"
+                },
+                {
+                    type: "paragraph",
+                    content: "Eu não quero que você apenas prossiga. Eu quero que você sinta uma **necessidade física de continuar**. O Pilar 1 foi a cirurgia para remover o tumor do método antigo. O Pilar 2 é onde começamos a te dar **superpoderes auditivos**."
+                },
+                {
+                    type: "paragraph",
+                    content: "Imagine a sensação de dar o play em um filme e, pela primeira vez, as palavras não serem apenas ruído, mas **frases claras**. Imagine o prazer de não precisar mais de legendas para a sua própria vida. Esse prazer está a **um clique de distância**."
+                },
+                {
+                    type: "elite-insight",
+                    title: "💡 INSIGHT FINAL DE ELITE",
+                    content: "A mordaça caiu. Você conhece a minha dor, e agora ela é o seu escudo. Você entendeu que o inglês é biologia e emoção, não gramática e papel. Você não é mais um estudante; você é um OPERADOR em treinamento."
+                },
+                {
+                    type: "box-action",
+                    title: "📋 BRIEFING DE ENCERRAMENTO",
+                    content: "O Pilar 1 está selado. Seu sistema operacional mental foi completamente reformatado. Você agora possui:\\n\\n✅ Conhecimento do Filtro Afetivo e como desativá-lo\\n✅ A história do Roger como prova de que a mudança é possível\\n✅ A visão clara do fracasso do método tradicional\\n✅ O vocabulário Pareto 80/20 para máximo ROI\\n✅ O ouvido calibrado para o Connected Speech\\n✅ A Aliança de Elite selada no seu DNA"
+                },
+                {
+                    type: "pillar-end",
+                    title: "🎖️ PILAR 1 CONCLUÍDO",
+                    content: "OPERADOR, O GLOBO ESTÁ ESCURO. É HORA DE ILUMINAR O PILAR 2. Seus ouvidos estão prestes a receber superpoderes de decodificação. Prepare-se para ouvir o inglês como você nunca ouviu antes."
+                }
+            ]
         }
     ]
 };
 
+// ==============================================================================
+// PILAR 2: DECODIFICAÇÃO AUDITIVA (EXPANDED ELITE VERSION)
+// ==============================================================================
 export const PILAR_2_DATA: PillarData = {
     id: 2,
-    title: "Pilar 2: Inglês Auditivo",
-    subtitle: "A chave para destravar a comunicação real em inglês.",
+    title: "Pilar 2: Decodificação Auditiva Avançada",
+    subtitle: "A ciência do som: Schwa, Connected Speech e o fim das legendas.",
     blocks: [
         {
-            type: "box-goal",
-            title: "Objetivo do Pilar",
-            content: "Abandonar o \"inglês de sala de aula\" e mergulhar no inglês falado por pessoas de verdade, entendendo o contexto e respondendo com confiança."
-        },
-        {
-            type: "h3",
-            content: "Introdução: O Fim do \"Inglês de Livro\""
-        },
-        {
-            type: "paragraph",
-            content: "Bem-vindo ao pilar que separa quem **estuda** inglês de quem **vive** em inglês."
-        },
-        {
-            type: "paragraph",
-            content: "Se você sempre teve aquela sensação estranha de que o inglês dos livros não tem nada a ver com o inglês que você ouve em filmes, séries, músicas ou conversas reais… você não está errado. Na verdade, você finalmente percebeu a verdade."
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "O problema nunca foi você. O problema é que te ensinaram um inglês artificial, limpo demais, lento demais e distante demais da vida real."
-        },
-        {
-            type: "paragraph",
-            content: "Neste pilar, a promessa é simples e ousada:\n**Abandonar o \"inglês de sala de aula\".**\n**Mergulhar no inglês falado por pessoas de verdade.**"
-        },
-        {
-            type: "paragraph",
-            content: "Aqui, o objetivo não é falar bonito. Não é soar perfeito. É entender o que está sendo dito num bar barulhento, numa série sem legenda ou numa reunião de trabalho — e ter confiança suficiente para responder, mesmo sem saber todas as palavras."
-        },
-        {
-            type: "paragraph",
-            content: "Vamos entrar no **caos organizado** do inglês falado.\nCaótico à primeira vista. Organizado quando você entende as regras invisíveis."
-        },
-        {
-            type: "paragraph",
-            content: "Respira fundo. É aqui que o jogo muda."
+            type: "system-status",
+            content: "AUDIO MATRIX: ENGAGED. Frequency analysis started."
         },
         {
             type: "h2",
-            content: "Parte 1: A Mentalidade Certa para Entender Nativos"
-        },
-        {
-            type: "box-insight",
-            title: "Mentalidade",
-            content: "A maioria dos alunos não falha no *listening* por falta de vocabulário. Eles falham por **ansiedade**, **expectativa irreal** e **medo de \'não entender tudo\'**. Vamos desmontar isso agora."
-        },
-        {
-            type: "h3",
-            content: "Aceite: Você NÃO vai entender 100% (e tudo bem!)"
+            content: "Introdução: O Abismo entre Escrita e Som"
         },
         {
             type: "paragraph",
-            content: "Essa é talvez a libertação mais importante de toda a sua jornada com o inglês."
+            content: "O inglês não é uma língua fonética como o português (onde se lê o que se escreve). O inglês é uma língua de ritmo e acentuação. Se você tentar ler inglês como lê português, você soará como um robô – e pior, não entenderá os humanos."
         },
         {
-            type: "paragraph",
-            content: "Nenhum nativo entende 100% do que ouve. Nunca. Nem entre eles. Existem sotaques, dialetos, gírias regionais, pessoas falando rápido demais, música alta, barulho de fundo... sempre existe perda de informação."
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Sua meta não é a perfeição. Sua meta é a **compreensão do contexto**. Se você entendeu a ideia principal, a intenção da frase e o clima da conversa, **você venceu.** Ponto final."
-        },
-        {
-            type: "paragraph",
-            content: "Cada vez que você se pune por não entender uma palavra, você treina seu cérebro a entrar em modo de pânico. Quando você relaxa, o cérebro trabalha melhor. É simples assim."
-        },
-        {
-            type: "h3",
-            content: "Foque no Contexto e nas Palavras-Chave"
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Em vez de tentar capturar cada palavra, foque em **substantivos importantes**, **verbos de ação** e **adjetivos-chave**. Combine isso com o contexto visual e situacional. Inglês falado é um quebra-cabeça — e você não precisa de todas as peças para entender a imagem geral."
-        },
-        {
-            type: "paragraph",
-            content: "Imagine a seguinte cena: você está assistindo a uma série e um personagem entra em um restaurante. Você ouve:"
-        },
-        {
-            type: "paragraph",
-            content: "...*order*... a lot of *food*... so *hungry*..."
-        },
-        {
-            type: "paragraph",
-            content: "Mesmo que você perca 80% da frase, você já sabe exatamente o que está acontecendo. Isso acontece porque o cérebro humano é uma máquina poderosa de preencher lacunas. O problema é que, no ensino tradicional, ninguém te ensinou a usar isso a seu favor."
-        },
-        {
-            type: "paragraph",
-            content: "Em vez de tentar capturar cada palavra, foque em:"
-        },
-        {
-            type: "list",
+            type: "table",
             content: [
-                "**Substantivos importantes** (pessoas, lugares, coisas)",
-                "**Verbos de ação** (o que está acontecendo)",
-                "**Adjetivos-chave** (como algo é ou está)"
+                "Frase Escrita|Leitura Brasileira (Errada)|Realidade Nativa (Certa)",
+                "{{Wait a minute|Espere um minuto}}|Uêiti a minúti|Wei-da-mi-nit",
+                "{{I don't know|Eu não sei}}|Ai dônti nôu|Ai-du-no",
+                "{{He is a teacher|Ele é um professor}}|Rí ízi a tí-tchêr|Hi-za-ti-tcher"
             ]
-        },
-        {
-            type: "paragraph",
-            content: "Combine isso com o contexto visual e situacional. Inglês falado é um quebra-cabeça — e você não precisa de todas as peças para entender a imagem geral."
-        },
-        {
-            type: "h3",
-            content: "A Importância do \"Listening\" Ativo"
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Ouvir ativamente significa prestar atenção em **entonação**, **ritmo da fala**, **pausas estratégicas** e **emoção** por trás das palavras. Às vezes, a melodia diz mais do que a frase inteira."
-        },
-        {
-            type: "paragraph",
-            content: "Ouvir não é o mesmo que escutar. Muita gente \"ouve\" inglês passivamente, apenas esperando a vez de falar ou o momento em que vai se perder. O *listening* ativo muda isso completamente."
-        },
-        {
-            type: "paragraph",
-            content: "Ouvir ativamente significa prestar atenção em:"
-        },
-        {
-            type: "list",
-            content: [
-                "**Entonação** (raiva, ironia, empolgação)",
-                "**Ritmo** da fala",
-                "**Pausas** estratégicas",
-                "**Emoção** por trás das palavras"
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Às vezes, a entonação diz mais do que a frase inteira. É assim que nativos se entendem — e é assim que você vai começar a entender também."
         },
         {
             type: "h2",
-            content: "Parte 2: Desvendando o Inglês Falado – O Código Secreto"
-        },
-        {
-            type: "paragraph",
-            content: "Agora entramos no território que quase ninguém ensina. O inglês falado não é lento, nem complicado. Ele só usa **atalhos sonoros**. Quando você aprende esses atalhos, tudo começa a soar mais claro — quase como se alguém tivesse diminuído a velocidade do mundo."
-        },
-        {
-            type: "h3",
-            content: "Contrações Comuns: Onde as Letras Desaparecem"
-        },
-        {
-            type: "paragraph",
-            content: "No inglês real, as pessoas economizam energia. Elas comem palavras, juntam sons e simplificam tudo. Ninguém fala \"I am going to go\". As pessoas falam \"**I'm gonna go**\". Aprender isso não é \'errado\". É essencial."
-        },
-        {
-            type: "list",
-            content: [
-                "**gonna**: going to (Ex: *I'm gonna travel tomorrow.*)",
-                "**wanna**: want to (Ex: *I wanna learn English.*)",
-                "**gotta**: got to (Ex: *I gotta go now.*)",
-                "**lemme**: let me (Ex: *Lemme see that.*)",
-                "**gimme**: give me (Ex: *Gimme a break.*)",
-                "**outta**: out of (Ex: *Get outta here!*)",
-                "**kinda**: kind of (Ex: *It's kinda cold today.*)",
-                "**dunno**: don't know (Ex: *I dunno the answer.*)"
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Quando você reconhece essas formas, seu ouvido para de travar — porque agora ele sabe o que esperar."
-        },
-        {
-            type: "h3",
-            content: "Gírias e Expressões Essenciais"
-        },
-        {
-            type: "paragraph",
-            content: "Você não precisa aprender todas as gírias do planeta. Mas algumas são tão frequentes que viram vocabulário básico."
-        },
-        {
-            type: "list",
-            content: [
-                "**What’s up? / Sup?**: \"E aí?\". A resposta geralmente é \"Not much\", \"Hey\" ou até outra pergunta.",
-                "**Cool**: Serve para tudo: \"legal\", \"ok\", \"combinado\", \"bom\".",
-                "**Awesome / Dope / Sick**: \"Incrível\", \"excelente\". (Sim, *sick* pode ser positivo).",
-                "**Hang out**: Passar tempo junto, sem um plano formal. *Let's hang out this weekend.*",
-                "**My bad**: \"Foi mal\", \"erro meu\".",
-                "**It’s on me**: \"Eu pago\".",
-                "**For real?**: \"Sério?\", \"É verdade?\". Usado para mostrar surpresa."
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Essas expressões aparecem todos os dias em conversas reais."
-        },
-        {
-            type: "h3",
-            content: "Linked Sounds: A Cola Invisível das Palavras"
-        },
-        {
-            type: "paragraph",
-            content: "Aqui está um dos maiores motivos pelo qual o inglês parece \"rápido demais\". Nativos não falam palavra-por-palavra. **Eles conectam tudo.** A regra geral é simples:"
+            content: "Parte 1: O Som Mais Importante (The Schwa /ə/)"
         },
         {
             type: "box-insight",
-            title: "Insight-chave",
-            content: "Se uma palavra termina em som de consoante e a próxima começa com som de vogal, os sons se unem. Só de saber que isso existe, seu cérebro para de esperar pausas artificiais."
+            title: "O Segredo Invisível",
+            content: "Existe um som que representa 30% de todo o inglês falado. Ele se chama SCHWA. É um som preguiçoso, curto, quase um 'â' sussurrado. Ele acontece em sílabas que NÃO são tônicas."
+        },
+        {
+            type: "paragraph",
+            content: "Exemplos do Schwa (o som /ə/):"
         },
         {
             type: "list",
             content: [
-                "**an apple**: soa como `anapple`",
-                "**turn it off**: soa como `turnitoff`",
-                "**what’s up**: soa como `whatsup`",
-                "**rock and roll**: soa como `rocknroll`"
+                "**{{About|Sobre}}** -> Não é 'A-baut'. É /ə/-baut.",
+                "{{Banana|Banana}} -> Ba-nan-/ə/.",
+                "{{Photograph|Fotografia}} -> Fo-to-gr/ə/f.",
+                "{{Teacher|Professor}} -> Ti-tch/ə/r."
             ]
         },
         {
-            type: "paragraph",
-            content: "Só de saber que isso existe, seu cérebro para de esperar pausas artificiais — e o *listening* melhora quase que automaticamente."
-        },
-        {
-            type: "h3",
-            content: "Reduções Informais: O Nível Avançado dos Atalhos"
-        },
-        {
-            type: "paragraph",
-            content: "Além das contrações e da ligação de sons, existem as reduções, que são ainda mais sutis."
-        },
-        {
-            type: "list",
-            content: [
-                "**whaddaya**: what do you (Ex: *Whaddaya wanna do?*)",
-                "**whatcha**: what are you (Ex: *Whatcha doing?*)",
-                "**sorta**: sort of (Ex: *It's sorta like that.*)"
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Reconhecer esses padrões é o que realmente separa um ouvinte intermediário de um avançado."
-        },
-        {
-            type: "h3",
-            content: "Ritmo e Entonação: A Música do Inglês"
-        },
-        {
-            type: "paragraph",
-            content: "Mais importante que a gramática, o **ritmo** (`stress`) é o que torna o inglês compreensível. O inglês é uma língua de \"stress-timed\", o que significa que algumas sílabas e palavras são mais longas e **fortes** que outras."
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Foque em pronunciar as **palavras de conteúdo** (substantivos, verbos principais, adjetivos, advérbios) com mais força e clareza. As **palavras de função** (artigos, preposições, pronomes, auxiliares) são geralmente curtas e \"engolidas\"."
-        },
-        {
-            type: "paragraph",
-            content: "A **entonação** (a \"melodia\" da frase) também carrega um significado imenso:"
-        },
-        {
-            type: "list",
-            content: [
-                "**Afirmações**: A melodia geralmente **desce** no final. ( `I live in Brazil.` ↘ )",
-                "**Perguntas \"Sim/Não\"**: A melodia geralmente **sobe** no final. ( `Do you live in Brazil?` ↗ )",
-                "**Perguntas \"WH\" (What, Where, etc.)**: A melodia geralmente **desce** no final. ( `Where do you live?` ↘ )"
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Prestar atenção nessa \"música\" vai melhorar seu *listening* mais rápido do que qualquer regra gramatical."
+            type: "interactive-quiz",
+            content: "Onde está o Schwa na palavra '{{POLICE|POLÍCIA}}'?|No 'PO' (/pə/)|No 'LICE'|Não tem.|0"
         },
         {
             type: "h2",
-            content: "Parte 3: Ferramentas de Imersão – Aprenda Enquanto se Diverte"
+            content: "Parte 2: Connected Speech (A Cola Sonora)"
         },
         {
             type: "paragraph",
-            content: "A imersão não é um luxo. É uma necessidade. Quanto mais o inglês faz parte da sua vida, menos ele parece \"estudo\" — e mais parece comunicação natural."
+            content: "Nativos não pausam entre palavras. Eles colam tudo. Existem 3 tipos principais de cola que você precisa dominar para parar de dizer 'eles falam rápido demais'."
         },
         {
             type: "h3",
-            content: "Como Usar Séries, Filmes e Músicas (O Método em 3 Passos)"
+            content: "Regra 1: Consoante + Vogal (O Link Básico)"
         },
         {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Utilize o Método em 3 Passos: 1) Legenda em Português para absorver a história; 2) Legenda em Inglês para estudo ativo (pausar, anotar); 3) Sem Legenda para testar a compreensão real."
+            type: "paragraph",
+            content: "Quando uma palavra termina em som de consoante e a próxima começa com vogal, elas viram uma só."
+        },
+        {
+            type: "reveal-box",
+            title: "Exemplos de Link C+V",
+            content: "- **{{Wake up|Acordar}}** -> `Wei-kup`\n- **{{Turn it off|Desligue isso}}** -> `Tur-ni-toff`\n- **{{An apple|Uma maçã}}** -> `A-na-pple`\n- **{{Stop it|Pare com isso}}** -> `Sto-pit`"
+        },
+        {
+            type: "h3",
+            content: "Regra 2: Consoante + Consoante (O Link Gêmeo)"
+        },
+        {
+            type: "paragraph",
+            content: "Quando a consoante final é igual à inicial da próxima, você pronuncia apenas UMA vez, alongada."
         },
         {
             type: "list",
             content: [
-                "**Passo 1 — Legenda em Português**: Aqui você só absorve a história. Entenda o contexto, os personagens, o clima. Sem pressão.",
-                "**Passo 2 — Legenda em Inglês (O Jogo Começa)**: Agora é estudo ativo. Pause sempre que ouvir: contrações, gírias ou sons conectados. Anote frases reais. Aqui você transforma entretenimento em aprendizado.",
-                "**Passo 3 — Sem Legenda (O Teste Real)**: Teste sua compreensão. Você vai perceber algo poderoso: mesmo sem entender tudo, você entende **muito mais** do que antes."
+                "**{{Black cat|Gato preto}}** -> `Bla-cat` (Não diga o 'k' duas vezes)",
+                "**{{Social life|Vida social}}** -> `So-sha-life`",
+                "**{{Good day|Bom dia}}** -> `Goo-day`"
             ]
         },
         {
             type: "h3",
-            content: "Sugestões de Conteúdo para Começar"
+            content: "Regra 3: O 'T' Americano (Flap T)"
+        },
+        {
+            type: "paragraph",
+            content: "Entre vogais, o 'T' americano soa como 'R' de 'arara'."
         },
         {
             type: "list",
             content: [
-                "**Sitcoms (para diálogos do dia a dia)**: *Friends*, *How I Met Your Mother*, *The Office*. A repetição e o cenário cotidiano são ótimos para iniciantes.",
-                "**Animações (para pronúncia clara)**: *Avatar: The Last Airbender*, *Gravity Falls*, *The Simpsons*. Dubladores têm uma dicção perfeita para treinar o ouvido.",
-                "**Músicas Pop (para memorização)**: Taylor Swift, Ed Sheeran, Bruno Mars. As letras são simples e o refrão gruda na cabeça, ajudando a fixar vocabulário."
+                "**{{Water|Água}}** -> `Wa-rer`",
+                "**{{Better|Melhor}}** -> `Be-rer`",
+                "**{{City|Cidade}}** -> `Ci-ry`",
+                "**{{A lot of|Muito de}}** -> `A-lo-ra-v`"
             ]
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Comece com vídeos curtos no YouTube sobre algo que você **já ama**. Quando o tema te interessa, o cérebro aprende mais rápido — sempre."
         },
         {
             type: "h2",
-            content: "Parte 4: Seu Laboratório de Listening – Rotina Prática"
+            content: "Parte 3: O Catálogo de Reduções Extremas"
         },
         {
             type: "paragraph",
-            content: "Para garantir que você não pare, aqui está uma sugestão de rotina semanal simples para treinar seu ouvido:"
+            content: "Além de conectar, eles cortam pedaços das palavras. Decore esta tabela se quiser entender filmes."
         },
         {
-            type: "list",
+            type: "table",
             content: [
-                "**Segunda-feira (Podcast Passivo)**: Ouça um episódio de podcast no caminho para o trabalho ou lavando louça. Sem pressão, apenas deixe o inglês entrar.",
-                "**Quarta-feira (Música Ativa)**: Escolha uma música que você gosta. Leia a letra enquanto ouve. Depois, tente cantar junto (isso ajuda a conectar os sons).",
-                "**Sexta-feira (Série com Legenda em Inglês)**: Assista a 20 minutos de uma série que você já conhece, mas mude a legenda para inglês. Tente associar o que ouve com o que lê.",
-                "**Domingo (YouTube Descompromissado)**: Assista a um vídeo sobre um hobby seu (culinária, carros, tecnologia, maquiagem) de um canal nativo."
+                "Formal|Redução|Tradução Mental",
+                "{{Going to|Vou (futuro)}}|{{Gonna|Vou}}|Indo (futuro)",
+                "{{Want to|Querer}}|{{Wanna|Querer}}|Querer",
+                "{{Kind of|Tipo de}}|{{Kinda|Meio que}}|Meio que...",
+                "{{Out of|Fora de}}|{{Outta|Fora de}}|Fora de",
+                "{{Got to|Tenho que}}|{{Gotta|Tenho que}}|Tenho que",
+                "{{Don't know|Não sei}}|{{Dunno|Sei lá}}|Não sei",
+                "{{Let me|Deixe-me}}|{{Lemme|Deixa eu}}|Deixa eu...",
+                "{{Give me|Dê-me}}|{{Gimme|Me dá}}|Me dá"
             ]
+        },
+        {
+            type: "audio-player",
+            content: "Frase Teste: \"{{I'm gonna outta here coz I gotta work.|Vou sair daqui porque tenho que trabalhar.}}\""
+        },
+        {
+            type: "h2",
+            content: "Parte 4: A Técnica do Listening Ativo"
+        },
+        {
+            type: "box-action",
+            title: "Protocolo de Estudo com Séries",
+            content: "Não assista passivamente. Escolha uma cena de 2 minutos.\n\n1. **Sem legenda**: Tente pegar o contexto.\n2. **Legenda em Inglês**: Leia e ouça. Identifique os 'Links' e 'Reduções' que aprendeu acima.\n3. **Shadowing**: Pause frase a frase e tente imitar o som exato.\n4. **Sem legenda novamente**: Você verá que a cena ficou 'lenta' magicamente."
         },
         {
             type: "pillar-end",
-            title: "Parabéns por concluir o Pilar Auditivo!",
-            content: "Você agora tem as ferramentas e a mentalidade para desvendar o inglês falado. A prática leva à maestria. Continue imerso, e o caos organizado do inglês se tornará sua melodia favorita."
+            title: "Decodificação Completa",
+            content: "Seus ouvidos agora têm o filtro certo. O ruído virou sinal. Vamos para a sobrevivência prática."
         }
     ]
 };
 
+// ==============================================================================
+// PILAR 3: SOBREVIVÊNCIA TÁTICA (EXPANDED ELITE VERSION)
+// ==============================================================================
 export const PILAR_3_DATA: PillarData = {
     id: 3,
-    title: "Pilar 3: Inglês de Sobrevivência",
-    subtitle: "Seu kit de ferramentas linguísticas para situações reais e imprevistas.",
+    title: "Pilar 3: Kit de Sobrevivência Global",
+    subtitle: "Scripts completos para dominar qualquer cenário urbano sem pânico.",
     blocks: [
         {
-            type: "box-goal",
-            title: "Objetivo do Pilar",
-            content: "Te entregar frases prontas, vocabulário essencial e estruturas universais para agir com confiança em situações reais, diminuindo o medo de travar."
+            type: "system-status",
+            content: "{{SURVIVAL MODE|MODO DE SOBREVIVÊNCIA}}: {{READY|PRONTO}}. {{Tactical scripts loaded|Scripts táticos carregados}}."
+        },
+        {
+            type: "h2",
+            content: "Introdução: A Matriz da Educação (Politeness)"
+        },
+        {
+            type: "paragraph",
+            content: "Nos EUA e Reino Unido, a 'educação' (politeness) é moeda de troca. Ser direto demais soa rude. Ser educado abre portas e garante melhor atendimento."
+        },
+        {
+            type: "table",
+            content: [
+                "Nível|Frase|Percepção do Nativo",
+                "🔴 Rude|{{I want water.|Eu quero água.}}|Homem das cavernas. Exigente.",
+                "🟡 Básico|{{Give me water, please.|Me dê água, por favor.}}|Aceitável, mas um pouco direto.",
+                "🟢 Elite|{{Could I have some water?|Poderia me dar um pouco de água?}}|Educado, fluente, merece respeito.",
+                "✨ Ultra|{{I'd like some water, please.|Gostaria de um pouco de água, por favor.}}|Perfeito. Padrão ouro."
+            ]
+        },
+        {
+            type: "h2",
+            content: "Parte 1: O Restaurante (Cenário Completo)"
+        },
+        {
+            type: "paragraph",
+            content: "O restaurante é o teste final de sobrevivência. Vamos mapear do início ao fim."
         },
         {
             type: "h3",
-            content: "Introdução: Seu Kit de Ferramentas para o Mundo Real"
+            content: "Fase 1: Chegando (The Host)"
+        },
+        {
+            type: "dialogue",
+            title: "Na Porta",
+            content: [
+                "Host: {{Hi, welcome! Do you have a reservation?|Oi, bem-vindo! Você tem reserva?}}",
+                "You: {{Yes, under the name [Seu Nome].|Sim, no nome de [Seu Nome].}}",
+                "Host: {{Right this way.|Por aqui, por favor.}}"
+            ]
+        },
+        {
+            type: "h3",
+            content: "Fase 2: Pedindo (Ordering)"
         },
         {
             type: "paragraph",
-            content: "Se o Pilar 2 te ensinou a entender o inglês falado, o Pilar 3 existe para algo ainda mais importante: **agir**."
+            content: "Nunca diga 'I want'. Use 'I'll have' ou 'I'd like'."
+        },
+        {
+            type: "dialogue",
+            title: "O Pedido",
+            content: [
+                "Waiter: {{Are you ready to order?|Está pronto para pedir?}}",
+                "You: {{Yes. I'll have the steak, please.|Sim. Vou querer o bife, por favor.}}",
+                "Waiter: {{How would you like your steak cooked?|Qual o ponto da carne?}}",
+                "You: {{Medium-rare, please.|Ao ponto para mal, por favor.}}",
+                "Waiter: {{And to drink?|E para beber?}}",
+                "You: {{Just tap water, please.|Apenas água da torneira, por favor.}}"
+            ]
+        },
+        {
+            type: "box-insight",
+            title: "Dica Cultural",
+            content: "**Tap Water** (água da torneira) é grátis e segura nos EUA e Europa. Se pedir 'Water', eles podem trazer uma garrafa cara de $8. Seja específico."
+        },
+        {
+            type: "h3",
+            content: "Fase 3: Pagando (The Check)"
+        },
+        {
+            type: "list",
+            content: [
+                "Peça a conta: *\"{{Can I have the check, please?|Pode me trazer a conta, por favor?}}\"* (EUA) ou *\"{{The bill, please?|A conta, por favor?}}\"* (UK).",
+                "Gorjeta ({{Tip|Gorjeta}}): Nos EUA, 18-20% é obrigatório moralmente. Não deixe menos que isso a menos que o serviço tenha sido terrível.",
+                "Dividir: *\"{{Can we split the check?|Podemos dividir a conta?}}\"* "
+            ]
+        },
+        {
+            type: "h2",
+            content: "Parte 2: Hotel & Problemas (Troubleshooting)"
         },
         {
             type: "paragraph",
-            content: "Aqui não estamos falando de teoria. Estamos falando de situações reais, comuns e, muitas vezes, estressantes — aquelas em que o coração acelera, a mente dá branco e a vontade é de voltar pro português."
+            content: "Fazer check-in é fácil. O difícil é reclamar que o chuveiro não funciona sem parecer um louco."
         },
         {
             type: "box-warning",
-            title: "Erro comum",
-            content: "Deixar o coração acelerar e a mente dar branco em situações de estresse. Tenha frases-chave na ponta da língua para as situações mais comuns."
-        },
-        {
-            type: "paragraph",
-            content: "Este pilar é o seu **kit de sobrevivência linguística**."
-        },
-        {
-            type: "paragraph",
-            content: "A ideia é simples: te entregar frases prontas, vocabulário essencial e estruturas universais que funcionam em praticamente qualquer país, cidade ou contexto. Quando você entra nessas situações com frases-chave na cabeça, o medo diminui drasticamente."
-        },
-        {
-            type: "paragraph",
-            content: "Pense nisso como um livro de receitas:"
+            title: "A Fórmula da Reclamação Suave",
+            content: "Use esta estrutura: **Desculpa + O Problema + O Pedido.**\n\nEx: \"Hi, sorry to bother you, but my shower isn't working. Could you send someone to check it?\""
         },
         {
             type: "list",
             content: [
-                "você não precisa ser chef",
-                "você só precisa seguir os passos"
+                "**O Wi-Fi não conecta**: *\"{{I'm having trouble connecting to the Wi-Fi.|Estou com problemas para conectar no Wi-Fi.}}\"*",
+                "**Barulho**: *\"{{The room next door is very noisy.|O quarto ao lado está muito barulhento.}}\"*",
+                "**Toalhas**: *\"{{Could we get some extra towels?|Poderíamos ter algumas toalhas extras?}}\"*",
+                "**Late Check-out**: *\"{{Is it possible to have a late check-out?|É possível fazer o check-out mais tarde?}}\"* "
             ]
-        },
-        {
-            type: "paragraph",
-            content: "Se seguir a receita, o resultado é comunicação."
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Sua Linguagem Corporal Fala Primeiro. Mais da metade da comunicação é não-verbal. Mantenha uma postura aberta, faça contato visual e, mais importante, sorria. Um sorriso é o \"lubrificante social\" universal."
-        },
-        {
-            type: "paragraph",
-            content: "Vamos cozinhar."
         },
         {
             type: "h2",
-            content: "Parte 1: Kit de Sobrevivência Social – As Frases Universais"
+            content: "Parte 3: Direções & Transporte (Uber/Taxi)"
         },
         {
             type: "paragraph",
-            content: "Existem frases em inglês que funcionam como um canivete suíço. Elas não resolvem tudo, mas te salvam em quase qualquer conversa. Mais importante: elas te dão **tempo, controle e confiança**."
+            content: "Hoje temos GPS, mas bateria acaba. Saber perguntar é essencial."
         },
         {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Dominar essas frases é como ter uma rede de segurança invisível. Elas te dão tempo, controle e confiança."
-        },
-        {
-            type: "h3",
-            content: "Cumprimentos e Apresentações (O Quebra-Gelo)"
-        },
-        {
-            type: "list",
+            type: "dialogue",
+            title: "Pedindo Direção",
             content: [
-                "**Oi (Formal)**: `Hello.` / `Good morning/afternoon.`",
-                "**Oi (Informal)**: `Hey.` / `Hi.` / `What's up?`",
-                "**Apresentação (Formal)**: `My name is [Roger]. Nice to meet you.`",
-                "**Apresentação (Informal)**: `I'm [Roger]. Nice to meet you.`",
-                "**Resposta**: `Nice to meet you, too.` / `You too!`"
+                "You: {{Excuse me, how do I get to the subway station?|Com licença, como chego à estação de metrô?}}",
+                "Local: {{Go straight, turn right at the lights, and it's on your left.|Vá em frente, vire à direita no semáforo, e fica à sua esquerda.}}",
+                "You: {{Thank you so much!|Muito obrigado!}}"
             ]
         },
         {
-            type: "box-action",
-            title: "Ação prática",
-            content: "\"Nice to meet you\" resolve 90% das apresentações no mundo inteiro. Não complique."
-        },
-        {
-            type: "h3",
-            content: "Pedindo Informações (O GPS Humano)"
-        },
-        {
-            type: "paragraph",
-            content: "Você não precisa decorar dezenas de frases. Basta dominar estruturas-base e trocar a última palavra. Essas três resolvem quase tudo:"
-        },
-        {
-            type: "list",
-            content: [
-                "**Excuse me, where is the...**: ...the restroom? / ...the exit?",
-                "**Excuse me, how do I get to...**: ...the train station? / ...the bus stop?",
-                "**Excuse me, do you have...**: ...a menu in English? / ...Wi-Fi here?"
-            ]
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "\"Excuse me\" abre portas. É educado, universal e coloca você no controle da conversa."
-        },
-        {
-            type: "h3",
-            content: "Frases de Ouro (Suas Cartas na Manga)"
-        },
-        {
-            type: "paragraph",
-            content: "Dica de tom: Sorria ao dizer essas frases. Um sorriso é universal e transforma um pedido de ajuda em uma interação amigável."
-        },
-        {
-            type: "list",
-            content: [
-                "**Sorry, my English is a work in progress.**: Frase amigável que gera empatia imediata.",
-                "**Could you speak a little slower, please?**",
-                "**Could you repeat that, please?**",
-                "**How do you spell that?**: Perfeita para nomes, ruas, e-mails.",
-                "**Could you write that down for me?**"
-            ]
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Usar essas frases não é fraqueza. É inteligência social."
+            type: "interactive-quiz",
+            content: "No Uber, você quer que ele ligue o ar condicionado. Você diz:|{{Turn on the air!|Ligue o ar!}}|{{Can you turn up the AC, please?|Pode aumentar o ar condicionado, por favor?}}|{{I'm hot.|Estou com calor.}}|1"
         },
         {
             type: "h2",
-            content: "Parte 2: Inglês para o Dia a Dia – Cenários Práticos"
+            content: "Parte 4: Saúde & Farmácia (Emergency)"
         },
         {
             type: "paragraph",
-            content: "Agora entramos na parte mais concreta: aplicação direta. Em cada cenário, você vai ver: o vocabulário essencial, o que você provavelmente vai falar e o que você provavelmente vai ouvir. Nada de surpresas."
+            content: "Não brinque com saúde. Vocabulário preciso salva vidas."
         },
         {
-            type: "h3",
-            content: "Cenário 1: No Restaurante"
-        },
-        {
-            type: "paragraph",
-            content: "**Vocabulário-chave**: `Menu`, `Bill / Check`, `Waiter / Waitress`, `Tip`, `Reservation`, `Order`"
-        },
-        {
-            type: "list",
+            type: "cards-grid",
             content: [
-                "**O que você vai FALAR**:",
-                "`A table for two, please.`",
-                "`Can I see the menu, please?`",
-                "`I'd like to order...`",
-                "`I'll have the burger.`",
-                "`Can I have the bill/check, please?`"
-            ]
-        },
-        {
-            type: "list",
-            content: [
-                "**O que você vai OUVIR**:",
-                "`Do you have a reservation?`",
-                "`Are you ready to order?`",
-                "`Anything else?`",
-                "`Cash or credit?`"
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Mesmo que você entenda só metade disso, o contexto faz o resto."
-        },
-        {
-            type: "h3",
-            content: "Cenário 2: No Aeroporto / Hotel"
-        },
-        {
-            type: "paragraph",
-            content: "**Vocabulário-chave**: `Check-in`, `Passport`, `Baggage / Luggage`, `Boarding pass`, `Gate`, `Reservation`"
-        },
-        {
-            type: "list",
-            content: [
-                "**O que você vai FALAR**:",
-                "`I have a reservation under the name [Roger].`",
-                "`What time is boarding?`",
-                "`Where is gate 23?`",
-                "`What time is check-out?`"
-            ]
-        },
-        {
-            type: "list",
-            content: [
-                "**O que você vai OUVIR**:",
-                "`Can I see your passport?`",
-                "`How many bags are you checking in?`",
-                "`Here is your room key.`",
-                "`Enjoy your stay.`"
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Esses diálogos se repetem no mundo inteiro. Aprendeu uma vez, usa sempre."
-        },
-        {
-            type: "h3",
-            content: "Cenário 3: Em uma Loja"
-        },
-        {
-            type: "paragraph",
-            content: "**Vocabulário-chave**: `Price` (preço), `Size` (tamanho), `Fitting room` (provador), `On sale` (em promoção), `Credit card`, `Cash` (dinheiro)."
-        },
-        {
-            type: "list",
-            content: [
-                "**O que você vai FALAR**:",
-                "`I'm just looking, thanks.` (Estou só olhando, obrigado/a.)",
-                "`How much is this?` (Quanto custa isto?)",
-                "`Do you have this in a different size/color?` (Você tem isto em outro tamanho/cor?)",
-                "`Where is the fitting room?` (Onde é o provador?)"
-            ]
-        },
-        {
-            type: "list",
-            content: [
-                "**O que você vai OUVIR**:",
-                "`Can I help you?` (Posso ajudar?)",
-                "`The fitting room is over there.` (O provador é logo ali.)",
-                "`That'll be [20 dollars].` (Vai custar/Fica em [20 dólares].)"
+                "Sintomas|{{Headache|Dor de cabeça}} (Dor de cabeça), {{Sore throat|Garganta inflamada}} (Garganta inflamada), {{Fever|Febre}} (Febre), {{Nauseous|Enjoado}} (Enjoado)",
+                "Remédios|{{Painkiller|Analgésico}} (Analgésico), {{Cough syrup|Xarope}} (Xarope), {{Band-aid|Curativo}} (Curativo), {{Prescription|Receita}} (Receita)"
             ]
         },
         {
             type: "box-action",
-            title: "Ação prática",
-            content: "\"I'm just looking, thanks\" é a frase mais útil para usar em lojas. Ela te dá espaço e tira a pressão de ter que comprar algo."
+            title: "Frase de Ouro na Farmácia",
+            content: "*\"{{I have a terrible headache. What do you recommend?|Tenho uma dor de cabeça terrível. O que você recomenda?}}\"* (Deixe o farmacêutico ajudar)."
         },
         {
             type: "pillar-end",
-            title: "Parabéns por concluir o Pilar de Sobrevivência!",
-            content: "Você agora está equipado(a) com as ferramentas essenciais para sobreviver e agir em inglês em situações reais. A prática dessas frases te dará a fluência e a confiança que você precisa para o próximo desafio."
+            title: "Agente Pronto para Campo",
+            content: "Você tem os scripts. Você tem a postura. Você tem o vocabulário. Agora você não é mais um turista perdido; você é um viajante tático."
         }
     ]
 };
 
-
+// ==============================================================================
+// PILAR 4: FUNDAMENTOS & ENGENHARIA (EXPANDED ELITE VERSION)
+// ==============================================================================
 export const PILAR_4_DATA: PillarData = {
     id: 4,
-    title: "Pilar 4: Fundamentos Essenciais",
-    subtitle: "Desvendando o motor do inglês: vocabulário e estrutura que realmente importam.",
+    title: "Pilar 4: Engenharia da Frase",
+    subtitle: "A lógica modular por trás do idioma: S+V+O e a Tabela Periódica dos Pronomes.",
     blocks: [
         {
-            type: "box-goal",
-            title: "Objetivo do Pilar",
-            content: "Desmistificar a gramática, focar no vocabulário de ouro e na estrutura mínima viável para você ganhar autonomia e começar a pensar em inglês."
+            type: "system-status",
+            content: "{{CORE ENGINE|MOTOR PRINCIPAL}}: {{LOADING|CARREGANDO}}... {{LOGIC MODULES ACTIVE|MÓDULOS LÓGICOS ATIVOS}}."
+        },
+        {
+            type: "h2",
+            content: "Introdução: O Fim do 'Portunhol'"
         },
         {
             type: "paragraph",
-            content: "Nos pilares anteriores, você sentiu o inglês da vida real. Viu que ele existe fora da sala de aula, fora do livro didático e fora daquele curso eterno que nunca termina."
+            content: "O 'Portunhol' acontece quando você pega a lógica do português e troca as palavras por inglês. Isso não funciona. O inglês é uma língua germânica, lógica e rígida. O português é latino, flexível e poético. Neste pilar, vamos instalar a lógica germânica no seu cérebro."
+        },
+        {
+            type: "h2",
+            content: "Parte 1: A Fórmula Mestra (S + V + O)"
         },
         {
             type: "paragraph",
-            content: "Agora, vamos fazer algo que quase nenhuma escola faz direito: abrir o capô e mostrar como o motor realmente funciona."
+            content: "Esta é a regra de ouro. 90% das frases em inglês seguem estritamente esta ordem. Não mude a ordem."
         },
         {
-            type: "paragraph",
-            content: "Muita gente trava só de ouvir a palavra gramática. E não é culpa sua. Durante anos, te venderam gramática como um amontoado de regras abstratas, exceções inúteis e exercícios que não levam a lugar nenhum."
+            type: "terminal-view",
+            content: [
+                "SVO PROTOCOL:",
+                "[ {{SUJEITO|QUEM}} ] + [ {{VERBO|AÇÃO}} ] + [ {{OBJETO|ALVO}} ]",
+                "Quem faz?   + O que faz? + O quê?",
+                "   {{I|Eu}}        +   {{Love|Amo}}     +  {{Pizza|Pizza}}",
+                "   {{She|Ela}}      +   {{Wants|Quer}}    +  {{Water|Água}}"
+            ]
         },
         {
             type: "box-warning",
-            title: "Erro comum",
-            content: "Ter medo ou aversão à gramática. O problema não é a gramática em si, mas como ela foi ensinada: um amontoado de regras abstratas e exercícios descontextualizados."
-        },
-        {
-            type: "paragraph",
-            content: "Aqui, a abordagem é outra."
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "O inglês não é um bicho de sete cabeças. Ele é um sistema lógico, simples e previsível. Quando você entende a base, ganha autonomia e começa a pensar em inglês."
-        },
-        {
-            type: "paragraph",
-            content: "E quando você entende a base:"
-        },
-        {
-            type: "list",
-            content: [
-                "você para de depender de frases decoradas,",
-                "ganha autonomia,",
-                "e começa a **pensar em inglês**, não a traduzir."
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Este pilar não existe para te prender a regras. Existe para te dar **liberdade real**. Nosso objetivo é claro:\n**Ação prática:** Te tornar independente o mais rápido possível."
+            title: "Erro Fatal: O Sujeito Oculto",
+            content: "Em português, dizemos 'Fui na praia' (Sujeito 'Eu' implícito). Em inglês, isso é PROIBIDO. Você DEVE dizer '**{{I went to the beach|Eu fui à praia}}**'. Sem sujeito, a frase não existe."
         },
         {
             type: "h2",
-            content: "Parte 1: O Vocabulário de Ouro (Golden Vocabulary)"
+            content: "Parte 2: A Tabela Periódica dos Pronomes"
         },
         {
             type: "paragraph",
-            content: "Aqui está uma verdade que o ensino tradicional ignora de propósito:"
+            content: "Você precisa saber quem é quem no jogo. Estes são os pilotos da sua frase."
         },
         {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Você NÃO precisa saber milhares de palavras para falar inglês. Cerca de 100 palavras representam mais de 50% de tudo o que é falado no dia a dia. Foco extremo no que realmente importa."
-        },
-        {
-            type: "paragraph",
-            content: "Estudos de linguística mostram que cerca de 100 palavras representam mais de 50% de tudo o que é falado no dia a dia. É o Princípio de Pareto (80/20) aplicado ao idioma. É como aprender a tocar violão: com 4 ou 5 acordes-chave, você já consegue tocar centenas de músicas. Com o Vocabulário de Ouro, acontece a mesma coisa."
-        },
-        {
-            type: "paragraph",
-            content: "Enquanto cursos tradicionais te afogam em listas intermináveis, nós fazemos o oposto: **foco extremo no que realmente importa.**"
-        },
-        {
-            type: "paragraph",
-            content: "Exemplos do tipo de palavra que você vai dominar:"
-        },
-        {
-            type: "list",
+            type: "table",
             content: [
-                "**Pronomes (quem faz)**: `I`, `you`, `he`, `she`, `it`, `we`, `they`",
-                "**Verbos (o motor)**: `be` (am, is, are), `have`, `do`, `go`, `say`, `can`, `get`, `make`, `know`, `want`",
-                "**Conectores (a cola)**: `and`, `but`, `or`, `so`, `because`, `in`, `on`, `at`, `with`",
-                "**Substantivos (vida real)**: `time`, `person`, `year`, `way`, `day`, `thing`, `work`, `home`, `life`"
-            ]
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "O Camaleão do Inglês: O Verbo \"To Be\". Pense nele como um camaleão: ele muda de forma dependendo de com quem ele está. Entender esse \"camaleão\" é destravar a estrutura de milhares de frases."
-        },
-        {
-            type: "list",
-            content: [
-                "`I` → `am` (I am happy.)",
-                "`He`, `She`, `It` → `is` (She is a doctor.)",
-                "`You`, `We`, `They` → `are` (They are here.)"
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Entender esse \"camaleão\" é destravar a estrutura de milhares de frases."
-        },
-        {
-            type: "paragraph",
-            content: "A lista completa estará na plataforma, mas o princípio é este:\n**Ação prática:** Menos palavras, mais poder."
-        },
-        {
-            type: "h3",
-            content: "Como Memorizar (Sem Decoreba)"
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Seu cérebro aprende por **conexão**, não por repetição burra. **Associação:** Nunca memorize palavras isoladas. Visualize, sinta a emoção. **Repetição Espaçada (SRS):** Use ferramentas como Anki ou Quizlet para revisar a palavra **exatamente quando você está prestes a esquecê-la**."
-        },
-        {
-            type: "h2",
-            content: "Parte 2: A Estrutura Mínima Viável (Minimum Viable Structure)"
-        },
-        {
-            type: "paragraph",
-            content: "A maioria absoluta das frases segue uma estrutura simples, direta, quase matemática: **Sujeito + Verbo + Objeto (S+V+O)**."
-        },
-        {
-            type: "paragraph",
-            content: "Pense nisso como LEGO. Blocos claros, encaixe lógico."
-        },
-        {
-            type: "list",
-            content: [
-                "`I` `like` `coffee.`",
-                "`You` `speak` `English.`",
-                "`She` `has` `a car.`"
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Se você sempre pensar: **Quem faz? → O que faz? → Em quê?**, você já estará certo em 90% das situações."
-        },
-        {
-            type: "h3",
-            content: "Como Fazer Perguntas Simples (WH Questions)"
-        },
-        {
-            type: "paragraph",
-            content: "Use as ferramentas certas para extrair informação: `What` (coisas), `Where` (lugares), `Who` (pessoas), `When` (tempo), `Why` (motivo), `How` (maneira)."
-        },
-        {
-            type: "paragraph",
-            content: "Estrutura base: **Palavra de pergunta + verbo auxiliar + sujeito**"
-        },
-        {
-            type: "list",
-            content: [
-                "`Where` **is** `the restroom?`",
-                "`What` **do** `you` `want?`"
-            ]
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "A resposta para uma pergunta com \"**Why**...?\" quase sempre começa com \"**Because**...\". É um padrão que se repete infinitamente."
-        },
-        {
-            type: "h3",
-            content: "Como Negar Frases (O Poder do NOT)"
-        },
-        {
-            type: "paragraph",
-            content: "Para negar, use um verbo auxiliar junto com `not`. Na vida real, usamos as contrações:"
-        },
-        {
-            type: "list",
-            content: [
-                "`do + not` → `don't`",
-                "`does + not` → `doesn't`",
-                "`is + not` → `isn't`",
-                "`can + not` → `can't`"
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "**Exemplos:**"
-        },
-        {
-            type: "list",
-            content: [
-                "`I like pizza.` → `I **don't** like pizza.`",
-                "`He speaks French.` → `He **doesn't** speak French.` (Note que o 's' do verbo 'speaks' \"se muda\" para o auxiliar, que vira 'doesn't'. O verbo principal volta ao normal: 'speak')."
+                "{{I|Eu}}|Eu (Sempre Maiúsculo)|{{I work here.|Eu trabalho aqui.}}",
+                "{{You|Você}}|Você / Vocês|{{You are smart.|Você é inteligente.}}",
+                "{{He|Ele}}|Ele (Homem)|{{He is my brother.|Ele é meu irmão.}}",
+                "{{She|Ela}}|Ela (Mulher)|{{She is the boss.|Ela é a chefe.}}",
+                "{{It|Ele/Ela}}|Ele/Ela (Coisa/Animal)|{{It is a dog.|É um cachorro.}}",
+                "{{We|Nós}}|Nós|{{We are a team.|Nós somos um time.}}",
+                "{{They|Eles}}|Eles/Elas (Plural de tudo)|{{They are coming.|Eles estão vindo.}}"
             ]
         },
         {
             type: "h2",
-            content: "Parte 3: Prática Estruturada – A Frase do Dia"
+            content: "Parte 3: O Sistema Binário (Do vs Does)"
         },
         {
             type: "paragraph",
-            content: "Nada de exercícios intermináveis."
+            content: "Para fazer perguntas no presente, o inglês usa 'operadores'. Imagine que são chaves que abrem a porta da interrogação."
         },
         {
-            type: "box-action",
-            title: "Ação prática",
-            content: "O Desafio da Frase do Dia: 1. Escolha 1 palavra do Vocabulário de Ouro (ex: `work`). 2. Crie: uma afirmativa (`I work at home.`), uma negativa (`She doesn’t work on weekends.`) e uma pergunta (`Where do you work?`). Menos de 5 minutos por dia. Resultados reais."
+            type: "decision-tree",
+            content: [
+                "Quem é o Sujeito?|{{I, You, We, They|Eu, Você, Nós, Eles}}|{{He, She, It|Ele, Ela, Coisa}}",
+                "Use {{DO|FAZER}}|Ex: {{Do you like pizza?|Você gosta de pizza?}}|Use {{DOES|FAZER}}|Ex: {{Does she like pizza?|Ela gosta de pizza?}}"
+            ]
+        },
+        {
+            type: "box-insight",
+            title: "O 'S' Fofoqueiro",
+            content: "Quando usamos **{{He/She/It|Ele/Ela/Coisa}}** no presente afirmativo, o verbo ganha um 'S'. Ex: '{{I work|Eu trabalho}}' -> '{{She works|Ela trabalha}}'. Esse 'S' não é plural. É uma marca de 'terceira pessoa'."
+        },
+        {
+            type: "interactive-quiz",
+            content: "Qual frase está correta?|{{She like coffee.|Ela gostar café.}}|{{She likes coffee.|Ela gosta de café.}}|{{She do like coffee.|Ela faz gostar café.}}|1"
+        },
+        {
+            type: "h2",
+            content: "Parte 4: O Passado e o Futuro (Time Travel)"
+        },
+        {
+            type: "paragraph",
+            content: "Mudar o tempo em inglês é incrivelmente fácil. Você só troca o operador."
+        },
+        {
+            type: "cards-grid",
+            content: [
+                "Passado ({{DID|FEZ}})|Para perguntar no passado, use **{{DID|FEZ}}**. O verbo volta ao normal. Ex: **{{Did you go?|Você foi?}}**",
+                "Futuro ({{WILL|VAI}})|Para falar do futuro, use **{{WILL|VAI}}**. Ex: {{I will go.|Eu irei.}}"
+            ]
+        },
+        {
+            type: "h2",
+            content: "Parte 5: As Palavras Mágicas (WH Questions)"
+        },
+        {
+            type: "paragraph",
+            content: "Para extrair informações específicas, use as 'WH Words' antes do operador."
+        },
+        {
+            type: "list",
+            content: [
+                "**{{What|O quê}}** (O quê/Qual) -> {{What do you want?|O que você quer?}}",
+                "**{{Where|Onde}}** (Onde) -> {{Where do you live?|Onde você mora?}}",
+                "**{{When|Quando}}** (Quando) -> {{When do you work?|Quando você trabalha?}}",
+                "**{{Who|Quem}}** (Quem) -> {{Who are you?|Quem é você?}}",
+                "**{{Why|Por que}}** (Por que) -> {{Why are you here?|Por que você está aqui?}}",
+                "**{{How|Como}}** (Como) -> {{How are you?|Como vai você?}}"
+            ]
         },
         {
             type: "pillar-end",
-            title: "Parabéns por concluir o Pilar de Fundamentos Essenciais!",
-            content: "Você agora tem o mapa para a independência no inglês: o vocabulário de ouro e a estrutura mínima viável. A prática constante da \"Frase do Dia\" vai solidificar esses fundamentos, e você estará pronto(a) para a produção controlada."
+            title: "Engenharia Dominada",
+            content: "Você tem as peças (vocabulário) e o manual (estrutura). Agora você pode construir qualquer frase simples com confiança."
         }
     ]
 };
 
+// ==============================================================================
+// PILAR 5: FINANÇAS E NÚMEROS (EXPANDED ELITE VERSION)
+// ==============================================================================
 export const PILAR_5_DATA: PillarData = {
     id: 5,
-    title: "Pilar 5: Inglês para Dinheiro e Números",
-    subtitle: "Conquiste total confiança em transações e negociações financeiras.",
+    title: "Pilar 5: Domínio Financeiro & Numérico",
+    subtitle: "Do café ao contrato milionário: como falar números com precisão cirúrgica.",
     blocks: [
         {
-            type: "box-goal",
-            title: "Objetivo do Pilar",
-            content: "Dominar a comunicação de números e dinheiro em inglês para ter confiança, precisão e poder em todas as transações, desde compras a negociações complexas."
-        },
-        {
-            type: "h3",
-            content: "Introdução: Por que Dinheiro e Números Merecem um Pilar Próprio?"
-        },
-        {
-            type: "paragraph",
-            content: "Seja sincero: você já travou ao tentar falar um número grande em inglês? Ou sentiu aquele frio na barriga ao perguntar o preço de algo numa loja, restaurante ou até negociar um valor de projeto? Se sim, você não está sozinho."
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Lidar com números e dinheiro não é só vocabulário; é sobre confiança, precisão e poder. Um pequeno erro aqui pode custar caro – literalmente."
-        },
-        {
-            type: "paragraph",
-            content: "Nos pilares anteriores, você construiu uma base sólida:"
-        },
-        {
-            type: "list",
-            content: [
-                "**Pilar 2 (Inglês Auditivo)**: Seu ouvido começou a reconhecer o inglês real, falado naturalmente.",
-                "**Pilar 3 (Sobrevivência no Inglês)**: Você aprendeu frases e padrões para se virar em situações essenciais.",
-                "**Pilar 4 (Fundamentos Essenciais)**: Entendeu a lógica por trás das frases e como construir as suas próprias."
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Agora, vamos aplicar tudo isso em uma das áreas mais práticas da vida adulta: o mundo financeiro. Aqui, cada número, cada centavo e cada frase contam."
+            type: "system-status",
+            content: "{{FINANCE MODULE|MÓDULO FINANCEIRO}}: {{ACTIVE|ATIVO}}. {{Converting currency|Convertendo moeda}}..."
         },
         {
             type: "h2",
-            content: "Parte 1: Os Números Sem Medo – Do Zero ao Infinito"
-        },
-        {
-            type: "h3",
-            content: "1.1 A Base de Tudo: 0 a 100"
+            content: "Introdução: O Custo do Erro"
         },
         {
             type: "paragraph",
-            content: "Dominar os números de 1 a 100 sem hesitar é o primeiro passo. A pronúncia correta é crucial, principalmente a diferença entre os \"teens\" (13-19) e as dezenas (20, 30, 40...)."
+            content: "Em uma viagem, errar um número pode custar o dobro. Em negócios, pode custar o emprego. Neste pilar, vamos blindar sua matemática linguística."
+        },
+        {
+            type: "h2",
+            content: "Parte 1: A Armadilha Sonora (13 vs 30)"
+        },
+        {
+            type: "paragraph",
+            content: "O erro mais comum e perigoso. Aprenda a diferença de ênfase."
+        },
+        {
+            type: "table",
+            content: [
+                "Grupo|Exemplos|Aonde está a força?|Som Final",
+                "Teens (Adolescentes)|{{13, 14, 15... 19|13, 14, 15... 19}}|No final (thir-{{TEEN|TEEN}})|Longo (innnn)",
+                "Ties (Dezenas)|{{30, 40, 50... 90|30, 40, 50... 90}}|No início ({{THIR|THIR}}-ty)|Curto e seco (y)"
+            ]
+        },
+        {
+            type: "interactive-quiz",
+            content: "Se eu digo '{{FOR-ty|QUARENTA}}', qual número é?|14|40|4"
+        },
+        {
+            type: "h2",
+            content: "Parte 2: Big Money (Milhões e Bilhares)"
+        },
+        {
+            type: "paragraph",
+            content: "Em inglês, usamos vírgula onde o português usa ponto, e vice-versa. Mas na fala, usamos blocos."
         },
         {
             type: "list",
             content: [
-                "**\"Teens\" (o final é forte)**: thir**TEEN**, four**TEEN**, fif**TEEN**",
-                "**Dezenas (a primeira sílaba é forte)**: **TWEN**ty, **THIR**ty, **FOR**ty"
+                "**{{Hundred|Centena}}**: Centena (100)",
+                "**{{Thousand|Milhar}}**: Milhar (1,000) -> Note a vírgula!",
+                "**{{Million|Milhão}}**: Milhão (1,000,000)",
+                "**{{Billion|Bilhão}}**: Bilhão (1,000,000,000)"
             ]
         },
         {
             type: "box-action",
-            title: "Ação prática",
-            content: "Grave você mesmo dizendo sequências como “13, 30, 14, 40, 15, 50”. Depois ouça e compare com áudios de nativos. Seu ouvido vai se ajustar naturalmente, um exercício direto do **Pilar 2**."
+            title: "Tática de Leitura",
+            content: "Leia sempre em blocos de 3 dígitos, seguindo a vírgula.\nEx: 2,500,300\n- 'Two million,'\n- 'Five hundred thousand,'\n- 'Three hundred.'"
         },
         {
-            type: "h3",
-            content: "1.2 Escalando para Grandes Números"
+            type: "h2",
+            content: "Parte 3: Moeda e Preços (Street Smart)"
         },
         {
             type: "paragraph",
-            content: "Depois do 100, o inglês segue um padrão lógico e repetitivo. Uma vez que você aprende, pode contar até o infinito."
+            content: "Ninguém fala 'Twenty dollars and zero cents'. Aprenda a gíria da rua."
         },
         {
-            type: "list",
+            type: "table",
             content: [
-                "**Hundred (Centena)**: `200` → “two hundred”",
-                "**Thousand (Milhar)**: `5,000` → “five thousand” | `5,200` → “five thousand, two hundred”",
-                "**Million (Milhão)**: `3,000,000` → “three million”"
-            ]
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "O Padrão-Mestre para Números Gigantes. A lógica é ler em blocos de três. Esqueça a tradução literal do português. Pense em blocos, aplique a \"etiqueta\" (thousand, million) e deixe o inglês fluir. É uma mudança de chave mental."
-        },
-        {
-            type: "paragraph",
-            content: "O número `1,234,567` é lido assim:"
-        },
-        {
-            type: "list",
-            content: [
-                "**`1`** (one **million**)",
-                "**`234`** (two hundred thirty-four **thousand**)",
-                "**`567`** (five hundred sixty-seven)"
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "**Juntando tudo:** \"one million, two hundred thirty-four thousand, five hundred sixty-seven\"."
-        },
-        {
-            type: "h3",
-            content: "Como Memorizar (Sem Decoreba)"
-        },
-        {
-            type: "paragraph",
-            content: "Seu cérebro aprende por **conexão**, não por repetição burra."
-        },
-        {
-            type: "list",
-            content: [
-                "**Associação**: Nunca memorize palavras isoladas.",
-                "**Errado**: “home = casa”",
-                "**Certo**: Feche os olhos, **visualize** a sua casa, sinta o ambiente, conecte a palavra a uma emoção. Aprendeu a palavra `see` (ver)? Lembre-se da última vez que você *viu* um pôr do sol incrível. Conecte a palavra a essa memória.",
-                "**Repetição Espaçada (SRS)**: Técnica baseada em neurociência. A ideia é revisar a palavra **exatamente quando você está prestes a esquecê-la.**",
-                "**Ferramentas**: **Anki** ou **Quizlet**. Você cria *flashcards*, e o sistema decide quando te mostrar a palavra de novo. É ciência aplicada."
+                "Escrito|Falado (Formal)|Falado (Rua)",
+                "$1.50|{{One dollar fifty|Um dólar e cinquenta}}|{{Buck fifty|Um mango e cinquenta}}",
+                "$20.00|{{Twenty dollars|Vinte dólares}}|{{Twenty bucks|Vinte contos}}",
+                "$1200|{{One thousand two hundred|Mil e duzentos}}|{{Twelve hundred|Doze centenas}} (Doze centenas)",
+                "$250k|{{250 thousand|250 mil}}|{{Quarter mill|Um quarto de milhão}}"
             ]
         },
         {
             type: "h2",
-            content: "Parte 2: Dinheiro na Prática – Comprando, Pagando e Negociando"
+            content: "Parte 4: Negociação de Salário (Roleplay Avançado)"
         },
         {
             type: "paragraph",
-            content: "Agora que os números não assustam mais, vamos usá-los em situações reais, com mini-diálogos para você treinar mentalmente."
+            content: "Você recebeu uma oferta. É hora de negociar."
         },
         {
-            type: "h3",
-            content: "2.1 Perguntando o Preço – O Poder do “How Much?”"
-        },
-        {
-            type: "paragraph",
-            content: "Esta é a sua ferramenta mais poderosa para qualquer transação."
-        },
-        {
-            type: "list",
+            type: "dialogue",
+            title: "A Contraproposta",
             content: [
-                "**Pergunta geral**: *How much is this?* (Quanto custa isto?)",
-                "**Para vários itens**: *How much are these?* (Quanto custam estes?)",
-                "**Sendo mais específico**: *Excuse me, how much does this jacket cost?*"
+                "HR: {{The offer is 50k a year.|A oferta é de 50 mil por ano.}}",
+                "You: {{I appreciate the offer. However, based on my experience and the market average, I was expecting something in the 60k to 65k range.|Agradeço a oferta. Porém, com base na minha experiência e média de mercado, eu esperava algo entre 60 e 65 mil.}}",
+                "HR: {{We can do 60k if you sign today.|Podemos fazer 60 mil se assinar hoje.}}",
+                "You: {{It's a deal.|Fechado.}}"
             ]
-        },
-        {
-            type: "paragraph",
-            content: "**Cenário Prático: Loja de Roupas**\n> **Você:** *Excuse me, how much does this jacket cost?*\n> **Vendedor:** *It’s $85.50 (eighty-five fifty).*\n> **Você:** *Eighty-five fifty, got it. I’ll take it, please.*"
         },
         {
             type: "box-insight",
-            title: "Insight-chave",
-            content: "Conexão de Pilares. Note como os nativos omitem “dollars” e “cents”. Isso é o **Pilar 2 (Inglês Auditivo)** em ação, aplicado a um cenário de **Sobrevivência (Pilar 3)**."
-        },
-        {
-            type: "h3",
-            content: "2.2 Dizer e Entender Preços com Naturalidade"
-        },
-        {
-            type: "list",
-            content: [
-                "`$25.50` → \"twenty-five fifty\"",
-                "`$150.99` → \"one fifty ninety-nine\"",
-                "`$1,200` → \"twelve hundred dollars\" (muito comum e soa mais natural)"
-            ]
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Dica de Pronúncia. Pratique dizer os preços em voz alta, como se estivesse no caixa. O cérebro e os músculos da fala memorizam o padrão, tornando a resposta automática."
-        },
-        {
-            type: "h3",
-            content: "2.3 Formas de Pagamento – Seja o Chefe da Situação"
-        },
-        {
-            type: "list",
-            content: [
-                "*Do you take credit cards?* – Aceitam cartão de crédito?",
-                "*Can I pay in cash?* – Posso pagar em dinheiro?",
-                "*I’ll pay by card.* – Vou pagar com cartão.",
-                "*Is it possible to split the bill?* – Dá para dividir a conta?"
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "**Mini-Cenário de Confiança: Café com amigos**\n> **Você:** *Don't worry, guys. It's on me.* (Deixa comigo, pessoal. É por minha conta.)\n> **Amigo:** *Are you sure?*\n> **Você:** *Absolutely. My treat.* (Com certeza. Eu pago.)"
-        },
-        {
-            type: "paragraph",
-            content: "Essas pequenas frases mostram domínio e geram uma imagem de confiança e generosidade."
-        },
-        {
-            type: "h3",
-            content: "2.4 Vocabulário Essencial para Transações"
-        },
-        {
-            type: "list",
-            content: [
-                "**Bill / Check**: A conta (*Can I have the check, please?*)",
-                "**Receipt**: O recibo/nota fiscal (*Could I get a receipt?*)",
-                "**Change**: O troco (*Keep the change.*)",
-                "**Discount**: Desconto (*Is there any discount for students?*)",
-                "**Tax**: Imposto (*Is the tax already included in the price?*)",
-                "**ATM / Cash machine**: Caixa eletrônico (*Where can I find an ATM?*)"
-            ]
+            title: "Termos de Poder",
+            content: "**{{Gross Salary|Salário Bruto}}**: Bruto.\\n**{{Net Salary|Salário Líquido}}**: Líquido.\\n**{{Benefits|Benefícios}}**: Benefícios (Plano de saúde, etc).\\n**{{Bonus|Bônus}}**: Bônus de performance."
         },
         {
             type: "h2",
-            content: "Parte 3: Dinheiro Além das Compras – Salário, Orçamento e Negócios"
-        },
-        {
-            type: "paragraph",
-            content: "Dominar números abre portas para conversas mais complexas e de maior valor."
+            content: "Parte 5: Datas e Horários (Time Management)"
         },
         {
             type: "list",
             content: [
-                "**Salary (Salário)**: *My first salary was three thousand dollars a month.*",
-                "**Budget (Orçamento)**: *We need to create a clear budget for this project.*",
-                "**Investment (Investimento)**: *This course is a great investment in your future.*",
-                "**Profit / Loss (Lucro / Prejuízo)**: *The company made a huge profit last year.*"
+                "**Anos**: Divida em dois. 1990 = '{{Nineteen ninety|Dezenove noventa}}'. 2024 = '{{Twenty twenty-four|Vinte vinte e quatro}}'.",
+                "**Horas**: Use 'Past' e 'To'. 2:15 = '{{Quarter past two|Um quarto passado das duas}}'. 2:50 = '{{Ten to three|Dez para as três}}'."
             ]
-        },
-        {
-            type: "paragraph",
-            content: "**Cenário Prático de Negociação:**\n> **Você:** *Based on the scope of the project, my rate is $1,500.* (Com base no escopo do projeto, meu valor é $1.500.)\n> **Cliente:** *I was hoping for something around $1,200.* (Eu esperava algo em torno de $1.200.)\n> **Você:** *I understand. Let’s meet halfway at $1,350. That's a fair price for both of us.* (Entendo. Vamos fechar no meio, em $1.350. É um preço justo para nós dois.)"
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Você não está apenas falando números. Você está negociando com naturalidade e segurança, usando a linguagem para atingir seus objetivos."
-        },
-        {
-            type: "h2",
-            content: "Parte 4: Mini-Simulações Interativas (Roleplay Mental)"
-        },
-        {
-            type: "paragraph",
-            content: "A teoria só vira prática com a repetição. Faça estas simulações em voz alta."
-        },
-        {
-            type: "list",
-            content: [
-                "**No café**:\n    *   Imagine o barista: *“What can I get for you?”*\n    *   Responda: *“I’ll have a large cappuccino, please. How much is that?”*\n    *   Ele diz: *“That’ll be $4.50.”*\n    *   Você: *“Four fifty. Here you go. Thank you!”*",
-                "**Na loja**:\n    *   Você: *“Excuse me, how much are these headphones?”*\n    *   Vendedor: *“They're $199.99 (one ninety-nine ninety-nine).”*\n    *   Você: *“Got it. Do you offer any student discounts?”*"
-            ]
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Dica Final de Confiança: Faça essas simulações em voz alta, na frente do espelho ou gravando a si mesmo. Isso cria \"memória muscular\" e confiança mental para a hora H."
         },
         {
             type: "pillar-end",
-            title: "Parabéns por concluir o Pilar de Dinheiro e Números!",
-            content: "Você agora tem total confiança para lidar com números, transações e negociações em inglês, destravando um novo nível de liberdade e autonomia financeira."
+            title: "Módulo Financeiro Encerrado",
+            content: "Você agora sabe quanto custa, quanto ganha e quando vai acontecer. Você está no controle dos números."
         }
     ]
 };
 
+// ==============================================================================
+// PILAR 6: PRODUÇÃO CONTROLADA (EXPANDED ELITE VERSION)
+// ==============================================================================
 export const PILAR_6_DATA: PillarData = {
     id: 6,
-    title: "Pilar 6: Produção Controlada",
-    subtitle: "Transformando o medo de falar em comunicação com confiança.",
+    title: "Pilar 6: Laboratório de Fala",
+    subtitle: "Transformando pensamento passivo em som ativo: técnicas de fonoaudiologia para fluência.",
     blocks: [
         {
-            type: "box-goal",
-            title: "Objetivo do Pilar",
-            content: "Aprender a transformar o conhecimento passivo em ação de fala, desenvolvendo fluidez, ritmo e confiança através de técnicas progressivas e controladas, sem pânico."
+            type: "system-status",
+            content: "{{VOICE MODULE|MÓDULO DE VOZ}}: {{RECORDING|GRAVANDO}}... {{PREPARE FOR OUTPUT|PREPARE PARA SAÍDA}}."
         },
         {
-            type: "h3",
-            content: "Introdução: O Elefante na Sala – O Medo de Falar"
+            type: "h2",
+            content: "Introdução: A Fisiologia da Fala"
         },
         {
             type: "paragraph",
-            content: "Você sabe o que realmente trava a maioria dos alunos de inglês? Não é gramática, não é vocabulário… é a hora de falar. O coração acelera, a boca seca, as palavras somem. Isso é natural, mas não precisa ser eterno."
+            content: "Falar inglês não é apenas mental; é físico. Sua boca, língua e garganta estão acostumadas com os sons do português. Para falar inglês, você precisa treinar esses músculos para fazer movimentos novos. É como ir à academia pela primeira vez."
+        },
+        {
+            type: "h2",
+            content: "Parte 1: Eliminando o Sotaque Brasileiro (The 'i' Killer)"
         },
         {
             type: "box-warning",
-            title: "Erro comum",
-            content: "Deixar o medo de falar te paralisar. O coração acelerar, a boca secar e as palavras sumirem é natural, mas este pilar te dará ferramentas para superar isso e agir."
+            title: "O Erro Número 1 do Brasileiro",
+            content: "Adicionar um 'i' no final de palavras que terminam em consoante muda. Ex: '{{Facebook|Facebook}}' vira 'Facebooki'. '{{Big|Grande}}' vira 'Bigui'. Isso destrói o ritmo do inglês."
         },
         {
             type: "paragraph",
-            content: "Este pilar vai te ensinar a transformar medo em ação, de forma progressiva, segura e divertida. Aqui você não vai decorar frases: vai criar memória muscular da fala, fluidez e confiança."
+            content: "O inglês adora consoantes secas e abruptas. Treine cortar o som imediatamente."
         },
         {
-            type: "paragraph",
-            content: "Lembre-se: você já construiu seu arsenal:"
-        },
-        {
-            type: "list",
+            type: "table",
             content: [
-                "**Pilar 2**: ouvido treinado para inglês real",
-                "**Pilar 3**: frases e padrões de sobrevivência",
-                "**Pilar 4**: lógica da língua",
-                "**Pilar 5**: números e transações sem medo"
+                "Palavra|Brasileiro Típico (Errado)|Inglês Correto (Seco)",
+                "{{Hot dog|Cachorro quente}}|Ró-ti dó-gui|{{Hot-dog|Cachorro quente}} (O 't' e 'g' somem)",
+                "{{Internet|Internet}}|In-ter-né-tchi|{{In-ter-net|Internet}} (O 't' final é mudo)",
+                "{{Facebook|Facebook}}|Fa-ce-boo-ki|{{Face-book|Facebook}} (O 'k' é uma parada)",
+                "{{Big Mac|Big Mac}}|Bi-gui Mé-qui|{{Big-Mac|Big Mac}}"
             ]
-        },
-        {
-            type: "paragraph",
-            content: "Agora é hora de ativar todo esse conhecimento."
         },
         {
             type: "h2",
-            content: "Parte 1: O Estacionamento Vazio da Fala – Sua Zona de Treinamento"
+            content: "Parte 2: Técnica Shadowing (A Sombra)"
         },
         {
             type: "paragraph",
-            content: "Imagine aprender a dirigir: ninguém te joga na rodovia às 18h. Primeiro vem o estacionamento vazio. Aqui, você pratica sem pressão, com controle total."
+            content: "Esta é a técnica usada por poliglotas e espiões. Não é repetir depois; é repetir JUNTO."
         },
         {
             type: "list",
             content: [
-                "**Estacionamento Vazio (Produção Controlada)**: movimentos básicos, balizas, viradas. Sem outros carros, sem pressão. **É aqui que você vai passar a maior parte do tempo neste pilar.**",
-                "**Ruas do Bairro (Interações Simples)**: pequenas interações, ruas calmas, poucos carros. Você já sabe o básico e começa a se arriscar um pouco mais.",
-                "**Rodovia (Conversa Real e Livre)**: alta velocidade, complexidade, muitos carros. É a conversa fluida, espontânea, onde você reage em tempo real."
+                "1. Escolha um áudio curto com transcrição (Podcast ou TED Talk).",
+                "2. Ouça uma vez para entender.",
+                "3. Toque de novo e tente falar AO MESMO TEMPO, imitando a melodia, as pausas e a respiração.",
+                "4. Grave-se e compare."
             ]
         },
         {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Cada frase falada no \"estacionamento vazio\" cria uma conexão neural mais forte. É treino mental + físico que se solidifica em habilidade. A prática sem pressão é a chave para a fluidez."
+            type: "audio-player",
+            content: "Frase de Treino: \"I think that learning English is crucial for my career.\""
         },
         {
             type: "h2",
-            content: "Parte 2: Ativando o Conhecimento Passivo – Da Cabeça para a Boca"
+            content: "Parte 3: Story Reworking (Engenharia Reversa)"
         },
         {
             type: "paragraph",
-            content: "Todo o vocabulário, frases e estruturas que você absorveu nos pilares anteriores agora são sua matéria-prima. É hora de transformar passividade em ação real: falar sem depender de script decorado, mas usando seus \"blocos de montar\"."
+            content: "Como melhorar seu vocabulário sozinho? Contando histórias e 'auditando' elas."
         },
         {
             type: "box-action",
-            title: "Ação prática",
-            content: "Exercício Rápido de Ativação: Escolha 5 palavras-chave do Pilar 4, 5 frases do Pilar 3 e construa 3 frases *suas* que combinem esses elementos. Fale em voz alta. Isso ativa a memória muscular imediatamente."
+            title: "O Processo de 4 Passos",
+            content: "1. **Grave**: Conte uma história de 1 minuto no gravador.\n2. **Transcreva**: Escreva exatamente o que você falou (com erros e tudo).\n3. **Melhore**: Pegue o texto e troque palavras básicas por avançadas (Ex: 'Good' -> 'Amazing'). Corrija a gramática com o ChatGPT.\n4. **Regrave**: Conte a mesma história, agora usando a versão melhorada."
+        },
+        {
+            type: "table",
+            content: [
+                "Versão 1.0 (Básica)|Versão 2.0 (Elite)",
+                "Yesterday I go to the mall.|Yesterday I **went** to the mall.",
+                "It was good.|It was **fantastic**.",
+                "I eat a burger.|I **had** a delicious burger."
+            ]
         },
         {
             type: "h2",
-            content: "Parte 3: Seu Arsenal de Técnicas de Produção Controlada"
+            content: "Parte 4: Respiração e Pausas (Thought Groups)"
         },
         {
             type: "paragraph",
-            content: "Prepare-se. Estas técnicas são seu caminho para destravar a fala."
+            content: "Você não fala frase por frase. Você fala em 'grupos de pensamento'. Aprender onde respirar faz você soar fluente instantaneamente."
         },
         {
-            type: "h3",
-            content: "Técnica 1: Shadowing (Espelhamento Ativo) – O Acelerador de Ritmo e Pronúncia"
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Shadowing: Desenvolva ritmo, pronúncia e entonação natural do inglês. Grave-se e compare sua voz com a do nativo. Ajuste e repita."
-        },
-        {
-            type: "list",
-            content: [
-                "**Shadowing com Transcrição**: Ouça o áudio *enquanto* lê o texto e tente falar junto. Foco total em acompanhar o ritmo e a \"música\" da fala. Ideal para iniciantes e para se familiarizar com a prosódia.",
-                "**Shadowing Cego**: O próximo nível. Ouça o áudio e repita *imediatamente*, sem olhar o texto. Aqui, você força seu cérebro a processar e reproduzir sem o apoio visual."
-            ]
-        },
-        {
-            type: "list",
-            content: [
-                "**Processo de Feedback Ativo**: Grave-se e compare sua voz com a do nativo.",
-                "**Pergunte-se**: Minha entonação subiu quando a do nativo subiu? Onde as palavras se conectam (linked sounds)? Meu ritmo está parecido?",
-                "**Ajuste**: Escolha um ponto para melhorar e repita."
-            ]
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Mini-Desafio de Shadowing (7 Dias para Desbloquear): Pratique com áudios curtos, primeiro com transcrição e depois cego. Grave-se e compare seu progresso. Você sentirá a evolução!"
-        },
-        {
-            type: "h3",
-            content: "Técnica 2: Leitura em Voz Alta Estratégica – A Performance da Fala"
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Leitura em Voz Alta: Pratique a **prosódia** (melodia, ritmo, pausas, ênfase). Marque a \"partitura\" da fala, grave-se e autoavalie."
-        },
-        {
-            type: "list",
-            content: [
-                "**Passo 1: Escolha e Entenda o Texto.** Um parágrafo de um artigo, um trecho de livro. Leia em silêncio primeiro para garantir a compreensão.",
-                "**Passo 2: Marque a \"Partitura\" da Fala.**\n    *   **Ênfase (Sublinhe):** Quais palavras são mais importantes para a frase? Ex: *\"I **believe** that **learning** English is **not** just about **memorizing** words...\"*\n    *   **Pausas (Barra Simples / Dupla):** Onde você faria uma pausa natural ao falar? Use `/` para pausas curtas (vírgulas) e `//` para pausas mais longas (pontos finais, novos pensamentos). Ex: *\"I believe that learning English is not just about memorizing words, / but about discovering a new way to see the world.\"*",
-                "**Passo 3: Performance e Gravação.** Leia em voz alta, seguindo suas marcações. Tente variar o tone, soar interessante. Grave-se.",
-                "**Passo 4: Autoavaliação.** Ouça sua gravação. Você soa natural? As pausas fazem sentido? As palavras enfatizadas transmitem a mensagem que você quer?"
-            ]
-        },
-        {
-            type: "h3",
-            content: "Técnica 3: Construção de Frases Guiadas – Os LEGOs da Fluência"
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Construção de Frases Guiadas: Use \"stems\" (inícios de frase) como pontos de partida para criar suas próprias sentenças e pequenas narrativas, construindo confiança estrutural (Pilar 4)."
-        },
-        {
-            type: "list",
-            content: [
-                "**Categorias de \"Stems\" (Inícios de Frase)**:",
-                "**Opinião & Crença**: *I think that... / I believe that... / In my opinion...*",
-                "**Preferência & Escolha**: *I'd rather... / I prefer... to...*",
-                "**Experiência Passada**: *I remember when... / I used to...*",
-                "**Planos & Futuro**: *I'm going to... / I'm planning to... / I'm looking forward to...*",
-                "**Causa e Efeito**: *Because of that... / As a result... / That's why...*"
-            ]
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Exercício de Encadeamento de Frases: Escolha um tema simples e use 3 a 5 \"stems\" diferentes para criar um mini-parágrafo. Fale esse parágrafo em voz alta 5 vezes."
-        },
-        {
-            type: "h3",
-            content: "Técnica 4: Revisão Ativa de Histórias (Story Reworking) – Seu Coach Pessoal"
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Revisão Ativa de Histórias: Conte uma história simples e grave-se. Transcreva sua fala, faça o \"upgrade\" de vocabulário e gramática, e grave a versão melhorada."
-        },
-        {
-            type: "list",
-            content: [
-                "**Passo 1: Conte uma História Simples e Grave.** Ligue o gravador do seu celular e fale sobre algo do seu dia, um evento recente, um livro que leu. Fale por 1-2 minutos. Não se preocupe com erros.",
-                "**Passo 2: Transcreva Sua Própria Fala.** Ouça a gravação e digite exatamente o que você disse, incluindo pausas, \"uhms\", erros de gramática, repetições. **Seja brutalmente honesto.**",
-                "**Passo 3: O \"Upgrade\" da História.**\n    *   **Vocabulário (Pilar 3):** Identifique palavras repetidas (ex: \"good\", \"nice\"). Substitua por sinônimos mais ricos (\"amazing\", \"delightful\", \"efficient\").\n    *   **Gramática (Pilar 4):** Corrija erros de tempo verbal, concordância.\n    *   **Estrutura da Frase:** As frases estão muito curtas? Conecte-as com conjunções (\"and\", \"but\", \"so\", \"because\", \"although\"). Use \"stems\" mais sofisticados.",
-                "**Passo 4: Grave a Versão Melhorada.** Pratique contar a história novamente, desta vez usando sua versão \"2.0\". Compare as duas gravações. O progresso será inegável."
-            ]
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Crie uma pasta no seu celular com as versões \"brutas\" e \"melhoradas\" de suas histórias. É sua jornada de fluência visível!"
-        },
-        {
-            type: "h3",
-            content: "Técnica 5: Roleplay Mental – A Situação Antes da Situação"
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Roleplay Mental: Prepare sua mente e sua boca para cenários reais antes que eles aconteçam. Simule diálogos e use \"muletas\" da Parte 4 para reduzir a ansiedade."
-        },
-        {
-            type: "list",
-            content: [
-                "**Imagine Cenários Comuns**:\n    *   Pedir comida em um restaurante estrangeiro.\n    *   Negociar um preço em uma loja (Pilar 5).\n    *   Apresentar-se em uma reunião de trabalho.\n    *   Dar direções a alguém.",
-                "**Simule o Diálogo**: Fale mentalmente ou em voz alta, simulando suas respostas e as possíveis respostas da outra pessoa. Pense nos imprevistos: \"E se eles me perguntarem sobre...?\"",
-                "**Combine com Frases de Preenchimento**: Se você travar, use suas \"muletas\" da Parte 4.\n    *   *Well, let me see...*\n    *   *That’s an interesting question...*\n    *   *You know, it’s funny you should ask that...*"
-            ]
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Quanto mais você simular, mais real e menos ameaçador o cenário se tornará. Isso reduz drasticamente a ansiedade e aumenta sua confiança instantaneamente."
+            type: "reveal-box",
+            title: "Exemplo de Pausas",
+            content: "Robô: \"I... want... to... go... to... the... store.\"\n\nHumano: \"I wanna go / to the store.\"\n\nAnalítico: \"If I were you / I would buy / that car.\""
         },
         {
             type: "h2",
-            content: "Parte 4: A Mentalidade de Produção Controlada – Para Vencer o Jogo da Fluência"
-        },
-        {
-            type: "paragraph",
-            content: "Este pilar não funcionará se você não ajustar sua mentalidade. É o software que roda o hardware."
+            content: "Parte 5: Desafio de 7 Dias (Bootcamp)"
         },
         {
             type: "list",
             content: [
-                "**Abandone o Perfeccionismo: Fluência > Perfeição.** Seu objetivo é comunicar, não ser perfeito. Seu sotaque é parte de quem você é. Erros são degraus, não falhas.",
-                "**Abrace os Ganhos Marginais: 1% Melhor Todo Dia.** A fluência é construída tijolo por tijolo. Cada pequena prática, cada pequena correção, cada nova palavra é um ganho marginal que se acumula exponencialmente. Não subestime o poder do \"um por cento\".",
-                "**Fale Sozinho. Sem Culpa. É um Superpoder.** Narre suas ações diárias. Converse consigo mesmo no espelho, no banho, no carro. *“Ok, now I’m making my coffee. First, I need to put water in the kettle. Then, I’ll turn it on.”* É um treino de pressão zero que ativa seu cérebro e sua boca.",
-                "**Aceite o \"Branco\" (Blanking) e Use Suas Ferramentas.** Vai acontecer de você esquecer uma palavra ou travar. Em vez de entrar em pânico, use suas frases de preenchimento. Elas são como um \"timeout\" que te dá tempo para pensar, sem parar a comunicação."
-            ]
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "O medo não desaparece; ele vai para o banco de trás. Você está no controle do volante. Você saiu do estacionamento e está dirigindo com confiança pelas ruas do seu bairro. Em breve, a rodovia será um passeio."
-        },
-        {
-            type: "h2",
-            content: "Parte 5: Plano de Ação de 7 Dias – Destravando a Fala"
-        },
-        {
-            type: "paragraph",
-            content: "Para você não ficar só na teoria, aqui está seu desafio para a próxima semana:"
-        },
-        {
-            type: "list",
-            content: [
-                "**Dia 1**: Fale em voz alta 5 coisas que você vê no seu quarto. (\"I see a bed. It is white.\")",
-                "**Dia 2**: Faça *Shadowing* de 1 minuto com um vídeo curto do YouTube (com legenda).",
-                "**Dia 3**: Narre o preparo do seu café da manhã. (\"I am pouring the coffee.\")",
-                "**Dia 4**: Grave um áudio de 30 segundos no WhatsApp (para você mesmo) contando como foi seu dia.",
-                "**Dia 5**: Leia um parágrafo de um livro ou notícia em voz alta, focando na entonação.",
-                "**Dia 6**: Simule uma apresentação pessoal (\"Hi, my name is... I work at...\") na frente do espelho.",
-                "**Dia 7**: Desafio final: Grave um vídeo de 1 minuto falando sobre seu sonho de viagem. Assista e celebre a vitória!"
+                "**Dia 1**: Grave-se lendo um parágrafo. Foque no final seco das palavras.",
+                "**Dia 2**: Shadowing de 2 minutos.",
+                "**Dia 3**: Narre o que você está fazendo enquanto cozinha/dirige.",
+                "**Dia 4**: Story Reworking (Versão 1.0 e 2.0).",
+                "**Dia 5**: Cante uma música rápida lendo a letra (Rap/Pop).",
+                "**Dia 6**: Responda a uma entrevista simulada no espelho.",
+                "**Dia 7**: Grave um vídeo se apresentando em 1 minuto. Guarde para ver daqui a 6 meses."
             ]
         },
         {
             type: "pillar-end",
-            title: "Parabéns por concluir o Pilar de Produção Controlada!",
-            content: "Você agora tem um arsenal de técnicas para transformar o conhecimento passivo em fala ativa. O medo não desaparece; ele vai para o banco de trás. Você está no controle do volante."
+            title: "Voz Ativada",
+            content: "Sua boca agora sabe o caminho. Sua mente sabe o processo. Fale sem medo. O silêncio é o único erro."
         }
     ]
 };
 
-
+// ==============================================================================
+// PILAR 7: AUTONOMIA E FERRAMENTAS (EXPANDED ELITE VERSION)
+// ==============================================================================
 export const PILAR_7_DATA: PillarData = {
     id: 7,
-    title: "Pilar 7: Prática & Autoaprendizado",
-    subtitle: "As ferramentas para a autonomia eterna e o cultivo da sua fluência.",
+    title: "Pilar 7: Autonomia & O Infinito",
+    subtitle: "Como nunca mais depender de um professor e aprender para sempre.",
     blocks: [
         {
-            type: "box-goal",
-            title: "Objetivo do Pilar",
-            content: "Construir sua independência total no aprendizado do inglês, transformando a prática guiada em um processo contínuo e autônomo, para cultivar sua fluência para sempre."
+            type: "system-status",
+            content: "AUTONOMY PROTOCOL: ENABLED. Breaking dependency chains."
         },
         {
-            type: "h3",
-            content: "Introdução: A Formatura – De Aluno a Arquiteto da Sua Fluência"
-        },
-        {
-            type: "paragraph",
-            content: "Se os pilares anteriores construíram sua casa, este pilar entrega a escritura, as chaves e o mapa do tesouro. Até agora, você seguiu um caminho guiado. Agora, você vai aprender a construir seus próprios caminhos."
+            type: "h2",
+            content: "Introdução: A Chave da Prisão"
         },
         {
             type: "paragraph",
-            content: "Este é o pilar da independência total."
+            content: "A indústria do inglês quer que você seja aluno para sempre. Nós queremos que você seja livre. Se você precisa de mim para saber se sua frase está certa, eu falhei. Este pilar é sua carta de alforria."
+        },
+        {
+            type: "h2",
+            content: "Parte 1: O Digital Toolkit (Seu Arsenal)"
+        },
+        {
+            type: "paragraph",
+            content: "A tecnologia hoje substitui 90% do que um professor faz. Use estas ferramentas."
+        },
+        {
+            type: "table",
+            content: [
+                "Ferramenta|Função|Como Usar",
+                "**DeepL**|Tradutor de Nuance|Melhor que o Google. Use para entender o 'tom' da frase.",
+                "**YouGlish**|Busca de Contexto|Digite uma palavra e veja 1000 vídeos de nativos usando ela.",
+                "**ChatGPT**|Tutor Pessoal|Peça correções, explicações gramaticais e exemplos.",
+                "**Anki**|Memória Externa|App de repetição espaçada para nunca esquecer vocabulário."
+            ]
         },
         {
             type: "box-insight",
-            title: "Insight-chave",
-            content: "A fluência não é um destino; é um jardim que precisa ser cultivado. Este pilar entrega ferramentas, estratégias e hábitos para garantir que seu inglês cresça e floresça para sempre."
-        },
-        {
-            type: "paragraph",
-            content: "Você já ativou sua fala com a Produção Controlada (Pilar 6). Agora vamos transformar isso em um processo contínuo e autônomo, para que a prática nunca acabe."
+            title: "Prompt Mestre para o ChatGPT",
+            content: "Copie e cole isso na IA: *\"Aja como um professor de inglês nativo. Eu vou escrever um texto. Quero que você corrija meus erros, explique o motivo da correção e sugira uma forma mais natural/nativa de dizer a mesma coisa.\"*"
         },
         {
             type: "h2",
-            content: "Parte 1: Criando seu Ecossistema de Imersão – Sua Bolha de Inglês"
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Não é preciso morar fora para viver em inglês. Crie uma bolha de imersão ao seu redor, dividida em Input Passivo e Input Ativo, transformando seu ambiente em um laboratório de fluência."
-        },
-        {
-            type: "h3",
-            content: "1.1 Input Passivo: O Combustível Invisível"
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Exposição constante sem pressão transforma o aprendizado em algo quase automático. Escolha conteúdos que você ama – interesse gera aprendizado invisível."
-        },
-        {
-            type: "list",
-            content: [
-                "**Música**: Ouça playlists em inglês, cante junto, anote frases que soem interessantes. Música treina ritmo, entonação e vocabulário passivo.",
-                "**Podcasts**: Comece com podcasts simples (ex: 6 Minute English), depois avance para temas que você ama. Técnica bônus: Audição-Ativa – ouça uma vez passivamente, depois tente capturar 3 palavras novas ou 1 ideia principal.",
-                "**Séries e Filmes (A Escada da Imersão)**:\n    1.  **Legenda em português:** Foco na história.\n    2.  **Legenda em inglês:** Conexão som → palavra.\n    3.  **Sem legenda:** Entenda pelo contexto e pelo som.",
-                "**YouTube como universidade pessoal**: Troque canais nacionais por equivalentes em inglês. Tudo vira mini-aulas divertidas."
-            ]
-        },
-        {
-            type: "h3",
-            content: "1.2 Input Ativo: Brincando com o Idioma"
+            content: "Parte 2: Input Ativo vs. Passivo"
         },
         {
             type: "paragraph",
-            content: "Aqui você produz e interage, transformando passivo em ativo."
+            content: "Ouvir música enquanto lava louça é bom, mas não ensina inglês. Isso é Input Passivo. Para evoluir, você precisa de Input Ativo."
+        },
+        {
+            type: "reveal-box",
+            title: "A Diferença Real",
+            content: "**Passivo**: Deixar o som entrar. Bom para manutenção.\n**Ativo**: Focar, anotar, repetir, pausar, analisar. Essencial para crescimento.\n\nRegra: 80% do seu tempo pode ser Passivo, mas os 20% Ativos valem ouro."
+        },
+        {
+            type: "h2",
+            content: "Parte 3: O Ciclo da Fluência (The Loop)"
+        },
+        {
+            type: "paragraph",
+            content: "Como manter o inglês vivo sem morar fora?"
         },
         {
             type: "list",
             content: [
-                "**Leitura prazerosa**: Use a regra 80/20 – não pare para cada palavra. Foque no contexto. Anote palavras-chave ou repetidas.",
-                "**Escrita de Baixo Estresse**:\n    *   **Diário de uma frase:** todo dia escreva uma frase em inglês sobre o seu dia.\n    *   **Comentários online:** participe de fóruns, posts ou vídeos em inglês – prática real, pressão zero."
+                "**1. Consumo**: Leia notícias, veja vídeos, ouça podcasts sobre assuntos que você GOSTA (não sobre 'aprender inglês').",
+                "**2. Captura**: Viu uma palavra nova? Anote no Anki.",
+                "**3. Prática**: Use essa palavra em uma frase sozinha no chuveiro.",
+                "**4. Revisão**: O Anki vai te lembrar da palavra antes de você esquecer."
             ]
         },
         {
             type: "h2",
-            content: "Parte 2: O Kit do Autoaprendiz Moderno"
+            content: "Parte 4: A Rotina de 15 Minutos (Para quem não tem tempo)"
         },
         {
-            type: "paragraph",
-            content: "Transforme seu ambiente em um laboratório de fluência:"
-        },
-        {
-            type: "list",
-            content: [
-                "**Dicionários que ensinam**: Cambridge ou Oxford English-English. Definição, exemplos, sinônimos, pronúncia. Pense sempre em inglês, não traduza.",
-                "**Seu “cérebro externo” – Apps de repetição espaçada**:\n    *   **Anki / Quizlet.** Crie seus próprios flashcards com palavras ou frases que encontrar. O ato de criar já é aprendizado.",
-                "**Comunidades e conversação**:\n    *   **Reddit, Discord, fóruns de hobbies em inglês.** Ler e escrever aqui é aprendizado real.\n    *   **Tandem / HelloTalk:** troque mensagens e áudios com falantes nativos, praticando segurança antes da conversa ao vivo."
-            ]
-        },
-        {
-            type: "h2",
-            content: "Parte 3: Mentalidade de Crescimento Contínuo – Seu GPS de Fluência"
-        },
-        {
-            type: "list",
-            content: [
-                "**Metas SMART**:\n    *   **E**specífica, **M**ensurável, **A**lcançável, **R**elevante, **T**emporal.\n    *   **Exemplo:** “Nos próximos 30 dias, vou adicionar 3 frases novas ao Anki todos os dias.”",
-                "**Furando o platô do intermediário**:"
-            ]
-        },
-        {
-            type: "box-warning",
-            title: "Erro comum",
-            content: "Ficar estagnado no \"platô do intermediário\". Aumente a dificuldade de forma gradual – podcasts para nativos, artigos mais complexos, livros, para continuar a evolução."
-        },
-        {
-            type: "list",
-            content: [
-                "**Hábito atômico e empilhamento**: associe o inglês a hábitos existentes. Ex: “Depois de escovar os dentes, reviso 2 flashcards no Anki”. Comece micro para manter a consistência."
-            ]
-        },
-        {
-            type: "h2",
-            content: "Parte 4: Mini Exercícios de Autoaprendizado – Colocando o Pilar em Ação"
-        },
-        {
-            type: "list",
-            content: [
-                "**Diário de voz**: grave 1-2 minutos falando sobre seu dia. Depois ouça e note erros ou palavras que pode melhorar.",
-                "**Mini tradução reversa**: pegue uma frase em português que você diz todo dia e tente dizê-la em inglês sem consultar dicionário.",
-                "**Shadowing rápido**: escolha um trecho de 30 segundos de podcast ou vídeo, repita 2x por dia. Melhora pronúncia e ritmo.",
-                "**Desafio de 5 palavras novas**: todas as semanas, escolha 5 palavras novas e use 5 vezes cada em frases faladas ou escritas."
-            ]
-        },
-        {
-            type: "h2",
-            content: "Conclusão: Mestre do Jardim da Fluência"
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Não é intensidade, é **consistência diária**. Um pouco de inglês todos os dias constrói fluência para toda a vida."
-        },
-        {
-            type: "paragraph",
-            content: "Este pilar não entrega mais “conteúdo”. Ele te dá mapas, bússola e ferramentas para nunca mais depender de cursos. A fluência se torna um hábito contínuo e prazeroso."
-        },
-        {
-            type: "paragraph",
-            content: "Você agora é o arquiteto da sua própria fluência."
-        },
-        {
-            type: "h2",
-            content: "Parte 5: As Melhores Ferramentas Digitais (Nossa Curadoria)"
-        },
-        {
-            type: "paragraph",
-            content: "Para fechar com chave de ouro, aqui vai minha lista pessoal de ferramentas que funcionam:"
-        },
-        {
-            type: "list",
-            content: [
-                "**DeepL (Tradutor)**: Muito superior ao Google Tradutor. Use para entender nuances e contextos de frases inteiras.",
-                "**YouGlish**: Uma ferramenta incrível onde você digita uma palavra e ela busca milhares de vídeos no YouTube onde essa palavra é dita por nativos. Perfeito para checar pronúncia real.",
-                "**ChatGPT (Como Tutor)**: Use a IA para conversar. Peça: *\"Corrija meus erros gramaticais na frase a seguir e explique o porquê: [sua frase]\"*.",
-                "**News in Levels**: Um site que traz a mesma notícia escrita em 3 níveis de dificuldade. Ótimo para leitura progressiva.",
-                "**BBC Learning English**: Um clássico que nunca falha. Podcasts curtos e materiais de altíssima qualidade gratuitos."
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Use essas ferramentas como seus assistentes pessoais na jornada da autonomia."
+            type: "box-action",
+            title: "O Plano Diário Mínimo Viável",
+            content: "- **Minuto 0-5 (Café)**: Ler 1 artigo curto no app da BBC News ou CNN.\n- **Minuto 5-10 (Trânsito)**: Ouvir 5 min de um Podcast.\n- **Minuto 10-15 (Noite)**: Escrever 3 frases sobre como foi seu dia no bloco de notas."
         },
         {
             type: "pillar-end",
-            title: "Parabéns por concluir o Pilar de Prática & Autoaprendizado!",
-            content: "Você agora tem as ferramentas e a mentalidade para ser o arquiteto da sua própria fluência. A independência é sua, cultive-a diariamente."
+            title: "Você é Livre",
+            content: "Você tem as ferramentas. Você tem o método. Você tem a rotina. A partir de agora, a responsabilidade é sua. E isso é ótimo."
         }
     ]
 };
 
+// ==============================================================================
+// PILAR 8: ESPECIALIZAÇÕES (EXPANDED ELITE VERSION)
+// ==============================================================================
 export const PILAR_8_DATA: PillarData = {
     id: 8,
-    title: "Pilar 8: Módulos de Especialização",
-    subtitle: "Construindo seu futuro em inglês: o caminho rápido para a maestria.",
+    title: "Pilar 8: Especializações (Select Your Class)",
+    subtitle: "Personalize sua jornada: onde você quer ser elite?",
     blocks: [
         {
-            type: "box-goal",
-            title: "Objetivo do Pilar",
-            content: "Escolher seu caminho de especialização em inglês para acelerar o aprendizado, aplicar o idioma a objetivos reais de vida e carreira, e transformar fluência em uma ferramenta estratégica para conquistar oportunidades."
-        },
-        {
-            type: "h3",
-            content: "Introdução: O Fim do Começo – E o Início da Sua Maestria"
+            type: "system-status",
+            content: "CHARACTER SELECTION: OPEN. Choose your specialization."
         },
         {
             type: "paragraph",
-            content: "Parabéns! Se você chegou até aqui, você completou o Currículo Base da ES English Academy. Você construiu raízes fortes e um tronco robusto que suporta qualquer tempestade de inglês."
-        },
-        {
-            type: "list",
-            content: [
-                "Você treinou seu ouvido (**Pilar 2**).",
-                "Aprendeu a sobreviver a situações reais (**Pilar 3**).",
-                "Entendeu a lógica da língua (**Pilar 4**).",
-                "Dominou o universo do dinheiro e números (**Pilar 5**).",
-                "Começou a falar sem pânico (**Pilar 6**).",
-                "E aprendeu a aprender por conta própria (**Pilar 7**)."
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Agora, a pergunta não é mais \"se você consegue se comunicar\", mas **\"onde você quer se destacar?\"**"
-        },
-        {
-            type: "paragraph",
-            content: "Este é o pilar da expansão e especialização. Aqui, você escolhe seus galhos e decide quais frutos deseja colher."
+            content: "O 'Inglês Geral' te trouxe até aqui. Agora, para chegar ao topo, você precisa de 'Inglês Específico'. Escolha sua classe de combate."
         },
         {
             type: "h2",
-            content: "Parte 1: A Filosofia da Especialização – O Caminho Rápido para a Maestria"
+            content: "Classe 1: Business Elite (O Executivo)"
         },
         {
-            type: "paragraph",
-            content: "Imagine um médico. Primeiro, ele faz a faculdade (o currículo base), depois escolhe uma especialidade: cardiologia, pediatria ou neurologia. É nesse foco que ele se torna um verdadeiro expert."
-        },
-        {
-            type: "paragraph",
-            content: "No inglês, funciona da mesma forma."
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Depois de construir sua base, focar em áreas específicas acelera seu aprendizado de forma exponencial. O inglês se torna uma ferramenta poderosa para conquistar objetivos, não apenas um idioma a ser \"aprendido\"."
-        },
-        {
-            type: "paragraph",
-            content: "Quando o conteúdo é aplicado diretamente à sua vida ou carreira, você aprende mais rápido, retém melhor e sente uma motivação real. Você deixa de “aprender inglês por aprender” e passa a **usar o idioma como uma ferramenta poderosa para conquistar objetivos.**"
-        },
-        {
-            type: "h2",
-            content: "Parte 2: A Vitrine de Futuros – Conheça Nossos Módulos de Especialização"
-        },
-        {
-            type: "paragraph",
-            content: "Aqui estão os ramos que você pode explorar."
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Cada módulo de especialização é uma imersão profunda com vocabulário, cenários e práticas específicas. Escolha o que mais se alinha com seus objetivos de vida e carreira para um aprendizado acelerado."
-        },
-        {
-            type: "h3",
-            content: "Módulo 1: Inglês para Negócios (Business English)"
-        },
-        {
-            type: "list",
+            type: "cards-grid",
             content: [
-                "**Para quem é**: Profissionais de todas as áreas que precisam se comunicar com clareza em reuniões, apresentações e e-mails.",
-                "**O que você vai aprender**: Vocabulário corporativo, negociação, apresentação de dados e gráficos, etiqueta de e-mails, participação em *conference calls*.",
-                "**Resultado Final**: Você se posicionará de forma **profissional e segura**, defendendo ideias e projetos sem hesitação."
+                "Foco|Reuniões, Liderança, Negociação e E-mails Formais.",
+                "Para quem|Gerentes, Empreendedores e quem quer subir na carreira corporativa."
             ]
         },
         {
-            type: "h3",
-            content: "Módulo 2: Inglês para Viagens (Travel English)"
-        },
-        {
             type: "list",
             content: [
-                "**Para quem é**: Viajantes que querem explorar o mundo com independência e confiança.",
-                "**O que você vai aprender**: Aeroportos, imigração, hotéis, restaurantes, transporte e resolução de imprevistos.",
-                "**Resultado Final**: Você viajará de forma **autônoma e tranquila**, interagindo com locais e mergulhando de cabeça na cultura."
-            ]
-        },
-        {
-            type: "h3",
-            content: "Módulo 3: Inglês para Entrevistas de Emprego (Job Interview Prep)"
-        },
-        {
-            type: "list",
-            content: [
-                "**Para quem é**: Profissionais buscando vagas em multinacionais ou no exterior.",
-                "**O que você vai aprender**: Respostas estratégicas usando o STAR Method, como fazer perguntas inteligentes ao entrevistador e como se destacar da concorrência.",
-                "**Resultado Final**: Você entrará em qualquer entrevista com **confiança total**, pronto para impressionar e conquistar a vaga."
-            ]
-        },
-        {
-            type: "h3",
-            content: "Módulo 4: Inglês para TI (English for IT Professionals)"
-        },
-        {
-            type: "list",
-            content: [
-                "**Para quem é**: Desenvolvedores, analistas, gerentes de projeto e profissionais de tecnologia.",
-                "**O que você vai aprender**: Vocabulário técnico essencial, participação em *daily meetings*, reporte de bugs, discussão de *roadmaps* e entendimento de documentações.",
-                "**Resultado Final**: Você se comunicará com **clareza e precisão** em equipes globais de tecnologia, acelerando sua carreira."
-            ]
-        },
-        {
-            type: "h3",
-            content: "Módulo 5: Compras (Shopping)"
-        },
-        {
-            type: "list",
-            content: [
-                "**Para quem é**: Quem quer aproveitar o melhor do consumo global, seja online ou em viagens, sem depender de tradutores.",
-                "**O que você vai aprender**: Vocabulário de supermercado e alimentos, conversão de medidas de roupas e calçados, pedir reembolsos e barganhar preços.",
-                "**Resultado Final**: Você fará compras inteligentes, economizando dinheiro e evitando erros por falta de comunicação."
-            ]
-        },
-        {
-            type: "h3",
-            content: "Módulo 6: Saúde (Health)"
-        },
-        {
-            type: "list",
-            content: [
-                "**Para quem é**: Essencial para todos. O \"seguro de vida\" linguístico para quem viaja ou mora fora.",
-                "**O que você vai aprender**: Descrever sintomas com precisão, comprar remédios na farmácia (sem receita ou com), vocabulário de emergência e anatomia básica.",
-                "**Resultado Final**: Segurança total para cuidar de si e da sua família em momentos de necessidade médica."
-            ]
-        },
-        {
-            type: "h3",
-            content: "Módulo 7: Cultura Pop (Pop Culture)"
-        },
-        {
-            type: "list",
-            content: [
-                "**Para quem é**: Quem ama filmes, séries e música e quer consumir conteúdo original sem legendas em português.",
-                "**O que você vai aprender**: Gírias reais (slangs), expressões idiomáticas de séries, inglês conectado de músicas e vocabulário de redes sociais.",
-                "**Resultado Final**: Seu lazer vira estudo. Você entenderá o inglês \"da rua\" e da internet, conectando-se com o mundo moderno."
+                "Aprenda a interromper com educação em uma call.",
+                "Apresente gráficos e dados com confiança.",
+                "Escreva e-mails que impõem respeito."
             ]
         },
         {
             type: "h2",
-            content: "Parte 3: Como Funciona – Sua Próxima Etapa"
+            content: "Classe 2: Global Traveler (O Nômade)"
         },
         {
-            type: "paragraph",
-            content: "Os Módulos de Especialização são cursos independentes que você pode escolher conforme seu objetivo. Cada módulo oferece conteúdo focado, prático e diretamente aplicável."
-        },
-        {
-            type: "paragraph",
-            content: "Além disso, ao entrar em um módulo, você terá acesso a uma comunidade de alunos com o mesmo objetivo, potencializando a prática e o networking."
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Escolher um módulo não significa limitar-se. Pense como um escalador: você foca em um pico agora, mas pode conquistar outros depois, usando a mesma base sólida que construiu."
-        },
-        {
-            type: "h2",
-            content: "Parte 4: Transformando Conhecimento em Oportunidade"
-        },
-        {
-            type: "paragraph",
-            content: "Especialização é mais do que aprender vocabulário."
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Especialização é abrir portas que antes pareciam fechadas. Você deixa de “sobreviver” no idioma e passa a conquistar resultados reais com ele."
+            type: "cards-grid",
+            content: [
+                "Foco|Sobrevivência Avançada, Resolução de Problemas, Socialização.",
+                "Para quem|Viajantes, Nômades Digitais e Turistas Profissionais."
+            ]
         },
         {
             type: "list",
             content: [
-                "Participar de reuniões internacionais **sem medo**.",
-                "Fazer apresentações e relatórios **com confiança**.",
-                "Resolver problemas complexos em inglês **de forma autônoma**.",
-                "Viajar e interagir com culturas diferentes **sem barreiras**.",
-                "Passar em entrevistas decisivas e **conquistar a vaga**."
+                "Resolva extravios de bagagem e problemas de hotel.",
+                "Faça amizade em bares e hostels.",
+                "Alugue carros e entenda as leis locais."
             ]
         },
         {
-            type: "paragraph",
-            content: "A especialização transforma seu inglês em uma ferramenta estratégica. Você deixa de “sobreviver” no idioma e passa a **conquistar resultados reais** com ele."
+            type: "h2",
+            content: "Classe 3: Job Hunter (O Candidato)"
+        },
+        {
+            type: "cards-grid",
+            content: [
+                "Foco|Entrevistas, Currículo, LinkedIn e Storytelling Pessoal.",
+                "Para quem|Quem busca vaga em multinacional ou emprego no exterior."
+            ]
+        },
+        {
+            type: "list",
+            content: [
+                "Responda 'Tell me about yourself' perfeitamente.",
+                "Use o método STAR para descrever suas conquistas.",
+                "Negocie seu salário e benefícios em dólar."
+            ]
         },
         {
             type: "h2",
-            content: "Perguntas Frequentes sobre a Especialização"
+            content: "Classe 4: IT Professional (O Tech Lead)"
         },
         {
-            type: "paragraph",
-            content: "**1. Posso fazer mais de uma especialização ao mesmo tempo?**\nRecomendamos focar em **uma** de cada vez. A profundidade exige foco. Termine um módulo, aplique o conhecimento e depois parta para o próximo. Isso evita a sobrecarga cognitiva."
+            type: "cards-grid",
+            content: [
+                "Foco|Termos Técnicos, Daily Scrum, Code Review e Documentação.",
+                "Para quem|Desenvolvedores, POs, Designers e Data Scientists."
+            ]
         },
         {
-            type: "paragraph",
-            content: "**2. E se eu não tiver um objetivo profissional claro agora?**\nComece pelo módulo de **Inglês para Viagens**. Ele é universal, divertido e te dá uma base incrível de autonomia que serve para qualquer pessoa, em qualquer momento da vida."
-        },
-        {
-            type: "paragraph",
-            content: "**3. O conteúdo base (Pilares 1-7) é suficiente sem a especialização?**\nSim, para a comunicação geral do dia a dia. Mas se você quer usar o inglês para alavancar sua carreira ou resolver problemas complexos específicos, a especialização é o \"pulo do gato\" que te coloca à frente da concorrência."
-        },
-        {
-            type: "h2",
-            content: "Conclusão: Escolha Seu Galho e Suba Mais Alto"
-        },
-        {
-            type: "paragraph",
-            content: "O Currículo Base te deu raízes fortes e um tronco sólido. Agora, você escolhe qual galho explorar para alcançar novos frutos."
-        },
-        {
-            type: "paragraph",
-            content: "Cada módulo é uma ponte entre conhecimento e oportunidade, entre fluência e impacto real."
+            type: "list",
+            content: [
+                "Participe de Dailies sem travar.",
+                "Explique arquitetura complexa de forma simples.",
+                "Entenda sotaques de times globais (indianos, europeus, etc)"
+            ]
         },
         {
             type: "pillar-end",
-            title: "Parabéns por concluir o Pilar de Especializações!",
-            content: "Você já construiu a fundação. Agora é hora de construir seu legado em inglês, escolhendo o caminho que te levará à maestria em sua área de interesse."
+            title: "Menu Aberto",
+            content: "Estude os cards. No próximo pilar, você tomará a decisão final e traçará seu plano."
         }
     ]
 };
 
+// ==============================================================================
+// PILAR 9: A ENCRUZILHADA (EXPANDED ELITE VERSION)
+// ==============================================================================
 export const PILAR_9_DATA: PillarData = {
     id: 9,
-    title: "Pilar 9: A Encruzilhada",
-    subtitle: "Sua bússola para o futuro e a consulta estratégica que define seu caminho.",
+    title: "Pilar 9: A Decisão Final",
+    subtitle: "O briefing da sua próxima missão e o acesso ao suporte humano.",
     blocks: [
         {
-            type: "box-goal",
-            title: "Objetivo do Pilar",
-            content: "Utilizar a bússola de especialização para identificar o próximo destino de aprendizado e, através da consulta estratégica, traçar um plano de estudos personalizado para sua maestria em inglês."
-        },
-        {
-            type: "h3",
-            content: "Introdução: Você no Comando"
-        },
-        {
-            type: "paragraph",
-            content: "Parabéns! Você finalizou o Currículo Base."
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Você não é mais um passageiro no aprendizado do inglês; você é o piloto. Você tem a base, as ferramentas e a confiança para ir a qualquer lugar."
-        },
-        {
-            type: "paragraph",
-            content: "E agora, você se encontra em uma encruzilhada. Não uma encruzilhada de confusão, mas de **oportunidade**. Para qual direção você vai apontar sua nova habilidade?"
-        },
-        {
-            type: "paragraph",
-            content: "Este pilar não é um final. É o início da sua jornada de maestria. Ele foi desenhado para funcionar como uma **bússola**, te ajudando a escolher o caminho mais rápido e motivador para seus objetivos. E, ao final, te conectar com nosso especialista para traçar o mapa definitivo."
-        },
-        {
-            type: "box-warning",
-            title: "Erro comum",
-            content: "Encarar a encruzilhada como confusão, e não como oportunidade. A indecisão é o maior inimigo do progresso. Use a bússola para escolher seu próximo destino com clareza."
+            type: "system-status",
+            content: "MISSION BRIEFING: FINAL STAGE. Calculating trajectory."
         },
         {
             type: "h2",
-            content: "Parte 1: A Bússola do Futuro – Qual é o seu Próximo Destino?"
+            content: "Introdução: O Fim do Tutorial"
+        },
+        {
+            type: "paragraph",
+            content: "Nos videogames, você acabou de sair da 'Ilha do Tutorial'. O mapa-múndi está aberto. Você tem o barco, a bússola e a tripulação. Para onde você navega? A indecisão aqui é fatal. Quem não sabe para onde vai, fica parado no porto."
+        },
+        {
+            type: "h2",
+            content: "Parte 1: O Algoritmo de Decisão Tática"
+        },
+        {
+            type: "paragraph",
+            content: "Responda rápido para descobrir seu próximo passo ideal."
+        },
+        {
+            type: "interactive-quiz",
+            content: "Q1: Você precisa do inglês para TRABALHO nos próximos 3 meses?|SIM (Urgente)|NÃO (Longo Prazo)|0"
+        },
+        {
+            type: "reveal-box",
+            title: "Se respondeu SIM:",
+            content: "- Já tem o emprego? -> Faça **Business Elite** ou **IT Pro**.\n- Está procurando? -> Faça **Job Hunter**.\n\nFoco total em vocabulário profissional."
+        },
+        {
+            type: "reveal-box",
+            title: "Se respondeu NÃO:",
+            content: "- Tem viagem marcada? -> Faça **Global Traveler**.\n- Quer apenas curtir filmes/séries? -> Faça **Pop Culture**.\n\nFoco em diversão e cultura."
+        },
+        {
+            type: "h2",
+            content: "Parte 2: O Contrato de Compromisso"
+        },
+        {
+            type: "paragraph",
+            content: "Estudos mostram que escrever suas metas aumenta em 42% a chance de realizá-las. Assine seu compromisso mental agora."
+        },
+        {
+            type: "terminal-view",
+            content: [
+                "COMMITMENT PROTOCOL:",
+                "I, [SEU NOME], declare that I have completed the Foundation Phase.",
+                "My next target is: [SUA ESPECIALIZAÇÃO].",
+                "I will dedicate 15 minutes daily.",
+                "Status: SIGNED."
+            ]
+        },
+        {
+            type: "h2",
+            content: "Parte 3: Suporte Humano (Human Intel)"
+        },
+        {
+            type: "paragraph",
+            content: "Ainda está confuso? O algoritmo não resolveu? Temos um agente humano esperando por você."
         },
         {
             type: "box-action",
-            title: "Ação prática",
-            content: "Responda as perguntas a seguir com honestidade. Anote suas respostas (A, B, C, D, etc.). No final, você terá um perfil claro de qual caminho seguir em sua especialização."
-        },
-        {
-            type: "h3",
-            content: "Pergunta 1: Qual destes cenários descreve melhor sua **necessidade profissional mais urgente**?"
-        },
-        {
-            type: "list",
-            content: [
-                "(A) Participar de reuniões, negociar e escrever e-mails corporativos.",
-                "(B) Preparar-me para uma entrevista de emprego em uma multinacional.",
-                "(C) Discutir projetos, participar de *dailies* e entender documentação na área de tecnologia.",
-                "(D) Viajar o mundo trabalhando remotamente, fechando projetos com clientes internacionais.",
-                "(E) Criar campanhas de marketing e *pitches* de venda para um público global.",
-                "(F) Ler artigos científicos, participar de congressos ou atender pacientes estrangeiros.",
-                "(G) Escrever um artigo acadêmico ou preparar-me para um mestrado/doutorado no exterior.",
-                "(H) Expandir meu canal do YouTube ou perfil no Instagram para uma audiência internacional."
-            ]
-        },
-        {
-            type: "h3",
-            content: "Pergunta 2: Qual destas **habilidades** te traria o maior retorno sobre o investimento (de tempo e dinheiro) nos próximos 6 meses?"
-        },
-        {
-            type: "list",
-            content: [
-                "(A) A habilidade de apresentar um relatório trimestral para diretores com confiança.",
-                "(B) A habilidade de responder \"Tell me about yourself\" de uma forma que impressione qualquer recrutador.",
-                "(C) A habilidade de explicar um *bug* complexo para uma equipe de desenvolvedores na Índia.",
-                "(D) A habilidade de negociar o aluguel de um Airbnb em Bali e, na mesma semana, o escopo de um projeto com um cliente na Califórnia.",
-                "(E) A habilidade de escrever um e-mail marketing que converte em vendas no mercado americano.",
-                "(F) A habilidade de entender uma apresentação sobre uma nova técnica cirúrgica em um congresso internacional.",
-                "(G) A habilidade de defender a tese do seu *paper* em um painel com outros pesquisadores.",
-                "(H) A habilidade de criar um roteiro de vídeo viral que funcione culturalmente nos EUA."
-            ]
-        },
-        {
-            type: "h2",
-            content: "Parte 2: Decodificando seu Perfil – Os 8 Caminhos da Especialização"
-        },
-        {
-            type: "paragraph",
-            content: "Agora, veja qual letra você mais marcou e descubra seu perfil."
-        },
-        {
-            type: "list",
-            content: [
-                "**Se você marcou mais (A) – Perfil: O Estrategista Corporativo**\n    *   **Seu Caminho:** **Inglês para Negócios (Business English)**. Você precisa da linguagem do poder corporativo. Seu foco é clareza, profissionalismo e impacto no mundo dos negócios.",
-                "**Se você marcou mais (B) – Perfil: O Caçador de Oportunidades**\n    *   **Seu Caminho:** **Inglês para Entrevistas de Emprego (Job Interview Prep)**. Sua necessidade é de altíssimo impacto e curta duração. Você precisa da ferramenta certa para conquistar a próxima grande oportunidade da sua carreira.",
-                "**Se você marcou mais (C) – Perfil: O Construtor de Tecnologia**\n    *   **Seu Caminho:** **Inglês para Profissionais de TI (English for IT)**. Você vive em um mundo de *frameworks*, *APIs* e *sprints*. Sua comunicação precisa ser tão lógica e precisa quanto seu código.",
-                "**Se você marcou mais (D) – Perfil: O Nômade Global**\n    *   **Seu Caminho:** **Inglês para Nômades Digitais e Freelancers**. Você é um \"exército de um homem só\". Precisa da versatilidade de negociar um projeto e, no dia seguinte, pedir um café como um local.",
-                "**Se você marcou mais (E) – Perfil: O Vendedor de Ideias**\n    *   **Seu Caminho:** **Inglês para Marketing e Vendas (English for Marketing & Sales)**. Você não fala apenas inglês; você persuade, engaja e converte. Sua ferramenta é a palavra, e ela precisa ser afiada para o mercado global.",
-                "**Se você marcou mais (F) – Perfil: O Guardião da Saúde**\n    *   **Seu Caminho:** **Inglês para a Área da Saúde (Medical English)**. Precisão é tudo. Um termo errado pode ter consequências sérias. Seu foco é a comunicação técnica e humana no cuidado com a vida.",
-                "**Se você marcou mais (G) – Perfil: O Desbravador Acadêmico**\n    *   **Seu Caminho:** **Inglês para o Universo Acadêmico (Academic English)**. Sua arena é a da pesquisa, dos dados e da argumentação. Você precisa do inglês formal e estruturado para publicar e defender suas ideias.",
-                "**Se você marcou mais (H) – Perfil: O Influenciador Global**\n    *   **Seu Caminho:** **Inglês para Criadores de Conteúdo (Content Creators)**. Seu idioma precisa atravessar culturas. Você precisa entender de *trends*, gírias e *storytelling* que ressoem com uma audiência global."
-            ]
-        },
-        {
-            type: "h2",
-            content: "Parte 3: A Consulta Estratégica – Seu Mapa Personalizado para a Maestria"
-        },
-        {
-            type: "paragraph",
-            content: "Você usou a bússola e identificou sua direção. Excelente. Agora, é hora de sentar com um cartógrafo experiente para desenhar o mapa."
-        },
-        {
-            type: "paragraph",
-            content: "**É para isso que serve sua segunda Consultoria Pedagógica.**"
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Agende sua consultoria estratégica. É a diferença entre ter um destino e ter um plano de voo detalhado para chegar lá. Validar sua escolha, traçar um plano de estudos micro e definir metas SMART para seus primeiros 30 dias de especialização."
-        },
-        {
-            type: "h2",
-            content: "Parte 4: Seu Kit de Partida para a Nova Jornada (Bônus)"
-        },
-        {
-            type: "box-action",
-            title: "Ação prática",
-            content: "Acesse seu Kit de Partida para a Nova Jornada: Bônus 1 (Acesso Vitalício ao Grupo VIP de Alunos), Bônus 2 (Ebook \"Vocabulário do Dia a Dia: 100 Expressões que Todo Nativo Usa\"), Bônus 3 (Guia Rápido \"Conversação para Viagens: 50 Frases Essenciais\")."
-        },
-        {
-            type: "h2",
-            content: "Conclusão: A Jornada é Sua. A Missão é Nossa."
-        },
-        {
-            type: "paragraph",
-            content: "Você chegou ao final do começo. Agora, uma nova e excitante fase se inicia: a da especialização, do impacto e da maestria."
-        },
-        {
-            type: "box-insight",
-            title: "Insight-chave",
-            content: "Cada módulo é uma ponte entre conhecimento e oportunidade, entre fluência e impacto real."
-        },
-        {
-            type: "paragraph",
-            content: "Você já construiu a fundação. **Agora é hora de construir seu legado em inglês.**"
-        },
-        {
-            type: "h2",
-            content: "Manifesto do Aluno Vitalício"
-        },
-        {
-            type: "paragraph",
-            content: "Para encerrar esta etapa, quero deixar com você o código de honra dos nossos alunos mais bem-sucedidos. Imprima isso, cole na parede ou salve no celular."
-        },
-        {
-            type: "list",
-            content: [
-                "1.  **Eu não estudo inglês; eu vivo em inglês.** O idioma não é uma tarefa, é uma ferramenta de vida.",
-                "2.  **Errar é meu método de aprendizado.** Eu não tenho vergonha de tentar. Cada erro é um dado que melhora meu algoritmo mental.",
-                "3.  **Consistência vence intensidade.** 15 minutos todo dia valem mais que 5 horas no sábado.",
-                "4.  **Eu sou o responsável.** Não culpo o professor, o método ou a falta de tempo. Eu crio minhas oportunidades.",
-                "5.  **A fluência é uma jornada, não um destino.** Eu nunca paro de aprender, porque o mundo nunca para de evoluir."
-            ]
-        },
-        {
-            type: "paragraph",
-            content: "Seja bem-vindo à elite dos autodidatas."
+            title: "Consultoria Estratégica",
+            content: "Agende sua sessão individual. Vamos diagnosticar seu nível atual, entender seus objetivos de vida e desenhar um plano de estudos personalizado para os próximos 6 meses."
         },
         {
             type: "pillar-end",
-            title: "Parabéns por concluir o Pilar de Especializações!",
-            content: "Você já construiu a fundação. Agora é hora de construir seu legado em inglês, escolhendo o caminho que te levará à maestria em sua área de interesse."
+            title: "MISSÃO CUMPRIDA",
+            content: "O Currículo Base está finalizado. Você sobreviveu. Você evoluiu. Agora, vá e conquiste o mundo. End of Transmission."
         }
     ]
 };
 
-export const PILLARS_CONTENT: Record<number, PillarData> = {
+export const PILLARS_CONTENT: { [key: number]: PillarData } = {
     1: PILAR_1_DATA,
     2: PILAR_2_DATA,
     3: PILAR_3_DATA,
