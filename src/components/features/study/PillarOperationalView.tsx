@@ -10,6 +10,7 @@ import {
 import { ContentBlock, PillarData, PillarModule } from "@/types/study";
 import { cn } from "@/lib/utils";
 import { TranslatablePhrase } from "@/components/ui/TranslatablePhrase";
+import { useProgress } from "@/context/ProgressContext";
 
 interface PillarOperationalViewProps {
     data: PillarData;
@@ -894,8 +895,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         data.modules?.[0]?.id || null
     );
 
-    // Track completed modules locally (in real app, this would come from context/API)
-    const [completedModules, setCompletedModules] = useState<Set<string>>(new Set());
+    const { markPillarModuleAsCompleted, isPillarModuleCompleted } = useProgress();
 
     // If no modules, fallback (or handle legacy blocks) - ideally we migrate all
     if (!data.modules) {
@@ -909,8 +909,8 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
 
     const handleModuleClick = (moduleId: string, status: string | undefined, index: number) => {
         // Allow clicking on completed or active modules
-        const isCompleted = completedModules.has(moduleId);
-        const isUnlocked = index === 0 || completedModules.has(data.modules![index - 1]?.id);
+        const isCompleted = isPillarModuleCompleted(moduleId);
+        const isUnlocked = index === 0 || isPillarModuleCompleted(data.modules![index - 1]?.id);
 
         if (status === 'locked' && !isCompleted && !isUnlocked) return;
 
@@ -935,7 +935,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
 
     const handleCompleteModule = (currentModuleId: string, currentIndex: number) => {
         // Mark as completed
-        setCompletedModules(prev => new Set([...prev, currentModuleId]));
+        markPillarModuleAsCompleted(currentModuleId);
 
         // Close current module
         setActiveModuleId(null);
@@ -997,8 +997,8 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
             <div className="space-y-4">
                 {data.modules.map((module, index) => {
                     const isActive = activeModuleId === module.id;
-                    const isCompleted = completedModules.has(module.id);
-                    const isFirstUnlockedIncomplete = index === 0 || completedModules.has(data.modules![index - 1]?.id);
+                    const isCompleted = isPillarModuleCompleted(module.id);
+                    const isFirstUnlockedIncomplete = index === 0 || isPillarModuleCompleted(data.modules![index - 1]?.id);
                     const isLocked = module.status === 'locked' && !isCompleted && !isFirstUnlockedIncomplete;
                     const isHighlighted = highlightedModuleId === module.id;
 

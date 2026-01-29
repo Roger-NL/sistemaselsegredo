@@ -15,7 +15,7 @@ export default function PilarPage() {
     const params = useParams();
     const pillarId = Number(params.id) || 1;
 
-    const { isPillarUnlocked, getCurrentPillarNumber } = useProgress();
+    const { isPillarUnlocked, getCurrentPillarNumber, isPillarModuleCompleted } = useProgress();
 
     const pillar = PILLARS[pillarId - 1];
     const isUnlocked = isPillarUnlocked(pillarId);
@@ -72,6 +72,11 @@ export default function PilarPage() {
 
     // Selecionar conteúdo baseado no ID do Map
     const activeContent = PILLARS_CONTENT[pillarId] || null;
+
+    // Verificar se todos os módulos (se houver) foram completados
+    const areAllModulesCompleted = activeContent?.modules
+        ? activeContent.modules.every(m => isPillarModuleCompleted(m.id))
+        : true;
 
     return (
         <TubesBackground className="min-h-screen min-h-[100dvh]">
@@ -130,14 +135,24 @@ export default function PilarPage() {
                                 {/* Ação Final do Pilar (Legacy or Global) */}
                                 <div className="mt-12 flex justify-center pb-20">
                                     <TacticalButton
-                                        variant="neon"
-                                        onClick={handleStartQuiz}
-                                        className="py-4 px-8 text-lg"
+                                        variant={areAllModulesCompleted ? "neon" : "ghost"}
+                                        onClick={areAllModulesCompleted ? handleStartQuiz : undefined}
+                                        disabled={!areAllModulesCompleted}
+                                        className={`py-4 px-8 text-lg ${!areAllModulesCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         <span className="flex items-center gap-3">
-                                            <CheckCircle2 className="w-6 h-6" />
-                                            Confirmar Leitura e Iniciar Missão
-                                            <ArrowRight className="w-5 h-5" />
+                                            {areAllModulesCompleted ? (
+                                                <>
+                                                    <CheckCircle2 className="w-6 h-6" />
+                                                    Confirmar Leitura e Iniciar Missão
+                                                    <ArrowRight className="w-5 h-5" />
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Lock className="w-6 h-6" />
+                                                    Complete todos os módulos para avançar
+                                                </>
+                                            )}
                                         </span>
                                     </TacticalButton>
                                 </div>

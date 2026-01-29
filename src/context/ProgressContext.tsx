@@ -54,6 +54,12 @@ interface ProgressContextType {
     isCourseFullyComplete: () => boolean;
     /** Verifica se uma especialização específica está completa */
     isSpecializationComplete: (specId: string) => boolean;
+    /** Lista de IDs de módulos de pilares completados (ex: 'p1-m1') */
+    completedPillarModules: string[];
+    /** Marca um módulo de pilar como completado */
+    markPillarModuleAsCompleted: (moduleId: string) => void;
+    /** Verifica se um módulo de pilar está completado */
+    isPillarModuleCompleted: (moduleId: string) => boolean;
 }
 
 const ProgressContext = createContext<ProgressContextType | null>(null);
@@ -77,6 +83,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const [specializationStatus, setSpecializationStatus] = useState<'studying' | 'pending_approval' | 'completed' | null>(null);
     const [completedSpecializations, setCompletedSpecializations] = useState<string[]>([]);
     const [completedModules, setCompletedModules] = useState<Record<string, number[]>>({});
+    const [completedPillarModules, setCompletedPillarModules] = useState<string[]>([]);
     const [isHydrated, setIsHydrated] = useState(false);
 
     // Carrega progresso do localStorage na montagem
@@ -92,6 +99,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                     setSpecializationStatus(parsed.specializationStatus || null);
                     setCompletedSpecializations(parsed.completedSpecializations || []);
                     setCompletedModules(parsed.completedModules || {});
+                    setCompletedPillarModules(parsed.completedPillarModules || []);
                 } else {
                     // Formato antigo (apenas status)
                     setPillarStatus(parsed);
@@ -111,10 +119,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 chosenSpecialization,
                 specializationStatus,
                 completedSpecializations,
-                completedModules
+                completedModules,
+                completedPillarModules
             }));
         }
-    }, [pillarStatus, chosenSpecialization, specializationStatus, completedSpecializations, completedModules, isHydrated]);
+    }, [pillarStatus, chosenSpecialization, specializationStatus, completedSpecializations, completedModules, completedPillarModules, isHydrated]);
 
     // Marca pilar como completado e desbloqueia próximo
     const completePillar = (pillarNumber: number) => {
@@ -263,6 +272,18 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         return Math.min(Math.round(pillarProgress + specProgress), 100);
     };
 
+    // Marca módulo de pilar como completado
+    const markPillarModuleAsCompleted = (moduleId: string) => {
+        if (!completedPillarModules.includes(moduleId)) {
+            setCompletedPillarModules(prev => [...prev, moduleId]);
+        }
+    };
+
+    // Verifica se módulo de pilar está completado
+    const isPillarModuleCompleted = (moduleId: string) => {
+        return completedPillarModules.includes(moduleId);
+    };
+
     // Retorna planetas com status atualizado
     const getPlanetsWithStatus = (): Planet[] => {
         const allComplete = areAllPillarsComplete();
@@ -285,7 +306,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             chosenSpecialization: null,
             specializationStatus: null,
             completedSpecializations: [],
-            completedModules: {}
+            completedModules: {},
+            completedPillarModules: []
         }));
         window.location.reload();
     };
@@ -315,6 +337,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 isSpecializationComplete,
                 finishCurrentSpecialization,
                 getGlobalProgress,
+                completedPillarModules,
+                markPillarModuleAsCompleted,
+                isPillarModuleCompleted,
             }}
         >
             {children}

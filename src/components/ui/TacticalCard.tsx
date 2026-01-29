@@ -54,6 +54,12 @@ const variantColors = {
         glow: "rgba(16, 185, 129, 0.4)",
         status: "text-emerald-400",
     },
+    ghost: {
+        border: "border-white/5",
+        corner: "#94a3b8",
+        glow: "rgba(255, 255, 255, 0.05)",
+        status: "text-slate-400",
+    },
 };
 
 // Componente dos cantos táticos
@@ -194,7 +200,7 @@ export function TacticalCard({
 interface TacticalButtonProps {
     children: React.ReactNode;
     className?: string;
-    variant?: "default" | "neon" | "danger" | "success";
+    variant?: "default" | "neon" | "danger" | "success" | "ghost";
     selected?: boolean;
     disabled?: boolean;
     onClick?: (e: React.MouseEvent) => void;
