@@ -47,7 +47,6 @@ export default function EspecialidadePage() {
     };
 
     return (
-        <TubesBackground className="min-h-screen min-h-[100dvh]">
             <main className="min-h-screen w-full p-4 md:p-12 pointer-events-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6 md:mb-12 relative z-50 pointer-events-auto">
@@ -117,6 +116,5 @@ export default function EspecialidadePage() {
                     </div>
                 </div>
             </main>
-        </TubesBackground>
     );
 }

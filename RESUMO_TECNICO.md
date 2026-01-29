@@ -87,3 +87,25 @@ Atendendo a feedbacks visuais especÃ­ficos para elevar o nÃ­vel "premium" e reso
 | 17:15 | **UI:** Ajuste "Imponente" do Typewriter (Fonte Gigante, Cores Neon) |
 | 17:30 | **FIX:** CorreÃ§Ã£o da proporÃ§Ã£o do Globo (Bug do "Ovo") |
 | 17:40 | **POLISH:** Typewriter Mobile + RemoÃ§Ã£o de Anel + Ajuste de EspaÃ§amento |
+
+
+##  8. REFINAMENTO DE LÓGICA DE ESTUDO E CORREÇÃO DE BUGS (29/01) [MADRUGADA]
+
+Focamos em garantir a integridade do fluxo de estudo no Pilar 1 e a robustez técnica da aplicação.
+
+### Bloqueio Tático do Conteúdo (Pilar 1)
+Implementamos uma regra de negócio crucial para garantir que o aluno consuma todo o material antes de avançar.
+- **Botão 'Confirmar Leitura':** Anteriormente acessível a qualquer momento, agora permanece **BLOQUEADO** (estado 'Ghost') até que todos os módulos do pilar sejam completados.
+- **Rastreamento Persistente:** O progresso de cada módulo individual (p1-m1, p1-m2, etc.) agora é salvo no localStorage via ProgressContext. Isso significa que o aluno pode fechar o navegador e voltar e seu progresso dentro do pilar estará salvo.
+- **Feedback Visual:** O botão muda de um estado desabilitado com ícone de cadeado ('Complete todos os módulos') para um estado ativo Neon ('Iniciar Missão') assim que o último módulo é finalizado.
+
+### Correções de Runtime (Estabilidade)
+- **Erro de Variante 'Ghost':** Identificamos e corrigimos um erro onde o componente TacticalButton recebia uma variante de estilo ('ghost') que não estava definida no TacticalCard, causando quebra da aplicação (Runtime TypeError: Cannot read properties of undefined).
+    - **Solução:** Adicionamos formalmente a definição de estilo ghost (bordas transparentes, texto slate, glow sutil) ao objeto de temas do componente.
+
+###  Histórico de Mudanças
+| Horário | Mudança |
+|---------|---------|
+| 04:15 | **FEAT:** Lógica de bloqueio do botão final baseada em conclusão de módulos |
+| 04:20 | **DATA:** Persistência de módulos individuais no ProgressContext (LocalStorage) |
+| 04:25 | **FIX:** Definição da variante 'ghost' no TacticalCard (Crash Fix) |

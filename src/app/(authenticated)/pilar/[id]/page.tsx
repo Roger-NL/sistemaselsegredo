@@ -79,7 +79,6 @@ export default function PilarPage() {
         : true;
 
     return (
-        <TubesBackground className="min-h-screen min-h-[100dvh]">
             <div className="min-h-screen min-h-[100dvh] w-full overflow-y-auto pointer-events-auto">
                 <main className="w-full p-4 md:p-8 pb-24 md:pb-8">
                     <div className="max-w-4xl mx-auto">
@@ -201,6 +200,5 @@ export default function PilarPage() {
                     </div>
                 </main>
             </div>
-        </TubesBackground>
     );
 }

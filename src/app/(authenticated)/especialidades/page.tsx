@@ -5,8 +5,6 @@ import { DecisionMatrix } from "@/components/features/decision/DecisionMatrix";
 
 export default function EspecialidadesPage() {
     return (
-        <TubesBackground className="h-screen">
-            <DecisionMatrix />
-        </TubesBackground>
+        <DecisionMatrix />
     );
 }
