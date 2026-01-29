@@ -70,7 +70,7 @@ export default function Page() {
       />
 
       {/* Streak & Leaderboard - Right Side (Desktop) - Minimal Wireframe Style */}
-      <div className="absolute right-6 top-1/2 -translate-y-1/2 hidden xl:flex flex-col items-end gap-4 z-20 pointer-events-auto">
+      <div className="absolute right-6 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-end gap-4 z-20 pointer-events-auto">
 
         {/* Streak Counter - Minimal */}
         <div className="flex items-center gap-3">
