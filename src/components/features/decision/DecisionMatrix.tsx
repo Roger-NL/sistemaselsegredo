@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TacticalCard, TacticalButton } from "@/components/ui/TacticalCard"; // Import correto
 import { useProgress } from "@/context/ProgressContext";
 import { PLANETS } from "@/data/curriculum";
-import { Shield, Target, Map, Cpu, Zap, Activity, Lock, ArrowLeft, BookOpen, Briefcase, Plane, BarChart3, ShoppingBag, Heart, Clapperboard, CheckCircle2 } from "lucide-react";
+import { Shield, Target, Map, Cpu, Zap, Activity, Lock, ArrowLeft, BookOpen, Briefcase, Plane, BarChart3, ShoppingBag, Heart, Clapperboard, CheckCircle2, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { cn } from "@/lib/utils";
@@ -18,15 +18,34 @@ export const DecisionMatrix = () => {
     areAllPillarsComplete,
     canChooseSpecialization,
     getCompletedCount,
-    isSpecializationComplete
+    isSpecializationComplete,
+    hasSeenMissionComplete,
+    markMissionCompleteSeen,
+    getCurrentSpecialization
   } = useProgress();
 
   const allComplete = areAllPillarsComplete();
   const canSelect = canChooseSpecialization();
   const completedCount = getCompletedCount();
+  const currentSpec = getCurrentSpecialization();
 
-  const [step, setStep] = useState<"intro" | "choice" | "diagnostic" | "result">("intro");
+  // Determine initial step:
+  // - If user already has a specialization: show "current" view
+  // - If user completed pillars but hasn't seen intro: show intro
+  // - If user completed pillars and already saw intro: go to choice
+  // - If user hasn't completed pillars: show intro (locked state)
+  const getInitialStep = () => {
+    if (chosenSpecialization) return "current";
+    if (canSelect && hasSeenMissionComplete) return "choice";
+    return "intro";
+  };
+
+  const [step, setStep] = useState<"intro" | "choice" | "current" | "diagnostic" | "result">(getInitialStep);
   const [analyzing, setAnalyzing] = useState(false);
+
+  // Note: We removed the useEffect that was forcing step to "current" 
+  // because it was preventing users from viewing "Outras Especialidades"
+  // The initial step is correctly set by getInitialStep()
 
   // Retorna ícone apropriado para cada especialidade
   const getSpecIcon = (id: string) => {
@@ -45,6 +64,13 @@ export const DecisionMatrix = () => {
     if (!canSelect) return; // Bloqueia se não pode selecionar
     unlockSpecialization(id);
     setStep("result");
+  };
+
+  const handleProceedToChoice = () => {
+    if (canSelect && !hasSeenMissionComplete) {
+      markMissionCompleteSeen();
+    }
+    setStep("choice");
   };
 
   const startDiagnostic = () => {
@@ -95,6 +121,84 @@ export const DecisionMatrix = () => {
         </div>
 
         <AnimatePresence mode="wait">
+          {/* CURRENT SPECIALIZATION VIEW - Shown when user already has a specialization */}
+          {step === "current" && currentSpec && (
+            <motion.div
+              key="current"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.1 }}
+              className="w-full max-w-lg mx-auto"
+            >
+              <div className="relative rounded-2xl p-0.5 sm:p-1">
+                <GlowingEffect
+                  spread={40}
+                  glow={true}
+                  disabled={false}
+                  proximity={128}
+                  inactiveZone={0.05}
+                  borderWidth={2}
+                  variant="white"
+                  className="[--glow-color:theme(colors.violet.500)]"
+                />
+                <div className="relative overflow-hidden rounded-xl border-[0.75px] border-white/10 bg-black/95 p-6 md:p-8 shadow-2xl backdrop-blur-xl">
+                  {/* Decorative background grid */}
+                  <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_100%)] pointer-events-none" />
+
+                  <div className="relative z-10 text-center flex flex-col items-center justify-center gap-5 md:gap-6">
+                    <div className="flex justify-between items-center w-full border-b border-white/5 pb-3">
+                      <span className="text-[9px] font-mono tracking-[0.15em] text-white/30 uppercase">
+                        SYS_ID // MINHA ESPECIALIZAÇÃO
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                        <span className="text-[9px] font-mono tracking-widest text-white/50 uppercase">
+                          EM ESTUDO
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="w-20 h-20 md:w-28 md:h-28 border border-dashed border-violet-500/30 bg-violet-500/10 rounded-full flex items-center justify-center relative">
+                      <div className="absolute inset-0 rounded-full bg-violet-500 blur-xl opacity-20" />
+                      <div className="text-violet-200 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
+                        {getSpecIcon(currentSpec.id)}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 md:space-y-3 max-w-sm">
+                      <h1 className="text-2xl md:text-4xl font-serif text-transparent bg-clip-text bg-gradient-to-b from-violet-200 via-violet-300 to-violet-400 tracking-widest uppercase drop-shadow-sm leading-tight">
+                        {currentSpec.title}
+                      </h1>
+                      <p className="text-white/50 font-mono text-[10px] md:text-xs leading-relaxed px-2">
+                        Você está estudando esta especialização. Continue para dominar as habilidades avançadas.
+                      </p>
+                    </div>
+
+                    <div className="pt-2 w-full flex flex-col gap-3">
+                      <button
+                        onClick={() => router.push(`/especialidade/${currentSpec.id}`)}
+                        className="group relative px-6 py-3 w-full font-mono text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 rounded-sm bg-violet-500 text-white hover:bg-violet-400 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer"
+                      >
+                        Continuar Estudo
+                        <div className="absolute inset-0 -z-10 bg-violet-500 blur-lg opacity-0 group-hover:opacity-50 transition-opacity" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setStep("choice");
+                        }}
+                        className="group relative px-6 py-3 w-full font-mono text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 rounded-sm bg-transparent text-white/70 border border-white/20 hover:bg-white/10 hover:border-white/40 cursor-pointer"
+                      >
+                        Outras Especialidades
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {step === "intro" && (
             <motion.div
               key="intro"
@@ -137,7 +241,7 @@ export const DecisionMatrix = () => {
                       animate={{ rotate: 360 }}
                       transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
                       className={`w-20 h-20 md:w-28 md:h-28 border border-dashed ${canSelect ? "border-purple-500/30 bg-purple-500/5" : "border-red-500/30 bg-red-500/5"} rounded-full flex items-center justify-center relative group cursor-pointer flex-shrink-0`}
-                      onClick={() => setStep("choice")}
+                      onClick={handleProceedToChoice}
                     >
                       <div className={`absolute inset-0 rounded-full blur-xl opacity-20 ${canSelect ? "bg-purple-500" : "bg-red-500"}`} />
                       {canSelect ? (
@@ -173,7 +277,7 @@ export const DecisionMatrix = () => {
 
                     <div className="pt-2 w-full flex justify-center">
                       <button
-                        onClick={() => setStep("choice")}
+                        onClick={handleProceedToChoice}
                         className={cn(
                           "group relative px-6 py-3 w-full sm:w-auto min-w-[180px] font-mono text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 rounded-sm",
                           canSelect
@@ -213,6 +317,7 @@ export const DecisionMatrix = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
                 {PLANETS.map((planet) => {
                   const isCompleted = isSpecializationComplete(planet.id);
+                  const isCurrentSpec = chosenSpecialization === planet.id;
                   return (
                     <div key={planet.id} className={`group relative h-full rounded-xl p-1 transition-all duration-300 ${!canSelect ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
                       onClick={() => handleManualChoice(planet.id)}
@@ -227,7 +332,8 @@ export const DecisionMatrix = () => {
                         variant={isCompleted ? "white" : "default"}
                         className={cn(
                           isCompleted && "[--glow-color:theme(colors.emerald.500)]",
-                          !isCompleted && canSelect && "[--glow-color:theme(colors.violet.500)]",
+                          !isCompleted && isCurrentSpec && "[--glow-color:theme(colors.violet.500)]",
+                          !isCompleted && !isCurrentSpec && canSelect && "[--glow-color:theme(colors.violet.500)]",
                           !canSelect && "[--glow-color:theme(colors.zinc.500)]"
                         )}
                       />
@@ -235,9 +341,19 @@ export const DecisionMatrix = () => {
                       <div className={cn(
                         "relative flex h-full flex-col justify-between overflow-hidden rounded-lg border-[0.75px] bg-[#050505] p-3 sm:p-5 shadow-sm transition-all",
                         isCompleted ? "border-emerald-500/30 bg-emerald-950/10" :
-                          canSelect ? "border-white/10 group-hover:border-violet-500/30 bg-black" :
-                            "border-white/5 bg-black"
+                          isCurrentSpec ? "border-violet-500/50 bg-violet-950/20" :
+                            canSelect ? "border-white/10 group-hover:border-violet-500/30 bg-black" :
+                              "border-white/5 bg-black"
                       )}>
+                        {/* Current spec indicator */}
+                        {isCurrentSpec && (
+                          <div className="absolute top-2 right-2">
+                            <span className="px-2 py-0.5 bg-violet-500/30 text-violet-300 text-[8px] font-mono uppercase rounded-full">
+                              Atual
+                            </span>
+                          </div>
+                        )}
+
                         {/* System Header (Simulating TacticalCard) */}
                         <div className="flex justify-between items-start mb-3 border-b border-white/5 pb-2">
                           <span className="font-mono text-[9px] text-white/30 uppercase tracking-widest">

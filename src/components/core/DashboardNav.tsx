@@ -7,9 +7,10 @@ import { getRank } from "@/utils/ranks";
 
 interface DashboardNavProps {
     studentName?: string;
+    studentStreak?: number;
 }
 
-export function DashboardNav({ studentName = "Aluno" }: DashboardNavProps) {
+export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: DashboardNavProps) {
     const router = useRouter();
     const { getCompletedCount, getGlobalProgress } = useProgress();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,7 +20,8 @@ export function DashboardNav({ studentName = "Aluno" }: DashboardNavProps) {
     const globalProgress = getGlobalProgress();
 
     // Mock streak data
-    const currentStreak = 7;
+    // const currentStreak = 7;
+    const currentStreak = studentStreak;
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 pointer-events-auto">

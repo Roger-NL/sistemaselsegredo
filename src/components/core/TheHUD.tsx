@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Lock, ChevronRight, Check, Star } from "lucide-react";
+import { X, Lock, ChevronRight, Check, Star, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type Pillar } from "@/data/curriculum";
+import { type Pillar, PLANETS } from "@/data/curriculum";
 import { getRank } from "@/utils/ranks";
 import { useProgress } from "@/context/ProgressContext";
 
@@ -21,7 +21,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
     const [mounted, setMounted] = useState(false);
     const currentRank = getRank(completedCount);
     const router = useRouter();
-    const { areAllPillarsComplete, canChooseSpecialization } = useProgress();
+    const { areAllPillarsComplete, canChooseSpecialization, chosenSpecialization } = useProgress();
 
     const allComplete = areAllPillarsComplete();
     const canSelectSpecialization = canChooseSpecialization();
@@ -106,6 +106,49 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
 
                         {/* Lista de Pilares Grid */}
                         <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+                            {/* Minha Especialização - Mostrar primeiro se já tem uma */}
+                            {allComplete && chosenSpecialization && (
+                                <div className="mb-8">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <Star className="w-4 h-4 text-violet-400" />
+                                        <span className="text-[10px] font-mono tracking-[0.3em] text-violet-400/80 uppercase">Minha Especialização</span>
+                                    </div>
+                                    <div
+                                        onClick={() => {
+                                            onClose();
+                                            router.push(`/especialidade/${chosenSpecialization}`);
+                                        }}
+                                        className="group relative p-6 border transition-all duration-300 flex items-center justify-between overflow-hidden bg-gradient-to-r from-violet-500/30 to-purple-500/30 border-violet-500/60 hover:border-violet-400 cursor-pointer"
+                                    >
+                                        <div className="flex items-center gap-6 z-10">
+                                            <span className="text-2xl font-mono font-bold tracking-tighter text-violet-300">
+                                                ★
+                                            </span>
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-mono uppercase tracking-[0.2em] mb-1 text-violet-300">
+                                                    Continuar Estudo →
+                                                </span>
+                                                <span className="font-serif text-lg tracking-wide text-violet-200 font-medium">
+                                                    {pillars.length > 0 && PLANETS.find(p => p.id === chosenSpecialization)?.title}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <ChevronRight className="w-5 h-5 text-violet-300 group-hover:translate-x-1 transition-transform" />
+                                        <div className="absolute inset-0 bg-violet-500 blur-[2px] opacity-20 pointer-events-none group-hover:opacity-30 transition-opacity" />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Título da seção de pilares */}
+                            {allComplete && (
+                                <div className="flex items-center gap-2 mb-4">
+                                    <BookOpen className="w-4 h-4 text-[#EEF4D4]/60" />
+                                    <span className="text-[10px] font-mono tracking-[0.3em] text-[#EEF4D4]/60 uppercase">
+                                        {chosenSpecialization ? "Revisar Pilares" : "Todos os Pilares Completos"}
+                                    </span>
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                                 {pillars.map((pillar, index) => {
                                     const isLocked = pillar.status === "locked";
@@ -178,7 +221,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                                             text-[10px] font-mono uppercase tracking-[0.2em] mb-1 transition-colors
                                                             ${isActive ? "text-black/60" : "text-[#EEF4D4]/60"}
                                                         `}>
-                                                            {isCompleted ? "Concluído com sucesso" : "Clique para acessar →"}
+                                                            {isCompleted ? (allComplete && chosenSpecialization ? "Revisar →" : "Concluído com sucesso") : "Clique para acessar →"}
                                                         </span>
                                                         <span className={`
                                                             font-serif text-lg tracking-wide transition-colors
@@ -226,7 +269,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
 
                                         <div className="flex flex-col">
                                             <span className="text-[10px] font-mono uppercase tracking-[0.2em] mb-1 text-violet-400">
-                                                {allComplete ? "Disponível" : "Visualizar"}
+                                                {allComplete ? (chosenSpecialization ? "Outras Especialidades" : "Escolher Especialidade") : "Visualizar"}
                                             </span>
                                             <span className="font-serif text-lg tracking-wide text-violet-300 font-medium">
                                                 Especialidades

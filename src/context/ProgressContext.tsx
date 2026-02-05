@@ -54,6 +54,10 @@ interface ProgressContextType {
     isCourseFullyComplete: () => boolean;
     /** Verifica se uma especialização específica está completa */
     isSpecializationComplete: (specId: string) => boolean;
+    /** Verifica se o usuário já viu a tela de 'Missão Concluída' */
+    hasSeenMissionComplete: boolean;
+    /** Marca que o usuário viu a tela de 'Missão Concluída' */
+    markMissionCompleteSeen: () => void;
     /** Lista de IDs de módulos de pilares completados (ex: 'p1-m1') */
     completedPillarModules: string[];
     /** Marca um módulo de pilar como completado */
@@ -84,6 +88,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const [completedSpecializations, setCompletedSpecializations] = useState<string[]>([]);
     const [completedModules, setCompletedModules] = useState<Record<string, number[]>>({});
     const [completedPillarModules, setCompletedPillarModules] = useState<string[]>([]);
+    const [hasSeenMissionComplete, setHasSeenMissionComplete] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
 
     // Carrega progresso do localStorage na montagem
@@ -100,6 +105,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                     setCompletedSpecializations(parsed.completedSpecializations || []);
                     setCompletedModules(parsed.completedModules || {});
                     setCompletedPillarModules(parsed.completedPillarModules || []);
+                    setHasSeenMissionComplete(parsed.hasSeenMissionComplete || false);
                 } else {
                     // Formato antigo (apenas status)
                     setPillarStatus(parsed);
@@ -120,10 +126,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 specializationStatus,
                 completedSpecializations,
                 completedModules,
-                completedPillarModules
+                completedPillarModules,
+                hasSeenMissionComplete
             }));
         }
-    }, [pillarStatus, chosenSpecialization, specializationStatus, completedSpecializations, completedModules, completedPillarModules, isHydrated]);
+    }, [pillarStatus, chosenSpecialization, specializationStatus, completedSpecializations, completedModules, completedPillarModules, hasSeenMissionComplete, isHydrated]);
 
     // Marca pilar como completado e desbloqueia próximo
     const completePillar = (pillarNumber: number) => {
@@ -284,6 +291,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         return completedPillarModules.includes(moduleId);
     };
 
+    // Marca que o usuário viu a tela de Missão Concluída
+    const markMissionCompleteSeen = () => {
+        setHasSeenMissionComplete(true);
+    };
+
     // Retorna planetas com status atualizado
     const getPlanetsWithStatus = (): Planet[] => {
         const allComplete = areAllPillarsComplete();
@@ -307,7 +319,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             specializationStatus: null,
             completedSpecializations: [],
             completedModules: {},
-            completedPillarModules: []
+            completedPillarModules: [],
+            hasSeenMissionComplete: false
         }));
         window.location.reload();
     };
@@ -340,6 +353,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 completedPillarModules,
                 markPillarModuleAsCompleted,
                 isPillarModuleCompleted,
+                hasSeenMissionComplete,
+                markMissionCompleteSeen,
             }}
         >
             {children}

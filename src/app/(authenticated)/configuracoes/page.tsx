@@ -4,8 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardNav } from "@/components/core/DashboardNav";
 
+import { useAuth } from "@/context/AuthContext";
+
 export default function ConfiguracoesPage() {
     const router = useRouter();
+    const { user } = useAuth();
 
     // Mock settings state
     const [settings, setSettings] = useState({
@@ -37,7 +40,7 @@ export default function ConfiguracoesPage() {
     return (
         <div className="min-h-screen bg-[#FAFAFA] pointer-events-auto">
             {/* Navigation */}
-            <DashboardNav studentName="Rogério Augusto" />
+            <DashboardNav studentName={user?.name || "Rogério Augusto"} />
 
             {/* Main Content */}
             <main className="pt-24 pb-12 px-4 max-w-3xl mx-auto">
@@ -125,7 +128,7 @@ export default function ConfiguracoesPage() {
                                 </div>
                                 <div className="text-left">
                                     <p className="font-medium text-gray-900">Alterar E-mail</p>
-                                    <p className="text-sm text-gray-500">rogerio@email.com</p>
+                                    <p className="text-sm text-gray-500">{user?.email || "rogerio@email.com"}</p>
                                 </div>
                             </div>
                             <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">

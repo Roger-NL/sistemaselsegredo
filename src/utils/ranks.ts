@@ -1,14 +1,15 @@
+// Patentes de Piloto - Do iniciante ao lendário!
 export const RANKS = [
-    "Recruta",          // 0
-    "Cadete",           // 1
-    "Soldado",          // 2
-    "Cabo",             // 3
-    "Sargento",         // 4
-    "Tenente",          // 5
-    "Capitão",          // 6
-    "Major",            // 7
-    "Coronel",          // 8
-    "General de Exército" // 9
+    "Passageiro",        // 0 - Só olhando pela janela
+    "Simulador",         // 1 - Treinou no joguinho
+    "Drone",             // 2 - Voa baixinho
+    "Ultraleve",         // 3 - Ganhando altitude
+    "Comercial",         // 4 - Coisa séria agora
+    "Capitão",           // 5 - Cruzando continentes
+    "Comandante",        // 6 - Lidera a formação
+    "Ás",                // 7 - Elite do ar
+    "Supersônico",       // 8 - Quebra barreira do som
+    "Lenda"              // 9 - Hall da Fama
 ];
 
 export const getRank = (completedCount: number) => {

@@ -6,33 +6,35 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
-export default function LoginPage() {
-    const [identifier, setIdentifier] = useState("");
+export default function CadastroPage() {
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { login } = useAuth();
+    const { register } = useAuth();
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
 
-        if (!identifier || !password) {
+        if (!name || !email || !password || !confirmPassword) {
             setError("Preencha todos os campos");
             return;
         }
 
         setIsSubmitting(true);
 
-        const result = await login(identifier, password);
+        const result = await register(name, email, password, confirmPassword);
 
         if (result.success) {
             setTimeout(() => {
                 router.push("/dashboard");
             }, 500);
         } else {
-            setError(result.error || "Erro ao fazer login");
+            setError(result.error || "Erro ao criar conta");
             setIsSubmitting(false);
         }
     };
@@ -47,24 +49,25 @@ export default function LoginPage() {
                         ES English Academy
                     </h1>
                     <p className="text-lg text-slate-600 leading-relaxed mb-8">
-                        Abandon the traditional classroom. Enter the operational command center designed for rapid fluency acquisition.
+                        Join the elite. Begin your journey to fluency with our
+                        revolutionary tactical learning methodology.
                     </p>
                     <div className="grid grid-cols-2 gap-4 text-sm text-slate-500">
                         <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                            Active Methodology
+                            Personalized Learning
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                            Real-world Scenarios
+                            Track Your Progress
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                            Global Certification
+                            Global Community
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                            Elite Community
+                            Certification Ready
                         </div>
                     </div>
                 </div>
@@ -75,10 +78,10 @@ export default function LoginPage() {
                 <div className="w-full max-w-sm space-y-8">
                     <div className="text-center lg:text-left">
                         <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-                            Access Command
+                            Criar Conta
                         </h2>
                         <p className="mt-2 text-sm text-slate-500">
-                            Enter your credentials to access the dashboard.
+                            Preencha seus dados para começar sua jornada.
                         </p>
                     </div>
 
@@ -91,19 +94,35 @@ export default function LoginPage() {
 
                         <div className="space-y-4">
                             <div>
-                                <label htmlFor="identifier" className="block text-sm font-medium text-slate-700">
-                                    Email ou Nome
+                                <label htmlFor="name" className="block text-sm font-medium text-slate-700">
+                                    Nome
                                 </label>
                                 <input
-                                    id="identifier"
-                                    name="identifier"
+                                    id="name"
+                                    name="name"
                                     type="text"
-                                    autoComplete="username"
+                                    autoComplete="name"
                                     required
-                                    value={identifier}
-                                    onChange={(e) => setIdentifier(e.target.value)}
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
                                     className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black sm:text-sm transition-colors"
-                                    placeholder="seu@email.com ou nome"
+                                    placeholder="Seu nome"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+                                    Email
+                                </label>
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black sm:text-sm transition-colors"
+                                    placeholder="seu@email.com"
                                 />
                             </div>
                             <div>
@@ -114,7 +133,7 @@ export default function LoginPage() {
                                     id="password"
                                     name="password"
                                     type="password"
-                                    autoComplete="current-password"
+                                    autoComplete="new-password"
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -122,25 +141,21 @@ export default function LoginPage() {
                                     placeholder="••••••••"
                                 />
                             </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <input
-                                    id="remember-me"
-                                    name="remember-me"
-                                    type="checkbox"
-                                    className="h-4 w-4 rounded border-slate-300 text-black focus:ring-black"
-                                />
-                                <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-900">
-                                    Lembrar-me
+                            <div>
+                                <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700">
+                                    Confirmar Senha
                                 </label>
-                            </div>
-
-                            <div className="text-sm">
-                                <a href="#" className="font-medium text-slate-900 hover:text-slate-700">
-                                    Esqueceu a senha?
-                                </a>
+                                <input
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type="password"
+                                    autoComplete="new-password"
+                                    required
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black sm:text-sm transition-colors"
+                                    placeholder="••••••••"
+                                />
                             </div>
                         </div>
 
@@ -156,18 +171,18 @@ export default function LoginPage() {
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        Autenticando...
+                                        Criando conta...
                                     </span>
                                 ) : (
-                                    "Entrar"
+                                    "Criar Conta"
                                 )}
                             </button>
                         </div>
 
                         <div className="text-center text-sm text-slate-500">
-                            Não tem uma conta?{" "}
-                            <Link href="/cadastro" className="font-medium text-slate-900 hover:text-slate-700">
-                                Criar conta
+                            Já tem uma conta?{" "}
+                            <Link href="/login" className="font-medium text-slate-900 hover:text-slate-700">
+                                Fazer login
                             </Link>
                         </div>
                     </form>
@@ -190,7 +205,7 @@ export default function LoginPage() {
                             transition={{ delay: 0.3 }}
                             className="text-white font-mono text-xl tracking-widest"
                         >
-                            ESTABLISHING SECURE CONNECTION...
+                            INITIALIZING AGENT PROFILE...
                         </motion.div>
                     </motion.div>
                 )}
