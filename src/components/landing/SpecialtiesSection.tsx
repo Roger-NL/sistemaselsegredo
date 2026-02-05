@@ -5,6 +5,7 @@ import {
     Clapperboard, Heart, ShoppingBag, Briefcase,
     Plane, BarChart3, Rocket, ArrowRight, Star
 } from "lucide-react";
+import { useLandingTheme } from "@/context/LandingThemeContext";
 
 const SPECIALTIES = [
     {
@@ -58,8 +59,18 @@ const SPECIALTIES = [
 ];
 
 export function SpecialtiesSection() {
+    // Theme - with safe fallback
+    let isDark = true;
+    try {
+        const theme = useLandingTheme();
+        isDark = theme.isDark;
+    } catch {
+        // Default to dark if outside provider
+    }
+
     return (
-        <section id="specialties" className="py-24 px-4 bg-gradient-to-b from-black via-violet-950/10 to-black relative overflow-hidden">
+        <section id="specialties" className={`py-24 px-4 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-gradient-to-b from-black via-violet-950/10 to-black" : "bg-gradient-to-b from-gray-50 via-violet-100/20 to-white"
+            }`}>
             {/* Background Effects */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.1),transparent_70%)]" />
 
@@ -70,19 +81,20 @@ export function SpecialtiesSection() {
                     whileInView={{ opacity: 1, y: 0 }}
                     className="text-center mb-20"
                 >
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-violet-500/30 bg-violet-500/10 mb-6">
-                        <Rocket className="w-4 h-4 text-violet-400" />
-                        <span className="font-mono text-violet-400 text-xs tracking-widest uppercase">
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-6 ${isDark ? "border-violet-500/30 bg-violet-500/10" : "border-violet-500/40 bg-violet-500/20"
+                        }`}>
+                        <Rocket className="w-4 h-4 text-violet-500" />
+                        <span className={`font-mono text-xs tracking-widest uppercase ${isDark ? "text-violet-400" : "text-violet-600"}`}>
                             Depois dos 9 Pilares
                         </span>
                     </div>
-                    <h2 className="text-4xl md:text-6xl font-bold font-serif text-white mb-4">
+                    <h2 className={`text-4xl md:text-6xl font-bold font-serif mb-4 ${isDark ? "text-white" : "text-gray-900"}`}>
                         Escolha Sua <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-pink-400">
                             Especialidade
                         </span>
                     </h2>
-                    <p className="text-white/50 max-w-xl mx-auto">
+                    <p className={`max-w-xl mx-auto ${isDark ? "text-white/50" : "text-gray-600"}`}>
                         Após dominar os fundamentos, você escolhe uma área de foco para se tornar um verdadeiro especialista.
                     </p>
                 </motion.div>
@@ -126,15 +138,18 @@ export function SpecialtiesSection() {
                                 </div>
 
                                 {/* Content */}
-                                <h3 className="text-xl font-bold text-white mb-2">{spec.title}</h3>
-                                <p className="text-white/50 text-sm mb-4 leading-relaxed">{spec.desc}</p>
+                                <h3 className={`text-xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>{spec.title}</h3>
+                                <p className={`text-sm mb-4 leading-relaxed ${isDark ? "text-white/50" : "text-gray-600"}`}>{spec.desc}</p>
 
                                 {/* Examples Pills */}
                                 <div className="flex flex-wrap gap-2">
                                     {spec.examples.map((ex, i) => (
                                         <span
                                             key={i}
-                                            className="text-xs px-2 py-1 rounded-full bg-white/5 text-white/40 border border-white/10"
+                                            className={`text-xs px-2 py-1 rounded-full border ${isDark
+                                                    ? "bg-white/5 text-white/40 border-white/10"
+                                                    : "bg-gray-100 text-gray-600 border-gray-200"
+                                                }`}
                                         >
                                             {ex}
                                         </span>
@@ -160,7 +175,7 @@ export function SpecialtiesSection() {
                     whileInView={{ opacity: 1 }}
                     className="text-center mt-16"
                 >
-                    <p className="text-white/30 text-sm mb-4 flex items-center justify-center gap-2">
+                    <p className={`text-sm mb-4 flex items-center justify-center gap-2 ${isDark ? "text-white/30" : "text-gray-500"}`}>
                         <Star className="w-4 h-4 text-amber-400" />
                         Novas especialidades são adicionadas regularmente
                         <Star className="w-4 h-4 text-amber-400" />

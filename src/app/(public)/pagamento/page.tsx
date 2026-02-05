@@ -85,7 +85,7 @@ export default function PagamentoPage() {
                                         Ativar Acesso Completo
                                     </h1>
                                     <p className="text-white/50 text-sm">
-                                        Escolha como deseja liberar seu acesso ao Sistema O Segredo
+                                        Escolha como deseja liberar seu acesso à ES English Academy
                                     </p>
                                 </div>
 
@@ -211,7 +211,7 @@ export default function PagamentoPage() {
                                         Pagamento
                                     </h2>
                                     <p className="text-white/50 text-sm">
-                                        Acesso completo ao Sistema O Segredo
+                                        Acesso completo à ES English Academy
                                     </p>
                                 </div>
 

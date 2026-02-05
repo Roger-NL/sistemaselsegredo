@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Shield, Clock, Zap, CheckCircle2, Sparkles, Headphones } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useLandingTheme } from "@/context/LandingThemeContext";
 
 const BENEFITS = [
     "Acesso vitalício a todo o conteúdo",
@@ -18,12 +19,22 @@ export function CtaSection() {
     const router = useRouter();
     const { isAuthenticated } = useAuth();
 
+    // Theme - with safe fallback
+    let isDark = true;
+    try {
+        const theme = useLandingTheme();
+        isDark = theme.isDark;
+    } catch {
+        // Default to dark if outside provider
+    }
+
     const handleCta = () => {
         router.push(isAuthenticated ? "/dashboard" : "/login");
     };
 
     return (
-        <section className="py-32 px-4 relative overflow-hidden">
+        <section className={`py-32 px-4 relative overflow-hidden transition-colors duration-500 ${isDark ? "" : "bg-white"
+            }`}>
             {/* Background glow */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-500/20 rounded-full blur-[150px]" />
@@ -35,7 +46,10 @@ export function CtaSection() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8 }}
-                    className="p-8 md:p-16 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] backdrop-blur-xl relative overflow-hidden"
+                    className={`p-8 md:p-16 rounded-3xl border backdrop-blur-xl relative overflow-hidden ${isDark
+                            ? "border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
+                            : "border-gray-200 bg-white shadow-xl"
+                        }`}
                 >
                     {/* Decorative elements */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
@@ -56,11 +70,11 @@ export function CtaSection() {
                         </motion.div>
 
                         {/* Headline */}
-                        <h2 className="text-3xl md:text-5xl font-serif text-white mb-6 leading-tight">
+                        <h2 className={`text-3xl md:text-5xl font-serif mb-6 leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
                             Pronto Para Destravar<br />Seu Inglês?
                         </h2>
 
-                        <p className="text-white/50 text-base md:text-lg font-mono max-w-2xl mx-auto mb-12">
+                        <p className={`text-base md:text-lg font-mono max-w-2xl mx-auto mb-12 ${isDark ? "text-white/50" : "text-gray-600"}`}>
                             Junte-se a mais de 1.800 brasileiros que já abandonaram o método tradicional e agora falam inglês de verdade.
                         </p>
 
@@ -76,7 +90,7 @@ export function CtaSection() {
                                     className="flex items-center gap-3"
                                 >
                                     <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
-                                    <span className="text-white/70 text-sm">{benefit}</span>
+                                    <span className={`text-sm ${isDark ? "text-white/70" : "text-gray-700"}`}>{benefit}</span>
                                 </motion.div>
                             ))}
                         </div>
@@ -102,7 +116,7 @@ export function CtaSection() {
                         </motion.button>
 
                         {/* Trust elements */}
-                        <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-white/30 text-xs font-mono">
+                        <div className={`flex flex-wrap items-center justify-center gap-6 mt-10 text-xs font-mono ${isDark ? "text-white/30" : "text-gray-400"}`}>
                             <div className="flex items-center gap-2">
                                 <Shield className="w-4 h-4" />
                                 <span>7 DIAS DE GARANTIA</span>
@@ -127,7 +141,7 @@ export function CtaSection() {
                     transition={{ delay: 0.3 }}
                     className="text-center mt-16"
                 >
-                    <p className="text-white/40 text-sm font-mono">
+                    <p className={`text-sm font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>
                         Ainda tem dúvidas?{" "}
                         <button className="text-violet-400 hover:text-violet-300 underline underline-offset-4 transition-colors">
                             Veja nossas perguntas frequentes

@@ -3,10 +3,21 @@
 import { motion } from "framer-motion";
 import { RANKS } from "@/utils/ranks";
 import { Quote } from "lucide-react";
+import { useLandingTheme } from "@/context/LandingThemeContext";
 
 export function RanksSection() {
+    // Theme - with safe fallback
+    let isDark = true;
+    try {
+        const theme = useLandingTheme();
+        isDark = theme.isDark;
+    } catch {
+        // Default to dark if outside provider
+    }
+
     return (
-        <section className="py-24 px-4 border-t border-white/5 relative z-20 bg-black">
+        <section className={`py-24 px-4 border-t relative z-20 transition-colors duration-500 ${isDark ? "border-white/5 bg-black" : "border-gray-200 bg-gray-50"
+            }`}>
             <div className="container mx-auto max-w-7xl text-center">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -14,8 +25,8 @@ export function RanksSection() {
                     viewport={{ once: true }}
                     className="mb-16"
                 >
-                    <h2 className="text-3xl md:text-5xl font-serif text-white mb-6">Sua Carreira de Piloto</h2>
-                    <p className="text-white/40 font-mono text-sm tracking-widest uppercase mb-12">
+                    <h2 className={`text-3xl md:text-5xl font-serif mb-6 ${isDark ? "text-white" : "text-gray-900"}`}>Sua Carreira de Piloto</h2>
+                    <p className={`font-mono text-sm tracking-widest uppercase mb-12 ${isDark ? "text-white/40" : "text-gray-500"}`}>
                         Do check-in ao hall da fama
                     </p>
                 </motion.div>
@@ -53,7 +64,7 @@ export function RanksSection() {
                     <div className="flex items-center justify-center gap-4">
                         <div className="w-10 h-10 rounded-full bg-violet-500" />
                         <div className="text-left">
-                            <div className="text-white font-bold font-mono text-sm">RODRIGO SANTOS</div>
+                            <div className={`font-bold font-mono text-sm ${isDark ? "text-white" : "text-gray-900"}`}>RODRIGO SANTOS</div>
                             <div className="text-violet-400 text-xs font-mono uppercase tracking-widest">Patente: Ás dos Céus</div>
                         </div>
                     </div>

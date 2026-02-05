@@ -7,118 +7,141 @@ import {
     Users, Sparkles, PenTool, Globe, Trophy,
     TrendingUp, Zap, Target, Clock, ArrowRight
 } from "lucide-react";
+import { useLandingTheme } from "@/context/LandingThemeContext";
 
-// --- PILLAR DATA ---
+// --- PILLAR DATA (Real Course Structure) ---
 const PILLARS = [
+    // FASE 1: PREPARAÇÃO & SOBREVIVÊNCIA
     {
         id: 1,
-        title: "Mindset Reset",
+        title: "Mindset & Desprogramação",
         icon: Brain,
         colorHex: "#8b5cf6",
+        phase: "PREPARAÇÃO",
         stats: [
-            { label: "Bloqueios Eliminados", value: "100%" },
-            { label: "Tempo de Resposta", value: "-70%" }
+            { label: "Método Escolar", value: "Deletado" },
+            { label: "Medo de Errar", value: "-100%" }
         ],
-        insight: "Seu cérebro não é o problema. O medo é.",
-        visual: "brain"
+        insight: "Desprogramação do método escolar. Você vai desaprender para aprender certo.",
+        visual: "brain",
+        mission: "Prova de Mindset"
     },
     {
         id: 2,
-        title: "Deep Listening",
+        title: "Imersão Auditiva",
         icon: Headphones,
         colorHex: "#06b6d4",
+        phase: "PREPARAÇÃO",
         stats: [
-            { label: "Compreensão Auditiva", value: "+85%" },
+            { label: "Listening Ativo", value: "100%" },
             { label: "Velocidade Nativa", value: "1.5x" }
         ],
-        insight: "Nativos não falam devagar. Você vai aprender a ouvir rápido.",
-        visual: "waves"
+        insight: "Técnicas de Listening que te fazem entender nativos falando rápido.",
+        visual: "waves",
+        mission: "Teste de Identificação de Sons"
     },
     {
         id: 3,
-        title: "Gramática Tática",
-        icon: BookOpen,
+        title: "Sobrevivência Urbana",
+        icon: Globe,
         colorHex: "#10b981",
+        phase: "PREPARAÇÃO",
         stats: [
-            { label: "Regras Necessárias", value: "20%" },
-            { label: "Aplicação Prática", value: "100%" }
+            { label: "Situações Reais", value: "50+" },
+            { label: "Inglês da Rua", value: "100%" }
         ],
-        insight: "Esqueça 80% da gramática. Foque no que importa.",
-        visual: "chart"
+        insight: "O inglês que você usa para pedir comida, ajuda, e sobreviver.",
+        visual: "chart",
+        mission: "Simulação de Pedido Real"
     },
+    // FASE 2: ESTRUTURA & EXPANSÃO
     {
         id: 4,
-        title: "Vocabulário 80/20",
-        icon: MessageSquare,
+        title: "Fundamentos Lógicos",
+        icon: BookOpen,
         colorHex: "#f59e0b",
+        phase: "ESTRUTURA",
         stats: [
-            { label: "Palavras de Alta Frequência", value: "800" },
-            { label: "Cobertura Real", value: "80%" }
+            { label: "Regras Úteis", value: "20%" },
+            { label: "O Resto", value: "Lixo" }
         ],
-        insight: "Com 800 palavras você resolve 80% das situações.",
-        visual: "pareto"
+        insight: "A lógica gramatical que REALMENTE importa. O resto é enfeite.",
+        visual: "pareto",
+        mission: "Construção de Frases Complexas"
     },
     {
         id: 5,
-        title: "Pronúncia Elite",
-        icon: Mic,
+        title: "Números & Negócios",
+        icon: TrendingUp,
         colorHex: "#ec4899",
+        phase: "ESTRUTURA",
         stats: [
-            { label: "Clareza de Fala", value: "+90%" },
-            { label: "Sotaque Brasileiro", value: "-95%" }
+            { label: "Checkpoint", value: "AO VIVO" },
+            { label: "Dinheiro & Tempo", value: "Fluente" }
         ],
-        insight: "Pare de soar como turista. Fale como nativo.",
-        visual: "mic"
+        insight: "Dinheiro, tempo, negociação. O inglês que paga suas contas.",
+        visual: "chart",
+        mission: "Mentoria Ao Vivo: Calibragem"
     },
     {
         id: 6,
-        title: "Simulação Real",
-        icon: Users,
+        title: "Produção Oral",
+        icon: Mic,
         colorHex: "#3b82f6",
+        phase: "ESTRUTURA",
         stats: [
-            { label: "Cenários de Pressão", value: "50+" },
-            { label: "Confiança em Crises", value: "+200%" }
+            { label: "Shadowing", value: "Ativo" },
+            { label: "Sotaque BR", value: "-90%" }
         ],
-        insight: "Treinamento de combate em situações reais.",
-        visual: "combat"
+        insight: "Shadowing e pronúncia. Você vai soar como nativo, não turista.",
+        visual: "mic",
+        mission: "Envio de Áudio de Leitura"
     },
+    // FASE 3: AUTONOMIA & ELITE
     {
         id: 7,
-        title: "Arsenal Nativo",
+        title: "Autonomia Real",
         icon: Sparkles,
         colorHex: "#a855f7",
+        phase: "AUTONOMIA",
         stats: [
-            { label: "Expressões Idiomáticas", value: "150+" },
-            { label: "Phrasal Verbs", value: "100+" }
+            { label: "Aprender Sozinho", value: "100%" },
+            { label: "Dependência", value: "0%" }
         ],
-        insight: "As armas secretas que os livros não ensinam.",
-        visual: "arsenal"
+        insight: "Aprender a aprender. Você vira independente de qualquer curso.",
+        visual: "arsenal",
+        mission: "Pesquisa Guiada"
     },
     {
         id: 8,
-        title: "Escrita de Elite",
-        icon: PenTool,
+        title: "Especializações",
+        icon: Target,
         colorHex: "#ef4444",
+        phase: "AUTONOMIA",
         stats: [
-            { label: "Templates Profissionais", value: "30+" },
-            { label: "Emails Efetivos", value: "100%" }
+            { label: "Carreiras", value: "3+" },
+            { label: "Foco Específico", value: "100%" }
         ],
-        insight: "Emails que fecham negócios.",
-        visual: "email"
+        insight: "Job Hunter, Business, Travel. Escolha sua especialização.",
+        visual: "email",
+        mission: "Briefing de Carreira"
     },
     {
         id: 9,
-        title: "Identidade Final",
-        icon: Globe,
+        title: "Debriefing Final",
+        icon: Trophy,
         colorHex: "#6366f1",
+        phase: "AUTONOMIA",
         stats: [
-            { label: "Imersão Total", value: "24/7" },
-            { label: "Fluência Operacional", value: "100%" }
+            { label: "Checkpoint", value: "AO VIVO" },
+            { label: "Fluência", value: "Aprovada" }
         ],
-        insight: "Você não 'sabe' inglês. Você 'é' um falante.",
-        visual: "identity"
+        insight: "Simulação final com professor. Você prova que está pronto.",
+        visual: "identity",
+        mission: "Roleplay Final Ao Vivo"
     }
 ];
+
 
 // Visual Widget - Auto animated
 function PillarVisual({ type, colorHex }: { type: string; colorHex: string }) {
@@ -196,7 +219,7 @@ function PillarVisual({ type, colorHex }: { type: string; colorHex: string }) {
 }
 
 // Single Pillar Row with Horizontal Scroll Content
-function PillarRow({ pillar, index }: { pillar: typeof PILLARS[0]; index: number }) {
+function PillarRow({ pillar, index, isDark }: { pillar: typeof PILLARS[0]; index: number; isDark: boolean }) {
     const isEven = index % 2 === 0;
 
     return (
@@ -243,7 +266,7 @@ function PillarRow({ pillar, index }: { pillar: typeof PILLARS[0]; index: number
                     >
                         <pillar.icon className="w-10 h-10" style={{ color: pillar.colorHex }} />
                     </div>
-                    <span className="text-xs font-mono text-white/40 mt-2">NÍVEL {pillar.id.toString().padStart(2, '0')}</span>
+                    <span className={`text-xs font-mono mt-2 ${isDark ? "text-white/40" : "text-gray-500"}`}>NÍVEL {pillar.id.toString().padStart(2, '0')}</span>
                 </motion.div>
 
                 {/* Content Grid - All visible at once */}
@@ -253,17 +276,18 @@ function PillarRow({ pillar, index }: { pillar: typeof PILLARS[0]; index: number
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.3 }}
-                        className="p-6 rounded-2xl bg-black/80 border border-white/10 backdrop-blur-sm"
+                        className={`p-6 rounded-2xl border backdrop-blur-sm ${isDark ? "bg-black/80 border-white/10" : "bg-white border-gray-200 shadow-lg"
+                            }`}
                     >
                         {/* Mobile Icon */}
                         <div className="flex items-center gap-3 mb-4 md:hidden">
                             <pillar.icon className="w-6 h-6" style={{ color: pillar.colorHex }} />
-                            <span className="text-xs font-mono text-white/40">NÍVEL {pillar.id.toString().padStart(2, '0')}</span>
+                            <span className={`text-xs font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>NÍVEL {pillar.id.toString().padStart(2, '0')}</span>
                         </div>
 
                         {/* Title & Insight */}
-                        <h3 className="text-2xl font-bold text-white mb-3">{pillar.title}</h3>
-                        <p className="text-white/50 text-sm italic leading-relaxed mb-6">"{pillar.insight}"</p>
+                        <h3 className={`text-2xl font-bold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>{pillar.title}</h3>
+                        <p className={`text-sm italic leading-relaxed mb-6 ${isDark ? "text-white/50" : "text-gray-600"}`}>"{pillar.insight}"</p>
 
                         {/* Visual + Stats Row */}
                         <div className="flex flex-col sm:flex-row gap-6 items-center">
@@ -291,7 +315,7 @@ function PillarRow({ pillar, index }: { pillar: typeof PILLARS[0]; index: number
                                         </div>
                                         <div>
                                             <div className="text-lg font-bold" style={{ color: pillar.colorHex }}>{stat.value}</div>
-                                            <div className="text-[10px] text-white/40">{stat.label}</div>
+                                            <div className={`text-[10px] ${isDark ? "text-white/40" : "text-gray-500"}`}>{stat.label}</div>
                                         </div>
                                     </motion.div>
                                 ))}
@@ -305,13 +329,28 @@ function PillarRow({ pillar, index }: { pillar: typeof PILLARS[0]; index: number
 }
 
 export function MethodSection() {
+    // Theme - with safe fallback
+    let isDark = true;
+    let isLight = false;
+    try {
+        const theme = useLandingTheme();
+        isDark = theme.isDark;
+        isLight = theme.isLight;
+    } catch {
+        // Default to dark if outside provider
+    }
+
     return (
-        <section id="method" className="py-24 px-4 bg-black relative overflow-hidden">
-            {/* Pure Black Background */}
-            <div className="absolute inset-0 bg-black" />
+        <section id="method" className={`py-24 px-4 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-black" : "bg-gray-50"
+            }`}>
+            {/* Background */}
+            {isDark && <div className="absolute inset-0 bg-black" />}
 
             {/* Subtle Grid */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:80px_80px]" />
+            <div className={`absolute inset-0 bg-[size:80px_80px] ${isDark
+                ? "bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]"
+                : "bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)]"
+                }`} />
 
             <div className="container mx-auto max-w-5xl relative z-10">
                 {/* Header */}
@@ -332,13 +371,14 @@ export function MethodSection() {
                             Rota de Extração Ativa
                         </span>
                     </motion.div>
-                    <h2 className="text-4xl md:text-6xl font-bold font-serif text-white mb-4">
+                    <h2 className={`text-4xl md:text-6xl font-bold font-serif mb-4 ${isDark ? "text-white" : "text-gray-900"
+                        }`}>
                         9 Níveis para <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-cyan-400 to-violet-400">
                             Fluência Total
                         </span>
                     </h2>
-                    <p className="text-white/40 max-w-lg mx-auto text-sm">
+                    <p className={`max-w-lg mx-auto text-sm ${isDark ? "text-white/40" : "text-gray-500"}`}>
                         Domine cada nível para desbloquear a fluência total
                     </p>
                 </motion.div>
@@ -347,7 +387,7 @@ export function MethodSection() {
                 <div className="relative">
                     {/* Pillar Rows */}
                     {PILLARS.map((pillar, index) => (
-                        <PillarRow key={pillar.id} pillar={pillar} index={index} />
+                        <PillarRow key={pillar.id} pillar={pillar} index={index} isDark={isDark} />
                     ))}
 
                     {/* Final Goal */}
