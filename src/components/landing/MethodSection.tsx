@@ -20,7 +20,7 @@ const PILLARS = [
         phase: "PREPARAÇÃO",
         stats: [
             { label: "Método Escolar", value: "Deletado" },
-            { label: "Medo de Errar", value: "-100%" }
+            { label: "Medo de Errar", value: "Zero" }
         ],
         insight: "Desprogramação do método escolar. Você vai desaprender para aprender certo.",
         visual: "brain",
@@ -33,7 +33,7 @@ const PILLARS = [
         colorHex: "#06b6d4",
         phase: "PREPARAÇÃO",
         stats: [
-            { label: "Listening Ativo", value: "100%" },
+            { label: "Listening Ativo", value: "Total" },
             { label: "Velocidade Nativa", value: "1.5x" }
         ],
         insight: "Técnicas de Listening que te fazem entender nativos falando rápido.",
@@ -48,7 +48,7 @@ const PILLARS = [
         phase: "PREPARAÇÃO",
         stats: [
             { label: "Situações Reais", value: "50+" },
-            { label: "Inglês da Rua", value: "100%" }
+            { label: "Inglês da Rua", value: "Real" }
         ],
         insight: "O inglês que você usa para pedir comida, ajuda, e sobreviver.",
         visual: "chart",

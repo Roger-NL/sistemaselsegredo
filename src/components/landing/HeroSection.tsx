@@ -71,8 +71,8 @@ function CompactStat({ value, label, color, delay, isDark }: { value: string; la
             transition={{ delay, duration: 0.4 }}
             className="text-center"
         >
-            <div className="text-3xl md:text-4xl font-bold font-mono" style={{ color }}>{value}</div>
-            <div className={`text-[10px] md:text-xs uppercase tracking-wider ${isDark ? "text-white/50" : "text-gray-500"}`}>{label}</div>
+            <div className="text-2xl md:text-4xl font-bold font-mono" style={{ color }}>{value}</div>
+            <div className={`text-[9px] md:text-xs uppercase tracking-wider ${isDark ? "text-white/50" : "text-gray-500"}`}>{label}</div>
         </motion.div>
     );
 }
@@ -127,7 +127,7 @@ function MagneticButton({ children, onClick, variant = "primary", size = "normal
             style={{ x: springX, y: springY }}
             className={`
                 relative rounded-xl font-mono tracking-widest uppercase overflow-hidden group
-                ${size === "large" ? "px-10 py-5 text-base" : "px-6 py-3 text-sm"}
+                ${size === "large" ? "px-6 py-4 md:px-10 md:py-5 text-sm md:text-base" : "px-6 py-3 text-sm"}
                 ${variant === "primary"
                     ? isDark
                         ? "bg-white text-black hover:text-white"
@@ -169,7 +169,7 @@ export function HeroSection() {
     const handleCta = () => router.push(isAuthenticated ? "/dashboard" : "/login");
 
     return (
-        <section ref={containerRef} className={`relative min-h-screen flex items-center overflow-hidden transition-colors duration-500
+        <section ref={containerRef} className={`relative min-h-screen flex items-start md:items-center overflow-x-hidden transition-colors duration-500
             ${isLight ? "bg-gradient-to-b from-gray-50 to-white" : ""}
         `}>
             {/* FUNDO - Condicional */}
@@ -188,10 +188,10 @@ export function HeroSection() {
                 }`} />
 
             <motion.div
-                style={{ y, opacity }}
-                className="container mx-auto px-4 relative z-10 py-20"
+                style={{ y }}
+                className="container mx-auto px-4 relative z-10 pt-28 pb-32 md:py-20"
             >
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                <div className="grid lg:grid-cols-2 gap-16 xl:gap-24 items-center">
                     {/* COLUNA ESQUERDA - Texto e CTA */}
                     <div>
                         {/* Eyebrow */}
@@ -213,7 +213,7 @@ export function HeroSection() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className={`text-4xl md:text-6xl lg:text-7xl font-bold font-serif leading-[1.1] mb-4 ${isDark ? "text-white" : "text-gray-900"
+                            className={`text-3xl md:text-6xl lg:text-5xl xl:text-7xl font-bold font-serif leading-[1.1] mb-4 ${isDark ? "text-white" : "text-gray-900"
                                 }`}
                         >
                             DESBLOQUEIE
@@ -291,7 +291,7 @@ export function HeroSection() {
                                         initial={{ scale: 0 }}
                                         animate={{ scale: 1 }}
                                         transition={{ delay: 0.8 + n * 0.1 }}
-                                        className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold border"
+                                        className="w-6 h-6 md:w-8 md:h-8 rounded-lg flex items-center justify-center text-[10px] md:text-xs font-bold border"
                                         style={{
                                             borderColor: n <= 3 ? '#8b5cf6' : n <= 6 ? '#06b6d4' : '#10b981',
                                             backgroundColor: n <= 3 ? 'rgba(139,92,246,0.2)' : n <= 6 ? 'rgba(6,182,212,0.2)' : 'rgba(16,185,129,0.2)',
@@ -313,7 +313,7 @@ export function HeroSection() {
                         <div className="grid grid-cols-2 gap-3">
                             <FeatureChip Icon={Video} text="3 Mentorias Ao Vivo" color="#06b6d4" delay={1.2} isDark={isDark} />
                             <FeatureChip Icon={ShieldCheck} text="Correção Real" color="#8b5cf6" delay={1.3} isDark={isDark} />
-                            <FeatureChip Icon={Headphones} text="100% Áudio" color="#ec4899" delay={1.4} isDark={isDark} />
+                            <FeatureChip Icon={Headphones} text="Imersão Auditiva" color="#ec4899" delay={1.4} isDark={isDark} />
                             <FeatureChip Icon={Mic} text="Foco na Fala" color="#10b981" delay={1.5} isDark={isDark} />
                             <FeatureChip Icon={MessageSquare} text="Suporte Direto" color="#f59e0b" delay={1.6} isDark={isDark} />
                             <FeatureChip Icon={Target} text="Especializações" color="#ef4444" delay={1.7} isDark={isDark} />

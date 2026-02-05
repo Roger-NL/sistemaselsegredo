@@ -73,10 +73,10 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
     return (
         <>
             {/* Nav transparente */}
-            <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-6 md:px-12 pointer-events-none">
+            <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-4 md:px-12 md:py-6 pointer-events-none">
                 <div
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className={`font-serif text-xl tracking-widest font-bold pointer-events-auto cursor-pointer transition-colors
+                    className={`font-serif text-sm md:text-xl tracking-widest font-bold pointer-events-auto cursor-pointer transition-colors
                         ${isDark ? "text-white hover:text-[#EEF4D4]" : "text-gray-900 hover:text-violet-600"}
                     `}
                 >

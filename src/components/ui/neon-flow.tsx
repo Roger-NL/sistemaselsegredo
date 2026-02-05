@@ -62,10 +62,10 @@ function TubesBackgroundComponent({
 
     return (
         <div className={cn("relative w-full min-h-screen min-h-[100dvh] bg-black", className)}>
-            {/* Fundo gradiente fixo - não intercepta cliques */}
-            <div
+            {/* Fundo gradiente fixo - removido a pedido para evitar escurecimento excessivo */}
+            {/* <div
                 className="fixed inset-0 bg-gradient-to-br from-violet-950/40 via-black to-pink-950/30 pointer-events-none"
-            />
+            /> */}
 
             {/* Iframe - fixed cover, pointer-events-none */}
             {showIframe && (
