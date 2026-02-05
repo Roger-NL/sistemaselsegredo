@@ -5,6 +5,7 @@
 
 import {
     User,
+    SubscriptionStatus,
     initDB,
     getUserByIdentifier,
     getUserById,
@@ -17,7 +18,7 @@ import {
     clearSession,
 } from './local-db';
 
-export type { User } from './local-db';
+export type { User, SubscriptionStatus } from './local-db';
 
 export interface AuthResult {
     success: boolean;
@@ -201,3 +202,94 @@ export function logout(): void {
 export function isAuthenticated(): boolean {
     return getCurrentUser() !== null;
 }
+
+// ============================================================================
+// SUBSCRIPTION ACTIVATION
+// ============================================================================
+
+import { validateCode, useCode, initInviteCodes } from './invite-codes';
+
+/**
+ * Initialize invite codes on auth init
+ */
+export function initAuthFull(): void {
+    initDB();
+    initInviteCodes();
+}
+
+/**
+ * Activate subscription with invite code
+ */
+export async function activateWithInvite(userId: string, code: string): Promise<AuthResult> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const validCode = validateCode(code);
+    if (!validCode) {
+        return { success: false, error: 'Código inválido ou expirado' };
+    }
+
+    // Use the code (increment counter)
+    const used = useCode(code);
+    if (!used) {
+        return { success: false, error: 'Erro ao processar código' };
+    }
+
+    // Activate user subscription (1 year)
+    const expiresAt = new Date();
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+    const updatedUser = dbUpdateUser(userId, {
+        subscriptionStatus: 'active',
+        subscriptionExpiresAt: expiresAt.toISOString(),
+        inviteCodeUsed: validCode.code
+    });
+
+    if (!updatedUser) {
+        return { success: false, error: 'Erro ao ativar conta' };
+    }
+
+    return { success: true, user: sanitizeUser(updatedUser) };
+}
+
+/**
+ * Activate subscription with payment (placeholder for real integration)
+ */
+export async function activateWithPayment(userId: string, paymentId: string): Promise<AuthResult> {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // In production, verify payment with gateway (Stripe, Mercado Pago, etc)
+    // For now, just activate
+
+    const expiresAt = new Date();
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+    const updatedUser = dbUpdateUser(userId, {
+        subscriptionStatus: 'active',
+        subscriptionExpiresAt: expiresAt.toISOString(),
+        paymentId
+    });
+
+    if (!updatedUser) {
+        return { success: false, error: 'Erro ao processar pagamento' };
+    }
+
+    return { success: true, user: sanitizeUser(updatedUser) };
+}
+
+/**
+ * Check if subscription is still valid
+ */
+export function checkSubscriptionStatus(user: Omit<User, 'passwordHash'>): 'pending' | 'active' | 'expired' {
+    if (user.subscriptionStatus === 'pending') return 'pending';
+
+    if (user.subscriptionStatus === 'active' && user.subscriptionExpiresAt) {
+        const now = new Date();
+        const expires = new Date(user.subscriptionExpiresAt);
+        if (now > expires) {
+            return 'expired';
+        }
+    }
+
+    return user.subscriptionStatus;
+}
+

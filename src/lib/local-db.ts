@@ -6,6 +6,8 @@
 const DB_KEY = 'es-academy-users-db';
 const SESSION_KEY = 'es-academy-session';
 
+export type SubscriptionStatus = 'pending' | 'active' | 'expired';
+
 export interface User {
     id: string;
     name: string;
@@ -14,6 +16,11 @@ export interface User {
     createdAt: string;
     lastLoginDate?: string; // ISO String
     currentStreak: number;
+    // Access Control
+    subscriptionStatus: SubscriptionStatus;
+    subscriptionExpiresAt?: string; // ISO date
+    inviteCodeUsed?: string;
+    paymentId?: string;
 }
 
 export interface Session {
@@ -51,6 +58,7 @@ export function initDB(): void {
         createdAt: new Date().toISOString(),
         currentStreak: 1,
         lastLoginDate: new Date().toISOString(),
+        subscriptionStatus: 'active', // Seed user has full access
     };
 
     const db: User[] = [seedUser];
@@ -121,6 +129,7 @@ export function createUser(name: string, email: string, password: string): User 
         createdAt: new Date().toISOString(),
         currentStreak: 1, // Start with streak 1
         lastLoginDate: new Date().toISOString(),
+        subscriptionStatus: 'pending', // New users start as pending until payment/invite
     };
 
     users.push(newUser);
