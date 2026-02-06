@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Star, Quote, Mic, TrendingUp, Award, Headphones } from "lucide-react";
-import { useState } from "react";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import { Star, Quote, Mic, TrendingUp, Award, Headphones, LucideIcon } from "lucide-react";
+import { useState, useRef } from "react";
 import { useLandingTheme } from "@/context/LandingThemeContext";
 
 const TESTIMONIALS = [
@@ -42,6 +42,45 @@ const RESULTS = [
     { value: "1.847+", label: "Operadores Ativos", icon: Award },
 ];
 
+// Animated Stat Card with Spread Effect
+function StatCard({
+    result,
+    index,
+    distanceFromCenter,
+    scrollProgress,
+    isDark
+}: {
+    result: { value: string; label: string; icon: LucideIcon };
+    index: number;
+    distanceFromCenter: number;
+    scrollProgress: MotionValue<number>;
+    isDark: boolean;
+}) {
+    const x = useTransform(scrollProgress, [0, 0.6], [distanceFromCenter * 50, 0]);
+    const y = useTransform(scrollProgress, [0, 0.6], [Math.abs(distanceFromCenter) * 20, 0]);
+    const scale = useTransform(scrollProgress, [0, 0.5], [0.85, 1]);
+    const opacity = useTransform(scrollProgress, [0, 0.4], [0.4, 1]);
+
+    return (
+        <motion.div
+            style={{ x, y, scale, opacity }}
+            whileHover={{ scale: 1.05, y: -5 }}
+            className={`p-6 rounded-2xl border text-center group transition-all ${isDark
+                ? "border-white/10 bg-white/[0.02] hover:border-green-500/30"
+                : "border-gray-200 bg-white shadow-md hover:border-green-500/30"
+                }`}
+        >
+            <result.icon className="w-8 h-8 text-green-500 mx-auto mb-4 group-hover:scale-110 transition-transform" />
+            <div className={`text-2xl md:text-3xl font-bold font-mono mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>
+                {result.value}
+            </div>
+            <div className={`text-xs font-mono uppercase tracking-widest ${isDark ? "text-white/40" : "text-gray-500"}`}>
+                {result.label}
+            </div>
+        </motion.div>
+    );
+}
+
 export function ResultsSection() {
     const [activeTestimonial, setActiveTestimonial] = useState(0);
 
@@ -53,6 +92,25 @@ export function ResultsSection() {
     } catch {
         // Default to dark if outside provider
     }
+
+    // Scroll animations
+    const statsRef = useRef<HTMLDivElement>(null);
+    const testimonialsRef = useRef<HTMLDivElement>(null);
+
+    const { scrollYProgress: statsScroll } = useScroll({
+        target: statsRef,
+        offset: ["start end", "center center"]
+    });
+
+    const { scrollYProgress: testimonialsScroll } = useScroll({
+        target: testimonialsRef,
+        offset: ["start end", "center center"]
+    });
+
+    // Parallax for testimonial card
+    const testimonialX = useTransform(testimonialsScroll, [0, 0.5], [60, 0]);
+    const testimonialOpacity = useTransform(testimonialsScroll, [0, 0.4], [0.3, 1]);
+    const testimonialScale = useTransform(testimonialsScroll, [0, 0.5], [0.95, 1]);
 
     return (
         <section className={`py-32 px-4 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-black" : "bg-white"
@@ -83,51 +141,35 @@ export function ResultsSection() {
                     </h2>
                 </motion.div>
 
-                {/* Stats Grid */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                    className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-24"
-                >
-                    {RESULTS.map((result, index) => (
-                        <motion.div
-                            key={index}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.1 }}
-                            whileHover={{ scale: 1.05, y: -5 }}
-                            className={`p-6 rounded-2xl border text-center group transition-all ${isDark
-                                    ? "border-white/10 bg-white/[0.02] hover:border-green-500/30"
-                                    : "border-gray-200 bg-white shadow-md hover:border-green-500/30"
-                                }`}
-                        >
-                            <result.icon className="w-8 h-8 text-green-500 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-                            <div className={`text-2xl md:text-3xl font-bold font-mono mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>
-                                {result.value}
-                            </div>
-                            <div className={`text-xs font-mono uppercase tracking-widest ${isDark ? "text-white/40" : "text-gray-500"}`}>
-                                {result.label}
-                            </div>
-                        </motion.div>
-                    ))}
-                </motion.div>
+                {/* Stats Grid - with Spread Animation */}
+                <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-24">
+                    {RESULTS.map((result, index) => {
+                        const centerIndex = Math.floor(RESULTS.length / 2);
+                        const distanceFromCenter = index - centerIndex;
 
-                {/* Testimonials Carousel */}
-                <div className="relative">
+                        return (
+                            <StatCard
+                                key={index}
+                                result={result}
+                                index={index}
+                                distanceFromCenter={distanceFromCenter}
+                                scrollProgress={statsScroll}
+                                isDark={isDark}
+                            />
+                        );
+                    })}
+                </div>
+
+                {/* Testimonials Carousel - with Slide Animation */}
+                <div ref={testimonialsRef} className="relative">
                     <div className="flex flex-col lg:flex-row gap-8 items-center">
                         {/* Main testimonial */}
                         <motion.div
                             key={activeTestimonial}
-                            initial={{ opacity: 0, x: 30 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -30 }}
-                            transition={{ duration: 0.5 }}
+                            style={{ x: testimonialX, opacity: testimonialOpacity, scale: testimonialScale }}
                             className={`flex-1 p-8 md:p-12 rounded-3xl border relative overflow-hidden ${isDark
-                                    ? "border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent"
-                                    : "border-gray-200 bg-white shadow-lg"
+                                ? "border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent"
+                                : "border-gray-200 bg-white shadow-lg"
                                 }`}
                         >
                             <Quote className={`absolute top-8 right-8 w-16 h-16 ${isDark ? "text-white/5" : "text-gray-100"}`} />
@@ -171,13 +213,17 @@ export function ResultsSection() {
                             </div>
                         </motion.div>
 
-                        {/* Testimonial selector */}
+                        {/* Testimonial selector with staggered animation */}
                         <div className="flex lg:flex-col gap-4">
                             {TESTIMONIALS.map((testimonial, index) => (
                                 <motion.button
                                     key={index}
                                     onClick={() => setActiveTestimonial(index)}
-                                    whileHover={{ scale: 1.05 }}
+                                    initial={{ opacity: 0, x: 20 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.15 }}
+                                    whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.95 }}
                                     className={`relative p-1 rounded-full transition-all ${activeTestimonial === index
                                         ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-black'
@@ -194,21 +240,21 @@ export function ResultsSection() {
                         </div>
                     </div>
 
-                    {/* 5 stars */}
+                    {/* 5 stars with staggered reveal */}
                     <div className="flex justify-center gap-1 mt-12">
                         {[...Array(5)].map((_, i) => (
                             <motion.div
                                 key={i}
-                                initial={{ opacity: 0, scale: 0 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
+                                initial={{ opacity: 0, scale: 0, rotate: -180 }}
+                                whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
+                                transition={{ delay: i * 0.1, type: "spring", stiffness: 200 }}
                             >
                                 <Star className="w-6 h-6 fill-amber-400 text-amber-400" />
                             </motion.div>
                         ))}
                     </div>
-                    <p className="text-center text-white/40 text-sm font-mono mt-4">
+                    <p className={`text-center text-sm font-mono mt-4 ${isDark ? "text-white/40" : "text-gray-500"}`}>
                         Média de 4.9/5 baseado em 847 avaliações
                     </p>
                 </div>

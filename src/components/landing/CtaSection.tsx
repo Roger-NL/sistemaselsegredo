@@ -1,10 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Shield, Clock, Zap, CheckCircle2, Sparkles, Headphones } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useLandingTheme } from "@/context/LandingThemeContext";
+import { useRef } from "react";
 
 const BENEFITS = [
     "Acesso vitalício a todo o conteúdo",
@@ -32,23 +33,46 @@ export function CtaSection() {
         router.push(isAuthenticated ? "/dashboard" : "/login");
     };
 
+    // Scroll animations
+    const sectionRef = useRef<HTMLElement>(null);
+    const benefitsRef = useRef<HTMLDivElement>(null);
+
+    const { scrollYProgress } = useScroll({
+        target: sectionRef,
+        offset: ["start end", "center center"]
+    });
+
+    const { scrollYProgress: benefitsScroll } = useScroll({
+        target: benefitsRef,
+        offset: ["start end", "center center"]
+    });
+
+    // Card parallax and scale
+    const cardY = useTransform(scrollYProgress, [0, 0.5], [80, 0]);
+    const cardOpacity = useTransform(scrollYProgress, [0, 0.4], [0.3, 1]);
+    const cardScale = useTransform(scrollYProgress, [0, 0.5], [0.92, 1]);
+
+    // Background glow animation based on scroll
+    const glowScale = useTransform(scrollYProgress, [0, 1], [0.8, 1.2]);
+    const glowOpacity = useTransform(scrollYProgress, [0, 0.5], [0.1, 0.3]);
+
     return (
-        <section className={`py-32 px-4 relative overflow-hidden transition-colors duration-500 ${isDark ? "" : "bg-white"
+        <section ref={sectionRef} className={`py-32 px-4 relative overflow-hidden transition-colors duration-500 ${isDark ? "" : "bg-white"
             }`}>
-            {/* Background glow */}
+            {/* Background glow - animated with scroll */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-500/20 rounded-full blur-[150px]" />
+                <motion.div
+                    style={{ scale: glowScale, opacity: glowOpacity }}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-500 rounded-full blur-[150px]"
+                />
             </div>
 
             <div className="container mx-auto max-w-4xl relative z-10">
                 <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8 }}
+                    style={{ y: cardY, opacity: cardOpacity, scale: cardScale }}
                     className={`p-8 md:p-16 rounded-3xl border backdrop-blur-xl relative overflow-hidden ${isDark
-                            ? "border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
-                            : "border-gray-200 bg-white shadow-xl"
+                        ? "border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02]"
+                        : "border-gray-200 bg-white shadow-xl"
                         }`}
                 >
                     {/* Decorative elements */}
@@ -58,12 +82,18 @@ export function CtaSection() {
                     <div className="relative z-10 text-center">
                         {/* Badge */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            whileInView={{ opacity: 1, scale: 1, y: 0 }}
                             viewport={{ once: true }}
+                            transition={{ type: "spring", stiffness: 200 }}
                             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 mb-8"
                         >
-                            <Sparkles className="w-4 h-4 text-amber-400" />
+                            <motion.div
+                                animate={{ rotate: [0, 15, -15, 0] }}
+                                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                            >
+                                <Sparkles className="w-4 h-4 text-amber-400" />
+                            </motion.div>
                             <span className="text-amber-300 font-mono text-xs uppercase tracking-widest">
                                 Vagas Limitadas
                             </span>
@@ -78,27 +108,38 @@ export function CtaSection() {
                             Junte-se a mais de 1.800 brasileiros que já abandonaram o método tradicional e agora falam inglês de verdade.
                         </p>
 
-                        {/* Benefits grid */}
-                        <div className="grid md:grid-cols-2 gap-4 text-left mb-12">
-                            {BENEFITS.map((benefit, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: index * 0.1 }}
-                                    className="flex items-center gap-3"
-                                >
-                                    <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
-                                    <span className={`text-sm ${isDark ? "text-white/70" : "text-gray-700"}`}>{benefit}</span>
-                                </motion.div>
-                            ))}
+                        {/* Benefits grid - with staggered scroll animation */}
+                        <div ref={benefitsRef} className="grid md:grid-cols-2 gap-4 text-left mb-12">
+                            {BENEFITS.map((benefit, index) => {
+                                const isLeft = index % 2 === 0;
+                                return (
+                                    <motion.div
+                                        key={index}
+                                        initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
+                                        whileInView={{ opacity: 1, x: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.08, type: "spring", stiffness: 100 }}
+                                        whileHover={{ x: 5, scale: 1.02 }}
+                                        className="flex items-center gap-3"
+                                    >
+                                        <motion.div
+                                            initial={{ scale: 0 }}
+                                            whileInView={{ scale: 1 }}
+                                            viewport={{ once: true }}
+                                            transition={{ delay: index * 0.08 + 0.1, type: "spring", stiffness: 300 }}
+                                        >
+                                            <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
+                                        </motion.div>
+                                        <span className={`text-sm ${isDark ? "text-white/70" : "text-gray-700"}`}>{benefit}</span>
+                                    </motion.div>
+                                );
+                            })}
                         </div>
 
                         {/* CTA Button */}
                         <motion.button
                             onClick={handleCta}
-                            whileHover={{ scale: 1.05 }}
+                            whileHover={{ scale: 1.05, y: -3 }}
                             whileTap={{ scale: 0.95 }}
                             className="group relative px-12 py-6 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-mono font-bold tracking-widest uppercase rounded-xl overflow-hidden shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.5)] transition-shadow"
                         >
@@ -115,20 +156,26 @@ export function CtaSection() {
                             </span>
                         </motion.button>
 
-                        {/* Trust elements */}
+                        {/* Trust elements with scroll reveal */}
                         <div className={`flex flex-wrap items-center justify-center gap-6 mt-10 text-xs font-mono ${isDark ? "text-white/30" : "text-gray-400"}`}>
-                            <div className="flex items-center gap-2">
-                                <Shield className="w-4 h-4" />
-                                <span>7 DIAS DE GARANTIA</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4" />
-                                <span>ACESSO IMEDIATO</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Headphones className="w-4 h-4" />
-                                <span>SUPORTE DEDICADO</span>
-                            </div>
+                            {[
+                                { icon: Shield, text: "7 DIAS DE GARANTIA" },
+                                { icon: Clock, text: "ACESSO IMEDIATO" },
+                                { icon: Headphones, text: "SUPORTE DEDICADO" }
+                            ].map((item, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: 0.5 + index * 0.1 }}
+                                    whileHover={{ scale: 1.1, y: -2 }}
+                                    className="flex items-center gap-2"
+                                >
+                                    <item.icon className="w-4 h-4" />
+                                    <span>{item.text}</span>
+                                </motion.div>
+                            ))}
                         </div>
                     </div>
                 </motion.div>
