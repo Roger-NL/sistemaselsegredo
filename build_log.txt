@@ -6,7 +6,7 @@
 
   Creating an optimized production build ...
 
-> Build error occurred
+> Build dgg    error occurred
 Error: Turbopack build failed with 1 errors:
 ./src/app/dashboard/page.tsx:3:1
 Module not found: Can't resolve '@/components/solar/SolarSystem'

@@ -13,6 +13,8 @@ import { LandingThemeProvider, useLandingTheme } from "@/context/LandingThemeCon
 import { Sun, Moon } from "lucide-react";
 import { motion } from "framer-motion";
 
+import { FaqSection } from "./FaqSection";
+
 // Theme Toggle Button
 function ThemeToggle() {
     const { theme, toggleTheme, isDark } = useLandingTheme();
@@ -104,7 +106,7 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
                             }
                         `}
                     >
-                        {isLoading ? "..." : (isAuthenticated ? "Dashboard" : "Login")}
+                        {isLoading ? "..." : (isAuthenticated ? "Dashboard" : "COMEÇAR GRÁTIS")}
                     </button>
                 </div>
             </nav>
@@ -115,6 +117,7 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
             <SpecialtiesSection />
             <ResultsSection />
             <RanksSection />
+            <FaqSection />
             <CtaSection />
 
             {/* Footer */}
