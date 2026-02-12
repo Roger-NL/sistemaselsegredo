@@ -180,7 +180,10 @@ export function FaqSection() {
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
                         {HOW_IT_WORKS.map((item, index) => (
-                            <div key={index} className="flex flex-col items-center text-center gap-2">
+                            <div
+                                key={index}
+                                className={`flex flex-col items-center text-center gap-2 ${index === 4 ? "col-span-2 md:col-span-1" : ""}`}
+                            >
                                 <div
                                     className="w-10 h-10 rounded-lg flex items-center justify-center"
                                     style={{ backgroundColor: `${item.color}15` }}
