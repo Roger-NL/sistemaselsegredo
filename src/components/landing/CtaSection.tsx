@@ -8,12 +8,12 @@ import { useLandingTheme } from "@/context/LandingThemeContext";
 import { useRef } from "react";
 
 const BENEFITS = [
-    "Acesso vitalício a todo o conteúdo",
-    "9 Pilares completos + 6 Especializações",
-    "Comunidade exclusiva de Operadores",
-    "Atualizações semanais de conteúdo",
-    "Método científico baseado em neurociência",
-    "Focado em conversação real, não decoreba"
+    "9 Pilares com Correção Humana",
+    "3 Sessões Particulares 1-on-1",
+    "Suporte Diário Assíncrono (Torre de Comando)",
+    "6 Especializações de Carreira",
+    "Acesso Vitalício + Atualizações",
+    "Garantia Incondicional de 7 dias"
 ];
 
 export function CtaSection() {
@@ -95,7 +95,7 @@ export function CtaSection() {
                                 <Sparkles className="w-4 h-4 text-amber-400" />
                             </motion.div>
                             <span className="text-amber-300 font-mono text-xs uppercase tracking-widest">
-                                Vagas Limitadas
+                                Método No-Video · Resultado Validado
                             </span>
                         </motion.div>
 
@@ -105,7 +105,7 @@ export function CtaSection() {
                         </h2>
 
                         <p className={`text-base md:text-lg font-mono max-w-2xl mx-auto mb-12 ${isDark ? "text-white/50" : "text-gray-600"}`}>
-                            Junte-se a mais de 1.800 brasileiros que já abandonaram o método tradicional e agora falam inglês de verdade.
+                            Formato Híbrido: Textos de Elite + Escrita Ativa + Correção Humana + 3 Mentorias Ao Vivo. Tudo incluso.
                         </p>
 
                         {/* Benefits grid - with staggered scroll animation */}

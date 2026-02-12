@@ -65,6 +65,42 @@ function LandingContent() {
     );
 }
 
+// Inline CTA — uses the exact same button style as Hero
+function InlineCta({ text, isDark, isAuthenticated }: {
+    text: string;
+    isDark: boolean;
+    isAuthenticated: boolean;
+}) {
+    const router = useRouter();
+    const handleClick = () => {
+        router.push(isAuthenticated ? "/dashboard" : "/register");
+    };
+
+    return (
+        <div className={`py-8 md:py-10 flex flex-col items-center gap-4 px-4 transition-colors duration-500
+            ${isDark ? "bg-black" : "bg-white"}
+        `}>
+            <p className={`font-mono text-xs md:text-sm text-center max-w-md
+                ${isDark ? "text-white/40" : "text-gray-500"}
+            `}>
+                {text}
+            </p>
+            <button
+                onClick={handleClick}
+                className="group relative px-8 py-3 bg-white text-black font-mono font-black tracking-wider uppercase hover:bg-emerald-50 transition-all transform active:scale-95 rounded-sm overflow-hidden text-center shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-transparent hover:border-emerald-200 text-xs md:text-sm"
+            >
+                {isAuthenticated ? "ACESSAR COCKPIT →" : "COMEÇAR AGORA →"}
+            </button>
+            <div className={`flex items-center gap-4 text-[10px] font-mono uppercase tracking-widest
+                ${isDark ? "text-white/20" : "text-gray-400"}
+            `}>
+                <span>✓ Pagamento Único</span>
+                <span>✓ 7 dias de garantia</span>
+            </div>
+        </div>
+    );
+}
+
 // Landing Inner Component
 function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading }: {
     isDark: boolean;
@@ -112,13 +148,34 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
                 </div>
             </nav>
 
-            {/* Seções */}
+            {/* Seções com CTAs intercalados */}
             <HeroSection />
             <DifferentiatorsSection />
+
+            <InlineCta
+                text="Pilar 1 liberado gratuitamente. Prove que o método funciona antes de investir."
+                isDark={isDark}
+                isAuthenticated={isAuthenticated}
+            />
+
             <MethodSection />
             <SpecialtiesSection />
+
+            <InlineCta
+                text="Sem videoaula. Você escreve, é corrigido, e só avança com aprovação humana."
+                isDark={isDark}
+                isAuthenticated={isAuthenticated}
+            />
+
             <ResultsSection />
             <RanksSection />
+
+            <InlineCta
+                text="Mais de 1.800 brasileiros já destravaram o inglês com este sistema."
+                isDark={isDark}
+                isAuthenticated={isAuthenticated}
+            />
+
             <FaqSection />
             <CtaSection />
 

@@ -368,7 +368,7 @@ export function MethodSection() {
                     >
                         <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                         <span className="font-mono text-green-400 text-xs tracking-widest uppercase">
-                            Rota de Extração Ativa
+                            Modelo No-Video · Escrita Ativa
                         </span>
                     </motion.div>
                     <h2 className={`text-4xl md:text-6xl font-bold font-serif mb-4 ${isDark ? "text-white" : "text-gray-900"
@@ -379,7 +379,7 @@ export function MethodSection() {
                         </span>
                     </h2>
                     <p className={`max-w-lg mx-auto text-sm ${isDark ? "text-white/40" : "text-gray-500"}`}>
-                        Domine cada nível para desbloquear a fluência total
+                        Sem videoaula. Cada nível exige produção escrita + validação humana.
                     </p>
                 </motion.div>
 

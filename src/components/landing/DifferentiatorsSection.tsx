@@ -6,8 +6,8 @@ import { Lock, UserCheck, Users, BrainCircuit } from "lucide-react";
 export function DifferentiatorsSection() {
     const differentiators = [
         {
-            title: "Você NÃO avança se não souber.",
-            desc: "Cada etapa exige validação real.",
+            title: "Modelo No-Video. Você faz, não assiste.",
+            desc: "Retenção passiva: 10%. Retenção ativa (ler+escrever): 90%. Por isso eliminamos 100% das videoaulas.",
             icon: Lock,
             color: "text-rose-400",
             bg: "bg-rose-500/10",
@@ -17,7 +17,7 @@ export function DifferentiatorsSection() {
         },
         {
             title: "Professor real valida cada pilar.",
-            desc: "Sem robô. Sem resposta automática.",
+            desc: "Um Capitão analisa sua produção escrita e envia feedback detalhado. Só avança se aprovado.",
             icon: UserCheck,
             color: "text-cyan-400",
             bg: "bg-cyan-500/10",
@@ -26,8 +26,8 @@ export function DifferentiatorsSection() {
             delay: 0.2
         },
         {
-            title: "3 mentorias individuais incluídas.",
-            desc: "Correção estratégica ao vivo.",
+            title: "3 mentorias 1-on-1 ao vivo inclusas.",
+            desc: "Diagnóstico, calibragem e simulação final. Foco em destravar a fala e corrigir pronúncia.",
             icon: Users,
             color: "text-violet-400",
             bg: "bg-violet-500/10",
@@ -37,7 +37,7 @@ export function DifferentiatorsSection() {
         },
         {
             title: "Impossível fingir que aprendeu.",
-            desc: "Se não dominar, você refaz.",
+            desc: "Protocolo Flight Manual: Briefing → Escrita Ativa → Audio Support → Validação Humana.",
             icon: BrainCircuit,
             color: "text-emerald-400",
             bg: "bg-emerald-500/10",

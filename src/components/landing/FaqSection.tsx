@@ -8,19 +8,27 @@ import { useLandingTheme } from "@/context/LandingThemeContext";
 const FAQS = [
     {
         question: "Minha rotina é muito corrida. Vou conseguir acompanhar?",
-        answer: "Exatamente por isso este sistema foi criado. O método tradicional de 2 horas de aula por semana é ineficiente. Nosso sistema é baseado em Micro-Doses de Inteligência (15-20 min/dia). Você estuda no trânsito, na espera do médico ou antes de dormir. O segredo é a constância, não a duração."
+        answer: "Exatamente por isso este sistema foi criado. Nosso protocolo Flight Manual é baseado em Micro-Doses de Inteligência (15-20 min/dia). Você estuda no trânsito, na fila ou antes de dormir. Um Briefing de leitura + uma Operação escrita. O segredo é a constância, não a duração."
     },
     {
         question: "Já tentei outros cursos e nunca aprendi. Por que este seria diferente?",
-        answer: "A maioria dos cursos te entrega vídeos e te deixa sozinho (Método Passivo). Aqui, o método é Ativo e Híbrido. Você tem Validação Humana em cada pilar. Se você errar, um professor te corrige antes de você avançar. Aqui, é impossível 'fingir' que aprendeu."
+        answer: "A maioria dos cursos te coloca no 'Netflix Mode' — assistindo vídeos passivamente. Aqui, o método é Ativo e Híbrido (No-Video). Você lê, escreve, e um professor real corrige antes de você avançar. Retenção passiva: 10%. Retenção ativa (nosso modelo): até 90%. Aqui, é impossível 'fingir' que aprendeu."
     },
     {
-        question: "O valor inclui as 3 aulas particulares ou pago à parte?",
-        answer: "O valor de R$ 197 é o pacote completo. Ele já inclui o acesso total à plataforma, as correções humanas de cada pilar e as 3 sessões particulares ao vivo (1-on-1). Sem taxas escondidas, sem mensalidades."
+        question: "Sem videoaula? Como funciona o dia a dia?",
+        answer: "Segue o protocolo Flight Manual: 1) Briefing — Leitura estratégica de texto de alta densidade (3x mais rápido que vídeo). 2) Operação — Você resolve problemas escrevendo, forçando a criação de novas sinapses neurais. 3) Audio Support — Áudios nativos para treinar Listening. 4) Validação Humana — Um Professor Real analisa sua Missão de Campo e dá feedback detalhado."
+    },
+    {
+        question: "As 3 sessões particulares estão inclusas?",
+        answer: "Sim. São 3 Mentorias de Elite ao vivo (1-on-1): Diagnóstico (início), Calibragem (meio) e Simulação Final (fim). O foco é destravar a fala e corrigir vícios de pronúncia que a escrita não pega. Tudo incluso no pacote, sem taxas extras."
+    },
+    {
+        question: "Como funciona o suporte se não tem vídeo?",
+        answer: "Através da Torre de Comando: 1) Suporte Diário Assíncrono — Canal direto na plataforma para dúvidas de texto e gramática, com resposta humana em até 24h úteis. 2) Mentorias Ao Vivo — As 3 sessões estratégicas para treinar speaking. Não vendemos horas de aula, vendemos resultado validado."
     },
     {
         question: "Preciso ter base de inglês para começar?",
-        answer: "Não. O sistema foi desenhado para levar alguém do Zero Absoluto (Recruta) ao nível de Operações Especiais. Começamos do pilar de Mindset e Sobrevivência, construindo sua confiança desde o primeiro dia."
+        answer: "Não. O sistema foi desenhado para levar alguém do Zero Absoluto (Recruta) ao nível de Operações Especiais. Começamos pelo pilar de Mindset e Sobrevivência, construindo sua confiança desde o primeiro dia."
     },
     {
         question: "As aulas particulares são em grupo?",
@@ -28,7 +36,7 @@ const FAQS = [
     },
     {
         question: "E se eu não me adaptar ao método?",
-        answer: "O risco é todo nosso. Você tem uma Garantia Incondicional de 7 Dias. Se por QUALQUER motivo você achar que o curso não é para você, basta um clique e devolvemos 100% do seu dinheiro. Sem perguntas."
+        answer: "O risco é todo nosso. Garantia Incondicional de 7 Dias. Se por QUALQUER motivo você achar que o curso não é para você, devolvemos 100% do seu dinheiro. Sem perguntas."
     }
 ];
 
