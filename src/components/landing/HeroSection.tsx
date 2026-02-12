@@ -1,9 +1,65 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowRight, Unlock, PlayCircle, ShieldCheck } from "lucide-react";
+import { motion, useAnimation, useInView } from "framer-motion";
+import { ArrowRight, Unlock, PlayCircle, ShieldCheck, Check, Rocket } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useState, useEffect, useRef } from "react";
+
+// Typer Effect Component
+const TypewriterText = () => {
+    const phrases = [
+        "Você trava quando precisa falar?",
+        "Já estudou anos e não conversa?",
+        "Entende mas não responde?",
+        "Tem vergonha da pronúncia?",
+        "Aqui você não avança sem aprender."
+    ];
+
+    const [index, setIndex] = useState(0);
+    const [subIndex, setSubIndex] = useState(0);
+    const [reverse, setReverse] = useState(false);
+
+    // Blinking cursor
+    const [blink, setBlink] = useState(true);
+
+    useEffect(() => {
+        const timeout2 = setInterval(() => {
+            setBlink((prev) => !prev);
+        }, 500);
+        return () => clearInterval(timeout2);
+    }, []);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            // Logic to type/delete
+            if (subIndex === phrases[index].length + 1 && !reverse) {
+                // Wait before deleting
+                setTimeout(() => setReverse(true), 2000); // 2s pause at end of phrase
+                return;
+            }
+
+            if (subIndex === 0 && reverse) {
+                setReverse(false);
+                setIndex((prev) => (prev + 1) % phrases.length); // Loop back to start
+                return;
+            }
+
+            setSubIndex((prev) => prev + (reverse ? -1 : 1));
+        }, Math.max(reverse ? 30 : 80, parseInt((Math.random() * 50).toString()))); // Random typing speed
+
+        return () => clearTimeout(timeout);
+    }, [subIndex, index, reverse, phrases]);
+
+    return (
+        <div className="h-20 md:h-24 flex items-center">
+            <p className="text-white text-base md:text-xl font-mono font-bold leading-relaxed">
+                {phrases[index].substring(0, subIndex)}
+                <span className={`${blink ? "opacity-100" : "opacity-0"} ml-1 text-emerald-400`}>|</span>
+            </p>
+        </div>
+    );
+};
 
 export function HeroSection() {
     const router = useRouter();
@@ -14,15 +70,16 @@ export function HeroSection() {
     };
 
     return (
-        <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-24 pb-12 px-4 md:px-8">
-            {/* O fundo é transparente para deixar o TubesBackground aparecer */}
-            
-            <div className="container mx-auto max-w-7xl grid md:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
+        <section className="relative flex flex-col items-center justify-center overflow-hidden pt-24 pb-8 px-4 md:px-8">
+            {/* Background elements managed by parent */}
+            <div className="absolute inset-0 z-0 backdrop-blur-[3px] pointer-events-none" />
 
-                {/* Coluna Esquerda: Texto e CTA */}
-                <div className="flex flex-col gap-5 md:gap-6 text-left pointer-events-auto order-1">
-                    
-                    {/* Badge de Status - Mobile Compacto */}
+            <div className="container mx-auto max-w-7xl grid md:grid-cols-2 gap-8 md:gap-16 items-center relative z-10">
+
+                {/* Left Column: Text & CTA */}
+                <div className="flex flex-col gap-2 text-left pointer-events-auto order-1">
+
+                    {/* Badge */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -31,147 +88,140 @@ export function HeroSection() {
                         className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white/5 border border-white/10 w-fit backdrop-blur-md"
                     >
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#EEF4D4] opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#EEF4D4]"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuchsia-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-fuchsia-500"></span>
                         </span>
-                        <span className="text-[10px] md:text-xs font-mono text-[#EEF4D4] tracking-widest uppercase font-bold">
-                            Inscrições Abertas • Freemium
+                        <span className="text-[10px] md:text-xs font-mono text-fuchsia-200 tracking-widest uppercase font-bold">
+                            Sistema de Validação Ativo
                         </span>
                     </motion.div>
 
-                    {/* Título Principal */}
+                    {/* Headline */}
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.1 }}
                         viewport={{ once: true }}
-                        className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-white leading-[1.1]"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.1]"
                     >
-                        Protocolo de <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-200 via-white to-violet-200">
-                            Fluência Tática
-                        </span>
+                        Fale inglês com <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-300 to-emerald-300 animate-pulse-slow font-black">
+                            confiança.
+                        </span> <br />
+                        De verdade.
                     </motion.h1>
 
-                    {/* Subtítulo */}
+                    {/* Subheadline + Typewriter */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
                         viewport={{ once: true }}
-                        className="relative pl-4 md:pl-6 border-l-2 border-[#EEF4D4]/30"
+                        className="relative"
                     >
-                        <p className="text-white/80 text-base md:text-xl font-light leading-relaxed">
-                            Não compre agora. Acesse o <strong className="text-[#EEF4D4]">Pilar 1 (Mindset)</strong> gratuitamente e prove a eficácia do método.
-                        </p>
+                        <h2 className="text-lg md:text-xl text-white font-bold mb-1 text-white/90">
+                            Um sistema onde você <strong className="font-black text-emerald-300">só avança se provar que aprendeu</strong>.
+                        </h2>
+
+                        <div className="border-l-4 border-fuchsia-500/50 pl-4 md:pl-6 min-h-[60px]">
+                            <TypewriterText />
+                        </div>
                     </motion.div>
 
-                    {/* Botões de Ação - Full Width no Mobile */}
+                    {/* Main CTA */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.3 }}
                         viewport={{ once: true }}
-                        className="flex flex-col sm:flex-row gap-4 mt-2 md:mt-4 w-full sm:w-auto"
+                        className="flex flex-col gap-4 mt-2 w-full sm:w-auto"
                     >
+                        {/* Exclusivity Micro-copy */}
+                        <p className="text-[10px] md:text-xs font-mono font-bold text-white/50 uppercase tracking-widest pl-1">
+                            Sistema fechado com validação humana.
+                        </p>
+
                         <button
                             onClick={handleCta}
-                            className="group relative px-6 py-4 bg-[#EEF4D4] text-black font-mono font-bold tracking-widest uppercase hover:bg-white transition-all transform active:scale-95 rounded-sm overflow-hidden text-center w-full sm:w-auto shadow-[0_0_20px_rgba(238,244,212,0.2)]"
+                            className="group relative px-8 py-4 bg-white text-black font-mono font-black tracking-wider uppercase hover:bg-emerald-50 transition-all transform active:scale-95 rounded-sm overflow-hidden text-center w-full sm:w-auto shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-transparent hover:border-emerald-200"
                         >
-                            <span className="relative z-10 flex items-center justify-center gap-2">
-                                {isAuthenticated ? "ACESSAR Q.G." : "LIBERAR PILAR 1 GRÁTIS"}
-                                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            <span className="relative z-10 flex items-center justify-center gap-3 text-sm md:text-base whitespace-nowrap">
+                                <Rocket className="w-5 h-5 text-fuchsia-600 group-hover:text-fuchsia-500 transition-colors" />
+                                ATIVAR MEU ACESSO IMEDIATO
                             </span>
                         </button>
-                    </motion.div>
 
-                    {/* Ícones de Confiança - Mobile Friendly */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        transition={{ duration: 1, delay: 0.5 }}
-                        viewport={{ once: true }}
-                        className="flex flex-wrap items-center gap-4 md:gap-6 mt-2 md:mt-6 text-white/40 text-[10px] md:text-xs font-mono uppercase tracking-widest"
-                    >
-                        <div className="flex items-center gap-2">
-                            <ShieldCheck className="w-3 h-3 md:w-4 md:h-4" />
-                            <span>Sem Cartão</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <PlayCircle className="w-3 h-3 md:w-4 md:h-4" />
-                            <span>Acesso Imediato</span>
+                        {/* Conversion Boosters */}
+                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[10px] md:text-xs font-mono font-bold text-white/40 uppercase tracking-widest pl-1">
+                            <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-emerald-400" /> Sem cartão de crédito</span>
+                            <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-cyan-400" /> Acesso imediato</span>
+                            <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-violet-400" /> Mentoria Inclusa</span>
                         </div>
                     </motion.div>
                 </div>
 
-                {/* Coluna Direita: O "Visual" - Agora visível e otimizado para mobile */}
-                <motion.div 
-                    initial={{ opacity: 0, y: 40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                {/* Right Column: Visual (Subtle & Supporting) */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 1, delay: 0.2 }}
-                    className="relative block mt-8 md:mt-0 order-2"
+                    className="relative flex justify-center items-center order-2 mt-12 md:mt-0"
                 >
-                    {/* Glow adaptativo */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-violet-500/20 blur-[60px] md:blur-[100px] rounded-full pointer-events-none" />
+                    {/* Compact Glow - Multi-color Neon */}
+                    <div className="absolute w-[250px] h-[250px] bg-gradient-to-tr from-violet-500/10 via-fuchsia-500/10 to-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
 
-                    {/* Card Principal - Escala no mobile */}
-                    <div className="relative z-10 bg-white/5 border border-white/10 backdrop-blur-xl p-5 md:p-8 rounded-2xl shadow-2xl transform md:rotate-3 hover:rotate-0 transition-transform duration-500 mx-auto max-w-sm md:max-w-none">
-                        <div className="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
-                            <span className="text-[10px] md:text-xs font-mono text-white/40 uppercase tracking-widest">Plano de Curso</span>
-                            <span className="text-[10px] md:text-xs font-mono text-[#EEF4D4] uppercase tracking-widest flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                Online
-                            </span>
+                    {/* Compact Card Container - Darker, Subtle Blur */}
+                    <div className="relative z-10 w-full max-w-[420px] bg-black/80 border border-white/5 backdrop-blur-[4px] rounded-2xl p-6 shadow-2xl transform md:rotate-1 hover:rotate-0 transition-all duration-500">
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-red-500/50 animate-pulse" />
+                                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Ao Vivo</span>
+                            </div>
+                            <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Plano de Voo</span>
                         </div>
 
-                        {/* Item 1: Liberado (Destaque) */}
-                        <div className="mb-3 p-3 md:p-4 rounded-xl bg-[#EEF4D4]/10 border border-[#EEF4D4]/20 flex items-center justify-between group cursor-pointer shadow-[0_0_15px_rgba(238,244,212,0.1)]">
-                            <div className="flex items-center gap-3 md:gap-4">
-                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#EEF4D4] text-black flex items-center justify-center shadow-lg">
-                                    <Unlock className="w-4 h-4 md:w-5 md:h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="text-white font-serif text-base md:text-lg leading-tight">Pilar 01</h3>
-                                    <p className="text-[#EEF4D4]/70 text-[10px] md:text-xs font-mono">Mindset & Inteligência</p>
-                                </div>
+                        {/* Active Pillar - Dark Theme, Low Contrast */}
+                        <div className="relative mb-3 bg-white/[0.03] rounded-lg p-4 border border-white/10 hover:bg-white/[0.05] transition-colors">
+                            <div className="absolute -top-2 -right-2 bg-black text-white/50 text-[9px] font-bold px-2 py-0.5 rounded overflow-hidden uppercase tracking-widest border border-white/5">
+                                Atual
                             </div>
-                            <div className="px-2 py-1 rounded bg-[#EEF4D4] text-black text-[9px] md:text-[10px] font-bold uppercase tracking-widest animate-pulse">
-                                Grátis
+                            <div className="flex justify-between items-center mb-2">
+                                <h4 className="text-white/90 font-serif font-bold text-base md:text-lg">Pilar 01</h4>
+                                <Unlock className="w-4 h-4 text-white/50" />
+                            </div>
+                            <p className="text-white/50 text-[10px] md:text-xs font-mono leading-tight">
+                                Mindset & Inteligência. <br />
+                                <span className="text-[10px] opacity-60 font-medium mt-1 block text-violet-400">STATUS: EM ANDAMENTO</span>
+                            </p>
+                        </div>
+
+                        {/* Locked Pillar 2 */}
+                        <div className="mb-2 bg-white/[0.02] rounded-lg p-3 border border-white/5 opacity-40 flex items-center justify-between">
+                            <div>
+                                <h4 className="text-white font-serif text-sm">Pilar 02</h4>
+                                <p className="text-white/30 text-[10px] font-mono">Imersão Auditiva</p>
+                            </div>
+                            <div className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
+                                <span className="text-white/20 text-[10px]">🔒</span>
                             </div>
                         </div>
 
-                        {/* Item 2: Bloqueado (Opaco) */}
-                        <div className="mb-3 p-3 md:p-4 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between opacity-50">
-                            <div className="flex items-center gap-3 md:gap-4">
-                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 text-white/20 flex items-center justify-center">
-                                    <PlayCircle className="w-4 h-4 md:w-5 md:h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="text-white font-serif text-base md:text-lg leading-tight">Pilar 02</h3>
-                                    <p className="text-white/30 text-[10px] md:text-xs font-mono">Imersão Auditiva</p>
-                                </div>
+                        {/* Locked Pillar 3 */}
+                        <div className="bg-white/[0.02] rounded-lg p-3 border border-white/5 opacity-30 flex items-center justify-between">
+                            <div>
+                                <h4 className="text-white font-serif text-sm">Pilar 03</h4>
+                                <p className="text-white/30 text-[10px] font-mono">Sobrevivência</p>
                             </div>
-                            <Unlock className="w-3 h-3 md:w-4 md:h-4 text-white/20" />
+                            <div className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
+                                <span className="text-white/20 text-[10px]">🔒</span>
+                            </div>
                         </div>
 
-                        {/* Item 3: Bloqueado (Opaco) */}
-                        <div className="p-3 md:p-4 rounded-xl bg-black/20 border border-white/5 flex items-center justify-between opacity-50">
-                            <div className="flex items-center gap-3 md:gap-4">
-                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 text-white/20 flex items-center justify-center">
-                                    <PlayCircle className="w-4 h-4 md:w-5 md:h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="text-white font-serif text-base md:text-lg leading-tight">Pilar 03</h3>
-                                    <p className="text-white/30 text-[10px] md:text-xs font-mono">Sobrevivência</p>
-                                </div>
-                            </div>
-                            <Unlock className="w-3 h-3 md:w-4 md:h-4 text-white/20" />
-                        </div>
-
-                        {/* Aviso */}
-                        <div className="mt-6 md:mt-8 text-center">
-                            <p className="text-white/40 text-[10px] md:text-xs font-mono">
-                                Desbloqueie o restante após provar o método.
+                        {/* Validation Note */}
+                        <div className="mt-6 text-center border-t border-white/5 pt-4">
+                            <p className="text-white/20 text-[10px] font-mono uppercase tracking-widest">
+                                *Validação obrigatória p/ avançar
                             </p>
                         </div>
                     </div>

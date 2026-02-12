@@ -153,7 +153,7 @@ export function FeaturesSection() {
                             {pillar.status === 'unlocked' && (
                                 <div className="mt-6">
                                     <button className="text-xs font-bold text-green-400 uppercase tracking-widest hover:text-green-300 flex items-center gap-2">
-                                        Acessar Agora <ArrowRight className="w-3 h-3" />
+                                        ACESSAR PILAR 1 <ArrowRight className="w-3 h-3" />
                                     </button>
                                 </div>
                             )}

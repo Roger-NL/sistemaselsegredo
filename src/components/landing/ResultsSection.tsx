@@ -1,8 +1,8 @@
 "use client";
 
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
-import { Star, Quote, Mic, TrendingUp, Award, Headphones, LucideIcon } from "lucide-react";
-import { useState, useRef } from "react";
+import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from "framer-motion";
+import { Star, Quote, Mic, TrendingUp, Award, Headphones, ChevronLeft, ChevronRight, LucideIcon } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { useLandingTheme } from "@/context/LandingThemeContext";
 
 const TESTIMONIALS = [
@@ -83,6 +83,28 @@ function StatCard({
 
 export function ResultsSection() {
     const [activeTestimonial, setActiveTestimonial] = useState(0);
+    const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+    // Auto-play functionality
+    useEffect(() => {
+        if (!isAutoPlaying) return;
+
+        const interval = setInterval(() => {
+            setActiveTestimonial((prev) => (prev + 1) % TESTIMONIALS.length);
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [isAutoPlaying]);
+
+    const handleNext = () => {
+        setIsAutoPlaying(false);
+        setActiveTestimonial((prev) => (prev + 1) % TESTIMONIALS.length);
+    };
+
+    const handlePrev = () => {
+        setIsAutoPlaying(false);
+        setActiveTestimonial((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
+    };
 
     // Theme - with safe fallback
     let isDark = true;
@@ -161,11 +183,15 @@ export function ResultsSection() {
                 </div>
 
                 {/* Testimonials Carousel - with Slide Animation */}
-                <div ref={testimonialsRef} className="relative">
+                <div
+                    ref={testimonialsRef}
+                    className="relative"
+                    onMouseEnter={() => setIsAutoPlaying(false)}
+                    onMouseLeave={() => setIsAutoPlaying(true)}
+                >
                     <div className="flex flex-col lg:flex-row gap-8 items-center">
                         {/* Main testimonial */}
                         <motion.div
-                            key={activeTestimonial}
                             style={{ x: testimonialX, opacity: testimonialOpacity, scale: testimonialScale }}
                             className={`flex-1 p-8 md:p-12 rounded-3xl border relative overflow-hidden ${isDark
                                 ? "border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent"
@@ -174,43 +200,74 @@ export function ResultsSection() {
                         >
                             <Quote className={`absolute top-8 right-8 w-16 h-16 ${isDark ? "text-white/5" : "text-gray-100"}`} />
 
-                            <div className="relative z-10">
-                                <div className="flex items-center gap-4 mb-8">
-                                    <div className="relative">
-                                        <img
-                                            src={TESTIMONIALS[activeTestimonial].image}
-                                            alt={TESTIMONIALS[activeTestimonial].name}
-                                            className="w-16 h-16 rounded-full border-2 border-violet-500"
-                                        />
-                                        <div className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full bg-violet-500 text-[10px] font-mono text-white uppercase">
-                                            {TESTIMONIALS[activeTestimonial].rank}
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={activeTestimonial}
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="relative z-10"
+                                >
+                                    <div className="flex items-center gap-4 mb-8">
+                                        <div className="relative">
+                                            <img
+                                                src={TESTIMONIALS[activeTestimonial].image}
+                                                alt={TESTIMONIALS[activeTestimonial].name}
+                                                className="w-16 h-16 rounded-full border-2 border-violet-500"
+                                            />
+                                            <div className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full bg-violet-500 text-[10px] font-mono text-white uppercase">
+                                                {TESTIMONIALS[activeTestimonial].rank}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{TESTIMONIALS[activeTestimonial].name}</h4>
+                                            <p className={`text-sm font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>{TESTIMONIALS[activeTestimonial].role} • {TESTIMONIALS[activeTestimonial].location}</p>
                                         </div>
                                     </div>
-                                    <div>
-                                        <h4 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{TESTIMONIALS[activeTestimonial].name}</h4>
-                                        <p className={`text-sm font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>{TESTIMONIALS[activeTestimonial].role} • {TESTIMONIALS[activeTestimonial].location}</p>
-                                    </div>
-                                </div>
 
-                                <p className={`text-xl md:text-2xl font-serif leading-relaxed mb-8 italic ${isDark ? "text-white/90" : "text-gray-800"}`}>
-                                    "{TESTIMONIALS[activeTestimonial].quote}"
-                                </p>
+                                    <p className={`text-xl md:text-2xl font-serif leading-relaxed mb-8 italic ${isDark ? "text-white/90" : "text-gray-800"}`}>
+                                        "{TESTIMONIALS[activeTestimonial].quote}"
+                                    </p>
 
-                                <div className="flex gap-8">
-                                    <div>
-                                        <div className="text-2xl font-bold text-green-500 font-mono">
-                                            {TESTIMONIALS[activeTestimonial].stats.level}
+                                    <div className="flex gap-8">
+                                        <div>
+                                            <div className="text-2xl font-bold text-green-500 font-mono">
+                                                {TESTIMONIALS[activeTestimonial].stats.level}
+                                            </div>
+                                            <div className={`text-xs font-mono uppercase ${isDark ? "text-white/40" : "text-gray-500"}`}>Nível Atual</div>
                                         </div>
-                                        <div className={`text-xs font-mono uppercase ${isDark ? "text-white/40" : "text-gray-500"}`}>Nível Atual</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-2xl font-bold text-green-500 font-mono">
-                                            {TESTIMONIALS[activeTestimonial].stats.months}
+                                        <div>
+                                            <div className="text-2xl font-bold text-green-500 font-mono">
+                                                {TESTIMONIALS[activeTestimonial].stats.months}
+                                            </div>
+                                            <div className={`text-xs font-mono uppercase ${isDark ? "text-white/40" : "text-gray-500"}`}>Tempo de Estudo</div>
                                         </div>
-                                        <div className={`text-xs font-mono uppercase ${isDark ? "text-white/40" : "text-gray-500"}`}>Tempo de Estudo</div>
                                     </div>
-                                </div>
-                            </div>
+
+                                    {/* Navigation Buttons */}
+                                    <div className="absolute bottom-8 right-8 flex gap-2 z-20">
+                                        <button
+                                            onClick={handlePrev}
+                                            className={`p-2 rounded-full transition-all ${isDark
+                                                ? "bg-white/10 hover:bg-white/20 text-white"
+                                                : "bg-gray-100 hover:bg-gray-200 text-gray-900"}`}
+                                            aria-label="Previous testimonial"
+                                        >
+                                            <ChevronLeft className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={handleNext}
+                                            className={`p-2 rounded-full transition-all ${isDark
+                                                ? "bg-white/10 hover:bg-white/20 text-white"
+                                                : "bg-gray-100 hover:bg-gray-200 text-gray-900"}`}
+                                            aria-label="Next testimonial"
+                                        >
+                                            <ChevronRight className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            </AnimatePresence>
                         </motion.div>
 
                         {/* Testimonial selector with staggered animation */}

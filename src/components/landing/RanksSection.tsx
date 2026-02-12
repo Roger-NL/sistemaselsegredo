@@ -5,6 +5,9 @@ import { RANKS } from "@/utils/ranks";
 import { Quote } from "lucide-react";
 import { useLandingTheme } from "@/context/LandingThemeContext";
 import { useRef } from "react";
+import { Star, ChevronLeft, ChevronRight, Quote as QuoteIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 
 // Animated Rank Badge with Spread Effect
 function RankBadge({
@@ -57,22 +60,10 @@ export function RanksSection() {
 
     // Scroll animations
     const ranksRef = useRef<HTMLDivElement>(null);
-    const quoteRef = useRef<HTMLDivElement>(null);
-
     const { scrollYProgress: ranksScroll } = useScroll({
         target: ranksRef,
         offset: ["start end", "center center"]
     });
-
-    const { scrollYProgress: quoteScroll } = useScroll({
-        target: quoteRef,
-        offset: ["start end", "center center"]
-    });
-
-    // Quote parallax
-    const quoteY = useTransform(quoteScroll, [0, 1], [30, 0]);
-    const quoteOpacity = useTransform(quoteScroll, [0, 0.5], [0.3, 1]);
-    const quoteScale = useTransform(quoteScroll, [0, 0.5], [0.95, 1]);
 
     return (
         <section className={`py-24 px-4 border-t relative z-20 transition-colors duration-500 ${isDark ? "border-white/5 bg-black" : "border-gray-200 bg-gray-50"
@@ -109,29 +100,186 @@ export function RanksSection() {
                     })}
                 </div>
 
-                {/* Quote with Parallax */}
-                <motion.div
-                    ref={quoteRef}
-                    style={{ y: quoteY, opacity: quoteOpacity, scale: quoteScale }}
-                    className="max-w-3xl mx-auto relative p-12 rounded-3xl bg-[#EEF4D4]/5 border border-[#EEF4D4]/10"
-                >
-                    <Quote className="w-12 h-12 text-[#EEF4D4]/20 absolute top-8 left-8" />
-                    <p className="text-xl md:text-2xl font-serif text-[#EEF4D4]/90 leading-relaxed italic mb-6 relative z-10">
-                        "Comecei como um Passageiro de Janela, sem saber nada. Hoje sou Comandante e acabei de emitir minha primeira volta ao mundo de Executiva. O sistema é infalível."
-                    </p>
-                    <div className="flex items-center justify-center gap-4">
-                        <motion.div
-                            className="w-10 h-10 rounded-full bg-violet-500"
-                            whileHover={{ scale: 1.2, rotate: 360 }}
-                            transition={{ duration: 0.5 }}
-                        />
-                        <div className="text-left">
-                            <div className={`font-bold font-mono text-sm ${isDark ? "text-white" : "text-gray-900"}`}>RODRIGO SANTOS</div>
-                            <div className="text-violet-400 text-xs font-mono uppercase tracking-widest">Patente: Ás dos Céus</div>
-                        </div>
-                    </div>
-                </motion.div>
+                {/* Google Reviews Carousel */}
+                <ReviewsCarousel />
             </div>
         </section>
+    );
+}
+
+const REVIEWS = [
+    {
+        name: "Carlos Mendes",
+        role: "Tech Lead",
+        image: "https://randomuser.me/api/portraits/men/32.jpg",
+        content: "O método é insano. Eu travava muito em reuniões, agora consigo liderar calls globais. Vale cada centavo.",
+        rating: 5,
+        date: "2 dias atrás"
+    },
+    {
+        name: "Fernanda Lima",
+        role: "UX Designer",
+        image: "https://randomuser.me/api/portraits/women/44.jpg",
+        content: "Realmente diferente de tudo. A validação humana faz você estudar de verdade. Não tem como enganar o sistema.",
+        rating: 5,
+        date: "1 semana atrás"
+    },
+    {
+        name: "Ricardo Souza",
+        role: "Empresário",
+        image: "https://randomuser.me/api/portraits/men/85.jpg",
+        content: "Eu achava que era mais um curso online, mas a estrutura de gamificação te prende. Completei o Pilar 1 em 4 dias.",
+        rating: 5,
+        date: "2 semanas atrás"
+    },
+    {
+        name: "Juliana Alves",
+        role: "Advogada",
+        image: "https://randomuser.me/api/portraits/women/68.jpg",
+        content: "O suporte é rápido e as mentorias individuais ajudaram muito na minha pronúncia. Recomendo demais.",
+        rating: 5,
+        date: "3 semanas atrás"
+    },
+    {
+        name: "Marcos Paulo",
+        role: "Desenvolvedor",
+        image: "https://randomuser.me/api/portraits/men/22.jpg",
+        content: "Plataforma muito bonita e fluida. Tive um pouco de dificuldade no começo com o ritmo, mas depois engrenei. Muito bom.",
+        rating: 4,
+        date: "1 mês atrás"
+    },
+    {
+        name: "Beatriz Rocha",
+        role: "Marketing",
+        image: "https://randomuser.me/api/portraits/women/24.jpg",
+        content: "Finalmente um curso que não é chato. A sensação de 'subir de patente' vicia. Meu inglês melhorou 100%.",
+        rating: 5,
+        date: "1 mês atrás"
+    }
+];
+
+
+function ReviewsCarousel() {
+    const [current, setCurrent] = useState(0);
+    const [direction, setDirection] = useState(0);
+
+    const next = () => {
+        setDirection(1);
+        setCurrent((prev) => (prev + 1) % REVIEWS.length);
+    };
+
+    const prev = () => {
+        setDirection(-1);
+        setCurrent((prev) => (prev - 1 + REVIEWS.length) % REVIEWS.length);
+    };
+
+    // Auto-play (optional, keeps it alive)
+    useEffect(() => {
+        const timer = setInterval(next, 8000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const variants = {
+        enter: (direction: number) => ({
+            x: direction > 0 ? 50 : -50,
+            opacity: 0,
+            scale: 0.95
+        }),
+        center: {
+            zIndex: 1,
+            x: 0,
+            opacity: 1,
+            scale: 1
+        },
+        exit: (direction: number) => ({
+            zIndex: 0,
+            x: direction < 0 ? 50 : -50,
+            opacity: 0,
+            scale: 0.95
+        })
+    };
+
+    return (
+        <div className="relative max-w-4xl mx-auto mt-20">
+            {/* Carousel Container */}
+            <div className="relative h-[280px] md:h-[220px] overflow-hidden">
+                <AnimatePresence initial={false} custom={direction}>
+                    <motion.div
+                        key={current}
+                        custom={direction}
+                        variants={variants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        transition={{
+                            x: { type: "spring", stiffness: 300, damping: 30 },
+                            opacity: { duration: 0.2 }
+                        }}
+                        className="absolute inset-0 w-full"
+                    >
+                        <div className="relative p-6 md:p-8 rounded-2xl bg-[#EEF4D4]/5 border border-[#EEF4D4]/10 backdrop-blur-sm mx-4 md:mx-12 min-h-full flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
+
+                            <QuoteIcon className="absolute top-4 right-6 w-12 h-12 text-[#EEF4D4]/10 -z-10 rotate-180" />
+
+                            {/* Avatar */}
+                            <div className="relative shrink-0">
+                                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full p-[2px] bg-gradient-to-tr from-violet-500 to-emerald-500">
+                                    <img
+                                        src={REVIEWS[current].image}
+                                        alt={REVIEWS[current].name}
+                                        className="w-full h-full rounded-full object-cover border-2 border-black"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1">
+                                <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-2">
+                                    <div>
+                                        <h4 className="font-bold text-white text-lg">{REVIEWS[current].name}</h4>
+                                        <p className="text-white/40 text-xs font-mono uppercase tracking-wider">{REVIEWS[current].role}</p>
+                                    </div>
+                                    <div className="flex items-center justify-center md:justify-end gap-1 mt-1 md:mt-0">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star key={i} className={`w-3 h-3 ${i < REVIEWS[current].rating ? "text-[#F4B400] fill-current" : "text-white/20"}`} />
+                                        ))}
+                                        <span className="ml-2 text-[10px] text-white/30">{REVIEWS[current].date}</span>
+                                    </div>
+                                </div>
+                                <p className="text-[#EEF4D4]/80 text-sm md:text-base leading-relaxed italic">
+                                    "{REVIEWS[current].content}"
+                                </p>
+                            </div>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
+            </div>
+
+            {/* Controls */}
+            <div className="flex justify-center gap-4 mt-6 relative z-10">
+                <button
+                    onClick={prev}
+                    className="p-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer active:scale-95"
+                >
+                    <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                    onClick={next}
+                    className="p-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer active:scale-95"
+                >
+                    <ChevronRight className="w-5 h-5" />
+                </button>
+            </div>
+
+            {/* Pagination Dots */}
+            <div className="flex justify-center gap-1.5 mt-4">
+                {REVIEWS.map((_, i) => (
+                    <div
+                        key={i}
+                        className={`h-1 rounded-full transition-all duration-300 ${i === current ? "w-8 bg-emerald-500" : "w-2 bg-white/10"}`}
+                    />
+                ))}
+            </div>
+        </div>
     );
 }

@@ -2,6 +2,7 @@
 
 import { TubesBackground } from "@/components/ui/neon-flow";
 import { HeroSection } from "./HeroSection";
+import { DifferentiatorsSection } from "./DifferentiatorsSection";
 import { MethodSection } from "./MethodSection";
 import { SpecialtiesSection } from "./SpecialtiesSection";
 import { ResultsSection } from "./ResultsSection";
@@ -106,13 +107,14 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
                             }
                         `}
                     >
-                        {isLoading ? "..." : (isAuthenticated ? "Dashboard" : "COMEÇAR GRÁTIS")}
+                        {isLoading ? "..." : (isAuthenticated ? "Dashboard" : "ACESSAR PILAR 1")}
                     </button>
                 </div>
             </nav>
 
             {/* Seções */}
             <HeroSection />
+            <DifferentiatorsSection />
             <MethodSection />
             <SpecialtiesSection />
             <ResultsSection />

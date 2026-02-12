@@ -151,7 +151,7 @@ export function CtaSection() {
                             />
 
                             <span className="relative z-10 flex items-center justify-center gap-3 text-lg">
-                                {isAuthenticated ? "ACESSAR O COCKPIT" : "INICIAR PROTOCOLO"}
+                                {isAuthenticated ? "ACESSAR O COCKPIT" : "🚀 ENTRAR NO COCKPIT"}
                                 <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
                             </span>
                         </motion.button>
