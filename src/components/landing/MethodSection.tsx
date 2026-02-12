@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRef } from "react";
 import {
     Brain, Headphones, BookOpen, MessageSquare, Mic,
@@ -147,12 +147,12 @@ const PILLARS = [
 function PillarVisual({ type, colorHex }: { type: string; colorHex: string }) {
     if (type === "waves") {
         return (
-            <div className="flex items-center justify-center gap-0.5 h-16 w-32">
-                {[...Array(20)].map((_, i) => (
+            <div className="flex items-center justify-center gap-0.5 h-12 w-24">
+                {[...Array(16)].map((_, i) => (
                     <motion.div
                         key={i}
                         animate={{
-                            height: [6, Math.random() * 40 + 10, 6],
+                            height: [4, Math.random() * 30 + 8, 4],
                         }}
                         transition={{
                             duration: 0.4 + Math.random() * 0.4,
@@ -169,31 +169,31 @@ function PillarVisual({ type, colorHex }: { type: string; colorHex: string }) {
     }
     if (type === "pareto") {
         return (
-            <div className="flex items-end gap-3 h-20 w-32">
+            <div className="flex items-end gap-2 h-14 w-24">
                 <motion.div
                     initial={{ height: 0 }}
-                    whileInView={{ height: 60 }}
+                    whileInView={{ height: 44 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     style={{ backgroundColor: colorHex }}
-                    className="w-12 rounded-t relative"
+                    className="w-10 rounded-t relative"
                 >
-                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold" style={{ color: colorHex }}>80%</span>
+                    <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-bold" style={{ color: colorHex }}>80%</span>
                 </motion.div>
                 <motion.div
                     initial={{ height: 0 }}
-                    whileInView={{ height: 15 }}
+                    whileInView={{ height: 12 }}
                     transition={{ delay: 0.4, duration: 0.8 }}
-                    className="w-12 bg-white/20 rounded-t relative"
+                    className="w-10 bg-white/20 rounded-t relative"
                 >
-                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-white/40">20%</span>
+                    <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-white/40">20%</span>
                 </motion.div>
             </div>
         );
     }
     if (type === "brain") {
         return (
-            <div className="relative w-20 h-20 flex items-center justify-center">
-                <Brain className="w-14 h-14" style={{ color: `${colorHex}60` }} />
+            <div className="relative w-14 h-14 flex items-center justify-center">
+                <Brain className="w-10 h-10" style={{ color: `${colorHex}60` }} />
                 <motion.div
                     animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.6, 0.2] }}
                     transition={{ duration: 2, repeat: Infinity }}
@@ -203,13 +203,13 @@ function PillarVisual({ type, colorHex }: { type: string; colorHex: string }) {
                 <motion.div
                     animate={{ opacity: [0, 1, 0] }}
                     transition={{ duration: 0.4, repeat: Infinity, delay: 0.1 }}
-                    className="absolute w-2 h-2 rounded-full top-3 left-4"
+                    className="absolute w-1.5 h-1.5 rounded-full top-2 left-3"
                     style={{ backgroundColor: colorHex }}
                 />
                 <motion.div
                     animate={{ opacity: [0, 1, 0] }}
                     transition={{ duration: 0.4, repeat: Infinity, delay: 0.5 }}
-                    className="absolute w-2 h-2 rounded-full bottom-4 right-3"
+                    className="absolute w-1.5 h-1.5 rounded-full bottom-3 right-2"
                     style={{ backgroundColor: colorHex }}
                 />
             </div>
@@ -218,28 +218,28 @@ function PillarVisual({ type, colorHex }: { type: string; colorHex: string }) {
     return null;
 }
 
-// Single Pillar Row with Horizontal Scroll Content
+// Single Pillar Row — compact version with all content
 function PillarRow({ pillar, index, isDark }: { pillar: typeof PILLARS[0]; index: number; isDark: boolean }) {
     const isEven = index % 2 === 0;
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 60 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.5, delay: 0.1 }}
             className="relative"
         >
             {/* Vertical Connection Line */}
-            <div className="absolute left-8 md:left-1/2 md:-translate-x-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-green-500/30 to-transparent" />
+            <div className="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-green-500/30 to-transparent" />
 
             {/* Node Dot */}
             <motion.div
                 initial={{ scale: 0 }}
                 whileInView={{ scale: 1 }}
                 viewport={{ once: true }}
-                className="absolute left-8 md:left-1/2 md:-translate-x-1/2 top-8 w-4 h-4 rounded-full z-20"
-                style={{ backgroundColor: pillar.colorHex, boxShadow: `0 0 20px ${pillar.colorHex}` }}
+                className="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-5 w-2.5 h-2.5 rounded-full z-20"
+                style={{ backgroundColor: pillar.colorHex, boxShadow: `0 0 15px ${pillar.colorHex}` }}
             >
                 <motion.div
                     animate={{ scale: [1, 2, 1], opacity: [0.8, 0, 0.8] }}
@@ -250,72 +250,72 @@ function PillarRow({ pillar, index, isDark }: { pillar: typeof PILLARS[0]; index
             </motion.div>
 
             {/* Content Row */}
-            <div className={`flex items-start gap-6 py-12 pl-20 md:pl-0 ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+            <div className={`flex items-start gap-3 py-4 pl-16 md:pl-0 ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
 
-                {/* Level Badge */}
+                {/* Level Badge — desktop only */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.2 }}
-                    className={`hidden md:flex flex-shrink-0 w-32 flex-col items-center ${isEven ? 'md:items-end' : 'md:items-start'}`}
+                    className={`hidden md:flex flex-shrink-0 w-28 flex-col items-center ${isEven ? 'md:items-end' : 'md:items-start'}`}
                 >
                     <div
-                        className="p-4 rounded-xl border"
+                        className="p-2.5 rounded-lg border"
                         style={{ backgroundColor: `${pillar.colorHex}10`, borderColor: `${pillar.colorHex}30` }}
                     >
-                        <pillar.icon className="w-10 h-10" style={{ color: pillar.colorHex }} />
+                        <pillar.icon className="w-7 h-7" style={{ color: pillar.colorHex }} />
                     </div>
-                    <span className={`text-xs font-mono mt-2 ${isDark ? "text-white/40" : "text-gray-500"}`}>NÍVEL {pillar.id.toString().padStart(2, '0')}</span>
+                    <span className={`text-[10px] font-mono mt-1.5 ${isDark ? "text-white/40" : "text-gray-500"}`}>NÍVEL {pillar.id.toString().padStart(2, '0')}</span>
                 </motion.div>
 
-                {/* Content Grid - All visible at once */}
+                {/* Content Card — compact */}
                 <div className="flex-1">
                     <motion.div
-                        initial={{ opacity: 0, x: isEven ? -30 : 30 }}
+                        initial={{ opacity: 0, x: isEven ? -20 : 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.3 }}
-                        className={`p-6 rounded-2xl border backdrop-blur-sm ${isDark ? "bg-black/80 border-white/10" : "bg-white border-gray-200 shadow-lg"
+                        className={`p-3.5 md:p-4 rounded-xl border backdrop-blur-sm ${isDark ? "bg-black/80 border-white/10" : "bg-white border-gray-200 shadow-lg"
                             }`}
                     >
                         {/* Mobile Icon */}
-                        <div className="flex items-center gap-3 mb-4 md:hidden">
-                            <pillar.icon className="w-6 h-6" style={{ color: pillar.colorHex }} />
-                            <span className={`text-xs font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>NÍVEL {pillar.id.toString().padStart(2, '0')}</span>
+                        <div className="flex items-center gap-2 mb-2 md:hidden">
+                            <pillar.icon className="w-5 h-5" style={{ color: pillar.colorHex }} />
+                            <span className={`text-[10px] font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>NÍVEL {pillar.id.toString().padStart(2, '0')}</span>
                         </div>
 
-                        {/* Title & Insight */}
-                        <h3 className={`text-2xl font-bold mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>{pillar.title}</h3>
-                        <p className={`text-sm italic leading-relaxed mb-6 ${isDark ? "text-white/50" : "text-gray-600"}`}>"{pillar.insight}"</p>
+                        {/* Title & Insight — inline layout */}
+                        <h3 className={`text-lg font-bold mb-1.5 ${isDark ? "text-white" : "text-gray-900"}`}>{pillar.title}</h3>
+                        <p className={`text-xs italic leading-snug mb-3 ${isDark ? "text-white/50" : "text-gray-600"}`}>"{pillar.insight}"</p>
 
-                        {/* Visual + Stats Row */}
-                        <div className="flex flex-col sm:flex-row gap-6 items-center">
-                            {/* Visual Widget */}
+                        {/* Visual + Stats — horizontal compact */}
+                        <div className="flex flex-row gap-3 items-center">
+                            {/* Visual Widget — slightly smaller */}
                             <div className="flex-shrink-0">
                                 <PillarVisual type={pillar.visual} colorHex={pillar.colorHex} />
                             </div>
 
-                            {/* Stats */}
-                            <div className="flex-1 grid grid-cols-2 gap-4">
+                            {/* Stats — compact */}
+                            <div className="flex-1 grid grid-cols-2 gap-2">
                                 {pillar.stats.map((stat, i) => (
                                     <motion.div
                                         key={i}
-                                        initial={{ opacity: 0, x: 20 }}
+                                        initial={{ opacity: 0, x: 15 }}
                                         whileInView={{ opacity: 1, x: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: 0.4 + i * 0.1 }}
-                                        className="flex items-center gap-3"
+                                        className="flex items-center gap-2"
                                     >
                                         <div
-                                            className="w-10 h-10 rounded-lg flex items-center justify-center"
+                                            className="w-8 h-8 rounded-lg flex items-center justify-center"
                                             style={{ backgroundColor: `${pillar.colorHex}20` }}
                                         >
-                                            <TrendingUp className="w-5 h-5" style={{ color: pillar.colorHex }} />
+                                            <TrendingUp className="w-4 h-4" style={{ color: pillar.colorHex }} />
                                         </div>
                                         <div>
-                                            <div className="text-lg font-bold" style={{ color: pillar.colorHex }}>{stat.value}</div>
-                                            <div className={`text-[10px] ${isDark ? "text-white/40" : "text-gray-500"}`}>{stat.label}</div>
+                                            <div className="text-sm font-bold leading-tight" style={{ color: pillar.colorHex }}>{stat.value}</div>
+                                            <div className={`text-[9px] ${isDark ? "text-white/40" : "text-gray-500"}`}>{stat.label}</div>
                                         </div>
                                     </motion.div>
                                 ))}
@@ -358,7 +358,7 @@ export function MethodSection() {
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-center mb-20"
+                    className="text-center mb-12"
                 >
                     <motion.div
                         initial={{ scale: 0 }}
@@ -395,10 +395,10 @@ export function MethodSection() {
                         initial={{ opacity: 0, scale: 0.5 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="relative z-10 mt-16 flex justify-center"
+                        className="relative z-10 mt-10 flex justify-center"
                     >
                         {/* Connection to final */}
-                        <div className="absolute left-8 md:left-1/2 md:-translate-x-1/2 -top-16 h-16 w-px bg-gradient-to-b from-green-500/30 to-green-500" />
+                        <div className="absolute left-6 md:left-1/2 md:-translate-x-1/2 -top-10 h-10 w-px bg-gradient-to-b from-green-500/30 to-green-500" />
 
                         <motion.div
                             animate={{
@@ -409,12 +409,12 @@ export function MethodSection() {
                                 ]
                             }}
                             transition={{ duration: 2, repeat: Infinity }}
-                            className="relative w-36 h-36 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center border-4 border-green-400"
+                            className="relative w-28 h-28 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center border-4 border-green-400"
                         >
                             <div className="text-center">
-                                <Trophy className="w-12 h-12 text-white mx-auto mb-1" />
-                                <div className="text-white font-bold text-sm">OPERADOR</div>
-                                <div className="text-green-200 text-[10px]">CERTIFICADO</div>
+                                <Trophy className="w-9 h-9 text-white mx-auto mb-0.5" />
+                                <div className="text-white font-bold text-[11px]">OPERADOR</div>
+                                <div className="text-green-200 text-[8px]">CERTIFICADO</div>
                             </div>
                         </motion.div>
                     </motion.div>
