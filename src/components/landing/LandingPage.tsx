@@ -11,33 +11,10 @@ import { RanksSection } from "./RanksSection";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { LandingThemeProvider, useLandingTheme } from "@/context/LandingThemeContext";
-import { Sun, Moon } from "lucide-react";
-import { motion } from "framer-motion";
 
 import { FaqSection } from "./FaqSection";
 
-// Theme Toggle Button
-function ThemeToggle() {
-    const { theme, toggleTheme, isDark } = useLandingTheme();
 
-    return (
-        <motion.button
-            onClick={toggleTheme}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className={`
-                w-10 h-10 rounded-full flex items-center justify-center border backdrop-blur-md transition-all
-                ${isDark
-                    ? "bg-white/10 border-white/20 text-white hover:bg-white/20"
-                    : "bg-black/10 border-black/20 text-black hover:bg-black/20"
-                }
-            `}
-            title={isDark ? "Modo Claro" : "Modo Escuro"}
-        >
-            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </motion.button>
-    );
-}
 
 // Inner Content with Theme Access
 function LandingContent() {
@@ -73,7 +50,7 @@ function InlineCta({ text, isDark, isAuthenticated }: {
 }) {
     const router = useRouter();
     const handleClick = () => {
-        router.push(isAuthenticated ? "/dashboard" : "/register");
+        router.push(isAuthenticated ? "/dashboard" : "/cadastro");
     };
 
     return (
@@ -123,8 +100,6 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
                 </div>
 
                 <div className="flex items-center gap-4 pointer-events-auto">
-                    {/* Theme Toggle */}
-                    <ThemeToggle />
 
                     <button
                         onClick={() => document.getElementById('method')?.scrollIntoView({ behavior: 'smooth' })}
@@ -143,7 +118,7 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
                             }
                         `}
                     >
-                        {isLoading ? "..." : (isAuthenticated ? "Dashboard" : "ACESSAR PILAR 1")}
+                        {isLoading ? "..." : (isAuthenticated ? "ENTRAR" : "LOGIN")}
                     </button>
                 </div>
             </nav>

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useProgress } from "@/context/ProgressContext";
 import { getRank } from "@/utils/ranks";
 
+import { useAuth } from "@/context/AuthContext";
+
 interface DashboardNavProps {
     studentName?: string;
     studentStreak?: number;
@@ -12,6 +14,7 @@ interface DashboardNavProps {
 
 export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: DashboardNavProps) {
     const router = useRouter();
+    const { logout } = useAuth();
     const { getCompletedCount, getGlobalProgress } = useProgress();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -133,7 +136,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                             </div>
                             <div className="my-2 border-t border-white/10" />
                             <button
-                                onClick={() => { setIsMenuOpen(false); router.push('/'); }}
+                                onClick={() => { setIsMenuOpen(false); logout(); }}
                                 className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-red-500/10"
                             >
                                 🚪 Sair
@@ -178,7 +181,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                                     <button onClick={() => { setIsMenuOpen(false); router.push('/perfil'); }} className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10">👤 Meu Perfil</button>
                                     <button onClick={() => { setIsMenuOpen(false); router.push('/configuracoes'); }} className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10">⚙️ Configurações</button>
                                     <div className="my-2 border-t border-white/10" />
-                                    <button onClick={() => { setIsMenuOpen(false); router.push('/'); }} className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-red-500/10">🚪 Sair</button>
+                                    <button onClick={() => { setIsMenuOpen(false); logout(); }} className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-red-500/10">🚪 Sair</button>
                                 </div>
                             )}
                         </div>

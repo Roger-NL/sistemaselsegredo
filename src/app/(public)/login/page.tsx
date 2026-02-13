@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,8 +11,15 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { login } = useAuth();
+    const { login, isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
+
+    // Auto-redirect if already logged in
+    useEffect(() => {
+        if (!isLoading && isAuthenticated) {
+            router.push("/dashboard");
+        }
+    }, [isAuthenticated, isLoading, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,6 +46,14 @@ export default function LoginPage() {
 
     return (
         <div className="flex min-h-screen">
+            {/* Back to landing */}
+            <Link
+                href="/"
+                className="absolute top-6 left-6 z-10 text-sm text-slate-400 hover:text-slate-700 transition-colors flex items-center gap-1 font-mono"
+            >
+                ← Voltar
+            </Link>
+
             {/* Lado Esquerdo - Arte/Conceito */}
             <div className="hidden lg:flex w-1/2 bg-slate-50 border-r border-slate-200 items-center justify-center p-12 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10 pattern-grid-lg text-slate-900" />

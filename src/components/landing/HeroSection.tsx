@@ -66,7 +66,7 @@ export function HeroSection() {
     const { isAuthenticated } = useAuth();
 
     const handleCta = () => {
-        router.push(isAuthenticated ? "/dashboard" : "/register");
+        router.push(isAuthenticated ? "/dashboard" : "/cadastro");
     };
 
     return (
