@@ -75,10 +75,10 @@ export default function LoginPage() {
                 {/* Header */}
                 <div className="text-center mb-10">
                     <h1 className="text-3xl font-bold tracking-tighter text-white mb-2">
-                        Acesso ao Comando
+                        Acesse sua Conta
                     </h1>
                     <p className="text-slate-400 text-sm">
-                        Insira suas credenciais para acessar o painel operacional.
+                        Entre com seus dados para acessar.
                     </p>
                 </div>
 
@@ -92,7 +92,7 @@ export default function LoginPage() {
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="identifier" className="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
-                                ID / Email
+                                E-mail
                             </label>
                             <div className="relative group">
                                 <input
@@ -104,7 +104,7 @@ export default function LoginPage() {
                                     value={identifier}
                                     onChange={(e) => setIdentifier(e.target.value)}
                                     className="block w-full rounded-lg bg-black/40 border border-white/10 px-4 py-3 text-white placeholder-slate-600 focus:border-white/30 focus:ring-0 transition-all outline-none sm:text-sm"
-                                    placeholder="SEU ID OU EMAIL"
+                                    placeholder="seu@email.com"
                                 />
                                 <div className="absolute inset-0 rounded-lg bg-white/5 opacity-0 group-hover:opacity-10 pointer-events-none transition-opacity" />
                             </div>
@@ -112,7 +112,7 @@ export default function LoginPage() {
 
                         <div>
                             <label htmlFor="password" className="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
-                                Senha de Acesso
+                                Senha
                             </label>
                             <div className="relative group">
                                 <input
@@ -163,18 +163,18 @@ export default function LoginPage() {
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    AUTENTICANDO...
+                                    ENTRANDO...
                                 </span>
                             ) : (
-                                "INICIAR CONEXÃO"
+                                "ENTRAR"
                             )}
                         </button>
                     </div>
 
                     <div className="text-center text-xs text-slate-500 mt-6">
-                        NÃO POSSUI CREDENCIAIS?{" "}
+                        NÃO TEM UMA CONTA?{" "}
                         <Link href="/cadastro" className="text-slate-300 hover:text-white font-medium transition-colors">
-                            SOLICITAR ID
+                            CADASTRE-SE
                         </Link>
                     </div>
                 </form>
@@ -214,7 +214,7 @@ export default function LoginPage() {
                             transition={{ delay: 0.3 }}
                             className="text-white font-mono text-xl tracking-widest"
                         >
-                            ESTABELECENDO CONEXÃO SEGURA...
+                            ENTRANDO...
                         </motion.div>
                     </motion.div>
                 )}
