@@ -48,11 +48,6 @@ function InlineCta({ text, isDark, isAuthenticated }: {
     isDark: boolean;
     isAuthenticated: boolean;
 }) {
-    const router = useRouter();
-    const handleClick = () => {
-        router.push(isAuthenticated ? "/dashboard" : "/cadastro");
-    };
-
     return (
         <div className={`py-8 md:py-10 flex flex-col items-center gap-4 px-4 transition-colors duration-500
             ${isDark ? "bg-black" : "bg-white"}
@@ -62,12 +57,12 @@ function InlineCta({ text, isDark, isAuthenticated }: {
             `}>
                 {text}
             </p>
-            <button
-                onClick={handleClick}
-                className="group relative px-8 py-3 bg-white text-black font-mono font-black tracking-wider uppercase hover:bg-emerald-50 transition-all transform active:scale-95 rounded-sm overflow-hidden text-center shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-transparent hover:border-emerald-200 text-xs md:text-sm"
+            <a
+                href={isAuthenticated ? "/dashboard" : "/cadastro"}
+                className="group relative px-8 py-3 bg-white text-black font-mono font-black tracking-wider uppercase hover:bg-emerald-50 transition-all transform active:scale-95 rounded-sm overflow-hidden text-center shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-transparent hover:border-emerald-200 text-xs md:text-sm inline-block no-underline cursor-pointer"
             >
                 {isAuthenticated ? "ACESSAR COCKPIT →" : "COMEÇAR AGORA →"}
-            </button>
+            </a>
             <div className={`flex items-center gap-4 text-[10px] font-mono uppercase tracking-widest
                 ${isDark ? "text-white/20" : "text-gray-400"}
             `}>
@@ -109,9 +104,9 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
                     >
                         Método
                     </button>
-                    <button
-                        onClick={handleLogin}
-                        className={`px-6 py-2 border rounded-full font-mono text-xs uppercase tracking-widest transition-all backdrop-blur-md
+                    <a
+                        href={isAuthenticated ? "/dashboard" : "/login"}
+                        className={`px-6 py-2 border rounded-full font-mono text-xs uppercase tracking-widest transition-all backdrop-blur-md inline-block no-underline text-center cursor-pointer
                             ${isDark
                                 ? "border-white/20 text-white bg-black/30 hover:bg-white hover:text-black"
                                 : "border-gray-300 text-gray-900 bg-white/80 hover:bg-gray-900 hover:text-white"
@@ -119,7 +114,7 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
                         `}
                     >
                         {isLoading ? "..." : (isAuthenticated ? "ENTRAR" : "LOGIN")}
-                    </button>
+                    </a>
                 </div>
             </nav>
 

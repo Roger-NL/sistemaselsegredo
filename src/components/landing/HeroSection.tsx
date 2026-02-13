@@ -141,15 +141,15 @@ export function HeroSection() {
                             Sistema fechado com validação humana.
                         </p>
 
-                        <button
-                            onClick={handleCta}
-                            className="group relative px-8 py-4 bg-white text-black font-mono font-black tracking-wider uppercase hover:bg-emerald-50 transition-all transform active:scale-95 rounded-sm overflow-hidden text-center w-full sm:w-auto shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-transparent hover:border-emerald-200"
+                        <a
+                            href={isAuthenticated ? "/dashboard" : "/cadastro"}
+                            className="group relative px-8 py-4 bg-white text-black font-mono font-black tracking-wider uppercase hover:bg-emerald-50 transition-all transform active:scale-95 rounded-sm overflow-hidden text-center w-full sm:w-auto shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-transparent hover:border-emerald-200 inline-block no-underline cursor-pointer"
                         >
                             <span className="relative z-10 flex items-center justify-center gap-3 text-sm md:text-base whitespace-nowrap">
                                 <Rocket className="w-5 h-5 text-fuchsia-600 group-hover:text-fuchsia-500 transition-colors" />
                                 ATIVAR MEU ACESSO IMEDIATO
                             </span>
-                        </button>
+                        </a>
 
                         {/* Conversion Boosters */}
                         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[10px] md:text-xs font-mono font-bold text-white/40 uppercase tracking-widest pl-1">

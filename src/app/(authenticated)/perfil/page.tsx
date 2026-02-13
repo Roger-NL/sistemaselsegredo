@@ -12,19 +12,74 @@ export default function PerfilPage() {
     const { getCompletedCount, getGlobalProgress } = useProgress();
     const { user, updateProfile, isLoading: authLoading } = useAuth();
 
+    // Função auxiliar para detecção de bandeira
+    const getFlagEmoji = (phone: string): string => {
+        if (!phone) return '🏳️';
+        const clean = phone.replace(/[^\d+]/g, '');
+        if (clean.startsWith('+55')) return '🇧🇷';
+        if (clean.startsWith('+1')) return '🇺🇸';
+        if (clean.startsWith('+351')) return '🇵🇹';
+        if (clean.startsWith('+44')) return '🇬🇧';
+        if (clean.startsWith('+34')) return '🇪🇸';
+        if (clean.startsWith('+33')) return '🇫🇷';
+        if (clean.startsWith('+49')) return '🇩🇪';
+        if (clean.startsWith('+39')) return '🇮🇹';
+        if (clean.startsWith('+')) return '🌐';
+        // Se parece BR sem DDI
+        if (clean.length >= 10 && clean.length <= 11) return '🇧🇷';
+        return '🏳️';
+    };
+
+    // Formatter utility
+    const formatPhoneNumber = (value: string) => {
+        if (!value) return "";
+        let raw = value.replace(/[^\d+]/g, '');
+
+        // Auto-fix BR without DDI
+        if (!raw.startsWith('+')) {
+            if (raw.length >= 10 && raw.length <= 11) {
+                raw = '+55' + raw;
+            } else if (raw.startsWith('55') && raw.length > 2) {
+                raw = '+' + raw;
+            }
+        }
+
+        if (raw.startsWith('+55')) {
+            const ddd = raw.slice(3, 5);
+            const part1 = raw.slice(5, 10);
+            const part2 = raw.slice(10, 14);
+
+            let formatted = '+55';
+            if (ddd) formatted += ` (${ddd}`;
+            if (ddd.length === 2) formatted += `) `;
+            if (part1) formatted += `${part1}`;
+            if (part1.length === 5) formatted += `-`;
+            if (part2) formatted += `${part2}`;
+            return formatted;
+        }
+
+        return raw;
+    };
+
     // State for editing
     const [isEditing, setIsEditing] = useState(false);
     const [editName, setEditName] = useState("");
     const [editEmail, setEditEmail] = useState("");
+    const [editPhone, setEditPhone] = useState("");
+    const [localPhone, setLocalPhone] = useState("");
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
 
     // Initialize edit fields when user data is loaded
     useEffect(() => {
+        const saved = typeof window !== 'undefined' ? localStorage.getItem('es-secure-comms-v2') || "" : "";
+        setLocalPhone(saved);
+
         if (user) {
             setEditName(user.name);
             setEditEmail(user.email);
+            setEditPhone(user.phone || saved || "");
         }
     }, [user]);
 
@@ -39,10 +94,11 @@ export default function PerfilPage() {
         }
 
         setIsSaving(true);
-        const result = await updateProfile(editName, editEmail);
+        const result = await updateProfile(editName, editEmail, editPhone);
         setIsSaving(false);
 
         if (result.success) {
+            setLocalPhone(editPhone);
             setSuccessMsg("Perfil atualizado com sucesso!");
             setIsEditing(false);
 
@@ -60,7 +116,8 @@ export default function PerfilPage() {
     // Default or loading state
     if (authLoading) return <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">Carregando...</div>;
 
-    const displayUser = user || { name: "Usuário", email: "...", createdAt: new Date().toISOString(), currentStreak: 0 };
+    const baseUser = user || { name: "Usuário", email: "...", createdAt: new Date().toISOString(), currentStreak: 0, phone: "" };
+    const displayUser = { ...baseUser, phone: baseUser.phone || localPhone || "" };
 
     // Format date properly
     const memberSince = new Date(displayUser.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -120,7 +177,7 @@ export default function PerfilPage() {
                                             type="text"
                                             value={editName}
                                             onChange={(e) => setEditName(e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black text-gray-900 bg-white"
                                         />
                                     </div>
                                     <div>
@@ -129,8 +186,32 @@ export default function PerfilPage() {
                                             type="email"
                                             value={editEmail}
                                             onChange={(e) => setEditEmail(e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black text-gray-900 bg-white"
                                         />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+                                        <div className="relative">
+                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-xl select-none pointer-events-none">
+                                                {getFlagEmoji(editPhone)}
+                                            </div>
+                                            <input
+                                                type="tel"
+                                                value={editPhone}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    // Allow deletion
+                                                    if (val.length < editPhone.length) {
+                                                        setEditPhone(val);
+                                                        return;
+                                                    }
+                                                    setEditPhone(formatPhoneNumber(val));
+                                                }}
+                                                placeholder="+55 (00) 00000-0000"
+                                                className="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black text-gray-900 bg-white"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">Deixe em branco para remover.</p>
                                     </div>
                                     <div className="flex gap-3 pt-2 justify-center md:justify-start">
                                         <button
@@ -145,6 +226,7 @@ export default function PerfilPage() {
                                                 setIsEditing(false);
                                                 setEditName(displayUser.name);
                                                 setEditEmail(displayUser.email);
+                                                setEditPhone(displayUser.phone || "");
                                             }}
                                             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                                         >
@@ -156,6 +238,13 @@ export default function PerfilPage() {
                                 <>
                                     <h2 className="text-2xl font-bold text-gray-900 capitalize">{displayUser.name}</h2>
                                     <p className="text-gray-500">{displayUser.email}</p>
+                                    {displayUser.phone && (
+                                        <p className="text-gray-500 text-sm mt-1 flex items-center gap-2">
+                                            <span className="text-emerald-600">📱</span>
+                                            <span className="text-lg">{getFlagEmoji(displayUser.phone)}</span>
+                                            {formatPhoneNumber(displayUser.phone)}
+                                        </p>
+                                    )}
 
                                     {/* Rank Badge */}
                                     <div className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-gradient-to-r from-[#EEF4D4]/30 to-emerald-100/50 rounded-full">

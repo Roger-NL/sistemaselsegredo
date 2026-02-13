@@ -25,7 +25,7 @@ interface AuthContextType {
     subscriptionStatus: SubscriptionStatus | null;
     login: (identifier: string, password: string) => Promise<AuthResult>;
     register: (name: string, email: string, password: string, confirmPassword: string) => Promise<AuthResult>;
-    updateProfile: (name: string, email: string) => Promise<AuthResult>;
+    updateProfile: (name: string, email: string, phone?: string) => Promise<AuthResult>;
     activateWithInvite: (code: string) => Promise<AuthResult>;
     activateWithPayment: (paymentId: string) => Promise<AuthResult>;
     logout: () => void;
@@ -75,12 +75,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
     };
 
-    const updateProfile = async (name: string, email: string): Promise<AuthResult> => {
+    const updateProfile = async (name: string, email: string, phone?: string): Promise<AuthResult> => {
         if (!user) return { success: false, error: 'Usuário não autenticado' };
 
-        const result = await authUpdateProfile(user.id, name, email);
+        const result = await authUpdateProfile(user.id, name, email, phone);
         if (result.success && result.user) {
             setUser(result.user);
+
+            // Sync with local storage flag for modal
+            if (typeof window !== 'undefined') {
+                if (phone) {
+                    localStorage.setItem('es-secure-comms-v2', phone);
+                } else {
+                    localStorage.removeItem('es-secure-comms-v2');
+                }
+            }
         }
         return result;
     };

@@ -132,7 +132,7 @@ export function FaqSection() {
     }
 
     return (
-        <section className={`py-16 md:py-24 px-4 border-t relative z-20 transition-colors duration-500
+        <section id="faq" className={`py-16 md:py-24 px-4 border-t relative z-20 transition-colors duration-500
             ${isDark ? "bg-black border-white/5" : "bg-gray-50 border-gray-200"}
         `}>
             <div className="container mx-auto max-w-5xl">

@@ -3,7 +3,10 @@
 import { motion } from "framer-motion";
 import { Shield, Lock, Unlock, Zap, Ear, Mic, Brain, Globe, Briefcase, Plane, ShoppingBag, Heart, Clapperboard, BarChart3, Target, ArrowRight } from "lucide-react";
 
+import { useAuth } from "@/context/AuthContext";
+
 export function FeaturesSection() {
+    const { isAuthenticated } = useAuth();
     const pillars = [
         {
             title: "Pilar 1: Mindset & Inteligência",
@@ -152,9 +155,12 @@ export function FeaturesSection() {
 
                             {pillar.status === 'unlocked' && (
                                 <div className="mt-6">
-                                    <button className="text-xs font-bold text-green-400 uppercase tracking-widest hover:text-green-300 flex items-center gap-2">
+                                    <a
+                                        href={isAuthenticated ? "/dashboard" : "/cadastro"}
+                                        className="text-xs font-bold text-green-400 uppercase tracking-widest hover:text-green-300 flex items-center gap-2 inline-block no-underline cursor-pointer"
+                                    >
                                         ACESSAR PILAR 1 <ArrowRight className="w-3 h-3" />
-                                    </button>
+                                    </a>
                                 </div>
                             )}
                         </motion.div>

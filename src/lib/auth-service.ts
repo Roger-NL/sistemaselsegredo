@@ -148,7 +148,8 @@ export async function register(
 export async function updateProfile(
     userId: string,
     name: string,
-    email: string
+    email: string,
+    phone?: string
 ): Promise<AuthResult> {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -163,7 +164,7 @@ export async function updateProfile(
         return { success: false, error: 'Este email já está em uso por outro usuário' };
     }
 
-    const updatedUser = dbUpdateUser(userId, { name, email });
+    const updatedUser = dbUpdateUser(userId, { name, email, phone });
 
     if (!updatedUser) {
         return { success: false, error: 'Erro ao atualizar usuário' };

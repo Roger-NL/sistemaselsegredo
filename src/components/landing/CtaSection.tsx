@@ -76,8 +76,8 @@ export function CtaSection() {
                         }`}
                 >
                     {/* Decorative elements */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
                     <div className="relative z-10 text-center">
                         {/* Badge */}
@@ -137,15 +137,15 @@ export function CtaSection() {
                         </div>
 
                         {/* CTA Button */}
-                        <motion.button
-                            onClick={handleCta}
+                        <motion.a
+                            href={isAuthenticated ? "/dashboard" : "/login"}
                             whileHover={{ scale: 1.05, y: -3 }}
                             whileTap={{ scale: 0.95 }}
-                            className="group relative px-12 py-6 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-mono font-bold tracking-widest uppercase rounded-xl overflow-hidden shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.5)] transition-shadow"
+                            className="group relative px-12 py-6 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-mono font-bold tracking-widest uppercase rounded-xl overflow-hidden shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.5)] transition-shadow inline-block text-center cursor-pointer"
                         >
                             {/* Animated glow */}
                             <motion.div
-                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
                                 animate={{ x: ["-100%", "100%"] }}
                                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
                             />
@@ -154,7 +154,7 @@ export function CtaSection() {
                                 {isAuthenticated ? "ACESSAR O COCKPIT" : "🚀 ENTRAR NO COCKPIT"}
                                 <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
                             </span>
-                        </motion.button>
+                        </motion.a>
 
                         {/* Trust elements with scroll reveal */}
                         <div className={`flex flex-wrap items-center justify-center gap-6 mt-10 text-xs font-mono ${isDark ? "text-white/30" : "text-gray-400"}`}>
@@ -190,7 +190,10 @@ export function CtaSection() {
                 >
                     <p className={`text-sm font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>
                         Ainda tem dúvidas?{" "}
-                        <button className="text-violet-400 hover:text-violet-300 underline underline-offset-4 transition-colors">
+                        <button
+                            onClick={() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' })}
+                            className="text-violet-400 hover:text-violet-300 underline underline-offset-4 transition-colors"
+                        >
                             Veja nossas perguntas frequentes
                         </button>
                     </p>

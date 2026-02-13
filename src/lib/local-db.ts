@@ -21,6 +21,7 @@ export interface User {
     subscriptionExpiresAt?: string; // ISO date
     inviteCodeUsed?: string;
     paymentId?: string;
+    phone?: string; // WhatsApp number
 }
 
 export interface Session {
@@ -129,7 +130,7 @@ export function createUser(name: string, email: string, password: string): User 
         createdAt: new Date().toISOString(),
         currentStreak: 1, // Start with streak 1
         lastLoginDate: new Date().toISOString(),
-        subscriptionStatus: 'pending', // New users start as pending until payment/invite
+        subscriptionStatus: 'active', // Freemium: new users get immediate access
     };
 
     users.push(newUser);

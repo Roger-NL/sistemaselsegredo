@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RotatingEarth from "@/components/ui/wireframe-dotted-globe";
 import { DevControls } from "@/components/core/DevControls";
 import { useProgress } from "@/context/ProgressContext";
@@ -12,12 +12,13 @@ import { TheHUD } from "@/components/core/TheHUD";
 import { GlobalStatusPanel } from "@/components/features/dashboard/GlobalStatusPanel";
 import { Typewriter } from "@/components/ui/typewriter";
 import { DashboardNav } from "@/components/core/DashboardNav";
+import SecureCommsModal from "@/components/core/SecureCommsModal";
 
 import { useAuth } from "@/context/AuthContext";
 
 export default function Page() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const {
     getCompletedCount,
     getCurrentPillarNumber,
@@ -40,6 +41,23 @@ export default function Page() {
   // Isso resolve o problema do botão "Voltar" não funcionar
 
   const [isHUDOpen, setIsHUDOpen] = useState(false);
+  const [showCommsModal, setShowCommsModal] = useState(false);
+
+  // Trigger: Verifica conexão WhatsApp ao entrar (delay 3s)
+  useEffect(() => {
+    // Verifica se já conectou
+    const alreadyConnected = localStorage.getItem('es-secure-comms-v2');
+
+    if (!alreadyConnected) {
+      // Se NÃO conectou, espera 3 segundos e bloqueia a tela com o modal
+      const timer = setTimeout(() => {
+        setShowCommsModal(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+
+    // Se já conectou, segue a vida (lógica do Pilar 1 removida/substituída por essa mais restritiva)
+  }, []);
 
   const handleGlobeClick = () => {
     console.log("Opening HUD");
@@ -374,6 +392,21 @@ export default function Page() {
           </div>
         </div>
       </div>
+
+      {/* WhatsApp Capture Modal — Trigger: Login (Mandatório) */}
+      <SecureCommsModal
+        trigger="login"
+        isOpen={showCommsModal}
+        onClose={() => {
+          setShowCommsModal(false);
+        }}
+        onConnect={(phone) => {
+          if (user) {
+            updateProfile(user.name, user.email, phone);
+          }
+          setShowCommsModal(false);
+        }}
+      />
 
       {/* Dev Controls */}
       <div className="pointer-events-auto">

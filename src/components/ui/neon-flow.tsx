@@ -83,7 +83,7 @@ function TubesBackgroundComponent({
             )}
 
             {/* Conteúdo - z-10 para ficar acima do fundo */}
-            <div className="relative z-10 w-full min-h-screen min-h-[100dvh] pointer-events-none">
+            <div className="relative z-10 w-full min-h-screen min-h-[100dvh] pointer-events-auto">
                 {/* Cada filho com pointer-events-auto pode capturar cliques */}
                 {children}
             </div>
