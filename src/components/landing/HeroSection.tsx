@@ -108,7 +108,7 @@ export function HeroSection() {
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400 font-black">
                             em 90 dias.
                         </span>
-                        <span className="text-xl sm:text-2xl md:text-2xl font-mono font-medium text-white/60 mt-1 tracking-wide">
+                        <span className="text-xl sm:text-2xl md:text-2xl font-mono font-medium text-white/80 mt-1 tracking-wide">
                             Inglês sem sala de aula.
                         </span>
                     </motion.h1>
