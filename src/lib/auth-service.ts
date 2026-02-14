@@ -3,18 +3,18 @@
  * Replaces local-db with Firebase Auth + Firestore
  */
 
-import { 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    signOut, 
+import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
     updateProfile as firebaseUpdateProfile,
-    User as FirebaseUser 
+    User as FirebaseUser
 } from "firebase/auth";
-import { 
-    doc, 
-    setDoc, 
-    getDoc, 
-    updateDoc, 
+import {
+    doc,
+    setDoc,
+    getDoc,
+    updateDoc,
     serverTimestamp,
     collection,
     query,
@@ -25,8 +25,11 @@ import {
 import { auth, db } from "./firebase";
 import Cookies from 'js-cookie';
 
+// ADMIN LIST (Hardcoded for MVP Phase)
+const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
+
 // Types
-export type SubscriptionStatus = 'pending' | 'active' | 'expired';
+export type SubscriptionStatus = 'free' | 'premium' | 'expired';
 
 export interface User {
     id: string;
@@ -40,6 +43,7 @@ export interface User {
     inviteCodeUsed?: string;
     paymentId?: string;
     phone?: string;
+    approvedPillar?: number; // Controle manual de progressão
 }
 
 export interface AuthResult {
@@ -64,7 +68,14 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
 
     if (userDoc.exists()) {
         const data = userDoc.data() as User;
-        return { ...data, id: fbUser.uid }; // Ensure ID matches
+
+        // MIGRATION / COMPATIBILITY: Map 'active' (legacy) to 'free' or 'premium' based on fields?
+        // For now, let's treat 'active' as 'free' unless we prove otherwise.
+        // Actually, if 'active' was the default for everything, it is effectively 'free'.
+        let status = data.subscriptionStatus as any;
+        if (status === 'active') status = 'free';
+
+        return { ...data, subscriptionStatus: status, id: fbUser.uid }; // Ensure ID matches
     }
     return null;
 }
@@ -117,6 +128,10 @@ export async function login(identifier: string, password: string): Promise<AuthR
 
         // Set Middleware Cookie
         Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
+        
+        // Set Role Cookie
+        const role = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'student';
+        Cookies.set('es_user_role', role, { expires: 7, path: '/' });
 
         return { success: true, user };
 
@@ -127,7 +142,7 @@ export async function login(identifier: string, password: string): Promise<AuthR
         if (error.code === 'auth/user-not-found') msg = "Usuário não encontrado.";
         if (error.code === 'auth/wrong-password') msg = "Senha incorreta.";
         if (error.code === 'auth/too-many-requests') msg = "Muitas tentativas. Tente mais tarde.";
-        
+
         return { success: false, error: msg };
     }
 }
@@ -150,9 +165,6 @@ export async function register(
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const fbUser = userCredential.user;
 
-        // Set Display Name
-        await firebaseUpdateProfile(fbUser, { displayName: name });
-
         // Create Firestore Document
         const newUser: User = {
             id: fbUser.uid,
@@ -161,10 +173,15 @@ export async function register(
             createdAt: new Date().toISOString(),
             currentStreak: 1,
             lastLoginDate: new Date().toISOString(),
-            subscriptionStatus: 'active', // Freemium Start
+            subscriptionStatus: 'free', // Freemium Start
+            approvedPillar: 1, // Start at Pillar 1
         };
 
-        await setDoc(doc(db, "users", fbUser.uid), newUser);
+        // Run Firestore creation and Profile update in parallel to avoid race conditions
+        await Promise.all([
+            setDoc(doc(db, "users", fbUser.uid), newUser),
+            firebaseUpdateProfile(fbUser, { displayName: name })
+        ]);
 
         // Set Middleware Cookie
         Cookies.set('es_session_token', newUser.id, { expires: 7, path: '/' });
@@ -176,7 +193,7 @@ export async function register(
         let msg = "Erro ao criar conta.";
         if (error.code === 'auth/email-already-in-use') msg = "Este e-mail já está em uso.";
         if (error.code === 'auth/weak-password') msg = "A senha é muito fraca.";
-        
+
         return { success: false, error: msg };
     }
 }
@@ -212,6 +229,7 @@ export async function updateProfile(
 export async function logout(): Promise<void> {
     await signOut(auth);
     Cookies.remove('es_session_token', { path: '/' });
+    Cookies.remove('es_user_role', { path: '/' });
 }
 
 /**
@@ -223,7 +241,7 @@ export function getCurrentUser(): User | null {
     // In Firebase, we rely on onAuthStateChanged in the context
     // This helper is kept for compatibility but returns null
     // The AuthContext will handle the real user loading.
-    return null; 
+    return null;
 }
 
 // ============================================================================
@@ -247,7 +265,7 @@ export async function activateWithInvite(userId: string, code: string): Promise<
         try {
             const userRef = doc(db, "users", userId);
             await updateDoc(userRef, {
-                subscriptionStatus: 'active',
+                subscriptionStatus: 'premium',
                 subscriptionExpiresAt: expiresAt.toISOString(),
                 inviteCodeUsed: 'ADMIN-TEST-KEY'
             });
@@ -277,15 +295,15 @@ export async function activateWithInvite(userId: string, code: string): Promise<
 
         // Batch Write (Atomicidade: ou faz tudo ou nada)
         const batch = writeBatch(db);
-        
-        batch.update(codeRef, { 
+
+        batch.update(codeRef, {
             status: 'used',
             usedBy: userId,
             usedAt: new Date().toISOString()
         });
-        
+
         batch.update(userRef, {
-            subscriptionStatus: 'active',
+            subscriptionStatus: 'premium',
             subscriptionExpiresAt: expiresAt.toISOString(),
             inviteCodeUsed: code
         });
@@ -311,7 +329,7 @@ export async function activateWithPayment(userId: string, paymentId: string): Pr
     try {
         const userRef = doc(db, "users", userId);
         await updateDoc(userRef, {
-            subscriptionStatus: 'active',
+            subscriptionStatus: 'premium',
             subscriptionExpiresAt: expiresAt.toISOString(),
             paymentId
         });
@@ -327,15 +345,18 @@ export async function activateWithPayment(userId: string, paymentId: string): Pr
  * Check Subscription Status
  */
 export function checkSubscriptionStatus(user: User): SubscriptionStatus | 'expired' {
-    if (user.subscriptionStatus === 'pending') return 'pending';
+    if (user.subscriptionStatus === 'free') return 'free';
 
-    if (user.subscriptionStatus === 'active' && user.subscriptionExpiresAt) {
+    if (user.subscriptionStatus === 'premium' && user.subscriptionExpiresAt) {
         const now = new Date();
         const expires = new Date(user.subscriptionExpiresAt);
         if (now > expires) {
             return 'expired';
         }
     }
+
+    // Legacy fallback
+    if (user.subscriptionStatus === 'active' as any) return 'free';
 
     return user.subscriptionStatus;
 }

@@ -11,33 +11,41 @@ import { RanksSection } from "./RanksSection";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { LandingThemeProvider, useLandingTheme } from "@/context/LandingThemeContext";
-
+import { useEffect } from "react";
 import { FaqSection } from "./FaqSection";
 
-
-
-// Inner Content with Theme Access
+// Inner Content with Theme Access - NOW ENFORCED DARK
 function LandingContent() {
     const router = useRouter();
     const { isAuthenticated, isLoading } = useAuth();
-    const { isDark, isLight } = useLandingTheme();
+
+    // Auto-redirect to dashboard if logged in
+    useEffect(() => {
+        if (!isLoading && isAuthenticated) {
+            router.push("/dashboard");
+        }
+    }, [isAuthenticated, isLoading, router]);
+
+    // We keep the hook call to ensure context exists, but we ignore the values for layout
+    // enforcing dark mode visually
+    const isDark = true;
+    const isLight = false;
 
     const handleLogin = () => {
         router.push(isAuthenticated ? "/dashboard" : "/login");
     };
 
     return (
-        <div className={`overflow-x-hidden transition-colors duration-500 ${isLight ? "bg-white" : ""}`}>
-            {/* Wrapper condicional - só usa TubesBackground no dark mode */}
-            {isDark ? (
-                <TubesBackground className="overflow-x-hidden">
-                    <LandingInner isDark={isDark} isLight={isLight} handleLogin={handleLogin} isAuthenticated={isAuthenticated} isLoading={isLoading} />
-                </TubesBackground>
-            ) : (
-                <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-                    <LandingInner isDark={isDark} isLight={isLight} handleLogin={handleLogin} isAuthenticated={isAuthenticated} isLoading={isLoading} />
-                </div>
-            )}
+        <div className="overflow-x-hidden bg-black text-white min-h-screen">
+            <TubesBackground className="overflow-x-hidden">
+                <LandingInner
+                    isDark={true}
+                    isLight={false}
+                    handleLogin={handleLogin}
+                    isAuthenticated={isAuthenticated}
+                    isLoading={isLoading}
+                />
+            </TubesBackground>
         </div>
     );
 }

@@ -6,7 +6,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Define your static routes here
     const routes = [
         '',
-        '/quiz',
         '/especialidades',
         // Add other main routes as they become stable
     ]

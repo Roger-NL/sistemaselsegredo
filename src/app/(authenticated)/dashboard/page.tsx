@@ -68,8 +68,24 @@ export default function Page() {
   // Pegar pilares com status para o HUD
   const pillarsWithStatus = useProgress().getPillarsWithStatus();
 
+  // Admin Check
+  const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email);
+
   return (
     <main className="relative min-h-screen min-h-[100dvh] w-full overflow-hidden text-white selection:bg-[#EEF4D4] selection:text-black flex items-center justify-center pointer-events-none">
+
+      {/* Admin Portal Button - Fixed Bottom Right */}
+      {isAdmin && (
+        <div className="fixed bottom-4 right-4 z-[9999] pointer-events-auto">
+            <button 
+                onClick={() => router.push('/admin/dashboard')}
+                className="bg-red-600 text-white px-4 py-2 rounded shadow-lg font-bold text-xs uppercase tracking-widest hover:bg-red-700 transition-colors"
+            >
+                PAINEL ADMIN
+            </button>
+        </div>
+      )}
 
       {/* Dashboard Navigation - Apple Bean Style */}
       <DashboardNav
@@ -408,7 +424,7 @@ export default function Page() {
 
       {/* Dev Controls */}
       <div className="pointer-events-auto">
-        <DevControls />
+        <DevControls isAdmin={isAdmin || false} />
       </div>
     </main>
   );

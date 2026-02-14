@@ -16,7 +16,7 @@ export default function PagamentoPage() {
     const [loading, setLoading] = useState(false);
 
     // If already active, redirect to dashboard
-    if (subscriptionStatus === 'active') {
+    if (subscriptionStatus === 'premium') {
         router.push('/dashboard');
         return null;
     }

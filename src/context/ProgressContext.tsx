@@ -94,7 +94,101 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const [hasSeenMissionComplete, setHasSeenMissionComplete] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
 
-    // ... (useEffect logic remains same) ...
+    // Carrega progresso do localStorage na montagem
+    useEffect(() => {
+        const stored = secureStorage.getItem<any>(STORAGE_KEY);
+        if (stored) {
+            try {
+                // Retrocompatibilidade (se for string antiga sem chosenSpecialization)
+                if (stored.pillarStatus) {
+                    setPillarStatus(stored.pillarStatus);
+                    setChosenSpecialization(stored.chosenSpecialization || null);
+                    setSpecializationStatus(stored.specializationStatus || null);
+                    setCompletedSpecializations(stored.completedSpecializations || []);
+                    setCompletedModules(stored.completedModules || {});
+                    setCompletedPillarModules(stored.completedPillarModules || []);
+                    setHasSeenMissionComplete(stored.hasSeenMissionComplete || false);
+                } else {
+                    // Formato antigo (apenas status)
+                    setPillarStatus(stored);
+                }
+            } catch {
+                setPillarStatus(getInitialStatus());
+            }
+        }
+        setIsHydrated(true);
+    }, []);
+
+    // Salva no localStorage quando muda
+    useEffect(() => {
+        if (isHydrated) {
+            secureStorage.setItem(STORAGE_KEY, {
+                pillarStatus,
+                chosenSpecialization,
+                specializationStatus,
+                completedSpecializations,
+                completedModules,
+                completedPillarModules,
+                hasSeenMissionComplete
+            });
+        }
+    }, [pillarStatus, chosenSpecialization, specializationStatus, completedSpecializations, completedModules, completedPillarModules, hasSeenMissionComplete, isHydrated]);
+
+    // Marca pilar como completado e desbloqueia próximo
+    const completePillar = (pillarNumber: number) => {
+        setPillarStatus((prev) => {
+            const newStatus = { ...prev };
+            const currentPillarId = `pilar-${pillarNumber}`;
+            const nextPillarId = `pilar-${pillarNumber + 1}`;
+
+            // Marca atual como completed
+            newStatus[currentPillarId] = "completed";
+
+            // Desbloqueia próximo (se existir)
+            if (pillarNumber < 9 && newStatus[nextPillarId]) {
+                newStatus[nextPillarId] = "unlocked";
+            }
+
+            return newStatus;
+        });
+    };
+
+    // Define nível específico (Dev Mode)
+    const setPillarLevel = (level: number) => {
+        const newStatus: Record<string, PillarStatus> = {};
+        PILLARS.forEach((pillar, index) => {
+            const pillarNum = index + 1;
+            if (pillarNum < level) {
+                newStatus[pillar.id] = "completed";
+            } else if (pillarNum === level) {
+                newStatus[pillar.id] = "unlocked";
+            } else {
+                newStatus[pillar.id] = "locked";
+            }
+        });
+        setPillarStatus(newStatus);
+    };
+
+    // Retorna número do pilar atual
+    const getCurrentPillarNumber = (): number => {
+        for (let i = 1; i <= 9; i++) {
+            const status = pillarStatus[`pilar-${i}`];
+            if (status !== "completed") {
+                return i;
+            }
+        }
+        return 9; // Todos completos
+    };
+
+    // Conta pilares completados
+    const getCompletedCount = (): number => {
+        return Object.values(pillarStatus).filter((s) => s === "completed").length;
+    };
+
+    // Verifica se todos completos
+    const areAllPillarsComplete = (): boolean => {
+        return getCompletedCount() === 9;
+    };
 
     // Verifica se pilar está desbloqueado
     const isPillarUnlocked = (pillarNumber: number): boolean => {
@@ -102,7 +196,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         if (pillarNumber === 1) return true;
 
         // Regra Premium: Pilar 2+ exige assinatura ativa
-        if (subscriptionStatus !== 'active') return false;
+        if (subscriptionStatus !== 'premium') return false;
 
         // Regra de Progresso: Só libera se o anterior estiver feito (lógica antiga)
         const status = pillarStatus[`pilar-${pillarNumber}`];

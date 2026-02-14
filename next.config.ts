@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
         },
         {
           key: 'X-Frame-Options',
-          value: 'DENY' // Proteção contra Clickjacking
+          value: 'SAMEORIGIN' // Allows iframe from same origin (needed for neon-tubes.html)
         },
         {
           key: 'X-Content-Type-Options',

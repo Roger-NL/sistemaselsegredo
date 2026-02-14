@@ -47,19 +47,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 // User is signed in, fetch Firestore data
                 try {
                     const userDocRef = doc(db, "users", firebaseUser.uid);
-                    const userDoc = await getDoc(userDocRef);
+                    let userDoc = await getDoc(userDocRef);
+
+                    // Retry logic for new registrations (race condition fix)
+                    if (!userDoc.exists()) {
+                        for (let i = 0; i < 3; i++) {
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            userDoc = await getDoc(userDocRef);
+                            if (userDoc.exists()) break;
+                        }
+                    }
 
                     if (userDoc.exists()) {
                         const userData = userDoc.data() as User;
                         // Ensure ID is set
                         const fullUser = { ...userData, id: firebaseUser.uid };
                         setUser(fullUser);
-                        
+
                         // Sync Cookie for Middleware
                         Cookies.set('es_session_token', firebaseUser.uid, { expires: 7, path: '/' });
                     } else {
                         // User exists in Auth but not in Firestore (Rare edge case)
-                        console.error("User authenticated but no Firestore profile found.");
+                        console.error("User authenticated but no Firestore profile found after retries.");
                         setUser(null);
                     }
                 } catch (error) {
@@ -128,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = async () => {
         await authLogout();
         // State update happens automatically via onAuthStateChanged
-        router.push("/login");
+        router.push("/");
     };
 
     const subscriptionStatus: SubscriptionStatus | null = user

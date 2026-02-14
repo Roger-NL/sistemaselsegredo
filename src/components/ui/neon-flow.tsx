@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect, memo } from 'react';
 import { cn } from "@/lib/utils";
+import { neonTubesHtml } from './neon-tubes-html';
 
 interface TubesBackgroundProps {
     children?: React.ReactNode;
@@ -71,7 +72,7 @@ function TubesBackgroundComponent({
             {showIframe && (
                 <iframe
                     ref={iframeRef}
-                    src="/neon-tubes.html"
+                    srcDoc={neonTubesHtml}
                     className="fixed inset-0 w-full h-full border-0 opacity-0 animate-fade-in pointer-events-none"
                     style={{
                         animationDelay: '0.3s',

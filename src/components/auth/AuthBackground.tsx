@@ -9,16 +9,16 @@ export default function AuthBackground() {
     const mouseY = useMotionValue(0);
     const [mounted, setMounted] = useState(false);
 
-    const springConfig = { damping: 25, stiffness: 700 };
+    const springConfig = { damping: 30, stiffness: 100 };
     const springX = useSpring(mouseX, springConfig);
     const springY = useSpring(mouseY, springConfig);
 
-    // Parallax layers
-    const layer1X = useTransform(springX, [-0.5, 0.5], [-20, 20]);
-    const layer1Y = useTransform(springY, [-0.5, 0.5], [-20, 20]);
+    // Parallax layers (Increased intensity)
+    const layer1X = useTransform(springX, [-0.5, 0.5], [-50, 50]);
+    const layer1Y = useTransform(springY, [-0.5, 0.5], [-50, 50]);
 
-    const layer2X = useTransform(springX, [-0.5, 0.5], [-40, 40]);
-    const layer2Y = useTransform(springY, [-0.5, 0.5], [-40, 40]);
+    const layer2X = useTransform(springX, [-0.5, 0.5], [-100, 100]);
+    const layer2Y = useTransform(springY, [-0.5, 0.5], [-100, 100]);
 
     useEffect(() => {
         setMounted(true);

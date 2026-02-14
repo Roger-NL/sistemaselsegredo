@@ -1,0 +1,271 @@
+export const neonTubesHtml = `<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Effect</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="tubes-canvas"></canvas>
+
+    <script type="module">
+        import TubesCursor from 'https://cdn.jsdelivr.net/npm/threejs-components@0.0.19/build/cursors/tubes1.min.js';
+
+        const canvas = document.getElementById('tubes-canvas');
+
+        // ===== INTERCEPTAR MOUSE HANDLERS =====
+        // Guarda os handlers de mouse originais para poder chamá-los manualmente
+        const mouseHandlers = [];
+        const pointerHandlers = [];
+
+        // Salva o addEventListener original
+        const originalAddEventListener = canvas.addEventListener.bind(canvas);
+        const originalWindowAddEventListener = window.addEventListener.bind(window);
+        const originalDocAddEventListener = document.addEventListener.bind(document);
+
+        // Intercepta addEventListener do canvas
+        canvas.addEventListener = function (type, handler, options) {
+            if (type === 'mousemove' || type === 'pointermove') {
+                mouseHandlers.push({ type, handler });
+                console.log('Captured handler for:', type);
+            }
+            return originalAddEventListener(type, handler, options);
+        };
+
+        // Intercepta addEventListener do window
+        window.addEventListener = function (type, handler, options) {
+            if (type === 'mousemove' || type === 'pointermove') {
+                mouseHandlers.push({ type, handler });
+                console.log('Captured window handler for:', type);
+            }
+            return originalWindowAddEventListener(type, handler, options);
+        };
+
+        // Intercepta addEventListener do document
+        document.addEventListener = function (type, handler, options) {
+            if (type === 'mousemove' || type === 'pointermove') {
+                mouseHandlers.push({ type, handler });
+                console.log('Captured document handler for:', type);
+            }
+            return originalDocAddEventListener(type, handler, options);
+        };
+
+        // Helper for random colors (nebula palette)
+        const randomColors = (count) => {
+            const nebulaPalette = [
+                "#d4af37", "#c9a227", "#b8860b",
+                "#8b5cf6", "#7c3aed", "#6d28d9",
+                "#ec4899", "#db2777", "#be185d",
+                "#3b82f6", "#2563eb", "#1d4ed8",
+                "#14b8a6", "#0d9488", "#0f766e",
+            ];
+            return new Array(count)
+                .fill(0)
+                .map(() => nebulaPalette[Math.floor(Math.random() * nebulaPalette.length)]);
+        };
+
+        // Initialize TubesCursor
+        const app = TubesCursor(canvas, {
+            tubes: {
+                count: 12,
+                colors: ["#d4af37", "#8b5cf6", "#ec4899", "#3b82f6", "#14b8a6", "#f59e0b"],
+                geometry: {
+                    radius: 0.08,
+                    radiusSegments: 8,
+                    tubularSegments: 200,
+                    length: 40,
+                    spread: { x: 3.5, y: 0.8, z: 2.0 }
+                },
+                speed: { flow: 0.4, rotation: 0.1 },
+                lights: {
+                    intensity: 150,
+                    colors: ["#d4af37", "#8b5cf6", "#ec4899", "#3b82f6", "#14b8a6"]
+                }
+            }
+        });
+
+        console.log('TubesCursor initialized, captured handlers:', mouseHandlers.length);
+
+        // ===== SISTEMA DE MOVIMENTO AUTOMÁTICO =====
+        let lastActivityTime = Date.now();
+        let isIdle = false;
+        let idleAnimationId = null;
+        let currentPos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+        // Função para simular movimento do mouse
+        const simulateMouseMove = (x, y) => {
+            const rect = canvas.getBoundingClientRect();
+            const offsetX = x - rect.left;
+            const offsetY = y - rect.top;
+
+            // Cria evento com todas as propriedades necessárias
+            const eventInit = {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: x,
+                clientY: y,
+                pageX: x,
+                pageY: y,
+                screenX: x,
+                screenY: y,
+                movementX: x - currentPos.x,
+                movementY: y - currentPos.y
+            };
+
+            // Cria eventos DOM reais
+            const mouseEvent = new MouseEvent('mousemove', eventInit);
+            const pointerEvent = new PointerEvent('pointermove', {
+                ...eventInit,
+                pointerId: 1,
+                pointerType: 'mouse',
+                isPrimary: true
+            });
+
+            // Injeta offsetX/offsetY
+            Object.defineProperty(mouseEvent, 'offsetX', { value: offsetX });
+            Object.defineProperty(mouseEvent, 'offsetY', { value: offsetY });
+            Object.defineProperty(pointerEvent, 'offsetX', { value: offsetX });
+            Object.defineProperty(pointerEvent, 'offsetY', { value: offsetY });
+
+            // Dispara eventos nos elementos
+            canvas.dispatchEvent(mouseEvent);
+            canvas.dispatchEvent(pointerEvent);
+            document.dispatchEvent(new MouseEvent('mousemove', eventInit));
+            window.dispatchEvent(new MouseEvent('mousemove', eventInit));
+
+            // Também chama handlers capturados diretamente
+            const fakeEvent = {
+                clientX: x, clientY: y,
+                pageX: x, pageY: y,
+                screenX: x, screenY: y,
+                offsetX, offsetY,
+                movementX: x - currentPos.x,
+                movementY: y - currentPos.y,
+                target: canvas,
+                currentTarget: canvas,
+                bubbles: true,
+                cancelable: true,
+                preventDefault: () => { },
+                stopPropagation: () => { }
+            };
+
+            mouseHandlers.forEach(({ handler }) => {
+                try { handler(fakeEvent); } catch (e) { }
+            });
+
+            currentPos = { x, y };
+        };
+
+        // Animação de movimento automático
+        const runIdleAnimation = () => {
+            if (!isIdle) return;
+
+            const time = Date.now() * 0.0003;
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const radiusX = window.innerWidth * 0.4;
+            const radiusY = window.innerHeight * 0.3;
+
+            // Movimento orgânico em lemniscata
+            const x = centerX + Math.sin(time) * radiusX * Math.cos(time * 0.5);
+            const y = centerY + Math.sin(time * 1.3) * radiusY * 0.7 + Math.cos(time * 0.4) * radiusY * 0.3;
+
+            simulateMouseMove(x, y);
+            idleAnimationId = requestAnimationFrame(runIdleAnimation);
+        };
+
+        // Verificar inatividade
+        const checkIdle = () => {
+            if (Date.now() - lastActivityTime > 2000 && !isIdle) {
+                isIdle = true;
+                console.log('Starting idle animation');
+                runIdleAnimation();
+            }
+        };
+
+        setInterval(checkIdle, 100);
+
+        // Parar idle quando há movimento real
+        const stopIdle = () => {
+            lastActivityTime = Date.now();
+            if (isIdle) {
+                isIdle = false;
+                if (idleAnimationId) {
+                    cancelAnimationFrame(idleAnimationId);
+                    idleAnimationId = null;
+                }
+            }
+        };
+
+        // Detectar movimento real do mouse (antes de ser processado pela lib)
+        originalAddEventListener('mousemove', (e) => {
+            stopIdle();
+            currentPos = { x: e.clientX, y: e.clientY };
+        });
+
+        originalAddEventListener('pointermove', (e) => {
+            stopIdle();
+            currentPos = { x: e.clientX, y: e.clientY };
+        });
+
+        // Mensagens do parent (iframe)
+        originalWindowAddEventListener('message', (event) => {
+            if (event.data.type === 'randomize') {
+                const colors = randomColors(6);
+                const lightsColors = randomColors(5);
+                try {
+                    app.tubes.setColors(colors);
+                    app.tubes.setLightsColors(lightsColors);
+                } catch (e) { }
+            }
+
+            if (event.data.type === 'mousemove') {
+                stopIdle();
+                const { clientX, clientY } = event.data;
+                simulateMouseMove(clientX, clientY);
+            }
+        });
+
+        // Click para randomizar
+        originalAddEventListener('click', () => {
+            const colors = randomColors(6);
+            const lightsColors = randomColors(5);
+            try {
+                app.tubes.setColors(colors);
+                app.tubes.setLightsColors(lightsColors);
+            } catch (e) { }
+        });
+
+        // Iniciar movimento automático IMEDIATAMENTE ao carregar
+        // Não espera por inatividade - começa movendo e para quando detecta mouse real
+        isIdle = true;
+        console.log('Auto-starting idle animation immediately');
+        runIdleAnimation();
+    </script>
+</body>
+
+</html>`;

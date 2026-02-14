@@ -4,11 +4,15 @@ import { useProgress } from "@/context/ProgressContext";
 import { useState } from "react";
 import { Settings, ShieldAlert } from "lucide-react";
 
-export function DevControls() {
+interface DevControlsProps {
+    isAdmin: boolean;
+}
+
+export function DevControls({ isAdmin }: DevControlsProps) {
     const { setPillarLevel, resetProgress, completePillar } = useProgress();
     const [isOpen, setIsOpen] = useState(false);
 
-    if (process.env.NODE_ENV === 'production') return null;
+    if (!isAdmin) return null;
 
     const handleCompleteAll = () => {
         // Completa todos os 9 pilares
@@ -18,7 +22,7 @@ export function DevControls() {
     };
 
     return (
-        <div className="fixed bottom-4 right-4 z-[99999] pointer-events-auto">
+        <div className="fixed bottom-4 left-4 z-[99999] pointer-events-auto">
             <button 
                 onClick={() => setIsOpen(!isOpen)}
                 className="bg-black/80 text-white p-2 rounded-full border border-white/20 hover:bg-white/20 transition-all hover:rotate-90"

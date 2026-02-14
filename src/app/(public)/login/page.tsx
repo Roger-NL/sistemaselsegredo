@@ -44,7 +44,13 @@ export default function LoginPage() {
         const result = await login(identifier, password);
 
         if (result.success) {
-            router.push("/dashboard");
+            // Check for admin redirect
+            const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
+            const target = result.user && ADMIN_EMAILS.includes(result.user.email) 
+                ? "/admin/dashboard" 
+                : "/dashboard";
+            
+            router.push(target);
         } else {
             setError(result.error || "Erro ao fazer login");
             setIsSubmitting(false);
