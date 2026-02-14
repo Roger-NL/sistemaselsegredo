@@ -1,16 +1,16 @@
 import { db } from "./firebase";
-import { 
-    collection, 
-    addDoc, 
-    updateDoc, 
-    doc, 
-    getDocs, 
-    query, 
-    where, 
-    serverTimestamp, 
+import {
+    collection,
+    addDoc,
+    updateDoc,
+    doc,
+    getDocs,
+    query,
+    where,
+    serverTimestamp,
     Timestamp,
     orderBy,
-    limit 
+    limit
 } from "firebase/firestore";
 
 export type ExamStatus = 'pending' | 'approved' | 'rejected';
@@ -58,16 +58,22 @@ export async function getUserExamStatus(userId: string, pillarId: number): Promi
         const q = query(
             collection(db, COLLECTION),
             where("userId", "==", userId),
-            where("pillarId", "==", pillarId),
-            orderBy("createdAt", "desc"),
-            limit(1)
+            where("pillarId", "==", pillarId)
         );
 
         const snapshot = await getDocs(q);
         if (snapshot.empty) return null;
 
-        const docData = snapshot.docs[0].data();
-        return { id: snapshot.docs[0].id, ...docData } as PillarExam;
+        // Sort in memory to get the latest (descending by createdAt)
+        // Adjust for potential nulls or different timestamp formats if necessary
+        const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PillarExam));
+        docs.sort((a, b) => {
+            const timeA = a.createdAt?.toMillis?.() || 0;
+            const timeB = b.createdAt?.toMillis?.() || 0;
+            return timeB - timeA;
+        });
+
+        return docs[0];
     } catch (error) {
         console.error("Erro ao buscar status da prova:", error);
         return null;

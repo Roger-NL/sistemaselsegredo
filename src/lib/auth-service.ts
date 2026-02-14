@@ -6,8 +6,11 @@
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
     signOut,
     updateProfile as firebaseUpdateProfile,
+    updatePassword,
     User as FirebaseUser
 } from "firebase/auth";
 import {
@@ -81,6 +84,57 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
 }
 
 /**
+ * Login with Google
+ */
+export async function loginWithGoogle(): Promise<AuthResult> {
+    try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const fbUser = result.user;
+
+        // Check if user exists in Firestore
+        const userDocRef = doc(db, "users", fbUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        let user: User;
+
+        if (userDoc.exists()) {
+            // User exists, just update last login
+            await updateDoc(userDocRef, {
+                lastLoginDate: new Date().toISOString()
+            });
+            user = (await mapFirebaseUser(fbUser))!;
+        } else {
+            // New User via Google
+            const newUser: User = {
+                id: fbUser.uid,
+                name: fbUser.displayName || "Usuário Google",
+                email: fbUser.email || "",
+                createdAt: new Date().toISOString(),
+                currentStreak: 1,
+                lastLoginDate: new Date().toISOString(),
+                subscriptionStatus: 'free',
+                approvedPillar: 1
+            };
+
+            await setDoc(userDocRef, newUser);
+            user = newUser;
+        }
+
+        // Cookies
+        Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
+        const role = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'student';
+        Cookies.set('es_user_role', role, { expires: 7, path: '/' });
+
+        return { success: true, user };
+
+    } catch (error: any) {
+        console.error("Google Login Error:", error);
+        return { success: false, error: "Erro ao entrar com Google." };
+    }
+}
+
+/**
  * Login with email/password
  */
 export async function login(identifier: string, password: string): Promise<AuthResult> {
@@ -128,7 +182,7 @@ export async function login(identifier: string, password: string): Promise<AuthR
 
         // Set Middleware Cookie
         Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
-        
+
         // Set Role Cookie
         const role = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'student';
         Cookies.set('es_user_role', role, { expires: 7, path: '/' });
@@ -220,6 +274,29 @@ export async function updateProfile(
 
     } catch (error) {
         return { success: false, error: 'Erro ao atualizar perfil.' };
+    }
+}
+
+/**
+ * Change Password (No old password required, but needs fresh session)
+ */
+export async function changePassword(newPassword: string): Promise<AuthResult> {
+    try {
+        const user = auth.currentUser;
+        if (!user) return { success: false, error: 'Usuário não autenticado.' };
+
+        await updatePassword(user, newPassword);
+        return { success: true };
+    } catch (error: any) {
+        console.error("Change Password Error:", error);
+        // Firebase specific errors
+        if (error.code === 'auth/requires-recent-login') {
+            return { success: false, error: 'Por segurança, faça login novamente antes de mudar a senha.' };
+        }
+        if (error.code === 'auth/weak-password') {
+            return { success: false, error: 'A nova senha deve ter pelo menos 6 caracteres.' };
+        }
+        return { success: false, error: 'Erro ao alterar senha.' };
     }
 }
 

@@ -9,11 +9,13 @@ import Cookies from 'js-cookie';
 
 import {
     login as authLogin,
+    loginWithGoogle as authLoginWithGoogle,
     register as authRegister,
     updateProfile as authUpdateProfile,
     logout as authLogout,
     activateWithInvite as authActivateWithInvite,
     activateWithPayment as authActivateWithPayment,
+    changePassword as authChangePassword,
     checkSubscriptionStatus,
     User,
     AuthResult,
@@ -29,6 +31,8 @@ interface AuthContextType {
     updateProfile: (name: string, email: string, phone?: string) => Promise<AuthResult>;
     activateWithInvite: (code: string) => Promise<AuthResult>;
     activateWithPayment: (paymentId: string) => Promise<AuthResult>;
+    loginWithGoogle: () => Promise<AuthResult>;
+    changePassword: (newPassword: string) => Promise<AuthResult>;
     logout: () => void;
     isLoading: boolean;
 }
@@ -93,6 +97,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
     };
 
+    const loginWithGoogle = async (): Promise<AuthResult> => {
+        const result = await authLoginWithGoogle();
+        // State update happens automatically via onAuthStateChanged
+        return result;
+    };
+
     const register = async (
         name: string,
         email: string,
@@ -134,6 +144,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
     };
 
+    const changePassword = async (newPassword: string): Promise<AuthResult> => {
+        if (!user) return { success: false, error: 'Usuário não autenticado' };
+        return await authChangePassword(newPassword);
+    };
+
     const logout = async () => {
         await authLogout();
         // State update happens automatically via onAuthStateChanged
@@ -151,10 +166,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 user,
                 subscriptionStatus,
                 login,
+                loginWithGoogle,
                 register,
                 updateProfile,
                 activateWithInvite,
                 activateWithPayment,
+                changePassword,
                 logout,
                 isLoading,
             }}

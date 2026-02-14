@@ -10,7 +10,8 @@ import { DashboardNav } from "@/components/core/DashboardNav";
 export default function PerfilPage() {
     const router = useRouter();
     const { getCompletedCount, getGlobalProgress } = useProgress();
-    const { user, updateProfile, isLoading: authLoading } = useAuth();
+    const [newPassword, setNewPassword] = useState("");
+    const { user, updateProfile, changePassword, isLoading: authLoading } = useAuth();
 
     // Função auxiliar para detecção de bandeira
     const getFlagEmoji = (phone: string): string => {
@@ -94,18 +95,36 @@ export default function PerfilPage() {
         }
 
         setIsSaving(true);
-        const result = await updateProfile(editName, editEmail, editPhone);
+
+        const promises: Promise<any>[] = [];
+        promises.push(updateProfile(editName, editEmail, editPhone));
+
+        if (newPassword) {
+            if (newPassword.length < 6) {
+                setError("A senha deve ter pelo menos 6 caracteres.");
+                setIsSaving(false);
+                return;
+            }
+            promises.push(changePassword(newPassword));
+        }
+
+        const results = await Promise.all(promises);
         setIsSaving(false);
 
-        if (result.success) {
+        const profileResult = results[0];
+        const passwordResult = newPassword ? results[1] : { success: true };
+
+        if (profileResult.success && passwordResult.success) {
             setLocalPhone(editPhone);
-            setSuccessMsg("Perfil atualizado com sucesso!");
+            setSuccessMsg(newPassword ? "Perfil e senha atualizados com sucesso!" : "Perfil atualizado com sucesso!");
             setIsEditing(false);
+            setNewPassword(""); // Reset password field
 
             // Clear success message after 3 seconds
             setTimeout(() => setSuccessMsg(""), 3000);
         } else {
-            setError(result.error || "Erro ao atualizar perfil");
+            const errorMsg = profileResult.error || passwordResult.error || "Erro ao atualizar dados";
+            setError(errorMsg);
         }
     };
 
@@ -212,6 +231,18 @@ export default function PerfilPage() {
                                             />
                                         </div>
                                         <p className="text-xs text-gray-500 mt-1">Deixe em branco para remover.</p>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Nova Senha (Opcional)</label>
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            placeholder="Mínimo 6 caracteres"
+                                            className="w-full px-3 py-2 border border-blue-200 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-blue-50/50 placeholder:text-gray-400"
+                                            autoComplete="new-password"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Deixe em branco para manter a atual.</p>
                                     </div>
                                     <div className="flex gap-3 pt-2 justify-center md:justify-start">
                                         <button
