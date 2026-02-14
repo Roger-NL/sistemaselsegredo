@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { PILLARS, PLANETS, type Pillar, type Planet, type PillarStatus } from "@/data/curriculum";
+import { secureStorage } from "@/lib/secure-storage";
 
 // ============================================================================
 // PROGRESS CONTEXT
@@ -93,22 +94,21 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // Carrega progresso do localStorage na montagem
     useEffect(() => {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored = secureStorage.getItem<any>(STORAGE_KEY);
         if (stored) {
             try {
-                const parsed = JSON.parse(stored);
                 // Retrocompatibilidade (se for string antiga sem chosenSpecialization)
-                if (parsed.pillarStatus) {
-                    setPillarStatus(parsed.pillarStatus);
-                    setChosenSpecialization(parsed.chosenSpecialization || null);
-                    setSpecializationStatus(parsed.specializationStatus || null);
-                    setCompletedSpecializations(parsed.completedSpecializations || []);
-                    setCompletedModules(parsed.completedModules || {});
-                    setCompletedPillarModules(parsed.completedPillarModules || []);
-                    setHasSeenMissionComplete(parsed.hasSeenMissionComplete || false);
+                if (stored.pillarStatus) {
+                    setPillarStatus(stored.pillarStatus);
+                    setChosenSpecialization(stored.chosenSpecialization || null);
+                    setSpecializationStatus(stored.specializationStatus || null);
+                    setCompletedSpecializations(stored.completedSpecializations || []);
+                    setCompletedModules(stored.completedModules || {});
+                    setCompletedPillarModules(stored.completedPillarModules || []);
+                    setHasSeenMissionComplete(stored.hasSeenMissionComplete || false);
                 } else {
                     // Formato antigo (apenas status)
-                    setPillarStatus(parsed);
+                    setPillarStatus(stored);
                 }
             } catch {
                 setPillarStatus(getInitialStatus());
@@ -120,7 +120,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     // Salva no localStorage quando muda
     useEffect(() => {
         if (isHydrated) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            secureStorage.setItem(STORAGE_KEY, {
                 pillarStatus,
                 chosenSpecialization,
                 specializationStatus,
@@ -128,7 +128,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 completedModules,
                 completedPillarModules,
                 hasSeenMissionComplete
-            }));
+            });
         }
     }, [pillarStatus, chosenSpecialization, specializationStatus, completedSpecializations, completedModules, completedPillarModules, hasSeenMissionComplete, isHydrated]);
 
@@ -313,7 +313,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setSpecializationStatus(null);
         setCompletedSpecializations([]);
         setCompletedModules({});
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        secureStorage.setItem(STORAGE_KEY, {
             pillarStatus: initial,
             chosenSpecialization: null,
             specializationStatus: null,
@@ -321,7 +321,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             completedModules: {},
             completedPillarModules: [],
             hasSeenMissionComplete: false
-        }));
+        });
         window.location.reload();
     };
 

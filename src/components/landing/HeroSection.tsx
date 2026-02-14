@@ -52,8 +52,8 @@ const TypewriterText = () => {
     }, [subIndex, index, reverse, phrases]);
 
     return (
-        <div className="h-20 md:h-24 flex items-center">
-            <p className="text-white text-base md:text-xl font-mono font-bold leading-relaxed">
+        <div className="h-14 md:h-20 flex items-center">
+            <p className="text-white text-sm md:text-lg font-mono font-bold leading-relaxed">
                 {phrases[index].substring(0, subIndex)}
                 <span className={`${blink ? "opacity-100" : "opacity-0"} ml-1 text-emerald-400`}>|</span>
             </p>
@@ -70,11 +70,11 @@ export function HeroSection() {
     };
 
     return (
-        <section className="relative flex flex-col items-center justify-center overflow-hidden pt-24 pb-8 px-4 md:px-8">
+        <section className="relative flex flex-col items-center justify-center overflow-hidden min-h-[min(100vh,800px)] py-12 md:py-20 px-4 md:px-8">
             {/* Background elements managed by parent */}
             <div className="absolute inset-0 z-0 backdrop-blur-[3px] pointer-events-none" />
 
-            <div className="container mx-auto max-w-7xl grid md:grid-cols-2 gap-8 md:gap-16 items-center relative z-10">
+            <div className="container mx-auto max-w-6xl grid md:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
 
                 {/* Left Column: Text & CTA */}
                 <div className="flex flex-col gap-2 text-left pointer-events-auto order-1">
@@ -102,13 +102,15 @@ export function HeroSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.1 }}
                         viewport={{ once: true }}
-                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.1]"
+                        className="flex flex-col gap-1 text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-white leading-tight tracking-tight"
                     >
-                        Fale inglês com <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-300 to-emerald-300 animate-pulse-slow font-black">
-                            confiança.
-                        </span> <br />
-                        De verdade.
+                        <span>Sua Fluência Global</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400 font-black">
+                            em 90 dias.
+                        </span>
+                        <span className="text-xl sm:text-2xl md:text-2xl font-mono font-medium text-white/60 mt-1 tracking-wide">
+                            Inglês sem sala de aula.
+                        </span>
                     </motion.h1>
 
                     {/* Subheadline + Typewriter */}
@@ -119,11 +121,11 @@ export function HeroSection() {
                         viewport={{ once: true }}
                         className="relative"
                     >
-                        <h2 className="text-lg md:text-xl text-white font-bold mb-1 text-white/90">
+                        <h2 className="text-sm md:text-lg text-white font-bold mb-1 text-white/90">
                             Um sistema onde você <strong className="font-black text-emerald-300">só avança se provar que aprendeu</strong>.
                         </h2>
 
-                        <div className="border-l-4 border-fuchsia-500/50 pl-4 md:pl-6 min-h-[60px]">
+                        <div className="border-l-4 border-fuchsia-500/50 pl-4 md:pl-6 min-h-[50px]">
                             <TypewriterText />
                         </div>
                     </motion.div>
@@ -143,11 +145,11 @@ export function HeroSection() {
 
                         <a
                             href={isAuthenticated ? "/dashboard" : "/cadastro"}
-                            className="group relative px-8 py-4 bg-white text-black font-mono font-black tracking-wider uppercase hover:bg-emerald-50 transition-all transform active:scale-95 rounded-sm overflow-hidden text-center w-full sm:w-auto shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-transparent hover:border-emerald-200 inline-block no-underline cursor-pointer"
+                            className="group relative inline-flex items-center justify-center w-full sm:w-auto px-5 py-3 md:px-8 md:py-4 bg-white text-black font-mono font-black tracking-wider uppercase hover:bg-emerald-50 transition-all transform active:scale-95 rounded-sm overflow-hidden text-center shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-transparent hover:border-emerald-200 no-underline cursor-pointer"
                         >
-                            <span className="relative z-10 flex items-center justify-center gap-3 text-sm md:text-base whitespace-nowrap">
-                                <Rocket className="w-5 h-5 text-fuchsia-600 group-hover:text-fuchsia-500 transition-colors" />
-                                ATIVAR MEU ACESSO IMEDIATO
+                            <span className="relative z-10 flex flex-row items-center justify-center gap-2 md:gap-3 text-[11px] sm:text-sm md:text-base whitespace-normal sm:whitespace-nowrap leading-tight text-center">
+                                <Rocket className="w-4 h-4 md:w-5 md:h-5 text-fuchsia-600 group-hover:text-fuchsia-500 transition-colors flex-shrink-0" />
+                                <span>ACESSAR COCKPIT (Acesso Gratuito ao Pilar 1)</span>
                             </span>
                         </a>
 
@@ -165,15 +167,15 @@ export function HeroSection() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 1, delay: 0.2 }}
-                    className="relative flex justify-center items-center order-2 mt-12 md:mt-0"
+                    className="relative flex justify-center items-center order-2 mt-8 md:mt-0"
                 >
                     {/* Compact Glow - Multi-color Neon */}
                     <div className="absolute w-[250px] h-[250px] bg-gradient-to-tr from-violet-500/10 via-fuchsia-500/10 to-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
 
                     {/* Compact Card Container - Darker, Subtle Blur */}
-                    <div className="relative z-10 w-full max-w-[420px] bg-black/80 border border-white/5 backdrop-blur-[4px] rounded-2xl p-6 shadow-2xl transform md:rotate-1 hover:rotate-0 transition-all duration-500">
+                    <div className="relative z-10 w-full max-w-[380px] bg-black/80 border border-white/5 backdrop-blur-[4px] rounded-2xl p-4 md:p-5 shadow-2xl transform md:rotate-1 hover:rotate-0 transition-all duration-500">
                         {/* Header */}
-                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
+                        <div className="flex items-center justify-between mb-4 md:mb-6 pb-4 border-b border-white/5">
                             <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 rounded-full bg-red-500/50 animate-pulse" />
                                 <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Ao Vivo</span>

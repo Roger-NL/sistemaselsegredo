@@ -4,10 +4,10 @@ import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
-    TacticalCard,
-    TacticalButton,
-    SegmentedProgress
-} from "@/components/ui/TacticalCard";
+    FlightCard,
+    FlightButton,
+    FlightProgress
+} from "@/components/ui/FlightCard";
 import {
     Question,
     getQuizByPillarNumber
@@ -42,16 +42,16 @@ export function QuizInterface({
 
     if (!quiz) {
         return (
-            <TacticalCard
+            <FlightCard
                 variant="danger"
-                systemId="ERR-404"
-                status="CLASSIFIED"
+                flightId="ERR-404"
+                status="PRIVATE_JET"
                 className="p-8 text-center"
             >
                 <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
                 <p className="text-[#EEF4D4] text-lg font-medium">Quiz não encontrado</p>
                 <p className="text-white/40 text-sm mt-2">Pilar {pillarNumber}</p>
-            </TacticalCard>
+            </FlightCard>
         );
     }
 
@@ -102,10 +102,10 @@ export function QuizInterface({
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
             >
-                <TacticalCard
+                <FlightCard
                     variant={passed ? "success" : "danger"}
-                    systemId={`RESULT-${pillarNumber}`}
-                    status={passed ? "SECURE" : "PROCESSING"}
+                    flightId={`RESULT-${pillarNumber}`}
+                    status={passed ? "CLEARED" : "IN_FLIGHT"}
                     className="p-6 overflow-hidden relative"
                 >
                     {/* Background Glow */}
@@ -185,16 +185,16 @@ export function QuizInterface({
                         {/* Botões */}
                         <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md">
                             {!passed && (
-                                <TacticalButton
+                                <FlightButton
                                     variant="default"
                                     onClick={handleRestart}
                                     className="w-full justify-center py-6 border-white/10 hover:border-white/30 text-white/60 hover:text-white [&>span>span]:hidden [&>span]:w-full [&>span]:justify-center"
                                 >
                                     <RotateCcw className="w-4 h-4 mr-2" />
                                     REINICIAR PROTOCOLO
-                                </TacticalButton>
+                                </FlightButton>
                             )}
-                            <TacticalButton
+                            <FlightButton
                                 variant={passed ? "success" : "default"}
                                 onClick={handleFinish}
                                 className={cn(
@@ -206,19 +206,19 @@ export function QuizInterface({
                             >
                                 {passed ? "CONTINUAR OPERAÇÃO" : "SAIR DO SISTEMA"}
                                 <ChevronRight className="w-4 h-4 ml-2" />
-                            </TacticalButton>
+                            </FlightButton>
                         </div>
                     </div>
-                </TacticalCard>
+                </FlightCard>
             </motion.div>
         );
     }
 
     // ========== INTERFACE DO QUIZ (Compacta) ==========
     return (
-        <TacticalCard
-            systemId={`PILAR-${pillarNumber}`}
-            status="LIVE"
+        <FlightCard
+            flightId={`PILAR-${pillarNumber}`}
+            status="BOARDING"
             variant={
                 feedback === "correct" ? "success" :
                     feedback === "incorrect" ? "danger" :
@@ -240,7 +240,7 @@ export function QuizInterface({
                 <span className="text-white/50 text-sm font-medium">
                     Questão {currentQuestionIndex + 1} de {totalQuestions}
                 </span>
-                <SegmentedProgress
+                <FlightProgress
                     current={currentQuestionIndex + 1}
                     total={totalQuestions}
                     variant="neon"
@@ -365,7 +365,7 @@ export function QuizInterface({
             {/* Botão de ação */}
             <div className="px-6 pb-5 pt-2 border-t border-white/5 flex justify-end">
                 {feedback === "idle" ? (
-                    <TacticalButton
+                    <FlightButton
                         variant="neon"
                         disabled={selectedAnswer === null}
                         onClick={handleConfirmAnswer}
@@ -373,19 +373,19 @@ export function QuizInterface({
                     >
                         Confirmar
                         <ChevronRight className="w-4 h-4 ml-1 inline" />
-                    </TacticalButton>
+                    </FlightButton>
                 ) : (
-                    <TacticalButton
+                    <FlightButton
                         variant={feedback === "correct" ? "success" : "default"}
                         onClick={handleNextQuestion}
                         className="px-6"
                     >
                         {currentQuestionIndex < totalQuestions - 1 ? "Próxima" : "Ver Resultado"}
                         <ChevronRight className="w-4 h-4 ml-1 inline" />
-                    </TacticalButton>
+                    </FlightButton>
                 )}
             </div>
-        </TacticalCard>
+        </FlightCard>
     );
 }
 

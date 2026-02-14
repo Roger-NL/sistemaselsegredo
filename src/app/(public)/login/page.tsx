@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import AuthBackground from "@/components/auth/AuthConcept";
-import SecureCommsModal from "@/components/core/SecureCommsModal";
+import AuthBackground from "@/components/auth/AuthBackground";
+import ConciergeModal from "@/components/core/ConciergeModal";
 
 export default function LoginPage() {
     const [identifier, setIdentifier] = useState("");
@@ -182,7 +182,7 @@ export default function LoginPage() {
 
 
             {/* WhatsApp Capture Modal — Trigger 1: Login */}
-            <SecureCommsModal
+            <ConciergeModal
                 trigger="login"
                 isOpen={showCommsModal}
                 onClose={() => {
@@ -191,7 +191,7 @@ export default function LoginPage() {
                 }}
                 onConnect={(phone) => {
                     if (typeof window !== 'undefined') {
-                        localStorage.setItem('es-secure-comms-v2', phone);
+                        localStorage.setItem('es-concierge-v1', phone);
                     }
                     setShowCommsModal(false);
                     router.push("/dashboard");

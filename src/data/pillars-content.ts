@@ -119,6 +119,11 @@ export const PILAR_1_DATA: PillarData = {
                     type: "box-warning",
                     title: "⚠️ VÍCIO BRASILEIRO DETECTADO",
                     content: "Pare de pedir desculpas pelo seu inglês. Cada vez que você diz \"{{Sorry for my English|Desculpe pelo meu inglês}}\", você está reafirmando para o seu subconsciente que você é um intruso. Operadores de elite não pedem desculpas; eles ajustam a frequência do rádio."
+                },
+                {
+                    type: "elite-insight",
+                    title: "🔓 OPEN LOOP: O SOM INVISÍVEL",
+                    content: "Você aprendeu a controlar o medo biológico. Mas existe um 'vírus' sonoro que impede 99% dos brasileiros de entenderem nativos, mesmo estando calmos. Ele se chama SCHWA. Sem dominá-lo (Pilar 2), você continuará surdo para o inglês real."
                 }
             ]
         },
@@ -271,6 +276,11 @@ export const PILAR_1_DATA: PillarData = {
                     type: "elite-insight",
                     title: "💡 INSIGHT DE ELITE",
                     content: "Eu não criei a ES Academy porque sou um gênio das línguas. Eu a criei porque eu senti a humilhação de ser um adulto 'mudo'. Minha missão é garantir que você não precise passar por quatro anos de mentiras para só então começar a viver o idioma na prática."
+                },
+                {
+                    type: "box-warning",
+                    title: "🔓 OPEN LOOP: A COLA SONORA",
+                    content: "A técnica que salvou Roger na 'Ponte Húngara' depende de uma coisa: decodificar a velocidade nativa. No próximo pilar, revelaremos o segredo do 'Connected Speech', a razão pela qual 'What do you want' vira 'Whaddya-wanna'."
                 }
             ]
         },
@@ -668,7 +678,7 @@ export const PILAR_1_DATA: PillarData = {
             blocks: [
                 {
                     type: "system-status",
-                    content: "{{IDENTITY PROTOCOL|PROTOCOLO DE IDENTIDADE}}: {{OPERATOR_ALLIANCE.exe INITIALIZING|ALIANÇA_DO_OPERADOR.exe INICIALIZANDO}}..."
+                    content: "{{IDENTITY PROCEDURE|PROCEDIMENTO DE IDENTIDADE}}: {{OPERATOR_ALLIANCE.exe INITIALIZING|ALIANÇA_DO_OPERADOR.exe INICIALIZANDO}}..."
                 },
                 {
                     type: "box-goal",
@@ -694,7 +704,7 @@ export const PILAR_1_DATA: PillarData = {
                         steps: [
                             "O Eixo Hipotálamo-Hipófise-Adrenal (HPA): O seu cérebro prioriza o que é vital. Se você estuda por 'obrigação', seu cérebro descarta. Se você estuda por CONEXÃO (para salvar seu emprego, para falar com seu parceiro, para ser livre), seu cérebro entende que o inglês é uma ferramenta de sobrevivência.",
                             "Ocitocina e Aprendizado Social: Ao se conectar com a minha história e com os outros operadores, seu cérebro libera ocitocina. Esse hormônio REDUZ o medo (Filtro Afetivo) e abre as portas para a plasticidade neural.",
-                            "A Mudança de Identidade: O seu Córtex Cingulado Anterior monitora conflitos. Se você diz 'eu sou péssimo em inglês', ele vai sabotar seus treinos. Ao assinar este protocolo, você está instalando uma nova identidade: 'Eu sou um comunicador de elite em treinamento'. O cérebro trabalhará para manter essa nova imagem."
+                            "A Mudança de Identidade: O seu Córtex Cingulado Anterior monitora conflitos. Se você diz 'eu sou péssimo em inglês', ele vai sabotar seus treinos. Ao assinar este procedimento, você está instalando uma nova identidade: 'Eu sou um comunicador de elite em treinamento'. O cérebro trabalhará para manter essa nova imagem."
                         ]
                     })
                 },
@@ -925,7 +935,7 @@ export const PILAR_2_DATA: PillarData = {
         },
         {
             type: "box-action",
-            title: "Protocolo de Estudo com Séries",
+            title: "Procedimento de Estudo com Séries",
             content: "Não assista passivamente. Escolha uma cena de 2 minutos.\n\n1. **Sem legenda**: Tente pegar o contexto.\n2. **Legenda em Inglês**: Leia e ouça. Identifique os 'Links' e 'Reduções' que aprendeu acima.\n3. **Shadowing**: Pause frase a frase e tente imitar o som exato.\n4. **Sem legenda novamente**: Você verá que a cena ficou 'lenta' magicamente."
         },
         {
@@ -1126,7 +1136,7 @@ export const PILAR_4_DATA: PillarData = {
         {
             type: "terminal-view",
             content: [
-                "SVO PROTOCOL:",
+                "SVO PROCEDURE:",
                 "[ {{SUJEITO|QUEM}} ] + [ {{VERBO|AÇÃO}} ] + [ {{OBJETO|ALVO}} ]",
                 "Quem faz?   + O que faz? + O quê?",
                 "   {{I|Eu}}        +   {{Love|Amo}}     +  {{Pizza|Pizza}}",
@@ -1479,7 +1489,7 @@ export const PILAR_7_DATA: PillarData = {
     blocks: [
         {
             type: "system-status",
-            content: "AUTONOMY PROTOCOL: ENABLED. Breaking dependency chains."
+            content: "AUTONOMY PROCEDURE: ENABLED. Breaking dependency chains."
         },
         {
             type: "h2",
@@ -1712,7 +1722,7 @@ export const PILAR_9_DATA: PillarData = {
         {
             type: "terminal-view",
             content: [
-                "COMMITMENT PROTOCOL:",
+                "COMMITMENT PROCEDURE:",
                 "I, [SEU NOME], declare that I have completed the Foundation Phase.",
                 "My next target is: [SUA ESPECIALIZAÇÃO].",
                 "I will dedicate 15 minutes daily.",

@@ -116,7 +116,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                     <div
                                         onClick={() => {
                                             onClose();
-                                            router.push(`/especialidade/${chosenSpecialization}`);
+                                            router.push(`/especialidades/${chosenSpecialization}`);
                                         }}
                                         className="group relative p-6 border transition-all duration-300 flex items-center justify-between overflow-hidden bg-gradient-to-r from-violet-500/30 to-purple-500/30 border-violet-500/60 hover:border-violet-400 cursor-pointer"
                                     >

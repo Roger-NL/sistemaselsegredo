@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useProgress } from "@/context/ProgressContext";
 import { PLANETS } from "@/data/curriculum";
 import { TubesBackground } from "@/components/ui/neon-flow";
-import { TacticalCard, TacticalButton } from "@/components/ui/TacticalCard";
+import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, CheckCircle, Target, Activity, Map, Cpu, Briefcase, Plane, ShoppingBag, Heart, Clapperboard, BarChart3 } from "lucide-react";
 import { SPECIALIZATIONS_CONTENT } from "@/data/specializations-content";
@@ -22,7 +22,14 @@ const SPEC_ICONS: Record<string, React.ReactNode> = {
 export default function EspecialidadePage() {
     const params = useParams();
     const router = useRouter();
-    const { chosenSpecialization, finishCurrentSpecialization } = useProgress();
+    const { chosenSpecialization, finishCurrentSpecialization, areAllPillarsComplete } = useProgress();
+
+    // Logic Hardening: Anti-Cheat
+    // Prevent direct access via URL if pillars are not complete
+    if (!areAllPillarsComplete()) {
+        if (typeof window !== 'undefined') router.push("/dashboard");
+        return null;
+    }
 
     const specId = params.id as string;
     const spec = PLANETS.find(p => p.id === specId);
@@ -33,9 +40,9 @@ export default function EspecialidadePage() {
             <TubesBackground className="h-screen">
                 <div className="h-screen flex items-center justify-center">
                     <p className="text-white/50">Especialidade não encontrada ou em desenvolvimento.</p>
-                    <TacticalButton onClick={() => router.push("/")} className="ml-4">
+                    <FlightButton onClick={() => router.push("/")} className="ml-4">
                         Voltar
-                    </TacticalButton>
+                    </FlightButton>
                 </div>
             </TubesBackground>
         );
@@ -103,7 +110,7 @@ export default function EspecialidadePage() {
 
                     {/* Footer Actions */}
                     <div className="mt-12 flex justify-center pb-20">
-                        <TacticalButton
+                        <FlightButton
                             variant="success"
                             onClick={handleComplete}
                             className="px-8 py-4 text-lg tracking-widest uppercase font-bold"
@@ -112,7 +119,7 @@ export default function EspecialidadePage() {
                                 <CheckCircle className="w-6 h-6" />
                                 Concluir Sessão de Estudo
                             </span>
-                        </TacticalButton>
+                        </FlightButton>
                     </div>
                 </div>
             </main>

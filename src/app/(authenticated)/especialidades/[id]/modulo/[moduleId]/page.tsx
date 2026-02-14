@@ -2,7 +2,7 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { TubesBackground } from "@/components/ui/neon-flow";
-import { TacticalCard, TacticalButton } from "@/components/ui/TacticalCard";
+import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
 import { ArrowLeft, CheckCircle, PlayCircle, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -19,7 +19,7 @@ export default function ModulePage() {
     const handleComplete = () => {
         // Here we would save progress
         // For MVP, just go back
-        router.push(`/especialidade/${specId}`);
+        router.push(`/especialidades/${specId}`);
     };
 
     return (
@@ -29,7 +29,7 @@ export default function ModulePage() {
                 {/* Header Navigation */}
                 <div className="w-full max-w-4xl flex items-center justify-between mb-8">
                     <button
-                        onClick={() => router.push(`/especialidade/${specId}`)}
+                        onClick={() => router.push(`/especialidades/${specId}`)}
                         className="flex items-center gap-2 text-white/50 hover:text-white transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />
@@ -41,9 +41,9 @@ export default function ModulePage() {
                 </div>
 
                 {/* Main Content Card */}
-                <TacticalCard
-                    systemId={`MOD-${moduleId.padStart(2, "0")}`}
-                    status="LIVE"
+                <FlightCard
+                    flightId={`MOD-${moduleId.padStart(2, "0")}`}
+                    status="BOARDING"
                     variant="neon"
                     className="w-full max-w-4xl flex-1 flex flex-col"
                 >
@@ -99,26 +99,25 @@ export default function ModulePage() {
 
                         {/* Actions Footer */}
                         <div className="mt-12 pt-8 border-t border-white/5 flex justify-end gap-4">
-                            <TacticalButton
+                            <FlightButton
                                 onClick={() => router.back()}
                                 className="w-auto"
                             >
                                 Voltar
-                            </TacticalButton>
-                            <TacticalButton
+                            </FlightButton>
+                            <FlightButton
                                 variant="success"
                                 onClick={handleComplete}
                                 className="w-auto"
                             >
-                                <span className="flex items-center gap-2">
-                                    <CheckCircle className="w-4 h-4" />
-                                    Concluir Módulo
-                                </span>
-                            </TacticalButton>
-                        </div>
-
+                                                            <span className="flex items-center gap-2">
+                                                                <CheckCircle className="w-4 h-4" />
+                                                                Concluir Módulo
+                                                            </span>
+                                                        </FlightButton>
+                                                    </div>
                     </div>
-                </TacticalCard>
+                </FlightCard>
             </main>
         </TubesBackground>
     );

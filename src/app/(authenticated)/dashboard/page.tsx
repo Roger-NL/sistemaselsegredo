@@ -6,13 +6,12 @@ import RotatingEarth from "@/components/ui/wireframe-dotted-globe";
 import { DevControls } from "@/components/core/DevControls";
 import { useProgress } from "@/context/ProgressContext";
 import { getRank } from "@/utils/ranks";
-import { TubesBackground } from "@/components/ui/neon-flow";
 import { PILLARS } from "@/data/curriculum";
 import { TheHUD } from "@/components/core/TheHUD";
 import { GlobalStatusPanel } from "@/components/features/dashboard/GlobalStatusPanel";
 import { Typewriter } from "@/components/ui/typewriter";
 import { DashboardNav } from "@/components/core/DashboardNav";
-import SecureCommsModal from "@/components/core/SecureCommsModal";
+import ConciergeModal from "@/components/core/ConciergeModal";
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -322,8 +321,7 @@ export default function Page() {
           <div
             onClick={(e) => {
               e.stopPropagation();
-              if (currentSpec) router.push(`/especialidade/${currentSpec.id}`);
-              else if (completedCount < 9) router.push(`/pilar/${currentPillarNumber}`);
+                                                          if (currentSpec) router.push(`/especialidades/${currentSpec.id}`);              else if (completedCount < 9) router.push(`/pilar/${currentPillarNumber}`);
               else router.push("/especialidades");
             }}
             className="cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95"
@@ -394,7 +392,7 @@ export default function Page() {
       </div>
 
       {/* WhatsApp Capture Modal — Trigger: Login (Mandatório) */}
-      <SecureCommsModal
+      <ConciergeModal
         trigger="login"
         isOpen={showCommsModal}
         onClose={() => {

@@ -5,20 +5,20 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 // ============================================================================
-// TACTICAL CARD - Cosmos Wireframe UI Component
-// Moldura estilo "Intelligence Agency" com glassmorphism e cantos HUD
+// FLIGHT CARD - Aero Premium UI Component
+// Moldura estilo "Civil Aviation Dashboard" com glassmorphism e indicadores de voo
 // ============================================================================
 
-interface TacticalCardProps {
+interface FlightCardProps {
     children: React.ReactNode;
     className?: string;
 
     // Header técnico opcional
-    systemId?: string;
-    status?: "ENCRYPTED" | "LIVE" | "PROCESSING" | "SECURE" | "CLASSIFIED" | "CONSTRUCTION" | "COMPLETED";
+    flightId?: string; // Ex: FLIGHT-001
+    status?: "RESTRICTED" | "BOARDING" | "IN_FLIGHT" | "CLEARED" | "PRIVATE_JET" | "MAINTENANCE" | "LANDED" | "SECURE" | "LIVE" | "COMPLETED"; // Mantendo antigos temporariamente para compatibilidade
 
     // Variante visual
-    variant?: "default" | "neon" | "danger" | "success";
+    variant?: "default" | "neon" | "danger" | "success" | "ghost";
 
     // Interatividade
     onClick?: () => void;
@@ -62,8 +62,8 @@ const variantColors = {
     },
 };
 
-// Componente dos cantos táticos
-function TacticalCorner({
+// Componente dos indicadores de canto (Aero Markers)
+function FlightCorner({
     position,
     color
 }: {
@@ -77,6 +77,7 @@ function TacticalCorner({
         "bottom-right": "bottom-0 right-0",
     };
 
+    // Símbolos mais sutis, estilo HUD de avião
     const cornerSymbol = {
         "top-left": "┌",
         "top-right": "┐",
@@ -98,17 +99,23 @@ function TacticalCorner({
     );
 }
 
-export function TacticalCard({
+export function FlightCard({
     children,
     className,
-    systemId,
+    flightId,
     status,
     variant = "default",
     onClick,
     hoverable = false,
     animate = true,
-}: TacticalCardProps) {
+}: FlightCardProps) {
     const colors = variantColors[variant];
+
+    // Mapeamento de compatibilidade para status antigos (se necessário)
+    let displayStatus = status;
+    if (status === "LIVE") displayStatus = "BOARDING";
+    if (status === "SECURE") displayStatus = "CLEARED";
+    if (status === "COMPLETED") displayStatus = "LANDED";
 
     const cardContent = (
         <div
@@ -134,28 +141,28 @@ export function TacticalCard({
                     : undefined,
             }}
         >
-            {/* Tactical Corners */}
-            <TacticalCorner position="top-left" color={colors.corner} />
-            <TacticalCorner position="top-right" color={colors.corner} />
-            <TacticalCorner position="bottom-left" color={colors.corner} />
-            <TacticalCorner position="bottom-right" color={colors.corner} />
+            {/* Flight Corners */}
+            <FlightCorner position="top-left" color={colors.corner} />
+            <FlightCorner position="top-right" color={colors.corner} />
+            <FlightCorner position="bottom-left" color={colors.corner} />
+            <FlightCorner position="bottom-right" color={colors.corner} />
 
             {/* Header Técnico (Opcional) */}
-            {(systemId || status) && (
+            {(flightId || displayStatus) && (
                 <div className="flex items-center justify-between px-4 py-2 border-b border-white/5">
-                    {systemId && (
+                    {flightId && (
                         <span className="font-mono text-[10px] text-white/40 uppercase tracking-widest">
-                            SYSTEM_ID // {systemId}
+                            FLIGHT // {flightId}
                         </span>
                     )}
-                    {status && (
+                    {displayStatus && (
                         <span className={cn(
                             "font-mono text-[10px] uppercase tracking-wider",
                             "flex items-center gap-1.5",
                             colors.status
                         )}>
                             <span className="inline-block w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                            {status}
+                            {displayStatus}
                         </span>
                     )}
                 </div>
@@ -194,10 +201,10 @@ export function TacticalCard({
 }
 
 // ============================================================================
-// TACTICAL BUTTON - Botão estilo painel de controle
+// FLIGHT BUTTON - Botão estilo painel de controle
 // ============================================================================
 
-interface TacticalButtonProps {
+interface FlightButtonProps {
     children: React.ReactNode;
     className?: string;
     variant?: "default" | "neon" | "danger" | "success" | "ghost";
@@ -206,14 +213,14 @@ interface TacticalButtonProps {
     onClick?: (e: React.MouseEvent) => void;
 }
 
-export function TacticalButton({
+export function FlightButton({
     children,
     className,
     variant = "default",
     selected = false,
     disabled = false,
     onClick,
-}: TacticalButtonProps) {
+}: FlightButtonProps) {
     const colors = variantColors[variant];
 
     return (
@@ -257,22 +264,22 @@ export function TacticalButton({
 }
 
 // ============================================================================
-// SEGMENTED PROGRESS - Barra de progresso em blocos
+// FLIGHT PROGRESS - Barra de progresso segmentada
 // ============================================================================
 
-interface SegmentedProgressProps {
+interface FlightProgressProps {
     current: number;
     total: number;
     className?: string;
     variant?: "default" | "neon" | "success";
 }
 
-export function SegmentedProgress({
+export function FlightProgress({
     current,
     total,
     className,
     variant = "neon",
-}: SegmentedProgressProps) {
+}: FlightProgressProps) {
     const colors = variantColors[variant];
 
     return (
@@ -297,4 +304,4 @@ export function SegmentedProgress({
     );
 }
 
-export default TacticalCard;
+export default FlightCard;

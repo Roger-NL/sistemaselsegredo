@@ -3,6 +3,8 @@
  * Designed to be easily replaceable with Firebase
  */
 
+import { secureStorage } from "@/lib/secure-storage";
+
 const DB_KEY = 'es-academy-users-db';
 const SESSION_KEY = 'es-academy-session';
 
@@ -45,7 +47,7 @@ function generateId(): string {
 export function initDB(): void {
     if (typeof window === 'undefined') return;
 
-    const existing = localStorage.getItem(DB_KEY);
+    const existing = secureStorage.getItem(DB_KEY);
     if (existing) return; // DB already exists
 
     // Seed with default user: roger / 1234
@@ -63,7 +65,7 @@ export function initDB(): void {
     };
 
     const db: User[] = [seedUser];
-    localStorage.setItem(DB_KEY, JSON.stringify(db));
+    secureStorage.setItem(DB_KEY, db);
     console.log('[LocalDB] Database initialized with seed user');
 }
 
@@ -73,12 +75,12 @@ export function initDB(): void {
 export function getUsers(): User[] {
     if (typeof window === 'undefined') return [];
 
-    const data = localStorage.getItem(DB_KEY);
+    const data = secureStorage.getItem<User[]>(DB_KEY);
     if (!data) {
         initDB();
         return getUsers();
     }
-    return JSON.parse(data);
+    return data;
 }
 
 /**
@@ -134,7 +136,7 @@ export function createUser(name: string, email: string, password: string): User 
     };
 
     users.push(newUser);
-    localStorage.setItem(DB_KEY, JSON.stringify(users));
+    secureStorage.setItem(DB_KEY, users);
 
     return newUser;
 }
@@ -153,7 +155,7 @@ export function updateUser(userId: string, data: Partial<Omit<User, 'id' | 'pass
         ...data,
     };
 
-    localStorage.setItem(DB_KEY, JSON.stringify(users));
+    secureStorage.setItem(DB_KEY, users);
     return users[index];
 }
 
@@ -167,18 +169,16 @@ export function createSession(userId: string): void {
         userId,
         createdAt: new Date().toISOString(),
     };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    secureStorage.setItem(SESSION_KEY, session);
 }
 
 export function getSession(): Session | null {
     if (typeof window === 'undefined') return null;
 
-    const data = localStorage.getItem(SESSION_KEY);
-    if (!data) return null;
-    return JSON.parse(data);
+    return secureStorage.getItem<Session>(SESSION_KEY);
 }
 
 export function clearSession(): void {
     if (typeof window === 'undefined') return;
-    localStorage.removeItem(SESSION_KEY);
+    secureStorage.removeItem(SESSION_KEY);
 }

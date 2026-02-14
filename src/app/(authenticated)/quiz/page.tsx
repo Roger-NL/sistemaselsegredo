@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { QuizInterface } from "@/components/features/quiz";
 import { TubesBackground } from "@/components/ui/neon-flow";
-import { TacticalCard } from "@/components/ui/TacticalCard";
+import { FlightCard } from "@/components/ui/FlightCard";
 import { useProgress } from "@/context/ProgressContext";
 import { PILLARS } from "@/data/curriculum";
 import { CheckCircle2, Lock, ArrowLeft, Rocket } from "lucide-react";

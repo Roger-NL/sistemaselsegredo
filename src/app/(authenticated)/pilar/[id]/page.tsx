@@ -4,7 +4,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useProgress } from "@/context/ProgressContext";
 import { PILLARS } from "@/data/curriculum";
 import { TubesBackground } from "@/components/ui/neon-flow";
-import { TacticalCard, TacticalButton } from "@/components/ui/TacticalCard";
+import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
 import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Lock } from "lucide-react";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
 import { StudyViewer } from "@/components/features/study/StudyViewer";
@@ -40,13 +40,13 @@ export default function PilarPage() {
     if (!pillar) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center p-4">
-                <TacticalCard variant="danger" className="p-8 text-center max-w-md">
+                <FlightCard variant="danger" className="p-8 text-center max-w-md">
                     <h1 className="text-2xl font-bold text-[#EEF4D4] mb-4">Pilar não encontrado</h1>
-                    <TacticalButton onClick={() => router.push("/")}>
+                    <FlightButton onClick={() => router.push("/")}>
                         <ArrowLeft className="w-4 h-4 mr-2 inline" />
                         Voltar ao Dashboard
-                    </TacticalButton>
-                </TacticalCard>
+                    </FlightButton>
+                </FlightCard>
             </div>
         );
     }
@@ -55,17 +55,17 @@ export default function PilarPage() {
     if (!isUnlocked) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center p-4">
-                <TacticalCard variant="default" className="p-8 text-center max-w-md">
+                <FlightCard variant="default" className="p-8 text-center max-w-md">
                     <Lock className="w-16 h-16 text-white/30 mx-auto mb-4" />
                     <h1 className="text-2xl font-bold text-[#EEF4D4] mb-2">{pillar.title}</h1>
                     <p className="text-white/50 mb-6">
                         Complete o Pilar {pillarId - 1} primeiro para desbloquear este conteúdo.
                     </p>
-                    <TacticalButton variant="neon" onClick={() => router.push(`/pilar/${currentPillarNumber}`)}>
+                    <FlightButton variant="neon" onClick={() => router.push(`/pilar/${currentPillarNumber}`)}>
                         Ir para Pilar {currentPillarNumber}
                         <ArrowRight className="w-4 h-4 ml-2 inline" />
-                    </TacticalButton>
-                </TacticalCard>
+                    </FlightButton>
+                </FlightCard>
             </div>
         );
     }
@@ -133,7 +133,7 @@ export default function PilarPage() {
 
                                 {/* Ação Final do Pilar (Legacy or Global) */}
                                 <div className="mt-12 flex justify-center pb-20">
-                                    <TacticalButton
+                                    <FlightButton
                                         variant={areAllModulesCompleted ? "neon" : "ghost"}
                                         onClick={areAllModulesCompleted ? handleStartQuiz : undefined}
                                         disabled={!areAllModulesCompleted}
@@ -153,14 +153,14 @@ export default function PilarPage() {
                                                 </>
                                             )}
                                         </span>
-                                    </TacticalButton>
+                                    </FlightButton>
                                 </div>
                             </div>
                         ) : (
                             // Fallback para pilares sem conteúdo ainda
-                            <TacticalCard
-                                systemId={`PILAR-${pillarId.toString().padStart(2, "0")}`}
-                                status="CONSTRUCTION"
+                            <FlightCard
+                                flightId={`PILAR-${pillarId.toString().padStart(2, "0")}`}
+                                status="MAINTENANCE"
                                 variant="neon"
                                 className="mb-6 min-h-[50vh] flex flex-col items-center justify-center text-center p-12"
                             >
@@ -172,7 +172,7 @@ export default function PilarPage() {
                                     Os dados deste pilar estão sendo processados pelo sistema central.
                                     O Pilar 1 já está totalmente operacional.
                                 </p>
-                            </TacticalCard>
+                            </FlightCard>
                         )}
 
                         {/* Navegação de Rodapé - Mobile: fixed, Desktop: inline */}

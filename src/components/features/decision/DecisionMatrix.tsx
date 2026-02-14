@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TacticalCard, TacticalButton } from "@/components/ui/TacticalCard"; // Import correto
+import { FlightCard, FlightButton } from "@/components/ui/FlightCard"; // Import correto
 import { useProgress } from "@/context/ProgressContext";
 import { PLANETS } from "@/data/curriculum";
 import { Shield, Target, Map, Cpu, Zap, Activity, Lock, ArrowLeft, BookOpen, Briefcase, Plane, BarChart3, ShoppingBag, Heart, Clapperboard, CheckCircle2, ChevronRight } from "lucide-react";
@@ -176,8 +176,7 @@ export const DecisionMatrix = () => {
 
                     <div className="pt-2 w-full flex flex-col gap-3">
                       <button
-                        onClick={() => router.push(`/especialidade/${currentSpec.id}`)}
-                        className="group relative px-6 py-3 w-full font-mono text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 rounded-sm bg-violet-500 text-white hover:bg-violet-400 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer"
+                                                                    onClick={() => router.push(`/especialidades/${currentSpec.id}`)}                        className="group relative px-6 py-3 w-full font-mono text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 rounded-sm bg-violet-500 text-white hover:bg-violet-400 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] cursor-pointer"
                       >
                         Continuar Estudo
                         <div className="absolute inset-0 -z-10 bg-violet-500 blur-lg opacity-0 group-hover:opacity-50 transition-opacity" />
@@ -454,7 +453,7 @@ export const DecisionMatrix = () => {
 
           {step === "result" && (
             <motion.div key="result" className="max-w-md w-full text-center space-y-8">
-              <TacticalCard systemId="DEPLOYMENT" status="SECURE" variant="success">
+              <FlightCard flightId="DEPLOYMENT" status="CLEARED" variant="success">
                 <div className="py-8 px-6 space-y-6">
                   <div className="text-emerald-400 font-mono text-xs animate-pulse">DECRYPTION SUCCESSFUL</div>
                   <h2 className="text-3xl text-[#EEF4D4] font-serif uppercase tracking-widest">
@@ -463,16 +462,14 @@ export const DecisionMatrix = () => {
                   <p className="text-gray-400 font-mono text-xs leading-relaxed">
                     Seu perfil foi vinculado a esta operação. O treinamento avançado começa agora.
                   </p>
-                  <TacticalButton
+                  <FlightButton
                     variant="success"
-                    onClick={() => router.push(`/especialidade/${chosenSpecialization}`)}
-                    className="justify-center text-center uppercase text-xs tracking-widest font-bold"
+                                            onClick={() => router.push(`/especialidades/${chosenSpecialization}`)}                    className="justify-center text-center uppercase text-xs tracking-widest font-bold"
                   >
                     Iniciar Operação
-                  </TacticalButton>
+                  </FlightButton>
                 </div>
-              </TacticalCard>
-            </motion.div>
+                                          </FlightCard>            </motion.div>
           )}
         </AnimatePresence>
       </div>

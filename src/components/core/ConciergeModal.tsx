@@ -5,30 +5,30 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, BellRing, Zap, X } from "lucide-react";
 
 // ============================================================================
-// SECURE COMMS MODAL — WhatsApp Capture
+// CONCIERGE MODAL — WhatsApp Capture
 // Trigger 1: Após Login (5% OFF)
 // Trigger 2: Após completar Pilar 1 (6% OFF - Última chamada)
 // ============================================================================
 
-const STORAGE_KEY_COMMS = "es-secure-comms-v2";
-const STORAGE_KEY_DISMISSED_LOGIN = "es-secure-comms-dismissed-login";
-const STORAGE_KEY_DISMISSED_PILAR = "es-secure-comms-dismissed-pilar";
+const STORAGE_KEY_CONCIERGE = "es-concierge-v1";
+const STORAGE_KEY_DISMISSED_LOGIN = "es-concierge-dismissed-login";
+const STORAGE_KEY_DISMISSED_PILAR = "es-concierge-dismissed-pilar";
 
 export type CommsModalTrigger = "login" | "pilar1";
 
-interface SecureCommsModalProps {
+interface ConciergeModalProps {
     trigger: CommsModalTrigger;
     isOpen: boolean;
     onClose: () => void;
     onConnect?: (phone: string) => void;
 }
 
-export function useSecureCommsModal(trigger: CommsModalTrigger) {
+export function useConciergeModal(trigger: CommsModalTrigger) {
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         // Se já conectou WhatsApp, nunca mais mostra
-        const alreadyConnected = localStorage.getItem(STORAGE_KEY_COMMS);
+        const alreadyConnected = localStorage.getItem(STORAGE_KEY_CONCIERGE);
         if (alreadyConnected) return;
 
         // Verifica se já dispensou para este trigger
@@ -58,7 +58,7 @@ export function useSecureCommsModal(trigger: CommsModalTrigger) {
     };
 
     const connect = (phone: string) => {
-        localStorage.setItem(STORAGE_KEY_COMMS, phone);
+        localStorage.setItem(STORAGE_KEY_CONCIERGE, phone);
         setIsOpen(false);
     };
 
@@ -80,12 +80,12 @@ function getFlagEmoji(phone: string): string {
     return '🏳️';
 }
 
-export default function SecureCommsModal({
+export default function ConciergeModal({
     trigger,
     isOpen,
     onClose,
     onConnect,
-}: SecureCommsModalProps) {
+}: ConciergeModalProps) {
     // Formatter utility (Re duplicated for simplicity in component isolation)
     const formatPhoneNumber = (value: string) => {
         if (!value) return "";
@@ -269,7 +269,7 @@ export default function SecureCommsModal({
                                     </div>
                                     {/* Icon indicator */}
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity">
-                                        <span className="text-[10px] text-emerald-500 font-mono tracking-wider">SECURE</span>
+                                        <span className="text-[10px] text-emerald-500 font-mono tracking-wider">PRIORITY</span>
                                     </div>
                                 </div>
                                 {error && <p className="text-xs text-red-500 pl-1">{error}</p>}

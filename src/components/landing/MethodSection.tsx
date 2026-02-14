@@ -341,7 +341,7 @@ export function MethodSection() {
     }
 
     return (
-        <section id="method" className={`py-24 px-4 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-black" : "bg-gray-50"
+        <section id="method" className={`py-16 md:py-24 px-4 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-black" : "bg-gray-50"
             }`}>
             {/* Background */}
             {isDark && <div className="absolute inset-0 bg-black" />}
@@ -371,7 +371,7 @@ export function MethodSection() {
                             Modelo No-Video · Escrita Ativa
                         </span>
                     </motion.div>
-                    <h2 className={`text-4xl md:text-6xl font-bold font-serif mb-4 ${isDark ? "text-white" : "text-gray-900"
+                    <h2 className={`text-3xl sm:text-4xl md:text-6xl font-bold font-serif mb-4 ${isDark ? "text-white" : "text-gray-900"
                         }`}>
                         9 Níveis para <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-cyan-400 to-violet-400">

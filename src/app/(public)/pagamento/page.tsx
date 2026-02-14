@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { TacticalCard, TacticalButton } from "@/components/ui/TacticalCard";
+import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
 import { Ticket, CreditCard, Check, AlertCircle, ArrowLeft, Loader2, Shield } from "lucide-react";
 
 export default function PagamentoPage() {
@@ -69,7 +69,7 @@ export default function PagamentoPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="relative z-10 w-full max-w-lg"
             >
-                <TacticalCard className="p-8">
+                <FlightCard className="p-8">
                     <AnimatePresence mode="wait">
                         {/* Choice Screen */}
                         {mode === 'choice' && (
@@ -82,15 +82,15 @@ export default function PagamentoPage() {
                                 <div className="text-center mb-8">
                                     <Shield className="w-16 h-16 text-violet-500 mx-auto mb-4" />
                                     <h1 className="text-2xl font-bold text-white mb-2">
-                                        Ativar Acesso Completo
+                                        Missão Concluída
                                     </h1>
                                     <p className="text-white/50 text-sm">
-                                        Escolha como deseja liberar seu acesso à ES English Academy
+                                        Você provou seu valor no Pilar 1. Agora, acesse a operação completa.
                                     </p>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <TacticalButton
+                                    <FlightButton
                                         onClick={() => setMode('invite')}
                                         className="w-full flex items-center justify-between gap-4 p-4"
                                         variant="ghost"
@@ -102,9 +102,9 @@ export default function PagamentoPage() {
                                                 <div className="text-xs text-white/50">Convite especial</div>
                                             </div>
                                         </div>
-                                    </TacticalButton>
+                                    </FlightButton>
 
-                                    <TacticalButton
+                                    <FlightButton
                                         onClick={() => setMode('payment')}
                                         className="w-full flex items-center justify-between gap-4 p-4"
                                         variant="neon"
@@ -112,11 +112,11 @@ export default function PagamentoPage() {
                                         <div className="flex items-center gap-3">
                                             <CreditCard className="w-6 h-6" />
                                             <div className="text-left">
-                                                <div className="font-bold">Pagar Agora</div>
-                                                <div className="text-xs opacity-70">Acesso imediato</div>
+                                                <div className="font-bold">Liberar Acesso Completo</div>
+                                                <div className="text-xs opacity-70">Oferta Exclusiva: R$ 297</div>
                                             </div>
                                         </div>
-                                    </TacticalButton>
+                                    </FlightButton>
                                 </div>
 
                                 <button
@@ -173,7 +173,7 @@ export default function PagamentoPage() {
                                         </div>
                                     )}
 
-                                    <TacticalButton
+                                    <FlightButton
                                         onClick={handleInviteSubmit}
                                         disabled={loading || inviteCode.length < 4}
                                         className="w-full"
@@ -184,7 +184,7 @@ export default function PagamentoPage() {
                                         ) : (
                                             'Validar Código'
                                         )}
-                                    </TacticalButton>
+                                    </FlightButton>
                                 </form>
                             </motion.div>
                         )}
@@ -232,7 +232,7 @@ export default function PagamentoPage() {
                                     </div>
                                 )}
 
-                                <TacticalButton
+                                <FlightButton
                                     onClick={handlePayment}
                                     disabled={loading}
                                     className="w-full"
@@ -243,7 +243,7 @@ export default function PagamentoPage() {
                                     ) : (
                                         'Pagar e Ativar'
                                     )}
-                                </TacticalButton>
+                                </FlightButton>
 
                                 <p className="text-white/30 text-xs text-center mt-4">
                                     🔒 Pagamento seguro e processado via gateway confiável
@@ -276,7 +276,7 @@ export default function PagamentoPage() {
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </TacticalCard>
+                </FlightCard>
             </motion.div>
         </div>
     );

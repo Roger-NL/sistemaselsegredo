@@ -3,6 +3,8 @@
  * Abstraction layer to easily swap local-db for Firebase
  */
 
+import Cookies from 'js-cookie';
+
 import {
     User,
     SubscriptionStatus,
@@ -103,6 +105,7 @@ export async function login(identifier: string, password: string): Promise<AuthR
     // If lastLogin === today, do nothing (streak already counted for today)
 
     createSession(user.id);
+    Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
 
     return { success: true, user: sanitizeUser(user) };
 }
@@ -138,6 +141,7 @@ export async function register(
 
     const user = dbCreateUser(name, email, password);
     createSession(user.id);
+    Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
 
     return { success: true, user: sanitizeUser(user) };
 }
@@ -195,6 +199,7 @@ export function getCurrentUser(): Omit<User, 'passwordHash'> | null {
  */
 export function logout(): void {
     clearSession();
+    Cookies.remove('es_session_token', { path: '/' });
 }
 
 /**

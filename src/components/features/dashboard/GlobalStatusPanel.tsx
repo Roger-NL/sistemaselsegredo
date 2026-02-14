@@ -5,16 +5,46 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, Activity, Globe2, ShieldCheck, Star } from "lucide-react";
 
 export const GlobalStatusPanel = () => {
-    const { getGlobalProgress, isCourseFullyComplete } = useProgress();
+    const { getGlobalProgress, isCourseFullyComplete, getCompletedCount } = useProgress();
     const progress = getGlobalProgress();
     const isComplete = isCourseFullyComplete();
+    const completedCount = getCompletedCount();
+    const lockedCount = 9 - completedCount;
 
     return (
         <>
             {/* Desktop progress panel removed - no longer needed */}
 
-            {/* Overlay de Missão Cumprida (Mobile/Desktop) */}
+            {/* Overlay de Status (Mobile/Desktop) */}
             <AnimatePresence>
+                {/* Visual Scarcity Indicator (Quando não completo) */}
+                {!isComplete && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ delay: 1 }}
+                        className="fixed top-20 md:top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full flex justify-center px-4"
+                    >
+                        <div className="bg-black/60 backdrop-blur-md border border-red-500/20 rounded-full pl-4 pr-6 py-2 flex items-center gap-3 shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-emerald-100 font-bold text-xs tracking-widest uppercase">
+                                    {completedCount}/9 Liberado
+                                </span>
+                            </div>
+                            <div className="w-px h-4 bg-white/10" />
+                            <div className="flex items-center gap-2">
+                                <span className="text-red-400 font-bold text-xs tracking-widest uppercase flex items-center gap-1">
+                                    <span className="text-[10px]">🔒</span>
+                                    {lockedCount} Destinos Bloqueados
+                                </span>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* Mission Accomplished Overlay */}
                 {isComplete && (
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}

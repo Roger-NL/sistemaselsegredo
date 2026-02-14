@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import AuthBackground from "@/components/auth/AuthConcept";
+import AuthBackground from "@/components/auth/AuthBackground";
 
 export default function CadastroPage() {
     const [name, setName] = useState("");
