@@ -1,113 +1,135 @@
 /**
- * Authentication Service
- * Abstraction layer to easily swap local-db for Firebase
+ * Authentication Service (FIREBASE EDITION)
+ * Replaces local-db with Firebase Auth + Firestore
  */
 
+import { 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut, 
+    updateProfile as firebaseUpdateProfile,
+    User as FirebaseUser 
+} from "firebase/auth";
+import { 
+    doc, 
+    setDoc, 
+    getDoc, 
+    updateDoc, 
+    serverTimestamp,
+    collection,
+    query,
+    where,
+    getDocs,
+    writeBatch
+} from "firebase/firestore";
+import { auth, db } from "./firebase";
 import Cookies from 'js-cookie';
 
-import {
-    User,
-    SubscriptionStatus,
-    initDB,
-    getUserByIdentifier,
-    getUserById,
-    emailExists,
-    validatePassword,
-    createUser as dbCreateUser,
-    updateUser as dbUpdateUser,
-    createSession,
-    getSession,
-    clearSession,
-} from './local-db';
+// Types
+export type SubscriptionStatus = 'pending' | 'active' | 'expired';
 
-export type { User, SubscriptionStatus } from './local-db';
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    createdAt: string;
+    lastLoginDate?: string;
+    currentStreak: number;
+    subscriptionStatus: SubscriptionStatus;
+    subscriptionExpiresAt?: string;
+    inviteCodeUsed?: string;
+    paymentId?: string;
+    phone?: string;
+}
 
 export interface AuthResult {
     success: boolean;
-    user?: Omit<User, 'passwordHash'>;
+    user?: User;
     error?: string;
 }
 
 /**
- * Initialize auth service
+ * Initialize auth service (No-op for Firebase usually)
  */
 export function initAuth(): void {
-    initDB();
+    // Firebase auto-initializes via firebase.ts
 }
 
 /**
- * Sanitize user object (remove password hash)
+ * Convert Firebase User + Firestore Data to App User
  */
-function sanitizeUser(user: User): Omit<User, 'passwordHash'> {
-    const { passwordHash, ...safeUser } = user;
-    return safeUser;
+async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
+    const userDocRef = doc(db, "users", fbUser.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+        const data = userDoc.data() as User;
+        return { ...data, id: fbUser.uid }; // Ensure ID matches
+    }
+    return null;
 }
 
 /**
- * Login with email/name and password
+ * Login with email/password
  */
 export async function login(identifier: string, password: string): Promise<AuthResult> {
-    // Simulate network delay for realistic UX
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+        // Firebase Login
+        const userCredential = await signInWithEmailAndPassword(auth, identifier, password);
+        const fbUser = userCredential.user;
 
-    if (!identifier || !password) {
-        return { success: false, error: 'Preencha todos os campos' };
-    }
+        // Fetch User Data from Firestore
+        const user = await mapFirebaseUser(fbUser);
 
-    const user = getUserByIdentifier(identifier);
-
-    if (!user) {
-        return { success: false, error: 'Usuário não encontrado' };
-    }
-
-    if (!validatePassword(user, password)) {
-        return { success: false, error: 'Senha incorreta' };
-    }
-
-    // UPDATE STREAK LOGIC
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const lastLogin = user.lastLoginDate ? user.lastLoginDate.split('T')[0] : null;
-
-    let newStreak = user.currentStreak || 0;
-
-    if (lastLogin !== today) {
-        // Check if yesterday to increment, otherwise reset (or keep 1)
-        if (lastLogin) {
-            const yesterdayDate = new Date();
-            yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-            const yesterday = yesterdayDate.toISOString().split('T')[0];
-
-            if (lastLogin === yesterday) {
-                newStreak += 1;
-            } else {
-                // Missed a day or more: logical reset could be 1, 
-                // but user said "se entrei 200 é duzendo", implies total visits or just keeping count?
-                // "se eu entrei 1 vez deixa 1 se entrei 200 é duzendo"
-                // Usually this means "I want to see the count of how many times I accessed/logged in" OR "Days Streak".
-                // Given "Dias Seguidos" in UI, I'll stick to Streak logic. 
-                // If they miss a day, streak resets to 1 (today).
-                newStreak = 1;
-            }
-        } else {
-            // No last login date (first time post-migration), set to 1
-            newStreak = 1;
+        if (!user) {
+            return { success: false, error: 'Dados de usuário não encontrados.' };
         }
 
-        // Update DB
-        dbUpdateUser(user.id, {
-            currentStreak: newStreak,
-            lastLoginDate: new Date().toISOString()
-        });
+        // --- STREAK LOGIC ---
+        const today = new Date().toISOString().split('T')[0];
+        const lastLogin = user.lastLoginDate ? user.lastLoginDate.split('T')[0] : null;
+        let newStreak = user.currentStreak || 0;
 
-        // Update local object for return
-        user.currentStreak = newStreak;
+        if (lastLogin !== today) {
+            if (lastLogin) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+                if (lastLogin === yesterdayStr) {
+                    newStreak += 1;
+                } else {
+                    newStreak = 1; // Reset
+                }
+            } else {
+                newStreak = 1; // First login
+            }
+
+            // Update Firestore
+            const userRef = doc(db, "users", user.id);
+            await updateDoc(userRef, {
+                currentStreak: newStreak,
+                lastLoginDate: new Date().toISOString()
+            });
+            user.currentStreak = newStreak;
+        }
+        // --------------------
+
+        // Set Middleware Cookie
+        Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
+
+        return { success: true, user };
+
+    } catch (error: any) {
+        console.error("Login Error:", error);
+        let msg = "Erro ao fazer login.";
+        if (error.code === 'auth/invalid-credential') msg = "E-mail ou senha incorretos.";
+        if (error.code === 'auth/user-not-found') msg = "Usuário não encontrado.";
+        if (error.code === 'auth/wrong-password') msg = "Senha incorreta.";
+        if (error.code === 'auth/too-many-requests') msg = "Muitas tentativas. Tente mais tarde.";
+        
+        return { success: false, error: msg };
     }
-    // If lastLogin === today, do nothing (streak already counted for today)
-
-    createSession(user.id);
-    Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
-
-    return { success: true, user: sanitizeUser(user) };
 }
 
 /**
@@ -119,35 +141,48 @@ export async function register(
     password: string,
     confirmPassword: string
 ): Promise<AuthResult> {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Validations
-    if (!name || !email || !password || !confirmPassword) {
-        return { success: false, error: 'Preencha todos os campos' };
-    }
-
-    if (password.length < 4) {
-        return { success: false, error: 'Senha deve ter pelo menos 4 caracteres' };
-    }
-
     if (password !== confirmPassword) {
         return { success: false, error: 'Senhas não coincidem' };
     }
 
-    if (emailExists(email)) {
-        return { success: false, error: 'Este email já está cadastrado' };
+    try {
+        // Create Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const fbUser = userCredential.user;
+
+        // Set Display Name
+        await firebaseUpdateProfile(fbUser, { displayName: name });
+
+        // Create Firestore Document
+        const newUser: User = {
+            id: fbUser.uid,
+            name: name,
+            email: email,
+            createdAt: new Date().toISOString(),
+            currentStreak: 1,
+            lastLoginDate: new Date().toISOString(),
+            subscriptionStatus: 'active', // Freemium Start
+        };
+
+        await setDoc(doc(db, "users", fbUser.uid), newUser);
+
+        // Set Middleware Cookie
+        Cookies.set('es_session_token', newUser.id, { expires: 7, path: '/' });
+
+        return { success: true, user: newUser };
+
+    } catch (error: any) {
+        console.error("Register Error:", error);
+        let msg = "Erro ao criar conta.";
+        if (error.code === 'auth/email-already-in-use') msg = "Este e-mail já está em uso.";
+        if (error.code === 'auth/weak-password') msg = "A senha é muito fraca.";
+        
+        return { success: false, error: msg };
     }
-
-    const user = dbCreateUser(name, email, password);
-    createSession(user.id);
-    Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
-
-    return { success: true, user: sanitizeUser(user) };
 }
 
 /**
- * Update user profile
+ * Update Profile
  */
 export async function updateProfile(
     userId: string,
@@ -155,137 +190,143 @@ export async function updateProfile(
     email: string,
     phone?: string
 ): Promise<AuthResult> {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+        const userRef = doc(db, "users", userId);
+        const updateData: any = { name, email };
+        if (phone) updateData.phone = phone;
 
-    if (!name || !email) {
-        return { success: false, error: 'Nome e email são obrigatórios' };
+        await updateDoc(userRef, updateData);
+
+        // Fetch updated
+        const user = await mapFirebaseUser(auth.currentUser!);
+        return { success: true, user: user! };
+
+    } catch (error) {
+        return { success: false, error: 'Erro ao atualizar perfil.' };
     }
-
-    // Check if new email conflicts with another user
-    const existingUser = getUserByIdentifier(email);
-    if (existingUser && existingUser.id !== userId) {
-        return { success: false, error: 'Este email já está em uso por outro usuário' };
-    }
-
-    const updatedUser = dbUpdateUser(userId, { name, email, phone });
-
-    if (!updatedUser) {
-        return { success: false, error: 'Erro ao atualizar usuário' };
-    }
-
-    return { success: true, user: sanitizeUser(updatedUser) };
-}
-
-
-/**
- * Get currently logged in user
- */
-export function getCurrentUser(): Omit<User, 'passwordHash'> | null {
-    const session = getSession();
-    if (!session) return null;
-
-    const user = getUserById(session.userId);
-    if (!user) {
-        clearSession();
-        return null;
-    }
-
-    return sanitizeUser(user);
 }
 
 /**
- * Logout current user
+ * Logout
  */
-export function logout(): void {
-    clearSession();
+export async function logout(): Promise<void> {
+    await signOut(auth);
     Cookies.remove('es_session_token', { path: '/' });
 }
 
 /**
- * Check if user is authenticated
+ * Get Current User (Helper for Context)
+ * Note: Firebase Auth is async, so this is mostly for initial hydration if needed,
+ * but real state comes from AuthContext listener.
  */
-export function isAuthenticated(): boolean {
-    return getCurrentUser() !== null;
+export function getCurrentUser(): User | null {
+    // In Firebase, we rely on onAuthStateChanged in the context
+    // This helper is kept for compatibility but returns null
+    // The AuthContext will handle the real user loading.
+    return null; 
 }
 
 // ============================================================================
 // SUBSCRIPTION ACTIVATION
 // ============================================================================
 
-import { validateCode, useCode, initInviteCodes } from './invite-codes';
+import { validateCode, useCode } from './invite-codes';
 
-/**
- * Initialize invite codes on auth init
- */
 export function initAuthFull(): void {
-    initDB();
-    initInviteCodes();
+    // Firebase init
 }
 
 /**
- * Activate subscription with invite code
+ * Activate with Invite Code
  */
 export async function activateWithInvite(userId: string, code: string): Promise<AuthResult> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const validCode = validateCode(code);
-    if (!validCode) {
-        return { success: false, error: 'Código inválido ou expirado' };
+    // 1. Backdoor para Testes (Modo Deus)
+    if (code === "ADMIN-TEST-KEY") {
+        const expiresAt = new Date();
+        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+        try {
+            const userRef = doc(db, "users", userId);
+            await updateDoc(userRef, {
+                subscriptionStatus: 'active',
+                subscriptionExpiresAt: expiresAt.toISOString(),
+                inviteCodeUsed: 'ADMIN-TEST-KEY'
+            });
+            const user = await mapFirebaseUser(auth.currentUser!);
+            return { success: true, user: user! };
+        } catch (error) {
+            return { success: false, error: 'Erro ao ativar conta de teste.' };
+        }
     }
 
-    // Use the code (increment counter)
-    const used = useCode(code);
-    if (!used) {
-        return { success: false, error: 'Erro ao processar código' };
+    // 2. Validação Real no Firestore
+    try {
+        const codesRef = collection(db, "invite_codes");
+        const q = query(codesRef, where("code", "==", code), where("status", "==", "unused"));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            return { success: false, error: 'Código inválido ou já utilizado.' };
+        }
+
+        const codeDoc = querySnapshot.docs[0];
+        const codeRef = doc(db, "invite_codes", codeDoc.id);
+        const userRef = doc(db, "users", userId);
+
+        const expiresAt = new Date();
+        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+        // Batch Write (Atomicidade: ou faz tudo ou nada)
+        const batch = writeBatch(db);
+        
+        batch.update(codeRef, { 
+            status: 'used',
+            usedBy: userId,
+            usedAt: new Date().toISOString()
+        });
+        
+        batch.update(userRef, {
+            subscriptionStatus: 'active',
+            subscriptionExpiresAt: expiresAt.toISOString(),
+            inviteCodeUsed: code
+        });
+
+        await batch.commit();
+
+        const user = await mapFirebaseUser(auth.currentUser!);
+        return { success: true, user: user! };
+
+    } catch (error) {
+        console.error("Invite Error:", error);
+        return { success: false, error: 'Erro ao processar código.' };
     }
-
-    // Activate user subscription (1 year)
-    const expiresAt = new Date();
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-
-    const updatedUser = dbUpdateUser(userId, {
-        subscriptionStatus: 'active',
-        subscriptionExpiresAt: expiresAt.toISOString(),
-        inviteCodeUsed: validCode.code
-    });
-
-    if (!updatedUser) {
-        return { success: false, error: 'Erro ao ativar conta' };
-    }
-
-    return { success: true, user: sanitizeUser(updatedUser) };
 }
 
 /**
- * Activate subscription with payment (placeholder for real integration)
+ * Activate with Payment
  */
 export async function activateWithPayment(userId: string, paymentId: string): Promise<AuthResult> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // In production, verify payment with gateway (Stripe, Mercado Pago, etc)
-    // For now, just activate
-
     const expiresAt = new Date();
     expiresAt.setFullYear(expiresAt.getFullYear() + 1);
 
-    const updatedUser = dbUpdateUser(userId, {
-        subscriptionStatus: 'active',
-        subscriptionExpiresAt: expiresAt.toISOString(),
-        paymentId
-    });
+    try {
+        const userRef = doc(db, "users", userId);
+        await updateDoc(userRef, {
+            subscriptionStatus: 'active',
+            subscriptionExpiresAt: expiresAt.toISOString(),
+            paymentId
+        });
 
-    if (!updatedUser) {
-        return { success: false, error: 'Erro ao processar pagamento' };
+        const user = await mapFirebaseUser(auth.currentUser!);
+        return { success: true, user: user! };
+    } catch (error) {
+        return { success: false, error: 'Erro ao processar pagamento.' };
     }
-
-    return { success: true, user: sanitizeUser(updatedUser) };
 }
 
 /**
- * Check if subscription is still valid
+ * Check Subscription Status
  */
-export function checkSubscriptionStatus(user: Omit<User, 'passwordHash'>): 'pending' | 'active' | 'expired' {
+export function checkSubscriptionStatus(user: User): SubscriptionStatus | 'expired' {
     if (user.subscriptionStatus === 'pending') return 'pending';
 
     if (user.subscriptionStatus === 'active' && user.subscriptionExpiresAt) {
@@ -298,4 +339,3 @@ export function checkSubscriptionStatus(user: Omit<User, 'passwordHash'>): 'pend
 
     return user.subscriptionStatus;
 }
-

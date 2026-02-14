@@ -2,13 +2,16 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
+import Cookies from 'js-cookie';
+
 import {
-    initAuthFull,
     login as authLogin,
     register as authRegister,
     updateProfile as authUpdateProfile,
     logout as authLogout,
-    getCurrentUser,
     activateWithInvite as authActivateWithInvite,
     activateWithPayment as authActivateWithPayment,
     checkSubscriptionStatus,
@@ -17,11 +20,9 @@ import {
     SubscriptionStatus,
 } from "@/lib/auth-service";
 
-type SafeUser = Omit<User, 'passwordHash'>;
-
 interface AuthContextType {
     isAuthenticated: boolean;
-    user: SafeUser | null;
+    user: User | null;
     subscriptionStatus: SubscriptionStatus | null;
     login: (identifier: string, password: string) => Promise<AuthResult>;
     register: (name: string, email: string, password: string, confirmPassword: string) => Promise<AuthResult>;
@@ -29,36 +30,57 @@ interface AuthContextType {
     activateWithInvite: (code: string) => Promise<AuthResult>;
     activateWithPayment: (paymentId: string) => Promise<AuthResult>;
     logout: () => void;
-    refreshUser: () => void;
     isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<SafeUser | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
-    const refreshUser = () => {
-        const currentUser = getCurrentUser();
-        if (currentUser) {
-            setUser(currentUser);
-        }
-    };
-
+    // FIREBASE REAL-TIME LISTENER
     useEffect(() => {
-        // Initialize database and invite codes
-        initAuthFull();
-        refreshUser();
-        setIsLoading(false);
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (firebaseUser) {
+                // User is signed in, fetch Firestore data
+                try {
+                    const userDocRef = doc(db, "users", firebaseUser.uid);
+                    const userDoc = await getDoc(userDocRef);
+
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data() as User;
+                        // Ensure ID is set
+                        const fullUser = { ...userData, id: firebaseUser.uid };
+                        setUser(fullUser);
+                        
+                        // Sync Cookie for Middleware
+                        Cookies.set('es_session_token', firebaseUser.uid, { expires: 7, path: '/' });
+                    } else {
+                        // User exists in Auth but not in Firestore (Rare edge case)
+                        console.error("User authenticated but no Firestore profile found.");
+                        setUser(null);
+                    }
+                } catch (error) {
+                    console.error("Error fetching user profile:", error);
+                    setUser(null);
+                }
+            } else {
+                // User is signed out
+                setUser(null);
+                Cookies.remove('es_session_token', { path: '/' });
+            }
+            setIsLoading(false);
+        });
+
+        // Cleanup subscription
+        return () => unsubscribe();
     }, []);
 
     const login = async (identifier: string, password: string): Promise<AuthResult> => {
         const result = await authLogin(identifier, password);
-        if (result.success && result.user) {
-            setUser(result.user);
-        }
+        // State update happens automatically via onAuthStateChanged
         return result;
     };
 
@@ -69,34 +91,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         confirmPassword: string
     ): Promise<AuthResult> => {
         const result = await authRegister(name, email, password, confirmPassword);
-        if (result.success && result.user) {
-            setUser(result.user);
-        }
+        // State update happens automatically via onAuthStateChanged
         return result;
     };
 
     const updateProfile = async (name: string, email: string, phone?: string): Promise<AuthResult> => {
         if (!user) return { success: false, error: 'Usuário não autenticado' };
-
+        // We update Firestore, then onAuthStateChanged logic might not auto-trigger
+        // unless we force a reload or update local state manually.
+        // For efficiency, we update local state here too if successful.
         const result = await authUpdateProfile(user.id, name, email, phone);
         if (result.success && result.user) {
             setUser(result.user);
-
-            // Sync with local storage flag for modal
-            if (typeof window !== 'undefined') {
-                if (phone) {
-                    localStorage.setItem('es-secure-comms-v2', phone);
-                } else {
-                    localStorage.removeItem('es-secure-comms-v2');
-                }
-            }
         }
         return result;
     };
 
     const activateWithInvite = async (code: string): Promise<AuthResult> => {
         if (!user) return { success: false, error: 'Usuário não autenticado' };
-
         const result = await authActivateWithInvite(user.id, code);
         if (result.success && result.user) {
             setUser(result.user);
@@ -106,7 +118,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const activateWithPayment = async (paymentId: string): Promise<AuthResult> => {
         if (!user) return { success: false, error: 'Usuário não autenticado' };
-
         const result = await authActivateWithPayment(user.id, paymentId);
         if (result.success && result.user) {
             setUser(result.user);
@@ -114,13 +125,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
     };
 
-    const logout = () => {
-        authLogout();
-        setUser(null);
+    const logout = async () => {
+        await authLogout();
+        // State update happens automatically via onAuthStateChanged
         router.push("/login");
     };
 
-    // Calculate current subscription status
     const subscriptionStatus: SubscriptionStatus | null = user
         ? checkSubscriptionStatus(user)
         : null;
@@ -137,7 +147,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 activateWithInvite,
                 activateWithPayment,
                 logout,
-                refreshUser,
                 isLoading,
             }}
         >
