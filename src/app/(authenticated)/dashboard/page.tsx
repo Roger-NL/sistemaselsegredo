@@ -12,6 +12,7 @@ import { GlobalStatusPanel } from "@/components/features/dashboard/GlobalStatusP
 import { Typewriter } from "@/components/ui/typewriter";
 import { DashboardNav } from "@/components/core/DashboardNav";
 import ConciergeModal from "@/components/core/ConciergeModal";
+import { ExamFeedbackPopup } from "@/components/features/dashboard/ExamFeedbackPopup";
 
 import { useAuth } from "@/context/AuthContext";
 import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard";
@@ -439,6 +440,9 @@ export default function Page() {
           setShowCommsModal(false);
         }}
       />
+
+      {/* Exam Feedback Popup - Checks for new grades */}
+      <ExamFeedbackPopup />
 
       {/* Dev Controls */}
       <div className="pointer-events-auto">
