@@ -125,6 +125,7 @@ export async function loginWithGoogle(): Promise<AuthResult> {
         Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
         const role = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'student';
         Cookies.set('es_user_role', role, { expires: 7, path: '/' });
+        Cookies.set('es_user_status', user.subscriptionStatus, { expires: 7, path: '/' });
 
         return { success: true, user };
 
@@ -186,6 +187,7 @@ export async function login(identifier: string, password: string): Promise<AuthR
         // Set Role Cookie
         const role = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'student';
         Cookies.set('es_user_role', role, { expires: 7, path: '/' });
+        Cookies.set('es_user_status', user.subscriptionStatus, { expires: 7, path: '/' });
 
         return { success: true, user };
 
@@ -239,6 +241,9 @@ export async function register(
 
         // Set Middleware Cookie
         Cookies.set('es_session_token', newUser.id, { expires: 7, path: '/' });
+        const role = ADMIN_EMAILS.includes(email) ? 'admin' : 'student';
+        Cookies.set('es_user_role', role, { expires: 7, path: '/' });
+        Cookies.set('es_user_status', newUser.subscriptionStatus, { expires: 7, path: '/' });
 
         return { success: true, user: newUser };
 
