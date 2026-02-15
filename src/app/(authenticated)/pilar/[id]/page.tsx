@@ -6,7 +6,7 @@ import { PremiumWall } from "@/components/features/subscription/PremiumWall";
 export default async function PillarPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const pillarId = Number(id) || 1;
-    const cookieStore = await cookies();
+    const cookieStore = await cookies() as any; // CAST TO ANY TO FIX BUILD ERROR
 
     // SECURITY CHECK: Read status from cookie
     // Note: In a banking app, we would verify this token with Firebase Admin SDK.
