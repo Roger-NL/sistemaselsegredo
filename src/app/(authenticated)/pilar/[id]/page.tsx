@@ -3,9 +3,10 @@ import { PILLARS_CONTENT } from "@/data/pillars-content";
 import PillarPageClient from "@/components/features/study/PillarPageClient";
 import { PremiumWall } from "@/components/features/subscription/PremiumWall";
 
-export default function PillarPage({ params }: { params: { id: string } }) {
-    const pillarId = Number(params.id) || 1;
-    const cookieStore = cookies();
+export default async function PillarPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const pillarId = Number(id) || 1;
+    const cookieStore = await cookies();
 
     // SECURITY CHECK: Read status from cookie
     // Note: In a banking app, we would verify this token with Firebase Admin SDK.
