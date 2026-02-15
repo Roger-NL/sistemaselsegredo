@@ -78,12 +78,12 @@ export default function Page() {
       {/* Admin Portal Button - Fixed Bottom Right */}
       {isAdmin && (
         <div className="fixed bottom-4 right-4 z-[9999] pointer-events-auto">
-            <button 
-                onClick={() => router.push('/admin/dashboard')}
-                className="bg-red-600 text-white px-4 py-2 rounded shadow-lg font-bold text-xs uppercase tracking-widest hover:bg-red-700 transition-colors"
-            >
-                PAINEL ADMIN
-            </button>
+          <button
+            onClick={() => router.push('/admin/dashboard')}
+            className="bg-red-600 text-white px-4 py-2 rounded shadow-lg font-bold text-xs uppercase tracking-widest hover:bg-red-700 transition-colors"
+          >
+            PAINEL ADMIN
+          </button>
         </div>
       )}
 
@@ -241,19 +241,7 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Hint text above globe */}
-        <div
-          className="absolute z-20 pointer-events-none text-center"
-          style={{
-            top: "calc(50% - 230px)",
-            left: "50%",
-            transform: "translateX(-50%)"
-          }}
-        >
-          <p className="text-xs md:text-sm text-white/50 font-mono uppercase tracking-widest animate-pulse">
-            Clique no globo para ver seus pilares
-          </p>
-        </div>
+
 
         <div
           className="absolute z-10 pointer-events-none"
@@ -337,7 +325,7 @@ export default function Page() {
           <div
             onClick={(e) => {
               e.stopPropagation();
-                                                          if (currentSpec) router.push(`/especialidades/${currentSpec.id}`);              else if (completedCount < 9) router.push(`/pilar/${currentPillarNumber}`);
+              if (currentSpec) router.push(`/especialidades/${currentSpec.id}`); else if (completedCount < 9) router.push(`/pilar/${currentPillarNumber}`);
               else router.push("/especialidades");
             }}
             className="cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95"
@@ -404,6 +392,8 @@ export default function Page() {
               </p>
             )}
           </div>
+
+
         </div>
       </div>
 

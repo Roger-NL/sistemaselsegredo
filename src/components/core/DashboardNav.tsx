@@ -187,16 +187,23 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                         </div>
                     </div>
 
-                    {/* Center Section - Progress */}
-                    <div className="hidden lg:flex items-center gap-3 flex-1 justify-center max-w-md">
-                        <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono">Progresso</span>
-                        <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-gradient-to-r from-violet-500 via-[#EEF4D4] to-emerald-400 rounded-full transition-all"
-                                style={{ width: `${globalProgress}%` }}
-                            />
+                    {/* Center Section - Unlock Status (Strategic Desktop Placement) */}
+                    <div className="hidden lg:flex items-center gap-6 flex-1 justify-center">
+                        <div className="flex items-center gap-3 bg-white/5 px-4 py-1.5 rounded-full border border-white/5">
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span className="text-emerald-100 font-bold text-xs font-mono tracking-widest uppercase">
+                                    {completedCount}/9 Liberado
+                                </span>
+                            </div>
+                            <div className="w-px h-3 bg-white/10" />
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px]">🔒</span>
+                                <span className="text-white/40 font-bold text-xs font-mono tracking-widest uppercase">
+                                    {9 - completedCount} Bloqueados
+                                </span>
+                            </div>
                         </div>
-                        <span className="text-xs text-[#EEF4D4] font-mono font-bold">{globalProgress}%</span>
                     </div>
 
                     {/* Right Section */}

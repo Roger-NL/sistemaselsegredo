@@ -23,7 +23,7 @@ export function DevControls({ isAdmin }: DevControlsProps) {
 
     return (
         <div className="fixed bottom-4 left-4 z-[99999] pointer-events-auto">
-            <button 
+            <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="bg-black/80 text-white p-2 rounded-full border border-white/20 hover:bg-white/20 transition-all hover:rotate-90"
             >
@@ -31,12 +31,12 @@ export function DevControls({ isAdmin }: DevControlsProps) {
             </button>
 
             {isOpen && (
-                <div className="absolute bottom-12 right-0 bg-black/90 border border-white/20 p-4 rounded-lg w-56 space-y-3 backdrop-blur-md shadow-2xl">
+                <div className="absolute bottom-12 left-0 bg-black/90 border border-white/20 p-4 rounded-lg w-56 space-y-3 backdrop-blur-md shadow-2xl">
                     <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                         <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider">Dev Tools</h3>
-                         <span className="text-[10px] text-emerald-500 font-mono">v4.0</span>
+                        <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider">Dev Tools</h3>
+                        <span className="text-[10px] text-emerald-500 font-mono">v4.0</span>
                     </div>
-                    
+
                     <div>
                         <span className="text-[10px] text-white/30 uppercase block mb-1">Set Level (Unlock)</span>
                         <div className="grid grid-cols-5 gap-1">
@@ -53,7 +53,7 @@ export function DevControls({ isAdmin }: DevControlsProps) {
                     </div>
 
                     <div className="space-y-2 pt-2 border-t border-white/10">
-                        <button 
+                        <button
                             onClick={handleCompleteAll}
                             className="w-full flex items-center justify-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs py-2 rounded hover:bg-emerald-500 hover:text-white transition-colors uppercase font-bold tracking-wider"
                         >
@@ -61,7 +61,7 @@ export function DevControls({ isAdmin }: DevControlsProps) {
                             Complete All
                         </button>
 
-                        <button 
+                        <button
                             onClick={resetProgress}
                             className="w-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs py-1 rounded hover:bg-red-500 hover:text-white transition-colors uppercase"
                         >
