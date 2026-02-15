@@ -14,6 +14,7 @@ import { DashboardNav } from "@/components/core/DashboardNav";
 import ConciergeModal from "@/components/core/ConciergeModal";
 
 import { useAuth } from "@/context/AuthContext";
+import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard";
 
 export default function Page() {
   const router = useRouter();
@@ -41,6 +42,17 @@ export default function Page() {
 
   const [isHUDOpen, setIsHUDOpen] = useState(false);
   const [showCommsModal, setShowCommsModal] = useState(false);
+
+  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
+
+  // Carregar Leaderboard
+  useEffect(() => {
+    async function loadData() {
+      const data = await getLeaderboard(5);
+      setLeaderboard(data);
+    }
+    loadData();
+  }, []);
 
   // Trigger: Verifica conexão WhatsApp ao entrar (delay 3s)
   useEffect(() => {
@@ -137,31 +149,47 @@ export default function Page() {
         {/* Thin separator line */}
         <div className="w-32 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-        {/* Leaderboard - Minimal List */}
+
+
+        {/* Leaderboard - Real Data */}
         <div className="flex flex-col items-end gap-1.5">
           <span className="text-[9px] font-mono text-white/30 uppercase tracking-widest mb-1">Top Streaks</span>
-          {[
-            { name: "Maria S.", streak: 45 },
-            { name: "João P.", streak: 32 },
-            { name: "Ana C.", streak: 28 },
-            { name: "Você", streak: user?.currentStreak || 0, isYou: true },
-            { name: "Carlos L.", streak: 5 },
-          ].sort((a, b) => b.streak - a.streak).map((u, i) => (
-            <div
-              key={i}
-              className={`flex items-center gap-2 text-right ${u.isYou ? '' : ''}`}
-            >
-              <span className={`text-xs ${u.isYou ? 'text-orange-400 font-bold' : 'text-white/50'}`}>
-                {u.name}
-              </span>
-              <span className={`text-[10px] font-mono ${u.isYou ? 'text-orange-300' : 'text-white/30'}`}>
-                {u.streak}
-              </span>
-              <span className="text-[10px]">
-                {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : u.isYou ? '🔥' : '·'}
-              </span>
-            </div>
-          ))}
+
+          {leaderboard.length === 0 ? (
+            <div className="text-[10px] text-white/20 animate-pulse">Carregando...</div>
+          ) : (
+            leaderboard.map((u, i) => {
+              const isMe = user?.id === u.id;
+              return (
+                <div
+                  key={u.id}
+                  className="flex items-center gap-2 text-right"
+                >
+                  <span className={`text-xs ${isMe ? 'text-orange-400 font-bold' : 'text-white/50'}`}>
+                    {isMe ? "Você" : u.name}
+                  </span>
+                  <span className={`text-[10px] font-mono ${isMe ? 'text-orange-300' : 'text-white/30'}`}>
+                    {u.streak}
+                  </span>
+                  <span className="text-[10px]">
+                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : isMe ? '🔥' : '·'}
+                  </span>
+                </div>
+              );
+            })
+          )}
+
+          {/* Always show current user if not in top 5? Optional, but nice. */}
+          {user && leaderboard.length > 0 && !leaderboard.find(u => u.id === user.id) && (
+            <>
+              <div className="h-px w-8 bg-white/10 my-0.5" />
+              <div className="flex items-center gap-2 text-right opacity-80">
+                <span className="text-xs text-orange-400 font-bold">Você</span>
+                <span className="text-[10px] font-mono text-orange-300">{user.currentStreak || 0}</span>
+                <span className="text-[10px]">🔥</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
