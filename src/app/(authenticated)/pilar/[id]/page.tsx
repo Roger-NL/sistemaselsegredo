@@ -51,6 +51,13 @@ export default function PilarPage() {
 
         // Caso 1: Já está aprovado para o próximo -> Apenas avança
         if (approvedLevel >= nextPillar) {
+
+            // NEW: Intercept Pillar 1
+            if (pillarId === 1 && subscriptionStatus !== 'premium') {
+                router.push('/pagamento');
+                return;
+            }
+
             completePillar(pillarId);
             if (pillarId < 9) {
                 router.push(`/pilar/${nextPillar}`);
@@ -192,11 +199,24 @@ export default function PilarPage() {
                                                 Complete todos os módulos para avançar
                                             </>
                                         ) : (user?.approvedPillar || 1) >= pillarId + 1 ? (
-                                            <>
-                                                <CheckCircle2 className="w-6 h-6" />
-                                                Concluir e Avançar
-                                                <ArrowRight className="w-5 h-5" />
-                                            </>
+                                            // Lógica específica para o Pilar 1 (Conversão Premium)
+                                            pillarId === 1 && subscriptionStatus !== 'premium' ? (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <span className="text-xs font-normal text-emerald-300 normal-case tracking-normal">
+                                                        Feedback enviado para seu WhatsApp!
+                                                    </span>
+                                                    <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-yellow-400">
+                                                        <span>QUERO SER PREMIUM AGORA</span>
+                                                        <ArrowRight className="w-5 h-5" />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <CheckCircle2 className="w-6 h-6" />
+                                                    Concluir e Avançar
+                                                    <ArrowRight className="w-5 h-5" />
+                                                </>
+                                            )
                                         ) : exam?.status === 'pending' ? (
                                             <>
                                                 <div className="animate-spin h-5 w-5 border-2 border-white/30 border-t-white rounded-full mr-2" />
