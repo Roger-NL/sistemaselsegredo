@@ -52,18 +52,17 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
     // Helper functions
     const handleAction = async () => {
+        // NEW: Intercept Pillar 1 (Premium Logic) - CLICK ANYTIME
+        if (pillarId === 1 && subscriptionStatus !== 'premium') {
+            router.push('/pagamento');
+            return;
+        }
+
         const nextPillar = pillarId + 1;
         const approvedLevel = user?.approvedPillar || 1;
 
         // Caso 1: Já está aprovado para o próximo -> Apenas avança
         if (approvedLevel >= nextPillar) {
-
-            // NEW: Intercept Pillar 1
-            if (pillarId === 1 && subscriptionStatus !== 'premium') {
-                router.push('/pagamento');
-                return;
-            }
-
             completePillar(pillarId);
             if (pillarId < 9) {
                 router.push(`/pilar/${nextPillar}`);
@@ -195,9 +194,9 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                             <div className="mt-12 flex justify-center pb-20">
                                 <FlightButton
                                     variant={areAllModulesCompleted ? (exam?.status === 'pending' ? "ghost" : "neon") : "ghost"}
-                                    onClick={areAllModulesCompleted && exam?.status !== 'pending' ? handleAction : undefined}
-                                    disabled={!areAllModulesCompleted || exam?.status === 'pending' || isCheckingExam}
-                                    className={`py-4 px-8 text-lg ${(!areAllModulesCompleted || exam?.status === 'pending') ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    onClick={areAllModulesCompleted && (exam?.status !== 'pending' || (pillarId === 1 && subscriptionStatus !== 'premium')) ? handleAction : undefined}
+                                    disabled={!areAllModulesCompleted || isCheckingExam || (exam?.status === 'pending' && !(pillarId === 1 && subscriptionStatus !== 'premium'))}
+                                    className={`py-4 px-8 text-lg ${(!areAllModulesCompleted || (exam?.status === 'pending' && !(pillarId === 1 && subscriptionStatus !== 'premium'))) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <span className="flex items-center gap-3">
                                         {!areAllModulesCompleted ? (
