@@ -2,14 +2,12 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckCircle2, ArrowRight, Loader2, ClipboardCheck, MessageSquare, AlertCircle, ShieldCheck } from "lucide-react";
-import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
+import { X, CheckCircle2, ArrowRight, Loader2, ClipboardCheck, MessageSquare, AlertCircle, ShieldCheck, Phone } from "lucide-react";
+import { FlightButton } from "@/components/ui/FlightCard";
 import { getQuizByPillarNumber } from "@/data/quizzes";
 import { submitExam } from "@/lib/exam-service";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { db } from "@/lib/firebase";
-import { doc, writeBatch, serverTimestamp } from "firebase/firestore";
 
 interface PillarExamModalProps {
     pillarId: number;
@@ -18,7 +16,7 @@ interface PillarExamModalProps {
     onSuccess: () => void;
 }
 
-type Step = 'intro' | 'quiz' | 'written' | 'sending' | 'success';
+type Step = 'intro' | 'quiz' | 'written' | 'whatsapp' | 'sending' | 'success';
 
 export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: PillarExamModalProps) {
     const { user } = useAuth();
@@ -27,14 +25,25 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
     const [quizIndex, setQuizIndex] = useState(0);
     const [answers, setAnswers] = useState<number[]>([]);
     const [writtenText, setWrittenAnswer] = useState("");
+    const [whatsapp, setWhatsapp] = useState("");
     const [error, setError] = useState("");
-    
+
     const quiz = getQuizByPillarNumber(pillarId);
     const questions = quiz?.questions || [];
 
     const handleNextStep = () => {
         if (step === 'intro') setStep('quiz');
         else if (step === 'quiz') setStep('written');
+        else if (step === 'written') {
+            if (writtenText.length < 50) {
+                setError("Por favor, escreva um pouco mais sobre sua experiência e os exemplos (mínimo 50 caracteres).");
+                return;
+            }
+            // If Pillar 1, ask for WhatsApp. If Other Pillars, maybe skip or also ask?
+            // User requested emphasizing WhatsApp for Pillar 1 logic.
+            setStep('whatsapp');
+            setError("");
+        }
     };
 
     const handleAnswer = (optionIdx: number) => {
@@ -57,20 +66,27 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
     };
 
     const handleSubmit = async () => {
-        if (writtenText.length < 50) {
-            setError("Por favor, escreva um pouco mais sobre sua experiência e os exemplos (mínimo 50 caracteres).");
-            return;
-        }
+        // Validation for WhatsApp (Optional or Mandatory? User said "se ela nao por ficala aguardando a resposta")
+        // implying it might be optional, BUT "ficala aguardando a resposta" might mean "on platform only".
+        // Let's make it look mandatory but allow skip if they really want? Or just mandatory for better conversion.
+        // Given "nao deve ter fricsao", maybe optional is better?
+        // But user said "solicitar o wpp novamente se ela nao por".
+        // Let's make it mandatory for Pillar 1 to ensure delivery promise? 
+        // No, friction kills conversion. Let's make it optional but highly recommended.
+
+        // Actually, user said: "se ela nao por ficala aguardando a resposta" -> If she doesn't put it, she stays waiting for response (on platform).
+        // This implies IT IS OPTIONAL.
 
         setStep('sending');
         setError("");
 
         const score = calculateScore();
-        
+
         const result = await submitExam({
             userId: user!.id,
             userEmail: user!.email,
             userName: user!.name,
+            userPhone: whatsapp, // NEW
             pillarId: pillarId,
             quizScore: score,
             quizAttempts: 1,
@@ -79,9 +95,10 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
 
         if (result.success) {
             setStep('success');
+            // Check if Pillar 1, aim for immediate upsell logic
         } else {
             setError(result.error || "Erro ao enviar missão.");
-            setStep('written');
+            setStep('whatsapp');
         }
     };
 
@@ -89,9 +106,9 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
 
     return (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-            <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="absolute inset-0 bg-black/90 backdrop-blur-sm"
                 onClick={onClose}
@@ -187,7 +204,6 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                         <span className={`text-[10px] font-mono ${writtenText.length < 50 ? 'text-red-400' : 'text-emerald-400'}`}>
                                             Caracteres: {writtenText.length} (mín. 50)
                                         </span>
-                                        <span className="text-[10px] font-mono text-white/20 uppercase tracking-widest">Correção Humana em 24h</span>
                                     </div>
                                 </div>
 
@@ -198,10 +214,52 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                     </div>
                                 )}
 
-                                <FlightButton variant="neon" className="w-full py-4" onClick={handleSubmit}>
-                                    Enviar para o Comando
+                                <FlightButton variant="neon" className="w-full py-4" onClick={handleNextStep}>
+                                    Continuar
                                     <ArrowRight className="ml-2 w-5 h-5" />
                                 </FlightButton>
+                            </motion.div>
+                        )}
+
+                        {/* WHATSAPP INPUT (NEW STEP) */}
+                        {step === 'whatsapp' && (
+                            <motion.div key="whatsapp" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                                <div className="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-center">
+                                    <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Phone className="w-8 h-8 text-emerald-400" />
+                                    </div>
+                                    <h3 className="text-lg font-medium text-white mb-2">Canal de Comunicação Prioritário</h3>
+                                    <p className="text-white/60 text-sm mb-6 max-w-sm mx-auto">
+                                        Para receber o feedback do seu relatório diretamente no seu celular (mais rápido), informe seu WhatsApp abaixo.
+                                    </p>
+
+                                    <div className="max-w-xs mx-auto">
+                                        <input
+                                            type="tel"
+                                            value={whatsapp}
+                                            onChange={(e) => setWhatsapp(e.target.value)}
+                                            placeholder="(XX) 9XXXX-XXXX"
+                                            className="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-colors mb-2"
+                                        />
+                                        <p className="text-[10px] text-white/30 uppercase tracking-widest">
+                                            {whatsapp ? "Número registrado" : "Opcional (Resposta ficará no site)"}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {error && (
+                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3 text-red-400 text-xs">
+                                        <AlertCircle size={14} />
+                                        {error}
+                                    </div>
+                                )}
+
+                                <div className="space-y-3">
+                                    <FlightButton variant="neon" className="w-full py-4 text-lg" onClick={handleSubmit}>
+                                        Enviar Missão Final
+                                        <ArrowRight className="ml-2 w-5 h-5" />
+                                    </FlightButton>
+                                </div>
                             </motion.div>
                         )}
 
@@ -219,26 +277,25 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                 <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30">
                                     <CheckCircle2 className="w-10 h-10 text-emerald-400" />
                                 </div>
-                                
+
                                 {pillarId === 1 ? (
                                     <>
                                         <div>
-                                            <h3 className="text-2xl font-bold text-white mb-2">Relatório Registrado</h3>
+                                            <h3 className="text-2xl font-bold text-white mb-2">Relatório Recebido!</h3>
                                             <p className="text-white/50 text-sm max-w-sm mx-auto leading-relaxed">
-                                                Sua missão foi salva e está na <span className="text-white font-bold text-emerald-400">fila de correção prioritária</span>. <br /><br />
-                                                Para receber o veredito do Comando, seu feedback personalizado e desbloquear os próximos 8 destinos, ative sua licença Premium.
+                                                Sua missão foi salva. Para furar a fila de correção e desbloquear os próximos 8 destinos <strong>agora mesmo</strong>, ative sua licença.
                                             </p>
                                         </div>
                                         <div className="space-y-3">
-                                            <FlightButton variant="neon" className="w-full py-4 text-lg" onClick={() => { router.push('/pagamento'); onClose(); }}>
-                                                Ativar Licença Premium
+                                            <FlightButton variant="neon" className="w-full py-4 text-lg border-yellow-500/50 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500" onClick={() => { router.push('/pagamento'); onClose(); }}>
+                                                QUERO FURAR A FILA (PREMIUM)
                                                 <ArrowRight className="ml-2 w-5 h-5" />
                                             </FlightButton>
-                                            <button 
+                                            <button
                                                 onClick={() => { onSuccess(); onClose(); }}
-                                                className="text-white/30 text-xs hover:text-white transition-colors uppercase tracking-widest"
+                                                className="text-white/30 text-xs hover:text-white transition-colors uppercase tracking-widest mt-4 block mx-auto underline decoration-white/10 underline-offset-4"
                                             >
-                                                Ver Dashboard (Acesso Limitado)
+                                                Aguardar análise padrão (Gratuito)
                                             </button>
                                         </div>
                                     </>
@@ -247,7 +304,7 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                         <div>
                                             <h3 className="text-2xl font-bold text-white mb-2">Relatório Recebido</h3>
                                             <p className="text-white/50 text-sm max-w-sm mx-auto">
-                                                Sua missão foi registrada. Nossa equipe de instrutores analisará seu relatório em até 24h. Você receberá o desbloqueio assim que aprovado.
+                                                Sua missão foi registrada. Nossa equipe de instrutores analisará seu relatório em até 24h.
                                             </p>
                                         </div>
                                         <FlightButton variant="ghost" className="w-full" onClick={() => { onSuccess(); onClose(); }}>

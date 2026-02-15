@@ -6,11 +6,12 @@ import { PILLARS } from "@/data/curriculum";
 import { useAuth } from "@/context/AuthContext";
 import { PremiumWall } from "@/components/features/subscription/PremiumWall";
 import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
-import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Lock, X, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Lock, X, ShieldCheck, MessageSquare } from "lucide-react";
 import { StudyViewer } from "@/components/features/study/StudyViewer";
 import { PillarOperationalView } from "@/components/features/study/PillarOperationalView";
 import { getUserExamStatus, PillarExam } from "@/lib/exam-service";
 import { PillarExamModal } from "@/components/features/study/exam/PillarExamModal";
+import { PillarExamViewModal } from "@/components/features/study/exam/PillarExamViewModal";
 import { useState, useEffect } from "react";
 import { PillarData } from "@/types/study";
 
@@ -34,6 +35,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     // Access Control & Exam State
     const [exam, setExam] = useState<PillarExam | null>(null);
     const [isExamModalOpen, setIsExamModalOpen] = useState(false);
+    const [isViewExamModalOpen, setIsViewExamModalOpen] = useState(false);
     const [isCheckingExam, setIsCheckingExam] = useState(true);
 
     const refreshExamStatus = async () => {
@@ -204,11 +206,11 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                                 Complete todos os módulos para avançar
                                             </>
                                         ) : (user?.approvedPillar || 1) >= pillarId + 1 ? (
-                                            // Lógica específica para o Pilar 1 (Conversão Premium)
+                                            // === CASO: APROVADO ===
                                             pillarId === 1 && subscriptionStatus !== 'premium' ? (
                                                 <div className="flex flex-col items-center gap-1">
                                                     <span className="text-xs font-normal text-emerald-300 normal-case tracking-normal">
-                                                        Feedback enviado para seu WhatsApp!
+                                                        Missão Cumprida!
                                                     </span>
                                                     <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-yellow-400">
                                                         <span>QUERO SER PREMIUM AGORA</span>
@@ -223,17 +225,32 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                                 </>
                                             )
                                         ) : exam?.status === 'pending' ? (
-                                            <>
-                                                <div className="animate-spin h-5 w-5 border-2 border-white/30 border-t-white rounded-full mr-2" />
-                                                Aguardando Aprovação do Comando...
-                                            </>
+                                            // === CASO: PENDENTE ===
+                                            pillarId === 1 && subscriptionStatus !== 'premium' ? (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <span className="text-xs font-normal text-white/50 normal-case tracking-normal">
+                                                        Análise em andamento...
+                                                    </span>
+                                                    <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-yellow-400 animate-pulse">
+                                                        <span>FURAR FILA (CORREÇÃO IMEDIATA)</span>
+                                                        <ArrowRight className="w-5 h-5" />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <div className="animate-spin h-5 w-5 border-2 border-white/30 border-t-white rounded-full mr-2" />
+                                                    Aguardando Aprovação...
+                                                </>
+                                            )
                                         ) : exam?.status === 'rejected' ? (
+                                            // === CASO: REPROVADO ===
                                             <>
                                                 <X className="w-6 h-6 text-red-500" />
                                                 Missão Reprovada. Tentar Novamente?
                                                 <ArrowRight className="w-5 h-5" />
                                             </>
                                         ) : (
+                                            // === CASO: NÃO INICIADO ===
                                             <>
                                                 <ShieldCheck className="w-6 h-6" />
                                                 Iniciar Missão Final do Pilar {pillarId}
@@ -242,14 +259,33 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                         )}
                                     </span>
                                 </FlightButton>
+
+                                {/* Botão Secundário para ver Missão (Aparece se tiver exame) */}
+                                {exam && (
+                                    <button
+                                        onClick={() => setIsViewExamModalOpen(true)}
+                                        className="absolute -bottom-8 text-[10px] text-white/30 hover:text-white uppercase tracking-widest flex items-center gap-2"
+                                    >
+                                        <MessageSquare className="w-3 h-3" />
+                                        Ver meu Relatório
+                                    </button>
+                                )}
                             </div>
 
-                            {/* Modal de Avaliação Híbrida */}
+                            {/* Modal de Avaliação Híbrida (Prova) */}
                             <PillarExamModal
                                 pillarId={pillarId}
                                 isOpen={isExamModalOpen}
                                 onClose={() => setIsExamModalOpen(false)}
                                 onSuccess={refreshExamStatus}
+                            />
+
+                            {/* Modal de Visualização (Leitura) */}
+                            <PillarExamViewModal
+                                pillarId={pillarId}
+                                exam={exam}
+                                isOpen={isViewExamModalOpen}
+                                onClose={() => setIsViewExamModalOpen(false)}
                             />
                         </div>
                     ) : (

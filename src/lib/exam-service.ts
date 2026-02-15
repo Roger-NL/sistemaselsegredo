@@ -20,6 +20,7 @@ export interface PillarExam {
     userId: string;
     userEmail?: string;
     userName?: string;
+    userPhone?: string;
     pillarId: number;
     quizScore: number; // 0 a 100
     quizAttempts: number;
