@@ -39,9 +39,14 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                 setError("Por favor, escreva um pouco mais sobre sua experiência e os exemplos (mínimo 50 caracteres).");
                 return;
             }
-            // If Pillar 1, ask for WhatsApp. If Other Pillars, maybe skip or also ask?
-            // User requested emphasizing WhatsApp for Pillar 1 logic.
-            setStep('whatsapp');
+
+            // Check if user already has a phone number
+            if (user?.phone && user.phone.length > 8) {
+                // If phone exists, skip the step and submit directly using profile phone
+                handleSubmit(user.phone);
+            } else {
+                setStep('whatsapp');
+            }
             setError("");
         }
     };
@@ -65,7 +70,7 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
         return Math.round((correct / questions.length) * 100);
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (phoneOverride?: string) => {
         // Validation for WhatsApp (Optional or Mandatory? User said "se ela nao por ficala aguardando a resposta")
         // implying it might be optional, BUT "ficala aguardando a resposta" might mean "on platform only".
         // Let's make it look mandatory but allow skip if they really want? Or just mandatory for better conversion.
@@ -81,12 +86,13 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
         setError("");
 
         const score = calculateScore();
+        const finalPhone = phoneOverride || whatsapp;
 
         const result = await submitExam({
             userId: user!.id,
             userEmail: user!.email,
             userName: user!.name,
-            userPhone: whatsapp, // NEW
+            userPhone: finalPhone, // NEW
             pillarId: pillarId,
             quizScore: score,
             quizAttempts: 1,
@@ -255,7 +261,7 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                 )}
 
                                 <div className="space-y-3">
-                                    <FlightButton variant="neon" className="w-full py-4 text-lg" onClick={handleSubmit}>
+                                    <FlightButton variant="neon" className="w-full py-4 text-lg" onClick={() => handleSubmit()}>
                                         Enviar Missão Final
                                         <ArrowRight className="ml-2 w-5 h-5" />
                                     </FlightButton>
