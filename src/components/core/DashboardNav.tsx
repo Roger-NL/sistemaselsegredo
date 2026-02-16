@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProgress } from "@/context/ProgressContext";
 import { getRank } from "@/utils/ranks";
-import { LeaderboardModal } from "@/components/features/dashboard/LeaderboardModal"; // NEW IMPORT
+import { LeaderboardModal } from "@/components/features/dashboard/LeaderboardModal";
+import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard"; // Added Import
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -15,10 +16,19 @@ interface DashboardNavProps {
 
 export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: DashboardNavProps) {
     const router = useRouter();
-    const { logout } = useAuth();
+    const { logout, user } = useAuth(); // Destructure user
     const { getCompletedCount, getGlobalProgress } = useProgress();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false); // NEW STATE
+    const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
+
+    // Mini Leaderboard State
+    const [miniLeaderboard, setMiniLeaderboard] = useState<LeaderboardUser[]>([]);
+
+    useEffect(() => {
+        if (isMenuOpen) {
+            getLeaderboard(3).then(data => setMiniLeaderboard(data));
+        }
+    }, [isMenuOpen]);
 
     const completedCount = getCompletedCount();
     const currentRank = getRank(completedCount);
@@ -142,16 +152,19 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                                 <div className="px-4 py-2">
                                     <span className="text-[10px] text-white/40 uppercase tracking-widest">🏆 Top Streaks</span>
                                     <div className="mt-2 space-y-1">
-                                        {[
-                                            { name: "Roger", streak: 45 }, // Static fallback if needed or remove
-                                            { name: "Maria", streak: 32 },
-                                            { name: "Você", streak: currentStreak, isYou: true },
-                                        ].map((u, i) => (
-                                            <div key={i} className={`flex items-center justify-between text-xs ${u.isYou ? 'text-orange-400' : 'text-white/50'}`}>
-                                                <span>{i === 0 ? '🥇' : i === 1 ? '🥈' : '🔥'} {u.name}</span>
-                                                <span>{u.streak}d</span>
-                                            </div>
-                                        ))}
+                                        {miniLeaderboard.length === 0 ? (
+                                            <div className="text-[10px] text-white/30 animate-pulse">Carregando...</div>
+                                        ) : (
+                                            miniLeaderboard.map((u, i) => {
+                                                const isMe = user?.id === u.id;
+                                                return (
+                                                    <div key={i} className={`flex items-center justify-between text-xs ${isMe ? 'text-orange-400' : 'text-white/50'}`}>
+                                                        <span>{i === 0 ? '🥇' : i === 1 ? '🥈' : '🔥'} {isMe ? 'Você' : u.name}</span>
+                                                        <span>{u.streak}d</span>
+                                                    </div>
+                                                );
+                                            })
+                                        )}
                                     </div>
                                     <button
                                         onClick={() => { setIsMenuOpen(false); setIsLeaderboardOpen(true); }}

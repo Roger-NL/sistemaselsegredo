@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import Cookies from 'js-cookie';
 
@@ -65,7 +65,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     if (userDoc.exists()) {
                         const userData = userDoc.data() as User;
                         // Ensure ID is set
-                        const fullUser = { ...userData, id: firebaseUser.uid };
+                        let fullUser = { ...userData, id: firebaseUser.uid };
+
+                        // --- STREAK LOGIC (BRAZIL TIME) ---
+                        try {
+                            const now = new Date();
+                            // Helper to get YYYY-MM-DD in Brazil
+                            const getBrazilDate = (date: Date) => {
+                                return new Intl.DateTimeFormat('en-CA', {
+                                    timeZone: 'America/Sao_Paulo',
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit'
+                                }).format(date);
+                            };
+
+                            const todayStr = getBrazilDate(now);
+                            const lastLoginStr = fullUser.lastLoginDate
+                                ? getBrazilDate(new Date(fullUser.lastLoginDate))
+                                : null;
+
+                            // Update if it's a new day OR if we just logged in for the first time
+                            if (lastLoginStr !== todayStr) {
+                                let newStreak = fullUser.currentStreak || 0;
+
+                                // Check if yesterday
+                                const yesterday = new Date(now);
+                                yesterday.setDate(yesterday.getDate() - 1);
+                                const yesterdayStr = getBrazilDate(yesterday);
+
+                                if (lastLoginStr === yesterdayStr) {
+                                    newStreak += 1;
+                                } else {
+                                    newStreak = 1; // Missed a day or first login
+                                }
+
+                                // Update Firestore
+                                await updateDoc(userDocRef, {
+                                    currentStreak: newStreak,
+                                    lastLoginDate: now.toISOString()
+                                });
+
+                                // Update local state immediately
+                                fullUser.currentStreak = newStreak;
+                                fullUser.lastLoginDate = now.toISOString();
+                            }
+                        } catch (err) {
+                            console.error("Streak Error:", err);
+                        }
+                        // -----------------------------------
+
                         setUser(fullUser);
 
                         // Sync Cookie for Middleware
