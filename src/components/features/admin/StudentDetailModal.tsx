@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { X, User, Mail, Phone, Calendar, Star, TrendingUp, ShieldCheck, CheckCircle2, AlertCircle, Clock, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, updateDoc, doc } from "firebase/firestore";
 import { PillarExam } from "@/lib/exam-service";
 
 interface StudentDetailModalProps {
@@ -17,13 +17,16 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
     const [exams, setExams] = useState<PillarExam[]>([]);
     const [loadingExams, setLoadingExams] = useState(false);
     const [expandedExam, setExpandedExam] = useState<string | null>(null);
+    const [currentPillarLevel, setCurrentPillarLevel] = useState(1);
 
     useEffect(() => {
         if (user && isOpen) {
+            setCurrentPillarLevel(user.approvedPillar || 1);
             fetchExams();
         } else {
             setExams([]);
             setExpandedExam(null);
+            setCurrentPillarLevel(1);
         }
     }, [user, isOpen]);
 
@@ -145,8 +148,32 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
                                 <ShieldCheck className="w-5 h-5 text-violet-600" />
                                 Progresso & Missões (Desafios)
                             </h3>
-                            <div className="px-3 py-1 bg-violet-50 text-violet-700 rounded-full text-xs font-bold uppercase tracking-wider border border-violet-100">
-                                Nível Atual: Pilar {user.approvedPillar || 1}
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nível Liberado:</span>
+                                <select
+                                    className="bg-white border border-violet-200 text-violet-700 text-xs font-bold rounded-lg p-1 pr-6 focus:ring-violet-500 focus:border-violet-500 cursor-pointer outline-none shadow-sm"
+                                    value={currentPillarLevel}
+                                    onChange={async (e) => {
+                                        const newVal = parseInt(e.target.value);
+                                        if (confirm(`DESEJA ALTERAR O NÍVEL DO ALUNO PARA O PILAR ${newVal}?\n\nIsso pode bloquear ou desbloquear conteúdos para o aluno imediatamente.`)) {
+                                            try {
+                                                await updateDoc(doc(db, "users", user.id), {
+                                                    approvedPillar: newVal
+                                                });
+                                                user.approvedPillar = newVal;
+                                                setCurrentPillarLevel(newVal);
+                                                alert("Nível atualizado! O aluno agora tem acesso até o Pilar " + newVal);
+                                            } catch (error) {
+                                                console.error(error);
+                                                alert("Erro ao atualizar.");
+                                            }
+                                        }
+                                    }}
+                                >
+                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                                        <option key={num} value={num}>Pilar {num}</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
 
