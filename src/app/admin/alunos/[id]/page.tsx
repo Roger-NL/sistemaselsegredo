@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, updateDoc, doc } from "firebase/firestore";
 import { ArrowLeft, User, Mail, Calendar, CheckCircle, Clock } from "lucide-react";
 import { FlightButton } from "@/components/ui/FlightCard";
 import { PillarExam } from "@/lib/exam-service";
@@ -15,6 +15,7 @@ interface StudentProfile {
     email: string;
     plan: string;
     joinedAt: any;
+    approvedPillar?: number;
 }
 
 export default function StudentDetailPage({ params }: { params: { id: string } }) {
@@ -138,9 +139,33 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
                         </div>
                     </div>
 
-                    <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg">
-                        <span className="text-[10px] uppercase tracking-widest text-white/40 block mb-1">Plano Atual</span>
-                        <span className="text-xl font-bold text-emerald-400">FREE</span>
+                    <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg max-w-xs">
+                        <span className="text-[10px] uppercase tracking-widest text-white/40 block mb-1">Controle de Progresso</span>
+                        <div className="flex items-center gap-2">
+                            <select
+                                className="bg-black/50 border border-white/20 text-white text-sm rounded-lg p-2 focus:ring-violet-500 focus:border-violet-500 block w-full"
+                                value={student?.approvedPillar || 1}
+                                onChange={async (e) => {
+                                    const newVal = parseInt(e.target.value);
+                                    if (confirm(`Tem certeza que deseja alterar o nível do aluno para o Pilar ${newVal}? Isso resetará ou avançará o progresso dele.`)) {
+                                        try {
+                                            await updateDoc(doc(db, "users", studentId), {
+                                                approvedPillar: newVal
+                                            });
+                                            setStudent(prev => ({ ...prev!, approvedPillar: newVal }));
+                                            alert("Nível atualizado com sucesso!");
+                                        } catch (error) {
+                                            console.error(error);
+                                            alert("Erro ao atualizar.");
+                                        }
+                                    }
+                                }}
+                            >
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                                    <option key={num} value={num}>Pilar {num}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -246,6 +271,6 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }
