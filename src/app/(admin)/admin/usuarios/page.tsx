@@ -113,9 +113,16 @@ export default function AdminUsersPage() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="font-mono text-xs text-slate-500">
-                                            {user.inviteCodeUsed ? `CUPOM: ${user.inviteCodeUsed}` : 'N/A'}
-                                        </span>
+                                        <div className="flex flex-col">
+                                            <span className={`font-semibold text-xs ${user.subscriptionStatus === 'premium' || user.subscriptionStatus === 'active' ? 'text-emerald-700' : 'text-slate-600'}`}>
+                                                {user.subscriptionStatus === 'premium' || user.subscriptionStatus === 'active' ? 'Premium' : 'Free'}
+                                            </span>
+                                            {user.inviteCodeUsed && (
+                                                <span className="text-[10px] text-slate-400 font-mono">
+                                                    Cupom: {user.inviteCodeUsed}
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4 text-slate-500">
                                         {user.createdAt
