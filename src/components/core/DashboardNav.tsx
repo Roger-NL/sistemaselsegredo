@@ -117,6 +117,12 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                             >
                                 ⚙️ Configurações
                             </button>
+                            <button
+                                onClick={() => { setIsMenuOpen(false); router.push('/boletim'); }}
+                                className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10"
+                            >
+                                📊 Boletim
+                            </button>
                             <div className="my-2 border-t border-white/10" />
                             {/* Mini Leaderboard in Dropdown */}
                             <div className="px-4 py-2">
@@ -213,6 +219,10 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
                             <span className="hidden sm:inline">Voltar</span>
+                        </button>
+
+                        <button onClick={() => router.push('/boletim')} className="bean-button bean-button-accent">
+                            <span className="hidden sm:inline">Boletim</span>
                         </button>
 
                         <button onClick={() => console.log("Ranking")} className="bean-button bean-button-accent">
