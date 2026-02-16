@@ -46,9 +46,18 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
         }
     };
 
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+
     useEffect(() => {
         refreshExamStatus();
     }, [user, pillarId]);
+
+    useEffect(() => {
+        if (searchParams?.get("feedback") === "true") {
+            // Wait a bit for exam to load if necessary, or just rely on state update
+            setIsViewExamModalOpen(true);
+        }
+    }, [searchParams]);
 
     // Helper functions
     const handleAction = async () => {

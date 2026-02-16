@@ -59,7 +59,7 @@ export function ExamFeedbackPopup() {
 
     const handleAction = () => {
         handleClose();
-        router.push(`/pilar/${examData.pillarId}`);
+        router.push(`/pilar/${examData.pillarId}?feedback=true`);
     };
 
     if (!isOpen || !examData) return null;
