@@ -84,7 +84,7 @@ function getInitialStatus(): Record<string, PillarStatus> {
 
 // Provider
 export function ProgressProvider({ children }: { children: ReactNode }) {
-    const { subscriptionStatus } = useAuth();
+    const { user, subscriptionStatus } = useAuth(); // NOW using user
     const [pillarStatus, setPillarStatus] = useState<Record<string, PillarStatus>>(getInitialStatus);
     const [chosenSpecialization, setChosenSpecialization] = useState<string | null>(null);
     const [specializationStatus, setSpecializationStatus] = useState<'studying' | 'pending_approval' | 'completed' | null>(null);
@@ -94,35 +94,60 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const [hasSeenMissionComplete, setHasSeenMissionComplete] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
 
-    // Carrega progresso do localStorage na montagem
+    // Dynamic Key based on user ID to prevent shared progress
+    const getStorageKey = () => user?.id ? `${STORAGE_KEY}-${user.id}` : null;
+
+    // Carrega progresso do localStorage na montagem ou quando user muda
     useEffect(() => {
-        const stored = secureStorage.getItem<any>(STORAGE_KEY);
+        const key = getStorageKey();
+        if (!key) {
+            // No user logged in? Reset to initial or keep empty?
+            // Usually reset to avoid showing previous user data
+            if (!user) {
+                setPillarStatus(getInitialStatus());
+                // Reset other states...
+                setChosenSpecialization(null);
+                setSpecializationStatus(null);
+                setCompletedSpecializations([]);
+                setCompletedModules({});
+                setCompletedPillarModules([]);
+                setHasSeenMissionComplete(false);
+            }
+            return;
+        }
+
+        const stored = secureStorage.getItem<any>(key);
         if (stored) {
             try {
-                // Retrocompatibilidade (se for string antiga sem chosenSpecialization)
-                if (stored.pillarStatus) {
-                    setPillarStatus(stored.pillarStatus);
-                    setChosenSpecialization(stored.chosenSpecialization || null);
-                    setSpecializationStatus(stored.specializationStatus || null);
-                    setCompletedSpecializations(stored.completedSpecializations || []);
-                    setCompletedModules(stored.completedModules || {});
-                    setCompletedPillarModules(stored.completedPillarModules || []);
-                    setHasSeenMissionComplete(stored.hasSeenMissionComplete || false);
-                } else {
-                    // Formato antigo (apenas status)
-                    setPillarStatus(stored);
-                }
+                // Retrocompatibilidade e carga
+                setPillarStatus(stored.pillarStatus || getInitialStatus());
+                setChosenSpecialization(stored.chosenSpecialization || null);
+                setSpecializationStatus(stored.specializationStatus || null);
+                setCompletedSpecializations(stored.completedSpecializations || []);
+                setCompletedModules(stored.completedModules || {});
+                setCompletedPillarModules(stored.completedPillarModules || []);
+                setHasSeenMissionComplete(stored.hasSeenMissionComplete || false);
             } catch {
                 setPillarStatus(getInitialStatus());
             }
+        } else {
+            // New user on this device -> start fresh
+            setPillarStatus(getInitialStatus());
+            setChosenSpecialization(null);
+            setSpecializationStatus(null);
+            setCompletedSpecializations([]);
+            setCompletedModules({});
+            setCompletedPillarModules([]);
+            setHasSeenMissionComplete(false);
         }
         setIsHydrated(true);
-    }, []);
+    }, [user]); // Re-run when user changes
 
     // Salva no localStorage quando muda
     useEffect(() => {
-        if (isHydrated) {
-            secureStorage.setItem(STORAGE_KEY, {
+        const key = getStorageKey();
+        if (isHydrated && key) {
+            secureStorage.setItem(key, {
                 pillarStatus,
                 chosenSpecialization,
                 specializationStatus,
@@ -132,7 +157,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 hasSeenMissionComplete
             });
         }
-    }, [pillarStatus, chosenSpecialization, specializationStatus, completedSpecializations, completedModules, completedPillarModules, hasSeenMissionComplete, isHydrated]);
+    }, [pillarStatus, chosenSpecialization, specializationStatus, completedSpecializations, completedModules, completedPillarModules, hasSeenMissionComplete, isHydrated, user]);
 
     // Marca pilar como completado e desbloqueia próximo
     const completePillar = (pillarNumber: number) => {
