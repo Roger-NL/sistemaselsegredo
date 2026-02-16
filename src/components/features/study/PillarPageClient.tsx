@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useProgress } from "@/context/ProgressContext";
 import { PILLARS } from "@/data/curriculum";
 import { useAuth } from "@/context/AuthContext";
@@ -22,6 +22,8 @@ interface PillarPageClientProps {
 
 export default function PillarPageClient({ pillarId, initialContent }: PillarPageClientProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
 
     // Note: pillarId is passed as prop, no need to read params
 
@@ -46,18 +48,17 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
         }
     };
 
-    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-
     useEffect(() => {
         refreshExamStatus();
     }, [user, pillarId]);
 
     useEffect(() => {
         if (searchParams?.get("feedback") === "true") {
-            // Wait a bit for exam to load if necessary, or just rely on state update
             setIsViewExamModalOpen(true);
+            // Remove the query param to avoid looping or reopening on refresh
+            router.replace(pathname, { scroll: false });
         }
-    }, [searchParams]);
+    }, [searchParams, pathname, router]);
 
     // Helper functions
     const handleAction = async () => {
