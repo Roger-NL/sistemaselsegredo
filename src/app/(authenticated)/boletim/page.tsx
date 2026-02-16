@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
@@ -16,12 +17,14 @@ import {
     Trophy,
     Target,
     BarChart3,
-    Search
+    Search,
+    ArrowLeft
 } from "lucide-react";
 import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
 import { PillarExamViewModal } from "@/components/features/study/exam/PillarExamViewModal";
 
 export default function BoletimPage() {
+    const router = useRouter();
     const { user } = useAuth();
     const [exams, setExams] = useState<Record<number, PillarExam>>({});
     const [loading, setLoading] = useState(true);
@@ -91,6 +94,14 @@ export default function BoletimPage() {
     return (
         <div className="min-h-screen w-full p-4 md:p-8 pb-32">
             <div className="max-w-5xl mx-auto space-y-8">
+                {/* Back Button */}
+                <button
+                    onClick={() => router.push('/dashboard')}
+                    className="flex items-center text-white/50 hover:text-white transition-colors mb-4 group"
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                    Voltar ao Dashboard
+                </button>
 
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -154,8 +165,8 @@ export default function BoletimPage() {
                                             </div>
                                             {exam ? (
                                                 <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest border ${exam.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                                        exam.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                                            'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                                                    exam.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                                        'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
                                                     }`}>
                                                     {exam.status === 'approved' ? 'Aprovado' :
                                                         exam.status === 'rejected' ? 'Reprovado' : 'Em Análise'}
