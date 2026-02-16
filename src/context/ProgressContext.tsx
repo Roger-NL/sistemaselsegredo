@@ -157,9 +157,40 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // ... (useEffect save remains same)
 
-    // ... (completePillar remains same - though UI handles next step mainly via router push)
+    // Marca pilar como completado e desbloqueia próximo
+    const completePillar = (pillarNumber: number) => {
+        setPillarStatus((prev) => {
+            const newStatus = { ...prev };
+            const currentPillarId = `pilar-${pillarNumber}`;
+            const nextPillarId = `pilar-${pillarNumber + 1}`;
 
-    // ... (setPillarLevel remains same)
+            // Marca atual como completed
+            newStatus[currentPillarId] = "completed";
+
+            // Desbloqueia próximo (se existir)
+            if (pillarNumber < 9 && newStatus[nextPillarId]) {
+                newStatus[nextPillarId] = "unlocked";
+            }
+
+            return newStatus;
+        });
+    };
+
+    // Define nível específico (Dev Mode)
+    const setPillarLevel = (level: number) => {
+        const newStatus: Record<string, PillarStatus> = {};
+        PILLARS.forEach((pillar, index) => {
+            const pillarNum = index + 1;
+            if (pillarNum < level) {
+                newStatus[pillar.id] = "completed";
+            } else if (pillarNum === level) {
+                newStatus[pillar.id] = "unlocked";
+            } else {
+                newStatus[pillar.id] = "locked";
+            }
+        });
+        setPillarStatus(newStatus);
+    };
 
     // Retorna número do pilar atual
     const getCurrentPillarNumber = (): number => {
@@ -175,9 +206,15 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         return 9; // Todos completos
     };
 
-    // ... (getCompletedCount remains same)
+    // Conta pilares completados
+    const getCompletedCount = (): number => {
+        return Object.values(pillarStatus).filter((s) => s === "completed").length;
+    };
 
-    // ... (areAllPillarsComplete remains same)
+    // Verifica se todos completos
+    const areAllPillarsComplete = (): boolean => {
+        return getCompletedCount() === 9;
+    };
 
     // Verifica se pilar está desbloqueado
     const isPillarUnlocked = (pillarNumber: number): boolean => {
