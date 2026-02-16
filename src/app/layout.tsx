@@ -26,7 +26,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://esenglishacademy.com"),
+  metadataBase: new URL("https://www.elsegredo.com"),
   title: {
     default: "ES English Academy | Global Command Center",
     template: "%s | ES English Academy",
