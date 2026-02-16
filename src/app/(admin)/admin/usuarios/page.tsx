@@ -11,11 +11,32 @@ export default function AdminUsersPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("all"); // all, active, pending
     const [selectedUser, setSelectedUser] = useState<any | null>(null);
+    const [pendingUserIds, setPendingUserIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
+        const fetchPendingExams = async () => {
+            try {
+                // Fetch ALL pending exams to map against users
+                // This is efficient enough for MVP (read all pending is usually small list compared to total users)
+                const q = query(collection(db, "pillar_exams"), where("status", "==", "pending"));
+                const snapshot = await getDocs(q);
+                const userIds = new Set<string>();
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.userId) userIds.add(data.userId);
+                });
+                setPendingUserIds(userIds);
+            } catch (error) {
+                console.error("Erro ao buscar exames pendentes:", error);
+            }
+        };
+
         const fetchUsers = async () => {
             setLoading(true);
             try {
+                // Parallel fetch
+                fetchPendingExams();
+
                 let q = query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50));
 
                 if (filter !== "all") {
@@ -105,11 +126,11 @@ export default function AdminUsersPage() {
                                     <td className="px-6 py-4">
                                         <span className={`
                                             inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
-                                            ${user.subscriptionStatus === 'active' || user.subscriptionStatus === 'premium'
-                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                : 'bg-slate-100 text-slate-500 border-slate-200'}
+                                            ${pendingUserIds.has(user.id)
+                                                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                                : 'bg-slate-50 text-slate-500 border-slate-200'}
                                         `}>
-                                            {user.subscriptionStatus === 'active' || user.subscriptionStatus === 'premium' ? 'Premium' : 'Free'}
+                                            {pendingUserIds.has(user.id) ? 'Correção Pendente' : 'Regular'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
