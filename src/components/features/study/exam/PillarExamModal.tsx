@@ -19,7 +19,7 @@ interface PillarExamModalProps {
 type Step = 'intro' | 'quiz' | 'written' | 'whatsapp' | 'sending' | 'success';
 
 export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: PillarExamModalProps) {
-    const { user } = useAuth();
+    const { user, updateProfile } = useAuth();
     const router = useRouter();
     const [step, setStep] = useState<Step>('intro');
     const [quizIndex, setQuizIndex] = useState(0);
@@ -87,6 +87,19 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
 
         const score = calculateScore();
         const finalPhone = phoneOverride || whatsapp;
+
+        // SYNC PHONE TO PROFILE IF NEW
+        // This ensures next time we skip the step
+        if (finalPhone && finalPhone.length > 8 && (!user?.phone || user.phone.length < 8)) {
+            try {
+                // Update profile in AuthContext and Firestore
+                // We use existing name/email, just update phone
+                await updateProfile(user!.name, user!.email, finalPhone);
+            } catch (err) {
+                console.error("Failed to sync phone to profile:", err);
+                // Continue with exam submission anyway
+            }
+        }
 
         const result = await submitExam({
             userId: user!.id,

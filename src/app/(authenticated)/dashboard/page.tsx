@@ -57,7 +57,12 @@ export default function Page() {
 
   // Trigger: Verifica conexão WhatsApp ao entrar (delay 3s)
   useEffect(() => {
-    // Verifica se já conectou
+    if (!user) return;
+
+    // Se já tem telefone válido no sistema, não mostra o modal
+    if (user.phone && user.phone.length > 8) return;
+
+    // Verifica se já conectou (fallback local)
     const alreadyConnected = localStorage.getItem('es-secure-comms-v2');
 
     if (!alreadyConnected) {
@@ -67,9 +72,7 @@ export default function Page() {
       }, 3000);
       return () => clearTimeout(timer);
     }
-
-    // Se já conectou, segue a vida (lógica do Pilar 1 removida/substituída por essa mais restritiva)
-  }, []);
+  }, [user]);
 
   const handleGlobeClick = () => {
     console.log("Opening HUD");
