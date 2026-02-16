@@ -1,0 +1,89 @@
+# ES ENGLISH ACADEMY - DOCUMENTAÇÃO TÉCNICA E FUNCIONAL
+# Baseada na análise do código-fonte atual (fevereiro/2026)
+
+## 1. VISÃO GERAL
+A "ES English Academy" é uma plataforma de ensino de inglês gamificada com uma estética "cyber-tech/militar". O sistema é construído como uma Progressive Web App (PWA) moderna, focada em imersão e retenção do usuário através de mecânicas de jogos (streaks, ranks, desbloqueio progressivo).
+
+## 2. ARQUITETURA TÉCNICA
+- **Frontend**: Next.js 14 (App Router)
+- **Linguagem**: TypeScript
+- **Estilização**: Tailwind CSS (Utilitários) + CSS Modules (em casos específicos)
+- **Animações**: Framer Motion (Transições de página, modais, efeitos de entrada)
+- **Backend Service**: Firebase (Google)
+  - **Authentication**: Email/Senha + Google Sign-In
+  - **Firestore**: Banco de dados NoSQL para usuários, progresso, exames e códigos de convite
+- **Estado Global**: React Context API (`AuthContext`, `ProgressContext`)
+
+## 3. IDENTIDADE VISUAL E UX
+- **Tema**: Dark Mode Profundo (`bg-[#050505]`) como padrão.
+- **Conceito**: "Flight/Aero Interface" + "Hacker Console".
+- **Elementos Chave**:
+  - **Glassmorphism**: Painéis translúcidos com blur (`backdrop-blur-xl`, `bg-white/5`).
+  - **Neon Glows**: Bordas e textos brilhantes (Violeta para especial/premium, Verde para sucesso, Laranja para streaks).
+  - **Tipografia**: Combinação de Sans-Serif (Interface limpa) e Monospace (Dados técnicos/decoração).
+  - **Componentes UI**: `FlightCard` (Moldura técnica), `FlightButton` (Botões de ação retangulares/tech).
+
+## 4. FUNCIONALIDADES DETALHADAS
+
+### 4.1. Autenticação (`/login`, `/cadastro`)
+- **Fluxo**: Login e Registro unificados visualmente.
+- **Integração**: Suporte nativo a Google Auth e Email/Senha.
+- **Redirecionamento Inteligente**:
+  - Admins (lista hardcoded de emails + verificação de role) -> `/admin/dashboard`
+  - Alunos -> `/dashboard`
+- **Segurança**: Middleware de proteção de rotas (`(authenticated)` vs `(public)`).
+
+### 4.2. Dashboard do Aluno (`/dashboard`)
+O "QG" do aluno.
+- **Globo Central (`RotatingEarth`)**: Elemento 3D interativo. Representa o mundo a ser conquistado.
+- **HUD (Heads-Up Display)**: Menu circular ou sobreposto para navegação entre os 9 Pilares.
+- **Global Status Panel**:
+  - Desktop: Barra superior integrada na navegação (`X/9 Liberado | Y Bloqueados`).
+  - Mobile: Painel flutuante posicionado estrategicamente acima do globo (ajustado para telas altas tipo S21).
+- **Leaderboard (Real-time)**:
+  - Lista os top 5 alunos com maior "Streak" (sequência de dias).
+  - Destaca o usuário atual ("Você") e usa ícones de medalha/fogo.
+  - Dados puxados do Firestore.
+- **Efeitos**: "Typewriter" animado exibindo a missão ("UNLOCK FLUENCY", "MASTER THE CODE").
+
+### 4.3. Sistema de Progresso (Pilares)
+A jornada é dividida em 9 Pilares sequenciais.
+- **Lógica de Bloqueio**:
+  - **Sequencial**: Pilar 2 só abre se Pilar 1 estiver concluído.
+  - **Premium Wall**: Pilar 2 a 9 exigem status `premium` (ou `active` legacy). Apenas Pilar 1 é Free.
+- **Página do Pilar (`/pilar/[id]`)**:
+  - **StudyViewer**: Renderiza conteúdo de estudo (texto, vídeo).
+  - **PillarOperationalView**: Gestão de módulos e tarefas práticas.
+  - **Exam System**:
+    - Ao final do pilar, o aluno submete uma "Prova" ou "Feedback".
+    - Estado `pending`: Aguardando aprovação manual do admin.
+    - Estado `approved`: Botão "Concluir e Avançar" aparece.
+    - Estado `rejected`: Permite tentar novamente.
+
+### 4.4. Funil de Vendas (Freemium -> Premium)
+Estratégia de conversão implementada no código:
+1.  **Pilar 1 (Isca)**: O aluno completa o Pilar 1 gratuitamente.
+2.  **Interceptação**: Ao finalizar, em vez de apenas avançar, o sistema detecta se é usuário Free.
+3.  **Call-to-Action**: Exibe mensagem "Feedback enviado para WhatsApp" e botão dourado "QUERO SER PREMIUM AGORA".
+4.  **Página de Vendas (`/pagamento`)**:
+    - **Design**: Landing Page de alta conversão (distinta do resto do app).
+    - **Elementos**: Headline de impacto ("Missão Fase 1 Concluída"), VSL (Vídeo de Vendas), Depoimentos ("Agentes Ativos").
+    - **Oferta**: Preço de **R$ 297** (com desconto por "desempenho").
+    - **Input de Código**: Escondido atrás de um link discreto ("Tenho código de convite") para não distrair pagantes.
+
+### 4.5. Admin Panel (`/admin`)
+Painel de controle para a equipe ("Comando").
+- **Dashboard**: Métricas vitais (Total de Alunos, Receita Estimada, Códigos Usados).
+- **Aprovações**: Interface para revisar provas/missões pendentes dos alunos (necessário para eles avançarem).
+- **Gestão de Usuários**: Visualização básica da base de alunos.
+
+## 5. REGRAS DE NEGÓCIO CRÍTICAS
+1.  **Aprovação Manual**: O avanço entre pilares muitas vezes depende de uma ação humana (Admin aprovar a prova).
+2.  **Bloqueio Premium**: O sistema é rígido quanto ao acesso do Pilar 2 em diante.
+3.  **Feedback Loop**: O sistema promete feedback via WhatsApp, sugerindo uma operação "concierge" ou manual por trás.
+
+## 6. ESTADO ATUAL
+- O sistema está funcional e em produção (Vercel + Firebase).
+- A integração com gateway de pagamento real (Stripe/Mercado Pago) está simulada (`mockPaymentId `) no código atual.
+- O Leaderboard é real.
+- A autenticação Google está ativa.
