@@ -191,6 +191,21 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                         </div>
                     </div>
 
+                    {/* Feedback Alert if Exists */}
+                    {exam?.adminFeedback && (
+                        <div className="mb-8 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-4">
+                            <div className="mt-1">
+                                <MessageSquare className="w-5 h-5 text-emerald-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-1">Feedback do Comando</h3>
+                                <p className="text-emerald-100/80 text-sm leading-relaxed">
+                                    "{exam.adminFeedback}"
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     {/* ÁREA DE ESTUDO */}
                     {activeContent ? (
                         <div className="animate-in fade-in duration-700 slide-in-from-bottom-4">

@@ -97,3 +97,20 @@ export async function gradeExam(examId: string, status: 'approved' | 'rejected',
         return { success: false, error: "Erro ao avaliar." };
     }
 }
+
+/**
+ * (ADMIN) Apenas editar feedback sem mudar status
+ */
+export async function updateExamFeedback(examId: string, feedback: string) {
+    try {
+        const examRef = doc(db, COLLECTION, examId);
+        await updateDoc(examRef, {
+            adminFeedback: feedback,
+            gradedAt: serverTimestamp() // Update timestamp on edit? debatable, but safe.
+        });
+        return { success: true };
+    } catch (error) {
+        console.error("Erro ao atualizar feedback:", error);
+        return { success: false, error: "Erro ao atualizar feedback." };
+    }
+}
