@@ -6,21 +6,18 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 
-// Typer Effect Component
-const TypewriterText = () => {
+// System Diagnostic Component - "The Surprising Object"
+const SystemDiagnostic = () => {
     const phrases = [
-        "Você trava quando precisa falar?",
-        "Já estudou anos e não conversa?",
+        "Vergonha da pronúncia?",
+        "Travado na hora de falar?",
         "Entende mas não responde?",
-        "Tem vergonha da pronúncia?",
-        "Aqui você não avança sem aprender."
+        "Medo de errar em público?"
     ];
 
     const [index, setIndex] = useState(0);
     const [subIndex, setSubIndex] = useState(0);
     const [reverse, setReverse] = useState(false);
-
-    // Blinking cursor
     const [blink, setBlink] = useState(true);
 
     useEffect(() => {
@@ -32,30 +29,37 @@ const TypewriterText = () => {
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            // Logic to type/delete
             if (subIndex === phrases[index].length + 1 && !reverse) {
-                // Wait before deleting
-                setTimeout(() => setReverse(true), 2000); // 2s pause at end of phrase
+                setTimeout(() => setReverse(true), 2000);
                 return;
             }
 
             if (subIndex === 0 && reverse) {
                 setReverse(false);
-                setIndex((prev) => (prev + 1) % phrases.length); // Loop back to start
+                setIndex((prev) => (prev + 1) % phrases.length);
                 return;
             }
 
             setSubIndex((prev) => prev + (reverse ? -1 : 1));
-        }, Math.max(reverse ? 30 : 80, parseInt((Math.random() * 50).toString()))); // Random typing speed
+        }, Math.max(reverse ? 30 : 60, parseInt((Math.random() * 50).toString())));
 
         return () => clearTimeout(timeout);
     }, [subIndex, index, reverse, phrases]);
 
     return (
-        <div className="h-14 md:h-20 flex items-center">
-            <p className="text-white text-sm md:text-lg font-mono font-bold leading-relaxed">
+        <div className="inline-flex items-center gap-3 px-4 py-2 bg-black/40 border border-white/10 rounded-full backdrop-blur-md shadow-[0_0_15px_rgba(0,0,0,0.5)] mb-8">
+            <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-[10px] font-mono font-bold text-emerald-500 tracking-wider uppercase">
+                    SYSTEM_CHECK:
+                </span>
+            </div>
+            <p className="text-sm md:text-base text-gray-300 font-mono min-w-[200px] md:min-w-[240px]">
                 {phrases[index].substring(0, subIndex)}
-                <span className={`${blink ? "opacity-100" : "opacity-0"} ml-1 text-emerald-400`}>|</span>
+                <span className={`${blink ? "opacity-100" : "opacity-0"} ml-0.5 text-emerald-500`}>_</span>
             </p>
         </div>
     );
@@ -77,7 +81,11 @@ export function HeroSection() {
             <div className="container mx-auto max-w-6xl grid md:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
 
                 {/* Left Column: Text & CTA */}
-                <div className="flex flex-col gap-2 text-left pointer-events-auto order-1">
+                {/* Left Column: Text & CTA */}
+                <div className="flex flex-col items-center md:items-start text-center md:text-left pointer-events-auto order-1 relative">
+
+                    {/* Smoky Glow Effect - Behind Headline */}
+                    <div className="absolute top-10 left-1/2 md:left-0 -translate-x-1/2 md:translate-x-0 w-[300px] h-[300px] bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none z-[-1]" />
 
                     {/* Badge */}
                     <motion.div
@@ -85,71 +93,68 @@ export function HeroSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white/5 border border-white/10 w-fit backdrop-blur-md"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white/5 border border-white/10 w-fit backdrop-blur-md mb-8 md:mb-12 mx-auto md:mx-0"
                     >
                         <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuchsia-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-fuchsia-500"></span>
                         </span>
                         <span className="text-[10px] md:text-xs font-mono text-fuchsia-200 tracking-widest uppercase font-bold">
-                            Sistema de Validação Ativo
+                            Sistema fechado com validação real
                         </span>
                     </motion.div>
 
-                    {/* Headline */}
+                    {/* Headline - Clean & Impactful (Refined for Desktop) */}
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.1 }}
                         viewport={{ once: true }}
-                        className="flex flex-col gap-1 text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-white leading-tight tracking-tight"
+                        className="flex flex-col text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight mb-8 md:mb-10"
                     >
-                        <span>Sua Fluência Global</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400 font-black">
-                            em 90 dias.
+                        <span className="text-white/90">Entenda e fale</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-emerald-100 to-emerald-200">
+                            inglês em até
                         </span>
-                        <span className="text-xl sm:text-2xl md:text-2xl font-mono font-medium text-white/80 mt-1 tracking-wide">
-                            Inglês sem sala de aula.
-                        </span>
+                        <span className="text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">120 dias.</span>
                     </motion.h1>
 
-                    {/* Subheadline + Typewriter */}
+                    {/* Neural Diagnostic Pill */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
                         viewport={{ once: true }}
-                        className="relative"
+                        className="w-full flex justify-center md:justify-start mb-2 md:mb-4"
                     >
-                        <h2 className="text-sm md:text-lg text-white font-bold mb-1 text-white/90">
-                            Um sistema onde você <strong className="font-black text-emerald-300">só avança se provar que aprendeu</strong>.
-                        </h2>
-
-                        <div className="border-l-4 border-fuchsia-500/50 pl-4 md:pl-6 min-h-[50px]">
-                            <TypewriterText />
-                        </div>
+                        <SystemDiagnostic />
                     </motion.div>
 
-                    {/* Main CTA */}
+                    {/* Main CTA - Kept exactly as requested */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.3 }}
                         viewport={{ once: true }}
-                        className="flex flex-col gap-4 mt-2 w-full sm:w-auto"
+                        className="flex flex-col items-center md:items-start gap-4 w-full sm:w-auto"
                     >
                         {/* Exclusivity Micro-copy */}
                         <p className="text-[10px] md:text-xs font-mono font-bold text-white/50 uppercase tracking-widest pl-1">
-                            Sistema fechado com validação humana.
+                            Sistema fechado com validação real.
                         </p>
 
                         <a
                             href={isAuthenticated ? "/dashboard" : "/cadastro"}
-                            className="group relative inline-flex items-center justify-center w-full sm:w-auto px-5 py-3 md:px-8 md:py-4 bg-white text-black font-mono font-black tracking-wider uppercase hover:bg-emerald-50 transition-all transform active:scale-95 rounded-sm overflow-hidden text-center shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-transparent hover:border-emerald-200 no-underline cursor-pointer"
+                            className="group relative inline-flex items-center justify-center w-full sm:w-auto px-6 py-4 md:px-8 bg-white border border-emerald-400 text-black font-mono font-bold tracking-widest uppercase hover:bg-emerald-50 transition-all duration-300 transform active:scale-95 overflow-hidden text-center shadow-[0_0_20px_rgba(52,211,153,0.6)] hover:shadow-[0_0_40px_rgba(52,211,153,0.9)] no-underline cursor-pointer rounded-sm"
                         >
-                            <span className="relative z-10 flex flex-row items-center justify-center gap-2 md:gap-3 text-[11px] sm:text-sm md:text-base whitespace-normal sm:whitespace-nowrap leading-tight text-center">
-                                <Rocket className="w-4 h-4 md:w-5 md:h-5 text-fuchsia-600 group-hover:text-fuchsia-500 transition-colors flex-shrink-0" />
-                                <span>ACESSAR COCKPIT (Acesso Gratuito ao Pilar 1)</span>
+                            {/* Technical Corner Brackets (Emerald for High Contrast) */}
+                            <span className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-emerald-500 transition-all duration-300 group-hover:w-full group-hover:h-full"></span>
+                            <span className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-emerald-500 transition-all duration-300 group-hover:w-full group-hover:h-full"></span>
+
+                            <span className="relative z-10 flex flex-row items-center justify-center gap-3 text-[10px] sm:text-xs md:text-sm leading-tight text-center drop-shadow-sm">
+                                {/* Plane Icon - "Taking Off" */}
+                                <Rocket className="w-5 h-5 md:w-6 md:h-6 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 flex-shrink-0 rotate-45 text-emerald-600" />
+                                <span className="font-black whitespace-normal max-w-[260px] sm:max-w-none">ACESSAR COCKPIT (ACESSO GRATUITO AO PILAR 1)</span>
                             </span>
                         </a>
 

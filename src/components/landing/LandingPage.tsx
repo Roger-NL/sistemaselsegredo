@@ -36,7 +36,7 @@ function LandingContent() {
     };
 
     return (
-        <div className="overflow-x-hidden bg-black text-white min-h-screen">
+        <div className="overflow-x-hidden bg-[#050505] text-white min-h-screen">
             <TubesBackground className="overflow-x-hidden">
                 <LandingInner
                     isDark={true}
