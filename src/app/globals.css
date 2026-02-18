@@ -440,3 +440,38 @@
     display: none;
   }
 }
+
+/* ============================================================
+   GRADIENT BUTTON - Rotating Border Effect
+   ============================================================ */
+
+:root {
+  --color-background-button: #050505;
+  --color-text: #ffffff;
+}
+
+@property --r {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes rotate {
+  to {
+    --r: 360deg;
+  }
+}
+
+.rotatingGradient {
+  /* The border is created by the background visible through the inset 'after' element */
+  background: conic-gradient(from var(--r) at 50% 50%, #7c3aed 0%, #4c1d95 25%, #7c3aed 50%, #c4b5fd 75%, #7c3aed 100%);
+  animation: rotate 4s linear infinite;
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+  /* Purple Neon Glow */
+  transition: all 0.3s ease;
+}
+
+.rotatingGradient:hover {
+  box-shadow: 0 0 40px rgba(124, 58, 237, 0.8);
+  transform: scale(1.02);
+}

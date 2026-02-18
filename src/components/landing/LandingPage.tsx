@@ -67,7 +67,7 @@ function InlineCta({ text, isDark, isAuthenticated }: {
             </p>
             <a
                 href={isAuthenticated ? "/dashboard" : "/cadastro"}
-                className="group relative px-8 py-3 bg-white text-black font-mono font-black tracking-wider uppercase hover:bg-emerald-50 transition-all transform active:scale-95 rounded-sm overflow-hidden text-center shadow-[0_0_30px_rgba(255,255,255,0.1)] border border-transparent hover:border-emerald-200 text-xs md:text-sm inline-block no-underline cursor-pointer"
+                className="group relative px-8 py-3 bg-[#050505] text-white font-medium tracking-widest uppercase hover:bg-violet-950/10 transition-all transform active:scale-95 rounded-full overflow-hidden text-center shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] border border-violet-500/60 hover:border-violet-400 text-xs md:text-sm inline-block no-underline cursor-pointer"
             >
                 {isAuthenticated ? "ACESSAR COCKPIT →" : "COMEÇAR AGORA →"}
             </a>

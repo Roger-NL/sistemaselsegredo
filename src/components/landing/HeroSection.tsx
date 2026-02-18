@@ -5,6 +5,7 @@ import { ArrowRight, Unlock, PlayCircle, ShieldCheck, Check, Rocket } from "luci
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useRef } from "react";
+import GradientButton from "@/components/ui/GradientButton";
 
 // System Diagnostic Component - "The Surprising Object"
 const SystemDiagnostic = () => {
@@ -47,17 +48,17 @@ const SystemDiagnostic = () => {
     }, [subIndex, index, reverse, phrases]);
 
     return (
-        <div className="inline-flex items-center gap-3 px-4 py-2 bg-black/40 border border-white/10 rounded-full backdrop-blur-md shadow-[0_0_15px_rgba(0,0,0,0.5)] mb-8">
-            <div className="flex items-center gap-2">
+        <div className="inline-flex items-center gap-2 md:gap-3 px-3 py-1.5 md:px-4 md:py-2 bg-black/40 border border-white/10 rounded-full backdrop-blur-md shadow-[0_0_15px_rgba(0,0,0,0.5)] mb-8 max-w-full">
+            <div className="flex items-center gap-2 flex-shrink-0">
                 <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span className="text-[10px] font-mono font-bold text-emerald-500 tracking-wider uppercase">
+                <span className="text-[9px] md:text-[10px] font-mono font-bold text-emerald-500 tracking-wider uppercase">
                     SYSTEM_CHECK:
                 </span>
             </div>
-            <p className="text-sm md:text-base text-gray-300 font-mono min-w-[200px] md:min-w-[240px]">
+            <p className="text-xs md:text-base text-gray-300 font-mono min-w-[140px] md:min-w-[240px] truncate">
                 {phrases[index].substring(0, subIndex)}
                 <span className={`${blink ? "opacity-100" : "opacity-0"} ml-0.5 text-emerald-500`}>_</span>
             </p>
@@ -143,20 +144,18 @@ export function HeroSection() {
                             Sistema fechado com validação real.
                         </p>
 
-                        <a
-                            href={isAuthenticated ? "/dashboard" : "/cadastro"}
-                            className="group relative inline-flex items-center justify-center w-full sm:w-auto px-6 py-4 md:px-8 bg-white border border-emerald-400 text-black font-mono font-bold tracking-widest uppercase hover:bg-emerald-50 transition-all duration-300 transform active:scale-95 overflow-hidden text-center shadow-[0_0_20px_rgba(52,211,153,0.6)] hover:shadow-[0_0_40px_rgba(52,211,153,0.9)] no-underline cursor-pointer rounded-sm"
-                        >
-                            {/* Technical Corner Brackets (Emerald for High Contrast) */}
-                            <span className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-emerald-500 transition-all duration-300 group-hover:w-full group-hover:h-full"></span>
-                            <span className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-emerald-500 transition-all duration-300 group-hover:w-full group-hover:h-full"></span>
-
-                            <span className="relative z-10 flex flex-row items-center justify-center gap-3 text-[10px] sm:text-xs md:text-sm leading-tight text-center drop-shadow-sm">
-                                {/* Plane Icon - "Taking Off" */}
-                                <Rocket className="w-5 h-5 md:w-6 md:h-6 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 flex-shrink-0 rotate-45 text-emerald-600" />
-                                <span className="font-black whitespace-normal max-w-[260px] sm:max-w-none">ACESSAR COCKPIT (ACESSO GRATUITO AO PILAR 1)</span>
-                            </span>
-                        </a>
+                        <div className="w-full sm:w-auto flex justify-center md:justify-start" onClick={handleCta}>
+                            <GradientButton
+                                className="group px-8 relative inline-flex items-center justify-center"
+                                width="100%"
+                                height="56px"
+                            >
+                                <span className="relative z-10 flex flex-row items-center justify-center gap-3 text-[10px] sm:text-xs md:text-sm leading-tight text-center drop-shadow-sm">
+                                    <Rocket className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 flex-shrink-0 rotate-45 text-violet-400" />
+                                    <span className="font-bold opacity-90 group-hover:opacity-100 transition-opacity whitespace-nowrap">ACESSAR COCKPIT <span className="opacity-50 font-normal ml-1">(GRÁTIS AO PILAR 1)</span></span>
+                                </span>
+                            </GradientButton>
+                        </div>
 
                         {/* Conversion Boosters */}
                         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[10px] md:text-xs font-mono font-bold text-white/40 uppercase tracking-widest pl-1">
@@ -178,7 +177,7 @@ export function HeroSection() {
                     <div className="absolute w-[250px] h-[250px] bg-gradient-to-tr from-violet-500/10 via-fuchsia-500/10 to-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
 
                     {/* Compact Card Container - Darker, Subtle Blur */}
-                    <div className="relative z-10 w-full max-w-[380px] bg-black/80 border border-white/5 backdrop-blur-[4px] rounded-2xl p-4 md:p-5 shadow-2xl transform md:rotate-1 hover:rotate-0 transition-all duration-500">
+                    <div className="relative z-10 w-full max-w-[320px] sm:max-w-[380px] bg-black/80 border border-white/5 backdrop-blur-[4px] rounded-2xl p-4 md:p-5 shadow-2xl transform md:rotate-1 hover:rotate-0 transition-all duration-500">
                         {/* Header */}
                         <div className="flex items-center justify-between mb-4 md:mb-6 pb-4 border-b border-white/5">
                             <div className="flex items-center gap-2">
