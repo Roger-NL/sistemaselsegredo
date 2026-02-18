@@ -121,28 +121,6 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             initialStatus = stored.pillarStatus;
         }
 
-        // SYNC WITH FIREBASE (approvedPillar)
-        // If admin sets approvedPillar = 3, then 1 and 2 should be completed, 3 unlocked, 4+ locked.
-        if (user?.approvedPillar) {
-            const approvedLevel = user.approvedPillar;
-            const newStatus: Record<string, PillarStatus> = {};
-            PILLARS.forEach((pillar, index) => {
-                const pillarNum = index + 1;
-                if (pillarNum < approvedLevel) {
-                    newStatus[pillar.id] = "completed";
-                } else if (pillarNum === approvedLevel) {
-                    newStatus[pillar.id] = "unlocked"; // Current active
-                } else {
-                    newStatus[pillar.id] = "locked";
-                }
-            });
-            // Merge with local knowledge of "completed" modules? 
-            // Better to trust Firebase for "Pillar Access".
-            initialStatus = newStatus;
-        }
-
-        setPillarStatus(initialStatus);
-
         if (stored) {
             setChosenSpecialization(stored.chosenSpecialization || null);
             setSpecializationStatus(stored.specializationStatus || null);
@@ -152,10 +130,98 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             setHasSeenMissionComplete(stored.hasSeenMissionComplete || false);
         }
 
+        // SYNC WITH FIREBASE (approvedPillar & Specialty Progress)
+        if (user) {
+            // 1. Pillar Logic (Server Authority for Level)
+            if (user.approvedPillar) {
+                const approvedLevel = user.approvedPillar;
+                const newStatus: Record<string, PillarStatus> = {};
+                PILLARS.forEach((pillar, index) => {
+                    const pillarNum = index + 1;
+                    if (pillarNum < approvedLevel) {
+                        newStatus[pillar.id] = "completed";
+                    } else if (pillarNum === approvedLevel) {
+                        // FIX: If locally completed (from storage OR user.localPillarStatus), keep it completed.
+                        // We check both sources.
+                        const localCompleted = initialStatus[pillar.id] === "completed" ||
+                            (user.localPillarStatus?.[pillar.id] === "completed");
+
+                        if (localCompleted) {
+                            newStatus[pillar.id] = "completed";
+                        } else {
+                            newStatus[pillar.id] = "unlocked";
+                        }
+                    } else {
+                        newStatus[pillar.id] = "locked";
+                    }
+                });
+                initialStatus = newStatus;
+            }
+
+            // 2. Specialty Progress (Firebase Authority if exists, else merge/fallback)
+            // If Firebase has data, it wins over local storage to allow cross-device sync.
+            if (user.chosenSpecialization !== undefined) setChosenSpecialization(user.chosenSpecialization);
+            if (user.specializationStatus !== undefined) setSpecializationStatus(user.specializationStatus);
+            if (user.completedSpecializations !== undefined) setCompletedSpecializations(user.completedSpecializations);
+
+            // For complex objects, we might want to merge or prefer server. Let's prefer server if present.
+            if (user.completedModules !== undefined && Object.keys(user.completedModules).length > 0) {
+                setCompletedModules(user.completedModules);
+            }
+            if (user.completedPillarModules !== undefined && user.completedPillarModules.length > 0) {
+                setCompletedPillarModules(user.completedPillarModules);
+            }
+            if (user.hasSeenMissionComplete !== undefined) setHasSeenMissionComplete(user.hasSeenMissionComplete);
+        }
+
+        setPillarStatus(initialStatus);
+
         setIsHydrated(true);
     }, [user]); // Re-run when user changes
 
-    // ... (useEffect save remains same)
+    // Salva progresso no localStorage sempre que mudar
+    // Salva progresso no localStorage E FIREBASE sempre que mudar
+    useEffect(() => {
+        const key = getStorageKey();
+        if (key && isHydrated) {
+            const progressData = {
+                pillarStatus,
+                chosenSpecialization,
+                specializationStatus,
+                completedSpecializations,
+                completedModules,
+                completedPillarModules,
+                hasSeenMissionComplete
+            };
+
+            // 1. Local Persistence (Fast, Offline)
+            secureStorage.setItem(key, progressData);
+
+            // 2. Remote Persistence (Firebase)
+            if (user?.id) {
+                // Import dynamically to avoid circular dependencies if any, 
+                // or assume we have the function available.
+                // We'll import `updateUserProgress` at the top or use a dynamic import.
+                // Since this is inside useEffect, we can use the imported function.
+                import("@/lib/auth-service").then(({ updateUserProgress }) => {
+                    updateUserProgress(user.id, {
+                        ...progressData,
+                        localPillarStatus: pillarStatus as any // Cast because Record<string, PillarStatus> vs Record<string, string>
+                    });
+                });
+            }
+        }
+    }, [
+        pillarStatus,
+        chosenSpecialization,
+        specializationStatus,
+        completedSpecializations,
+        completedModules,
+        completedPillarModules,
+        hasSeenMissionComplete,
+        user,
+        isHydrated
+    ]);
 
     // Marca pilar como completado e desbloqueia próximo
     const completePillar = (pillarNumber: number) => {

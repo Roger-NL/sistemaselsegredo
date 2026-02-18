@@ -29,13 +29,13 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-auto">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        className="absolute inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
                         onClick={onClose}
                     />
 
@@ -44,22 +44,33 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
                         initial={{ scale: 0.95, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="relative w-full max-w-md bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[80vh] flex flex-col"
+                        className="relative w-full max-w-md bg-[#0A0A0A] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[80vh] flex flex-col z-[10000] pointer-events-auto"
+                        onClick={(e) => e.stopPropagation()}
                     >
+                        {/* ABSOLUTE CLOSE BUTTON (To guarantee clickability) */}
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onClose();
+                            }}
+                            className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-white/10 text-white/40 hover:text-white rounded-full transition-all cursor-pointer z-50 pointer-events-auto"
+                            aria-label="Fechar"
+                        >
+                            <X size={20} />
+                        </button>
+
                         {/* Header */}
-                        <div className="p-6 border-b border-white/5 bg-white/[0.02]">
-                            <div className="flex items-center justify-between mb-1">
-                                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                    <TrendingUp className="w-5 h-5 text-orange-400" />
+                        <div className="p-6 border-b border-white/5 bg-white/[0.02] pr-12"> {/* pr-12 to avoid text under button */}
+                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                <TrendingUp className="w-5 h-5 text-orange-400" />
+                                <div>
                                     Ranking Global
-                                </h2>
-                                <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            <p className="text-xs text-white/40 uppercase tracking-widest font-mono">
-                                Top Sequências de Estudo (Streak)
-                            </p>
+                                    <p className="text-[10px] text-white/40 uppercase tracking-widest font-mono font-normal mt-0.5">
+                                        Top Sequências de Estudo
+                                    </p>
+                                </div>
+                            </h2>
                         </div>
 
                         {/* List */}

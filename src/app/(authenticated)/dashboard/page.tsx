@@ -312,13 +312,13 @@ export default function Page() {
                       textShadow: '0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3)'
                     }}
                   >
-                    {currentSpec ? Math.min(100, Math.max(0, Math.round((globalProgress - 50) * 2))) + "%" : "9/9"}
+                    {Math.min(100, Math.max(0, Math.round((globalProgress - 50) * 2))) + "%"}
                   </span>
                   <span
                     className="text-xs md:text-sm font-mono font-bold uppercase tracking-widest mt-2"
                     style={{ color: '#a78bfa' }}
                   >
-                    {currentSpec ? "Especialização" : "Masterizado"}
+                    Especialização
                   </span>
                 </div>
               ) : (

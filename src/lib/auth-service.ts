@@ -47,6 +47,14 @@ export interface User {
     paymentId?: string;
     phone?: string;
     approvedPillar?: number; // Controle manual de progressão
+    // New Progress Fields that persist to Firebase
+    chosenSpecialization?: string | null;
+    specializationStatus?: 'studying' | 'pending_approval' | 'completed' | null;
+    completedSpecializations?: string[];
+    completedModules?: Record<string, number[]>; // Map of specId -> [1, 2, 3]
+    completedPillarModules?: string[]; // IDs of unique modules like 'p1-m1', 'p2-m1'
+    hasSeenMissionComplete?: boolean;
+    localPillarStatus?: Record<string, string>; // Optional: Sync the full pillar status map if desired
 }
 
 export interface AuthResult {
@@ -441,4 +449,30 @@ export function checkSubscriptionStatus(user: User): SubscriptionStatus | 'expir
     if (user.subscriptionStatus === 'active' as any) return 'free';
 
     return user.subscriptionStatus;
+}
+/**
+ * Update specifically user progress fields (without overwriting other profile data)
+ * Used by ProgressContext
+ */
+export async function updateUserProgress(userId: string, progressData: Partial<User>): Promise<void> {
+    try {
+        const userRef = doc(db, "users", userId);
+        // Only update fields that are actually progress related to be safe
+        const safeUpdate = {
+            ...(progressData.chosenSpecialization !== undefined && { chosenSpecialization: progressData.chosenSpecialization }),
+            ...(progressData.specializationStatus !== undefined && { specializationStatus: progressData.specializationStatus }),
+            ...(progressData.completedSpecializations !== undefined && { completedSpecializations: progressData.completedSpecializations }),
+            ...(progressData.completedModules !== undefined && { completedModules: progressData.completedModules }),
+            ...(progressData.completedPillarModules !== undefined && { completedPillarModules: progressData.completedPillarModules }),
+            ...(progressData.hasSeenMissionComplete !== undefined && { hasSeenMissionComplete: progressData.hasSeenMissionComplete }),
+            ...(progressData.localPillarStatus !== undefined && { localPillarStatus: progressData.localPillarStatus }),
+        };
+
+        if (Object.keys(safeUpdate).length > 0) {
+            await updateDoc(userRef, safeUpdate);
+        }
+    } catch (error) {
+        console.error("Error syncing progress to Firebase:", error);
+        // Silently fail or retry - we don't want to block the UI for this background sync
+    }
 }
