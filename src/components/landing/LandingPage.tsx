@@ -95,7 +95,7 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
             <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between md:justify-end px-4 py-4 md:px-12 md:py-6 pointer-events-none">
                 <div
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className={`font-serif text-sm md:text-xl md:absolute md:left-1/2 md:-translate-x-1/2 tracking-widest font-bold pointer-events-auto cursor-pointer transition-colors
+                    className={`font-serif text-sm md:text-xl md:absolute md:left-1/2 md:-translate-x-1/2 tracking-[0.2em] font-light pointer-events-auto cursor-pointer transition-colors
                         ${isDark ? "text-white hover:text-[#EEF4D4]" : "text-gray-900 hover:text-violet-600"}
                     `}
                 >
@@ -112,17 +112,19 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
                     >
                         Método
                     </button>
-                    <a
-                        href={isAuthenticated ? "/dashboard" : "/login"}
-                        className={`px-6 py-2 border rounded-full font-mono text-xs uppercase tracking-widest transition-all backdrop-blur-md inline-block no-underline text-center cursor-pointer
-                            ${isDark
-                                ? "border-white/20 text-white bg-black/30 hover:bg-white hover:text-black"
-                                : "border-gray-300 text-gray-900 bg-white/80 hover:bg-gray-900 hover:text-white"
-                            }
-                        `}
-                    >
-                        {isLoading ? "..." : (isAuthenticated ? "ENTRAR" : "LOGIN")}
-                    </a>
+                    <div className="rotatingGradient rounded-full p-[1px] shadow-[0_0_10px_rgba(139,92,246,0.2)] inline-block" style={{ '--r': '0deg' } as React.CSSProperties}>
+                        <a
+                            href={isAuthenticated ? "/dashboard" : "/login"}
+                            className={`px-5 py-2 sm:px-6 sm:py-2 rounded-full font-mono text-[10px] sm:text-xs uppercase tracking-widest transition-all inline-block no-underline text-center cursor-pointer pointer-events-auto
+                                ${isDark
+                                    ? "text-white bg-[#050505] hover:bg-white/10"
+                                    : "text-gray-900 bg-white hover:bg-gray-100"
+                                }
+                            `}
+                        >
+                            {isLoading ? "..." : (isAuthenticated ? "ENTRAR" : "LOGIN")}
+                        </a>
+                    </div>
                 </div>
             </nav>
 

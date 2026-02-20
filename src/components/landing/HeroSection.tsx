@@ -94,13 +94,13 @@ export function HeroSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white/5 border border-white/10 w-fit backdrop-blur-md mb-8 md:mb-12 mx-auto md:mx-0"
+                        className="inline-flex items-center gap-2 md:gap-3 px-4 py-1.5 md:px-5 md:py-2 rounded-full bg-[#1a0b2e]/60 border border-fuchsia-500/30 w-fit backdrop-blur-md mb-6 md:mb-10 mx-auto md:mx-0 shadow-[0_0_15px_rgba(217,70,239,0.15)]"
                     >
-                        <span className="relative flex h-2 w-2">
+                        <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuchsia-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-fuchsia-500"></span>
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-fuchsia-500 shadow-[0_0_8px_rgba(217,70,239,0.8)]"></span>
                         </span>
-                        <span className="text-[10px] md:text-xs font-mono text-fuchsia-200 tracking-widest uppercase font-bold">
+                        <span className="text-[9px] sm:text-[10px] md:text-xs font-mono text-fuchsia-100/90 tracking-[0.15em] md:tracking-widest uppercase font-semibold">
                             Sistema fechado com validação real
                         </span>
                     </motion.div>
@@ -176,59 +176,64 @@ export function HeroSection() {
                     {/* Compact Glow - Multi-color Neon */}
                     <div className="absolute w-[250px] h-[250px] bg-gradient-to-tr from-violet-500/10 via-fuchsia-500/10 to-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
 
-                    {/* Compact Card Container - Darker, Subtle Blur */}
-                    <div className="relative z-10 w-full max-w-[320px] sm:max-w-[380px] bg-black/80 border border-white/5 backdrop-blur-[4px] rounded-2xl p-4 md:p-5 shadow-2xl transform md:rotate-1 hover:rotate-0 transition-all duration-500">
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-4 md:mb-6 pb-4 border-b border-white/5">
-                            <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-red-500/50 animate-pulse" />
-                                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Ao Vivo</span>
+                    {/* Compact Card Container - With Neon Border Effect strictly on edge */}
+                    <div
+                        className="relative z-10 w-full max-w-[320px] sm:max-w-[380px] rotatingGradient rounded-2xl p-[1px] shadow-[0_0_20px_rgba(139,92,246,0.3)] transform md:rotate-1 hover:rotate-0 transition-all duration-500"
+                        style={{ '--r': '0deg' } as React.CSSProperties}
+                    >
+                        <div className="bg-[#050505] rounded-[15px] p-4 md:p-5 w-full h-full relative z-10">
+                            {/* Header */}
+                            <div className="flex items-center justify-between mb-4 md:mb-6 pb-4 border-b border-white/5">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500/50 animate-pulse" />
+                                    <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Ao Vivo</span>
+                                </div>
+                                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Plano de Voo</span>
                             </div>
-                            <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Plano de Voo</span>
-                        </div>
 
-                        {/* Active Pillar - Dark Theme, Low Contrast */}
-                        <div className="relative mb-3 bg-white/[0.03] rounded-lg p-4 border border-white/10 hover:bg-white/[0.05] transition-colors">
-                            <div className="absolute -top-2 -right-2 bg-black text-white/50 text-[9px] font-bold px-2 py-0.5 rounded overflow-hidden uppercase tracking-widest border border-white/5">
-                                Atual
+                            {/* Active Pillar - Dark Theme */}
+                            <div className="relative mb-3 bg-white/[0.02] rounded-lg p-4 border border-white/5 hover:bg-white/[0.04] transition-colors">
+                                <div className="absolute -top-2 -right-2 bg-black text-white/50 text-[9px] font-bold px-2 py-0.5 rounded overflow-hidden uppercase tracking-widest border border-white/5">
+                                    Atual
+                                </div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <h4 className="text-white/90 font-serif font-bold text-base md:text-lg">Pilar 01</h4>
+                                    <Unlock className="w-4 h-4 text-white/50" />
+                                </div>
+                                <p className="text-white/50 text-[10px] md:text-xs font-mono leading-tight">
+                                    Mindset & Inteligência. <br />
+                                    <span className="text-[10px] opacity-60 font-medium mt-1 block text-violet-400">STATUS: EM ANDAMENTO</span>
+                                </p>
                             </div>
-                            <div className="flex justify-between items-center mb-2">
-                                <h4 className="text-white/90 font-serif font-bold text-base md:text-lg">Pilar 01</h4>
-                                <Unlock className="w-4 h-4 text-white/50" />
-                            </div>
-                            <p className="text-white/50 text-[10px] md:text-xs font-mono leading-tight">
-                                Mindset & Inteligência. <br />
-                                <span className="text-[10px] opacity-60 font-medium mt-1 block text-violet-400">STATUS: EM ANDAMENTO</span>
-                            </p>
-                        </div>
 
-                        {/* Locked Pillar 2 */}
-                        <div className="mb-2 bg-white/[0.02] rounded-lg p-3 border border-white/5 opacity-40 flex items-center justify-between">
-                            <div>
-                                <h4 className="text-white font-serif text-sm">Pilar 02</h4>
-                                <p className="text-white/30 text-[10px] font-mono">Imersão Auditiva</p>
+                            {/* Locked Pillar 2 */}
+                            <div className="mb-2 bg-white/[0.01] rounded-lg p-3 border border-white/5 opacity-40 flex items-center justify-between">
+                                <div>
+                                    <h4 className="text-white font-serif text-sm">Pilar 02</h4>
+                                    <p className="text-white/30 text-[10px] font-mono">Imersão Auditiva</p>
+                                </div>
+                                <div className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
+                                    <span className="text-white/20 text-[10px]">🔒</span>
+                                </div>
                             </div>
-                            <div className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
-                                <span className="text-white/20 text-[10px]">🔒</span>
-                            </div>
-                        </div>
 
-                        {/* Locked Pillar 3 */}
-                        <div className="bg-white/[0.02] rounded-lg p-3 border border-white/5 opacity-30 flex items-center justify-between">
-                            <div>
-                                <h4 className="text-white font-serif text-sm">Pilar 03</h4>
-                                <p className="text-white/30 text-[10px] font-mono">Sobrevivência</p>
+                            {/* Locked Pillar 3 */}
+                            <div className="bg-white/[0.01] rounded-lg p-3 border border-white/5 opacity-30 flex items-center justify-between">
+                                <div>
+                                    <h4 className="text-white font-serif text-sm">Pilar 03</h4>
+                                    <p className="text-white/30 text-[10px] font-mono">Sobrevivência</p>
+                                </div>
+                                <div className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
+                                    <span className="text-white/20 text-[10px]">🔒</span>
+                                </div>
                             </div>
-                            <div className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
-                                <span className="text-white/20 text-[10px]">🔒</span>
-                            </div>
-                        </div>
 
-                        {/* Validation Note */}
-                        <div className="mt-6 text-center border-t border-white/5 pt-4">
-                            <p className="text-white/20 text-[10px] font-mono uppercase tracking-widest">
-                                *Validação obrigatória p/ avançar
-                            </p>
+                            {/* Validation Note */}
+                            <div className="mt-6 text-center border-t border-white/5 pt-4">
+                                <p className="text-white/20 text-[10px] font-mono uppercase tracking-widest">
+                                    *Validação obrigatória p/ avançar
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </motion.div>
