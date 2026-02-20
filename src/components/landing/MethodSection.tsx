@@ -5,140 +5,59 @@ import { useRef } from "react";
 import {
     Brain, Headphones, BookOpen, MessageSquare, Mic,
     Users, Sparkles, PenTool, Globe, Trophy,
-    TrendingUp, Zap, Target, Clock, ArrowRight
+    TrendingUp, Zap, Target, Clock, ArrowRight, ShieldCheck
 } from "lucide-react";
 import { useLandingTheme } from "@/context/LandingThemeContext";
 
-// --- PILLAR DATA (Real Course Structure) ---
-const PILLARS = [
-    // FASE 1: PREPARAÇÃO & SOBREVIVÊNCIA
+// --- METHODOLOGY STEPS ---
+const METHOD_STEPS = [
     {
         id: 1,
-        title: "Mindset & Desprogramação",
-        icon: Brain,
-        colorHex: "#8b5cf6",
-        phase: "PREPARAÇÃO",
+        title: "Recepção de Missão",
+        icon: Target,
+        colorHex: "#f59e0b",
         stats: [
-            { label: "Método Escolar", value: "Deletado" },
-            { label: "Medo de Errar", value: "Zero" }
+            { label: "Briefing", value: "Direto" },
+            { label: "Objetivo", value: "Claro" }
         ],
-        insight: "Desprogramação do método escolar. Você vai desaprender para aprender certo.",
-        visual: "brain",
-        mission: "Prova de Mindset"
+        insight: "Briefing direto. Um objetivo, uma estrutura, uma habilidade.",
+        visual: "pareto"
     },
     {
         id: 2,
-        title: "Imersão Auditiva",
-        icon: Headphones,
-        colorHex: "#06b6d4",
-        phase: "PREPARAÇÃO",
+        title: "Sessões de Alta Intensidade",
+        icon: Zap,
+        colorHex: "#ef4444",
         stats: [
-            { label: "Listening Ativo", value: "Total" },
-            { label: "Velocidade Nativa", value: "1.5x" }
+            { label: "Tempo", value: "Curto" },
+            { label: "Foco", value: "Máximo" }
         ],
-        insight: "Técnicas de Listening que te fazem entender nativos falando rápido.",
-        visual: "waves",
-        mission: "Teste de Identificação de Sons"
+        insight: "Microtreinos diários. Tempo curto e exigência altíssima.",
+        visual: "brain"
     },
     {
         id: 3,
-        title: "Sobrevivência Urbana",
-        icon: Globe,
-        colorHex: "#10b981",
-        phase: "PREPARAÇÃO",
-        stats: [
-            { label: "Situações Reais", value: "50+" },
-            { label: "Inglês da Rua", value: "Real" }
-        ],
-        insight: "O inglês que você usa para pedir comida, ajuda, e sobreviver.",
-        visual: "chart",
-        mission: "Simulação de Pedido Real"
-    },
-    // FASE 2: ESTRUTURA & EXPANSÃO
-    {
-        id: 4,
-        title: "Fundamentos Lógicos",
-        icon: BookOpen,
-        colorHex: "#f59e0b",
-        phase: "ESTRUTURA",
-        stats: [
-            { label: "Regras Úteis", value: "20%" },
-            { label: "O Resto", value: "Lixo" }
-        ],
-        insight: "A lógica gramatical que REALMENTE importa. O resto é enfeite.",
-        visual: "pareto",
-        mission: "Construção de Frases Complexas"
-    },
-    {
-        id: 5,
-        title: "Números & Negócios",
-        icon: TrendingUp,
-        colorHex: "#ec4899",
-        phase: "ESTRUTURA",
-        stats: [
-            { label: "Checkpoint", value: "AO VIVO" },
-            { label: "Dinheiro & Tempo", value: "Fluente" }
-        ],
-        insight: "Dinheiro, tempo, negociação. O inglês que paga suas contas.",
-        visual: "chart",
-        mission: "Mentoria Ao Vivo: Calibragem"
-    },
-    {
-        id: 6,
-        title: "Produção Oral",
+        title: "Produção Ativa e Áudio-Base",
         icon: Mic,
         colorHex: "#3b82f6",
-        phase: "ESTRUTURA",
         stats: [
-            { label: "Shadowing", value: "Ativo" },
-            { label: "Sotaque BR", value: "-90%" }
+            { label: "Estímulo", value: "Áudio" },
+            { label: "Resposta", value: "Ativa" }
         ],
-        insight: "Shadowing e pronúncia. Você vai soar como nativo, não turista.",
-        visual: "mic",
-        mission: "Envio de Áudio de Leitura"
-    },
-    // FASE 3: AUTONOMIA & ELITE
-    {
-        id: 7,
-        title: "Autonomia Real",
-        icon: Sparkles,
-        colorHex: "#a855f7",
-        phase: "AUTONOMIA",
-        stats: [
-            { label: "Aprender Sozinho", value: "100%" },
-            { label: "Dependência", value: "0%" }
-        ],
-        insight: "Aprender a aprender. Você vira independente de qualquer curso.",
-        visual: "arsenal",
-        mission: "Pesquisa Guiada"
+        insight: "Percepção auditiva real. Processe nativos e responda de forma ativa.",
+        visual: "waves"
     },
     {
-        id: 8,
-        title: "Especializações",
-        icon: Target,
-        colorHex: "#ef4444",
-        phase: "AUTONOMIA",
+        id: 4,
+        title: "Auditoria de Precisão",
+        icon: ShieldCheck,
+        colorHex: "#10b981",
         stats: [
-            { label: "Carreiras", value: "3+" },
-            { label: "Foco Específico", value: "100%" }
+            { label: "Máquinas", value: "Zero" },
+            { label: "Correção", value: "Absoluta" }
         ],
-        insight: "Job Hunter, Business, Travel. Escolha sua especialização.",
-        visual: "email",
-        mission: "Briefing de Carreira"
-    },
-    {
-        id: 9,
-        title: "Debriefing Final",
-        icon: Trophy,
-        colorHex: "#6366f1",
-        phase: "AUTONOMIA",
-        stats: [
-            { label: "Checkpoint", value: "AO VIVO" },
-            { label: "Fluência", value: "Aprovada" }
-        ],
-        insight: "Simulação final com professor. Você prova que está pronto.",
-        visual: "identity",
-        mission: "Roleplay Final Ao Vivo"
+        insight: "Humanos auditam sua produção. Erros mapeados e anulados. Nada de IA genérica.",
+        visual: "chart"
     }
 ];
 
@@ -218,8 +137,8 @@ function PillarVisual({ type, colorHex }: { type: string; colorHex: string }) {
     return null;
 }
 
-// Single Pillar Row — compact version with all content
-function PillarRow({ pillar, index, isDark }: { pillar: typeof PILLARS[0]; index: number; isDark: boolean }) {
+// Single Step Row — compact version with all content
+function StepRow({ step, index, isDark }: { step: typeof METHOD_STEPS[0]; index: number; isDark: boolean }) {
     const isEven = index % 2 === 0;
 
     return (
@@ -239,13 +158,13 @@ function PillarRow({ pillar, index, isDark }: { pillar: typeof PILLARS[0]; index
                 whileInView={{ scale: 1 }}
                 viewport={{ once: true }}
                 className="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-5 w-2.5 h-2.5 rounded-full z-20"
-                style={{ backgroundColor: pillar.colorHex, boxShadow: `0 0 15px ${pillar.colorHex}` }}
+                style={{ backgroundColor: step.colorHex, boxShadow: `0 0 15px ${step.colorHex}` }}
             >
                 <motion.div
                     animate={{ scale: [1, 2, 1], opacity: [0.8, 0, 0.8] }}
                     transition={{ duration: 2, repeat: Infinity }}
                     className="absolute inset-0 rounded-full"
-                    style={{ border: `2px solid ${pillar.colorHex}` }}
+                    style={{ border: `2px solid ${step.colorHex}` }}
                 />
             </motion.div>
 
@@ -262,11 +181,11 @@ function PillarRow({ pillar, index, isDark }: { pillar: typeof PILLARS[0]; index
                 >
                     <div
                         className="p-2.5 rounded-lg border"
-                        style={{ backgroundColor: `${pillar.colorHex}10`, borderColor: `${pillar.colorHex}30` }}
+                        style={{ backgroundColor: `${step.colorHex}10`, borderColor: `${step.colorHex}30` }}
                     >
-                        <pillar.icon className="w-7 h-7" style={{ color: pillar.colorHex }} />
+                        <step.icon className="w-7 h-7" style={{ color: step.colorHex }} />
                     </div>
-                    <span className={`text-[10px] font-mono mt-1.5 ${isDark ? "text-white/40" : "text-gray-500"}`}>NÍVEL {pillar.id.toString().padStart(2, '0')}</span>
+                    <span className={`text-[10px] font-mono mt-1.5 ${isDark ? "text-white/40" : "text-gray-500"}`}>FASE {step.id.toString().padStart(2, '0')}</span>
                 </motion.div>
 
                 {/* Content Card — compact */}
@@ -281,24 +200,24 @@ function PillarRow({ pillar, index, isDark }: { pillar: typeof PILLARS[0]; index
                     >
                         {/* Mobile Icon */}
                         <div className="flex items-center gap-2 mb-2 md:hidden">
-                            <pillar.icon className="w-5 h-5" style={{ color: pillar.colorHex }} />
-                            <span className={`text-[10px] font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>NÍVEL {pillar.id.toString().padStart(2, '0')}</span>
+                            <step.icon className="w-5 h-5" style={{ color: step.colorHex }} />
+                            <span className={`text-[10px] font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>FASE {step.id.toString().padStart(2, '0')}</span>
                         </div>
 
                         {/* Title & Insight — inline layout */}
-                        <h3 className={`text-lg font-bold mb-1.5 ${isDark ? "text-white" : "text-gray-900"}`}>{pillar.title}</h3>
-                        <p className={`text-xs italic leading-snug mb-3 ${isDark ? "text-white/50" : "text-gray-600"}`}>"{pillar.insight}"</p>
+                        <h3 className={`text-lg font-bold mb-1.5 ${isDark ? "text-white" : "text-gray-900"}`}>{step.title}</h3>
+                        <p className={`text-sm font-bold leading-snug mb-3 ${isDark ? "text-white/70" : "text-gray-700"}`}>"{step.insight}"</p>
 
                         {/* Visual + Stats — horizontal compact */}
                         <div className="flex flex-row gap-3 items-center">
                             {/* Visual Widget — slightly smaller */}
                             <div className="flex-shrink-0">
-                                <PillarVisual type={pillar.visual} colorHex={pillar.colorHex} />
+                                <PillarVisual type={step.visual} colorHex={step.colorHex} />
                             </div>
 
                             {/* Stats — compact */}
                             <div className="flex-1 grid grid-cols-2 gap-2">
-                                {pillar.stats.map((stat, i) => (
+                                {step.stats.map((stat, i) => (
                                     <motion.div
                                         key={i}
                                         initial={{ opacity: 0, x: 15 }}
@@ -309,12 +228,12 @@ function PillarRow({ pillar, index, isDark }: { pillar: typeof PILLARS[0]; index
                                     >
                                         <div
                                             className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                            style={{ backgroundColor: `${pillar.colorHex}20` }}
+                                            style={{ backgroundColor: `${step.colorHex}20` }}
                                         >
-                                            <TrendingUp className="w-4 h-4" style={{ color: pillar.colorHex }} />
+                                            <TrendingUp className="w-4 h-4" style={{ color: step.colorHex }} />
                                         </div>
                                         <div>
-                                            <div className="text-sm font-bold leading-tight" style={{ color: pillar.colorHex }}>{stat.value}</div>
+                                            <div className="text-sm font-bold leading-tight" style={{ color: step.colorHex }}>{stat.value}</div>
                                             <div className={`text-[9px] ${isDark ? "text-white/40" : "text-gray-500"}`}>{stat.label}</div>
                                         </div>
                                     </motion.div>
@@ -353,6 +272,12 @@ export function MethodSection() {
                 }`} />
 
             <div className="container mx-auto max-w-5xl relative z-10">
+
+                {/* Subtile Geometric Decor */}
+                <div className="absolute top-40 -left-64 w-[500px] h-[500px] opacity-10 mix-blend-screen pointer-events-none z-0">
+                    <img src="/geometric-dark.png" alt="Geometric Shape" className="w-full h-full object-contain" />
+                </div>
+
                 {/* Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -368,26 +293,26 @@ export function MethodSection() {
                     >
                         <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                         <span className="font-mono text-green-400 text-xs tracking-widest uppercase">
-                            Modelo No-Video · Escrita Ativa
+                            FLIGHT MANUAL
                         </span>
                     </motion.div>
-                    <h2 className={`text-3xl sm:text-4xl md:text-6xl font-bold font-serif mb-4 ${isDark ? "text-white" : "text-gray-900"
+                    <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold font-serif mb-4 ${isDark ? "text-white" : "text-gray-900"
                         }`}>
-                        9 Níveis para <br />
+                        Como o sistema executa o <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-cyan-400 to-violet-400">
-                            Fluência Total
+                            treinamento.
                         </span>
                     </h2>
                     <p className={`max-w-lg mx-auto text-sm ${isDark ? "text-white/40" : "text-gray-500"}`}>
-                        Sem videoaula. Cada nível exige produção escrita + validação humana.
+                        Este não é um ambiente de aprendizado. É um simulador de fluência em alta densidade.
                     </p>
                 </motion.div>
 
                 {/* Timeline Journey */}
                 <div className="relative">
-                    {/* Pillar Rows */}
-                    {PILLARS.map((pillar, index) => (
-                        <PillarRow key={pillar.id} pillar={pillar} index={index} isDark={isDark} />
+                    {/* Steps Rows */}
+                    {METHOD_STEPS.map((step, index) => (
+                        <StepRow key={step.id} step={step} index={index} isDark={isDark} />
                     ))}
 
                     {/* Final Goal */}
@@ -412,9 +337,9 @@ export function MethodSection() {
                             className="relative w-28 h-28 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center border-4 border-green-400"
                         >
                             <div className="text-center">
-                                <Trophy className="w-9 h-9 text-white mx-auto mb-0.5" />
-                                <div className="text-white font-bold text-[11px]">OPERADOR</div>
-                                <div className="text-green-200 text-[8px]">CERTIFICADO</div>
+                                <Target className="w-9 h-9 text-white mx-auto mb-0.5" />
+                                <div className="text-white font-bold text-[11px]">CAPACIDADE</div>
+                                <div className="text-green-200 text-[8px]">OPERACIONAL</div>
                             </div>
                         </motion.div>
                     </motion.div>

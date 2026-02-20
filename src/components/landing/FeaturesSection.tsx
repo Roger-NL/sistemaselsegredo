@@ -9,57 +9,57 @@ export function FeaturesSection() {
     const { isAuthenticated } = useAuth();
     const pillars = [
         {
-            title: "Pilar 1: Mindset & Inteligência",
+            title: "Pilar 1: Base & Inteligência",
             icon: Brain,
-            desc: "Desprogramação escolar e técnicas de aprendizado acelerado.",
+            desc: "Desprogramação. Destrua o método escolar e aprenda a técnica real.",
             status: "unlocked"
         },
         {
-            title: "Pilar 2: Imersão Auditiva",
+            title: "Pilar 2: Imersão Nativa",
             icon: Ear,
-            desc: "Como decodificar nativos falando rápido (Connected Speech).",
+            desc: "Decodifique a fala rápida nativa.",
             status: "locked"
         },
         {
             title: "Pilar 3: Sobrevivência",
             icon: Globe,
-            desc: "Inglês de rua. Vocabulário essencial para não passar fome.",
+            desc: "Inglês de rua. Vocabulário crítico para o mundo real.",
             status: "locked"
         },
         {
             title: "Pilar 4: Fundamentos",
             icon: Shield,
-            desc: "Gramática tática. A lógica sem a chatice das regras.",
+            desc: "Gramática tática. Só a lógica que importa.",
             status: "locked"
         },
         {
-            title: "Pilar 5: Números & Negócios",
+            title: "Pilar 5: Números & Acordos",
             icon: BarChart3,
-            desc: "Dinheiro, horários e negociação básica.",
+            desc: "Dinheiro e negociação. O inglês que paga as contas.",
             status: "locked"
         },
         {
-            title: "Pilar 6: Produção Oral",
+            title: "Pilar 6: Ataque Oral",
             icon: Mic,
-            desc: "Técnicas de Shadowing para destravar a fala.",
+            desc: "Shadowing ativo para destravar a fala bloqueada.",
             status: "locked"
         },
         {
             title: "Pilar 7: Autonomia",
             icon: Zap,
-            desc: "Aprenda a aprender sozinho para sempre.",
+            desc: "Independência total. Aprenda a fluir sozinho.",
             status: "locked"
         },
         {
             title: "Pilar 8: Especializações",
             icon: Target,
-            desc: "Briefing das carreiras e focos específicos.",
+            desc: "Posicionamento para sua carreira.",
             status: "locked"
         },
         {
-            title: "Pilar 9: O Mundo Real",
+            title: "Pilar 9: Escalada",
             icon: Plane,
-            desc: "Simulações finais e preparação para o campo.",
+            desc: "Simulação final e prova de fogo com nativos.",
             status: "locked"
         },
     ];
@@ -79,7 +79,7 @@ export function FeaturesSection() {
 
             <div className="container mx-auto max-w-7xl relative z-10">
                 {/* Header */}
-                <div className="text-center mb-20">
+                <div className="text-center mb-16 md:mb-20">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -87,7 +87,7 @@ export function FeaturesSection() {
                         className="inline-block mb-4"
                     >
                         <span className="px-3 py-1 rounded-full border border-green-500/20 bg-green-500/5 text-green-400 font-mono text-xs tracking-widest uppercase">
-                            MAPA DA OPERAÇÃO
+                            Progressão Hierárquica
                         </span>
                     </motion.div>
                     <motion.h2
@@ -95,19 +95,24 @@ export function FeaturesSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-3xl md:text-5xl font-serif text-white mb-6"
+                        className="text-3xl md:text-5xl font-serif font-bold text-white mb-6"
                     >
-                        9 Pilares de Combate
+                        Progresso por Mérito.<br /> Sem Atalhos.
                     </motion.h2>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.2 }}
-                        className="text-white/40 font-mono text-sm md:text-base max-w-2xl mx-auto"
+                        className="text-white/70 font-mono font-bold text-base max-w-2xl mx-auto leading-relaxed"
                     >
-                        Comece pelo Pilar 1 gratuitamente. Desbloqueie o restante apenas se achar que o método funciona para você.
+                        Treinamento em blocos blindados. O próximo pilar só abre com aprovação (Clearance) na etapa anterior.
                     </motion.p>
+                </div>
+
+                {/* Decorative Geometric Element */}
+                <div className="absolute top-20 right-0 w-96 h-96 opacity-30 md:opacity-50 mix-blend-screen pointer-events-none translate-x-1/3 -translate-y-1/3 z-0">
+                    <img src="/geometric-amber.png" alt="Geometric Abstract" className="w-full h-full object-contain" />
                 </div>
 
                 {/* Grid de Pilares */}
@@ -186,9 +191,11 @@ export function FeaturesSection() {
                             </ul>
                         </div>
 
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-purple-500 blur-3xl opacity-20" />
-                            <Briefcase className="w-32 h-32 text-white/10 relative z-10" />
+                        <div className="relative group">
+                            <div className="absolute inset-0 bg-purple-500 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700" />
+                            <div className="relative z-10 w-32 h-32 md:w-48 md:h-48 group-hover:scale-110 transition-transform duration-700">
+                                <img src="/geometric-dark.png" alt="Abstract 3D Shape" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]" />
+                            </div>
                         </div>
                     </div>
                 </div>

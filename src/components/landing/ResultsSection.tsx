@@ -7,31 +7,31 @@ import { useLandingTheme } from "@/context/LandingThemeContext";
 
 const TESTIMONIALS = [
     {
-        name: "Marina Oliveira",
-        role: "Gerente de Projetos",
+        name: "Diretor de Inovação Técnica",
+        role: "Setor de Tecnologia",
         location: "São Paulo, SP",
-        image: "https://i.pravatar.cc/150?img=1",
-        rank: "Comandante",
-        quote: "Estudei 4 anos em franquia famosa e não conseguia conversar. Em 6 meses no ES Academy, fiz minha primeira reunião 100% em inglês com clientes dos EUA. A diferença é brutal.",
-        stats: { level: "Pilar 9", months: "6 meses" }
+        image: "https://i.pravatar.cc/150?img=11",
+        rank: "Operador",
+        quote: "A estrutura forçou a produção desde o início. O bloqueio mental desapareceu ao fim do Pilar 2. O acesso direto e a ausência de distrações otimizaram minha fluência.",
+        stats: { level: "Pilar 9", months: "4 meses" }
     },
     {
-        name: "Carlos Eduardo",
-        role: "Desenvolvedor",
+        name: "Desenvolvedora Sênior",
+        role: "Engenharia de Software",
         location: "Curitiba, PR",
-        image: "https://i.pravatar.cc/150?img=3",
-        rank: "Ás",
-        quote: "O método do Filtro Afetivo mudou minha vida. Antes eu travava completamente. Hoje faço entrevistas técnicas em inglês sem medo. Consegui um emprego remoto nos EUA.",
-        stats: { level: "Especialização", months: "8 meses" }
+        image: "https://i.pravatar.cc/150?img=9",
+        rank: "Operador",
+        quote: "A exigência na validação humana muda a perspectiva. Não é possível fingir a execução. O erro é atacado de imediato e o avanço metodológico se torna inegável.",
+        stats: { level: "Pilar 7", months: "3 meses" }
     },
     {
-        name: "Fernanda Costa",
-        role: "Médica",
+        name: "Analista de Infraestrutura",
+        role: "Cloud & Devops",
         location: "Rio de Janeiro, RJ",
-        image: "https://i.pravatar.cc/150?img=5",
-        rank: "Supersônico",
-        quote: "Fiz a especialização de Inglês para Saúde. Agora leio papers científicos sem tradutor e participo de congressos internacionais com confiança. O investimento se pagou em 3 meses.",
-        stats: { level: "Especialização", months: "10 meses" }
+        image: "https://i.pravatar.cc/150?img=12",
+        rank: "Operador",
+        quote: "Um ambiente frio e objetivo. Exatamente o que adultos necessitam para dominar a ferramenta linguística sem infantilização.",
+        stats: { level: "Pilar 5", months: "2 meses" }
     }
 ];
 
@@ -153,14 +153,17 @@ export function ResultsSection() {
                     className="text-center mb-20"
                 >
                     <span className="inline-block px-4 py-2 rounded-full border border-green-500/20 bg-green-500/5 text-green-500 font-mono text-xs tracking-widest uppercase mb-6">
-                        Resultados Reais
+                        Registros confirmados
                     </span>
                     <h2 className={`text-4xl md:text-6xl font-serif mb-6 ${isDark ? "text-white" : "text-gray-900"}`}>
-                        Eles Já Estão<br />
+                        Relatórios de<br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-                            Falando de Verdade
+                            Operação
                         </span>
                     </h2>
+                    <p className={`max-w-xl mx-auto text-base font-mono font-bold ${isDark ? "text-white/60" : "text-gray-600"}`}>
+                        Registros de usuários que romperam a barreira do bloqueio.
+                    </p>
                 </motion.div>
 
                 {/* Stats Grid - with Spread Animation */}
@@ -226,7 +229,7 @@ export function ResultsSection() {
                                         </div>
                                     </div>
 
-                                    <p className={`text-xl md:text-2xl font-serif leading-relaxed mb-8 italic ${isDark ? "text-white/90" : "text-gray-800"}`}>
+                                    <p className={`text-xl md:text-2xl font-serif font-bold leading-relaxed mb-8 italic shadow-black drop-shadow-sm ${isDark ? "text-white/95" : "text-gray-800"}`}>
                                         "{TESTIMONIALS[activeTestimonial].quote}"
                                     </p>
 

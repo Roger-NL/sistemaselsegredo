@@ -66,6 +66,34 @@ const SystemDiagnostic = () => {
     );
 };
 
+const TypingText = ({ text }: { text: string }) => {
+    const [subIndex, setSubIndex] = useState(0);
+    const [blink, setBlink] = useState(true);
+
+    useEffect(() => {
+        const timeout2 = setInterval(() => {
+            setBlink((prev) => !prev);
+        }, 500);
+        return () => clearInterval(timeout2);
+    }, []);
+
+    useEffect(() => {
+        if (subIndex < text.length) {
+            const timeout = setTimeout(() => {
+                setSubIndex((prev) => prev + 1);
+            }, 30);
+            return () => clearTimeout(timeout);
+        }
+    }, [subIndex, text]);
+
+    return (
+        <span>
+            {text.substring(0, subIndex)}
+            <span className={`${blink ? "opacity-100" : "opacity-0"} text-emerald-500`}>|</span>
+        </span>
+    );
+};
+
 export function HeroSection() {
     const router = useRouter();
     const { isAuthenticated } = useAuth();
@@ -75,15 +103,14 @@ export function HeroSection() {
     };
 
     return (
-        <section className="relative flex flex-col items-center justify-center overflow-hidden min-h-[min(100vh,800px)] pt-24 pb-12 md:pt-32 md:pb-20 px-4 md:px-8 mt-0">
+        <section className="relative flex flex-col items-center justify-start overflow-hidden min-h-[min(100vh,800px)] pt-20 md:pt-24 pb-12 md:pb-20 px-4 md:px-8 mt-0">
             {/* Background elements managed by parent */}
             <div className="absolute inset-0 z-0 backdrop-blur-[3px] pointer-events-none" />
 
             <div className="container mx-auto max-w-6xl grid md:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
 
                 {/* Left Column: Text & CTA */}
-                {/* Left Column: Text & CTA */}
-                <div className="flex flex-col items-center md:items-start text-center md:text-left pointer-events-auto order-1 relative">
+                <div className="flex flex-col items-center md:items-center text-center pointer-events-auto order-1 relative">
 
                     {/* Smoky Glow Effect - Behind Headline */}
                     <div className="absolute top-10 left-1/2 md:left-0 -translate-x-1/2 md:translate-x-0 w-[300px] h-[300px] bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none z-[-1]" />
@@ -105,35 +132,35 @@ export function HeroSection() {
                         </div>
 
                         <span className="relative z-10 text-[9px] sm:text-[10px] md:text-xs font-mono text-fuchsia-400/90 tracking-[0.15em] uppercase font-bold italic drop-shadow-[0_0_8px_rgba(217,70,239,0.6)] px-2">
-                            Sistema fechado com validação real
+                            Sistema de acesso restrito. Validação de ponta a ponta.
                         </span>
                     </motion.div>
 
-                    {/* Headline - Clean & Impactful (Refined for Desktop) */}
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.1 }}
                         viewport={{ once: true }}
-                        className="flex flex-col text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight mb-8 md:mb-10"
+                        className="flex flex-col text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl font-serif font-bold text-white leading-[1.1] tracking-tight mb-6"
                     >
                         <span className="text-white/90">Entenda e fale</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-emerald-100 to-emerald-200">
-                            inglês em até
+                        <span className="text-emerald-100/90 py-1">
+                            inglês funcional em até
                         </span>
                         <span className="text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">120 dias.</span>
                     </motion.h1>
 
-                    {/* Neural Diagnostic Pill */}
-                    <motion.div
+                    <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
+                        transition={{ duration: 0.8, delay: 0.15 }}
                         viewport={{ once: true }}
-                        className="w-full flex justify-center md:justify-start mb-2 md:mb-4"
+                        className="text-base md:text-lg text-gray-300 font-mono font-bold mb-8 md:mb-10 max-w-lg leading-relaxed shadow-black drop-shadow-md min-h-[96px] md:min-h-[80px]"
                     >
-                        <SystemDiagnostic />
-                    </motion.div>
+                        <TypingText text="Chega de consumo passivo. Execute missões diárias, valide com humanos e destrave sua comunicação real." />
+                    </motion.p>
+
+
 
                     {/* Main CTA - Kept exactly as requested */}
                     <motion.div
@@ -141,28 +168,28 @@ export function HeroSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.3 }}
                         viewport={{ once: true }}
-                        className="flex flex-col items-center md:items-start gap-4 w-full sm:w-auto"
+                        className="flex flex-col items-center gap-4 w-full"
                     >
                         {/* Exclusivity Micro-copy */}
-                        <p className="text-[10px] md:text-xs font-mono font-bold text-white/50 uppercase tracking-widest pl-1">
-                            Sistema fechado com validação real.
+                        <p className="text-[10px] md:text-xs font-mono font-bold text-white/50 uppercase tracking-widest pl-1 text-center">
+                            Validação técnica de ponta a ponta.
                         </p>
 
-                        <div className="w-full sm:w-auto flex justify-center md:justify-start" onClick={handleCta}>
+                        <div className="w-full flex justify-center" onClick={handleCta}>
                             <GradientButton
-                                className="group px-8 relative inline-flex items-center justify-center"
+                                className="group px-8 relative inline-flex items-center justify-center max-w-[340px]"
                                 width="100%"
                                 height="56px"
                             >
                                 <span className="relative z-10 flex flex-row items-center justify-center gap-3 text-[10px] sm:text-xs md:text-sm leading-tight text-center drop-shadow-sm">
                                     <Rocket className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 flex-shrink-0 rotate-45 text-violet-400" />
-                                    <span className="font-bold opacity-90 group-hover:opacity-100 transition-opacity whitespace-nowrap">ACESSAR COCKPIT <span className="opacity-50 font-normal ml-1">(GRÁTIS AO PILAR 1)</span></span>
+                                    <span className="font-bold opacity-90 group-hover:opacity-100 transition-opacity whitespace-nowrap">INICIAR PROTOCOLO <span className="opacity-50 font-normal ml-1">(ACESSO AO PILAR 1)</span></span>
                                 </span>
                             </GradientButton>
                         </div>
 
                         {/* Conversion Boosters */}
-                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[10px] md:text-xs font-mono font-bold text-white/40 uppercase tracking-widest pl-1">
+                        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px] md:text-xs font-mono font-bold text-white/40 uppercase tracking-widest pl-1 mt-2">
                             <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-emerald-400" /> Sem cartão de crédito</span>
                             <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-cyan-400" /> Acesso imediato</span>
                             <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-violet-400" /> Mentoria Inclusa</span>

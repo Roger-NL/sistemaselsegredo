@@ -15,52 +15,20 @@ const HOW_IT_WORKS = [
 
 const FAQS = [
     {
-        question: "É curso online gravado?",
-        answer: "Não. Sem videoaulas. Conteúdo em texto de alta densidade + exercícios escritos + áudios nativos. Formato ativo: você produz e é corrigido, não fica assistindo passivamente."
+        question: "Qual a janela de tempo necessária por dia?",
+        answer: "O protocolo exige missões focadas. O sistema foi desenvolvido para resultados em sessões curtas e de alta densidade diária, permitindo integração perfeita à rotina de alta performance."
     },
     {
-        question: "É mentoria ou são aulas ao vivo?",
-        answer: "Híbrido. O dia a dia é assíncrono — você estuda no seu ritmo, 15-20 min/dia. Inclui 3 mentorias ao vivo 1-on-1 em momentos estratégicos: Diagnóstico, Calibragem e Simulação Final."
+        question: "Há restrições de nível inicial para operar o sistema?",
+        answer: "Negativo. A plataforma efetua a calibragem e o nivelamento profundo no pilar fundacional. Você começa da construção lógica e progride gradualmente."
     },
     {
-        question: "Quantas vezes por semana preciso estudar?",
-        answer: "Ideal: todos os dias, 15-20 min. Mínimo recomendado: 5x/semana. O sistema é flexível — você define seus horários. O segredo é constância, não duração."
+        question: "E em caso de falha na execução de uma missão?",
+        answer: "A validação técnica irá bloquear o avanço. O relatório estrutural expõe a falha. O usuário refaz a missão até adquirir o padrão de fluência correto para a aprovação humana."
     },
     {
-        question: "Quanto tempo leva para ter resultado?",
-        answer: "Depende da sua constância. Média dos alunos: 6 meses para fluência funcional. Alguns alcançam antes. O sistema mede sua evolução pilar a pilar."
-    },
-    {
-        question: "Sem videoaula? Como funciona o dia a dia?",
-        answer: "Protocolo Flight Manual: 1) Briefing — Leitura estratégica. 2) Operação — Escrita neurossensorial. 3) Audio Support — Treino auditivo. 4) Validação Humana — Correção detalhada."
-    },
-    {
-        question: "As 3 sessões particulares estão inclusas?",
-        answer: "Sim. 3 mentorias 1-on-1 ao vivo: Diagnóstico, Calibragem e Simulação Final. Foco em fala e pronúncia. Tudo incluso, sem taxas extras."
-    },
-    {
-        question: "Como funciona o suporte?",
-        answer: "Torre de Comando: canal assíncrono com resposta humana em até 24h úteis + as 3 mentorias ao vivo para treinar speaking."
-    },
-    {
-        question: "Preciso ter base de inglês?",
-        answer: "Não. Do Zero Absoluto (Recruta) ao nível Operações Especiais. Começamos pelo Mindset e Sobrevivência."
-    },
-    {
-        question: "As sessões são em grupo?",
-        answer: "Não. As 3 sessões de Checkpoint são 100% individuais (1-on-1) com Professor Internacional."
-    },
-    {
-        question: "Já tentei outros cursos e nunca aprendi.",
-        answer: "A maioria usa 'Netflix Mode' — vídeos passivos. Retenção: 10%. Aqui é No-Video: ler + escrever + correção humana. Retenção: até 90%."
-    },
-    {
-        question: "Minha rotina é muito corrida.",
-        answer: "15-20 min/dia. No trânsito, na fila ou antes de dormir. Micro-Doses de Inteligência — constância, não duração."
-    },
-    {
-        question: "E se eu não me adaptar?",
-        answer: "Garantia Incondicional de 7 Dias. Devolvemos 100% do seu dinheiro. Sem perguntas."
+        question: "Como confirmo a viabilidade do método?",
+        answer: "O sistema disponibiliza liberação imediata ao Pilar 1 de forma experimental. Investigue a funcionalidade prática da interface e ateste a metodologia em suas próprias vias neurais antes do compromisso integral."
     },
 ];
 

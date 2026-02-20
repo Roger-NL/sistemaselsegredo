@@ -1,49 +1,49 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Lock, UserCheck, Users, BrainCircuit } from "lucide-react";
+import { Target, Cpu, Crosshair, Fingerprint } from "lucide-react";
 
 export function DifferentiatorsSection() {
     const differentiators = [
         {
-            title: "Modelo No-Video. Você faz, não assiste.",
-            desc: "Retenção passiva: 10%. Retenção ativa (ler+escrever): 90%. Por isso eliminamos 100% das videoaulas.",
-            icon: Lock,
-            color: "text-rose-400",
-            bg: "bg-rose-500/10",
-            border: "group-hover:border-rose-500/30",
-            glow: "from-rose-500/20",
-            delay: 0.1
-        },
-        {
-            title: "Professor real valida cada pilar.",
-            desc: "Um Capitão analisa sua produção escrita e envia feedback detalhado. Só avança se aprovado.",
-            icon: UserCheck,
-            color: "text-cyan-400",
-            bg: "bg-cyan-500/10",
-            border: "group-hover:border-cyan-500/30",
-            glow: "from-cyan-500/20",
+            title: "Execução vs. Assistir",
+            desc: "Sem especulação. O sistema exige produção ativa desde o minuto um.",
+            icon: Target,
+            color: "text-amber-400",
+            bg: "bg-amber-400/10",
+            border: "border-amber-500/20 hover:border-amber-500/50",
+            glow: "from-amber-500/20",
             delay: 0.2
         },
         {
-            title: "3 mentorias 1-on-1 ao vivo inclusas.",
-            desc: "Diagnóstico, calibragem e simulação final. Foco em destravar a fala e corrigir pronúncia.",
-            icon: Users,
-            color: "text-violet-400",
-            bg: "bg-violet-500/10",
-            border: "group-hover:border-violet-500/30",
-            glow: "from-violet-500/20",
+            title: "Prática Real vs. Teoria",
+            desc: "Foco 100% em comunicação do mundo real. Gramática inútil é descartada.",
+            icon: Cpu,
+            color: "text-emerald-400",
+            bg: "bg-emerald-400/10",
+            border: "border-emerald-500/20 hover:border-emerald-500/50",
+            glow: "from-emerald-500/20",
             delay: 0.3
         },
         {
-            title: "Impossível fingir que aprendeu.",
-            desc: "Protocolo Flight Manual: Briefing → Escrita Ativa → Audio Support → Validação Humana.",
-            icon: BrainCircuit,
-            color: "text-emerald-400",
-            bg: "bg-emerald-500/10",
-            border: "group-hover:border-emerald-500/30",
-            glow: "from-emerald-500/20",
+            title: "Precisão vs. Volume",
+            desc: "Acúmulo de horas é ilusão. Condicionamos seu reflexo neural para a fluência.",
+            icon: Crosshair,
+            color: "text-cyan-400",
+            bg: "bg-cyan-400/10",
+            border: "border-cyan-500/20 hover:border-cyan-500/50",
+            glow: "from-cyan-500/20",
             delay: 0.4
+        },
+        {
+            title: "Humano vs. IA Genérica",
+            desc: "Só avança quem atinge o critério técnico validado por especialistas.",
+            icon: Fingerprint,
+            color: "text-fuchsia-400",
+            bg: "bg-fuchsia-400/10",
+            border: "border-fuchsia-500/20 hover:border-fuchsia-500/50",
+            glow: "from-fuchsia-500/20",
+            delay: 0.5
         }
     ];
 
@@ -58,11 +58,14 @@ export function DifferentiatorsSection() {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-center mb-10"
+                    className="text-center mb-10 md:mb-16"
                 >
-                    <h2 className="text-3xl md:text-4xl font-serif text-white mb-6 drop-shadow-lg">
-                        Por que aqui é diferente?
+                    <h2 className="text-3xl md:text-5xl font-serif font-bold text-white mb-4 drop-shadow-lg">
+                        O tradicional falhou.
                     </h2>
+                    <p className="text-base md:text-lg font-bold text-gray-300 font-mono mb-6 max-w-2xl mx-auto leading-relaxed">
+                        Cursos comuns retêm tempo. Este sistema constrói capacidade funcional imediata.
+                    </p>
                     <div className="w-32 h-1 bg-gradient-to-r from-transparent via-violet-500 to-transparent mx-auto opacity-70 shadow-[0_0_15px_#8b5cf6]" />
                 </motion.div>
 
@@ -86,10 +89,10 @@ export function DifferentiatorsSection() {
                                     <item.icon className={`w-6 h-6 ${item.color}`} />
                                 </div>
 
-                                <h3 className="text-white font-serif text-lg leading-tight mb-3">
+                                <h3 className="text-white font-serif font-bold text-xl leading-tight mb-3">
                                     {item.title}
                                 </h3>
-                                <p className="text-white/50 font-mono text-xs leading-relaxed">
+                                <p className="text-white/80 font-mono font-bold text-sm leading-relaxed">
                                     {item.desc}
                                 </p>
                             </div>

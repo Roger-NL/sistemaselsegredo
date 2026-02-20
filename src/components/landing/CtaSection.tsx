@@ -8,12 +8,10 @@ import { useLandingTheme } from "@/context/LandingThemeContext";
 import { useRef } from "react";
 
 const BENEFITS = [
-    "9 Pilares com Correção Humana",
-    "3 Sessões Particulares 1-on-1",
-    "Suporte Diário Assíncrono (Torre de Comando)",
-    "6 Especializações de Carreira",
-    "Acesso Vitalício + Atualizações",
-    "Garantia Incondicional de 7 dias"
+    "Resposta Imediata — Sem Paralisações",
+    "Processamento Auditivo Natural",
+    "Comunicação Direta — Bloqueio Neural Eliminado",
+    "Estrutura de Alto Valor — Eliminação de Vícios"
 ];
 
 export function CtaSection() {
@@ -86,26 +84,26 @@ export function CtaSection() {
                             whileInView={{ opacity: 1, scale: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ type: "spring", stiffness: 200 }}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 mb-8"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 mb-8"
                         >
                             <motion.div
                                 animate={{ rotate: [0, 15, -15, 0] }}
                                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
                             >
-                                <Sparkles className="w-4 h-4 text-amber-400" />
+                                <Sparkles className="w-4 h-4 text-emerald-400" />
                             </motion.div>
-                            <span className="text-amber-300 font-mono text-xs uppercase tracking-widest">
-                                Método No-Video · Resultado Validado
+                            <span className="text-emerald-300 font-mono text-xs uppercase tracking-widest">
+                                O resultado da adaptação ao sistema em 120 dias
                             </span>
                         </motion.div>
 
                         {/* Headline */}
-                        <h2 className={`text-3xl md:text-5xl font-serif mb-6 leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
-                            Pronto Para Destravar<br />Seu Inglês?
+                        <h2 className={`text-3xl md:text-5xl font-serif font-bold mb-6 leading-tight ${isDark ? "text-white" : "text-gray-900"}`}>
+                            Capacidade Operacional<br />Final
                         </h2>
 
-                        <p className={`text-base md:text-lg font-mono max-w-2xl mx-auto mb-12 ${isDark ? "text-white/50" : "text-gray-600"}`}>
-                            Formato Híbrido: Textos de Elite + Escrita Ativa + Correção Humana + 3 Mentorias Ao Vivo. Tudo incluso.
+                        <p className={`text-base md:text-lg font-mono font-bold max-w-2xl mx-auto mb-12 shadow-black drop-shadow-sm ${isDark ? "text-white/80" : "text-gray-800"}`}>
+                            Responda com exatidão. Condicionamos seu reflexo neural para a fluência.
                         </p>
 
                         {/* Benefits grid - with staggered scroll animation */}
@@ -151,7 +149,7 @@ export function CtaSection() {
                             />
 
                             <span className="relative z-10 flex items-center justify-center gap-3 text-lg">
-                                {isAuthenticated ? "ACESSAR O COCKPIT" : "🚀 ENTRAR NO COCKPIT"}
+                                INICIAR PROTOCOLO
                                 <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
                             </span>
                         </motion.a>
