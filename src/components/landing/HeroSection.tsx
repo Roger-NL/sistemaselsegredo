@@ -66,7 +66,7 @@ const SystemDiagnostic = () => {
     );
 };
 
-const TypingText = ({ text }: { text: string }) => {
+const TypingText = ({ text, cursorClassName = "text-emerald-500" }: { text: string, cursorClassName?: string }) => {
     const [subIndex, setSubIndex] = useState(0);
     const [blink, setBlink] = useState(true);
 
@@ -89,7 +89,7 @@ const TypingText = ({ text }: { text: string }) => {
     return (
         <span>
             {text.substring(0, subIndex)}
-            <span className={`${blink ? "opacity-100" : "opacity-0"} text-emerald-500`}>|</span>
+            <span className={`${blink ? "opacity-100" : "opacity-0"} ${cursorClassName}`}>|</span>
         </span>
     );
 };
@@ -107,7 +107,7 @@ export function HeroSection() {
             {/* Background elements managed by parent */}
             <div className="absolute inset-0 z-0 backdrop-blur-[3px] pointer-events-none" />
 
-            <div className="container mx-auto max-w-6xl grid md:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
+            <div className="container mx-auto max-w-6xl grid md:grid-cols-2 gap-6 md:gap-10 items-center relative z-10">
 
                 {/* Left Column: Text & CTA */}
                 <div className="flex flex-col items-center md:items-center text-center pointer-events-auto order-1 relative">
@@ -141,24 +141,40 @@ export function HeroSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.1 }}
                         viewport={{ once: true }}
-                        className="flex flex-col text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl font-serif font-bold text-white leading-[1.1] tracking-tight mb-6"
+                        className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl font-serif font-bold text-white leading-[0.85] md:leading-[0.9] tracking-[-0.05em] mb-4 italic text-center flex flex-col"
                     >
-                        <span className="text-white/90">Entenda e fale</span>
-                        <span className="text-emerald-100/90 py-1">
-                            inglês funcional em até
+                        <span className="text-white/90">Entenda e</span>
+                        <span className="text-white/90">fale inglês</span>
+                        <span className="text-emerald-100/90">funcional em</span>
+                        <span>
+                            <span className="text-emerald-100/90 mr-2">até</span>
+                            <span className="text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">120 dias.</span>
                         </span>
-                        <span className="text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">120 dias.</span>
                     </motion.h1>
 
-                    <motion.p
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.15 }}
                         viewport={{ once: true }}
-                        className="text-base md:text-lg text-gray-300 font-mono font-bold mb-8 md:mb-10 max-w-lg leading-relaxed shadow-black drop-shadow-md min-h-[96px] md:min-h-[80px]"
+                        className="flex justify-center w-full mb-6 md:mb-8 min-h-[72px] md:min-h-[56px]"
                     >
-                        <TypingText text="Chega de consumo passivo. Execute missões diárias, valide com humanos e destrave sua comunicação real." />
-                    </motion.p>
+                        <div
+                            className="relative bg-[#F2F2F7] sm:bg-[#E9E9EB] sm:dark:bg-white text-black text-[15px] md:text-[17px] px-4 py-[10px] md:px-[18px] md:py-[12px] rounded-[20px] max-w-[290px] md:max-w-[400px] shadow-[0_4px_20px_rgba(0,0,0,0.5)] text-left"
+                            style={{
+                                fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+                                letterSpacing: "-0.015em",
+                                lineHeight: "1.35",
+                                fontWeight: 400
+                            }}
+                        >
+                            {/* iPhone SMS Tail (Received Message - Left) */}
+                            <svg className="absolute bottom-0 -left-[6px] w-[15px] h-[15px] text-[#F2F2F7] sm:text-[#E9E9EB] sm:dark:text-white fill-current pointer-events-none transform -scale-x-100" viewBox="0 0 15 15">
+                                <path d="M15 15H0C5 15 8 13 10 9C10 12 12 15 15 15Z" />
+                            </svg>
+                            <TypingText text="Chega de consumo passivo. Execute missões diárias, valide com humanos e destrave sua comunicação real." cursorClassName="text-black/40" />
+                        </div>
+                    </motion.div>
 
 
 
@@ -168,7 +184,7 @@ export function HeroSection() {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.3 }}
                         viewport={{ once: true }}
-                        className="flex flex-col items-center gap-4 w-full"
+                        className="flex flex-col items-center gap-3 w-full"
                     >
                         {/* Exclusivity Micro-copy */}
                         <p className="text-[10px] md:text-xs font-mono font-bold text-white/50 uppercase tracking-widest pl-1 text-center">
