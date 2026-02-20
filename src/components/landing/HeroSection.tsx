@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useAnimation, useInView } from "framer-motion";
-import { ArrowRight, Unlock, PlayCircle, ShieldCheck, Check, Rocket } from "lucide-react";
+import { ArrowRight, Unlock, PlayCircle, ShieldCheck, Check, Rocket, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useRef } from "react";
@@ -75,7 +75,7 @@ export function HeroSection() {
     };
 
     return (
-        <section className="relative flex flex-col items-center justify-center overflow-hidden min-h-[min(100vh,800px)] py-12 md:py-20 px-4 md:px-8">
+        <section className="relative flex flex-col items-center justify-center overflow-hidden min-h-[min(100vh,800px)] pt-24 pb-12 md:pt-32 md:pb-20 px-4 md:px-8 mt-0">
             {/* Background elements managed by parent */}
             <div className="absolute inset-0 z-0 backdrop-blur-[3px] pointer-events-none" />
 
@@ -88,19 +88,23 @@ export function HeroSection() {
                     {/* Smoky Glow Effect - Behind Headline */}
                     <div className="absolute top-10 left-1/2 md:left-0 -translate-x-1/2 md:translate-x-0 w-[300px] h-[300px] bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none z-[-1]" />
 
-                    {/* Badge */}
+                    {/* Badge / Raio Horizontal */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 md:gap-3 px-4 py-1.5 md:px-5 md:py-2 rounded-full bg-[#1a0b2e]/60 border border-fuchsia-500/30 w-fit backdrop-blur-md mb-6 md:mb-10 mx-auto md:mx-0 shadow-[0_0_15px_rgba(217,70,239,0.15)]"
+                        className="relative group inline-flex items-center px-6 py-1.5 md:py-2 w-fit mb-3 md:mb-5 mx-auto md:mx-0 cursor-default"
                     >
-                        <span className="relative flex h-1.5 w-1.5 md:h-2 md:w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-fuchsia-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 md:h-2 md:w-2 bg-fuchsia-500 shadow-[0_0_8px_rgba(217,70,239,0.8)]"></span>
-                        </span>
-                        <span className="text-[9px] sm:text-[10px] md:text-xs font-mono text-fuchsia-100/90 tracking-[0.15em] md:tracking-widest uppercase font-semibold">
+                        {/* Fundo com formato de raio/velocidade (Skew) */}
+                        <div className="absolute inset-0 bg-[#050505]/80 backdrop-blur-md border border-fuchsia-500/50 shadow-[0_0_15px_rgba(217,70,239,0.2)] -skew-x-[16deg] group-hover:border-fuchsia-400 group-hover:shadow-[0_0_25px_rgba(217,70,239,0.4)] transition-all duration-300" />
+
+                        {/* Brilho de Velocidade animado por trás */}
+                        <div className="absolute inset-0 overflow-hidden transform -skew-x-[16deg]">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-fuchsia-400/20 to-transparent w-full -translate-x-full group-hover:translate-x-full transition-transform duration-[1500ms] ease-in-out" />
+                        </div>
+
+                        <span className="relative z-10 text-[9px] sm:text-[10px] md:text-xs font-mono text-fuchsia-400/90 tracking-[0.15em] uppercase font-bold italic drop-shadow-[0_0_8px_rgba(217,70,239,0.6)] px-2">
                             Sistema fechado com validação real
                         </span>
                     </motion.div>
