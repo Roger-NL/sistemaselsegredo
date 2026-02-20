@@ -1,0 +1,62 @@
+﻿commit 83f9aa471ca8fa63065eb4d7e2eed5aa17236e17
+Author: roger-NL <raugerac@gmail.com>
+Date:   Wed Feb 18 22:20:25 2026 +0000
+
+    Fix pillar completion, enable persistence & firebase sync, and fix modal
+
+diff --git a/src/app/(authenticated)/dashboard/page.tsx b/src/app/(authenticated)/dashboard/page.tsx
+index cb41614..381b3f6 100644
+--- a/src/app/(authenticated)/dashboard/page.tsx
++++ b/src/app/(authenticated)/dashboard/page.tsx
+@@ -312,13 +312,13 @@ export default function Page() {
+                       textShadow: '0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3)'
+                     }}
+                   >
+-                    {currentSpec ? Math.min(100, Math.max(0, Math.round((globalProgress - 50) * 2))) + "%" : "9/9"}
++                    {Math.min(100, Math.max(0, Math.round((globalProgress - 50) * 2))) + "%"}
+                   </span>
+                   <span
+                     className="text-xs md:text-sm font-mono font-bold uppercase tracking-widest mt-2"
+                     style={{ color: '#a78bfa' }}
+                   >
+-                    {currentSpec ? "Especializa├º├úo" : "Masterizado"}
++                    Especializa├º├úo
+                   </span>
+                 </div>
+               ) : (
+
+commit 54a351e0f739cb4c7f0d0fc29e0a6f80a5be00bc
+Author: roger-NL <raugerac@gmail.com>
+Date:   Mon Feb 16 21:59:55 2026 +0000
+
+    fix(dashboard): suppress concierge modal if user already has phone on profile
+
+diff --git a/src/app/(authenticated)/dashboard/page.tsx b/src/app/(authenticated)/dashboard/page.tsx
+index b949528..cb41614 100644
+--- a/src/app/(authenticated)/dashboard/page.tsx
++++ b/src/app/(authenticated)/dashboard/page.tsx
+@@ -57,7 +57,12 @@ export default function Page() {
+ 
+   // Trigger: Verifica conex├úo WhatsApp ao entrar (delay 3s)
+   useEffect(() => {
+-    // Verifica se j├í conectou
++    if (!user) return;
++
++    // Se j├í tem telefone v├ílido no sistema, n├úo mostra o modal
++    if (user.phone && user.phone.length > 8) return;
++
++    // Verifica se j├í conectou (fallback local)
+     const alreadyConnected = localStorage.getItem('es-secure-comms-v2');
+ 
+     if (!alreadyConnected) {
+@@ -67,9 +72,7 @@ export default function Page() {
+       }, 3000);
+       return () => clearTimeout(timer);
+     }
+-
+-    // Se j├í conectou, segue a vida (l├│gica do Pilar 1 removida/substitu├¡da por essa mais restritiva)
+-  }, []);
++  }, [user]);
+ 
+   const handleGlobeClick = () => {
+     console.log("Opening HUD");

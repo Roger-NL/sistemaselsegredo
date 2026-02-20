@@ -199,12 +199,24 @@ export default function Page() {
 
       {/* Center Stage (The Globe) */}
       <div className="absolute inset-0 z-10 flex items-center justify-center">
-        {/* Typewriter Effect - Hero Left (Desktop) */}
-        <div className="absolute left-4 xl:left-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-start z-0 pointer-events-none select-none max-w-[500px]">
-          <h2 className="text-3xl xl:text-4xl font-bold text-white/40 tracking-widest font-mono mb-4 uppercase">
+        {/* Nova versão estonteante - Hero Left (Desktop) */}
+        <div className="absolute left-8 xl:left-12 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-start z-0 select-none max-w-[600px] pointer-events-none">
+          <div className="flex items-center gap-3 mb-6 opacity-80">
+            <div className="h-px w-8 bg-gradient-to-r from-transparent to-cyan-400" />
+            <span className="text-cyan-400 font-mono text-[10px] tracking-[0.3em] uppercase font-bold">
+              Mission Directive
+            </span>
+            <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+          </div>
+
+          <h2 className="text-3xl xl:text-4xl font-light text-white/50 tracking-widest font-mono mb-2 uppercase">
             Your Mission Is To
           </h2>
-          <div className="min-h-[120px]">
+
+          <div className="min-h-[160px] relative w-full pt-2 perspective-[1000px]">
+            {/* Ambient Background Glow purely for the text */}
+            <div className="absolute top-1/2 -translate-y-1/2 left-0 w-3/4 h-24 bg-gradient-to-r from-emerald-500/20 via-cyan-500/10 to-transparent blur-[40px] -z-10 rounded-full mix-blend-screen" />
+
             <Typewriter
               text={[
                 "UNLOCK\nFLUENCY",
@@ -240,35 +252,43 @@ export default function Page() {
                 "UNLEASH\nPOWER",
                 "DOMINATE\nTHE GAME"
               ]}
-              speed={80}
-              className="text-5xl xl:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#EEF4D4] via-emerald-400 to-cyan-400 tracking-tighter drop-shadow-[0_0_30px_rgba(238,244,212,0.3)] leading-[0.9] uppercase whitespace-pre-line"
-              waitTime={4000}
-              deleteSpeed={40}
+              speed={75}
+              className="text-5xl xl:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#EEF4D4] via-emerald-300 to-cyan-500 tracking-tighter leading-[0.85] uppercase whitespace-pre-line drop-shadow-sm"
+              waitTime={4500}
+              deleteSpeed={35}
               cursorChar={"_"}
-              cursorClassName="text-[#EEF4D4] ml-2 animate-pulse text-5xl xl:text-7xl align-baseline"
+              cursorClassName="text-cyan-400 animate-pulse text-5xl xl:text-7xl font-black drop-shadow-[0_0_15px_rgba(34,211,238,0.6)] inline-block -translate-y-[0.1em] -ml-2"
             />
           </div>
         </div>
 
-        {/* Typewriter Effect - Mobile (ACIMA do globo, não sobreposto) */}
-        <div className="absolute top-[15%] left-0 right-0 flex lg:hidden flex-col items-center z-30 pointer-events-none select-none px-4 text-center">
-          <h2 className="text-[10px] font-bold text-white/40 tracking-[0.2em] font-mono mb-1 uppercase">
-            MISSION:
-          </h2>
-          <div className="h-[32px] flex items-center justify-center">
+        {/* Nova versão estonteante - Mobile */}
+        <div className="absolute top-[11%] left-0 right-0 flex lg:hidden flex-col items-center z-30 pointer-events-none select-none px-4 text-center">
+          <div className="flex items-center gap-2 mb-0 opacity-80 z-40">
+            <span className="text-cyan-400 font-mono text-[9px] tracking-[0.4em] uppercase font-bold">
+              Mission Directive
+            </span>
+            <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+          </div>
+
+          <div className="min-h-[40px] flex items-center justify-center relative w-full z-40">
+            <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-full h-16 bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-emerald-500/10 blur-[20px] -z-10 rounded-full mix-blend-screen" />
+
             <Typewriter
               text={[
                 "UNLOCK FLUENCY",
                 "MASTER ENGLISH",
                 "NO BARRIERS",
-                "ACCESS WORLD"
+                "ACCESS WORLD",
+                "BECOME A LEGEND",
+                "CHANGE YOUR LIFE"
               ]}
               speed={60}
-              className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-[#EEF4D4] via-emerald-400 to-cyan-400 tracking-tighter drop-shadow-[0_0_10px_rgba(238,244,212,0.2)] leading-none uppercase"
-              waitTime={2000}
+              className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#EEF4D4] via-emerald-300 to-cyan-400 tracking-tighter leading-none uppercase drop-shadow-sm"
+              waitTime={2500}
               deleteSpeed={30}
               cursorChar={"_"}
-              cursorClassName="text-[#EEF4D4] ml-1 animate-pulse text-lg"
+              cursorClassName="text-cyan-400 animate-pulse text-2xl sm:text-3xl font-black drop-shadow-[0_0_10px_rgba(34,211,238,0.6)] inline-block -translate-y-[0.1em] -ml-1"
             />
           </div>
         </div>
