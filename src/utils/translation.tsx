@@ -6,6 +6,7 @@ import { TranslatablePhrase } from "@/components/ui/TranslatablePhrase";
  * React elements with TranslatablePhrase components.
  */
 export const parseTranslatable = (text: string): React.ReactNode => {
+    if (typeof text !== 'string') return text;
     if (!text) return "";
 
     // Regex to match {{english|portuguese}} pattern
@@ -52,6 +53,7 @@ export const parseTranslatable = (text: string): React.ReactNode => {
  * Used when we need plain text (e.g., for character-by-character rendering).
  */
 export const extractTranslatableText = (text: string): string => {
+    if (typeof text !== 'string') return text || "";
     if (!text) return "";
     return text.replace(/\{\{([^|]+)\|([^}]+)\}\}/g, '$1');
 };
@@ -60,6 +62,7 @@ export const extractTranslatableText = (text: string): string => {
  * Parses text with both **bold** markers and {{en|pt}} translation markers
  */
 export const parseTextWithTranslations = (text: string): React.ReactNode => {
+    if (typeof text !== 'string') return text;
     if (!text) return "";
 
     // First, split by bold markers

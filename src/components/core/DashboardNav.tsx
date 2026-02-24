@@ -63,7 +63,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                                 className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/10 border border-white/10"
                             >
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                <span className="text-xs text-white/80 max-w-[80px] truncate">{studentName.split(' ')[0]}</span>
+                                <span className="text-xs text-white/80 max-w-[80px] truncate">{studentName?.split?.(' ')?.[0] || studentName}</span>
                                 <svg className={`w-3 h-3 text-white/60 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
