@@ -263,6 +263,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 updateUserProgress(user.id, {
                     localPillarStatus: newStatus as any,
                     completedPillarModules: [],
+                    approvedPillar: level, // Sync the "Server Authority" as well
                 });
             });
         }
@@ -423,7 +424,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     };
 
     // Reseta progresso
-    const resetProgress = () => {
+    const resetProgress = async () => {
         const initial = getInitialStatus();
         setPillarStatus(initial);
         setChosenSpecialization(null);
@@ -443,19 +444,30 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 completedPillarModules: [],
                 hasSeenMissionComplete: false
             });
+        } else {
+            // Fallback to generic key for admin without user login
+            secureStorage.setItem(STORAGE_KEY, {
+                pillarStatus: initial,
+                chosenSpecialization: null,
+                specializationStatus: null,
+                completedSpecializations: [],
+                completedModules: {},
+                completedPillarModules: [],
+                hasSeenMissionComplete: false
+            });
         }
         // Also clear Firebase progress so it doesn't re-inject old data on reload
         if (user?.id) {
-            import("@/lib/auth-service").then(({ updateUserProgress }) => {
-                updateUserProgress(user.id, {
-                    localPillarStatus: {} as any,
-                    completedPillarModules: [],
-                    completedModules: {} as any,
-                    completedSpecializations: [],
-                    chosenSpecialization: null,
-                    specializationStatus: null,
-                    hasSeenMissionComplete: false,
-                });
+            const { updateUserProgress } = await import("@/lib/auth-service");
+            await updateUserProgress(user.id, {
+                localPillarStatus: {} as any,
+                completedPillarModules: [],
+                completedModules: {} as any,
+                completedSpecializations: [],
+                chosenSpecialization: null,
+                specializationStatus: null,
+                hasSeenMissionComplete: false,
+                approvedPillar: 1, // Reset to first pillar
             });
         }
         window.location.reload();

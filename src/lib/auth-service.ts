@@ -486,6 +486,7 @@ export async function updateUserProgress(userId: string, progressData: Partial<U
             ...(progressData.completedPillarModules !== undefined && { completedPillarModules: progressData.completedPillarModules }),
             ...(progressData.hasSeenMissionComplete !== undefined && { hasSeenMissionComplete: progressData.hasSeenMissionComplete }),
             ...(progressData.localPillarStatus !== undefined && { localPillarStatus: progressData.localPillarStatus }),
+            ...(progressData.approvedPillar !== undefined && { approvedPillar: progressData.approvedPillar }),
         };
 
         if (Object.keys(safeUpdate).length > 0) {
