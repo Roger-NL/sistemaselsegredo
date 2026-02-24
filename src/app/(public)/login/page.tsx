@@ -14,7 +14,11 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showCommsModal, setShowCommsModal] = useState(false);
-    const { login, loginWithGoogle, isAuthenticated, isLoading } = useAuth();
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [resetEmail, setResetEmail] = useState("");
+    const [resetStatus, setResetStatus] = useState({ loading: false, success: false, error: "" });
+
+    const { login, loginWithGoogle, isAuthenticated, isLoading, resetPassword } = useAuth();
     const router = useRouter();
 
     // Verifica se já conectou WhatsApp
@@ -54,6 +58,21 @@ export default function LoginPage() {
         } else {
             setError(result.error || "Erro ao fazer login");
             setIsSubmitting(false);
+        }
+    };
+
+    const handleReset = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setResetStatus({ loading: true, success: false, error: "" });
+        if (!resetEmail) {
+            setResetStatus({ loading: false, success: false, error: "Por favor, preencha o seu e-mail." });
+            return;
+        }
+        const res = await resetPassword(resetEmail);
+        if (res.success) {
+            setResetStatus({ loading: false, success: true, error: "" });
+        } else {
+            setResetStatus({ loading: false, success: false, error: res.error || "Ocorreu um erro ao enviar o e-mail." });
         }
     };
 
@@ -199,9 +218,13 @@ export default function LoginPage() {
                         </div>
 
                         <div className="text-xs">
-                            <a href="#" className="font-medium text-slate-400 hover:text-white transition-colors">
+                            <button
+                                type="button"
+                                onClick={() => setShowResetModal(true)}
+                                className="font-medium text-slate-400 hover:text-white transition-colors"
+                            >
                                 Recuperar acesso
-                            </a>
+                            </button>
                         </div>
                     </div>
 
@@ -233,6 +256,83 @@ export default function LoginPage() {
                     </div>
                 </form>
             </motion.div>
+
+            {/* Password Reset Modal */}
+            <AnimatePresence>
+                {showResetModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="w-full max-w-sm bg-[#0A0A0A] border border-white/10 p-6 rounded-2xl shadow-2xl relative"
+                        >
+                            <button
+                                onClick={() => {
+                                    setShowResetModal(false);
+                                    setResetStatus({ loading: false, success: false, error: "" });
+                                    setResetEmail("");
+                                }}
+                                className="absolute top-4 right-4 text-slate-500 hover:text-white"
+                            >
+                                ✕
+                            </button>
+                            <h2 className="text-xl font-bold text-white mb-2">Recuperar Senha</h2>
+
+                            {resetStatus.success ? (
+                                <div className="text-center py-6">
+                                    <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg className="w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-white font-medium mb-2">E-mail Enviado!</h3>
+                                    <p className="text-slate-400 text-sm">
+                                        Se esse e-mail estiver cadastrado, você receberá um link para criar uma nova senha.
+                                    </p>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleReset} className="space-y-4 pt-2">
+                                    <p className="text-slate-400 text-sm mb-4">
+                                        Digite o seu e-mail de acesso e nós enviaremos instruções para redefinir a sua senha.
+                                    </p>
+
+                                    {resetStatus.error && (
+                                        <div className="bg-red-500/10 text-red-400 p-3 rounded-lg text-xs font-mono">
+                                            {resetStatus.error}
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <label htmlFor="reset-email" className="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">E-mail</label>
+                                        <input
+                                            id="reset-email"
+                                            type="email"
+                                            value={resetEmail}
+                                            onChange={(e) => setResetEmail(e.target.value)}
+                                            required
+                                            className="block w-full rounded-lg bg-black/40 border border-white/10 px-4 py-3 text-white placeholder-slate-600 focus:border-white/30 focus:ring-0 transition-all outline-none sm:text-sm"
+                                            placeholder="seu@email.com"
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={resetStatus.loading}
+                                        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-black bg-white hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white transition-all disabled:opacity-50"
+                                    >
+                                        {resetStatus.loading ? "ENVIANDO..." : "ENVIAR LINK"}
+                                    </button>
+                                </form>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
 
             {/* WhatsApp Capture Modal — Trigger 1: Login */}

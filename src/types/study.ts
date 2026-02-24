@@ -5,7 +5,9 @@ export type ContentBlockType =
   | 'system-status' | 'terminal-view' | 'interactive-quiz' | 'reveal-box'
   | 'comparison' | 'audio-player' | 'cards-grid' | 'decision-tree'
   // Interactive types for Pilar 1
-  | 'brain-diagram' | 'comparison-table' | 'scenario-card' | 'phonetic-breakdown' | 'elite-insight'
+  | 'brain-diagram' | 'comparison-table' | 'scenario-card' | 'phonetic-breakdown' | 'elite-insight' | 'micro-win'
+  // New types for Part 2
+  | 'brave-insight' | 'micro-win' | 'scramble-exercise' | 'combat-sort-game' | 'audio-decode-game'
   // New types for Part 2
   | 'memory-diagram' | 'baby-learning' | 'phrase-analysis';
 

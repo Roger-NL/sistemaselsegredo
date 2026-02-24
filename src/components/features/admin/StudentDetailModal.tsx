@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { X, User, Mail, Phone, Calendar, Star, TrendingUp, ShieldCheck, CheckCircle2, AlertCircle, Clock, BookOpen } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, orderBy, updateDoc, doc } from "firebase/firestore";
@@ -18,6 +19,7 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
     const [loadingExams, setLoadingExams] = useState(false);
     const [expandedExam, setExpandedExam] = useState<string | null>(null);
     const [currentPillarLevel, setCurrentPillarLevel] = useState(1);
+    const { user: currentUser, refreshUser } = useAuth();
 
     useEffect(() => {
         if (user && isOpen) {
@@ -162,6 +164,11 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
                                                 });
                                                 user.approvedPillar = newVal;
                                                 setCurrentPillarLevel(newVal);
+
+                                                if (currentUser?.id === user.id) {
+                                                    await refreshUser();
+                                                }
+
                                                 alert("Nível atualizado! O aluno agora tem acesso até o Pilar " + newVal);
                                             } catch (error) {
                                                 console.error(error);

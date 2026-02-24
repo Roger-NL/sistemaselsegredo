@@ -5,131 +5,87 @@ import { PillarData } from "@/types/study";
 // ==============================================================================
 export const PILAR_1_DATA: PillarData = {
     id: 1,
-    title: "Pilar 1: Protocolo de Iniciação",
+    title: "PILAR 1: Protocolo de Iniciação",
     subtitle: "A reconfiguração completa da sua mentalidade e a ciência por trás da fluência.",
     modules: [
         {
             id: "p1-m1",
-            title: "Módulo 1: A Biologia do Travamento & O Filtro Afetivo",
-            subtitle: "Hackear o sistema de defesa do seu cérebro para desativar o modo de pânico.",
+            title: "MÓDULO 1: O \"Branco\" Mental e o Interruptor de Pânico",
+            subtitle: "Entender por que você trava e como desativar o modo de pânico em 5 segundos.",
             status: "active",
             blocks: [
                 {
+                    type: "h2",
+                    content: "Bem-vindo, Recruta ✈️"
+                },
+                {
+                    type: "paragraph",
+                    content: "Você está prestes a iniciar sua primeira missão. Este é o Flight Check, o momento de desprogramar velhos hábitos e se preparar para voar alto em inglês.\n\nNão se preocupe com termos técnicos ou métodos complicados. Aqui, tudo é prático. Cada passo que você dá é uma vitória real."
+                },
+                {
+                    type: "h3",
+                    content: "🚀 Missão 1 – Por que o inglês tradicional falha"
+                },
+                {
+                    type: "paragraph",
+                    content: "Muitas pessoas aprendem inglês assistindo vídeos ou memorizando regras. Resultado? Elas travam na hora de falar.\n\nAqui vamos:\n\n• Entender de forma prática como o inglês funciona\n• Treinar o cérebro para pensar no idioma, não traduzir\n• Criar confiança desde o primeiro minuto"
+                },
+                {
+                    type: "box-action",
+                    title: "Mini-exercício",
+                    content: "Essas palavras estão embaralhadas. Arrume-as nas frases abaixo:"
+                },
+                {
+                    type: "scramble-exercise",
+                    content: "I eat breakfast at 8 am."
+                },
+                {
+                    type: "scramble-exercise",
+                    content: "Today, I went to the park."
+                },
+                {
+                    type: "paragraph",
+                    content: "Sinta a diferença: você está construindo inglês de verdade, não copiando regras."
+                },
+                {
                     type: "system-status",
-                    content: "{{NEURAL SCAN|Escaneamento Neural}}: {{INITIATED|Iniciado}}. {{ANALYZING COGNITIVE BLOCKS|Analisando Bloqueios Cognitivos}}..."
-                },
-                {
-                    type: "box-goal",
-                    title: "Objetivo do Módulo",
-                    content: "Hackear o sistema de defesa do seu cérebro. Antes de aprender a falar, você precisa entender por que o seu hardware (biologia) está sabotando o seu software (aprendizado). Vamos desativar o modo de pânico e instalar o modo de processamento de elite."
-                },
-                {
-                    type: "h2",
-                    content: "1.1 A Anatomia do \"Branco\" Mental"
+                    content: "{{COCKPIT CHECK|CHECK-IN NA CABINE}}: {{SCANNING EMOTIONAL STATE|Escanendo Estado Emocional}}... {{PANIC SIGNAL DETECTED|Sinal de Pânico Detectado}}... {{BYPASSING AMYGDALA|Contornando Amígdala}}..."
                 },
                 {
                     type: "paragraph",
-                    content: "Você já esteve em uma situação onde precisava falar uma frase simples em inglês, mas sua mente se transformou em uma tela estática de TV antiga? Isso não é falta de inteligência; é o seu **Sistema Límbico** assumindo o controle da aeronave."
-                },
-                {
-                    type: "brain-diagram",
-                    content: JSON.stringify({
-                        title: "🧠 CAMADA NEUROCIENTÍFICA: O SEQUESTRO DA AMÍGDALA",
-                        steps: [
-                            "No centro do seu cérebro existe uma estrutura chamada Amígdala. Ela é o seu radar tático para ameaças. Para o seu cérebro primitivo, não existe diferença entre um leão faminto e o julgamento social de falar \"wrong\" em uma reunião.",
-                            "O Curto-Circuito: Quando o nível de estresse sobe (Filtro Afetivo), a Amígdala dispara cortisol. Este hormônio bloqueia as sinapses no Córtex Pré-Frontal (a sede do pensamento lógico e da gramática).",
-                            "A Paralisia: O acesso à memória de longo prazo é cortado. Você \"sabe\" o conteúdo, mas o cabo está desconectado."
-                        ]
-                    })
-                },
-                {
-                    type: "reveal-box",
-                    title: "🔬 A CIÊNCIA DA MIELINA (Clique para expandir)",
-                    content: "Nas escolas comuns, você estuda para a Memória Declarativa (saber sobre algo). Aqui, treinamos para a Mielinização. A mielina é uma camada de gordura que isola os neurônios; quanto mais você pratica um som real, mais espessa fica essa camada, tornando o impulso elétrico até 100x mais rápido."
+                    content: "Você já esteve em uma reunião ou viagem, alguém te fez uma pergunta simples e... **PUFT**. Sua mente virou uma TV fora do ar. O coração disparou, a mão suou e a palavra sumiu. \n\n**Isso não é falta de inteligência.** É biologia. Seu cérebro entrou em {{Panic Mode|Modo de Pânico}} e desligou sua capacidade de pensar em inglês para tentar te proteger do julgamento alheio."
                 },
                 {
                     type: "elite-insight",
-                    title: "💡 INSIGHT DE ELITE",
-                    content: "A fluência não é o tamanho do seu dicionário mental, mas a espessura da sua camada de mielina nos circuitos da fala."
+                    title: "💡 POR QUE ISSO IMPORTA?",
+                    content: "Enquanto você estiver no \"modo pânico\", seu cérebro bloqueia a parte que sabe gramática. Se você não souber desativar esse \"interruptor\", você vai estudar 10 anos e continuar travando na {{Real Life|Vida Real}}."
                 },
                 {
                     type: "h2",
-                    content: "1.2 Camada Cultural: O Complexo do \"Pajancu\" Brasileiro"
+                    content: "1.1 A Primeira Ferramenta de Controle (O Fim das Desculpas)"
                 },
                 {
                     type: "paragraph",
-                    content: "O aluno brasileiro médio sofre de uma síndrome cultural destrutiva: a necessidade de ser perfeito antes de ser funcional. Fomos ensinados a rir de quem erra a pronúncia, e isso criou uma geração de \"mudos alfabetizados\"."
+                    content: "Quando o \"branco\" vier, o pior erro é baixar a cabeça e dizer \"{{Sorry, my English is bad|Desculpe, meu inglês é ruim}}\". Isso reforça o pânico e te coloca em posição de submissão. \n\n**Onde você vai usar isso?** No aeroporto, em uma {{Business Call|Chamada de Trabalho}} ou conhecendo alguém novo."
                 },
                 {
-                    type: "comparison-table",
-                    content: JSON.stringify({
-                        headers: ["Perfil", "Foco Principal", "Resultado na Crise", "Mentalidade"],
-                        rows: [
-                            ["O Acadêmico", "Perfeição Gramatical", "Travamento Total", "\"Se não for perfeito, não falo.\""],
-                            ["O Operador ES", "Eficiência na Entrega", "Autonomia Tática", "\"A mensagem chegou? Missão cumprida.\""]
-                        ]
-                    })
+                    type: "box-action",
+                    title: "🎯 MINI-EXERCÍCIO: O COMANDO DE VOZ",
+                    content: "Em vez de pedir desculpas, você vai comandar a conversa. Se não entendeu, use esta frase curta e poderosa:\n\n**\"{{Say that again?|Diga de novo?}}\"**\n\n**Tarefa:** Repita em voz alta agora, com firmeza: **/sêi-dát-ə-guén/**. \nSinta a diferença. Você não está pedindo permissão; você está ajustando a frequência do rádio."
                 },
                 {
-                    type: "paragraph",
-                    content: "**A Realidade do Nativo:** O falante nativo de inglês é, por natureza, preguiçoso e focado em eficiência. Ele não está analisando se você usou o {{Gerund|Gerúndio}} corretamente; ele quer saber se o café vai chegar quente ou frio. O erro é apenas um ruído na linha; o travamento é a queda total do sinal."
-                },
-                {
-                    type: "h2",
-                    content: "🛠️ Engenharia Reversa: O Desmonte do \"{{I Don't Know|Eu Não Sei}}\""
+                    type: "micro-win",
+                    content: "**VITÓRIA IMEDIATA:** Você acaba de aprender a manter sua autoridade mesmo quando não entende uma frase. Você substituiu uma frase de \"vítima\" por uma frase de {{Operator|Operador}}."
                 },
                 {
                     type: "paragraph",
-                    content: "Vamos analisar como o cérebro processa uma das frases mais comuns do mundo e por que a forma como te ensinaram é um convite ao erro sob pressão."
-                },
-                {
-                    type: "phonetic-breakdown",
-                    content: JSON.stringify({
-                        formal: {
-                            text: "I do not know.",
-                            analysis: "4 unidades de processamento: I + do + not + know"
-                        },
-                        combat: {
-                            text: "I dunno.",
-                            analysis: "1 unidade sonora: /aj-dã-nou/"
-                        },
-                        explanation: "Economia Glótica: No \"I do not know\", sua língua precisa tocar o céu da boca duas vezes (no 'd' e no 'n'). Isso exige coordenação motora fina que desaparece sob estresse. O Schwa (/ə/): No \"dunno\", o som do 'o' é substituído pelo som mais comum do inglês: o Schwa. É um som neutro, de relaxamento total da mandíbula. Intenção: Falar \"I do not know\" soa robótico ou excessivamente enfático. Falar \"I dunno\" sinaliza que você é parte do grupo, baixando a guarda do interlocutor."
-                    })
-                },
-                {
-                    type: "h2",
-                    content: "⚔️ Cenário de Combate: O Labirinto do Aeroporto"
-                },
-                {
-                    type: "scenario-card",
-                    content: JSON.stringify({
-                        context: "Você acabou de desembarcar em Chicago. Está atrasado para a conexão. Um funcionário da companhia aérea te para e fala em velocidade 1.5x.",
-                        situation: "Sir, ya needa check ya gate 'cause it changed t'B12, got it?",
-                        wrong: {
-                            action: "O cérebro tenta traduzir \"Sir... you... need... to...\". Enquanto você traduz o \"need\", o funcionário já terminou a frase. O Filtro Afetivo sobe. Suor frio. Amígdala sequestra o cérebro.",
-                            result: "\"Yes... sorry... my English is bad.\" (Missão Fracassada)"
-                        },
-                        right: {
-                            action: "Ignore as \"Glue Words\": Você não precisa entender o \"ya\", \"needa\", \"'cause\". Foque nos \"Content Words\": Você ouviu GATE, CHANGE, B12.",
-                            result: "\"Gate B12? Okay, thanks!\" — Você usou o Mínimo Viável de Comunicação. Cortisol baixo, confiança alta."
-                        }
-                    })
-                },
-                {
-                    type: "box-warning",
-                    title: "⚠️ VÍCIO BRASILEIRO DETECTADO",
-                    content: "Pare de pedir desculpas pelo seu inglês. Cada vez que você diz \"{{Sorry for my English|Desculpe pelo meu inglês}}\", você está reafirmando para o seu subconsciente que você é um intruso. Operadores de elite não pedem desculpas; eles ajustam a frequência do rádio."
-                },
-                {
-                    type: "elite-insight",
-                    title: "🔓 OPEN LOOP: O SOM INVISÍVEL",
-                    content: "Você aprendeu a controlar o medo biológico. Mas existe um 'vírus' sonoro que impede 99% dos brasileiros de entenderem nativos, mesmo estando calmos. Ele se chama SCHWA. Sem dominá-lo (Pilar 2), você continuará surdo para o inglês real."
+                    content: "Ao final deste Pilar, você terá que responder a um desafio que avalia o que aprendeu. Seu progresso será registrado."
                 }
             ]
         },
         {
             id: "p1-m2",
-            title: "Parte 2: O Batismo de Fogo — A História de Roger",
+            title: "MÓDULO 2: Parte 2: O Batismo de Fogo — A História de Roger",
             subtitle: "A 'Ponte Húngara' e a prova de que a necessidade extrema vence qualquer método tradicional.",
             status: "locked",
             blocks: [
@@ -157,18 +113,18 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "memory-diagram",
                     content: JSON.stringify({
-                        title: "🧠 CAMADA NEUROCIENTÍFICA: Memória Declarativa vs. Procedural",
-                        declarative: {
-                            title: "Memória Declarativa",
-                            icon: "📚",
-                            description: "É o foco das escolas tradicionais. Armazena fatos e regras (ex: 'A estrutura do Present Perfect é have + particípio'). É um processo lento, consciente e exige que o Córtex Pré-Frontal 'calcule' a frase antes de falar. Sob estresse, esse cálculo trava."
+                        "title": "🧠 CAMADA NEUROCIENTÍFICA: Memória Declarativa vs. Procedural",
+                        "declarative": {
+                            "title": "Memória Declarativa",
+                            "icon": "📚",
+                            "description": "É o foco das escolas tradicionais. Armazena fatos e regras (ex: 'A estrutura do {{Present Perfect|Presente Perfeito}} é {{have|ter}} + particípio'). É um processo lento, consciente e exige que o Córtex Pré-Frontal 'calcule' a frase antes de falar. Sob estresse, esse cálculo trava."
                         },
-                        procedural: {
-                            title: "Memória Procedural",
-                            icon: "🎯",
-                            description: "É a memória de habilidades motoras (como dirigir ou lutar). Ela reside nos Gânglios da Base. É automática, rápida e não requer pensamento consciente. É a base da fluência real."
+                        "procedural": {
+                            "title": "Memória Procedural",
+                            "icon": "🎯",
+                            "description": "É a memória de habilidades motoras (como dirigir ou lutar). Ela reside nos Gânglios da Base. É automática, rápida e não requer pensamento consciente. É a base da fluência real."
                         },
-                        diagnosis: "No Brasil, o Roger tinha muita informação declarativa, mas zero treino procedural. Quando a pressão subiu, o cérebro dele tentou calcular a regra, gerou um erro de processamento e ele travou. O aprendizado real só acontece quando a língua migra da regra (declarativa) para o reflexo (procedural)."
+                        "diagnosis": "No Brasil, o Roger tinha muita informação declarativa, mas zero treino procedural. Quando a pressão subiu, o cérebro dele tentou calcular a regra, gerou um erro de processamento e ele travou. O aprendizado real só acontece quando a língua migra da regra (declarativa) para o reflexo (procedural)."
                     })
                 },
                 {
@@ -187,12 +143,12 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "comparison-table",
                     content: JSON.stringify({
-                        headers: ["Situação", "Inglês de Livro (Engessado)", "Inglês de Combate (Real)", "Análise de Eficiência"],
-                        rows: [
-                            ["Expressar Sentimento", "I am very happy to be here.", "I'm so glad I made it.", "Glad é mais orgânico; Made it foca no esforço."],
-                            ["Dificuldade de Entendimento", "Could you repeat that slowly?", "Wait, I'm lost. Come again?", "Metáforas de movimento são 10x mais comuns."],
-                            ["Sair de Casa", "We must go to the restaurant.", "Let's head out. I'm starving.", "Head out é um phrasal verb vital."],
-                            ["Resolver Conflito", "I do not agree with your opinion.", "I don't see it that way.", "Menos agressivo, mais tático."]
+                        "headers": ["Situação", "Inglês de Livro (Engessado)", "Inglês de Combate (Real)", "Análise de Eficiência"],
+                        "rows": [
+                            ["Expressar Sentimento", "{{I am very happy to be here.|Estou muito feliz de estar aqui.}}", "{{I'm so glad I made it.|Estou tão feliz que consegui.}}", "{{Glad|Contente}} é mais orgânico; {{Made it|Consegui}} foca no esforço."],
+                            ["Dificuldade de Entendimento", "{{Could you repeat that slowly?|Poderia repetir devagar?}}", "{{Wait, I'm lost. Come again?|Espera, me perdi. Pode repetir?}}", "Metáforas de movimento ({{lost|perdido}}) são 10x mais comuns."],
+                            ["Sair de Casa", "{{We must go to the restaurant.|Devemos ir ao restaurante.}}", "{{Let's head out. I'm starving.|Vamos indo. Tô faminto.}}", "{{Head out|Sair/Partir}} é um phrasal verb vital."],
+                            ["Resolver Conflito", "{{I do not agree with your opinion.|Não concordo com sua opinião.}}", "{{I don't see it that way.|Não vejo dessa forma.}}", "Menos agressivo, mais tático."]
                         ]
                     })
                 },
@@ -207,27 +163,27 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "baby-learning",
                     content: JSON.stringify({
-                        title: "As 4 Fases de Aquisição Tática",
-                        phases: [
+                        "title": "As 4 Fases de Aquisição Tática",
+                        "phases": [
                             {
-                                name: "Observação",
-                                icon: "👁️",
-                                description: "Reconhecimento de Padrão: Eu não focava nas palavras, mas nas reações dela. Se eu falava de um jeito e ela sorria, o padrão era validado. O feedback emocional é mais poderoso que qualquer correção gramatical."
+                                "name": "Observação",
+                                "icon": "👁️",
+                                "description": "Reconhecimento de Padrão: Eu não focava nas palavras, mas nas reações dela. Se eu falava de um jeito e ela sorria, o padrão era validado. O feedback emocional é mais poderoso que qualquer correção gramatical."
                             },
                             {
-                                name: "Associação",
-                                icon: "🔗",
-                                description: "Âncora Química: Eu não traduzia a palavra 'Missed'. Eu associava o som /míst/ ao sentimento de saudade quando ela viajava. Isso criou uma âncora dopaminérgica — a palavra virou sensação, não tradução."
+                                "name": "Associação",
+                                "icon": "🔗",
+                                "description": "Âncora Química: Eu não traduzia a palavra '{{Missed|Senti falta}}'. Eu associava o som /míst/ ao sentimento de saudade quando ela viajava. Isso criou uma âncora dopaminérgica — a palavra virou sensação, não tradução."
                             },
                             {
-                                name: "Erro",
-                                icon: "⚡",
-                                description: "Calibragem de Mira: Eu falava errado, era corrigido ou não era entendido, e meu cérebro ajustava o som. O erro era apenas um dado técnico de ajuste de mira, não uma falha moral."
+                                "name": "Erro",
+                                "icon": "⚡",
+                                "description": "Calibragem de Mira: Eu falava errado, era corrigido ou não era entendido, e meu cérebro ajustava o som. O erro era apenas um dado técnico de ajuste de mira, não uma falha moral."
                             },
                             {
-                                name: "Repetição",
-                                icon: "🔄",
-                                description: "Mielinização: O que funcionava, eu usava de novo e de novo até que os músculos da minha boca não precisassem mais de comando consciente. O reflexo substituiu o cálculo."
+                                "name": "Repetição",
+                                "icon": "🔄",
+                                "description": "Mielinização: O que funcionava, eu usava de novo e de novo até que os músculos da minha boca não precisassem mais de comando consciente. O reflexo substituiu o cálculo."
                             }
                         ]
                     })
@@ -235,9 +191,9 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "phrase-analysis",
                     content: JSON.stringify({
-                        phrase: "I'm not sure I follow you.",
-                        phonetic: "/aim-nó-ʃôr/ — O 't' final desaparece para dar lugar ao 'f'. Ninguém diz /ai/ /æm/ /nɒt/. O som real é um bloco único.",
-                        grammarNote: "Eu removi o 'that' (I'm not sure THAT I...). No método operacional, se uma palavra não adiciona significado, ela é descartada para economizar largura de banda cerebral."
+                        "phrase": "{{I'm not sure I follow you.|Não tenho certeza se te acompanho.}}",
+                        "phonetic": "/aim-nó-ʃôr-ai-fó-lou-iu/ — O 't' final desaparece para dar lugar ao 'f'. Ninguém diz {{I am not|Eu não sou}} /ai/ /æm/ /nɒt/. O som real é um bloco único.",
+                        "grammarNote": "Eu removi o '{{that|que}}' (I'm not sure THAT I...). No método operacional, se uma palavra não adiciona significado, ela é descartada para economizar largura de banda cerebral."
                     })
                 },
                 {
@@ -247,22 +203,22 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "scenario-card",
                     content: JSON.stringify({
-                        context: "Você e sua parceira/o estão em um restaurante. Houve um mal-entendido sobre o horário. O clima está pesado. Você precisa resolver isso sem parecer um robô ou um dicionário ambulante.",
-                        situation: "Você chegou atrasado e precisa se desculpar e resolver a situação.",
-                        wrong: {
-                            action: "O Recruta (Mentalidade de Franquia): Tenta montar a frase perfeita na cabeça antes de falar. Fica calculando preposições.",
-                            result: "\"I apologize. I arrived late because the traffic was very intense. Please, do not be angry.\" — Soa frio, distante e mecânico."
+                        "context": "Você e sua parceira/o estão em um restaurante. Houve um mal-entendido sobre o horário. O clima está pesado. Você precisa resolver isso sem parecer um robô ou um dicionário ambulante.",
+                        "situation": "Você chegou atrasado e precisa se desculpar e resolver a situação.",
+                        "wrong": {
+                            "action": "O Recruta (Mentalidade de Franquia): Tenta montar a frase perfeita na cabeça antes de falar. Fica calculando preposições.",
+                            "result": "\"{{I apologize. I arrived late because the traffic was very intense. Please, do not be angry.|Peço desculpas. Cheguei atrasado porque o trânsito estava muito intenso. Por favor, não fique brava.}}\" — Soa frio, distante e mecânico."
                         },
-                        right: {
-                            action: "O Operador (Mentalidade ES): Usa linguagem real com expressões de nativo. Admite o erro com naturalidade. Oferece solução prática.",
-                            result: "\"Hey, my bad. I messed up with the time. Traffic was a total nightmare, seriously. Let's just eat, okay? My treat.\" — Humano, tático, resolve o conflito."
+                        "right": {
+                            "action": "O Operador (Mentalidade ES): Usa linguagem real com expressões de nativo. Admite o erro com naturalidade. Oferece solução prática.",
+                            "result": "\"{{Hey, my bad. I messed up with the time. Traffic was a total nightmare, seriously. Let's just eat, okay? My treat.|Ei, foi mal. Eu errei com o horário. O trânsito estava um pesadelo total, sério. Vamos só comer, tá bom? Eu pago.}}\" — Humano, tático, resolve o conflito."
                         }
                     })
                 },
                 {
                     type: "reveal-box",
                     title: "🔍 Análise do Sucesso (Clique para expandir)",
-                    content: "'My bad / I messed up': Admite o erro de forma humana e rápida. Baixa o cortisol do interlocutor. 'Total nightmare': Usa uma imagem mental forte em vez de adjetivos técnicos (intense traffic). 'My treat': Resolve o conflito com uma ação prática (eu pago). A frase do Operador tem 15 palavras vs 21 do Recruta, e comunica 3x mais emoção."
+                    content: "'{{My bad|Foi mal}} / {{I messed up|Eu errei}}': Admite o erro de forma humana e rápida. Baixa o cortisol do interlocutor. '{{Total nightmare|Pesadelo total}}': Usa uma imagem mental forte em vez de adjetivos técnicos (intense traffic). '{{My treat|Por minha conta}}': Resolve o conflito com uma ação prática (eu pago). A frase do Operador tem 15 palavras vs 21 do Recruta, e comunica 3x mais emoção."
                 },
                 {
                     type: "h2",
@@ -270,7 +226,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "**Pare de se desculpar.** O vício brasileiro de dizer \"Sorry for my bad English\" é um sinal de submissão que sabota sua autoridade. Na \"Ponte Húngara\", eu entendi que se eu ficasse me desculpando, eu nunca lideraria a conversa. O inglês é apenas o cabo que conecta dois computadores; se o sinal tiver ruído, você não joga o computador fora, você apenas **ajusta a frequência**."
+                    content: "**Pare de se desculpar.** O vício brasileiro de dizer \"{{Sorry for my bad English|Desculpe pelo meu inglês ruim}}\" é um sinal de submissão que sabota sua autoridade. Na \"Ponte Húngara\", eu entendi que se eu ficasse me desculpando, eu nunca lideraria a conversa. O inglês é apenas o cabo que conecta dois computadores; se o sinal tiver ruído, você não joga o computador fora, você apenas **ajusta a frequência**."
                 },
                 {
                     type: "elite-insight",
@@ -280,65 +236,75 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "box-warning",
                     title: "🔓 OPEN LOOP: A COLA SONORA",
-                    content: "A técnica que salvou Roger na 'Ponte Húngara' depende de uma coisa: decodificar a velocidade nativa. No próximo pilar, revelaremos o segredo do 'Connected Speech', a razão pela qual 'What do you want' vira 'Whaddya-wanna'."
+                    content: "A técnica que salvou Roger na 'Ponte Húngara' depende de uma coisa: decodificar a velocidade nativa. No próximo pilar, revelaremos o segredo do '{{Connected Speech|Fala Conectada}}', a razão pela qual '{{What do you want|O que você quer}}' vira '{{Whaddya-wanna|O que cê quer}}'."
                 }
             ]
         },
         {
             id: "p1-m3",
-            title: "Parte 3: O Necrotério do Ensino Tradicional",
-            subtitle: "Por que o Sistema foi Desenhado para Você Falhar — uma autópsia no método das grandes franquias.",
+            title: "MÓDULO 3: Parte 3: O Necrotério do Ensino Tradicional",
+            subtitle: "Autópsia no método das franquias — por que o sistema precisa que você falhe para lucrar.",
             status: "locked",
             blocks: [
                 {
                     type: "system-status",
-                    content: "{{AUTOPSY REPORT|Relatório de Autópsia}}: {{TRADITIONAL_METHOD.exe INITIATED|MÉTODO_TRADICIONAL.exe INICIADO}}..."
+                    content: "{{AUTOPSY REPORT|Relatório de Autópsia}}: {{TRADITIONAL_METHOD.exe|MÉTODO_TRADICIONAL.exe}}... {{VIRUS DETECTED|Vírus Detectado}}... {{SHUTTING DOWN SYSTEM|Desligando Sistema}}..."
                 },
                 {
-                    type: "box-goal",
-                    title: "Objetivo Tático",
-                    content: "Realizar uma autópsia no método das grandes franquias e escolas tradicionais. Vamos identificar os 'vírus' pedagógicos que infectaram seu aprendizado e substituí-los por uma mentalidade de ROI (Retorno sobre Investimento) Linguístico."
+                    type: "box-warning",
+                    title: "🚨 A VERDADE BRUTAL",
+                    content: "O modelo de negócio das grandes escolas depende do seu fracasso. Se você aprende em 6 meses, eles perdem 4 anos de mensalidade. Você não é um aluno para eles; você é uma anuidade paga."
                 },
                 {
                     type: "h2",
-                    content: "3.1 A Anatomia do Fracasso Programado"
+                    content: "3.1 O Inglês de \"Laboratório\" (Estéril e Morto)"
                 },
                 {
                     type: "paragraph",
-                    content: "Você já se perguntou por que as grandes escolas de inglês ocupam os prédios mais caros e gastam milhões em marketing com celebridades, mas o Brasil continua no topo dos rankings de pior proficiência do mundo?"
-                },
-                {
-                    type: "paragraph",
-                    content: "A resposta é brutal: **O modelo de negócio deles depende do seu fracasso.** Se você aprender inglês em 1 ano, eles perdem 4 anos de mensalidade. O sistema tradicional foi desenhado para ser um labirinto, não uma linha reta."
+                    content: "Você passou anos preenchendo lacunas em livros coloridos. Aprendeu a cor das frutas e os animais da fazenda. Mas, no primeiro soco da vida real (um nativo falando rápido), você desmaiou. \n\nO inglês de livro é um cadáver: não tem sotaque, não tem gíria e não tem pressa. O mundo real é um 'zoológico'."
                 },
                 {
                     type: "brain-diagram",
                     content: JSON.stringify({
-                        title: "🧠 CAMADA NEUROCIENTÍFICA: A Armadilha do Input Passivo",
-                        steps: [
-                            "A Curva de Esquecimento (Ebbinghaus): Se você estuda uma regra gramatical e preenche lacunas em um livro, seu cérebro descarta 80% dessa informação em 24 horas. Por quê? Porque não houve 'Saliência de Sobrevivência'.",
-                            "O Erro das Sinapses Isoladas: No método antigo, você aprende 'palavras soltas'. No seu cérebro, isso cria sinapses fracas e isoladas. Para falar, o cérebro precisa de uma rede densa.",
-                            "O Método Elite: Nós usamos {{Active Recall|Recuperação Ativa}}. Em vez de você ler uma regra, nós te jogamos em um cenário onde você precisa daquela estrutura para sobreviver. Isso força o cérebro a fortalecer a bainha de mielina instantaneamente."
+                        "title": "🧠 POR QUE VOCÊ ESQUECE TUDO?",
+                        "steps": [
+                            "Input Passivo: Ler regras e ouvir áudios lentos gera sinapses fracas. Seu cérebro deleta isso em 24h porque não vê risco nem recompensa.",
+                            "A Mordaça Gramatical: Ao tentar 'calcular' a regra antes de falar, você gera um delay de processamento. A conversa avança e você fica para trás.",
+                            "Recuperação Ativa (ES): Nós não ensinamos a regra. Nós te jogamos no fogo. O cérebro só grava o que é necessário para surpreender."
                         ]
                     })
                 },
                 {
                     type: "h2",
-                    content: "3.2 Camada Cultural: O 'Inglês de Laboratório' vs. O Mundo Cão"
+                    content: "3.2 O Crime do \"{{I am going to|Eu vou}}\""
                 },
                 {
                     type: "paragraph",
-                    content: "O inglês dos livros didáticos é o que chamamos de **Inglês de Laboratório**: estéril, sem sotaque, sem ruído e sem pressa. No entanto, o mundo real é um 'zoológico'."
+                    content: "Eles te ensinaram a falar frases inteiras, sílaba por sílaba. Mas humanos não falam assim. Veja a diferença entre o que você aprendeu e o que você realmente precisa ouvir."
+                },
+                {
+                    type: "phonetic-breakdown",
+                    content: JSON.stringify({
+                        "formal": {
+                            "text": "{{I am going to travel next year.|Eu vou viajar no ano que vem.}}",
+                            "analysis": "5 Unidades de processamento. Pesado. Soa como um computador de 1990."
+                        },
+                        "combat": {
+                            "text": "{{I'm gonna travel nex' year.|Vou viajar ano que vem.}}",
+                            "analysis": "1 Unidade sonora: /aim-gâ-na/. Rápido. O 't' de {{next|próximo}} desaparece. É assim que o mundo fala."
+                        },
+                        "explanation": "Sanduíche de Consoantes: Quando o 't' fica preso entre duas consoantes, o nativo o descarta para ganhar velocidade. Se você tenta pronunciar tudo, você trava a língua e soa 'estrangeiro demais'."
+                    })
                 },
                 {
                     type: "comparison-table",
                     content: JSON.stringify({
-                        headers: ["Elemento", "Método Tradicional (Necrotério)", "Método Elite (Operacional)", "Impacto no Campo"],
-                        rows: [
-                            ["Foco", "Gramática Prescritiva (Regras)", "Gramática Funcional (Uso)", "O tradicional te faz um revisor; o Elite te faz um líder."],
-                            ["Velocidade", "Lenta e Articulada (Robótica)", "Velocidade Real ({{Connected Speech|Fala Conectada}})", "O tradicional te deixa surdo para nativos."],
-                            ["Erro", "Punido com notas e vergonha", "Usado como dado de calibragem", "O tradicional cria medo; o Elite cria audácia."],
-                            ["Vocabulário", "Geral e Inútil (Cores, Animais)", "Alta Frequência (Pareto 80/20)", "O tradicional gasta seu tempo; o Elite gera ROI."]
+                        "headers": ["Elemento", "Escola Comum (Necrotério)", "Método Elite (Operacional)"],
+                        "rows": [
+                            ["Velocidade", "Lenta e Robótica", "{{Connected Speech|Fala Conectada}} Real"],
+                            ["Erro", "Punido com nota (Gera Medo)", "Dados de Calibragem (Gera Audácia)"],
+                            ["Vocabulário", "Inútil (Cores/Animais)", "Pareto 80/20 (Alta Frequência)"],
+                            ["Foco", "Saber 'sobre' o inglês", "{{Get it done|Fazer acontecer}} no inglês"]
                         ]
                     })
                 },
@@ -349,242 +315,202 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "h2",
-                    content: "🛠️ Engenharia Reversa: Desmontando o 'I am going to'"
-                },
-                {
-                    type: "paragraph",
-                    content: "Vamos pegar o exemplo clássico que as escolas ensinam por meses: o futuro com 'going to'."
-                },
-                {
-                    type: "phonetic-breakdown",
-                    content: JSON.stringify({
-                        formal: {
-                            text: "{{I am going to travel next year|Vou viajar ano que vem}}.",
-                            analysis: "Pronunciando cada sílaba: I-am-go-ing-to — 5 unidades de processamento"
-                        },
-                        combat: {
-                            text: "{{I'm gonna travel nex' year|Vou viajar ano que vem}}.",
-                            analysis: "Bloco único: /aim-gâ-na/ — 1 unidade sonora"
-                        },
-                        explanation: "A Fusão (Gonna): O cérebro do nativo funde going + to para liberar espaço de processamento para a informação principal (travel). Se você tenta falar o 'going to' completo, você soa como um robô e perde o ritmo da conversa. Omissão do T Final: Em 'next year', o 't' de next desaparece porque a próxima palavra começa com uma consoante. É uma regra de Sandwich de Consoantes. No tradicional, ninguém te conta isso, e você fica tentando pronunciar o 't' e trava a língua. Intenção: O 'I am going to' formal é usado em documentos. Se você usa isso no bar ou em uma reunião de negócios informal, você cria uma barreira social. Você soa 'estrangeiro demais'."
-                    })
-                },
-                {
-                    type: "h2",
-                    content: "⚔️ Cenário de Combate: A Reunião de 'Briefing' (The Corporate Trap)"
+                    content: "⚔️ Cenário de Combate: A Emboscada Corporativa"
                 },
                 {
                     type: "scenario-card",
                     content: JSON.stringify({
-                        context: "Você está em uma reunião via Zoom com a equipe dos EUA. O seu chefe americano diz:",
-                        situation: "\"{{Guys, we gotta pivot the strategy 'cause the numbers ain't lookin' good. Whad'ya reckon?|Pessoal, temos que mudar a estratégia porque os números não parecem bons. O que vocês acham?}}\"",
-                        wrong: {
-                            action: "O Aluno Tradicional: Ele tenta processar: 'We got... to? Pivot? Cause? Ain't?'. Ele trava no Ain't porque o livro disse que isso é errado e não deve ser usado. O filtro afetivo sobe.",
-                            result: "Ele gagueja e perde a oportunidade de dar sua opinião. Silêncio constrangedor."
+                        "context": "Reunião de emergência via Zoom. Seu chefe americano solta uma metralhadora de palavras.",
+                        "situation": "\"{{Guys, we gotta pivot the strategy 'cause the numbers ain't lookin' good. Whad'ya reckon?|Pessoal, temos que mudar a estratégia porque os números não estão bons. O que acham?}}\"",
+                        "wrong": {
+                            "action": "Tentar processar o 'ain't' e o 'reckon' (que não estavam no seu livro). Entrar em pânico.",
+                            "result": "Silêncio constrangedor. Você parece incompetente, mas é apenas o seu método que é lento."
                         },
-                        right: {
-                            action: "O Operador Elite: Filtro de Ruído — ignora ain't e gotta. Captura de Palavras-Chave: {{PIVOT|MUDAR}}, {{STRATEGY|ESTRATÉGIA}}, {{NUMBERS|NÚMEROS}}, {{NOT GOOD|NADA BOM}}.",
-                            result: "\"{{I'm with you. Let's change the plan. I have an idea.|Estou com você. Vamos mudar o plano. Tenho uma ideia.}}\" — Simples, direto e operacional. O chefe quer soluções, não poesia."
+                        "right": {
+                            "action": "Filtro de Ruído. Capturar apenas as palavras de poder: {{PIVOT|MUDAR}}, {{STRATEGY|ESTRATÉGIA}}, {{NUMBERS|NÚMEROS}}, {{NOT GOOD|NADA BOM}}.",
+                            "result": "\"{{I'm with you. Let's change the plan. I have an idea.|Tô contigo. Vamos mudar o plano. Tenho uma ideia.}}\" (Líder. Operacional. Elite.)"
                         }
                     })
                 },
                 {
-                    type: "h2",
-                    content: "🎙️ Tom e Voz: O Despertar da Raiva Produtiva"
-                },
-                {
-                    type: "paragraph",
-                    content: "**Sinta raiva.** Sinta raiva dos anos perdidos preenchendo lacunas. Essa raiva é o que vai te impulsionar a não aceitar mais o método medíocre. O brasileiro médio tem 'trauma' de inglês porque foi tratado como uma criança incapaz. Aqui, você é um adulto com objetivos claros."
-                },
-                {
-                    type: "box-warning",
-                    title: "⚠️ VÍCIO BRASILEIRO DETECTADO",
-                    content: "O medo de parecer 'grosseiro' por ser direto. No inglês de elite, ser direto é ser respeitoso com o tempo do outro. O excesso de palavras (polidez excessiva de livro) soa como insegurança."
-                },
-                {
                     type: "elite-insight",
-                    title: "💡 INSIGHT DE ELITE",
-                    content: "O método tradicional é uma dieta de 500 calorias para quem quer correr uma maratona. Ele te mantém vivo, mas nunca te permite vencer. Estamos aqui para te dar o banquete da fluência real."
+                    title: "💡 DESPERTE SUA RAIVA",
+                    content: "Sinta raiva do tempo perdido preenchendo lacunas. Essa raiva é o que vai te impulsionar a não aceitar mais o método medíocre. O brasileiro médio tem 'trauma' de inglês porque foi tratado como uma criança incapaz."
+                },
+                {
+                    type: "box-action",
+                    title: "🔓 O FIM DA DITADURA DO DICIONÁRIO",
+                    content: "Saber inglês não é saber TODAS as palavras. É saber as palavras certas. No próximo módulo, vou te mostrar como 20% do vocabulário resolve 80% da sua vida. Vamos cortar a gordura e focar no músculo. O Princípio de Pareto vai explodir sua mente."
+                },
+                {
+                    type: "combat-sort-game",
+                    content: JSON.stringify([
+                        { "text": "I apologize for the inconveniences", "type": "lab" },
+                        { "text": "My bad, I messed up", "type": "combat" },
+                        { "text": "I am going to travel next year", "type": "lab" },
+                        { "text": "I'm gonna travel nex' year", "type": "combat" },
+                        { "text": "Could you repeat that slowly?", "type": "lab" },
+                        { "text": "Wait, I'm lost. Come again?", "type": "combat" }
+                    ])
                 }
             ]
         },
         {
             id: "p1-m4",
-            title: "Parte 4: A Lei de Pareto e a Fluência Operacional",
-            subtitle: "O Segredo dos 20% — como resolver 80% das situações com vocabulário cirúrgico.",
+            title: "MÓDULO 4: Parte 4: A Lei de Pareto e a Fluência Operacional",
+            subtitle: "O Segredo dos 20% — como resolver 80% das situações com vocabulário cirúrgico e tático.",
             status: "locked",
             blocks: [
                 {
                     type: "system-status",
-                    content: "{{PARETO ANALYSIS|Análise de Pareto}}: {{VOCABULARY_OPTIMIZATION.exe LOADING|OTIMIZAÇÃO_DE_VOCABULÁRIO.exe CARREGANDO}}..."
+                    content: "{{RESOURCE OPTIMIZATION|OTIMIZAÇÃO DE RECURSOS}}: {{ENABLED|Ativado}}. {{SCANNING HIGH-FREQUENCY DATA|Escaneando Dados de Alta Frequência}}... {{80/20 RULE APPLIED|Regra 80/20 Aplicada}}."
                 },
                 {
                     type: "box-goal",
                     title: "Objetivo Tático",
-                    content: "Aplicar o Princípio de Pareto (80/20) ao idioma. Vamos identificar as armas de alto calibre (vocabulário de alta frequência) que permitem que você resolva 80% das situações do mundo real com apenas 20% do esforço linguístico. Chega de carregar peso morto."
+                    content: "Parar de carregar peso morto. Vamos identificar as armas de alto calibre (vocabulário de alta frequência) que permitem que você opere no mundo real com o mínimo de esforço. Fluência não é sobre saber MUITO, é sobre saber o que IMPORTA."
                 },
                 {
                     type: "h2",
-                    content: "4.1 A Ditadura do Dicionário vs. A Eficiência do Operador"
+                    content: "4.1 A Ditadura do Dicionário vs. O ROI Linguístico"
                 },
                 {
                     type: "paragraph",
-                    content: "O maior erro do aluno brasileiro é acreditar que 'saber inglês' é saber **todas** as palavras. Um nativo médio utiliza cerca de 3.000 palavras no seu dia a dia, embora conheça 20.000. No entanto, com apenas **800 a 1.200 palavras bem aplicadas**, você já é capaz de operar em nível de elite em reuniões, viagens e negociações."
+                    content: "O maior erro do recruta é acreditar que saber inglês é saber TODAS as palavras. Um nativo conhece 20.000 palavras, mas usa apenas 3.000 no dia a dia.\n\nSe você focar nas palavras certas (o seu {{Return on Investment|Retorno sobre Investimento}}), você consegue negociar, viajar e liderar reuniões com apenas 800 a 1.200 palavras bem aplicadas. Você está estudando para ser um dicionário ambulante ou um Operador de Elite?"
                 },
                 {
                     type: "brain-diagram",
                     content: JSON.stringify({
-                        title: "🧠 CAMADA NEUROCIENTÍFICA: O SAR e a Sobrecarga Cognitiva",
-                        steps: [
-                            "O SAR: O seu cérebro possui um filtro chamado Sistema de Ativação Reticular. Ele decide o que é importante e o que é ruído. Se você tenta aprender palavras obscuras (como '{{nevertheless|no entanto}}' ou '{{furthermore|além disso}}'), seu SAR as descarta por falta de uso prático.",
-                            "Custo de Processamento ({{Cognitive Load|Carga Cognitiva}}): Cada palavra que você tenta 'escolher' na hora de falar consome energia do Córtex Pré-Frontal. Se você tem um dicionário imenso mas pouco treinado, seu cérebro sofre de Paralisia por Análise.",
-                            "Poda Neuronal ({{Synaptic Pruning|Poda Sináptica}}): O cérebro é eficiente. Ele fortalece as conexões que você usa sempre e 'poda' as que não usa. Ao focar nos 20% (Pareto), você cria super-rodovias neurais (mielinização pesada) para os termos que realmente importam."
+                        "title": "🧠 O FILTRO DE SOBREVIVÊNCIA (SAR)",
+                        "steps": [
+                            "Sobrecarga Cognitiva: Tentar aprender palavras 'bonitas' mas inúteis (como {{nevertheless|no entanto}}) trava o seu Córtex. Seu cérebro gasta energia escolhendo a palavra e esquece de falar.",
+                            "O Princípio de Pareto: 20% do vocabulário é responsável por 80% da comunicação real. Ao focar nesse núcleo, você cria 'Super-Rodovias Neurais' para respostas automáticas.",
+                            "Poda Sináptica: O cérebro de elite descarta o que não usa. Se uma palavra não te ajuda a resolver um problema em 15 segundos, ela é lixo tecnológico."
                         ]
                     })
                 },
                 {
-                    type: "h2",
-                    content: "4.2 Camada Cultural: Vocabulário de Luxo vs. Vocabulário de ROI"
-                },
-                {
-                    type: "paragraph",
-                    content: "Muitos alunos tentam impressionar usando palavras complexas e acabam soando como um livro didático antigo. No 'Global Command', a moeda de troca é a **clareza**."
+                    type: "elite-insight",
+                    title: "💡 INSIGHT DE COMANDO",
+                    content: "A fluência operacional não é o tamanho do seu arsenal, mas a sua habilidade em derrubar o alvo com uma única pistola. Carregar um canhão que você não consegue levantar só vai te fazer ser morto em campo."
                 },
                 {
                     type: "comparison-table",
                     content: JSON.stringify({
-                        headers: ["Conceito", "Palavra de Livro (Baixo ROI)", "Palavra de Elite (Alto ROI)", "Por que o ROI é maior?"],
-                        rows: [
-                            ["Executar", "To implement/execute", "{{To get it done|Fazer acontecer}}", "Get é o 'coringa' do inglês. Serve para 1000 situações."],
-                            ["Entender", "To comprehend", "{{To get it / To follow|Entender / Acompanhar}}", "Curto, rítmico e demonstra conexão imediata."],
-                            ["Ajudar", "To assist", "{{To help out / give a hand|Dar uma força}}", "Phrasal verbs geram proximidade e fluidez natural."],
-                            ["Compensar", "To compensate", "{{To make up for|Compensar por}}", "Soa menos corporativo e mais humano/operacional."],
-                            ["Descobrir", "To discover", "{{To find out|Descobrir}}", "É o termo padrão em 90% das conversas de negócios."]
+                        "headers": ["Conceito", "Palavra de Livro (Baixo ROI)", "Palavra de Elite (Alto ROI)", "Vantagem"],
+                        "rows": [
+                            ["Executar", "{{To execute/implement|Executar/Implementar}}", "{{To get it done|Fazer acontecer}}", "{{Get|Pegar/Conseguir}} é a ferramenta universal."],
+                            ["Entender", "{{To comprehend|Compreender}}", "{{To get it / To follow|Entender / Acompanhar}}", "Curto, rítmico e demonstra conexão."],
+                            ["Descobrir", "{{To discover|Descobrir}}", "{{To find out|Descobrir/Apurar}}", "Padrão ouro em 95% das conversas reais."],
+                            ["Compensar", "{{To compensate|Compensar}}", "{{To make up for|Compensar por}}", "Soa humano e natural, não corporativo."]
                         ]
                     })
                 },
                 {
                     type: "h2",
-                    content: "🛠️ Engenharia Reversa: O Poder do 'GET' (A Ferramenta Universal)"
+                    content: "4.2 A Ferramenta Universal: O Verbo \"{{GET|CONSEGUIR}}\""
                 },
                 {
                     type: "paragraph",
-                    content: "Se o inglês fosse uma caixa de ferramentas, o verbo **GET** seria a chave inglesa que ajusta qualquer parafuso. Se você domina o Get, sua autonomia operacional sobe 40% instantaneamente."
+                    content: "Se o inglês fosse uma máquina, o verbo **GET** seria o óleo que faz as engrenagens girarem. Ele substitui mais de 50 outros verbos. Se você domina o {{Get|Conseguir}}, sua autonomia sobre 40% instantaneamente."
                 },
                 {
                     type: "phrase-analysis",
                     content: JSON.stringify({
-                        phrase: "{{I'll get it to you by tomorrow.|Eu entrego para você amanhã.}}",
-                        phonetic: "/ail-gué-rit-tchu-bai-tu-már-rou/ — O 't' de get vira um 'r' suave (Flap T) porque está entre duas vogais. O 'to you' vira /tchu/.",
-                        grammarNote: "Multifuncionalidade: Nessa frase, GET substitui 'send', 'deliver', 'bring' ou 'email'. Ao usar Get, você simplifica a tarefa no cérebro do ouvinte. Você está prometendo um resultado, não descrevendo o processo técnico."
+                        "phrase": "{{I'll get it to you by tomorrow.|Eu entrego para você até amanhã.}}",
+                        "phonetic": "/ail-gué-rit-tchu-bai-tu-már-rou/ — O 't' de {{get|pegar}} vira um 'r' rápido (Flap T). O {{to you|para você}} vira /tchu/.",
+                        "grammarNote": "Aqui, GET substitui {{send|enviar}}, {{deliver|entregar}} ou {{bring|trazer}}. Você simplifica a tarefa para o cérebro de quem ouve."
                     })
                 },
                 {
                     type: "h2",
-                    content: "⚔️ Cenário de Combate: A Negociação de Prazo (The Deadline War)"
+                    content: "⚔️ Cenário de Combate: A Guerra dos Prazos"
                 },
                 {
                     type: "scenario-card",
                     content: JSON.stringify({
-                        context: "Você é o gerente de um projeto. Um cliente internacional quer saber por que o relatório não chegou. Você está sob pressão (Amígdala em alerta).",
-                        situation: "O cliente pergunta: '{{Where is the report? We were expecting it yesterday.|Cadê o relatório? Esperávamos isso ontem.}}'",
-                        wrong: {
-                            action: "O Recruta (Mentalidade Dicionário): Tenta montar uma frase complexa para parecer profissional.",
-                            result: "\"{{I apologize for the delay. We are experiencing some technical difficulties, but we will provide the document as soon as possible.|Peço desculpas pelo atraso. Estamos com dificuldades técnicas, mas entregaremos o documento assim que possível.}}\" — Muito longo, chances imensas de errar 'difficulties' ou 'provide'."
+                        "context": "Cliente internacional furioso. O relatório está atrasado. Sua Amígdala quer que você se esconda.",
+                        "situation": "\"{{Where is the report? We were expecting it yesterday!|Onde está o relatório? Estávamos esperando ontem!}}\"",
+                        "wrong": {
+                            "action": "O Recruta tenta ser 'educado demais' com palavras complexas e gagueja.",
+                            "result": "\"{{I apologize for the inconveniences. We are having difficulties...|Peço desculpas pelas inconveniências. Estamos tendo dificuldades...}}\" (Você soa inseguro e culpado)"
                         },
-                        right: {
-                            action: "O Operador (Pareto 80/20): Usa palavras de alta frequência e foca no resultado.",
-                            result: "\"{{Sorry about that. We're running a bit late, but I'll get it done today. I'll send it over in an hour. Is that okay?|Desculpe por isso. Estamos um pouco atrasados, mas vou resolver hoje. Te envio em uma hora. Tudo bem?}}\" — 'Running late' + 'Get it done' + 'Send it over' + pergunta tática."
+                        "right": {
+                            "action": "O Operador usa Pareto. Direto ao ponto. Foco no resultado.",
+                            "result": "\"{{Sorry about that. We're running a bit late, but I'll get it done today. Is that okay?|Desculpe por isso. Estamos um pouco atrasados, mas vou resolver hoje. Tudo bem?}}\" (Você assume o comando da conversa)"
                         }
                     })
                 },
                 {
-                    type: "reveal-box",
-                    title: "🔍 Análise do Sucesso (Clique para expandir)",
-                    content: "'Running late': Expressão de alta frequência para atrasos. 'Get it done': Foca no resultado, não no problema. 'Send it over': Phrasal verb que demonstra agilidade. 'Is that okay?': Devolve a bola para o cliente, ganhando tempo e controle da conversa."
-                },
-                {
-                    type: "h2",
-                    content: "🎙️ Tom e Voz: A Mentalidade de 'Menos é Mais'"
-                },
-                {
-                    type: "paragraph",
-                    content: "Muitos brasileiros têm vergonha de falar 'simples'. Eles acham que falar simples é sinal de ignorância. A verdade é o oposto: no mundo executivo global, **quem fala difícil geralmente é quem não sabe o que está fazendo**."
-                },
-                {
-                    type: "paragraph",
-                    content: "**Humor Tático:** Se você tentar usar uma palavra de 5 sílabas e gaguejar, você parece um amador. Se você usar uma palavra de 1 sílaba com a entonação correta e confiança de um operador, você parece o dono da empresa."
-                },
-                {
                     type: "box-warning",
-                    title: "⚠️ VÍCIO BRASILEIRO DETECTADO",
-                    content: "Tentar traduzir expressões idiomáticas do português literalmente (ex: 'The cow went to the swamp' para 'A vaca foi pro brejo'). Pare. No Método Pareto, usamos as expressões de alta frequência do inglês, como 'It's going south' (Está dando errado)."
+                    title: "⚠️ O LIMITE DO TUTORIAL",
+                    content: "O que você viu até aqui é o mapa da mina. Mas saber que o 80/20 existe não é o mesmo que possuir as listas de alta frequência e os treinamentos de mielinização pesada. \n\nExiste um protocolo silencioso que separa quem 'sabe como funciona' de quem 'opera no automático'. Para cruzar essa linha, você precisará de mais do que apenas teoria."
                 },
                 {
                     type: "elite-insight",
-                    title: "💡 INSIGHT DE ELITE",
-                    content: "A fluência operacional não é sobre o quanto você sabe, mas sobre o quão pouco você precisa para resolver um problema. Se você pode derrubar o alvo com uma pistola (palavras simples), por que carregar um canhão (vocabulário complexo) que você mal consegue levantar?"
+                    title: "🔓 OPEN LOOP: O VÍRUS DO SOTAQUE",
+                    content: "Você aprendeu a economizar palavras. Mas de que adianta usar as palavras certas se o seu sotaque brasileiro adiciona uma \"{{Vogal Fantasma|Epêntese}}\" que faz os gringos acharem que você é um amador? No próximo módulo, vou te mostrar o som invisível que destrói sua autoridade. Prepare seus ouvidos."
                 }
             ]
         },
         {
             id: "p1-m5",
-            title: "Parte 5: Anatomia do Som Real",
-            subtitle: "Decodificando a 'Metralhadora' Nativa — hackear o seu sistema auditivo.",
+            title: "MÓDULO 5: Parte 5: Anatomia do Som Real",
+            subtitle: "Decodificando a 'Metralhadora' Nativa — hackear o seu sistema auditivo para entender filmes e nativos.",
             status: "locked",
             blocks: [
                 {
                     type: "system-status",
-                    content: "{{AUDIO DECODER|DECODIFICADOR DE ÁUDIO}}: {{CONNECTED_SPEECH.wav ANALYZING|FALA_CONECTADA.wav ANALISANDO}}..."
+                    content: "{{AUDIO DECODER|DECODIFICADOR DE ÁUDIO}}: {{CONNECTED_SPEECH.wav ANALYZING|FALA_CONECTADA.wav ANALISANDO}}... {{DETECTING PHANTOM VOWELS|Detectando Vogais Fantasmas}}..."
                 },
                 {
                     type: "box-goal",
                     title: "Objetivo Tático",
-                    content: "Hackear o seu sistema auditivo. Vamos entender por que os nativos parecem falar 'rápido demais' e como desativar a 'Vogal Fantasma' (o vício nº 1 dos brasileiros) que destrói sua inteligência percebida em campo."
+                    content: "Seu ouvido não é ruim; ele foi mal treinado. Vamos entender por que os nativos parecem falar 'rápido demais' e como desativar a 'Vogal Fantasma' (o vício nº 1 dos brasileiros) que destrói sua inteligência percebida em campo."
                 },
                 {
                     type: "h2",
-                    content: "5.1 O Mito do 'Eles Falam Rápido Demais'"
+                    content: "5.1 O Mito da Velocidade (Eles não falam rápido)"
                 },
                 {
                     type: "paragraph",
-                    content: "A maior reclamação dos operadores novatos é: 'Eu entendo o professor, mas não entendo o nativo na rua'. O problema **não é a velocidade, é o ritmo**. O português é uma língua Syllable-timed (cada sílaba tem o mesmo peso); o inglês é Stress-timed (nós 'atropelamos' as sílabas fracas para enfatizar as fortes)."
+                    content: "A maior reclamação dos operadores novatos é: 'Eu entendo o professor, mas não entendo o nativo na rua'. O segredo: eles não falam rápido, eles falam **conectado**.\n\nO português é uma língua 'Sílaba por Sílaba' (tá-tá-tá-tá). O inglês é uma língua de 'Ritmo e Pancada' (Stress-timed). Nós atropelamos as palavras fracas para chegar logo nas fortes."
                 },
                 {
                     type: "brain-diagram",
                     content: JSON.stringify({
-                        title: "🧠 CAMADA NEUROCIENTÍFICA: Percepção Categórica e o Filtro Fonético",
-                        steps: [
-                            "Percepção Categórica: Seu cérebro foi treinado para ignorar sons que não existem no português. Quando um nativo usa um som que você não conhece (como o Schwa ou o Short I), seu cérebro tenta 'encaixar' esse som na gaveta mais próxima.",
-                            "O Erro de Processamento: O cérebro brasileiro ouve '{{Bit|Pouco}}' (pouco) e processa como '{{Beat|Bater}}' (bater). Essa confusão gera um delay de processamento no Córtex Auditivo, fazendo com que você perca o resto da frase enquanto tenta decodificar a primeira palavra.",
-                            "Mapeamento Fonético: Para entender o inglês real, precisamos 're-mapear' os neurônios auditivos para reconhecer o {{Connected Speech|Fala Conectada}} (fala conectada) como uma unidade única de som, e não como palavras separadas."
+                        "title": "🧠 O FILTRO FONÉTICO BRASILEIRO",
+                        "steps": [
+                            "Percepção Categórica: Seu cérebro foi treinado para ignorar sons que não existem no português. Quando um nativo usa um 'Schwa' ou um 'Short I', seu cérebro tenta encaixar na gaveta mais próxima (geralmente o som de 'i' ou 'é').",
+                            "O Delay de Processamento: Você ouve '{{Bit|Pouco}}' e seu cérebro processa como '{{Beat|Bater}}'. Essa confusão gera um atraso. Enquanto você decodifica a primeira palavra, o nativo já terminou a frase.",
+                            "Remapeamento Neural: Para entender o inglês real, precisamos instalar um novo driver de áudio no seu córtex auditivo."
                         ]
                     })
                 },
                 {
                     type: "h2",
-                    content: "5.2 A Batalha contra a 'Vogal Fantasma' (Epêntese)"
+                    content: "5.2 A Batalha contra a 'Vogal Fantasma' (O Vírus 'i')"
                 },
                 {
                     type: "paragraph",
-                    content: "O maior inimigo da sua fluência é o som que você **adiciona** onde ele não existe. No Brasil, toda consoante 'quer' ser seguida de uma vogal. No inglês, consoantes podem ser secas e mortas."
+                    content: "O maior inimigo da sua autoridade é o som que você **adiciona** onde ele não existe. No Brasil, consoante muda é proibida; toda consoante quer uma vogal de mãos dadas. No inglês, consoantes podem (e devem) morrer secas."
                 },
                 {
                     type: "comparison-table",
                     content: JSON.stringify({
-                        headers: ["Palavra", "O Erro (Vogal Fantasma)", "O Som Elite", "Impacto Tático"],
-                        rows: [
-                            ["Facebook", "Face-bu-qui", "/feis-buk/", "O 'i' final sinaliza amadorismo e quebra o ritmo."],
+                        "headers": ["Palavra", "O Erro Brasileiro (Vogal Fantasma)", "O Som Elite (Seco)", "Impacto na Imagem"],
+                        "rows": [
+                            ["Facebook", "Face-bu-qui", "/feis-buk/", "O 'i' final sinaliza amadorismo imediato."],
                             ["Like", "Lai-qui", "/laik/", "Matar o som no 'k' economiza 0.5s de processamento."],
-                            ["Red", "He-di", "/red/", "Se você disser 'Redi', o nativo pode entender 'Ready'."],
-                            ["Stop", "Es-tó-pi", "/stɑːp/", "Adicionar um 'e' antes do 's' é o 'dedo-duro' do brasileiro."]
+                            ["Red", "He-di", "/red/", "Se você disser 'Redi', o nativo entende '{{Ready|Pronto}}'."],
+                            ["Stop", "Es-tó-pi", "/stɑːp/", "Adicionar um 'e' antes do 's' é o 'dedo-duro' da sua nacionalidade."]
                         ]
                     })
                 },
                 {
                     type: "box-action",
-                    title: "🎯 Ação Corretiva",
-                    content: "Imagine que o final da palavra é um penhasco. Você deve parar exatamente na consoante final. Não deixe sua língua 'escorregar' para um som de 'i'."
+                    title: "🎯 AÇÃO CORRETIVA: O PENHASCO",
+                    content: "Imagine que o final da palavra é um penhasco. Você deve parar exatamente na consoante final. Não deixe sua língua 'escorregar' para um som de 'i'. Treine travar a garganta no final de \"{{Big|Grande}}\" e \"{{Hot|Quente}}\"."
                 },
                 {
                     type: "h2",
@@ -592,20 +518,20 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Vamos analisar a frase que você mais vai ouvir em campo e como ela realmente soa quando disparada por um nativo."
+                    content: "Vamos analisar a frase mais comum do mundo e por que você nunca a ouviu como aprendeu na escola."
                 },
                 {
                     type: "phonetic-breakdown",
                     content: JSON.stringify({
-                        formal: {
-                            text: "{{What do you want to eat?|O que você quer comer?}}",
-                            analysis: "6 palavras separadas — processamento lento e artificial"
+                        "formal": {
+                            "text": "{{What do you want to eat?|O que você quer comer?}}",
+                            "analysis": "6 palavras separadas. Lento. Artificial. Ninguém fala assim fora da sala de aula."
                         },
-                        combat: {
-                            text: "{{Whaddya wanna eat?|O que você quer comer?}}",
-                            analysis: "/wʌ-djə-wɑː-nə-it/ — 3 blocos sonoros"
+                        "combat": {
+                            "text": "{{Whaddya wanna eat?|Que cê qué comer?}}",
+                            "analysis": "/wʌ-djə-wɑː-nə-it/ — 3 blocos sonoros fluidos."
                         },
-                        explanation: "Redução Tática: O 'do you' funde-se com 'what', transformando-se em um som de 'dj' suave = /wʌ-djə/. O Schwa (/ə/): O som do 'o' em 'do' e do 'u' em 'you' morre, virando um som neutro e relaxado. O Flap T: Se a próxima palavra começar com vogal, o 't' vira um som de 'r' rápido. Wanna: O 'want to' é fundido para manter a velocidade."
+                        "explanation": "Redução Tática: O 'do you' funde-se com 'what', virando /wʌ-djə/. O 'want to' vira 'wanna'. Se você esperar ouvir 'What do you', você vai perder o início da frase e ficar perdido no resto."
                     })
                 },
                 {
@@ -614,23 +540,23 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "No Brasil, falamos com a boca muito aberta e articulada. O inglês é falado no fundo da garganta, com a mandíbula mais relaxada."
+                    content: "No Brasil, falamos com a boca muito aberta e articulada. O inglês é falado no fundo da garganta, com a mandíbula relaxada, quase sem abrir a boca."
                 },
                 {
                     type: "comparison-table",
                     content: JSON.stringify({
-                        headers: ["Elemento", "Formal (Acadêmico)", "Street (Operacional)", "Por que fazem isso?"],
-                        rows: [
-                            ["Got to", "{{I have got to go.|Eu tenho que ir.}}", "{{I gotta split.|Eu tenho que vazar.}}", "Eficiência máxima de movimento."],
-                            ["Could have", "{{I could have done it.|Eu poderia ter feito.}}", "{{I coulda dunnit.|Eu podia ter feito.}}", "Redução de 4 sílabas para 2."],
+                        "headers": ["Elemento", "Formal (Acadêmico)", "Street (Operacional)", "Por que fazem isso?"],
+                        "rows": [
+                            ["Got to", "{{I have got to go.|Eu tenho que ir.}}", "{{I gotta split.|Tenho que vazar.}}", "Eficiência máxima de movimento."],
+                            ["Could have", "{{I could have done it.|Eu poderia ter feito.}}", "{{I coulda dunnit.|Podia ter feito.}}", "Redução de 4 sílabas para 2."],
                             ["Out of", "{{Get out of here.|Saia daqui.}}", "{{Outta here!|Zarpa daqui!}}", "O 't' vira 'r' e as palavras se fundem."]
                         ]
                     })
                 },
                 {
                     type: "reveal-box",
-                    title: "📝 Nota do Instrutor (Clique para expandir)",
-                    content: "O nativo não fala 'errado', ele fala de forma econômica. Tentar falar o inglês de livro em um bar ou em uma reunião informal é como ir de terno e gravata para a praia: você é o único que não está confortável."
+                    title: "📝 NOTA TÁTICA (Clique para expandir)",
+                    content: "O nativo não fala 'errado', ele fala de forma econômica. Tentar falar o inglês de livro em um bar ou em uma reunião informal é como ir de terno e gravata para a praia: você é o único que não está confortável e todos percebem."
                 },
                 {
                     type: "h2",
@@ -639,15 +565,15 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "scenario-card",
                     content: JSON.stringify({
-                        context: "Você está em uma cafeteria em Londres. Há uma fila enorme atrás de você. O atendente, com sotaque forte e pressa, dispara:",
-                        situation: "\"{{Whaddya-havin? Need-any-thin-else?|O que vai querer? Precisa de mais alguma coisa?}}\"",
-                        wrong: {
-                            action: "O Aluno Tradicional: Tenta separar as palavras: 'What... do... you... having?'. Ele se confunde com o 'ing' no final e trava na gramática.",
-                            result: "O atendente perde a paciência. A fila cresce. Pânico."
+                        "context": "Starbucks em NY. Fila enorme atrás de você. O atendente, estressado, dispara:",
+                        "situation": "\"{{Whaddya-havin? Need-any-thin-else?|O que vai querer? Precisa de mais algo?}}\"",
+                        "wrong": {
+                            "action": "O Aluno Tradicional tenta separar as palavras: 'What... do... you... having?'. Ele trava na gramática do 'having'.",
+                            "result": "O atendente perde a paciência. 'Next!'. Você sai sem o café e com a autoestima no chão."
                         },
-                        right: {
-                            action: "O Operador Elite: Reconhece /whaddya/ como unidade de pergunta. Foca na entonação e na palavra HAVING.",
-                            result: "\"{{A black coffee, please. That's it.|Um café preto, por favor. Só isso.}}\" — Curto, grosso e funcional. Missão cumprida sem estresse."
+                        "right": {
+                            "action": "O Operador Elite reconhece o som /whaddya/ como um bloco único. Foca na entonação de pergunta.",
+                            "result": "\"{{A black coffee, please. That's it.|Um café preto, por favor. Só isso.}}\" (Curto, grosso e funcional. Missão cumprida.)"
                         }
                     })
                 },
@@ -657,33 +583,38 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Muitas vezes, a melhor pronúncia é o **silêncio entre as palavras**. O brasileiro tem medo do silêncio e preenche com 'éééé...' ou 'humm...'."
-                },
-                {
-                    type: "paragraph",
-                    content: "**Técnica de Elite:** Se você esquecer uma palavra, faça uma pausa silenciosa. Isso demonstra controle e autoridade. Preencher com sons de vogais brasileiras (o 'humm' com som de 'u') quebra sua imagem de operador."
+                    content: "O brasileiro tem pavor do silêncio. Quando esquecemos uma palavra, preenchemos com \"éééé...\" ou \"humm...\". Isso é mortal.\n\n**Técnica de Elite:** Se esquecer a palavra, faça uma pausa silenciosa. Olhe nos olhos. O silêncio demonstra pensamento e controle. O \"éééé\" demonstra insegurança e ativa o sotaque brasileiro."
                 },
                 {
                     type: "elite-insight",
                     title: "💡 INSIGHT DE ELITE",
-                    content: "O seu ouvido é um músculo. Se você só treina ouvindo áudio lento de livro didático, você está treinando para perder. A partir de agora, você vai consumir o som real, com todas as suas 'sujeiras' e contrações. É assim que o mundo fala."
+                    content: "O seu ouvido é um músculo. Se você só treina ouvindo áudio lento de livro didático, você está treinando para perder. A partir de agora, você vai consumir o som real, com todas as suas 'sujeiras', reduções e velocidade. Bem-vindo ao mundo real."
+                },
+                {
+                    type: "audio-decode-game",
+                    content: JSON.stringify([
+                        { "phonetic": "Whaddya-havin?", "options": ["What do you have?", "What are you having?", "What have you?"], "answer": 1 },
+                        { "phonetic": "I gotta split", "options": ["I got to spit", "I have got to go", "I got a split"], "answer": 1 },
+                        { "phonetic": "I coulda dunnit", "options": ["I could do it", "I could have done it", "I cold donut"], "answer": 1 },
+                        { "phonetic": "Outta here!", "options": ["Out of here", "Outside here", "Ought to hear"], "answer": 0 }
+                    ])
                 }
             ]
         },
         {
             id: "p1-m6",
-            title: "Parte 6: O Elo Final — A Aliança do Operador",
-            subtitle: "O Nascimento da sua Liberdade — selar a conexão emocional e ativar o Modo de Operação Total.",
+            title: "MÓDULO 6: Parte 6: O Elo Final — A Aliança do Operador",
+            subtitle: "O Nascimento da sua Liberdade — selar a conexão emocional e preparar para o Teste de Fogo.",
             status: "locked",
             blocks: [
                 {
                     type: "system-status",
-                    content: "{{IDENTITY PROCEDURE|PROCEDIMENTO DE IDENTIDADE}}: {{OPERATOR_ALLIANCE.exe INITIALIZING|ALIANÇA_DO_OPERADOR.exe INICIALIZANDO}}..."
+                    content: "{{IDENTITY PROCEDURE|PROCEDIMENTO DE IDENTIDADE}}: {{OPERATOR_ALLIANCE.exe INITIALIZING|ALIANÇA_DO_OPERADOR.exe INICIALIZANDO}}... {{HUMAN VERIFICATION REQUIRED|VERIFICAÇÃO HUMANA NECESSÁRIA}}..."
                 },
                 {
                     type: "box-goal",
                     title: "Objetivo Tático",
-                    content: "Selar a conexão emocional entre a sua história e a sua nova identidade. Este não é um contrato de estudos; é um pacto de sobrevivência. Vamos converter a sua frustração em combustível e ativar o 'Modo de Operação Total'."
+                    content: "Este é o ponto de não retorno. Não estamos aqui para \"tentar\" aprender inglês. Estamos aqui para assassinar o velho \"eu\" que tinha medo de falar. O objetivo deste módulo é selar um pacto biológico e preparar você para o **Checkpoint de Elite**."
                 },
                 {
                     type: "h2",
@@ -691,103 +622,66 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "A minha história (Parte 2) não terminou apenas com um vocabulário novo. Ela terminou quando eu percebi que o inglês era a única coisa que me separava da pessoa que eu amava. Eu me lembro vividamente de estar em uma mesa, querendo dizer algo profundo, algo que fizesse os olhos dela brilharem, e a gramática de livro ser uma **mordaça na minha boca**."
+                    content: "A minha história (Parte 2) não terminou apenas com um vocabulário novo. Ela terminou quando eu percebi que o inglês era a única coisa que me separava da pessoa que eu amava. Eu me lembro vividamente de estar em uma mesa, querendo dizer algo profundo, e a gramática de livro ser uma **mordaça na minha boca**."
                 },
                 {
                     type: "paragraph",
-                    content: "A ES Academy nasceu desse grito contido. Ela nasceu para que você nunca mais sinta que é 'menos' só porque não consegue conjugar o Present Perfect. **A fluência não é um troféu; é a sua voz sendo devolvida a você.** Quando eu finalmente consegui rir, chorar e brigar em inglês, eu não era apenas um 'falante', eu era **eu mesmo em outra língua**. E é essa liberdade que eu estou te entregando agora."
+                    content: "A ES Academy nasceu desse grito contido. Ela nasceu para que você nunca mais sinta que é 'menos' só porque não consegue conjugar o verbo. **A fluência não é um troféu; é a sua voz sendo devolvida a você.**"
                 },
                 {
                     type: "brain-diagram",
                     content: JSON.stringify({
-                        title: "🧠 CAMADA NEUROCIENTÍFICA: O Valor da Sobrevivência e o Sistema de Recompensa",
-                        steps: [
-                            "O Eixo Hipotálamo-Hipófise-Adrenal (HPA): O seu cérebro prioriza o que é vital. Se você estuda por 'obrigação', seu cérebro descarta. Se você estuda por CONEXÃO (para salvar seu emprego, para falar com seu parceiro, para ser livre), seu cérebro entende que o inglês é uma ferramenta de sobrevivência.",
-                            "Ocitocina e Aprendizado Social: Ao se conectar com a minha história e com os outros operadores, seu cérebro libera ocitocina. Esse hormônio REDUZ o medo (Filtro Afetivo) e abre as portas para a plasticidade neural.",
-                            "A Mudança de Identidade: O seu Córtex Cingulado Anterior monitora conflitos. Se você diz 'eu sou péssimo em inglês', ele vai sabotar seus treinos. Ao assinar este procedimento, você está instalando uma nova identidade: 'Eu sou um comunicador de elite em treinamento'. O cérebro trabalhará para manter essa nova imagem."
+                        "title": "🧠 O EFEITO SALIÊNCIA (Por que você vai ser testado)",
+                        "steps": [
+                            "O Cérebro Preguiçoso: Se você sabe que ninguém vai ver o seu trabalho, seu cérebro economiza energia e não retém a informação.",
+                            "A Pressão Social (Accountability): Saber que um HUMANO REAL vai ler e julgar suas palavras ativa o sistema de alerta do cérebro. A adrenalina sobe. A memória grava.",
+                            "A Validação: Receber um 'Aprovado' de um especialista gera uma descarga de dopamina 10x maior do que passar em um quiz automático."
                         ]
                     })
                 },
                 {
                     type: "h2",
-                    content: "6.2 A Aliança de Elite (O Teu Novo DNA)"
+                    content: "6.2 O Checkpoint Humano (A Prova de Fogo)"
                 },
                 {
                     type: "paragraph",
-                    content: "Para cruzar a fronteira para o Pilar 2, você precisa aceitar as leis que regem o nosso território. No 'Global Command', não há espaço para vítimas, apenas para **protagonistas**."
+                    content: "Você chegou ao fim do conteúdo teórico. Mas, no Global Command, teoria sem execução é alucinação. Para desbloquear o **Pilar 2 (Superpoderes Auditivos)**, você passará por duas etapas agora:\n\n1. **O Quiz Tático:** Perguntas rápidas para verificar se você entendeu os conceitos (Filtro Afetivo, Pareto, etc).\n2. **A Prova de Texto (O Desafio Real):** Você terá que escrever. E é aqui que separamos os meninos dos lobos."
                 },
                 {
-                    type: "comparison-table",
-                    content: JSON.stringify({
-                        headers: ["Lei", "O Princípio", "O Impacto na Sua Vida"],
-                        rows: [
-                            ["🔗 Lei da Conexão Humana", "Você nunca mais verá o inglês como 'matéria'. Você verá como o cabo que te liga ao mundo.", "Se o cabo tiver ruído, você não desiste; você ajusta a frequência."],
-                            ["⚡ Lei da Vulnerabilidade Tática", "Você admite que vai errar. E você vai rir disso.", "O erro é o sinal de que você está na fronteira do seu território, expandindo-o."],
-                            ["🗽 Lei da Liberdade Absoluta", "Você estuda hoje para ser o dono da sua narrativa amanhã.", "Sem tradutores, sem intermediários, sem mordaças."]
-                        ]
-                    })
+                    type: "box-warning",
+                    title: "🚫 PROTOCOLO ANTI-IA (LEIA COM ATENÇÃO)",
+                    content: "**NÃO USE CHATGPT. NÃO USE TRADUTOR.**\n\nSua prova será corrigida por um **Tutor Humano de Elite**, não por uma máquina. Nossos tutores são treinados para detectar padrões sintéticos de IA.\n\nSe detectarmos que seu texto foi gerado por robô:\n1. Sua prova será anulada.\n2. Você perderá o respeito do comando.\n\n**O que nós queremos:** Queremos o seu inglês \"quebrado\", real, sujo e honesto. Queremos ver o seu esforço, não a perfeição de um algoritmo. **Prefiro um erro honesto do que um acerto mentiroso.**"
+                },
+                {
+                    type: "elite-insight",
+                    title: "💎 O VALOR DO FEEDBACK SINCERO",
+                    content: "No mundo lá fora, as pessoas mentem para serem educadas. Elas dizem \"seu inglês é bom\" enquanto riem por dentro. Aqui, nós vendemos a **VERDADE**.\n\nVocê receberá um feedback brutalmente honesto, cirúrgico e humano. Alguém vai ler cada palavra sua, analisar sua lógica e te dizer exatamente onde você está errando e como corrigir. Esse nível de atenção personalizada é o que custa milhares de dólares em consultorias. Aqui, é o padrão."
                 },
                 {
                     type: "h2",
-                    content: "🛠️ Engenharia Reversa: O 'I Got This' (A Postura de Comando)"
+                    content: "⚔️ O Pacto Final"
                 },
                 {
                     type: "paragraph",
-                    content: "Analise o peso emocional desta frase curta. É o mantra do operador."
+                    content: "Antes de clicar em \"Iniciar Prova\", faça um acordo com você mesmo. Você não vai trapacear. Você não vai se esconder. Você vai colocar sua cara a tapa."
                 },
                 {
                     type: "phrase-analysis",
                     content: JSON.stringify({
-                        phrase: "{{I got this.|Deixa comigo.}}",
-                        phonetic: "/ai-gót-thís/ — O 't' de got é seco, quase um estalo. São três batidas fortes que acalmam o sistema nervoso.",
-                        grammarNote: "Propriedade (Ownership): O uso do 'Got' indica posse imediata da situação. Não é 'Eu tentarei'. É 'Está sob meu controle'. O som do 'th' em 'this' exige que você coloque a língua entre os dentes — é um gesto físico de afirmação que o sistema tradicional ignora, mas que nós usamos para ancorar a confiança."
+                        "phrase": "{{Bring it on.|Manda ver.}}",
+                        "phonetic": "/brin-guiron/ — O som conecta tudo. Postura de ataque.",
+                        "grammarNote": "Atitude de Combate: Usado quando você está pronto para o desafio, não importa quão difícil seja. É o oposto de recuar."
                     })
-                },
-                {
-                    type: "h2",
-                    content: "⚔️ Cenário de Combate: O Fantasma do Passado"
-                },
-                {
-                    type: "scenario-card",
-                    content: JSON.stringify({
-                        context: "Você abre o próximo pilar. A velha voz da insegurança sussurra:",
-                        situation: "\"Isso é muito difícil. Você nunca vai conseguir falar como o Roger.\"",
-                        wrong: {
-                            action: "O Recruta: Fica triste, fecha a plataforma.",
-                            result: "Volta para a zona de conforto da mediocridade. Mais um ano perdido."
-                        },
-                        right: {
-                            action: "O Operador Elite (Conexão Total): Responde ao Fantasma: 'Eu não quero falar como o Roger. Eu quero falar como EU mesmo. E o Roger está aqui para me dar o mapa que ele suou sangue para desenhar.'",
-                            result: "Ativação: Bata no peito e diga: '{{I got this. One step at a time.|Eu dou conta. Um passo de cada vez.}}' O medo é um passageiro, mas VOCÊ é o piloto."
-                        }
-                    })
-                },
-                {
-                    type: "h2",
-                    content: "🎙️ Tom e Voz: O Convite ao Próximo Nível"
-                },
-                {
-                    type: "paragraph",
-                    content: "Eu não quero que você apenas prossiga. Eu quero que você sinta uma **necessidade física de continuar**. O Pilar 1 foi a cirurgia para remover o tumor do método antigo. O Pilar 2 é onde começamos a te dar **superpoderes auditivos**."
-                },
-                {
-                    type: "paragraph",
-                    content: "Imagine a sensação de dar o play em um filme e, pela primeira vez, as palavras não serem apenas ruído, mas **frases claras**. Imagine o prazer de não precisar mais de legendas para a sua própria vida. Esse prazer está a **um clique de distância**."
-                },
-                {
-                    type: "elite-insight",
-                    title: "💡 INSIGHT FINAL DE ELITE",
-                    content: "A mordaça caiu. Você conhece a minha dor, e agora ela é o seu escudo. Você entendeu que o inglês é biologia e emoção, não gramática e papel. Você não é mais um estudante; você é um OPERADOR em treinamento."
                 },
                 {
                     type: "box-action",
-                    title: "📋 BRIEFING DE ENCERRAMENTO",
-                    content: "O Pilar 1 está selado. Seu sistema operacional mental foi completamente reformatado. Você agora possui:\\n\\n✅ Conhecimento do Filtro Afetivo e como desativá-lo\\n✅ A história do Roger como prova de que a mudança é possível\\n✅ A visão clara do fracasso do método tradicional\\n✅ O vocabulário Pareto 80/20 para máximo ROI\\n✅ O ouvido calibrado para o Connected Speech\\n✅ A Aliança de Elite selada no seu DNA"
+                    title: "📋 BRIEFING PRÉ-PROVA",
+                    content: "Você está prestes a entrar na zona de avaliação.\n\n**Sua Missão:** Provar que entendeu a mentalidade do Operador.\n**Seu Juiz:** Um ser humano real, especialista e incorruptível.\n**Sua Recompensa:** A verdade sobre o seu nível e a chave para o Pilar 2."
                 },
                 {
                     type: "pillar-end",
-                    title: "🎖️ PILAR 1 CONCLUÍDO",
-                    content: "OPERADOR, O GLOBO ESTÁ ESCURO. É HORA DE ILUMINAR O PILAR 2. Seus ouvidos estão prestes a receber superpoderes de decodificação. Prepare-se para ouvir o inglês como você nunca ouviu antes."
+                    title: "🎖️ PILAR 1: FASE TEÓRICA CONCLUÍDA",
+                    content: "A teoria acabou. A prática começa agora. Respire fundo. Beba água. E mostre-nos quem você realmente é. **Aos vencedores, o Pilar 2 os aguarda.**"
                 }
             ]
         }

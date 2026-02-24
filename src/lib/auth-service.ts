@@ -11,6 +11,7 @@ import {
     signOut,
     updateProfile as firebaseUpdateProfile,
     updatePassword,
+    sendPasswordResetEmail,
     User as FirebaseUser
 } from "firebase/auth";
 import {
@@ -310,6 +311,25 @@ export async function changePassword(newPassword: string): Promise<AuthResult> {
             return { success: false, error: 'A nova senha deve ter pelo menos 6 caracteres.' };
         }
         return { success: false, error: 'Erro ao alterar senha.' };
+    }
+}
+
+/**
+ * Reset Password (Send Email)
+ */
+export async function resetPassword(email: string): Promise<AuthResult> {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        return { success: true };
+    } catch (error: any) {
+        console.error("Reset Password Error:", error);
+        if (error.code === 'auth/user-not-found') {
+            return { success: false, error: 'Não há usuário cadastrado com este e-mail.' };
+        }
+        if (error.code === 'auth/invalid-email') {
+            return { success: false, error: 'Formato de e-mail inválido.' };
+        }
+        return { success: false, error: 'Erro ao enviar e-mail de recuperação.' };
     }
 }
 

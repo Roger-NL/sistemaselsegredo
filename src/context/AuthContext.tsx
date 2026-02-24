@@ -16,6 +16,7 @@ import {
     activateWithInvite as authActivateWithInvite,
     activateWithPayment as authActivateWithPayment,
     changePassword as authChangePassword,
+    resetPassword as authResetPassword,
     checkSubscriptionStatus,
     User,
     AuthResult,
@@ -33,7 +34,9 @@ interface AuthContextType {
     activateWithPayment: (paymentId: string) => Promise<AuthResult>;
     loginWithGoogle: () => Promise<AuthResult>;
     changePassword: (newPassword: string) => Promise<AuthResult>;
+    resetPassword: (email: string) => Promise<AuthResult>;
     logout: () => void;
+    refreshUser: () => Promise<void>;
     isLoading: boolean;
 }
 
@@ -198,6 +201,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return await authChangePassword(newPassword);
     };
 
+    const resetPassword = async (email: string): Promise<AuthResult> => {
+        return await authResetPassword(email);
+    };
+
+    const refreshUser = async () => {
+        if (!auth.currentUser) return;
+        try {
+            const userDocRef = doc(db, "users", auth.currentUser.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+                const userData = userDoc.data() as User;
+                setUser({ ...userData, id: auth.currentUser.uid });
+            }
+        } catch (error) {
+            console.error("Error refreshing user profile:", error);
+        }
+    };
+
     const logout = async () => {
         await authLogout();
         // State update happens automatically via onAuthStateChanged
@@ -221,7 +242,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 activateWithInvite,
                 activateWithPayment,
                 changePassword,
+                resetPassword,
                 logout,
+                refreshUser,
                 isLoading,
             }}
         >

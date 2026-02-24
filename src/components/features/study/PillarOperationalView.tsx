@@ -1,16 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
     AlertCircle, CheckCircle2, Lightbulb, Target, Zap, Play,
     Table as TableIcon, MessageSquare, Terminal, Cpu, HelpCircle,
-    Eye, ChevronDown, Lock, Unlock, ArrowRight, Brain, Crosshair, Volume2
+    Eye, ChevronDown, Lock, Unlock, ArrowRight, Brain, Crosshair, Volume2, Gamepad2
 } from "lucide-react";
 import { ContentBlock, PillarData, PillarModule } from "@/types/study";
 import { cn } from "@/lib/utils";
 import { TranslatablePhrase } from "@/components/ui/TranslatablePhrase";
 import { useProgress } from "@/context/ProgressContext";
+import { AudioButton } from "@/components/ui/AudioButton";
 
 interface PillarOperationalViewProps {
     data: PillarData;
@@ -94,6 +95,7 @@ const BoxIcon = ({ type }: { type: string }) => {
         case "box-insight": return <Lightbulb className="w-5 h-5 text-cyan-400" />;
         case "box-warning": return <AlertCircle className="w-5 h-5 text-amber-400" />;
         case "box-action": return <Zap className="w-5 h-5 text-violet-400" />;
+        case "micro-win": return <CheckCircle2 className="w-5 h-5 text-emerald-400" />;
         case "pillar-end": return <CheckCircle2 className="w-8 h-8 text-emerald-400" />;
         default: return null;
     }
@@ -104,6 +106,7 @@ const BoxStyles = {
     "box-insight": "bg-cyan-950/30 border-cyan-500/30 text-cyan-100",
     "box-warning": "bg-amber-950/30 border-amber-500/30 text-amber-100",
     "box-action": "bg-violet-950/30 border-violet-500/30 text-violet-100",
+    "micro-win": "bg-emerald-950/40 border-emerald-400/50 text-emerald-100 shadow-[0_0_15px_rgba(16,185,129,0.2)]",
     "pillar-end": "bg-emerald-950/20 border-emerald-500/50 text-emerald-50 text-center py-6 md:py-10",
 };
 
@@ -171,6 +174,251 @@ const RevealBox = ({ title, children }: { title: string, children: React.ReactNo
         </div>
     )
 }
+
+const ScrambleExercise = ({ targetSentence }: { targetSentence: string }) => {
+    // Basic tokenizer - split by spaces, keep punctuation simple for now
+    const initialWords = targetSentence.split(' ').map((word, id) => ({ id: `${id}-${word}`, text: word }));
+
+    // Shuffle the array initially
+    const [words, setWords] = useState(() => {
+        const shuffled = [...initialWords];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    });
+
+    const currentSentence = words.map(w => w.text).join(' ');
+    const isSuccess = currentSentence === targetSentence;
+
+    return (
+        <div className="my-8 rounded-xl border border-violet-500/30 overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950 shadow-xl">
+            <div className="bg-gradient-to-r from-violet-900/40 to-slate-900/40 px-4 py-3 md:px-6 md:py-4 border-b border-violet-500/30 flex items-center gap-3">
+                <Gamepad2 className="w-5 h-5 text-violet-400" />
+                <span className="font-bold text-violet-400 font-mono text-xs md:text-sm tracking-wider">CÓDIGO EMBARALHADO</span>
+                {isSuccess && <CheckCircle2 className="w-5 h-5 ml-auto text-emerald-400 animate-in zoom-in duration-300" />}
+            </div>
+
+            <div className="p-4 md:p-6 flex flex-col items-center">
+                <p className="text-sm md:text-base text-slate-300 mb-6 text-center">Desembaralhe as palavras para formar a frase correta. Arraste e solte.</p>
+
+                <Reorder.Group
+                    axis="x"
+                    values={words}
+                    onReorder={setWords}
+                    className="flex flex-wrap justify-center gap-2 md:gap-3 mb-6 min-h-[60px]"
+                >
+                    {words.map((word) => (
+                        <Reorder.Item key={word.id} value={word}>
+                            <motion.div
+                                className={cn(
+                                    "px-4 py-2 md:px-5 md:py-3 rounded-md font-mono text-sm md:text-base shadow-md cursor-grab active:cursor-grabbing border select-none transition-colors",
+                                    isSuccess
+                                        ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                                        : "bg-slate-800 border-slate-600 text-slate-200 hover:border-violet-400"
+                                )}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                {word.text}
+                            </motion.div>
+                        </Reorder.Item>
+                    ))}
+                </Reorder.Group>
+
+                {isSuccess && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-emerald-950/40 text-emerald-200 px-6 py-3 rounded-lg border border-emerald-500/30 text-center text-sm md:text-base"
+                    >
+                        <strong>Sucesso!</strong> A estrutura está perfeita.
+                    </motion.div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// Game 1: Sort between Formal (Lab) and Combat English
+const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat' }[] }) => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [score, setScore] = useState(0);
+    const [isFinished, setIsFinished] = useState(false);
+    const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
+
+    const handleSort = (choice: 'lab' | 'combat') => {
+        if (isFinished || feedback) return;
+
+        const isCorrect = data[currentIndex].type === choice;
+        if (isCorrect) setScore(s => s + 1);
+
+        setFeedback(isCorrect ? 'correct' : 'wrong');
+
+        setTimeout(() => {
+            setFeedback(null);
+            if (currentIndex + 1 < data.length) {
+                setCurrentIndex(curr => curr + 1);
+            } else {
+                setIsFinished(true);
+            }
+        }, 800);
+    };
+
+    return (
+        <div className="my-8 rounded-xl border border-amber-500/30 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-black shadow-2xl relative">
+            <div className="bg-gradient-to-r from-amber-900/40 to-slate-900/40 px-4 py-3 md:px-6 md:py-4 border-b border-amber-500/30 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <Crosshair className="w-5 h-5 text-amber-400" />
+                    <span className="font-bold text-amber-400 font-mono text-xs md:text-sm tracking-wider">FILTRO TÁTICO: O Radar</span>
+                </div>
+                {!isFinished && (
+                    <span className="font-mono text-xs text-amber-500 bg-amber-950/50 px-2 py-1 rounded">
+                        {currentIndex + 1}/{data.length}
+                    </span>
+                )}
+            </div>
+
+            <div className="p-6 md:p-8 flex flex-col items-center justify-center min-h-[300px]">
+                {isFinished ? (
+                    <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center">
+                        <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
+                        <h4 className="text-xl md:text-2xl font-bold text-slate-100 mb-2">Simulação Concluída!</h4>
+                        <p className="text-slate-400 mb-6">Precisão: {Math.round((score / data.length) * 100)}% ({score}/{data.length})</p>
+                        <button onClick={() => { setCurrentIndex(0); setScore(0); setIsFinished(false); }} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition">Reiniciar Radar</button>
+                    </motion.div>
+                ) : (
+                    <div className="w-full max-w-lg">
+                        <AnimatePresence mode="popLayout">
+                            <motion.div
+                                key={currentIndex}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                                className={cn(
+                                    "p-6 md:p-10 mb-8 rounded-xl border text-center font-mono text-xl md:text-2xl font-bold shadow-lg transition-colors",
+                                    feedback === 'correct' ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-400" :
+                                        feedback === 'wrong' ? "bg-red-950/60 border-red-500/50 text-red-400" :
+                                            "bg-slate-800/80 border-slate-600 text-slate-200"
+                                )}
+                            >
+                                "{data[currentIndex].text}"
+                            </motion.div>
+                        </AnimatePresence>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <button
+                                onClick={() => handleSort('lab')}
+                                disabled={feedback !== null}
+                                className="p-4 rounded-lg font-bold border-2 border-red-900/50 bg-red-950/20 text-red-400 hover:bg-red-900/40 hover:border-red-500/50 transition-all flex flex-col items-center gap-2"
+                            >
+                                <span className="text-2xl">📚</span>
+                                <span className="text-xs md:text-sm uppercase tracking-wider">Inglês de Laboratório</span>
+                            </button>
+                            <button
+                                onClick={() => handleSort('combat')}
+                                disabled={feedback !== null}
+                                className="p-4 rounded-lg font-bold border-2 border-emerald-900/50 bg-emerald-950/20 text-emerald-400 hover:bg-emerald-900/40 hover:border-emerald-500/50 transition-all flex flex-col items-center gap-2"
+                            >
+                                <span className="text-2xl">⚔️</span>
+                                <span className="text-xs md:text-sm uppercase tracking-wider">Inglês de Combate</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// Game 2: Decode native pronunciation
+const AudioDecodeGame = ({ data }: { data: { phonetic: string; options: string[]; answer: number }[] }) => {
+    const [currentStep, setCurrentStep] = useState(0);
+    const [score, setScore] = useState(0);
+    const [showResult, setShowResult] = useState(false);
+    const [isFinished, setIsFinished] = useState(false);
+    const [selectedOption, setSelectedOption] = useState<number | null>(null);
+
+    const handleSelect = (idx: number) => {
+        if (showResult || isFinished) return;
+        setSelectedOption(idx);
+        setShowResult(true);
+
+        if (idx === data[currentStep].answer) {
+            setScore(s => s + 1);
+        }
+
+        setTimeout(() => {
+            setShowResult(false);
+            setSelectedOption(null);
+            if (currentStep + 1 < data.length) {
+                setCurrentStep(c => c + 1);
+            } else {
+                setIsFinished(true);
+            }
+        }, 1200);
+    };
+
+    return (
+        <div className="my-8 rounded-xl border border-cyan-500/30 overflow-hidden bg-slate-900 shadow-xl">
+            <div className="bg-gradient-to-r from-cyan-900/40 to-blue-900/40 px-4 py-3 md:px-6 md:py-4 border-b border-cyan-500/30 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <Terminal className="w-5 h-5 text-cyan-400" />
+                    <span className="font-bold text-cyan-400 font-mono text-xs md:text-sm tracking-wider">HACKER FONÉTICO</span>
+                </div>
+                {!isFinished && (
+                    <span className="font-mono text-xs text-cyan-500 bg-cyan-950/50 px-2 py-1 rounded">
+                        Sinal {currentStep + 1}/{data.length}
+                    </span>
+                )}
+            </div>
+
+            <div className="p-6 md:p-8">
+                {isFinished ? (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-6">
+                        <Unlock className="w-16 h-16 text-cyan-400 mx-auto mb-4" />
+                        <h4 className="text-xl md:text-2xl font-bold text-slate-100 mb-2">Decodificação Completa</h4>
+                        <p className="text-slate-400 mb-6">Taxa de sucesso: {Math.round((score / data.length) * 100)}% ({score}/{data.length})</p>
+                        <button onClick={() => { setCurrentStep(0); setScore(0); setIsFinished(false); }} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition font-mono uppercase text-xs">Re-inicializar Scanner</button>
+                    </motion.div>
+                ) : (
+                    <div className="max-w-xl mx-auto">
+                        <p className="text-slate-400 text-sm text-center mb-2 uppercase tracking-wide font-bold">O que o nativo disse?</p>
+                        <div className="bg-black/50 border border-slate-700 rounded-lg p-6 mb-8 text-center backdrop-blur shadow-inner">
+                            <span className="font-mono text-2xl md:text-3xl font-bold text-cyan-300 animate-pulse">
+                                "{data[currentStep].phonetic}"
+                            </span>
+                        </div>
+
+                        <div className="grid gap-3">
+                            {data[currentStep].options.map((opt, idx) => {
+                                const isCorrect = idx === data[currentStep].answer;
+                                const isSelected = idx === selectedOption;
+                                return (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handleSelect(idx)}
+                                        disabled={showResult}
+                                        className={cn(
+                                            "w-full text-left px-5 py-3 md:py-4 rounded border font-mono text-sm md:text-base transition-all flex items-center justify-between",
+                                            showResult && isCorrect ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-200" :
+                                                showResult && isSelected && !isCorrect ? "bg-red-950/60 border-red-500/50 text-red-200" :
+                                                    "bg-slate-800 border-slate-700 text-slate-300 hover:border-cyan-500/50"
+                                        )}
+                                    >
+                                        <span>{opt}</span>
+                                        {showResult && isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
 
 // ============================================================================
 // NEW INTERACTIVE COMPONENTS FOR PILAR 1
@@ -288,9 +536,9 @@ const ScenarioCard = ({ data }: { data: { context: string; situation: string; wr
     const [showSolution, setShowSolution] = useState(false);
 
     return (
-        <div className="my-8 rounded-xl border border-amber-500/30 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-black shadow-2xl">
+        <div className="my-8 rounded-xl border border-amber-500/30 bg-gradient-to-br from-slate-900 via-slate-950 to-black shadow-2xl">
             {/* Header */}
-            <div className="bg-gradient-to-r from-amber-900/40 to-orange-900/30 px-4 py-3 md:px-6 md:py-4 border-b border-amber-500/30 flex items-center gap-3">
+            <div className="rounded-t-xl bg-gradient-to-r from-amber-900/40 to-orange-900/30 px-4 py-3 md:px-6 md:py-4 border-b border-amber-500/30 flex items-center gap-3">
                 <Crosshair className="w-5 h-5 text-amber-400" />
                 <span className="font-bold text-amber-400 font-mono text-xs md:text-sm tracking-wider">⚔️ CENÁRIO DE COMBATE</span>
                 <span className="ml-auto text-[10px] md:text-xs bg-red-500/20 text-red-400 px-2 py-0.5 md:px-3 md:py-1 rounded-full font-mono">STRESS: HIGH</span>
@@ -611,7 +859,7 @@ const PhraseAnalysis = ({ data }: { data: { phrase: string; phonetic: string; gr
             <div className="p-4 md:p-5">
                 <div className="flex items-center justify-between mb-4">
                     <span className="text-[10px] md:text-xs font-bold text-cyan-400 font-mono tracking-wider">ANÁLISE DE FRASE TÁTICA</span>
-                    <Volume2 className="w-4 h-4 text-cyan-500 cursor-pointer hover:text-cyan-400" />
+                    <AudioButton text={data.phrase} size="sm" />
                 </div>
 
                 <p className="text-xl md:text-2xl font-bold text-white mb-3 font-serif">
@@ -651,7 +899,7 @@ const PhraseAnalysis = ({ data }: { data: { phrase: string; phonetic: string; gr
 };
 
 const RenderBlock = ({ block }: { block: ContentBlock }) => {
-    if (block.type.startsWith("box-") || block.type === "pillar-end") {
+    if (block.type.startsWith("box-") || block.type === "pillar-end" || block.type === "micro-win") {
         const boxClass = BoxStyles[block.type as keyof typeof BoxStyles] || "";
         return (
             <div className={cn("rounded border-l-2 p-6 my-6 relative overflow-hidden backdrop-blur-sm", boxClass)}>
@@ -746,14 +994,18 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
         case "interactive-quiz":
             const [q, opts, ans] = (block.content as string).split('|');
             return <InteractiveQuiz question={q} options={opts ? opts.split(',') : []} answer={parseInt(ans) || 0} />;
+        case "scramble-exercise":
+            return <ScrambleExercise targetSentence={block.content as string} />;
+        case "combat-sort-game":
+            return <CombatSortGame data={JSON.parse(block.content as string)} />;
+        case "audio-decode-game":
+            return <AudioDecodeGame data={JSON.parse(block.content as string)} />;
         case "reveal-box":
-            return <RevealBox title={block.title || "ENCRYPTED DATA"}>{block.content}</RevealBox>;
+            return <RevealBox title={block.title || "ENCRYPTED DATA"}>{parseTextWithTranslations(block.content as string)}</RevealBox>;
         case "audio-player":
             return (
-                <div className="my-6 p-4 bg-slate-900/50 border border-slate-700 rounded-lg flex items-center gap-4 hover:border-cyan-500/50 transition-colors group cursor-pointer">
-                    <div className="w-10 h-10 rounded-full bg-cyan-900/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform flex-shrink-0">
-                        <Play className="w-5 h-5 ml-1 fill-current" />
-                    </div>
+                <div className="my-6 p-4 bg-slate-900/50 border border-slate-700 rounded-lg flex items-center gap-4 hover:border-cyan-500/50 transition-colors group">
+                    <AudioButton text={block.content as string} size="lg" />
                     <div className="flex-1">
                         <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Audio Log</div>
                         <div className="text-slate-300 font-medium text-sm md:text-base">{block.content}</div>

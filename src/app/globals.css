@@ -361,7 +361,10 @@
   border: 1px solid rgba(6, 182, 212, 0.5);
   border-radius: 8px;
   padding: 8px 12px;
-  white-space: nowrap;
+  white-space: normal;
+  width: max-content;
+  max-width: 250px;
+  text-align: center;
   z-index: 1000;
   animation: tooltipFadeIn 0.2s ease-out;
   box-shadow:
@@ -475,17 +478,20 @@
   box-shadow: 0 0 40px rgba(124, 58, 237, 0.8);
   transform: scale(1.02);
 }
+
 /* Text Color Animation Utility */
 .relative {
   position: relative;
 }
 
 @keyframes gradient-foreground-1 {
+
   from,
   16.667%,
   to {
     opacity: 1;
   }
+
   33.333%,
   83.333% {
     opacity: 0;
@@ -497,14 +503,17 @@
 }
 
 @keyframes gradient-foreground-2 {
+
   from,
   to {
     opacity: 0;
   }
+
   33.333%,
   50% {
     opacity: 1;
   }
+
   16.667%,
   66.667% {
     opacity: 0;
@@ -516,11 +525,13 @@
 }
 
 @keyframes gradient-foreground-3 {
+
   from,
   50%,
   to {
     opacity: 0;
   }
+
   66.667%,
   83.333% {
     opacity: 1;
@@ -542,30 +553,36 @@
 
 /* Neon-style gradients */
 .from-gradient-1-start {
-  --tw-gradient-from: #39ff14; /* Neon green */
+  --tw-gradient-from: #39ff14;
+  /* Neon green */
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(57, 255, 20, 0));
 }
 
 .to-gradient-1-end {
-  --tw-gradient-to: #00ffff; /* Neon cyan */
+  --tw-gradient-to: #00ffff;
+  /* Neon cyan */
 }
 
 .from-gradient-2-start {
-  --tw-gradient-from: #ff073a; /* Neon red-pink */
+  --tw-gradient-from: #ff073a;
+  /* Neon red-pink */
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(255, 7, 58, 0));
 }
 
 .to-gradient-2-end {
-  --tw-gradient-to: #ff6ec7; /* Neon magenta */
+  --tw-gradient-to: #ff6ec7;
+  /* Neon magenta */
 }
 
 .from-gradient-3-start {
-  --tw-gradient-from: #faff00; /* Neon yellow */
+  --tw-gradient-from: #faff00;
+  /* Neon yellow */
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(250, 255, 0, 0));
 }
 
 .to-gradient-3-end {
-  --tw-gradient-to: #00f0ff; /* Electric blue */
+  --tw-gradient-to: #00f0ff;
+  /* Electric blue */
 }
 
 
@@ -635,11 +652,13 @@
 }
 
 @keyframes gradient-background-1 {
+
   from,
   16.667%,
   to {
     opacity: 0;
   }
+
   25%,
   91.667% {
     opacity: 1;
@@ -652,14 +671,17 @@
 }
 
 @keyframes gradient-background-2 {
+
   from,
   to {
     opacity: 1;
   }
+
   33.333%,
   50% {
     opacity: 0;
   }
+
   25%,
   58.333% {
     opacity: 1;
@@ -672,12 +694,14 @@
 }
 
 @keyframes gradient-background-3 {
+
   from,
   58.333%,
   91.667%,
   to {
     opacity: 1;
   }
+
   66.667%,
   83.333% {
     opacity: 0;

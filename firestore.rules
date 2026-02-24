@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Função Tática que diz quem é o Admin
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == "roger@esacademy.com" ||
+        request.auth.token.email == "admin@esacademy.com" ||
+        request.auth.token.email == "raugerac@gmail.com"
+      );
+    }
+    
+    // 2. Proteção das Contas dos Alunos
+    match /users/{userId} {
+      // O próprio aluno pode ler/escrever a sua conta, MAS os Admins também podem forçar a entrada
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // 3. Proteção das Provas (Exames)
+    match /pillar_exams/{examId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      // Admins podem ler e avaliar os exames livremente
+      allow read, update, delete: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
+    }
+    
+    // 4. Fallback (Regra para o resto da base de dados)
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

@@ -20,7 +20,7 @@ interface StudentProfile {
 
 export default function StudentDetailPage({ params }: { params: { id: string } }) {
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const [student, setStudent] = useState<StudentProfile | null>(null);
     const [exams, setExams] = useState<PillarExam[]>([]);
     const [loading, setLoading] = useState(true);
@@ -153,6 +153,11 @@ export default function StudentDetailPage({ params }: { params: { id: string } }
                                                 approvedPillar: newVal
                                             });
                                             setStudent(prev => ({ ...prev!, approvedPillar: newVal }));
+
+                                            if (user?.id === studentId) {
+                                                await refreshUser();
+                                            }
+
                                             alert("Nível atualizado com sucesso!");
                                         } catch (error) {
                                             console.error(error);
