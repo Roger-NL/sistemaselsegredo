@@ -15,7 +15,9 @@ export type ContentBlockType =
   // New types for Module 3 (Frequency Sync)
   | 'boundary-illusion' | 'linking-map' | 'compression-deck' | 'block-decode' | 'latency-check'
   // New types for Module 4 (Radar Lock)
-  | 'radar-console' | 'stress-heatmap' | 'intonation-trace' | 'emphasis-shift' | 'triage-drill' | 'selective-jamming' | 'control-responses' | 'operator-notes' | 'completion-seal';
+  | 'radar-console' | 'stress-heatmap' | 'intonation-trace' | 'emphasis-shift' | 'triage-drill' | 'selective-jamming' | 'control-responses' | 'operator-notes' | 'completion-seal'
+  // New types for Module 5 (Full Spectrum)
+  | 'spectrum-init' | 'accent-drift-map' | 'imperfect-input' | 'emotional-overlay' | 'partial-loss-drill' | 'self-regulation-protocol' | 'readiness-check' | 'transition-brief';
 
 export interface ContentBlock {
   type: ContentBlockType;

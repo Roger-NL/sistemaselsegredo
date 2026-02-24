@@ -765,11 +765,345 @@ export const PILAR_2_DATA: PillarData = {
             ]
         },
         {
-            id: "p2-p4",
-            title: "MÓDULO 5: FULL SPECTRUM",
-            subtitle: "Operando em condições reais: sotaques, ruídos e caos sonoro.",
+            id: "p2-m5",
+            title: "MÓDULO 5: {{FULL SPECTRUM OPERATIONS|OPERAÇÕES EM ESPECTRO TOTAL}}",
+            subtitle: "Operando sob pressão. Quando o inglês vem sujo, imperfeito e sem aviso.",
             status: "locked",
-            blocks: []
+            blocks: [
+                {
+                    type: "spectrum-init",
+                    content:
+                        "{{FULL SPECTRUM MODE|MODO ESPECTRO TOTAL}} — ENABLED\n• {{Signal Quality|Qualidade do Sinal}}: UNSTABLE\n• {{Noise Level|Nível de Ruído}}: VARIABLE\n• {{Accent Drift|Deriva de Sotaque}}: ACTIVE\n• {{Expectation|Expectativa}}: ZERO\n\nNota da Torre: se você só entende inglês limpo, você não entende inglês.\nEste módulo não tem condições ideais. Isso é intencional."
+                },
+
+                {
+                    type: "h2",
+                    content: "O inglês do mundo real não coopera com você."
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Até agora, você treinou com intenção clara.\n\nNeste módulo, isso acaba.\n\nAqui o áudio vem:\n• cortado\n• apressado\n• emocional\n• com {{accent|sotaque}}\n• com erros\n\nE mesmo assim, **você precisa entender o suficiente para agir**.\n\nEsta é a diferença entre operador e estudante."
+                },
+
+                {
+                    type: "h3",
+                    content: "5.1 {{Accent Drift|Deriva de Sotaque}}: quando o inglês muda de forma"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Não existe um inglês único.\n\nO som muda conforme quem fala — e você vai ouvir todos os tipos no campo real.\n\nNeste ponto, muitos alunos quebram porque tentam comparar tudo com o inglês 'ideal' da cabeça deles.\n\nVocê vai aprender a aceitar variação sem travar. A missão não muda porque o sotaque mudou."
+                },
+
+                {
+                    type: "accent-drift-map",
+                    content: JSON.stringify({
+                        title: "{{Accent Drift Map|Mapa de Deriva de Sotaque}} — o que muda de verdade",
+                        instruction:
+                            "Observe os padrões. Não memorize sotaques. Identifique tendências e extraia missão apesar delas.",
+                        accents: [
+                            {
+                                profile: "{{Fast / Reduced|Rápido / Reduzido}}",
+                                characteristics: [
+                                    "vogais encurtadas",
+                                    "consoantes coladas",
+                                    "{{aggressive rhythm|ritmo agressivo}}"
+                                ],
+                                risk:
+                                    "Parece pressa ou raiva — mas pode ser apenas estilo."
+                            },
+                            {
+                                profile: "{{Flat / Low Intonation|Plano / Entonação Baixa}}",
+                                characteristics: [
+                                    "pouca variação de tom",
+                                    "{{stress|ênfase}} menos evidente",
+                                    "{{constant rhythm|ritmo constante}}"
+                                ],
+                                risk:
+                                    "Soa desinteressado — mas pode ser totalmente neutro."
+                            },
+                            {
+                                profile: "{{Heavy Stress Shifts|Mudanças de Ênfase Intensas}}",
+                                characteristics: [
+                                    "{{emphasis|ênfase}} inesperada",
+                                    "{{irregular rhythm|ritmo irregular}}",
+                                    "pausas onde não se espera"
+                                ],
+                                risk:
+                                    "O aluno perde o foco tentando entender o 'jeito' e perde o conteúdo."
+                            }
+                        ],
+                        rule:
+                            "Não lute contra o sotaque. Extraia a missão apesar dele."
+                    })
+                },
+
+                {
+                    type: "h3",
+                    content: "5.2 {{Imperfect English|Inglês Imperfeito}}: quando o erro vem do outro lado"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Nem todo mundo fala inglês bem. E isso vai acontecer — com clientes, parceiros, colegas.\n\nVocê vai ouvir:\n• gramática quebrada\n• frases incompletas\n• ordem estranha de palavras\n\nIsso é libertador: **se o outro erra e ainda é entendido, você também pode**.\n\nMas primeiro, você precisa entender o inglês imperfeito deles."
+                },
+
+                {
+                    type: "imperfect-input",
+                    content: JSON.stringify({
+                        title: "{{Imperfect Input|Entrada Imperfeita}} — compreensão sem correção",
+                        instruction:
+                            "Ignore a forma. Capture a função. O que importa não é o que está gramaticalmente correto — é o que está sendo comunicado.",
+                        samples: [
+                            {
+                                input: "Yesterday he no come meeting.",
+                                question: "Qual é a informação relevante?",
+                                options: [
+                                    "Ele cancelou tudo",
+                                    "Ele faltou à reunião",
+                                    "Ele chegou atrasado"
+                                ],
+                                answer: 1,
+                                insight:
+                                    "A forma está errada. A mensagem está clara. 'No come' = 'didn't come'."
+                            },
+                            {
+                                input: "We try fix tomorrow maybe.",
+                                question: "Qual é o estado da situação?",
+                                options: [
+                                    "Solução confirmada",
+                                    "Tentativa futura incerta",
+                                    "Problema resolvido"
+                                ],
+                                answer: 1,
+                                insight:
+                                    "'{{Try|Tentar}}' + '{{maybe|talvez}}' = baixa certeza. Não é compromisso."
+                            },
+                            {
+                                input: "I not understand why decision this.",
+                                question: "O que essa pessoa está expressando?",
+                                options: [
+                                    "Concordância total",
+                                    "Confusão / discordância com uma decisão",
+                                    "Pedido de prazo"
+                                ],
+                                answer: 1,
+                                insight:
+                                    "Mesmo com estrutura quebrada, '{{not understand|não entender}}' + '{{decision|decisão}}' = questionamento claro."
+                            }
+                        ],
+                        rule:
+                            "Campo real não dá nota de gramática. Ele cobra entendimento."
+                    })
+                },
+
+                {
+                    type: "h3",
+                    content: "5.3 {{Emotional Overlay|Sobreposição Emocional}}: quando emoção distorce o áudio"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Emoção muda tudo — velocidade, volume, clareza e escolha de palavras.\n\nO erro mais comum: reagir à emoção em vez de responder à missão.\n\nAqui você vai aprender a separar **{{emotion|emoção}}** de **{{content|conteúdo}}** para nunca reagir errado sob pressão."
+                },
+
+                {
+                    type: "emotional-overlay",
+                    content: JSON.stringify({
+                        title: "{{Emotional Overlay|Sobreposição Emocional}} — emoção não é instrução",
+                        instruction:
+                            "Para cada cenário, identifique emoção e missão separadamente. Responda à missão, não ao tom.",
+                        scenarios: [
+                            {
+                                audio: "This is taking forever!",
+                                emotion: "{{frustration|frustração}}",
+                                missionOptions: [
+                                    "Cancelar o projeto imediatamente",
+                                    "Acelerar ou cobrar andamento",
+                                    "Ignorar completamente"
+                                ],
+                                answer: 1,
+                                note:
+                                    "O tom é forte, mas a ação pedida é simples: acelerar."
+                            },
+                            {
+                                audio: "I just don't see how this helps.",
+                                emotion: "{{skepticism|ceticismo}}",
+                                missionOptions: [
+                                    "Defender a ideia atacando a pessoa",
+                                    "Explicar valor / justificar a abordagem",
+                                    "Encerrar a conversa"
+                                ],
+                                answer: 1,
+                                note:
+                                    "Não é ataque. É dúvida. A resposta é explicação, não defesa."
+                            },
+                            {
+                                audio: "Fine. Whatever works.",
+                                emotion: "{{resigned acceptance|resignação}}",
+                                missionOptions: [
+                                    "Celebrar como vitória",
+                                    "Avançar com cuidado — há resistência silenciosa",
+                                    "Ignorar e seguir adiante sem verificar"
+                                ],
+                                answer: 1,
+                                note:
+                                    "'{{Fine|Tudo bem}}' com tom plano raramente é entusiasmo. É sinal de alerta."
+                            }
+                        ],
+                        rule:
+                            "Responder à emoção gera conflito. Responder à missão gera controle."
+                    })
+                },
+
+                {
+                    type: "h3",
+                    content: "5.4 {{Partial Loss|Perda Parcial}}: quando você perde 30–40% do áudio"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Você não vai entender tudo. Nunca. Nem mesmo em português.\n\nIsso não é falha de inglês. É realidade de comunicação real.\n\nFalha é não saber o que fazer quando isso acontece.\n\nOperador não espera áudio perfeito — ele executa com o que tem."
+                },
+
+                {
+                    type: "partial-loss-drill",
+                    content: JSON.stringify({
+                        title: "{{Partial Loss Drill|Exercício de Perda Parcial}} — operar com informação incompleta",
+                        instruction:
+                            "Você só entende fragmentos. Decida a melhor ação possível sem pedir repetição total.",
+                        cases: [
+                            {
+                                heard: "…{{send|enviar}}… {{Friday|sexta}}… {{issue|problema}}…",
+                                options: [
+                                    "{{Ask for full repetition|Pedir repetição total}}",
+                                    "{{Confirm deadline and ask about the issue|Confirmar prazo e perguntar sobre o problema}}",
+                                    "{{Ignore and wait|Ignorar e aguardar}}"
+                                ],
+                                answer: 1,
+                                insight:
+                                    "Você confirma o que captou (prazo + problema) e abre espaço para o resto. Isso é controle."
+                            },
+                            {
+                                heard: "…{{not approved|não aprovado}}… {{budget|orçamento}}…",
+                                options: [
+                                    "{{Argue immediately|Argumentar imediatamente}}",
+                                    "{{Acknowledge and ask next steps|Confirmar e perguntar próximos passos}}",
+                                    "{{Stay silent indefinitely|Ficar em silêncio indefinidamente}}"
+                                ],
+                                answer: 1,
+                                insight:
+                                    "{{Acceptance|Aceitação}} + próximo passo mantém você no jogo. Argumentar sem informação completa é fraqueza."
+                            },
+                            {
+                                heard: "…{{team thinks|equipe acha}}… {{different approach|abordagem diferente}}…",
+                                options: [
+                                    "{{Defend current plan immediately|Defender o plano atual imediatamente}}",
+                                    "{{Clarify what approach they prefer|Esclarecer qual abordagem preferem}}",
+                                    "{{Agree to everything|Concordar com tudo}}"
+                                ],
+                                answer: 1,
+                                insight:
+                                    "Com informação parcial, clarificar é mais poderoso que defender ou ceder."
+                            }
+                        ],
+                        rule:
+                            "Não espere clareza total para agir. Campo não funciona assim."
+                    })
+                },
+
+                {
+                    type: "h3",
+                    content: "5.5 {{Self-Regulation|Autorregulação}}: manter o sistema estável"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "O maior inimigo neste módulo não é o áudio difícil.\n\nÉ a reação interna.\n\nPânico fecha o ouvido. Desculpa fragiliza posição. Silêncio excessivo sinaliza colapso.\n\nAqui você instala um protocolo de estabilidade que funciona em tempo real — mesmo quando você sente que perdeu o controle."
+                },
+
+                {
+                    type: "self-regulation-protocol",
+                    content: JSON.stringify({
+                        title: "{{Stability Protocol|Protocolo de Estabilidade}} — 4 passos em ordem",
+                        steps: [
+                            {
+                                number: 1,
+                                action: "{{Breathing|Respiração}} curta e silenciosa — 2 ciclos",
+                                why: "Reduz ativação do {{panic response|resposta de pânico}} antes de qualquer palavra."
+                            },
+                            {
+                                number: 2,
+                                action: "{{Confirm what was understood|Confirmar o que foi entendido}}",
+                                why: "Demonstra que você está no controle — mesmo sem entender tudo."
+                            },
+                            {
+                                number: 3,
+                                action: "{{One directed question|Uma pergunta direcionada — apenas uma}}",
+                                why: "Pedir tudo de novo ao mesmo tempo soa como colapso. Uma pergunta soa como precisão."
+                            },
+                            {
+                                number: 4,
+                                action: "{{Simple action or calibration request|Ação simples ou pedido de ajuste}}",
+                                why: "Encerra o ciclo com movimento — não com desculpa."
+                            }
+                        ],
+                        warning:
+                            "Pedir desculpa não regula sistema. Estrutura regula.\n'Sorry, my English is bad' não é humildade — é desarmamento."
+                    })
+                },
+
+                {
+                    type: "h3",
+                    content: "5.6 {{Readiness Check|Verificação de Prontidão}}: você está pronto para o voo real?"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Este é o último {{checkpoint|ponto de verificação}} técnico antes da validação humana.\n\nResponda com honestidade absoluta — não com o que você quer que seja verdade."
+                },
+
+                {
+                    type: "readiness-check",
+                    content: JSON.stringify({
+                        title: "{{Readiness Check|Verificação de Prontidão}} — diagnóstico final",
+                        description: "Marque apenas o que é verdadeiro agora, não o que você quer que seja.",
+                        questions: [
+                            {
+                                text: "Consigo entender {{intention|intenção}} mesmo perdendo palavras?",
+                                signal: "{{listening|escuta}} operacional"
+                            },
+                            {
+                                text: "Consigo responder sem entrar em {{panic|pânico}} ou travar?",
+                                signal: "{{response control|controle de resposta}}"
+                            },
+                            {
+                                text: "Consigo operar com {{accent|sotaque}} e áudio imperfeito?",
+                                signal: "{{spectrum tolerance|tolerância ao espectro}}"
+                            },
+                            {
+                                text: "Consigo manter controle emocional quando o inglês vem agressivo ou confuso?",
+                                signal: "{{self-regulation|autorregulação}}"
+                            }
+                        ],
+                        interpretation:
+                            "4 marcados: sistema funcional. Você está pronto para o {{Check-Ride|Voo de Verificação}}.\n3 marcados: bom — a aula ao vivo vai ajustar o gap.\n2 ou menos: o {{Check-Ride|Voo de Verificação}} vai revelar exatamente onde ajustar."
+                    })
+                },
+
+                {
+                    type: "transition-brief",
+                    content:
+                        "{{TRANSITION BRIEF|BRIEFING DE TRANSIÇÃO}} — PREPARAÇÃO PARA VALIDAÇÃO\n\nVocê treinou em espectro total.\nAgora vem o voo acompanhado.\n\nNo próximo módulo, um profissional vai:\n• testar seu {{listening|escuta}} em tempo real\n• observar suas reações sob pressão\n• confirmar se seu controle é real — não ensaiado\n\nIsso não é prova de inglês.\nÉ prova de {{readiness|prontidão}}."
+                },
+
+                {
+                    type: "completion-seal",
+                    content:
+                        "{{FULL SPECTRUM|ESPECTRO TOTAL}} — {{COMPLETE|CONCLUÍDO}}\n\nVocê não entende tudo.\nMas você entende o suficiente.\n\nIsso é {{functional fluency|fluência funcional}}.\nA Torre aguarda seu {{Check-Ride|Voo de Verificação}}."
+                }
+            ]
         },
         {
             id: "p2-final",
