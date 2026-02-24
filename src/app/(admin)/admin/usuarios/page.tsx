@@ -135,8 +135,8 @@ export default function AdminUsersPage() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
-                                            <span className={`font-semibold text-xs ${user.subscriptionStatus === 'premium' || user.subscriptionStatus === 'active' ? 'text-emerald-700' : 'text-slate-600'}`}>
-                                                {user.subscriptionStatus === 'premium' || user.subscriptionStatus === 'active' ? 'Premium' : 'Free'}
+                                            <span className={`font-semibold text-xs ${user.subscriptionStatus === 'premium' ? 'text-emerald-700' : 'text-slate-600'}`}>
+                                                {user.subscriptionStatus === 'premium' ? 'Premium' : 'Free'}
                                             </span>
                                             {user.inviteCodeUsed && (
                                                 <span className="text-[10px] text-slate-400 font-mono">

@@ -72,7 +72,8 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
         const approvedLevel = user?.approvedPillar || 1;
 
         // Caso 1: Já está aprovado para o próximo -> Apenas avança
-        if (approvedLevel >= nextPillar) {
+        const isUnlocked = isPillarUnlocked(nextPillar);
+        if (isUnlocked) {
             completePillar(pillarId);
             if (pillarId < 9) {
                 router.push(`/pilar/${nextPillar}`);
@@ -260,6 +261,12 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                                         <ArrowRight className="w-5 h-5" />
                                                     </div>
                                                 </div>
+                                            ) : subscriptionStatus === 'premium' ? (
+                                                <>
+                                                    <CheckCircle2 className="w-6 h-6" />
+                                                    Concluir e Avançar
+                                                    <ArrowRight className="w-5 h-5" />
+                                                </>
                                             ) : (
                                                 <>
                                                     <div className="animate-spin h-5 w-5 border-2 border-white/30 border-t-white rounded-full mr-2" />

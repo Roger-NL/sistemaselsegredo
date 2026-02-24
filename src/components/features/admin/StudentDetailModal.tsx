@@ -89,11 +89,11 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
                         <div>
                             <h2 className="text-2xl font-bold text-slate-900">{user.name || "Sem Nome"}</h2>
                             <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
-                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${user.subscriptionStatus === 'active' || user.subscriptionStatus === 'premium'
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${user.subscriptionStatus === 'premium'
                                     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                     : "bg-slate-100 text-slate-500 border-slate-200"
                                     }`}>
-                                    {user.subscriptionStatus === 'active' || user.subscriptionStatus === 'premium' ? "Premium" : "Free"}
+                                    {user.subscriptionStatus === 'premium' ? "Premium" : "Free"}
                                 </span>
                                 <span>•</span>
                                 <span className="font-mono text-xs">ID: {user.id}</span>

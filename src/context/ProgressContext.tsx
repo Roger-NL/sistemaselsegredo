@@ -298,18 +298,22 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         // Regra de Ouro: Pilar 1 é sempre livre (Freemium)
         if (pillarNumber === 1) return true;
 
-        // Regra Premium: Pilar 2+ exige assinatura ativa
-        if (subscriptionStatus !== 'premium') return false;
-
         // Regra de Admin/Progresso:
-        // Se user.approvedPillar for definido, ele manda.
-        if (user?.approvedPillar) {
-            return pillarNumber <= user.approvedPillar;
+        // Se user.approvedPillar for definido, ele tem prioridade absoluta.
+        if (user?.approvedPillar && pillarNumber <= user.approvedPillar) {
+            return true;
         }
 
-        // Fallback local storage logic
-        const status = pillarStatus[`pilar-${pillarNumber}`];
-        return status === "unlocked" || status === "completed";
+        // Regra Premium: Pilar 2+ exige assinatura ativa OU aprovação manual (já checada acima)
+        if (subscriptionStatus !== 'premium') return false;
+
+        // Se for Premium, ele pode acessar se o pilar anterior estiver marcado como completed
+        // OU se ele for o próximo na sequência natural de progresso local.
+        const prevPillarId = `pilar-${pillarNumber - 1}`;
+        const currentPillarStatus = pillarStatus[`pilar-${pillarNumber}`];
+        const prevPillarStatus = pillarStatus[prevPillarId];
+
+        return prevPillarStatus === "completed" || currentPillarStatus === "unlocked" || currentPillarStatus === "completed";
     };
 
     // Retorna pilares com status atualizado
