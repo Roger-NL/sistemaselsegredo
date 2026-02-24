@@ -8,45 +8,12 @@ export const PILAR_1_DATA: PillarData = {
     title: "PILAR 1: Protocolo de Iniciação",
     subtitle: "A reconfiguração completa da sua mentalidade e a ciência por trás da fluência.",
     modules: [
-        {
+                {
             id: "p1-m1",
             title: "MÓDULO 1: O \"Branco\" Mental e o Interruptor de Pânico",
             subtitle: "Entender por que você trava e como desativar o modo de pânico em 5 segundos.",
             status: "active",
             blocks: [
-                {
-                    type: "h2",
-                    content: "Bem-vindo, Recruta ✈️"
-                },
-                {
-                    type: "paragraph",
-                    content: "Você está prestes a iniciar sua primeira missão. Este é o Flight Check, o momento de desprogramar velhos hábitos e se preparar para voar alto em inglês.\n\nNão se preocupe com termos técnicos ou métodos complicados. Aqui, tudo é prático. Cada passo que você dá é uma vitória real."
-                },
-                {
-                    type: "h3",
-                    content: "🚀 Missão 1 – Por que o inglês tradicional falha"
-                },
-                {
-                    type: "paragraph",
-                    content: "Muitas pessoas aprendem inglês assistindo vídeos ou memorizando regras. Resultado? Elas travam na hora de falar.\n\nAqui vamos:\n\n• Entender de forma prática como o inglês funciona\n• Treinar o cérebro para pensar no idioma, não traduzir\n• Criar confiança desde o primeiro minuto"
-                },
-                {
-                    type: "box-action",
-                    title: "Mini-exercício",
-                    content: "Essas palavras estão embaralhadas. Arrume-as nas frases abaixo:"
-                },
-                {
-                    type: "scramble-exercise",
-                    content: "I eat breakfast at 8 am."
-                },
-                {
-                    type: "scramble-exercise",
-                    content: "Today, I went to the park."
-                },
-                {
-                    type: "paragraph",
-                    content: "Sinta a diferença: você está construindo inglês de verdade, não copiando regras."
-                },
                 {
                     type: "system-status",
                     content: "{{COCKPIT CHECK|CHECK-IN NA CABINE}}: {{SCANNING EMOTIONAL STATE|Escanendo Estado Emocional}}... {{PANIC SIGNAL DETECTED|Sinal de Pânico Detectado}}... {{BYPASSING AMYGDALA|Contornando Amígdala}}..."
@@ -76,10 +43,6 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "micro-win",
                     content: "**VITÓRIA IMEDIATA:** Você acaba de aprender a manter sua autoridade mesmo quando não entende uma frase. Você substituiu uma frase de \"vítima\" por uma frase de {{Operator|Operador}}."
-                },
-                {
-                    type: "paragraph",
-                    content: "Ao final deste Pilar, você terá que responder a um desafio que avalia o que aprendeu. Seu progresso será registrado."
                 }
             ]
         },
