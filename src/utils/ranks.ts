@@ -1,14 +1,14 @@
 export const RANKS = [
-    "{{Passenger|Passageiro}}",           // 0
-    "{{Check-in Complete|Check-in}}",     // 1
-    "{{Frequent Flyer|Viajante Frequente}}", // 2
-    "{{Crew Member|Tripulante}}",         // 3
-    "{{Crew Member|Tripulante+}}",        // 4 (Progresso)
-    "{{Co-Pilot|Co-piloto}}",             // 5
-    "{{Co-Pilot|Co-piloto+}}",            // 6 (Progresso)
-    "{{Captain|Capitão}}",               // 7
-    "{{Captain|Capitão+}}",              // 8 (Progresso)
-    "{{Commander|Comandante (Elite)}}"   // 9
+    "Passenger",           // 0
+    "Check-in Complete",   // 1
+    "Frequent Flyer",      // 2
+    "Crew Member",         // 3
+    "Crew Member+",        // 4 (Progresso)
+    "Co-Pilot",            // 5
+    "Co-Pilot+",           // 6 (Progresso)
+    "Captain",             // 7
+    "Captain+",            // 8 (Progresso)
+    "Commander (Elite)"    // 9
 ];
 
 export const getRank = (completedCount: number) => {
