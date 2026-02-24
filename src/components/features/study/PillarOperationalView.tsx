@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
     AlertCircle, CheckCircle2, Lightbulb, Target, Zap, Play,
@@ -125,6 +125,15 @@ const ScrambleExercise = ({ targetSentence }: { targetSentence: string }) => {
         return shuffled;
     });
 
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     const currentSentence = words.map(w => w.text).join(' ');
     const isSuccess = currentSentence === targetSentence;
 
@@ -137,25 +146,35 @@ const ScrambleExercise = ({ targetSentence }: { targetSentence: string }) => {
             </div>
 
             <div className="p-4 md:p-6 flex flex-col items-center">
-                <p className="text-sm md:text-base text-slate-300 mb-6 text-center">Desembaralhe as palavras para formar a frase correta. Arraste e solte.</p>
+                <p className="text-sm md:text-base text-slate-300 mb-6 text-center">
+                    {isMobile ? "Arraste as palavras para cima ou para baixo." : "Arraste as palavras para o lado."}
+                </p>
 
                 <Reorder.Group
-                    axis="x"
+                    axis={isMobile ? "y" : "x"}
                     values={words}
                     onReorder={setWords}
-                    className="flex flex-wrap justify-center gap-2 md:gap-3 mb-6 min-h-[60px]"
+                    className={cn(
+                        "flex justify-center gap-2 md:gap-3 mb-6 min-h-[60px] w-full",
+                        isMobile ? "flex-col items-stretch max-w-xs" : "flex-wrap"
+                    )}
                 >
                     {words.map((word) => (
-                        <Reorder.Item key={word.id} value={word}>
+                        <Reorder.Item
+                            key={word.id}
+                            value={word}
+                            style={{ touchAction: 'none' }}
+                        >
                             <motion.div
+                                layout
                                 className={cn(
-                                    "px-4 py-2 md:px-5 md:py-3 rounded-md font-mono text-sm md:text-base shadow-md cursor-grab active:cursor-grabbing border select-none transition-colors",
+                                    "px-4 py-2 md:px-5 md:py-3 rounded-md font-mono text-sm md:text-base shadow-md cursor-grab active:cursor-grabbing border select-none transition-colors text-center",
                                     isSuccess
                                         ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
                                         : "bg-slate-800 border-slate-600 text-slate-200 hover:border-violet-400"
                                 )}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                             >
                                 {word.text}
                             </motion.div>
@@ -167,7 +186,7 @@ const ScrambleExercise = ({ targetSentence }: { targetSentence: string }) => {
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-emerald-950/40 text-emerald-200 px-6 py-3 rounded-lg border border-emerald-500/30 text-center text-sm md:text-base"
+                        className="bg-emerald-950/40 text-emerald-200 px-6 py-3 rounded-lg border border-emerald-500/30 text-center text-sm md:text-base w-full"
                     >
                         <strong>Sucesso!</strong> A estrutura está perfeita.
                     </motion.div>
