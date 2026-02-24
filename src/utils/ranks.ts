@@ -1,15 +1,14 @@
-// Patentes de Piloto - Do iniciante ao lendário!
 export const RANKS = [
-    "Passageiro",        // 0 - Só olhando pela janela
-    "Simulador",         // 1 - Treinou no joguinho
-    "Drone",             // 2 - Voa baixinho
-    "Ultraleve",         // 3 - Ganhando altitude
-    "Comercial",         // 4 - Coisa séria agora
-    "Capitão",           // 5 - Cruzando continentes
-    "Comandante",        // 6 - Lidera a formação
-    "Ás",                // 7 - Elite do ar
-    "Supersônico",       // 8 - Quebra barreira do som
-    "Lenda"              // 9 - Hall da Fama
+    "{{Passenger|Passageiro}}",           // 0
+    "{{Check-in Complete|Check-in}}",     // 1
+    "{{Frequent Flyer|Viajante Frequente}}", // 2
+    "{{Crew Member|Tripulante}}",         // 3
+    "{{Crew Member|Tripulante+}}",        // 4 (Progresso)
+    "{{Co-Pilot|Co-piloto}}",             // 5
+    "{{Co-Pilot|Co-piloto+}}",            // 6 (Progresso)
+    "{{Captain|Capitão}}",               // 7
+    "{{Captain|Capitão+}}",              // 8 (Progresso)
+    "{{Commander|Comandante (Elite)}}"   // 9
 ];
 
 export const getRank = (completedCount: number) => {
