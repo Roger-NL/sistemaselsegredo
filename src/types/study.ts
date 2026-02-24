@@ -13,7 +13,9 @@ export type ContentBlockType =
   | 'audio-minimal-pairs' | 'phoneme-grid' | 'quick-check'
   | 'tower-log' | 'sonic-scan' | 'a-b-snaptest' | 'latency-meter' | 'cutoff-drill' | 'misfire-cases' | 'anchor-builder' | 'checksum' | 'tower-stamp'
   // New types for Module 3 (Frequency Sync)
-  | 'boundary-illusion' | 'linking-map' | 'compression-deck' | 'block-decode' | 'latency-check';
+  | 'boundary-illusion' | 'linking-map' | 'compression-deck' | 'block-decode' | 'latency-check'
+  // New types for Module 4 (Radar Lock)
+  | 'radar-console' | 'stress-heatmap' | 'intonation-trace' | 'emphasis-shift' | 'triage-drill' | 'selective-jamming' | 'control-responses' | 'operator-notes' | 'completion-seal';
 
 export interface ContentBlock {
   type: ContentBlockType;

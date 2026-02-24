@@ -1239,6 +1239,383 @@ const Checksum = ({ data }: { data: { title: string; rule: string; questions: { 
 };
 
 // ============================================================================
+// MODULE 4 COMPONENTS: RADAR LOCK
+// ============================================================================
+
+const RadarConsole = ({ content }: { content: string }) => (
+    <div className="my-6 bg-slate-950 border border-red-500/30 rounded-xl overflow-hidden">
+        <div className="flex items-center gap-2 bg-red-500/10 px-4 py-2 border-b border-red-500/20">
+            <Crosshair className="w-4 h-4 text-red-400 animate-pulse" />
+            <span className="text-red-400 font-mono text-xs uppercase tracking-widest">Radar Console</span>
+        </div>
+        <pre className="text-red-300/80 font-mono text-xs md:text-sm p-4 md:p-6 whitespace-pre-wrap leading-relaxed">
+            {content.split('\n').map((line, i) => (
+                <span key={i} className="block">{parseTextWithTranslations(line)}</span>
+            ))}
+        </pre>
+    </div>
+);
+
+const StressHeatmap = ({ data }: { data: { title: string; instruction: string; lines: { text: string; peaks: string[]; why: string }[]; rule: string } }) => {
+    const [revealed, setRevealed] = useState<boolean[]>(new Array(data.lines.length).fill(false));
+    const toggle = (idx: number) => setRevealed(prev => { const next = [...prev]; next[idx] = !next[idx]; return next; });
+
+    const renderWithPeaks = (text: string, peaks: string[]) => {
+        const parts = text.split(' ');
+        return (
+            <span className="text-lg md:text-xl font-mono font-bold tracking-wide">
+                {parts.map((word, i) => {
+                    const clean = word.replace(/[.,!?]/g, '');
+                    const isPeak = peaks.includes(clean);
+                    return (
+                        <span key={i} className={cn("mr-2", isPeak ? "text-red-300 bg-red-500/20 px-1 rounded" : "text-slate-400")}>
+                            {word}
+                        </span>
+                    );
+                })}
+            </span>
+        );
+    };
+
+    return (
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-red-500/30">
+            <div className="bg-red-500/10 p-4 border-b border-red-500/20 flex items-center gap-3">
+                <Crosshair className="w-5 h-5 text-red-400" />
+                <h3 className="font-bold text-red-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <p className="text-slate-400 text-sm mb-6">{parseTextWithTranslations(data.instruction)}</p>
+                <div className="space-y-4">
+                    {data.lines.map((line, idx) => (
+                        <div key={idx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                            <div className="mb-3">{renderWithPeaks(line.text, line.peaks)}</div>
+                            <button
+                                onClick={() => toggle(idx)}
+                                className="text-xs text-red-400/70 hover:text-red-300 font-mono transition-colors"
+                            >
+                                {revealed[idx] ? "▲ ocultar análise" : "▼ ver análise"}
+                            </button>
+                            <AnimatePresence>
+                                {revealed[idx] && (
+                                    <motion.p
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        className="mt-2 text-xs text-red-300/80 italic"
+                                    >
+                                        {parseTextWithTranslations(line.why)}
+                                    </motion.p>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    ))}
+                </div>
+                <p className="mt-4 text-xs text-red-400/80 font-mono italic text-center border-t border-red-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
+            </div>
+        </div>
+    );
+};
+
+const IntonationTrace = ({ data }: { data: { title: string; instruction: string; items: { line: string; contour: string; intent: string; danger: string }[]; rule: string } }) => {
+    const [expanded, setExpanded] = useState<number | null>(null);
+    return (
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-violet-500/30">
+            <div className="bg-violet-500/10 p-4 border-b border-violet-500/20 flex items-center gap-3">
+                <Zap className="w-5 h-5 text-violet-400" />
+                <h3 className="font-bold text-violet-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <div className="space-y-3">
+                    {data.items.map((item, idx) => (
+                        <div
+                            key={idx}
+                            className={cn(
+                                "rounded-lg border cursor-pointer transition-all",
+                                expanded === idx ? "bg-violet-500/15 border-violet-500/40" : "bg-slate-800/50 border-slate-700 hover:border-violet-500/30"
+                            )}
+                            onClick={() => setExpanded(expanded === idx ? null : idx)}
+                        >
+                            <div className="flex items-center gap-4 p-4">
+                                <span className="text-2xl font-bold text-violet-300 w-12 text-center flex-shrink-0">{item.contour}</span>
+                                <div className="flex-1">
+                                    <div className="font-mono text-base md:text-lg text-white font-bold">{item.line}</div>
+                                </div>
+                                <ChevronDown className={cn("w-4 h-4 text-violet-400 transition-transform", expanded === idx ? "rotate-180" : "")} />
+                            </div>
+                            <AnimatePresence>
+                                {expanded === idx && (
+                                    <motion.div
+                                        initial={{ height: 0 }}
+                                        animate={{ height: 'auto' }}
+                                        exit={{ height: 0 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="px-4 pb-4 space-y-2 border-t border-violet-500/20 pt-3">
+                                            <p className="text-sm text-violet-200">{parseTextWithTranslations(item.intent)}</p>
+                                            <p className="text-xs text-red-400/80 italic">⚠️ {parseTextWithTranslations(item.danger)}</p>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    ))}
+                </div>
+                <p className="mt-4 text-xs text-violet-400/80 font-mono italic text-center">{parseTextWithTranslations(data.rule)}</p>
+            </div>
+        </div>
+    );
+};
+
+const EmphasisShift = ({ data }: { data: { title: string; instruction: string; base: string; variants: { stressed: string; options: string[]; answer: number; note: string }[]; rule: string } }) => {
+    const [answers, setAnswers] = useState<Record<number, number>>({});
+    return (
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-amber-500/30">
+            <div className="bg-amber-500/10 p-4 border-b border-amber-500/20 flex items-center gap-3">
+                <Target className="w-5 h-5 text-amber-400" />
+                <h3 className="font-bold text-amber-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <div className="bg-slate-800/80 rounded-lg p-3 border border-amber-500/20 mb-5 text-center">
+                    <span className="text-[10px] uppercase font-mono text-slate-500 tracking-widest">Base phrase</span>
+                    <p className="text-base font-mono text-slate-300 italic mt-1">"{data.base}"</p>
+                </div>
+                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <div className="space-y-6">
+                    {data.variants.map((v, vIdx) => (
+                        <div key={vIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                            <div className="flex items-center gap-3 mb-3">
+                                <AudioButton text={v.stressed} size="sm" />
+                                <span className="text-sm md:text-base font-mono text-amber-200 font-bold italic">"{v.stressed}"</span>
+                            </div>
+                            <div className="grid grid-cols-1 gap-2">
+                                {v.options.map((opt, oIdx) => (
+                                    <button
+                                        key={oIdx}
+                                        onClick={() => setAnswers(prev => ({ ...prev, [vIdx]: oIdx }))}
+                                        className={cn(
+                                            "w-full text-left p-3 rounded border text-sm transition-all",
+                                            answers[vIdx] === oIdx
+                                                ? oIdx === v.answer
+                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
+                                                    : "bg-red-900/40 border-red-500/50 text-red-100"
+                                                : "bg-slate-900/50 border-slate-700 text-slate-400 hover:border-amber-500/30"
+                                        )}
+                                    >
+                                        {opt}
+                                    </button>
+                                ))}
+                            </div>
+                            {answers[vIdx] !== undefined && (
+                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-amber-300/80 italic">
+                                    {parseTextWithTranslations(v.note)}
+                                </motion.p>
+                            )}
+                        </div>
+                    ))}
+                </div>
+                <p className="mt-4 text-xs text-amber-400/80 font-mono italic text-center border-t border-amber-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
+            </div>
+        </div>
+    );
+};
+
+const TriageDrill = ({ data }: { data: { title: string; instruction: string; entries: { input: string; expectedTags: string[]; note: string }[]; rule: string } }) => {
+    const [revealed, setRevealed] = useState<boolean[]>(new Array(data.entries.length).fill(false));
+    const toggle = (idx: number) => setRevealed(prev => { const next = [...prev]; next[idx] = !next[idx]; return next; });
+    return (
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-cyan-500/30">
+            <div className="bg-cyan-500/10 p-4 border-b border-cyan-500/20 flex items-center gap-3">
+                <Terminal className="w-5 h-5 text-cyan-400" />
+                <h3 className="font-bold text-cyan-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <div className="space-y-4">
+                    {data.entries.map((entry, idx) => (
+                        <div key={idx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                            <div className="flex items-center gap-3 mb-3">
+                                <AudioButton text={entry.input} size="sm" />
+                                <span className="text-sm font-mono text-white italic">"{entry.input}"</span>
+                            </div>
+                            <button
+                                onClick={() => toggle(idx)}
+                                className="w-full py-2 rounded bg-cyan-500/15 border border-cyan-500/20 text-cyan-300 font-mono text-xs hover:bg-cyan-500/25 transition-colors"
+                            >
+                                {revealed[idx] ? "▲ ocultar tags" : "▼ revelar tags esperadas"}
+                            </button>
+                            <AnimatePresence>
+                                {revealed[idx] && (
+                                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 space-y-2">
+                                        <div className="flex gap-2 flex-wrap">
+                                            {entry.expectedTags.map((tag, tIdx) => (
+                                                <span key={tIdx} className={cn(
+                                                    "text-xs font-mono px-3 py-1 rounded-full border",
+                                                    tIdx === 0 ? "bg-red-500/15 border-red-500/30 text-red-300" :
+                                                        tIdx === 1 ? "bg-yellow-500/15 border-yellow-500/30 text-yellow-300" :
+                                                            "bg-violet-500/15 border-violet-500/30 text-violet-300"
+                                                )}>
+                                                    {tIdx === 0 ? "AÇÃO: " : tIdx === 1 ? "TEMPO: " : "TOM: "}{tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <p className="text-xs text-slate-400 italic">{parseTextWithTranslations(entry.note)}</p>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    ))}
+                </div>
+                <p className="mt-4 text-xs text-cyan-400/80 font-mono italic text-center">{parseTextWithTranslations(data.rule)}</p>
+            </div>
+        </div>
+    );
+};
+
+const SelectiveJamming = ({ data }: { data: { title: string; instruction: string; samples: { masked: string; question: string; options: string[]; answer: number; hint: string }[]; rule: string } }) => {
+    const [answers, setAnswers] = useState<Record<number, number>>({});
+    return (
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-slate-500/40">
+            <div className="bg-slate-700/30 p-4 border-b border-slate-600/30 flex items-center gap-3">
+                <Cpu className="w-5 h-5 text-slate-400" />
+                <h3 className="font-bold text-slate-300 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <div className="space-y-6">
+                    {data.samples.map((sample, sIdx) => (
+                        <div key={sIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                            <div className="font-mono text-lg md:text-xl text-white font-bold mb-1 tracking-wide">
+                                {sample.masked.split('___').map((part, i, arr) => (
+                                    <span key={i}>
+                                        {part}
+                                        {i < arr.length - 1 && <span className="text-slate-600 bg-slate-700 px-2 rounded mx-1">▓▓▓</span>}
+                                    </span>
+                                ))}
+                            </div>
+                            <p className="text-xs text-slate-500 mb-3 font-mono">{parseTextWithTranslations(sample.question)}</p>
+                            <div className="grid grid-cols-1 gap-2">
+                                {sample.options.map((opt, oIdx) => (
+                                    <button
+                                        key={oIdx}
+                                        onClick={() => setAnswers(prev => ({ ...prev, [sIdx]: oIdx }))}
+                                        className={cn(
+                                            "w-full text-left p-3 rounded border text-sm transition-all",
+                                            answers[sIdx] === oIdx
+                                                ? oIdx === sample.answer
+                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
+                                                    : "bg-red-900/40 border-red-500/50 text-red-100"
+                                                : "bg-slate-900/50 border-slate-700 text-slate-400 hover:border-slate-500"
+                                        )}
+                                    >
+                                        {opt}
+                                    </button>
+                                ))}
+                            </div>
+                            {answers[sIdx] !== undefined && (
+                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-slate-400 italic">
+                                    💡 {parseTextWithTranslations(sample.hint)}
+                                </motion.p>
+                            )}
+                        </div>
+                    ))}
+                </div>
+                <p className="mt-4 text-xs text-slate-400/80 font-mono italic text-center border-t border-slate-700 pt-4">{parseTextWithTranslations(data.rule)}</p>
+            </div>
+        </div>
+    );
+};
+
+const ControlResponses = ({ data }: { data: { title: string; instruction: string; situations: { heard: string; youKnow: string; options: string[]; answer: number; note: string }[]; rule: string } }) => {
+    const [answers, setAnswers] = useState<Record<number, number>>({});
+    return (
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-emerald-500/30">
+            <div className="bg-emerald-500/10 p-4 border-b border-emerald-500/20 flex items-center gap-3">
+                <MessageSquare className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-bold text-emerald-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <div className="space-y-6">
+                    {data.situations.map((sit, sIdx) => (
+                        <div key={sIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                            <div className="flex items-start gap-3 mb-3">
+                                <div className="flex-none">
+                                    <div className="text-[10px] font-mono text-slate-500 uppercase mb-1">Você ouviu</div>
+                                    <div className="text-base font-mono text-white font-bold italic">"{sit.heard}"</div>
+                                </div>
+                                <div className="flex-none ml-4">
+                                    <div className="text-[10px] font-mono text-slate-500 uppercase mb-1">Você sabe</div>
+                                    <span className="text-xs bg-cyan-500/15 border border-cyan-500/20 text-cyan-300 px-2 py-1 rounded font-mono">{sit.youKnow}</span>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-2">
+                                {sit.options.map((opt, oIdx) => (
+                                    <button
+                                        key={oIdx}
+                                        onClick={() => setAnswers(prev => ({ ...prev, [sIdx]: oIdx }))}
+                                        className={cn(
+                                            "w-full text-left p-3 rounded border text-sm transition-all font-mono",
+                                            answers[sIdx] === oIdx
+                                                ? oIdx === sit.answer
+                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
+                                                    : "bg-red-900/40 border-red-500/50 text-red-100"
+                                                : "bg-slate-900/50 border-slate-700 text-slate-300 hover:border-emerald-500/30"
+                                        )}
+                                    >
+                                        "{opt}"
+                                    </button>
+                                ))}
+                            </div>
+                            {answers[sIdx] !== undefined && (
+                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-emerald-300/80 italic">
+                                    ✓ {parseTextWithTranslations(sit.note)}
+                                </motion.p>
+                            )}
+                        </div>
+                    ))}
+                </div>
+                <p className="mt-4 text-xs text-emerald-400/80 font-mono italic text-center border-t border-emerald-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
+            </div>
+        </div>
+    );
+};
+
+const OperatorNotes = ({ content }: { content: string }) => (
+    <div className="my-6 bg-slate-950 border border-slate-600/30 rounded-xl overflow-hidden">
+        <div className="flex items-center gap-2 bg-slate-800/50 px-4 py-2 border-b border-slate-700/50">
+            <Eye className="w-4 h-4 text-slate-400" />
+            <span className="text-slate-400 font-mono text-xs uppercase tracking-widest">Operator Notes</span>
+        </div>
+        <pre className="text-slate-400/80 font-mono text-xs md:text-sm p-4 md:p-6 whitespace-pre-wrap leading-relaxed">
+            {content.split('\n').map((line, i) => (
+                <span key={i} className={cn("block", line.startsWith('•') ? "text-slate-300 pl-2" : "")}>{parseTextWithTranslations(line)}</span>
+            ))}
+        </pre>
+    </div>
+);
+
+const CompletionSeal = ({ content }: { content: string }) => (
+    <div className="my-12 relative">
+        <div className="absolute inset-0 bg-red-500/5 blur-3xl rounded-full" />
+        <div className="relative bg-red-950/20 border border-red-500/40 p-8 md:p-12 rounded-xl text-center overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+                <Crosshair className="w-32 h-32 text-red-500" />
+            </div>
+            <div className="relative z-10">
+                <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(239,68,68,0.4)]">
+                    <Crosshair className="w-10 h-10 text-slate-900" />
+                </div>
+                <pre className="text-red-200 font-mono text-xs md:text-sm whitespace-pre-wrap leading-relaxed max-w-lg mx-auto">
+                    {content.split('\n').map((line, i) => (
+                        <span key={i} className="block">{parseTextWithTranslations(line)}</span>
+                    ))}
+                </pre>
+            </div>
+        </div>
+    </div>
+);
+
+// ============================================================================
 // MODULE 3 COMPONENTS: FREQUENCY SYNC
 // ============================================================================
 
@@ -1769,6 +2146,27 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
             return <BlockDecode data={JSON.parse(block.content as string)} />;
         case "latency-check":
             return <LatencyCheck data={JSON.parse(block.content as string)} />;
+        // ================================================================
+        // MODULE 4 COMPONENT RENDERS (RADAR LOCK)
+        // ================================================================
+        case "radar-console":
+            return <RadarConsole content={block.content as string} />;
+        case "stress-heatmap":
+            return <StressHeatmap data={JSON.parse(block.content as string)} />;
+        case "intonation-trace":
+            return <IntonationTrace data={JSON.parse(block.content as string)} />;
+        case "emphasis-shift":
+            return <EmphasisShift data={JSON.parse(block.content as string)} />;
+        case "triage-drill":
+            return <TriageDrill data={JSON.parse(block.content as string)} />;
+        case "selective-jamming":
+            return <SelectiveJamming data={JSON.parse(block.content as string)} />;
+        case "control-responses":
+            return <ControlResponses data={JSON.parse(block.content as string)} />;
+        case "operator-notes":
+            return <OperatorNotes content={block.content as string} />;
+        case "completion-seal":
+            return <CompletionSeal content={block.content as string} />;
         default:
             return null;
     }

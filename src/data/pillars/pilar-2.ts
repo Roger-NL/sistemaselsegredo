@@ -438,11 +438,331 @@ export const PILAR_2_DATA: PillarData = {
             ]
         },
         {
-            id: "p2-p3",
-            title: "MÓDULO 4: RADAR LOCK",
-            subtitle: "Filtrando o sinal e focando no que realmente importa na frase.",
+            id: "p2-m4",
+            title: "MÓDULO 4: {{RADAR LOCK|TRAVA DE RADAR}}",
+            subtitle: "Filtrando o sinal. {{Stress|Ênfase}}, entonação e intenção — a leitura que acontece acima das palavras.",
             status: "locked",
-            blocks: []
+            blocks: [
+                {
+                    type: "radar-console",
+                    content:
+                        "{{RADAR CONSOLE|CONSOLE DE RADAR}} — {{LOCK SEQUENCE|SEQUÊNCIA DE TRAVA}}\n• Input: {{Continuous Speech|Fala Contínua}}\n• Target: {{INTENTION|INTENÇÃO}} + {{URGENCY|URGÊNCIA}} + {{DIRECTION|DIREÇÃO}}\n• Rule: {{Words are optional. Signals are mandatory.|Palavras são opcionais. Sinais são obrigatórios.}}\n\nNota da Torre: um operador não entende tudo. Um operador entende o que importa."
+                },
+
+                {
+                    type: "h2",
+                    content: "Você não precisa ouvir tudo. Você precisa travar o radar no que carrega intenção."
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Até aqui você já limpou ruído e começou a reconhecer blocos.\n\nAgora vem a camada que separa amador de operador: **priorização**.\n\nO inglês falado tem duas pistas que quase ninguém treina:\n• **{{Stress|Ênfase}}** (onde a frase bate)\n• **{{Intonation|Entonação}}** (para onde a frase aponta)\n\nQuando você aprende a ler essas duas coisas, você consegue operar mesmo quando perde palavras."
+                },
+
+                {
+                    type: "h3",
+                    content: "4.1 O princípio do {{Radar|Radar}}: a frase tem picos"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Toda frase tem picos de energia. Esses picos são onde mora a informação real.\n\nSeu cérebro brasileiro tende a dar o mesmo peso para tudo. No inglês, isso é suicídio auditivo.\n\nAqui você vai treinar a enxergar a fala como **{{energy map|mapa de energia}}**."
+                },
+
+                {
+                    type: "stress-heatmap",
+                    content: JSON.stringify({
+                        title: "{{Stress Heatmap|Mapa de Calor de Ênfase}} — onde a frase realmente 'bate'",
+                        instruction:
+                            "Leia as linhas e marque mentalmente as palavras que parecem 'mais fortes'. Você não precisa saber a palavra exata — só localizar os picos.",
+                        lines: [
+                            {
+                                text: "I NEED it by TOMORROW.",
+                                peaks: ["NEED", "TOMORROW"],
+                                why:
+                                    "Os picos carregam urgência e prazo. O resto é estrutura."
+                            },
+                            {
+                                text: "We CAN'T do it RIGHT now.",
+                                peaks: ["CAN'T", "RIGHT"],
+                                why:
+                                    "Negação + {{timing|tempo}}. Você já tem 80% do sentido."
+                            },
+                            {
+                                text: "I THOUGHT you said MONDAY.",
+                                peaks: ["THOUGHT", "MONDAY"],
+                                why:
+                                    "{{Conflict|Conflito}} de informação: memória vs data."
+                            }
+                        ],
+                        rule:
+                            "Se você captar os picos, você não entra em pânico. Você sabe do que se trata."
+                    })
+                },
+
+                {
+                    type: "h3",
+                    content: "4.2 {{Intonation Trace|Traçado de Entonação}}: a seta invisível"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "{{Intonation|Entonação}} é direção.\n\nEla responde perguntas como:\n• é pergunta ou afirmação?\n• é certeza ou dúvida?\n• é convite ou ordem?\n• é ironia ou literal?\n\nVocê não precisa entender todas as palavras para capturar isso. Você precisa ler a curva."
+                },
+
+                {
+                    type: "intonation-trace",
+                    content: JSON.stringify({
+                        title: "{{Intonation Trace|Traçado de Entonação}} — leitura por curva",
+                        instruction:
+                            "Assine a intenção de cada linha apenas pela curva (subindo/descendo).",
+                        items: [
+                            {
+                                line: "You're coming.",
+                                contour: "↘",
+                                intent: "Afirmação / decisão já tomada",
+                                danger:
+                                    "Se você tratar como pergunta, você responde errado e perde autoridade."
+                            },
+                            {
+                                line: "You're coming?",
+                                contour: "↗",
+                                intent: "Pergunta / confirmação",
+                                danger:
+                                    "Se você tratar como afirmação, você parece desatento."
+                            },
+                            {
+                                line: "Right…",
+                                contour: "↘↘ (lento)",
+                                intent: "{{Skepticism|Ceticismo}} / discordância disfarçada",
+                                danger:
+                                    "Você acha que foi concordância. Não foi."
+                            },
+                            {
+                                line: "Okay!",
+                                contour: "↗↘ (rápido)",
+                                intent: "{{Acceptance|Aceitação}} / energia",
+                                danger:
+                                    "Você acha que foi neutro. Foi positivo."
+                            }
+                        ],
+                        rule:
+                            "A curva te dá intenção antes da palavra te dar detalhe."
+                    })
+                },
+
+                {
+                    type: "h3",
+                    content: "4.3 {{Meaning Shift|Mudança de Significado}}: a mesma frase, três missões diferentes"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Agora você vai ver por que 'entender palavras' é frágil.\n\nCom as mesmas palavras, o {{stress|ênfase}} muda a missão.\n\nVocê vai treinar a detectar **onde o falante colocou o peso** — porque isso muda o alvo."
+                },
+
+                {
+                    type: "emphasis-shift",
+                    content: JSON.stringify({
+                        title: "{{Meaning Shift|Mudança de Significado}} — {{stress|ênfase}} muda o comando",
+                        instruction:
+                            "Escolha a leitura correta (intenção) para cada variação.",
+                        base: "I didn't say we should cancel it.",
+                        variants: [
+                            {
+                                stressed: "I DIDN'T say we should cancel it.",
+                                options: [
+                                    "Eu disse isso sim",
+                                    "Eu nego ter dito isso",
+                                    "Eu quero cancelar agora"
+                                ],
+                                answer: 1,
+                                note:
+                                    "O peso está na negação. {{Defense|Defesa}}."
+                            },
+                            {
+                                stressed: "I didn't SAY we should cancel it.",
+                                options: [
+                                    "Eu insinuei, mas não falei claramente",
+                                    "Eu falei com certeza",
+                                    "Eu estou cancelando"
+                                ],
+                                answer: 0,
+                                note:
+                                    "O peso está no '{{say|dizer}}'. Foi outra forma de comunicar."
+                            },
+                            {
+                                stressed: "I didn't say we should CANCEL it.",
+                                options: [
+                                    "O problema é cancelar especificamente",
+                                    "O problema é a gente",
+                                    "O problema é o horário"
+                                ],
+                                answer: 0,
+                                note:
+                                    "O alvo é a ação: {{cancel|cancelar}}."
+                            }
+                        ],
+                        rule:
+                            "{{Stress|Ênfase}} = mira. A mira define o que você responde."
+                    })
+                },
+
+                {
+                    type: "h3",
+                    content: "4.4 {{Priority Extraction|Extração de Prioridade}}: capturar missão em 3 sinais"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Quando o áudio vier caótico, seu cérebro quer entrar em modo pânico.\n\nAqui você instala um protocolo de extração em três sinais:\n\n1) **{{ACTION|AÇÃO}}** (o que está sendo feito/pedido)\n2) **{{TIME|TEMPO}}** (agora, depois, amanhã, urgente)\n3) **{{TONE|TOM}}** (leve, tenso, irritado, incerto)\n\nVocê vai treinar isso sem depender de texto."
+                },
+
+                {
+                    type: "triage-drill",
+                    content: JSON.stringify({
+                        title: "{{Triage Drill|Exercício de Triagem}} — {{ACTION|AÇÃO}} / {{TIME|TEMPO}} / {{TONE|TOM}}",
+                        instruction:
+                            "Para cada entrada, responda somente com 3 tags: [{{ACTION|AÇÃO}}] [{{TIME|TEMPO}}] [{{TONE|TOM}}].",
+                        entries: [
+                            {
+                                input: "Can you send it over by end of day?",
+                                expectedTags: ["enviar", "hoje", "neutro/objetivo"],
+                                note:
+                                    "Mesmo se você perder '{{send it over|enviar}}', você ainda pode captar pedido + prazo."
+                            },
+                            {
+                                input: "We might need to rethink this.",
+                                expectedTags: ["reavaliar", "em aberto", "incerto"],
+                                note:
+                                    "'{{Might|Pode ser}}' puxa dúvida. Isso muda como você responde."
+                            },
+                            {
+                                input: "No, we're not doing that.",
+                                expectedTags: ["recusar", "agora", "firme"],
+                                note:
+                                    "Negação + firmeza: não é debate."
+                            }
+                        ],
+                        rule:
+                            "Se você sai com tags corretas, você está operacional mesmo sem transcrição."
+                    })
+                },
+
+                {
+                    type: "h3",
+                    content: "4.5 {{Jamming Simulation|Simulação de Interferência}}: ruído seletivo (treino de foco real)"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "O mundo real não te dá áudio limpo.\n\nNesta simulação, você vai sofrer interferência em palavras 'de baixa importância'.\n\nObjetivo: manter o radar travado nos picos e na curva, ignorando o resto."
+                },
+
+                {
+                    type: "selective-jamming",
+                    content: JSON.stringify({
+                        title: "{{Selective Jamming|Interferência Seletiva}} — foco sob interferência",
+                        instruction:
+                            "Imagine que partes da frase foram cobertas por ruído. Você ainda precisa entender a missão.",
+                        samples: [
+                            {
+                                masked: "We ___ need this ___ Friday.",
+                                question: "Qual é a missão?",
+                                options: [
+                                    "Entregar algo até sexta",
+                                    "Cancelar algo na sexta",
+                                    "Viajar na sexta"
+                                ],
+                                answer: 0,
+                                hint:
+                                    "Mesmo mascarado, o pico '{{Friday|sexta-feira}}' segura o tempo. O resto você infere."
+                            },
+                            {
+                                masked: "I'm ___ sure this ___ work.",
+                                question: "Qual é o {{tone|tom}}?",
+                                options: ["certeza", "dúvida", "raiva"],
+                                answer: 1,
+                                hint:
+                                    "O '{{not sure|não tenho certeza}}' é sinal de risco."
+                            }
+                        ],
+                        rule:
+                            "Se você precisa de cada palavra para entender, você não tem controle — você tem dependência."
+                    })
+                },
+
+                {
+                    type: "h3",
+                    content: "4.6 {{Response Protocol|Protocolo de Resposta}}: como responder quando você só pegou o essencial"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Agora a parte mais valiosa: não basta entender. Você precisa responder sem parecer perdido.\n\nVocê vai usar {{control responses|respostas de controle}} que:\n• confirmam intenção\n• pedem ajuste mínimo\n• mantêm você no comando\n\nSem se justificar. Sem pedir desculpas. Sem cair no modo frágil."
+                },
+
+                {
+                    type: "control-responses",
+                    content: JSON.stringify({
+                        title: "{{Control Responses|Respostas de Controle}} — respostas de torre",
+                        instruction:
+                            "Escolha a resposta que mantém controle com informação parcial.",
+                        situations: [
+                            {
+                                heard: "…by tomorrow…",
+                                youKnow: "prazo",
+                                options: [
+                                    "I didn't understand anything.",
+                                    "Got it — by tomorrow. I'll send it over.",
+                                    "Can you repeat all of that slowly, please?"
+                                ],
+                                answer: 1,
+                                note:
+                                    "Você confirma o que captou (tempo) e responde com ação."
+                            },
+                            {
+                                heard: "…not sure…work…",
+                                youKnow: "dúvida/risco",
+                                options: [
+                                    "Okay.",
+                                    "So there's some risk. What's the main blocker?",
+                                    "Sorry, my English is bad."
+                                ],
+                                answer: 1,
+                                note:
+                                    "Você transforma dúvida em diagnóstico. Isso é operador."
+                            },
+                            {
+                                heard: "…we're not doing that…",
+                                youKnow: "recusa firme",
+                                options: [
+                                    "Why?",
+                                    "Understood. What's the alternative?",
+                                    "I think you're wrong."
+                                ],
+                                answer: 1,
+                                note:
+                                    "Você aceita o comando e pede rota alternativa."
+                            }
+                        ],
+                        rule:
+                            "Você responde ao que a frase QUER, não ao que a frase DIZ palavra por palavra."
+                    })
+                },
+
+                {
+                    type: "operator-notes",
+                    content:
+                        "NOTAS DO OPERADOR (gravadas no sistema)\n\nSe você travou neste módulo, não é porque ele é difícil.\nÉ porque ele ataca a sua crença antiga de que 'entender = palavras'.\n\nAqui você instalou outro padrão:\n• entender = picos + curva + intenção\n\nIsso reduz pânico em tempo real."
+                },
+
+                {
+                    type: "completion-seal",
+                    content:
+                        "{{RADAR LOCK|TRAVA DE RADAR}} — {{COMPLETE|CONCLUÍDO}}\nVocê aprendeu a:\n• localizar picos de informação\n• ler intenção pela {{intonation|entonação}}\n• extrair missão em 3 sinais\n• responder com controle mesmo com áudio incompleto\n\nPróxima etapa: caos real — sotaques, ruído e condições adversas.\nA Torre vai testar seu sistema em espectro total."
+                }
+            ]
         },
         {
             id: "p2-p4",
