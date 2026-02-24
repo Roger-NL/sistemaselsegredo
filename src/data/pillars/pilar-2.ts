@@ -1106,11 +1106,104 @@ export const PILAR_2_DATA: PillarData = {
             ]
         },
         {
-            id: "p2-final",
-            title: "MÓDULO 6: CHECK-RIDE",
-            subtitle: "Seu rito de passagem antes de avançar para o próximo Pilar.",
+            id: "p2-m6",
+            title: "MÓDULO 6: {{CLEARANCE|LIBERAÇÃO}}",
+            subtitle: "Você chegou. Respire fundo. O difícil ficou para trás.",
             status: "locked",
-            blocks: []
+            blocks: [
+                {
+                    type: "soft-status",
+                    content:
+                        "{{SYSTEM STATUS|STATUS DO SISTEMA}}\n• {{Technical Phase|Fase Técnica}}: COMPLETED\n• {{Cognitive Load|Carga Cognitiva}}: REDUCED\n• {{Next Step|Próximo Passo}}: {{HUMAN VALIDATION|VALIDAÇÃO HUMANA}}\n\nNota da Torre: respire. Você fez a parte difícil."
+                },
+
+                {
+                    type: "h2",
+                    content: "Pare um segundo. Você merece isso."
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Antes de qualquer próxima etapa, faça algo simples:\n\nPare.\n\nVocê acabou de atravessar a fase mais densa de todo o método.\n\nNenhum dos módulos anteriores foi fácil. E nenhum foi por acaso.\nCada exercício existia por um motivo. Cada desconforto tinha uma função."
+                },
+
+                {
+                    type: "h3",
+                    content: "O que já mudou em você"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Você pode não sentir isso claramente ainda — e tudo bem.\n\nAlgumas mudanças são silenciosas no começo.\n\nMas algumas coisas já não são mais as mesmas — e isso é o que importa."
+                },
+
+                {
+                    type: "simple-list",
+                    content: [
+                        "Você aprendeu a ouvir sem traduzir palavra por palavra",
+                        "Você aprendeu a aceitar imperfeição como parte do processo",
+                        "Você aprendeu a responder mesmo sem certeza total",
+                        "Você aprendeu a manter controle quando o inglês vem difícil",
+                        "Você treinou algo que a maioria nunca treina: {{composure|compostura}} sob pressão real"
+                    ]
+                },
+
+                {
+                    type: "h3",
+                    content: "O que acontece agora"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Daqui para frente, o sistema muda de forma.\n\nVocê não vai avançar sozinho.\n\nUm profissional vai ouvir você, observar como você reage — e confirmar se o que foi construído aqui já é real.\n\nNão é avaliação de inglês.\nÉ {{calibration|calibração}}."
+                },
+
+                {
+                    type: "paragraph",
+                    content:
+                        "Não tem certo ou errado.\nNão tem nota.\nNão tem armadilha.\n\nTem apenas presença — a sua."
+                },
+
+                {
+                    type: "h3",
+                    content: "Sobre o agendamento"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "No próximo passo, você verá um calendário com horários disponíveis.\n\nEscolha um e pronto.\n\nOs horários são limitados intencionalmente — para garantir atenção real ao seu caso e respeito pelo seu tempo."
+                },
+
+                {
+                    type: "soft-warning",
+                    title: "Uma coisa importante antes de marcar",
+                    content:
+                        "Você não precisa estudar mais nada agora.\n\nNão revise.\nNão decore.\nNão tente parecer melhor do que você é.\n\nVenha exatamente como está — porque é assim que a validação funciona de verdade."
+                },
+
+                {
+                    type: "h3",
+                    content: "Se algo ainda parece confuso"
+                },
+                {
+                    type: "paragraph",
+                    content:
+                        "Normal. Completamente normal.\n\nO ouvido demora mais para 'assentar' do que a mente.\n\nMuitas conexões acontecem depois que você para de forçar.\n\nConfie no processo — e confie no que você já construiu."
+                },
+
+                {
+                    type: "final-note",
+                    content:
+                        "Você não terminou o Pilar 2 tentando entender inglês.\n\nVocê terminou aprendendo a lidar com ele.\n\nIsso muda tudo."
+                },
+
+                {
+                    type: "pilar2-end",
+                    title: "PILAR 2 — {{COMPLETE|CONCLUÍDO}}",
+                    content:
+                        "A fase técnica foi encerrada.\n\nAgora é humano com humano.\n\nA Torre aguarda seu agendamento."
+                }
+            ]
         }
     ]
 };

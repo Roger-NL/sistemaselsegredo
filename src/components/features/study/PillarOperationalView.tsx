@@ -1239,6 +1239,128 @@ const Checksum = ({ data }: { data: { title: string; rule: string; questions: { 
 };
 
 // ============================================================================
+// MODULE 6 COMPONENTS: CLEARANCE
+// ============================================================================
+
+const SoftStatus = ({ content }: { content: string }) => (
+    <div className="my-6 bg-emerald-950/30 border border-emerald-500/20 rounded-xl overflow-hidden">
+        <div className="flex items-center justify-between bg-emerald-500/8 px-4 py-2 border-b border-emerald-500/15">
+            <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span className="text-emerald-400 font-mono text-xs uppercase tracking-widest">System Status</span>
+            </div>
+            <span className="text-[10px] font-mono text-emerald-500/50 uppercase tracking-widest">● STABLE</span>
+        </div>
+        <pre className="text-emerald-300/70 font-mono text-xs md:text-sm p-4 md:p-6 whitespace-pre-wrap leading-relaxed">
+            {content.split('\n').map((line, i) => (
+                <span key={i} className={cn("block", line.startsWith('•') ? "text-emerald-200/80 pl-2" : "")}>{parseTextWithTranslations(line)}</span>
+            ))}
+        </pre>
+    </div>
+);
+
+const SimpleList = ({ items }: { items: string[] }) => (
+    <div className="my-8 space-y-3">
+        {items.map((item, idx) => (
+            <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.08 }}
+                className="flex items-start gap-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/60 hover:border-emerald-500/20 transition-colors"
+            >
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mt-0.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                </div>
+                <p className="text-slate-300 text-sm leading-relaxed">{parseTextWithTranslations(item)}</p>
+            </motion.div>
+        ))}
+    </div>
+);
+
+const SoftWarning = ({ title, content }: { title: string; content: string }) => (
+    <div className="my-8 bg-amber-950/20 border border-amber-500/25 rounded-xl overflow-hidden">
+        <div className="flex items-center gap-3 bg-amber-500/8 px-5 py-3 border-b border-amber-500/15">
+            <Lightbulb className="w-4 h-4 text-amber-400" />
+            <span className="text-amber-300 font-semibold text-sm">{title}</span>
+        </div>
+        <div className="p-5 md:p-6">
+            <pre className="text-amber-200/70 text-sm leading-relaxed whitespace-pre-wrap font-sans">
+                {content.split('\n').map((line, i) => (
+                    <span key={i} className="block">{parseTextWithTranslations(line)}</span>
+                ))}
+            </pre>
+        </div>
+    </div>
+);
+
+const FinalNote = ({ content }: { content: string }) => (
+    <div className="my-12 relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-800/30 to-slate-900/30 rounded-2xl" />
+        <div className="relative px-8 md:px-16 py-10 md:py-14 text-center">
+            <div className="absolute left-4 top-4 text-slate-600 text-6xl font-serif leading-none select-none">"</div>
+            <div className="absolute right-4 bottom-4 text-slate-600 text-6xl font-serif leading-none select-none rotate-180">"</div>
+            {content.split('\n\n').map((para, idx) => (
+                <p key={idx} className={cn(
+                    "font-light leading-loose",
+                    idx === 0 ? "text-xl md:text-2xl text-slate-200 mb-5" :
+                        idx === 1 ? "text-lg md:text-xl text-slate-300 mb-4" :
+                            "text-base md:text-lg text-emerald-300 font-semibold"
+                )}>
+                    {parseTextWithTranslations(para)}
+                </p>
+            ))}
+        </div>
+    </div>
+);
+
+const PillarEnd = ({ title, content }: { title: string; content: string }) => (
+    <div className="my-12 relative overflow-hidden rounded-2xl">
+        {/* Background glow layers */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-emerald-950/30 to-slate-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.08)_0%,transparent_70%)]" />
+        {/* Decorative top line */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+
+        <div className="relative z-10 px-6 md:px-12 py-12 md:py-16 text-center">
+            {/* Icon */}
+            <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                className="w-24 h-24 mx-auto mb-8 relative"
+            >
+                <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
+                <div className="relative w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_60px_rgba(16,185,129,0.4)]">
+                    <CheckCircle2 className="w-12 h-12 text-slate-900" />
+                </div>
+            </motion.div>
+
+            {/* Title */}
+            <motion.h2
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-2xl md:text-3xl font-bold font-mono text-emerald-300 tracking-widest uppercase mb-8"
+            >
+                {parseTextWithTranslations(title)}
+            </motion.h2>
+
+            {/* Content */}
+            <pre className="text-slate-300 font-light text-base md:text-lg whitespace-pre-wrap leading-loose max-w-md mx-auto">
+                {content.split('\n').map((line, i) => (
+                    <span key={i} className={cn(
+                        "block",
+                        line.includes("humano") ? "text-white font-medium" : "",
+                        line.includes("aguarda") ? "text-emerald-400 font-mono text-sm mt-4 uppercase tracking-widest" : ""
+                    )}>{parseTextWithTranslations(line)}</span>
+                ))}
+            </pre>
+        </div>
+    </div>
+);
+
+// ============================================================================
 // MODULE 5 COMPONENTS: FULL SPECTRUM OPERATIONS
 // ============================================================================
 
@@ -2549,6 +2671,19 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
             return <ReadinessCheck data={JSON.parse(block.content as string)} />;
         case "transition-brief":
             return <TransitionBrief content={block.content as string} />;
+        // ================================================================
+        // MODULE 6 COMPONENT RENDERS (CLEARANCE)
+        // ================================================================
+        case "soft-status":
+            return <SoftStatus content={block.content as string} />;
+        case "simple-list":
+            return <SimpleList items={block.content as string[]} />;
+        case "soft-warning":
+            return <SoftWarning title={block.title || ""} content={block.content as string} />;
+        case "final-note":
+            return <FinalNote content={block.content as string} />;
+        case "pilar2-end":
+            return <PillarEnd title={block.title || ""} content={block.content as string} />;
         default:
             return null;
     }

@@ -17,7 +17,9 @@ export type ContentBlockType =
   // New types for Module 4 (Radar Lock)
   | 'radar-console' | 'stress-heatmap' | 'intonation-trace' | 'emphasis-shift' | 'triage-drill' | 'selective-jamming' | 'control-responses' | 'operator-notes' | 'completion-seal'
   // New types for Module 5 (Full Spectrum)
-  | 'spectrum-init' | 'accent-drift-map' | 'imperfect-input' | 'emotional-overlay' | 'partial-loss-drill' | 'self-regulation-protocol' | 'readiness-check' | 'transition-brief';
+  | 'spectrum-init' | 'accent-drift-map' | 'imperfect-input' | 'emotional-overlay' | 'partial-loss-drill' | 'self-regulation-protocol' | 'readiness-check' | 'transition-brief'
+  // New types for Module 6 (Clearance)
+  | 'soft-status' | 'simple-list' | 'soft-warning' | 'final-note' | 'pilar2-end';
 
 export interface ContentBlock {
   type: ContentBlockType;
