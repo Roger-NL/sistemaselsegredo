@@ -6,7 +6,7 @@
 ## 📋 STATUS GERAL DO PROJETO
 - [x] Implementação de TTS (Google/Web Speech) - **CONCLUÍDO**
 - [x] Conteúdo Real: Pilar 1 - **CONCLUÍDO**
-- [ ] Conteúdo Real: Pilar 2
+- [x] Conteúdo Real: Pilar 2 - **CONCLUÍDO**
 - [ ] Conteúdo Real: Pilar 3
 - [ ] Conteúdo Real: Pilar 4
 - [ ] Conteúdo Real: Pilar 5
@@ -36,3 +36,4 @@
 - [x] Ajuste 2: Falha detectada no fallback do Google (Erro 403 ou CORS). Implementando URL alternativa e tratamento de erro silencioso. (24/02/2026)
 - [x] Ajuste 3: VOZES ROBÓTICAS BLOQUEADAS. Implementado sistema de prioridade de vozes Premium (Neural/Natural/Online) e fallback nativo de nuvem (Youdao Neural). (24/02/2026)
 - [ ] Validar e testar no browser (Chrome/Edge/Safari).
+- [x] Refatorar `pillars-content.ts` dividindo em arquivos individuais e criar novo conteúdo exclusivo para Pilar 2. (24/02/2026)

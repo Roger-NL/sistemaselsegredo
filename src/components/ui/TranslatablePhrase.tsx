@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { AudioButton } from "./AudioButton";
+import { useTranslation } from "@/context/TranslationContext";
+import { cn } from "@/lib/utils";
 
 interface TranslatablePhraseProps {
     english: string;
@@ -18,6 +20,9 @@ export const TranslatablePhrase: React.FC<TranslatablePhraseProps> = ({
     portuguese,
 }) => {
     const [showTooltip, setShowTooltip] = useState(false);
+    const { alwaysShowTranslations } = useTranslation();
+
+    const isVisible = showTooltip || alwaysShowTranslations;
 
     return (
         <span className="inline-flex items-center gap-1.5 align-bottom">
@@ -28,8 +33,11 @@ export const TranslatablePhrase: React.FC<TranslatablePhraseProps> = ({
                 onTouchStart={() => setShowTooltip(!showTooltip)}
             >
                 <span className="translatable-text">{english}</span>
-                {showTooltip && (
-                    <span className="translatable-tooltip">
+                {isVisible && (
+                    <span className={cn(
+                        "translatable-tooltip",
+                        alwaysShowTranslations && "always-visible"
+                    )}>
                         <span className="tooltip-label">PT</span>
                         <span className="tooltip-text">{portuguese}</span>
                     </span>

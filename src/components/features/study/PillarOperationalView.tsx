@@ -11,7 +11,9 @@ import { ContentBlock, PillarData, PillarModule } from "@/types/study";
 import { cn } from "@/lib/utils";
 import { TranslatablePhrase } from "@/components/ui/TranslatablePhrase";
 import { useProgress } from "@/context/ProgressContext";
+import { useTranslation } from "@/context/TranslationContext";
 import { AudioButton } from "@/components/ui/AudioButton";
+import { Languages } from "lucide-react";
 
 interface PillarOperationalViewProps {
     data: PillarData;
@@ -62,6 +64,15 @@ const parseTranslatable = (text: string): React.ReactNode => {
     }
 
     return <>{parts}</>;
+};
+
+/**
+ * Extracts display text from {{english|portuguese}} markers.
+ * Returns the english text by default (strips the translation markers).
+ * Used when we need plain text (e.g., for character-by-character rendering).
+ */
+const extractTranslatableText = (text: string): string => {
+    return text.replace(/\{\{([^|]+)\|([^}]+)\}\}/g, '$1');
 };
 
 /**
@@ -898,6 +909,597 @@ const PhraseAnalysis = ({ data }: { data: { phrase: string; phonetic: string; gr
     );
 };
 
+// ================================================================
+// NEW TOWER COMPONENTS (PILAR 2)
+// ================================================================
+
+const TowerLog = ({ content }: { content: string }) => (
+    <div className="my-8 rounded-lg overflow-hidden border border-cyan-500/30 bg-[#050505] shadow-[0_0_25px_rgba(6,182,212,0.1)]">
+        <div className="bg-cyan-900/20 px-4 py-2 border-b border-cyan-500/20 flex items-center gap-2">
+            <Terminal className="w-4 h-4 text-cyan-400" />
+            <span className="text-[10px] font-mono font-bold text-cyan-400 tracking-widest uppercase">TOWER_OPERATIONAL_LOG</span>
+        </div>
+        <div className="p-4 md:p-6 font-mono text-sm md:text-base text-cyan-500/90 whitespace-pre-wrap leading-relaxed">
+            {parseTextWithTranslations(content)}
+            <motion.span
+                animate={{ opacity: [1, 0] }}
+                transition={{ duration: 0.8, repeat: Infinity }}
+                className="inline-block w-2 h-4 bg-cyan-500 ml-1 translate-y-0.5"
+            />
+        </div>
+    </div>
+);
+
+const SonicScan = ({ data }: { data: { title: string; instructions: string; items: string[]; output: string } }) => {
+    const [checkedItems, setCheckedItems] = useState<boolean[]>(new Array(data.items.length).fill(false));
+
+    const toggleItem = (idx: number) => {
+        const next = [...checkedItems];
+        next[idx] = !next[idx];
+        setCheckedItems(next);
+    };
+
+    const checkedCount = checkedItems.filter(Boolean).length;
+
+    return (
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-blue-500/30 backdrop-blur-sm">
+            <div className="bg-blue-500/10 p-4 border-b border-blue-500/20 flex items-center gap-3">
+                <Volume2 className="w-5 h-5 text-blue-400" />
+                <h3 className="font-bold text-blue-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <p className="text-slate-400 text-sm mb-6">{data.instructions}</p>
+                <div className="space-y-3">
+                    {data.items.map((item, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => toggleItem(idx)}
+                            className={cn(
+                                "w-full text-left p-4 rounded-lg border transition-all flex items-start gap-4",
+                                checkedItems[idx]
+                                    ? "bg-blue-900/30 border-blue-500/50 text-blue-100"
+                                    : "bg-slate-800/40 border-slate-700 text-slate-400 hover:border-slate-600"
+                            )}
+                        >
+                            <div className={cn(
+                                "w-5 h-5 rounded border mt-0.5 flex items-center justify-center flex-shrink-0 transition-colors",
+                                checkedItems[idx] ? "bg-blue-500 border-blue-500" : "border-slate-600"
+                            )}>
+                                {checkedItems[idx] && <CheckCircle2 className="w-4 h-4 text-slate-900" />}
+                            </div>
+                            <span className="text-sm md:text-base">{parseTextWithTranslations(item)}</span>
+                        </button>
+                    ))}
+                </div>
+
+                <AnimatePresence>
+                    {checkedCount >= 2 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-300 text-center font-bold text-xs md:text-sm font-mono"
+                        >
+                            ⚠️ {parseTextWithTranslations(data.output)}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
+    );
+};
+
+const ABSnapTest = ({ data }: { data: { title: string; rule: string; items: { id: string; label: string; a: string; b: string }[]; scoring: string } }) => {
+    const [answers, setAnswers] = useState<Record<string, 'a' | 'b'>>({});
+
+    return (
+        <div className="my-8 bg-slate-900/60 rounded-xl border border-purple-500/30">
+            <div className="bg-purple-500/10 p-4 border-b border-purple-500/20 flex items-center gap-3">
+                <Crosshair className="w-5 h-5 text-purple-400" />
+                <h3 className="font-bold text-purple-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6 text-center">
+                <p className="text-slate-400 text-sm mb-8">{data.rule}</p>
+
+                <div className="space-y-6 max-w-lg mx-auto">
+                    {data.items.map((item) => (
+                        <div key={item.id} className="flex flex-col items-center">
+                            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-3">{item.label}</span>
+                            <div className="flex items-center gap-4 w-full">
+                                <button
+                                    onClick={() => setAnswers(prev => ({ ...prev, [item.id]: 'a' }))}
+                                    className={cn(
+                                        "flex-1 py-4 px-2 rounded-lg border font-mono font-bold transition-all",
+                                        answers[item.id] === 'a'
+                                            ? "bg-cyan-500 border-cyan-400 text-slate-900 scale-[1.02]"
+                                            : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500"
+                                    )}
+                                >
+                                    {parseTextWithTranslations(item.a)}
+                                </button>
+                                <span className="text-slate-600 font-mono text-xs">VS</span>
+                                <button
+                                    onClick={() => setAnswers(prev => ({ ...prev, [item.id]: 'b' }))}
+                                    className={cn(
+                                        "flex-1 py-4 px-2 rounded-lg border font-mono font-bold transition-all",
+                                        answers[item.id] === 'b'
+                                            ? "bg-cyan-500 border-cyan-400 text-slate-900 scale-[1.02]"
+                                            : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500"
+                                    )}
+                                >
+                                    {parseTextWithTranslations(item.b)}
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-slate-800">
+                    <p className="text-xs text-slate-500 italic uppercase font-mono">{data.scoring}</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const LatencyMeter = ({ data }: { data: { title: string; description: string; options: string[]; verdicts: string[] } }) => {
+    const [selected, setSelected] = useState<number | null>(null);
+
+    return (
+        <div className="my-8 bg-slate-900/40 rounded-xl border border-amber-500/20">
+            <div className="bg-amber-500/10 p-4 border-b border-amber-500/20 flex items-center gap-3">
+                <Cpu className="w-5 h-5 text-amber-400" />
+                <h3 className="font-bold text-amber-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <p className="text-slate-300 text-sm md:text-base mb-6">{data.description}</p>
+                <div className="grid gap-3">
+                    {data.options.map((opt, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => setSelected(idx)}
+                            className={cn(
+                                "text-left p-4 rounded-lg border transition-all text-sm md:text-base",
+                                selected === idx
+                                    ? "bg-amber-900/30 border-amber-500/50 text-amber-200"
+                                    : "bg-slate-800/40 border-slate-700 text-slate-400 hover:border-slate-600"
+                            )}
+                        >
+                            {parseTextWithTranslations(opt)}
+                        </button>
+                    ))}
+                </div>
+
+                <AnimatePresence>
+                    {selected !== null && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="mt-6 p-4 bg-slate-800/80 rounded-lg border-l-4 border-amber-500 text-slate-300 text-xs md:text-sm"
+                        >
+                            <strong>LATENCY VERDICT:</strong> {parseTextWithTranslations(data.verdicts[selected])}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
+    );
+};
+
+const CutoffDrill = ({ data }: { data: { title: string; instruction: string; items: { word: string; cutoff: string }[]; warning: string } }) => (
+    <div className="my-8 bg-black/40 rounded-xl border border-red-500/20">
+        <div className="bg-red-950/20 p-4 border-b border-red-500/20 flex items-center gap-3">
+            <Zap className="w-5 h-5 text-red-500" />
+            <h3 className="font-bold text-red-500 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        </div>
+        <div className="p-4 md:p-8 text-center">
+            <p className="text-slate-400 text-sm mb-8 leading-relaxed">{data.instruction}</p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {data.items.map((item, idx) => (
+                    <div key={idx} className="bg-slate-900/80 border border-slate-800 p-4 rounded-lg group hover:border-red-500/50 transition-all">
+                        <div className="text-xs font-mono text-slate-500 mb-2 uppercase tracking-tighter">Trava: {item.cutoff}</div>
+                        <div className="text-xl md:text-2xl font-bold text-white font-mono group-hover:text-red-400 transition-colors">
+                            {extractTranslatableText(item.word).split('').map((char, i, arr) => (
+                                <span key={i} className={i === arr.length - 1 ? "text-red-500" : ""}>{char}</span>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <p className="mt-8 text-xs text-red-400/80 font-mono italic">{parseTextWithTranslations(data.warning)}</p>
+        </div>
+    </div>
+);
+
+const MisfireCases = ({ data }: { data: { title: string; cases: { whatYouSay: string; whatTheyHear: string; whyItHurts: string }[]; note: string } }) => (
+    <div className="my-8 rounded-xl border border-slate-700/50 bg-slate-900/30 backdrop-blur">
+        <div className="bg-red-900/10 px-4 py-3 border-b border-red-500/20 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500" />
+            <span className="font-bold text-slate-200 font-mono text-xs md:text-sm tracking-wider uppercase">{parseTextWithTranslations(data.title)}</span>
+        </div>
+        <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[500px]">
+                <thead>
+                    <tr className="bg-slate-800/50 text-[10px] uppercase font-mono text-slate-500 tracking-widest">
+                        <th className="px-6 py-4">Sinal Emitido (Erro)</th>
+                        <th className="px-6 py-4">Sinal Recebido (Nativo)</th>
+                        <th className="px-6 py-4">Dano Operacional</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                    {data.cases.map((c, i) => (
+                        <tr key={i} className="hover:bg-slate-800/30 transition-colors">
+                            <td className="px-6 py-4 font-mono text-red-400">{parseTextWithTranslations(c.whatYouSay)}</td>
+                            <td className="px-6 py-4 font-mono text-cyan-400 font-bold">{parseTextWithTranslations(c.whatTheyHear)}</td>
+                            <td className="px-6 py-4 text-xs md:text-sm text-slate-400 leading-relaxed">{parseTextWithTranslations(c.whyItHurts)}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+        <div className="p-4 bg-slate-900/50 border-t border-slate-800">
+            <p className="text-[10px] md:text-xs text-slate-500 font-mono italic">⚠️ {data.note}</p>
+        </div>
+    </div>
+);
+
+const AnchorBuilder = ({ data }: { data: { title: string; instruction: string; example: string; fields: { id: string; label: string; placeholder: string }[] } }) => {
+    const [values, setValues] = useState<Record<string, string>>({});
+
+    return (
+        <div className="my-8 bg-gradient-to-br from-slate-900/80 to-blue-900/20 rounded-xl border border-blue-500/30 shadow-xl">
+            <div className="bg-blue-900/40 p-4 border-b border-blue-500/30 flex items-center gap-3">
+                <Target className="w-5 h-5 text-blue-400" />
+                <h3 className="font-bold text-blue-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <p className="text-slate-300 text-sm md:text-base mb-2">{data.instruction}</p>
+                <div className="bg-black/40 p-3 rounded border border-slate-800 mb-8 mt-2">
+                    <p className="text-[11px] font-mono text-slate-500 uppercase mb-1">Padrão Tático de Exemplo:</p>
+                    <p className="text-xs md:text-sm text-blue-300 italic">"{parseTextWithTranslations(data.example)}"</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {data.fields.map((field) => (
+                        <div key={field.id} className="space-y-2">
+                            <label className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest block">{field.label}</label>
+                            <input
+                                type="text"
+                                placeholder={extractTranslatableText(field.placeholder)}
+                                value={values[field.id] || ''}
+                                onChange={(e) => setValues(prev => ({ ...prev, [field.id]: e.target.value }))}
+                                className="w-full bg-slate-950/80 border border-slate-700 rounded p-3 text-sm text-slate-200 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all outline-none"
+                            />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const Checksum = ({ data }: { data: { title: string; rule: string; questions: { q: string; options: string[]; answer: number }[] } }) => {
+    const [current, setCurrent] = useState(0);
+    const [selected, setSelected] = useState<number[]>(new Array(data.questions.length).fill(-1));
+    const [finished, setFinished] = useState(false);
+
+    const handleSelect = (idx: number) => {
+        const next = [...selected];
+        next[current] = idx;
+        setSelected(next);
+
+        if (current + 1 < data.questions.length) {
+            setTimeout(() => setCurrent(current + 1), 600);
+        } else {
+            setFinished(true);
+        }
+    };
+
+    return (
+        <div className="my-8 bg-slate-900 rounded-xl border border-emerald-500/30 shadow-2xl">
+            <div className="bg-emerald-500/10 p-4 border-b border-emerald-500/20 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <Target className="w-5 h-5 text-emerald-400" />
+                    <h3 className="font-bold text-emerald-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+                </div>
+                {!finished && <span className="font-mono text-xs text-emerald-500 bg-emerald-950/50 px-2 py-1 rounded">Check {current + 1}/{data.questions.length}</span>}
+            </div>
+            <div className="p-6 md:p-8">
+                {finished ? (
+                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center py-4">
+                        <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
+                        <h4 className="text-xl md:text-2xl font-bold text-white mb-2">Checksum Validado</h4>
+                        <p className="text-slate-400 text-sm mb-6 max-w-sm mx-auto">Sua antena auditiva está calibrada para o sinal limpo. Prepare-se para o próximo nível.</p>
+                        <button onClick={() => { setCurrent(0); setSelected(new Array(data.questions.length).fill(-1)); setFinished(false); }} className="px-6 py-2 bg-slate-800 text-slate-300 rounded text-xs font-mono uppercase tracking-widest hover:bg-slate-700 transition">Reiniciar Scan</button>
+                    </motion.div>
+                ) : (
+                    <div>
+                        <p className="text-slate-400 text-sm mb-6 italic text-center">{data.rule}</p>
+                        <h4 className="text-lg md:text-xl font-bold text-slate-100 mb-8 text-center">{parseTextWithTranslations(data.questions[current].q)}</h4>
+                        <div className="grid gap-3 max-w-md mx-auto">
+                            {data.questions[current].options.map((opt, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => handleSelect(idx)}
+                                    className={cn(
+                                        "w-full text-left p-4 rounded-lg border font-mono text-sm transition-all",
+                                        selected[current] === idx
+                                            ? idx === data.questions[current].answer ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100" : "bg-red-900/40 border-red-500/50 text-red-100"
+                                            : "bg-slate-800 border-slate-700 text-slate-400 hover:border-emerald-500/30"
+                                    )}
+                                >
+                                    {parseTextWithTranslations(opt)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// ============================================================================
+// MODULE 3 COMPONENTS: FREQUENCY SYNC
+// ============================================================================
+
+const BoundaryIllusion = ({ data }: { data: { title: string; instruction: string; example: string; insight: string } }) => {
+    const [revealed, setRevealed] = useState(false);
+    return (
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-indigo-500/30">
+            <div className="bg-indigo-500/10 p-4 border-b border-indigo-500/20 flex items-center gap-3">
+                <Brain className="w-5 h-5 text-indigo-400" />
+                <h3 className="font-bold text-indigo-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <p className="text-slate-400 text-sm mb-6">{parseTextWithTranslations(data.instruction)}</p>
+
+                <div className="bg-slate-800/80 rounded-lg p-6 border border-slate-700 mb-6">
+                    <div className="text-center">
+                        <div className="text-lg md:text-xl font-mono text-white font-bold mb-4 tracking-wide">
+                            {parseTextWithTranslations(data.example.split('\n')[0])}
+                        </div>
+
+                        <AnimatePresence>
+                            {revealed && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="mt-4"
+                                >
+                                    <div className="text-sm text-indigo-300/80 whitespace-pre-line leading-relaxed">
+                                        {data.example.split('\n').slice(1).map((line, i) => (
+                                            <p key={i} className="mb-1">{parseTextWithTranslations(line)}</p>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+
+                <button
+                    onClick={() => setRevealed(!revealed)}
+                    className="w-full py-3 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-mono text-sm hover:bg-indigo-500/30 transition-colors"
+                >
+                    {revealed ? "OCULTAR SEGMENTAÇÃO" : "REVELAR SEGMENTAÇÃO REAL"}
+                </button>
+
+                {revealed && (
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="mt-4 text-xs text-indigo-400/80 italic text-center font-mono"
+                    >
+                        💡 {parseTextWithTranslations(data.insight)}
+                    </motion.p>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const LinkingMap = ({ data }: { data: { title: string; patterns: { pattern: string; example: string; note: string }[]; rule: string } }) => (
+    <div className="my-8 bg-slate-900/50 rounded-xl border border-teal-500/30">
+        <div className="bg-teal-500/10 p-4 border-b border-teal-500/20 flex items-center gap-3">
+            <Zap className="w-5 h-5 text-teal-400" />
+            <h3 className="font-bold text-teal-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        </div>
+        <div className="p-4 md:p-6 space-y-4">
+            {data.patterns.map((p, idx) => (
+                <div key={idx} className="bg-slate-800/60 rounded-lg p-4 border border-teal-500/10 hover:border-teal-500/30 transition-colors">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-teal-500 bg-teal-500/10 px-2 py-1 rounded">
+                            {parseTextWithTranslations(p.pattern)}
+                        </span>
+                    </div>
+                    <div className="text-base md:text-lg font-mono font-bold text-white mb-2">
+                        {parseTextWithTranslations(p.example)}
+                    </div>
+                    <p className="text-xs text-slate-400 italic">{parseTextWithTranslations(p.note)}</p>
+                </div>
+            ))}
+            <div className="mt-4 p-3 bg-teal-500/10 border border-teal-500/20 rounded-lg text-center">
+                <p className="text-xs md:text-sm text-teal-300 font-mono">{parseTextWithTranslations(data.rule)}</p>
+            </div>
+        </div>
+    </div>
+);
+
+const CompressionDeck = ({ data }: { data: { title: string; items: { written: string; compressed: string; why: string }[]; warning: string } }) => {
+    const [flipped, setFlipped] = useState<boolean[]>(new Array(data.items.length).fill(false));
+    const toggle = (idx: number) => setFlipped(prev => { const next = [...prev]; next[idx] = !next[idx]; return next; });
+
+    return (
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-orange-500/30">
+            <div className="bg-orange-500/10 p-4 border-b border-orange-500/20 flex items-center gap-3">
+                <Cpu className="w-5 h-5 text-orange-400" />
+                <h3 className="font-bold text-orange-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                {data.items.map((item, idx) => (
+                    <button
+                        key={idx}
+                        onClick={() => toggle(idx)}
+                        className={cn(
+                            "p-4 rounded-lg border text-center transition-all duration-300 cursor-pointer group",
+                            flipped[idx]
+                                ? "bg-orange-500/20 border-orange-500/40"
+                                : "bg-slate-800/80 border-slate-700 hover:border-orange-500/30"
+                        )}
+                    >
+                        <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-2">
+                            {flipped[idx] ? "Compressed" : "Written"}
+                        </div>
+                        <div className="text-lg md:text-xl font-bold font-mono text-white mb-2">
+                            {flipped[idx] ? item.compressed : parseTextWithTranslations(item.written)}
+                        </div>
+                        {flipped[idx] && (
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-[10px] text-orange-300/80 italic"
+                            >
+                                {parseTextWithTranslations(item.why)}
+                            </motion.p>
+                        )}
+                        <div className="text-[10px] text-slate-500 mt-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                            {flipped[idx] ? "↩ escrito" : "→ comprimido"}
+                        </div>
+                    </button>
+                ))}
+            </div>
+            <p className="px-6 pb-4 text-xs text-orange-400/80 font-mono italic">{parseTextWithTranslations(data.warning)}</p>
+        </div>
+    );
+};
+
+const BlockDecode = ({ data }: { data: { title: string; instruction: string; samples: { audio: string; options: string[]; answer: number }[]; goal: string } }) => {
+    const [answers, setAnswers] = useState<Record<number, number>>({});
+    return (
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-cyan-500/30">
+            <div className="bg-cyan-500/10 p-4 border-b border-cyan-500/20 flex items-center gap-3">
+                <Play className="w-5 h-5 text-cyan-400" />
+                <h3 className="font-bold text-cyan-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <p className="text-slate-400 text-sm mb-6">{parseTextWithTranslations(data.instruction)}</p>
+
+                <div className="space-y-6">
+                    {data.samples.map((sample, sIdx) => (
+                        <div key={sIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                            <div className="flex items-center gap-3 mb-4">
+                                <AudioButton text={sample.audio} size="sm" />
+                                <span className="text-sm md:text-base font-mono text-white font-bold italic">"{sample.audio}"</span>
+                            </div>
+                            <div className="grid grid-cols-1 gap-2">
+                                {sample.options.map((opt, oIdx) => (
+                                    <button
+                                        key={oIdx}
+                                        onClick={() => setAnswers(prev => ({ ...prev, [sIdx]: oIdx }))}
+                                        className={cn(
+                                            "w-full text-left p-3 rounded border text-sm transition-all",
+                                            answers[sIdx] === oIdx
+                                                ? oIdx === sample.answer
+                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
+                                                    : "bg-red-900/40 border-red-500/50 text-red-100"
+                                                : "bg-slate-900/50 border-slate-700 text-slate-400 hover:border-cyan-500/30"
+                                        )}
+                                    >
+                                        {parseTextWithTranslations(opt)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <AnimatePresence>
+                    {Object.keys(answers).length === data.samples.length && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="mt-6 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-center"
+                        >
+                            <p className="text-sm text-cyan-300 font-mono font-bold">{parseTextWithTranslations(data.goal)}</p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
+    );
+};
+
+const LatencyCheck = ({ data }: { data: { title: string; description: string; items: string[]; interpretation: string } }) => {
+    const [checked, setChecked] = useState<boolean[]>(new Array(data.items.length).fill(false));
+    const toggle = (idx: number) => setChecked(prev => { const next = [...prev]; next[idx] = !next[idx]; return next; });
+
+    return (
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-yellow-500/30">
+            <div className="bg-yellow-500/10 p-4 border-b border-yellow-500/20 flex items-center gap-3">
+                <Cpu className="w-5 h-5 text-yellow-400" />
+                <h3 className="font-bold text-yellow-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            </div>
+            <div className="p-4 md:p-6">
+                <p className="text-slate-400 text-sm mb-4">{parseTextWithTranslations(data.description)}</p>
+                <div className="space-y-3">
+                    {data.items.map((item, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => toggle(idx)}
+                            className={cn(
+                                "w-full flex items-center gap-3 p-4 rounded-lg border text-left text-sm transition-all",
+                                checked[idx]
+                                    ? "bg-yellow-500/15 border-yellow-500/40 text-yellow-200"
+                                    : "bg-slate-800/50 border-slate-700 text-slate-400 hover:border-yellow-500/20"
+                            )}
+                        >
+                            <div className={cn(
+                                "w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors",
+                                checked[idx] ? "bg-yellow-500 border-yellow-400" : "border-slate-600"
+                            )}>
+                                {checked[idx] && <CheckCircle2 className="w-3 h-3 text-slate-900" />}
+                            </div>
+                            <span>{parseTextWithTranslations(item)}</span>
+                        </button>
+                    ))}
+                </div>
+
+                <AnimatePresence>
+                    {checked.some(Boolean) && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-center"
+                        >
+                            <p className="text-xs md:text-sm text-yellow-300 font-mono italic">{parseTextWithTranslations(data.interpretation)}</p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
+    );
+};
+
+const TowerStamp = ({ content }: { content: string }) => (
+    <div className="my-12 relative">
+        <div className="absolute inset-0 bg-emerald-500/5 blur-3xl rounded-full" />
+        <div className="relative bg-emerald-950/20 border border-emerald-500/40 p-8 md:p-12 rounded-xl text-center overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+                <CheckCircle2 className="w-32 h-32 text-emerald-500" />
+            </div>
+            <div className="relative z-10">
+                <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
+                    <CheckCircle2 className="w-10 h-10 text-slate-900" />
+                </div>
+                <h3 className="text-2xl md:text-3xl font-black text-emerald-400 font-mono tracking-tighter mb-4 uppercase">SINAL VALIDADO</h3>
+                <div className="text-slate-300 text-base md:text-lg max-w-lg mx-auto whitespace-pre-wrap leading-relaxed">
+                    {parseTextWithTranslations(content)}
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
 const RenderBlock = ({ block }: { block: ContentBlock }) => {
     if (block.type.startsWith("box-") || block.type === "pillar-end" || block.type === "micro-win") {
         const boxClass = BoxStyles[block.type as keyof typeof BoxStyles] || "";
@@ -935,7 +1537,7 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
                 </h2>
             );
         case "h3":
-            return <h3 className="text-xl font-bold text-slate-200 mt-8 mb-4">{block.content}</h3>;
+            return <h3 className="text-xl font-bold text-slate-200 mt-8 mb-4">{parseTextWithTranslations(block.content as string)}</h3>;
         case "paragraph":
             return (
                 <p className="text-lg text-slate-400 leading-relaxed mb-6 font-sans">
@@ -953,7 +1555,7 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
                             <li key={i} className="flex items-start gap-3 text-slate-400">
                                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 mt-2.5 flex-shrink-0 shadow-[0_0_5px_rgba(6,182,212,0.8)]" />
                                 <span className="text-lg">
-                                    {title ? <><strong className="text-slate-200">{title}:</strong>{desc}</> : <>{desc}</>}
+                                    {title ? <><strong className="text-slate-200">{parseTextWithTranslations(title)}:</strong>{parseTextWithTranslations(desc)}</> : <>{parseTextWithTranslations(desc)}</>}
                                 </span>
                             </li>
                         )
@@ -1001,7 +1603,7 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
         case "audio-decode-game":
             return <AudioDecodeGame data={JSON.parse(block.content as string)} />;
         case "reveal-box":
-            return <RevealBox title={block.title || "ENCRYPTED DATA"}>{parseTextWithTranslations(block.content as string)}</RevealBox>;
+            return <RevealBox title={parseTextWithTranslations(block.title || "ENCRYPTED DATA") as string}>{parseTextWithTranslations(block.content as string)}</RevealBox>;
         case "audio-player":
             return (
                 <div className="my-6 p-4 bg-slate-900/50 border border-slate-700 rounded-lg flex items-center gap-4 hover:border-cyan-500/50 transition-colors group">
@@ -1076,7 +1678,7 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
                 <div className="my-10 bg-slate-900/30 rounded border border-slate-700 overflow-hidden">
                     <div className="bg-slate-900/80 px-4 py-3 border-b border-slate-700 flex items-center gap-2">
                         <MessageSquare className="w-4 h-4 text-cyan-500" />
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Intercepted Comms: {block.title}</span>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Intercepted Comms: {parseTextWithTranslations(block.title || "")}</span>
                     </div>
                     <div className="p-6 space-y-4">
                         {(block.content as string[]).map((line, i) => {
@@ -1084,12 +1686,12 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
                             const isMe = ["You", "Você", "Eu", "Me"].includes(speaker.trim());
                             return (
                                 <div key={i} className={cn("flex flex-col max-w-[85%]", isMe ? "ml-auto items-end" : "mr-auto items-start")}>
-                                    <span className="text-[10px] uppercase font-bold text-slate-500 mb-1 px-1 font-mono">{speaker}</span>
+                                    <span className="text-[10px] uppercase font-bold text-slate-500 mb-1 px-1 font-mono">{parseTextWithTranslations(speaker)}</span>
                                     <div className={cn(
                                         "px-4 py-3 rounded text-sm leading-relaxed shadow-lg border relative",
                                         isMe ? "bg-cyan-900/20 border-cyan-500/30 text-cyan-100" : "bg-slate-800/40 border-slate-700 text-slate-300"
                                     )}>
-                                        {text}
+                                        {parseTextWithTranslations(text)}
                                     </div>
                                 </div>
                             )
@@ -1133,6 +1735,40 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
             const phraseData = typeof block.content === 'string' ? JSON.parse(block.content) : block.content;
             return <PhraseAnalysis data={phraseData} />;
         }
+        // ================================================================
+        // TOWER RENDERS (PILAR 2)
+        // ================================================================
+        case "tower-log":
+            return <TowerLog content={block.content as string} />;
+        case "sonic-scan":
+            return <SonicScan data={JSON.parse(block.content as string)} />;
+        case "a-b-snaptest":
+            return <ABSnapTest data={JSON.parse(block.content as string)} />;
+        case "latency-meter":
+            return <LatencyMeter data={JSON.parse(block.content as string)} />;
+        case "cutoff-drill":
+            return <CutoffDrill data={JSON.parse(block.content as string)} />;
+        case "misfire-cases":
+            return <MisfireCases data={JSON.parse(block.content as string)} />;
+        case "anchor-builder":
+            return <AnchorBuilder data={JSON.parse(block.content as string)} />;
+        case "checksum":
+            return <Checksum data={JSON.parse(block.content as string)} />;
+        case "tower-stamp":
+            return <TowerStamp content={block.content as string} />;
+        // ================================================================
+        // MODULE 3 COMPONENT RENDERS (FREQUENCY SYNC)
+        // ================================================================
+        case "boundary-illusion":
+            return <BoundaryIllusion data={JSON.parse(block.content as string)} />;
+        case "linking-map":
+            return <LinkingMap data={JSON.parse(block.content as string)} />;
+        case "compression-deck":
+            return <CompressionDeck data={JSON.parse(block.content as string)} />;
+        case "block-decode":
+            return <BlockDecode data={JSON.parse(block.content as string)} />;
+        case "latency-check":
+            return <LatencyCheck data={JSON.parse(block.content as string)} />;
         default:
             return null;
     }
@@ -1148,6 +1784,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
     );
 
     const { markPillarModuleAsCompleted, isPillarModuleCompleted } = useProgress();
+    const { alwaysShowTranslations, toggleAlwaysShowTranslations } = useTranslation();
 
     // If no modules, fallback (or handle legacy blocks) - ideally we migrate all
     if (!data.modules) {
@@ -1238,11 +1875,57 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
             <div className="mb-12 relative">
                 <div className="absolute top-0 left-0 w-20 h-1 bg-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.8)]" />
                 <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tighter pt-8">
-                    {data.title}
+                    {parseTextWithTranslations(data.title)}
                 </h1>
                 <p className="text-xl text-slate-400 max-w-2xl font-light leading-relaxed">
-                    {data.subtitle}
+                    {parseTextWithTranslations(data.subtitle)}
                 </p>
+
+                {/* TRANSLATION TOGGLE */}
+                <div className="mt-8 flex items-center">
+                    <button
+                        onClick={toggleAlwaysShowTranslations}
+                        className={cn(
+                            "flex items-center gap-3 px-4 py-2 rounded-full border transition-all duration-300 group relative overflow-hidden",
+                            alwaysShowTranslations
+                                ? "bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                                : "bg-slate-900/50 border-slate-700 text-slate-500 hover:border-slate-500"
+                        )}
+                    >
+                        <div className={cn(
+                            "absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity",
+                            alwaysShowTranslations && "opacity-100"
+                        )} />
+
+                        <Languages className={cn(
+                            "w-5 h-5 transition-transform duration-500",
+                            alwaysShowTranslations ? "rotate-0 scale-110" : "rotate-12 scale-100"
+                        )} />
+
+                        <div className="flex flex-col items-start leading-none relative z-10">
+                            <span className="text-[10px] uppercase font-bold tracking-widest mb-0.5 opacity-60">Study Mode</span>
+                            <span className="text-sm font-bold">
+                                {alwaysShowTranslations ? "Sempre Traduzir: ON" : "Sempre Traduzir: OFF"}
+                            </span>
+                        </div>
+
+                        <div className={cn(
+                            "w-8 h-4 rounded-full relative transition-colors duration-300 ml-2 border",
+                            alwaysShowTranslations ? "bg-cyan-500 border-cyan-400" : "bg-slate-800 border-slate-700"
+                        )}>
+                            <div className={cn(
+                                "absolute top-0.5 w-2.5 h-2.5 rounded-full bg-white transition-all duration-300 shadow-sm",
+                                alwaysShowTranslations ? "left-4.5" : "left-0.5"
+                            )} />
+                        </div>
+                    </button>
+
+                    <p className="ml-4 text-[10px] text-slate-500 max-w-[180px] leading-tight hidden sm:block italic">
+                        {alwaysShowTranslations
+                            ? "Traduções fixas ativadas para imersão técnica."
+                            : "Ative para exibir traduções sem precisar pairar."}
+                    </p>
+                </div>
             </div>
 
             {/* CASCADING MODULES */}
@@ -1268,7 +1951,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.1 }}
                                 className={cn(
-                                    "relative overflow-hidden rounded-lg border transition-all duration-300",
+                                    "relative rounded-lg border transition-all duration-300",
                                     isActive
                                         ? "bg-slate-900/80 border-cyan-500/50 shadow-[0_0_30px_rgba(8,145,178,0.1)]"
                                         : isHighlighted
@@ -1308,14 +1991,14 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                                 "font-bold text-base md:text-lg transition-colors flex items-center gap-2",
                                                 isCompleted ? "text-emerald-300" : isActive ? "text-white" : isLocked ? "text-slate-600" : "text-slate-300"
                                             )}>
-                                                {module.title}
+                                                {parseTextWithTranslations(module.title)}
                                                 {isCompleted && (
                                                     <span className="text-[10px] md:text-xs bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 md:px-2 md:py-0.5 rounded font-mono">COMPLETO</span>
                                                 )}
                                             </h3>
                                             {module.subtitle && (
                                                 <p className="text-sm text-slate-500 hidden md:block">
-                                                    {module.subtitle}
+                                                    {parseTextWithTranslations(module.subtitle)}
                                                 </p>
                                             )}
                                         </div>

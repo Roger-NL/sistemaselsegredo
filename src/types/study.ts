@@ -9,7 +9,11 @@ export type ContentBlockType =
   // New types for Part 2
   | 'brave-insight' | 'micro-win' | 'scramble-exercise' | 'combat-sort-game' | 'audio-decode-game'
   // New types for Part 2
-  | 'memory-diagram' | 'baby-learning' | 'phrase-analysis';
+  | 'memory-diagram' | 'baby-learning' | 'phrase-analysis'
+  | 'audio-minimal-pairs' | 'phoneme-grid' | 'quick-check'
+  | 'tower-log' | 'sonic-scan' | 'a-b-snaptest' | 'latency-meter' | 'cutoff-drill' | 'misfire-cases' | 'anchor-builder' | 'checksum' | 'tower-stamp'
+  // New types for Module 3 (Frequency Sync)
+  | 'boundary-illusion' | 'linking-map' | 'compression-deck' | 'block-decode' | 'latency-check';
 
 export interface ContentBlock {
   type: ContentBlockType;
