@@ -256,6 +256,16 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             }
         });
         setPillarStatus(newStatus);
+        setCompletedPillarModules([]);
+        // Sync to Firebase so reload doesn't override
+        if (user?.id) {
+            import("@/lib/auth-service").then(({ updateUserProgress }) => {
+                updateUserProgress(user.id, {
+                    localPillarStatus: newStatus as any,
+                    completedPillarModules: [],
+                });
+            });
+        }
     };
 
     // Retorna número do pilar atual
@@ -420,15 +430,34 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setSpecializationStatus(null);
         setCompletedSpecializations([]);
         setCompletedModules({});
-        secureStorage.setItem(STORAGE_KEY, {
-            pillarStatus: initial,
-            chosenSpecialization: null,
-            specializationStatus: null,
-            completedSpecializations: [],
-            completedModules: {},
-            completedPillarModules: [],
-            hasSeenMissionComplete: false
-        });
+        setCompletedPillarModules([]);
+        setHasSeenMissionComplete(false);
+        const key = getStorageKey();
+        if (key) {
+            secureStorage.setItem(key, {
+                pillarStatus: initial,
+                chosenSpecialization: null,
+                specializationStatus: null,
+                completedSpecializations: [],
+                completedModules: {},
+                completedPillarModules: [],
+                hasSeenMissionComplete: false
+            });
+        }
+        // Also clear Firebase progress so it doesn't re-inject old data on reload
+        if (user?.id) {
+            import("@/lib/auth-service").then(({ updateUserProgress }) => {
+                updateUserProgress(user.id, {
+                    localPillarStatus: {} as any,
+                    completedPillarModules: [],
+                    completedModules: {} as any,
+                    completedSpecializations: [],
+                    chosenSpecialization: null,
+                    specializationStatus: null,
+                    hasSeenMissionComplete: false,
+                });
+            });
+        }
         window.location.reload();
     };
 
