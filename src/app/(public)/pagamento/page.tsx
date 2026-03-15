@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { FlightButton } from "@/components/ui/FlightCard";
+import { ROUTES } from "@/lib/routes";
 import {
     Check,
     AlertCircle,
-    ArrowLeft,
     Loader2,
     Shield,
     Play,
@@ -19,7 +19,7 @@ import {
 
 export default function PagamentoPage() {
     const router = useRouter();
-    const { subscriptionStatus, activateWithInvite, activateWithPayment } = useAuth();
+    const { subscriptionStatus, activateWithInvite, activateWithPayment, isAuthenticated, isLoading } = useAuth();
 
     // UI States
     const [showCodeInput, setShowCodeInput] = useState(false);
@@ -28,15 +28,25 @@ export default function PagamentoPage() {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    // If already active, redirect to dashboard
-    if (subscriptionStatus === 'premium') {
-        router.push('/dashboard');
-        return null;
-    }
+    useEffect(() => {
+        if (subscriptionStatus === 'premium') {
+            router.replace(ROUTES.app.dashboard);
+        }
+    }, [router, subscriptionStatus]);
+
+    const redirectToLogin = () => {
+        router.push(`${ROUTES.auth.login}?callbackUrl=${encodeURIComponent(ROUTES.public.payment)}`);
+    };
 
     const handleInviteSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        if (!isAuthenticated) {
+            redirectToLogin();
+            return;
+        }
+
         setLoading(true);
 
         const result = await activateWithInvite(inviteCode);
@@ -44,7 +54,7 @@ export default function PagamentoPage() {
         if (result.success) {
             setSuccess(true);
             setTimeout(() => {
-                router.push('/dashboard');
+                router.push(ROUTES.app.dashboard);
             }, 2000);
         } else {
             setError(result.error || 'Erro ao validar código');
@@ -54,6 +64,12 @@ export default function PagamentoPage() {
 
     const handlePayment = async () => {
         setError('');
+
+        if (!isAuthenticated) {
+            redirectToLogin();
+            return;
+        }
+
         setLoading(true);
 
         // Simulate payment processing
@@ -65,7 +81,7 @@ export default function PagamentoPage() {
         if (result.success) {
             setSuccess(true);
             setTimeout(() => {
-                router.push('/dashboard');
+                router.push(ROUTES.app.dashboard);
             }, 2000);
         } else {
             setError(result.error || 'Erro no pagamento');
@@ -92,6 +108,10 @@ export default function PagamentoPage() {
         );
     }
 
+    if (!isLoading && subscriptionStatus === 'premium') {
+        return null;
+    }
+
     return (
         <div className="min-h-screen bg-[#050505] text-white overflow-x-hidden selection:bg-violet-500/30">
 
@@ -100,7 +120,7 @@ export default function PagamentoPage() {
                 <div className="font-bold tracking-tighter text-xl">
                     ES ACADEMY <span className="text-violet-500">PRO</span>
                 </div>
-                <button onClick={() => router.push('/')} className="text-xs text-white/50 hover:text-white transition-colors uppercase tracking-widest">
+                <button onClick={() => router.push(ROUTES.home)} className="text-xs text-white/50 hover:text-white transition-colors uppercase tracking-widest">
                     Voltar
                 </button>
             </nav>
@@ -179,7 +199,7 @@ export default function PagamentoPage() {
                                 { name: "Pedro H.", role: "Empreendedor", text: "Não é apenas inglês. É mentalidade. O English Bible mudou minha forma de pensar." }
                             ].map((review, idx) => (
                                 <div key={idx} className="bg-black/40 border border-white/10 p-6 rounded-xl hover:border-white/20 transition-colors">
-                                    <p className="text-slate-300 mb-6 leading-relaxed">"{review.text}"</p>
+                                    <p className="text-slate-300 mb-6 leading-relaxed">&quot;{review.text}&quot;</p>
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-sm font-bold text-slate-400">
                                             {review.name.charAt(0)}

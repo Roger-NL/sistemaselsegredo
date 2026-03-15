@@ -5,17 +5,17 @@ import { useState, useEffect } from "react";
 import RotatingEarth from "@/components/ui/wireframe-dotted-globe";
 import { DevControls } from "@/components/core/DevControls";
 import { useProgress } from "@/context/ProgressContext";
-import { getRank } from "@/utils/ranks";
 import { PILLARS } from "@/data/curriculum";
 import { TheHUD } from "@/components/core/TheHUD";
-import { GlobalStatusPanel } from "@/components/features/dashboard/GlobalStatusPanel";
+import { GlobalStatusPanel } from "@/features/dashboard/GlobalStatusPanel";
 import { Typewriter } from "@/components/ui/typewriter";
 import { DashboardNav } from "@/components/core/DashboardNav";
 import ConciergeModal from "@/components/core/ConciergeModal";
-import { ExamFeedbackPopup } from "@/components/features/dashboard/ExamFeedbackPopup";
+import { ExamFeedbackPopup } from "@/features/dashboard/ExamFeedbackPopup";
 
 import { useAuth } from "@/context/AuthContext";
-import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard";
+import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard/service";
+import { ROUTES } from "@/lib/routes";
 
 export default function Page() {
   const router = useRouter();
@@ -23,15 +23,12 @@ export default function Page() {
   const {
     getCompletedCount,
     getCurrentPillarNumber,
-    areAllPillarsComplete,
-    chosenSpecialization,
+    specializationStatus,
     getCurrentSpecialization,
-    canChooseSpecialization,
     getGlobalProgress
   } = useProgress();
 
   const completedCount = getCompletedCount();
-  const currentRank = getRank(completedCount);
   const currentPillarNumber = getCurrentPillarNumber();
   const currentPillar = PILLARS[currentPillarNumber - 1];
   const currentSpec = getCurrentSpecialization();
@@ -95,7 +92,7 @@ export default function Page() {
       {isAdmin && (
         <div className="fixed bottom-4 right-4 z-[9999] pointer-events-auto">
           <button
-            onClick={() => router.push('/admin/dashboard')}
+            onClick={() => router.push(ROUTES.admin.dashboard)}
             className="bg-red-600 text-white px-4 py-2 rounded shadow-lg font-bold text-xs uppercase tracking-widest hover:bg-red-700 transition-colors"
           >
             PAINEL ADMIN
@@ -377,8 +374,9 @@ export default function Page() {
           <div
             onClick={(e) => {
               e.stopPropagation();
-              if (currentSpec) router.push(`/especialidades/${currentSpec.id}`); else if (completedCount < 9) router.push(`/pilar/${currentPillarNumber}`);
-              else router.push("/especialidades");
+              if (currentSpec) router.push(`${ROUTES.app.specialties}/${currentSpec.id}`);
+              else if (completedCount < 9) router.push(`${ROUTES.app.pillar}/${currentPillarNumber}`);
+              else router.push(ROUTES.app.specialties);
             }}
             className="cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95"
           >
@@ -397,6 +395,8 @@ export default function Page() {
               <span className={`text-xs md:text-sm font-medium uppercase tracking-wider ${currentSpec ? "text-violet-300" : "text-[#EEF4D4]"}`}>
                 {currentSpec
                   ? "Continuar Estudo"
+                  : specializationStatus === "completed"
+                    ? "Especialização Concluída"
                   : completedCount === 9
                     ? "Escolher Especialidade"
                     : completedCount === 0
@@ -440,7 +440,9 @@ export default function Page() {
                   textShadow: '0 1px 4px rgba(0,0,0,0.5)'
                 }}
               >
-                {completedCount === 9 ? "Escolher Especialidade" : `Pilar ${currentPillarNumber}: ${currentPillar?.title || "Pilar 1"}`}
+                {completedCount === 9
+                  ? (specializationStatus === "completed" ? "Especialização concluída com sucesso" : "Escolher Especialidade")
+                  : `Pilar ${currentPillarNumber}: ${currentPillar?.title || "Pilar 1"}`}
               </p>
             )}
           </div>

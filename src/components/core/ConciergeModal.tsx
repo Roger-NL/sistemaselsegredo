@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { ShieldCheck, BellRing, Zap, X } from "lucide-react";
+import { ModalShell } from "@/components/ui/modal-shell";
 
 // ============================================================================
 // CONCIERGE MODAL — WhatsApp Capture
@@ -153,31 +153,12 @@ export default function ConciergeModal({
     };
 
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-auto"
-                >
-                    {/* Backdrop */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-                        onClick={onClose}
-                    />
-
-                    {/* Modal Card */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }} // smooth easeOutQuint
-                        className="relative w-full max-w-[420px] bg-[#09090b] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
-                    >
+        <ModalShell
+            isOpen={isOpen}
+            onClose={onClose}
+            panelClassName="w-full max-w-[420px] bg-[#09090b] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
+            zIndexClassName="z-[9999]"
+        >
                         {/* Status Bar Top */}
                         <div className={`h-1 w-full ${isLoginTrigger ? 'bg-emerald-500' : 'bg-amber-500'}`} />
 
@@ -303,9 +284,6 @@ export default function ConciergeModal({
                                 </button>
                             </div>
                         </div>
-                    </motion.div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+        </ModalShell>
     );
 }

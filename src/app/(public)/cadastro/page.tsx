@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import AuthBackground from "@/components/auth/AuthBackground";
+import { ROUTES } from "@/lib/routes";
 
 export default function CadastroPage() {
     const [name, setName] = useState("");
@@ -20,7 +21,7 @@ export default function CadastroPage() {
     // Auto-redirect if already logged in
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
-            router.push("/dashboard");
+            router.push(ROUTES.app.dashboard);
         }
     }, [isAuthenticated, isLoading, router]);
 
@@ -39,7 +40,7 @@ export default function CadastroPage() {
 
         if (result.success) {
             setTimeout(() => {
-                router.push("/perfil");
+                router.push(ROUTES.app.profile);
             }, 500);
         } else {
             setError(result.error || "Erro ao criar conta");
@@ -55,7 +56,7 @@ export default function CadastroPage() {
 
             {/* Back to landing */}
             <Link
-                href="/"
+                href={ROUTES.home}
                 className="absolute top-6 left-6 z-30 text-xs tracking-widest text-slate-500 hover:text-white transition-colors flex items-center gap-2 font-mono uppercase"
             >
                 ← Voltar
@@ -177,8 +178,8 @@ export default function CadastroPage() {
                                     // Redirect appropriately
                                     const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
                                     const target = result.user && ADMIN_EMAILS.includes(result.user.email)
-                                        ? "/admin/dashboard"
-                                        : "/perfil"; // Different redirect for registration? Or dashboard? Let's use /perfil like the form submit does.
+                                        ? ROUTES.admin.dashboard
+                                        : ROUTES.app.profile;
                                     router.push(target);
                                 } else {
                                     setError(result.error || "Erro ao cadastrar com Google");
@@ -238,7 +239,7 @@ export default function CadastroPage() {
 
                     <div className="text-center text-xs text-slate-500 mt-6">
                         JÁ TEM UMA CONTA?{" "}
-                        <Link href="/login" className="text-slate-300 hover:text-white font-medium transition-colors">
+                        <Link href={ROUTES.auth.login} className="text-slate-300 hover:text-white font-medium transition-colors">
                             FAZER LOGIN
                         </Link>
                     </div>

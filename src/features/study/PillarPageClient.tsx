@@ -1,0 +1,399 @@
+"use client";
+
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useProgress } from "@/context/ProgressContext";
+import { PILLARS } from "@/data/curriculum";
+import { useAuth } from "@/context/AuthContext";
+import { PremiumWall } from "@/features/subscription/PremiumWall";
+import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
+import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Lock, X, ShieldCheck, MessageSquare } from "lucide-react";
+import { StudyViewer } from "@/features/study/StudyViewer";
+import { PillarOperationalView } from "@/features/study/PillarOperationalView";
+import { getUserExamStatus, PillarExam } from "@/lib/exam/service";
+import { PillarExamModal } from "@/features/study/exam/PillarExamModal";
+import { PillarExamViewModal } from "@/features/study/exam/PillarExamViewModal";
+import { useState, useEffect, useCallback } from "react";
+import { PillarData } from "@/types/study";
+import { ROUTES } from "@/lib/routes";
+
+interface PillarPageClientProps {
+    pillarId: number;
+    initialContent: PillarData | null; // Content passed from server
+}
+
+const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
+
+export default function PillarPageClient({ pillarId, initialContent }: PillarPageClientProps) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+
+    // Note: pillarId is passed as prop, no need to read params
+
+    const { isPillarUnlocked, getCurrentPillarNumber, isPillarModuleCompleted, completePillar } = useProgress();
+    const { user, subscriptionStatus, isLoading: authLoading } = useAuth(); // Auth Check
+    const isAdminUser = !!user?.email && ADMIN_EMAILS.includes(user.email);
+
+    const pillar = PILLARS[pillarId - 1];
+    const isUnlocked = isPillarUnlocked(pillarId);
+    const currentPillarNumber = getCurrentPillarNumber();
+
+    // Access Control & Exam State
+    const [exam, setExam] = useState<PillarExam | null>(null);
+    const [isExamModalOpen, setIsExamModalOpen] = useState(false);
+    const [isViewExamModalOpen, setIsViewExamModalOpen] = useState(false);
+    const [isCheckingExam, setIsCheckingExam] = useState(true);
+
+    const refreshExamStatus = useCallback(async () => {
+        if (user) {
+            const currentExam = await getUserExamStatus(user.id, pillarId);
+            setExam(currentExam);
+        }
+        setIsCheckingExam(false);
+    }, [pillarId, user]);
+
+    const hasFeedbackQuery = searchParams?.get("feedback") === "true";
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const loadExamStatus = async () => {
+            await refreshExamStatus();
+            if (!isMounted) return;
+        };
+
+        loadExamStatus();
+
+        return () => {
+            isMounted = false;
+        }
+    }, [refreshExamStatus]);
+
+    useEffect(() => {
+        if (hasFeedbackQuery) {
+            // Remove the query param to avoid looping or reopening on refresh
+            router.replace(pathname, { scroll: false });
+        }
+    }, [hasFeedbackQuery, pathname, router]);
+
+    // Helper functions
+    const handleAction = async () => {
+        // NEW: Intercept Pillar 1 (Premium Logic) - CLICK ANYTIME
+        if (pillarId === 1 && subscriptionStatus !== 'premium') {
+            router.push(ROUTES.public.payment);
+            return;
+        }
+
+        const nextPillar = pillarId + 1;
+
+        // Caso 1: Já está aprovado para o próximo -> Apenas avança
+        const isUnlocked = isPillarUnlocked(nextPillar);
+        if (isUnlocked) {
+            completePillar(pillarId);
+            if (pillarId < 9) {
+                router.push(`${ROUTES.app.pillar}/${nextPillar}`);
+            } else {
+                router.push(ROUTES.app.dashboard);
+            }
+            return;
+        }
+
+        // Caso 2: Não está aprovado -> Abre Modal de Prova
+        setIsExamModalOpen(true);
+    };
+
+    const handleBack = () => {
+        router.back();
+    };
+
+    const handleGoToMenu = () => {
+        router.push(ROUTES.home);
+    };
+
+    // 1. Loading State
+    if (authLoading) {
+        return <div className="min-h-screen bg-black flex items-center justify-center text-white">Carregando...</div>;
+    }
+
+    // 2. Premium Lock (Pillar > 1 requires Premium)
+    // Client-side visual check (Server side should have sent null content anyway)
+    if (pillarId > 1 && subscriptionStatus !== 'premium' && !isAdminUser) {
+        return <PremiumWall />;
+    }
+
+    // 3. Invalid Pillar
+    if (!pillar) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center p-4">
+                <FlightCard variant="danger" className="p-8 text-center max-w-md">
+                    <h1 className="text-2xl font-bold text-[#EEF4D4] mb-4">Pilar não encontrado</h1>
+                    <FlightButton onClick={() => router.push(ROUTES.home)}>
+                        <ArrowLeft className="w-4 h-4 mr-2 inline" />
+                        Voltar ao Dashboard
+                    </FlightButton>
+                </FlightCard>
+            </div>
+        );
+    }
+
+    // 4. Sequential Lock (Must complete previous pillars)
+    if (!isUnlocked) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center p-4">
+                    <FlightCard variant="default" className="p-8 text-center max-w-md">
+                        <Lock className="w-16 h-16 text-white/30 mx-auto mb-4" />
+                    <h1 className="text-2xl font-bold text-[#EEF4D4] mb-2">{pillar.title}</h1>
+                    <p className="text-white/50 mb-6">
+                        Complete o Pilar {pillarId - 1} primeiro para desbloquear este conteúdo.
+                    </p>
+                    <FlightButton variant="neon" onClick={() => router.push(`${ROUTES.app.pillar}/${currentPillarNumber}`)}>
+                        Ir para Pilar {currentPillarNumber}
+                        <ArrowRight className="w-4 h-4 ml-2 inline" />
+                    </FlightButton>
+                </FlightCard>
+            </div>
+        );
+    }
+
+    // Selecionar conteúdo baseado no ID do Map (Passed from Server now)
+    const activeContent = initialContent;
+
+    // Verificar se todos os módulos (se houver) foram completados
+    const areAllModulesCompleted = activeContent?.modules
+        ? activeContent.modules.every(m => isPillarModuleCompleted(m.id))
+        : true;
+
+    return (
+        <div className="min-h-screen min-h-[100dvh] w-full overflow-y-auto pointer-events-auto">
+            <main className="w-full p-4 md:p-8 pb-24 md:pb-8">
+                <div className="max-w-4xl mx-auto">
+
+                    {/* Header Navigation */}
+                    <div className="flex items-center justify-between mb-8 relative z-50">
+                        <div className="flex items-center gap-4">
+                            <button
+                                type="button"
+                                onClick={handleBack}
+                                className="flex items-center gap-2 text-white/50 hover:text-white transition-colors py-2 px-3 rounded-md hover:bg-white/5 border border-white/10 hover:border-white/30"
+                            >
+                                <ArrowLeft className="w-4 h-4" />
+                                <span className="hidden md:inline">Voltar</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleGoToMenu}
+                                className="flex items-center gap-2 text-white/30 hover:text-white/60 transition-colors text-xs"
+                            >
+                                Menu Principal
+                            </button>
+                        </div>
+
+                        {/* Progresso Visual */}
+                        <div className="flex gap-1.5">
+                            {PILLARS.map((_, idx) => {
+                                const num = idx + 1;
+                                const done = num < currentPillarNumber;
+                                const current = num === pillarId;
+
+                                return (
+                                    <div
+                                        key={num}
+                                        className={`h-1.5 rounded-full transition-all duration-300 ${current ? "w-8 bg-violet-500 shadow-[0_0_10px_rgba(139,92,246,0.5)]" :
+                                            done ? "w-4 bg-emerald-500/50" : "w-2 bg-white/10"
+                                            }`}
+                                    />
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Feedback Alert if Exists */}
+                    {exam?.adminFeedback && (
+                        <div className="mb-8 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-4">
+                            <div className="mt-1">
+                                <MessageSquare className="w-5 h-5 text-emerald-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-emerald-400 font-bold text-sm uppercase tracking-wider mb-1">Feedback do Comando</h3>
+                                <p className="text-emerald-100/80 text-sm leading-relaxed">
+                                    &quot;{exam.adminFeedback}&quot;
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ÁREA DE ESTUDO */}
+                    {activeContent ? (
+                        <div className="animate-in fade-in duration-700 slide-in-from-bottom-4">
+                            {activeContent.modules ? (
+                                <PillarOperationalView data={activeContent} />
+                            ) : (
+                                <StudyViewer data={activeContent} />
+                            )}
+
+                            {/* Ação Final do Pilar */}
+                            <div className="mt-12 flex justify-center pb-20">
+                                <FlightButton
+                                    variant={areAllModulesCompleted ? (exam?.status === 'pending' ? "ghost" : "neon") : "ghost"}
+                                    onClick={areAllModulesCompleted && (exam?.status !== 'pending' || (pillarId === 1 && subscriptionStatus !== 'premium')) ? handleAction : undefined}
+                                    disabled={!areAllModulesCompleted || isCheckingExam || (exam?.status === 'pending' && !(pillarId === 1 && subscriptionStatus !== 'premium'))}
+                                    className={`py-4 px-8 text-lg ${(!areAllModulesCompleted || (exam?.status === 'pending' && !(pillarId === 1 && subscriptionStatus !== 'premium'))) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <span className="flex items-center gap-3">
+                                        {!areAllModulesCompleted ? (
+                                            <>
+                                                <Lock className="w-6 h-6" />
+                                                Complete todos os módulos para avançar
+                                            </>
+                                        ) : (user?.approvedPillar || 1) >= pillarId + 1 ? (
+                                            // === CASO: APROVADO ===
+                                            pillarId === 1 && subscriptionStatus !== 'premium' ? (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <span className="text-xs font-normal text-emerald-300 normal-case tracking-normal">
+                                                        Missão Cumprida!
+                                                    </span>
+                                                    <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-yellow-400">
+                                                        <span>QUERO SER PREMIUM AGORA</span>
+                                                        <ArrowRight className="w-5 h-5" />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <CheckCircle2 className="w-6 h-6" />
+                                                    Concluir e Avançar
+                                                    <ArrowRight className="w-5 h-5" />
+                                                </>
+                                            )
+                                        ) : exam?.status === 'pending' ? (
+                                            // === CASO: PENDENTE ===
+                                            pillarId === 1 && subscriptionStatus !== 'premium' ? (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <span className="text-xs font-normal text-white/50 normal-case tracking-normal">
+                                                        Análise em andamento...
+                                                    </span>
+                                                    <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-yellow-400 animate-pulse">
+                                                        <span>FURAR FILA (CORREÇÃO IMEDIATA)</span>
+                                                        <ArrowRight className="w-5 h-5" />
+                                                    </div>
+                                                </div>
+                                            ) : subscriptionStatus === 'premium' ? (
+                                                <>
+                                                    <CheckCircle2 className="w-6 h-6" />
+                                                    Concluir e Avançar
+                                                    <ArrowRight className="w-5 h-5" />
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="animate-spin h-5 w-5 border-2 border-white/30 border-t-white rounded-full mr-2" />
+                                                    Aguardando Aprovação...
+                                                </>
+                                            )
+                                        ) : exam?.status === 'rejected' ? (
+                                            // === CASO: REPROVADO ===
+                                            <>
+                                                <X className="w-6 h-6 text-red-500" />
+                                                Missão Reprovada. Tentar Novamente?
+                                                <ArrowRight className="w-5 h-5" />
+                                            </>
+                                        ) : (
+                                            // === CASO: NÃO INICIADO ===
+                                            <>
+                                                <ShieldCheck className="w-6 h-6" />
+                                                Iniciar Missão Final do Pilar {pillarId}
+                                                <ArrowRight className="w-5 h-5" />
+                                            </>
+                                        )}
+                                    </span>
+                                </FlightButton>
+
+                                {/* Botão Secundário para ver Missão (Aparece se tiver exame) */}
+                                {exam && (
+                                    <button
+                                        onClick={() => setIsViewExamModalOpen(true)}
+                                        className="absolute -bottom-8 text-[10px] text-white/30 hover:text-white uppercase tracking-widest flex items-center gap-2"
+                                    >
+                                        <MessageSquare className="w-3 h-3" />
+                                        Ver meu Relatório
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Modal de Avaliação Híbrida (Prova) */}
+                            <PillarExamModal
+                                pillarId={pillarId}
+                                isOpen={isExamModalOpen}
+                                onClose={() => setIsExamModalOpen(false)}
+                                onSuccess={refreshExamStatus}
+                            />
+
+                            {/* Modal de Visualização (Leitura) */}
+                            <PillarExamViewModal
+                                pillarId={pillarId}
+                                exam={exam}
+                                isOpen={isViewExamModalOpen || hasFeedbackQuery}
+                                onClose={() => setIsViewExamModalOpen(false)}
+                            />
+                        </div>
+                    ) : (
+                        // Fallback para pilares sem conteúdo ainda OR LOCKED by Server
+                        <FlightCard
+                            flightId={`PILAR-${pillarId.toString().padStart(2, "0")}`}
+                            status="RESTRICTED"
+                            variant={pillarId > 1 && subscriptionStatus !== 'premium' ? "danger" : "neon"}
+                            className="mb-6 min-h-[50vh] flex flex-col items-center justify-center text-center p-12"
+                        >
+                            {pillarId > 1 && subscriptionStatus !== 'premium' ? (
+                                <>
+                                    <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mb-6 border border-red-500/30">
+                                        <Lock className="w-10 h-10 text-red-400" />
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-white mb-2">Acesso Restrito</h2>
+                                    <p className="text-white/50 max-w-md mx-auto mb-6">
+                                        Este conteúdo está disponível apenas para membros do comando Premium.
+                                    </p>
+                                    <FlightButton variant="neon" onClick={() => router.push(ROUTES.public.payment)}>
+                                        Desbloquear Acesso Agora
+                                    </FlightButton>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                                        <BookOpen className="w-10 h-10 text-white/20" />
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-white mb-2">Conteúdo em Descriptografia</h2>
+                                    <p className="text-white/50 max-w-md mx-auto">
+                                        Os dados deste pilar estão sendo processados pelo sistema central.
+                                        O Pilar 1 já está totalmente operacional.
+                                    </p>
+                                </>
+                            )}
+                        </FlightCard>
+                    )}
+
+                    {/* Navegação de Rodapé - Mobile: fixed, Desktop: inline */}
+                    <div className="fixed bottom-0 left-0 right-0 p-3 bg-black/90 backdrop-blur-md border-t border-white/10 z-40 md:relative md:bg-transparent md:border-0 md:p-0 md:mt-12 flex justify-between items-center">
+                        {pillarId > 1 ? (
+                            <button
+                                onClick={() => router.push(`${ROUTES.app.pillar}/${pillarId - 1}`)}
+                                className="text-white/40 hover:text-white/70 transition-colors text-sm flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/5"
+                            >
+                                <ArrowLeft className="w-4 h-4" />
+                                Anterior
+                            </button>
+                        ) : <div />}
+
+                        {pillarId < 9 && isPillarUnlocked(pillarId + 1) && (
+                            <button
+                                onClick={() => router.push(`${ROUTES.app.pillar}/${pillarId + 1}`)}
+                                className="text-white/40 hover:text-white/70 transition-colors text-sm flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/5"
+                            >
+                                Próximo
+                                <ArrowRight className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </main>
+        </div>
+    );
+}

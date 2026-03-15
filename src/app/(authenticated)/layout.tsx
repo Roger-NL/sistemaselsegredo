@@ -5,6 +5,7 @@ import { ProgressProvider } from "@/context/ProgressContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { TubesBackground } from "@/components/ui/neon-flow";
+import { ROUTES } from "@/lib/routes";
 
 export default function AuthenticatedLayout({
     children,
@@ -16,7 +17,7 @@ export default function AuthenticatedLayout({
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
-            router.push("/login");
+            router.push(ROUTES.auth.login);
             return;
         }
     }, [isAuthenticated, isLoading, router]);

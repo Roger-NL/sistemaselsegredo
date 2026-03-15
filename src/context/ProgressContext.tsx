@@ -2,8 +2,9 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { PILLARS, PLANETS, type Pillar, type Planet, type PillarStatus } from "@/data/curriculum";
-import { secureStorage } from "@/lib/secure-storage";
+import { secureStorage } from "@/lib/storage/secure-storage";
 import { useAuth } from "@/context/AuthContext";
+import type { User } from "@/lib/auth/service";
 
 // ============================================================================
 // PROGRESS CONTEXT
@@ -73,6 +74,18 @@ const ProgressContext = createContext<ProgressContextType | null>(null);
 // Key para localStorage
 const STORAGE_KEY = "es-english-progress-v2";
 
+type ProgressSnapshot = Pick<
+    User,
+    | "chosenSpecialization"
+    | "specializationStatus"
+    | "completedSpecializations"
+    | "completedModules"
+    | "completedPillarModules"
+    | "hasSeenMissionComplete"
+> & {
+    pillarStatus: Record<string, PillarStatus>;
+};
+
 // Estado inicial: apenas pilar 1 desbloqueado
 function getInitialStatus(): Record<string, PillarStatus> {
     const status: Record<string, PillarStatus> = {};
@@ -94,13 +107,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const [hasSeenMissionComplete, setHasSeenMissionComplete] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
 
-    // Dynamic Key based on user ID to prevent shared progress
-    const getStorageKey = () => user?.id ? `${STORAGE_KEY}-${user.id}` : null;
+    // Dynamic key based on user ID to prevent shared progress
+    const storageKey = user?.id ? `${STORAGE_KEY}-${user.id}` : null;
 
     // Carrega progresso do localStorage na montagem ou quando user muda
     useEffect(() => {
-        const key = getStorageKey();
-        if (!key) {
+        if (!storageKey) {
             // ... (reset logica)
             if (!user) {
                 setPillarStatus(getInitialStatus());
@@ -114,7 +126,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             return;
         }
 
-        const stored = secureStorage.getItem<any>(key);
+        const stored = secureStorage.getItem<ProgressSnapshot>(storageKey);
 
         let initialStatus = getInitialStatus();
         if (stored && stored.pillarStatus) {
@@ -177,14 +189,13 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setPillarStatus(initialStatus);
 
         setIsHydrated(true);
-    }, [user]); // Re-run when user changes
+    }, [storageKey, user]); // Re-run when user changes
 
     // Salva progresso no localStorage sempre que mudar
     // Salva progresso no localStorage E FIREBASE sempre que mudar
     useEffect(() => {
-        const key = getStorageKey();
-        if (key && isHydrated) {
-            const progressData = {
+        if (storageKey && isHydrated) {
+            const progressData: ProgressSnapshot = {
                 pillarStatus,
                 chosenSpecialization,
                 specializationStatus,
@@ -195,7 +206,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             };
 
             // 1. Local Persistence (Fast, Offline)
-            secureStorage.setItem(key, progressData);
+            secureStorage.setItem(storageKey, progressData);
 
             // 2. Remote Persistence (Firebase)
             if (user?.id) {
@@ -203,10 +214,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 // or assume we have the function available.
                 // We'll import `updateUserProgress` at the top or use a dynamic import.
                 // Since this is inside useEffect, we can use the imported function.
-                import("@/lib/auth-service").then(({ updateUserProgress }) => {
+                import("@/lib/auth/service").then(({ updateUserProgress }) => {
                     updateUserProgress(user.id, {
                         ...progressData,
-                        localPillarStatus: pillarStatus as any // Cast because Record<string, PillarStatus> vs Record<string, string>
+                        localPillarStatus: pillarStatus
                     });
                 });
             }
@@ -219,6 +230,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         completedModules,
         completedPillarModules,
         hasSeenMissionComplete,
+        storageKey,
         user,
         isHydrated
     ]);
@@ -259,9 +271,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setCompletedPillarModules([]);
         // Sync to Firebase so reload doesn't override
         if (user?.id) {
-            import("@/lib/auth-service").then(({ updateUserProgress }) => {
+            import("@/lib/auth/service").then(({ updateUserProgress }) => {
                 updateUserProgress(user.id, {
-                    localPillarStatus: newStatus as any,
+                    localPillarStatus: newStatus,
                     completedPillarModules: [],
                     approvedPillar: level, // Sync the "Server Authority" as well
                 });
@@ -367,6 +379,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     // Verifica conclusão total (Base + Especialização)
     const isCourseFullyComplete = () => {
         if (!areAllPillarsComplete()) return false;
+        if (specializationStatus === "completed" && completedSpecializations.length > 0) return true;
         if (!chosenSpecialization) return false;
         return isSpecializationComplete(chosenSpecialization);
     };
@@ -379,6 +392,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 ...prev,
                 [chosenSpecialization]: [1, 2, 3, 4, 5]
             }));
+            setCompletedSpecializations(prev =>
+                prev.includes(chosenSpecialization) ? prev : [...prev, chosenSpecialization]
+            );
+            setSpecializationStatus("completed");
             // Sai da especialização (volta para o menu de escolha)
             setChosenSpecialization(null);
         }
@@ -396,6 +413,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             const completedModulesCount = completedModules[chosenSpecialization]?.length || 0;
             // Cada módulo (de 5) vale 10% do total (50% / 5 = 10%)
             specProgress = Math.min(completedModulesCount * 10, 50);
+        } else if (specializationStatus === "completed" && completedSpecializations.length > 0) {
+            specProgress = 50;
         }
 
         return Math.min(Math.round(pillarProgress + specProgress), 100);
@@ -423,7 +442,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         const allComplete = areAllPillarsComplete();
         return PLANETS.map((planet) => ({
             ...planet,
-            status: (allComplete && chosenSpecialization === planet.id) ? "unlocked" : "locked",
+            status: allComplete ? "unlocked" : "locked",
         }));
     };
 
@@ -437,20 +456,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setCompletedModules({});
         setCompletedPillarModules([]);
         setHasSeenMissionComplete(false);
-        const key = getStorageKey();
-        if (key) {
-            secureStorage.setItem(key, {
-                pillarStatus: initial,
-                chosenSpecialization: null,
-                specializationStatus: null,
-                completedSpecializations: [],
-                completedModules: {},
-                completedPillarModules: [],
-                hasSeenMissionComplete: false
-            });
-        } else {
-            // Fallback to generic key for admin without user login
-            secureStorage.setItem(STORAGE_KEY, {
+        if (storageKey) {
+            secureStorage.setItem(storageKey, {
                 pillarStatus: initial,
                 chosenSpecialization: null,
                 specializationStatus: null,
@@ -462,11 +469,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         }
         // Also clear Firebase progress so it doesn't re-inject old data on reload
         if (user?.id) {
-            const { updateUserProgress } = await import("@/lib/auth-service");
+            const { updateUserProgress } = await import("@/lib/auth/service");
             await updateUserProgress(user.id, {
-                localPillarStatus: {} as any,
+                localPillarStatus: {},
                 completedPillarModules: [],
-                completedModules: {} as any,
+                completedModules: {},
                 completedSpecializations: [],
                 chosenSpecialization: null,
                 specializationStatus: null,

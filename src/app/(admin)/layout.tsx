@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ROUTES } from "@/lib/routes";
 import { 
     LayoutDashboard, 
     Users, 
@@ -32,12 +33,12 @@ export default function AdminLayout({
     useEffect(() => {
         if (!isLoading) {
             if (!isAuthenticated) {
-                router.push("/login");
+                router.push(ROUTES.auth.login);
                 return;
             }
             // Simple Email Check for MVP
             if (user && !ADMIN_EMAILS.includes(user.email)) {
-                router.push("/dashboard"); // Kick regular users out
+                router.push(ROUTES.app.dashboard); // Kick regular users out
             }
         }
     }, [isAuthenticated, isLoading, user, router]);
@@ -125,7 +126,7 @@ export default function AdminLayout({
                         </div>
                     </div>
                     <Link 
-                        href="/dashboard"
+                        href={ROUTES.app.dashboard}
                         className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors mb-1"
                     >
                         <LayoutDashboard className="w-4 h-4" />

@@ -3,14 +3,23 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, limit, getDocs, where } from "firebase/firestore";
-import { Loader2, Search, User } from "lucide-react";
-import { StudentDetailModal } from "@/components/features/admin/StudentDetailModal";
+import { Loader2, User } from "lucide-react";
+import { StudentDetailModal } from "@/features/admin/StudentDetailModal";
+
+type AdminUserRow = {
+    id: string;
+    name?: string;
+    email?: string;
+    subscriptionStatus?: string;
+    inviteCodeUsed?: string;
+    approvedPillar?: number;
+};
 
 export default function AdminUsersPage() {
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState<AdminUserRow[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState("all"); // all, active, pending
-    const [selectedUser, setSelectedUser] = useState<any | null>(null);
+    const [filter, setFilter] = useState<"all" | "premium" | "free">("all");
+    const [selectedUser, setSelectedUser] = useState<AdminUserRow | null>(null);
     const [pendingUserIds, setPendingUserIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
@@ -74,14 +83,14 @@ export default function AdminUsersPage() {
                         Todos
                     </button>
                     <button
-                        onClick={() => setFilter("active")}
-                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${filter === "active" ? "bg-emerald-600 text-white" : "text-slate-600 hover:bg-slate-50"}`}
+                        onClick={() => setFilter("premium")}
+                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${filter === "premium" ? "bg-emerald-600 text-white" : "text-slate-600 hover:bg-slate-50"}`}
                     >
                         Premium
                     </button>
                     <button
-                        onClick={() => setFilter("pending")}
-                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${filter === "pending" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"}`}
+                        onClick={() => setFilter("free")}
+                        className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${filter === "free" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"}`}
                     >
                         Free
                     </button>

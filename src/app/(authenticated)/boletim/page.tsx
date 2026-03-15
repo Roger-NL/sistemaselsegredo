@@ -4,35 +4,35 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
-import { PillarExam } from "@/lib/exam-service";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { PillarExam } from "@/lib/exam/service";
+import { ROUTES } from "@/lib/routes";
 import { PILLARS } from "@/data/curriculum";
 import { motion } from "framer-motion";
 import {
     CheckCircle2,
-    Clock,
-    XCircle,
-    Lock,
     ChevronRight,
     Trophy,
     Target,
-    BarChart3,
     Search,
     ArrowLeft
 } from "lucide-react";
-import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
-import { PillarExamViewModal } from "@/components/features/study/exam/PillarExamViewModal";
+import { FlightCard } from "@/components/ui/FlightCard";
+import { PillarExamViewModal } from "@/features/study/exam/PillarExamViewModal";
 
 export default function BoletimPage() {
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, isLoading: authLoading } = useAuth();
     const [exams, setExams] = useState<Record<number, PillarExam>>({});
     const [loading, setLoading] = useState(true);
     const [selectedExam, setSelectedExam] = useState<PillarExam | null>(null);
 
     useEffect(() => {
         const fetchExams = async () => {
-            if (!user) return;
+            if (!user) {
+                setLoading(false);
+                return;
+            }
 
             try {
                 // Fetch all exams for user
@@ -66,6 +66,12 @@ export default function BoletimPage() {
         fetchExams();
     }, [user]);
 
+    useEffect(() => {
+        if (!authLoading && !user) {
+            router.replace(ROUTES.auth.login);
+        }
+    }, [authLoading, router, user]);
+
     // Calculate stats
     const updatedPillars = PILLARS.map((p, idx) => {
         const pillarId = idx + 1;
@@ -80,7 +86,7 @@ export default function BoletimPage() {
     const completed = Object.values(exams).filter(e => e.status === 'approved').length;
     const averageScore = Object.values(exams).reduce((acc, curr) => acc + (curr.quizScore || 0), 0) / (Object.values(exams).length || 1);
 
-    if (loading) {
+    if (loading || authLoading) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center p-4">
                 <div className="text-white/50 animate-pulse flex items-center gap-3">
@@ -91,12 +97,16 @@ export default function BoletimPage() {
         );
     }
 
+    if (!user) {
+        return null;
+    }
+
     return (
         <div className="min-h-screen w-full p-4 md:p-8 pb-32">
             <div className="max-w-5xl mx-auto space-y-8">
                 {/* Back Button */}
                 <button
-                    onClick={() => router.push('/dashboard')}
+                    onClick={() => router.push(ROUTES.app.dashboard)}
                     className="flex items-center text-white/50 hover:text-white transition-colors mb-4 group"
                 >
                     <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
@@ -142,7 +152,6 @@ export default function BoletimPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {updatedPillars.map((pillar) => {
                         const exam = pillar.exam;
-                        const status = exam?.status || 'locked';
                         // logic for locked: if no exam and previous not approved? 
                         // actually just use 'exam' existence. If no exam, check if unlocked?
                         // For this view, let's just show exam status if exists, else 'Not Started'.

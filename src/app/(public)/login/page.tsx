@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import AuthBackground from "@/components/auth/AuthBackground";
 import ConciergeModal from "@/components/core/ConciergeModal";
+import { ROUTES, isSafeInternalCallbackPath } from "@/lib/routes";
 
 export default function LoginPage() {
     const [identifier, setIdentifier] = useState("");
@@ -18,21 +19,26 @@ export default function LoginPage() {
     const [resetEmail, setResetEmail] = useState("");
     const [resetStatus, setResetStatus] = useState({ loading: false, success: false, error: "" });
 
-    const { login, loginWithGoogle, isAuthenticated, isLoading, resetPassword } = useAuth();
+    const { user, login, loginWithGoogle, isAuthenticated, isLoading, resetPassword } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
 
-    // Verifica se já conectou WhatsApp
-    const isWhatsAppConnected = () => {
-        if (typeof window === 'undefined') return false;
-        return !!localStorage.getItem('es-secure-comms-v2');
-    };
+    const getPostLoginTarget = useCallback((email?: string) => {
+        const callbackUrl = searchParams?.get("callbackUrl") || "";
+        if (isSafeInternalCallbackPath(callbackUrl)) {
+            return callbackUrl;
+        }
+
+        const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
+        return email && ADMIN_EMAILS.includes(email) ? ROUTES.admin.dashboard : ROUTES.app.dashboard;
+    }, [searchParams]);
 
     // Auto-redirect if already logged in
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
-            router.push("/dashboard");
+            router.push(getPostLoginTarget(user?.email));
         }
-    }, [isAuthenticated, isLoading, router]);
+    }, [getPostLoginTarget, isAuthenticated, isLoading, router, user]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -48,13 +54,7 @@ export default function LoginPage() {
         const result = await login(identifier, password);
 
         if (result.success) {
-            // Check for admin redirect
-            const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
-            const target = result.user && ADMIN_EMAILS.includes(result.user.email)
-                ? "/admin/dashboard"
-                : "/dashboard";
-
-            router.push(target);
+            router.push(getPostLoginTarget(result.user?.email));
         } else {
             setError(result.error || "Erro ao fazer login");
             setIsSubmitting(false);
@@ -84,7 +84,7 @@ export default function LoginPage() {
 
             {/* Back to landing */}
             <Link
-                href="/"
+                href={ROUTES.home}
                 className="absolute top-6 left-6 z-30 text-xs tracking-widest text-slate-500 hover:text-white transition-colors flex items-center gap-2 font-mono uppercase"
             >
                 ← Voltar
@@ -163,11 +163,7 @@ export default function LoginPage() {
                                 setIsSubmitting(true);
                                 const result = await loginWithGoogle();
                                 if (result.success) {
-                                    const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
-                                    const target = result.user && ADMIN_EMAILS.includes(result.user.email)
-                                        ? "/admin/dashboard"
-                                        : "/dashboard";
-                                    router.push(target);
+                                    router.push(getPostLoginTarget(result.user?.email));
                                 } else {
                                     setError(result.error || "Erro ao entrar com Google");
                                     setIsSubmitting(false);
@@ -250,7 +246,7 @@ export default function LoginPage() {
 
                     <div className="text-center text-xs text-slate-500 mt-6">
                         NÃO TEM UMA CONTA?{" "}
-                        <Link href="/cadastro" className="text-slate-300 hover:text-white font-medium transition-colors">
+                        <Link href={ROUTES.auth.signup} className="text-slate-300 hover:text-white font-medium transition-colors">
                             CADASTRE-SE
                         </Link>
                     </div>
@@ -341,14 +337,14 @@ export default function LoginPage() {
                 isOpen={showCommsModal}
                 onClose={() => {
                     setShowCommsModal(false);
-                    router.push("/dashboard");
+                    router.push(ROUTES.app.dashboard);
                 }}
                 onConnect={(phone) => {
                     if (typeof window !== 'undefined') {
                         localStorage.setItem('es-concierge-v1', phone);
                     }
                     setShowCommsModal(false);
-                    router.push("/dashboard");
+                    router.push(ROUTES.app.dashboard);
                 }}
             />
 

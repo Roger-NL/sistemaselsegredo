@@ -1,21 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TubesBackground } from "@/components/ui/neon-flow";
 import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
-import { Check, ArrowRight, Shield, Unlock, Lock } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
+import { Check, ArrowRight, Unlock } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function ObrigadoPage() {
     const router = useRouter();
-    const [countdown, setCountdown] = useState(10);
-
-    // Auto-redirect disabled to let user read, or enabled? 
-    // User said "e depois para o dashboard". Let's give them a button and maybe a slow auto-redirect.
 
     const handleContinue = () => {
-        router.push("/dashboard");
+        router.push(ROUTES.app.dashboard);
     };
 
     return (

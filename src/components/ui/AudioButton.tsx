@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Volume2, Volume1, Square } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/ui/cn";
 import { useTTS } from "@/hooks/useTTS";
 
 interface AudioButtonProps {
@@ -47,17 +47,37 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
         toggleSpeed();
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isPlaying) {
+                stop();
+            } else {
+                speak(text);
+            }
+        }
+    };
+
     // If it's playing, show stop icon.
     // If it's not playing, show volume icon.
     // Differentiate icon slightly based on speed setting.
     const VolumeIcon = speed === 1.0 ? Volume2 : Volume1;
 
     return (
-        <button
+        <span
+            role="button"
+            tabIndex={0}
+            aria-label={
+                isPlaying
+                    ? "Parar audio"
+                    : `Ouvir em ingles (Velocidade: ${speed}x. Clique com botao direito para alterar a velocidade)`
+            }
             onClick={handleClick}
             onContextMenu={handleRightClick}
+            onKeyDown={handleKeyDown}
             className={cn(
-                "relative rounded-full transition-all inline-flex items-center justify-center border",
+                "relative rounded-full transition-all inline-flex items-center justify-center border cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-500/60 focus:ring-offset-0",
                 isPlaying
                     ? "bg-cyan-500/20 border-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)] text-cyan-400"
                     : speed === 0.8
@@ -82,6 +102,6 @@ export const AudioButton: React.FC<AudioButtonProps> = ({
             {!isPlaying && speed === 0.8 && (
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full border border-black shadow-[0_0_5px_rgba(245,158,11,0.5)]" />
             )}
-        </button>
+        </span>
     );
 };

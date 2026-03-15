@@ -7,18 +7,16 @@ import {
     query, 
     where, 
     orderBy, 
-    onSnapshot, 
-    doc, 
-    writeBatch, 
-    serverTimestamp 
+    onSnapshot
 } from "firebase/firestore";
-import { Check, X, Loader2, ShieldCheck, FileText, ClipboardList, MessageCircle } from "lucide-react";
+import { Check, X, Loader2, FileText, ClipboardList, MessageCircle } from "lucide-react";
+import { gradeExam, type PillarExam } from "@/lib/exam/service";
 
 export default function AdminApprovalsPage() {
-    const [exams, setExams] = useState<any[]>([]);
+    const [exams, setExams] = useState<PillarExam[]>([]);
     const [loading, setLoading] = useState(true);
     const [processingId, setProcessingId] = useState<string | null>(null);
-    const [selectedExam, setSelectedExam] = useState<any | null>(null);
+    const [selectedExam, setSelectedExam] = useState<PillarExam | null>(null);
     const [feedback, setFeedback] = useState("");
 
     useEffect(() => {
@@ -32,7 +30,7 @@ export default function AdminApprovalsPage() {
             const data = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
-            }));
+            } as PillarExam));
             setExams(data);
             setLoading(false);
         });
@@ -45,25 +43,10 @@ export default function AdminApprovalsPage() {
         setProcessingId(selectedExam.id);
         
         try {
-            const batch = writeBatch(db);
-            
-            // 1. Update Exam Status
-            const examRef = doc(db, "pillar_exams", selectedExam.id);
-            batch.update(examRef, { 
-                status: status,
-                adminFeedback: feedback,
-                gradedAt: serverTimestamp()
-            });
-
-            // 2. If approved, Update User Level
-            if (status === 'approved') {
-                const userRef = doc(db, "users", selectedExam.userId);
-                batch.update(userRef, {
-                    approvedPillar: selectedExam.pillarId + 1
-                });
+            const result = await gradeExam(selectedExam.id!, status, feedback);
+            if (!result.success) {
+                throw new Error(result.error || "Falha ao avaliar");
             }
-
-            await batch.commit();
             setSelectedExam(null);
             setFeedback("");
         } catch (error) {
@@ -158,7 +141,7 @@ export default function AdminApprovalsPage() {
                             <div className="bg-slate-50 border border-slate-100 p-6 rounded-xl">
                                 <h4 className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-3">Relatório do Aluno:</h4>
                                 <p className="text-slate-700 whitespace-pre-wrap leading-relaxed italic">
-                                    "{selectedExam.writtenAnswer}"
+                                    &quot;{selectedExam.writtenAnswer}&quot;
                                 </p>
                             </div>
 

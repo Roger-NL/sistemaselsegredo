@@ -2,13 +2,14 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useProgress } from "@/context/ProgressContext";
+import { ROUTES } from "@/lib/routes";
 import { PLANETS } from "@/data/curriculum";
 import { TubesBackground } from "@/components/ui/neon-flow";
-import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
+import { FlightButton } from "@/components/ui/FlightCard";
 import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, CheckCircle, Target, Activity, Map, Cpu, Briefcase, Plane, ShoppingBag, Heart, Clapperboard, BarChart3 } from "lucide-react";
+import { ArrowLeft, CheckCircle, Target, Briefcase, Plane, ShoppingBag, Heart, Clapperboard, BarChart3 } from "lucide-react";
 import { SPECIALIZATIONS_CONTENT } from "@/data/specializations-content";
-import { StudyViewer } from "@/components/features/study/StudyViewer";
+import { StudyViewer } from "@/features/study/StudyViewer";
 
 const SPEC_ICONS: Record<string, React.ReactNode> = {
     "spec-popculture": <Clapperboard className="w-8 h-8" />,
@@ -22,12 +23,12 @@ const SPEC_ICONS: Record<string, React.ReactNode> = {
 export default function EspecialidadePage() {
     const params = useParams();
     const router = useRouter();
-    const { chosenSpecialization, finishCurrentSpecialization, areAllPillarsComplete } = useProgress();
+    const { finishCurrentSpecialization, areAllPillarsComplete } = useProgress();
 
     // Logic Hardening: Anti-Cheat
     // Prevent direct access via URL if pillars are not complete
     if (!areAllPillarsComplete()) {
-        if (typeof window !== 'undefined') router.push("/dashboard");
+        if (typeof window !== 'undefined') router.push(ROUTES.app.dashboard);
         return null;
     }
 
@@ -40,7 +41,7 @@ export default function EspecialidadePage() {
             <TubesBackground className="h-screen">
                 <div className="h-screen flex items-center justify-center">
                     <p className="text-white/50">Especialidade não encontrada ou em desenvolvimento.</p>
-                    <FlightButton onClick={() => router.push("/")} className="ml-4">
+                    <FlightButton onClick={() => router.push(ROUTES.home)} className="ml-4">
                         Voltar
                     </FlightButton>
                 </div>
@@ -50,7 +51,7 @@ export default function EspecialidadePage() {
 
     const handleComplete = () => {
         finishCurrentSpecialization();
-        router.push("/");
+        router.push(ROUTES.home);
     };
 
     return (
@@ -68,7 +69,7 @@ export default function EspecialidadePage() {
                         </button>
                         <button
                             type="button"
-                            onClick={() => router.push("/")}
+                            onClick={() => router.push(ROUTES.home)}
                             className="flex items-center gap-2 text-[#EEF4D4]/30 hover:text-[#EEF4D4]/60 transition-colors font-mono text-xs"
                         >
                             Menu Principal

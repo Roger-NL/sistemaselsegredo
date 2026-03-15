@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { AudioButton } from "./AudioButton";
 import { useTranslation } from "@/context/TranslationContext";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/ui/cn";
 
 interface TranslatablePhraseProps {
     english: string;

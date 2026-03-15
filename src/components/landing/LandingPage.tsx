@@ -10,9 +10,10 @@ import { CtaSection } from "./CtaSection";
 import { RanksSection } from "./RanksSection";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { LandingThemeProvider, useLandingTheme } from "@/context/LandingThemeContext";
+import { LandingThemeProvider } from "@/context/LandingThemeContext";
 import { useEffect } from "react";
 import { FaqSection } from "./FaqSection";
+import { ROUTES } from "@/lib/routes";
 
 // Inner Content with Theme Access - NOW ENFORCED DARK
 function LandingContent() {
@@ -22,26 +23,15 @@ function LandingContent() {
     // Auto-redirect to dashboard if logged in
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
-            router.push("/dashboard");
+            router.push(ROUTES.app.dashboard);
         }
     }, [isAuthenticated, isLoading, router]);
-
-    // We keep the hook call to ensure context exists, but we ignore the values for layout
-    // enforcing dark mode visually
-    const isDark = true;
-    const isLight = false;
-
-    const handleLogin = () => {
-        router.push(isAuthenticated ? "/dashboard" : "/login");
-    };
 
     return (
         <div className="overflow-x-hidden bg-[#050505] text-white min-h-screen">
             <TubesBackground className="overflow-x-hidden">
                 <LandingInner
                     isDark={true}
-                    isLight={false}
-                    handleLogin={handleLogin}
                     isAuthenticated={isAuthenticated}
                     isLoading={isLoading}
                 />
@@ -66,7 +56,7 @@ function InlineCta({ text, isDark, isAuthenticated }: {
                 {text}
             </p>
             <a
-                href={isAuthenticated ? "/dashboard" : "/cadastro"}
+                href={isAuthenticated ? ROUTES.app.dashboard : ROUTES.auth.signup}
                 className="group relative px-8 py-3 bg-[#050505] text-white font-medium tracking-widest uppercase hover:bg-violet-950/10 transition-all transform active:scale-95 rounded-full overflow-hidden text-center shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] border border-violet-500/60 hover:border-violet-400 text-xs md:text-sm inline-block no-underline cursor-pointer"
             >
                 {isAuthenticated ? "ACESSAR COCKPIT →" : "COMEÇAR AGORA →"}
@@ -82,10 +72,8 @@ function InlineCta({ text, isDark, isAuthenticated }: {
 }
 
 // Landing Inner Component
-function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading }: {
+function LandingInner({ isDark, isAuthenticated, isLoading }: {
     isDark: boolean;
-    isLight: boolean;
-    handleLogin: () => void;
     isAuthenticated: boolean;
     isLoading: boolean;
 }) {
@@ -114,7 +102,7 @@ function LandingInner({ isDark, isLight, handleLogin, isAuthenticated, isLoading
                     </button>
                     <div className="rotatingGradient rounded-full p-[1px] shadow-[0_0_10px_rgba(139,92,246,0.2)] inline-block" style={{ '--r': '0deg' } as React.CSSProperties}>
                         <a
-                            href={isAuthenticated ? "/dashboard" : "/login"}
+                            href={isAuthenticated ? ROUTES.app.dashboard : ROUTES.auth.login}
                             className={`px-5 py-2 sm:px-6 sm:py-2 rounded-full font-mono text-[10px] sm:text-xs uppercase tracking-widest transition-all inline-block no-underline text-center cursor-pointer pointer-events-auto
                                 ${isDark
                                     ? "text-white bg-[#050505] hover:bg-white/10"

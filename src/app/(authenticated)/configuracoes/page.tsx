@@ -5,6 +5,28 @@ import { useRouter } from "next/navigation";
 import { DashboardNav } from "@/components/core/DashboardNav";
 
 import { useAuth } from "@/context/AuthContext";
+import { ROUTES } from "@/lib/routes";
+
+function Toggle({
+    enabled,
+    onToggle,
+}: {
+    enabled: boolean;
+    onToggle: () => void;
+}) {
+    return (
+        <button
+            onClick={onToggle}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${enabled ? 'bg-emerald-500' : 'bg-gray-200'
+                }`}
+        >
+            <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${enabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+            />
+        </button>
+    );
+}
 
 export default function ConfiguracoesPage() {
     const router = useRouter();
@@ -22,20 +44,6 @@ export default function ConfiguracoesPage() {
     const toggleSetting = (key: keyof typeof settings) => {
         setSettings(prev => ({ ...prev, [key]: !prev[key] }));
     };
-
-    // Toggle component
-    const Toggle = ({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) => (
-        <button
-            onClick={onToggle}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 ${enabled ? 'bg-emerald-500' : 'bg-gray-200'
-                }`}
-        >
-            <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${enabled ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-            />
-        </button>
-    );
 
     return (
         <div className="min-h-screen bg-[#FAFAFA] pointer-events-auto">
@@ -167,7 +175,7 @@ export default function ConfiguracoesPage() {
 
                 {/* Back Button */}
                 <button
-                    onClick={() => router.push('/dashboard')}
+                    onClick={() => router.push(ROUTES.app.dashboard)}
                     className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

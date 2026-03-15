@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProgress } from "@/context/ProgressContext";
 import { getRank } from "@/utils/ranks";
-import { LeaderboardModal } from "@/components/features/dashboard/LeaderboardModal";
-import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard"; // Added Import
-
+import { LeaderboardModal } from "@/features/dashboard/LeaderboardModal";
+import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard/service"; // Added Import
 import { useAuth } from "@/context/AuthContext";
+import { ROUTES } from "@/lib/routes";
 
 interface DashboardNavProps {
     studentName?: string;
@@ -50,7 +50,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                         <div className="flex items-center justify-between gap-2">
                             {/* Logo */}
                             <button
-                                onClick={() => router.push('/dashboard')}
+                                onClick={() => router.push(ROUTES.app.dashboard)}
                                 className="flex items-baseline gap-1 hover:opacity-80 transition-opacity"
                             >
                                 <span className="text-sm font-bold text-[#EEF4D4]">ES</span>
@@ -107,7 +107,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
 
                                 {/* New Mobile Boletim Button */}
                                 <button
-                                    onClick={() => router.push('/boletim')}
+                                    onClick={() => router.push(ROUTES.app.boletim)}
                                     className="p-2 rounded-full bg-white/10 text-emerald-400 hover:bg-white/20"
                                 >
                                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -130,19 +130,19 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                         {isMenuOpen && (
                             <div className="absolute top-full left-3 right-3 mt-1 py-2 rounded-xl bg-black/90 backdrop-blur-xl border border-white/10 shadow-2xl z-50">
                                 <button
-                                    onClick={() => { setIsMenuOpen(false); router.push('/perfil'); }}
+                                    onClick={() => { setIsMenuOpen(false); router.push(ROUTES.app.profile); }}
                                     className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10"
                                 >
                                     👤 Meu Perfil
                                 </button>
                                 <button
-                                    onClick={() => { setIsMenuOpen(false); router.push('/configuracoes'); }}
+                                    onClick={() => { setIsMenuOpen(false); router.push(ROUTES.app.settings); }}
                                     className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10"
                                 >
                                     ⚙️ Configurações
                                 </button>
                                 <button
-                                    onClick={() => { setIsMenuOpen(false); router.push('/boletim'); }}
+                                    onClick={() => { setIsMenuOpen(false); router.push(ROUTES.app.boletim); }}
                                     className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10"
                                 >
                                     📊 Boletim
@@ -191,7 +191,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                         <div className="flex items-center gap-4">
                             {/* Logo */}
                             <button
-                                onClick={() => router.push('/dashboard')}
+                                onClick={() => router.push(ROUTES.app.dashboard)}
                                 className="flex flex-col hover:opacity-80 transition-opacity cursor-pointer"
                             >
                                 <h1 className="text-lg font-bold tracking-tight text-white">
@@ -217,8 +217,8 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
 
                                 {isMenuOpen && (
                                     <div className="absolute top-full left-0 mt-2 w-48 py-2 rounded-xl bg-black/80 backdrop-blur-xl border border-white/10 shadow-2xl z-50">
-                                        <button onClick={() => { setIsMenuOpen(false); router.push('/perfil'); }} className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10">👤 Meu Perfil</button>
-                                        <button onClick={() => { setIsMenuOpen(false); router.push('/configuracoes'); }} className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10">⚙️ Configurações</button>
+                                        <button onClick={() => { setIsMenuOpen(false); router.push(ROUTES.app.profile); }} className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10">👤 Meu Perfil</button>
+                                        <button onClick={() => { setIsMenuOpen(false); router.push(ROUTES.app.settings); }} className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10">⚙️ Configurações</button>
                                         <div className="my-2 border-t border-white/10" />
                                         <button onClick={() => { setIsMenuOpen(false); logout(); }} className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-red-500/10">🚪 Sair</button>
                                     </div>
@@ -254,7 +254,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                                 <span className="hidden sm:inline">Voltar</span>
                             </button>
 
-                            <button onClick={() => router.push('/boletim')} className="bean-button bean-button-accent">
+                            <button onClick={() => router.push(ROUTES.app.boletim)} className="bean-button bean-button-accent">
                                 <span className="hidden sm:inline">Boletim</span>
                             </button>
 

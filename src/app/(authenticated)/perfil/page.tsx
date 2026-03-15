@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useProgress } from "@/context/ProgressContext";
 import { useAuth } from "@/context/AuthContext";
 import { getRank } from "@/utils/ranks";
+import { ROUTES } from "@/lib/routes";
 import { DashboardNav } from "@/components/core/DashboardNav";
+
+type ProfileActionResult = {
+    success: boolean;
+    error?: string;
+};
 
 export default function PerfilPage() {
     const router = useRouter();
@@ -67,22 +73,12 @@ export default function PerfilPage() {
     const [editName, setEditName] = useState("");
     const [editEmail, setEditEmail] = useState("");
     const [editPhone, setEditPhone] = useState("");
-    const [localPhone, setLocalPhone] = useState("");
+    const [localPhone, setLocalPhone] = useState(() =>
+        typeof window !== 'undefined' ? localStorage.getItem('es-secure-comms-v2') || "" : ""
+    );
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
-
-    // Initialize edit fields when user data is loaded
-    useEffect(() => {
-        const saved = typeof window !== 'undefined' ? localStorage.getItem('es-secure-comms-v2') || "" : "";
-        setLocalPhone(saved);
-
-        if (user) {
-            setEditName(user.name);
-            setEditEmail(user.email);
-            setEditPhone(user.phone || saved || "");
-        }
-    }, [user]);
 
     // Handle profile update
     const handleUpdateProfile = async () => {
@@ -96,7 +92,7 @@ export default function PerfilPage() {
 
         setIsSaving(true);
 
-        const promises: Promise<any>[] = [];
+        const promises: Promise<ProfileActionResult>[] = [];
         promises.push(updateProfile(editName, editEmail, editPhone));
 
         if (newPassword) {
@@ -137,6 +133,24 @@ export default function PerfilPage() {
 
     const baseUser = user || { name: "Usuário", email: "...", createdAt: new Date().toISOString(), currentStreak: 0, phone: "" };
     const displayUser = { ...baseUser, phone: baseUser.phone || localPhone || "" };
+
+    const startEditing = () => {
+        setEditName(displayUser.name);
+        setEditEmail(displayUser.email);
+        setEditPhone(displayUser.phone || "");
+        setIsEditing(true);
+        setError("");
+        setSuccessMsg("");
+    };
+
+    const cancelEditing = () => {
+        setIsEditing(false);
+        setEditName(displayUser.name);
+        setEditEmail(displayUser.email);
+        setEditPhone(displayUser.phone || "");
+        setNewPassword("");
+        setError("");
+    };
 
     // Format date properly
     const memberSince = new Date(displayUser.createdAt).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -253,12 +267,7 @@ export default function PerfilPage() {
                                             {isSaving ? "Salvando..." : "Salvar Alterações"}
                                         </button>
                                         <button
-                                            onClick={() => {
-                                                setIsEditing(false);
-                                                setEditName(displayUser.name);
-                                                setEditEmail(displayUser.email);
-                                                setEditPhone(displayUser.phone || "");
-                                            }}
+                                            onClick={cancelEditing}
                                             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                                         >
                                             Cancelar
@@ -291,7 +300,7 @@ export default function PerfilPage() {
                         {/* Edit Button (Only show if not editing) */}
                         {!isEditing && (
                             <button
-                                onClick={() => setIsEditing(true)}
+                                onClick={startEditing}
                                 className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors shadow-sm"
                             >
                                 Editar Perfil
@@ -322,7 +331,7 @@ export default function PerfilPage() {
 
                 {/* Back Button */}
                 <button
-                    onClick={() => router.push('/dashboard')}
+                    onClick={() => router.push(ROUTES.app.dashboard)}
                     className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

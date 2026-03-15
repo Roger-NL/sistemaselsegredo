@@ -21,7 +21,7 @@ import {
     User,
     AuthResult,
     SubscriptionStatus,
-} from "@/lib/auth-service";
+} from "@/lib/auth/service";
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -47,6 +47,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
+    useEffect(() => {
+        if (!user) {
+            Cookies.remove('es_session_token', { path: '/' });
+            Cookies.remove('es_user_role', { path: '/' });
+            Cookies.remove('es_user_status', { path: '/' });
+            return;
+        }
+
+        const role = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"].includes(user.email)
+            ? 'admin'
+            : 'student';
+
+        Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
+        Cookies.set('es_user_role', role, { expires: 7, path: '/' });
+        Cookies.set('es_user_status', user.subscriptionStatus, { expires: 7, path: '/' });
+    }, [user]);
+
     // FIREBASE REAL-TIME LISTENER
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -68,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     if (userDoc.exists()) {
                         const userData = userDoc.data() as User;
                         // Ensure ID is set
-                        let fullUser = { ...userData, id: firebaseUser.uid };
+                        const fullUser = { ...userData, id: firebaseUser.uid };
 
                         // --- STREAK LOGIC (BRAZIL TIME) ---
                         try {
@@ -119,9 +136,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         // -----------------------------------
 
                         setUser(fullUser);
-
-                        // Sync Cookie for Middleware
-                        Cookies.set('es_session_token', firebaseUser.uid, { expires: 7, path: '/' });
                     } else {
                         // User exists in Auth but not in Firestore (Rare edge case)
                         console.error("User authenticated but no Firestore profile found after retries.");
@@ -134,7 +148,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             } else {
                 // User is signed out
                 setUser(null);
-                Cookies.remove('es_session_token', { path: '/' });
             }
             setIsLoading(false);
         });
