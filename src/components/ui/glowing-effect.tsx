@@ -2,7 +2,6 @@
 
 import { memo, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/ui/cn";
-import { AnimatePresence, motion } from "framer-motion";
 
 interface GlowingEffectProps {
     blur?: number;
@@ -99,7 +98,7 @@ export const GlowingEffect = memo(
                     element.style.setProperty("--start", String(newAngle));
                 });
             },
-            [inactiveZone, proximity, spread]
+            [inactiveZone, proximity]
         );
 
         useEffect(() => {

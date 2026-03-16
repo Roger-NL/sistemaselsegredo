@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useMemo, useState, useEffect } from "react";
+import React, { useRef, useMemo, useSyncExternalStore } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { motion } from "framer-motion";
@@ -334,12 +334,25 @@ interface TheSunProps {
   onClick: () => void;
 }
 
-export function TheSun({ onClick }: TheSunProps) {
-  const [isMobile, setIsMobile] = useState(false);
+function subscribeToViewportChange(callback: () => void) {
+  if (typeof window === "undefined") {
+    return () => {};
+  }
 
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-  }, []);
+  window.addEventListener("resize", callback);
+  return () => window.removeEventListener("resize", callback);
+}
+
+function getViewportSnapshot() {
+  return typeof window !== "undefined" ? window.innerWidth < 768 : false;
+}
+
+export function TheSun({ onClick }: TheSunProps) {
+  const isMobile = useSyncExternalStore(
+    subscribeToViewportChange,
+    getViewportSnapshot,
+    () => false
+  );
 
   return (
     <motion.div

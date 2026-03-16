@@ -1,11 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { useRef } from "react";
 import {
-    Brain, Headphones, BookOpen, MessageSquare, Mic,
-    Users, Sparkles, PenTool, Globe, Trophy,
-    TrendingUp, Zap, Target, Clock, ArrowRight, ShieldCheck
+    Brain, Mic,
+    TrendingUp, Zap, Target, ShieldCheck
 } from "lucide-react";
 import { useLandingTheme } from "@/context/LandingThemeContext";
 
@@ -61,22 +60,29 @@ const METHOD_STEPS = [
     }
 ];
 
+const WAVE_BARS = Array.from({ length: 16 }, (_, index) => ({
+    id: index,
+    height: 10 + (index % 5) * 4 + (index % 3) * 2,
+    duration: 0.45 + (index % 4) * 0.08,
+    delay: index * 0.03,
+}));
+
 
 // Visual Widget - Auto animated
 function PillarVisual({ type, colorHex }: { type: string; colorHex: string }) {
     if (type === "waves") {
         return (
             <div className="flex items-center justify-center gap-0.5 h-12 w-24">
-                {[...Array(16)].map((_, i) => (
+                {WAVE_BARS.map((bar) => (
                     <motion.div
-                        key={i}
+                        key={bar.id}
                         animate={{
-                            height: [4, Math.random() * 30 + 8, 4],
+                            height: [4, bar.height, 4],
                         }}
                         transition={{
-                            duration: 0.4 + Math.random() * 0.4,
+                            duration: bar.duration,
                             repeat: Infinity,
-                            delay: i * 0.03,
+                            delay: bar.delay,
                             ease: "easeInOut"
                         }}
                         style={{ backgroundColor: colorHex }}
@@ -206,7 +212,9 @@ function StepRow({ step, index, isDark }: { step: typeof METHOD_STEPS[0]; index:
 
                         {/* Title & Insight — inline layout */}
                         <h3 className={`text-lg font-bold mb-1.5 ${isDark ? "text-white" : "text-gray-900"}`}>{step.title}</h3>
-                        <p className={`text-sm font-bold leading-snug mb-3 ${isDark ? "text-white/70" : "text-gray-700"}`}>"{step.insight}"</p>
+                        <p className={`text-sm font-bold leading-snug mb-3 ${isDark ? "text-white/70" : "text-gray-700"}`}>
+                            &ldquo;{step.insight}&rdquo;
+                        </p>
 
                         {/* Visual + Stats — horizontal compact */}
                         <div className="flex flex-row gap-3 items-center">
@@ -250,11 +258,9 @@ function StepRow({ step, index, isDark }: { step: typeof METHOD_STEPS[0]; index:
 export function MethodSection() {
     // Theme - with safe fallback
     let isDark = true;
-    let isLight = false;
     try {
         const theme = useLandingTheme();
         isDark = theme.isDark;
-        isLight = theme.isLight;
     } catch {
         // Default to dark if outside provider
     }
@@ -275,7 +281,13 @@ export function MethodSection() {
 
                 {/* Subtile Geometric Decor */}
                 <div className="absolute top-40 -left-64 w-[500px] h-[500px] opacity-10 mix-blend-screen pointer-events-none z-0">
-                    <img src="/geometric-dark.png" alt="Geometric Shape" className="w-full h-full object-contain" />
+                    <Image
+                        src="/geometric-dark.png"
+                        alt="Geometric Shape"
+                        fill
+                        sizes="(max-width: 768px) 0px, 500px"
+                        className="object-contain"
+                    />
                 </div>
 
                 {/* Header */}

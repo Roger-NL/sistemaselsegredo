@@ -55,6 +55,8 @@ export function ExamFeedbackPopup() {
     };
 
     const handleAction = () => {
+        if (!examData) return;
+
         if (examData.pillarId === 1) {
             handleClose();
             router.push(ROUTES.public.payment);

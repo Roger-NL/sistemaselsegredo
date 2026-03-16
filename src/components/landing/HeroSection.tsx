@@ -1,70 +1,11 @@
 "use client";
 
-import { motion, useAnimation, useInView } from "framer-motion";
-import { ArrowRight, Unlock, PlayCircle, ShieldCheck, Check, Rocket, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import { Check, Rocket, Unlock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import GradientButton from "@/components/ui/GradientButton";
-
-// System Diagnostic Component - "The Surprising Object"
-const SystemDiagnostic = () => {
-    const phrases = [
-        "Vergonha da pronúncia?",
-        "Travado na hora de falar?",
-        "Entende mas não responde?",
-        "Medo de errar em público?"
-    ];
-
-    const [index, setIndex] = useState(0);
-    const [subIndex, setSubIndex] = useState(0);
-    const [reverse, setReverse] = useState(false);
-    const [blink, setBlink] = useState(true);
-
-    useEffect(() => {
-        const timeout2 = setInterval(() => {
-            setBlink((prev) => !prev);
-        }, 500);
-        return () => clearInterval(timeout2);
-    }, []);
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            if (subIndex === phrases[index].length + 1 && !reverse) {
-                setTimeout(() => setReverse(true), 2000);
-                return;
-            }
-
-            if (subIndex === 0 && reverse) {
-                setReverse(false);
-                setIndex((prev) => (prev + 1) % phrases.length);
-                return;
-            }
-
-            setSubIndex((prev) => prev + (reverse ? -1 : 1));
-        }, Math.max(reverse ? 30 : 60, parseInt((Math.random() * 50).toString())));
-
-        return () => clearTimeout(timeout);
-    }, [subIndex, index, reverse, phrases]);
-
-    return (
-        <div className="inline-flex items-center gap-2 md:gap-3 px-3 py-1.5 md:px-4 md:py-2 bg-black/40 border border-white/10 rounded-full backdrop-blur-md shadow-[0_0_15px_rgba(0,0,0,0.5)] mb-8 max-w-full">
-            <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span className="text-[9px] md:text-[10px] font-mono font-bold text-emerald-500 tracking-wider uppercase">
-                    SYSTEM_CHECK:
-                </span>
-            </div>
-            <p className="text-xs md:text-base text-gray-300 font-mono min-w-[140px] md:min-w-[240px] truncate">
-                {phrases[index].substring(0, subIndex)}
-                <span className={`${blink ? "opacity-100" : "opacity-0"} ml-0.5 text-emerald-500`}>_</span>
-            </p>
-        </div>
-    );
-};
 
 const TypingText = ({ text, cursorClassName = "text-emerald-500" }: { text: string, cursorClassName?: string }) => {
     const [subIndex, setSubIndex] = useState(0);

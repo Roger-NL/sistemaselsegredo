@@ -95,7 +95,7 @@ export function FaqSection() {
     try {
         const theme = useLandingTheme();
         isDark = theme.isDark;
-    } catch (e) {
+    } catch {
         // Fallback to dark
     }
 

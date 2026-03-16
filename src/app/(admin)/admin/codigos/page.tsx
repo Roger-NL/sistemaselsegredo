@@ -2,14 +2,32 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs, onSnapshot } from "firebase/firestore";
+import {
+    addDoc,
+    collection,
+    limit,
+    onSnapshot,
+    orderBy,
+    query,
+    serverTimestamp,
+    Timestamp,
+} from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
-import { Loader2, Key, Copy, Check, Plus, RefreshCw } from "lucide-react";
+import { Loader2, Copy, Check, Plus, RefreshCw } from "lucide-react";
+
+interface InviteCodeRecord {
+    id: string;
+    code: string;
+    status: "unused" | "used" | string;
+    createdAt?: Timestamp | null;
+    createdBy?: string;
+    type?: string;
+}
 
 export default function AdminCodesPage() {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
-    const [codes, setCodes] = useState<any[]>([]);
+    const [codes, setCodes] = useState<InviteCodeRecord[]>([]);
     const [copiedId, setCopiedId] = useState<string | null>(null);
 
     // Carregar códigos em tempo real
@@ -21,9 +39,9 @@ export default function AdminCodesPage() {
         );
         
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({
+            const data = snapshot.docs.map((doc): InviteCodeRecord => ({
                 id: doc.id,
-                ...doc.data()
+                ...(doc.data() as Omit<InviteCodeRecord, "id">),
             }));
             setCodes(data);
         });

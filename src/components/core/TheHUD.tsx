@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Lock, ChevronRight, Check, Star, BookOpen } from "lucide-react";
@@ -18,20 +17,13 @@ interface TheHUDProps {
 }
 
 export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps) {
-    const [mounted, setMounted] = useState(false);
     const currentRank = getRank(completedCount);
     const router = useRouter();
-    const { areAllPillarsComplete, canChooseSpecialization, chosenSpecialization } = useProgress();
+    const { areAllPillarsComplete, chosenSpecialization } = useProgress();
 
     const allComplete = areAllPillarsComplete();
-    const canSelectSpecialization = canChooseSpecialization();
 
-    useEffect(() => {
-        setMounted(true);
-        return () => setMounted(false);
-    }, []);
-
-    if (!mounted || typeof document === "undefined") return null;
+    if (typeof document === "undefined") return null;
 
     return createPortal(
         <AnimatePresence>

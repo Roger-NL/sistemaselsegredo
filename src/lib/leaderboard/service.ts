@@ -8,6 +8,11 @@ export interface LeaderboardUser {
     isYou?: boolean;
 }
 
+interface LeaderboardUserDoc {
+    name?: string;
+    currentStreak?: number;
+}
+
 export async function getLeaderboard(limitCount = 5): Promise<LeaderboardUser[]> {
     try {
         const usersRef = collection(db, "users");
@@ -16,9 +21,9 @@ export async function getLeaderboard(limitCount = 5): Promise<LeaderboardUser[]>
 
         const users: LeaderboardUser[] = [];
         querySnapshot.forEach((doc) => {
-            const data = doc.data();
+            const data = doc.data() as LeaderboardUserDoc;
             // Basic filtering to ensure name and streak exist
-            if (data.name && typeof data.currentStreak === 'number') {
+            if (typeof data.name === "string" && typeof data.currentStreak === 'number') {
                 users.push({
                     id: doc.id,
                     name: formatName(data.name),

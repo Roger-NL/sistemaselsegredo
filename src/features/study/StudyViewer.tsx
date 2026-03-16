@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { AlertCircle, CheckCircle2, Lightbulb, Target, Zap, Play, Table as TableIcon, MessageSquare, Terminal, Cpu, HelpCircle, Eye, ChevronDown, MousePointer2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Lightbulb, Target, Zap, Play, Table as TableIcon, MessageSquare, Cpu, HelpCircle, Eye, ChevronDown } from "lucide-react";
 import { ContentBlock, PillarData } from "@/types/study";
 import { cn } from "@/lib/ui/cn";
 

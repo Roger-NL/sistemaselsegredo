@@ -135,7 +135,7 @@ export function useTTS() {
                 if (preferredVoice) {
                     utterance.voice = preferredVoice;
                     utterance.onend = () => setIsPlaying(false);
-                    utterance.onerror = (e) => {
+                    utterance.onerror = () => {
                         console.log("[TTS] Native failed or interrupted, switching to Premium Cloud.");
                         playPremiumCloudTTS(text, currentSpeed);
                     };

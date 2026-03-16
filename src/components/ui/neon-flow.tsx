@@ -16,16 +16,11 @@ function TubesBackgroundComponent({
 }: TubesBackgroundProps) {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [showIframe, setShowIframe] = useState(false);
-    const mouseRef = useRef({ x: 0, y: 0 });
-
-    // Função para randomizar cores
-    const randomizeColors = () => {
-        if (iframeRef.current && iframeRef.current.contentWindow) {
-            iframeRef.current.contentWindow.postMessage({
-                type: 'randomize'
-            }, '*');
-        }
-    };
+    const pendingPointerRef = useRef<{ x: number; y: number } | null>(null);
+    const lastPostedPointerRef = useRef<{ x: number; y: number } | null>(null);
+    const animationFrameRef = useRef<number | null>(null);
+    const frameBudgetRef = useRef(1000 / 36);
+    const lastPostedAtRef = useRef(0);
 
     useEffect(() => {
         // Carrega iframe depois de 500ms
@@ -33,31 +28,74 @@ function TubesBackgroundComponent({
             setShowIframe(true);
         }, 500);
 
-        // Handler do movimento do mouse - envia para o iframe
-        const handleGlobalMouseMove = (e: MouseEvent) => {
-            mouseRef.current = { x: e.clientX, y: e.clientY };
+        const navigatorProfile = navigator as Navigator & { deviceMemory?: number };
+        const deviceMemory = typeof navigatorProfile.deviceMemory === "number" ? navigatorProfile.deviceMemory : 8;
+        const hardwareConcurrency = navigatorProfile.hardwareConcurrency ?? 8;
+        const isLowPowerDevice = hardwareConcurrency <= 4 || deviceMemory <= 4;
+        frameBudgetRef.current = 1000 / (isLowPowerDevice ? 24 : 36);
 
-            // Envia para o iframe
+        const flushPointerUpdate = (now: number) => {
+            animationFrameRef.current = null;
+
+            if (document.visibilityState !== "visible") return;
+
+            const pendingPointer = pendingPointerRef.current;
+            const lastPostedPointer = lastPostedPointerRef.current;
+            if (!pendingPointer) return;
+
+            if (lastPostedPointer) {
+                const hasMeaningfulMovement =
+                    Math.abs(lastPostedPointer.x - pendingPointer.x) >= 0.5 ||
+                    Math.abs(lastPostedPointer.y - pendingPointer.y) >= 0.5;
+
+                if (!hasMeaningfulMovement) return;
+            }
+
+            const frameBudget = frameBudgetRef.current;
+            if (now - lastPostedAtRef.current < frameBudget) {
+                animationFrameRef.current = window.requestAnimationFrame(flushPointerUpdate);
+                return;
+            }
+
             if (iframeRef.current && iframeRef.current.contentWindow) {
                 iframeRef.current.contentWindow.postMessage({
                     type: 'mousemove',
-                    clientX: e.clientX,
-                    clientY: e.clientY,
-                    pageX: e.pageX,
-                    pageY: e.pageY,
-                    screenX: e.screenX,
-                    screenY: e.screenY,
-                    movementX: e.movementX,
-                    movementY: e.movementY
+                    clientX: pendingPointer.x,
+                    clientY: pendingPointer.y,
                 }, '*');
+
+                lastPostedPointerRef.current = pendingPointer;
+                lastPostedAtRef.current = now;
             }
         };
 
-        window.addEventListener('mousemove', handleGlobalMouseMove);
+        const schedulePointerSync = () => {
+            if (animationFrameRef.current !== null) return;
+            animationFrameRef.current = window.requestAnimationFrame(flushPointerUpdate);
+        };
+
+        const handleGlobalPointerMove = (event: PointerEvent) => {
+            pendingPointerRef.current = { x: event.clientX, y: event.clientY };
+            schedulePointerSync();
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === "visible" && pendingPointerRef.current) {
+                schedulePointerSync();
+            }
+        };
+
+        window.addEventListener('pointermove', handleGlobalPointerMove, { passive: true });
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
             clearTimeout(timer);
-            window.removeEventListener('mousemove', handleGlobalMouseMove);
+            if (animationFrameRef.current !== null) {
+                window.cancelAnimationFrame(animationFrameRef.current);
+            }
+            lastPostedAtRef.current = 0;
+            window.removeEventListener('pointermove', handleGlobalPointerMove);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, []);
 

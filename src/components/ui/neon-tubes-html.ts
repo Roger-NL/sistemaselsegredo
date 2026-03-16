@@ -36,43 +36,6 @@ export const neonTubesHtml = `<!DOCTYPE html>
 
         const canvas = document.getElementById('tubes-canvas');
 
-        // ===== INTERCEPTAR MOUSE HANDLERS =====
-        // Guarda os handlers de mouse originais para poder chamá-los manualmente
-        const mouseHandlers = [];
-        const pointerHandlers = [];
-
-        // Salva o addEventListener original
-        const originalAddEventListener = canvas.addEventListener.bind(canvas);
-        const originalWindowAddEventListener = window.addEventListener.bind(window);
-        const originalDocAddEventListener = document.addEventListener.bind(document);
-
-        // Intercepta addEventListener do canvas
-        canvas.addEventListener = function (type, handler, options) {
-            if (type === 'mousemove' || type === 'pointermove') {
-                mouseHandlers.push({ type, handler });
-                console.log('Captured handler for:', type);
-            }
-            return originalAddEventListener(type, handler, options);
-        };
-
-        // Intercepta addEventListener do window
-        window.addEventListener = function (type, handler, options) {
-            if (type === 'mousemove' || type === 'pointermove') {
-                mouseHandlers.push({ type, handler });
-                console.log('Captured window handler for:', type);
-            }
-            return originalWindowAddEventListener(type, handler, options);
-        };
-
-        // Intercepta addEventListener do document
-        document.addEventListener = function (type, handler, options) {
-            if (type === 'mousemove' || type === 'pointermove') {
-                mouseHandlers.push({ type, handler });
-                console.log('Captured document handler for:', type);
-            }
-            return originalDocAddEventListener(type, handler, options);
-        };
-
         // Helper for random colors (nebula palette)
         const randomColors = (count) => {
             const nebulaPalette = [
@@ -86,6 +49,13 @@ export const neonTubesHtml = `<!DOCTYPE html>
                 .fill(0)
                 .map(() => nebulaPalette[Math.floor(Math.random() * nebulaPalette.length)]);
         };
+
+        const navigatorProfile = navigator;
+        const deviceMemory = typeof navigatorProfile.deviceMemory === 'number' ? navigatorProfile.deviceMemory : 8;
+        const hardwareConcurrency = navigatorProfile.hardwareConcurrency || 8;
+        const isLowPowerDevice = hardwareConcurrency <= 4 || deviceMemory <= 4;
+        const interactionFrameInterval = 1000 / (isLowPowerDevice ? 24 : 36);
+        const idleFrameInterval = 1000 / (isLowPowerDevice ? 18 : 24);
 
         // Initialize TubesCursor
         const app = TubesCursor(canvas, {
@@ -107,21 +77,66 @@ export const neonTubesHtml = `<!DOCTYPE html>
             }
         });
 
-        console.log('TubesCursor initialized, captured handlers:', mouseHandlers.length);
+        const randomizeColors = () => {
+            const colors = randomColors(6);
+            const lightsColors = randomColors(5);
+            try {
+                app.tubes.setColors(colors);
+                app.tubes.setLightsColors(lightsColors);
+            } catch (e) { }
+        };
 
-        // ===== SISTEMA DE MOVIMENTO AUTOMÁTICO =====
-        let lastActivityTime = Date.now();
-        let isIdle = false;
+        let isIdle = true;
         let idleAnimationId = null;
+        let idleStartTimeoutId = null;
+        let interactionAnimationId = null;
+        let lastInteractionFrame = 0;
+        let lastIdleFrame = 0;
+        let pendingPointer = null;
         let currentPos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
-        // Função para simular movimento do mouse
-        const simulateMouseMove = (x, y) => {
+        const scheduleIdleStart = (delay = 2000) => {
+            if (idleStartTimeoutId) {
+                clearTimeout(idleStartTimeoutId);
+            }
+
+            idleStartTimeoutId = window.setTimeout(() => {
+                if (document.visibilityState !== 'visible') return;
+                if (isIdle) return;
+
+                isIdle = true;
+                lastIdleFrame = 0;
+                if (idleAnimationId === null) {
+                    idleAnimationId = requestAnimationFrame(runIdleAnimation);
+                }
+            }, delay);
+        };
+
+        const stopIdle = () => {
+            if (idleStartTimeoutId) {
+                clearTimeout(idleStartTimeoutId);
+                idleStartTimeoutId = null;
+            }
+
+            if (isIdle) {
+                isIdle = false;
+            }
+
+            if (idleAnimationId !== null) {
+                cancelAnimationFrame(idleAnimationId);
+                idleAnimationId = null;
+            }
+
+            scheduleIdleStart(2000);
+        };
+
+        const dispatchSyntheticMove = (x, y) => {
             const rect = canvas.getBoundingClientRect();
             const offsetX = x - rect.left;
             const offsetY = y - rect.top;
+            const movementX = x - currentPos.x;
+            const movementY = y - currentPos.y;
 
-            // Cria evento com todas as propriedades necessárias
             const eventInit = {
                 view: window,
                 bubbles: true,
@@ -132,139 +147,117 @@ export const neonTubesHtml = `<!DOCTYPE html>
                 pageY: y,
                 screenX: x,
                 screenY: y,
-                movementX: x - currentPos.x,
-                movementY: y - currentPos.y
+                movementX,
+                movementY
             };
 
-            // Cria eventos DOM reais
             const mouseEvent = new MouseEvent('mousemove', eventInit);
-            const pointerEvent = new PointerEvent('pointermove', {
-                ...eventInit,
-                pointerId: 1,
-                pointerType: 'mouse',
-                isPrimary: true
-            });
-
-            // Injeta offsetX/offsetY
             Object.defineProperty(mouseEvent, 'offsetX', { value: offsetX });
             Object.defineProperty(mouseEvent, 'offsetY', { value: offsetY });
-            Object.defineProperty(pointerEvent, 'offsetX', { value: offsetX });
-            Object.defineProperty(pointerEvent, 'offsetY', { value: offsetY });
-
-            // Dispara eventos nos elementos
             canvas.dispatchEvent(mouseEvent);
-            canvas.dispatchEvent(pointerEvent);
+
+            if (typeof PointerEvent === 'function') {
+                const pointerEvent = new PointerEvent('pointermove', {
+                    ...eventInit,
+                    pointerId: 1,
+                    pointerType: 'mouse',
+                    isPrimary: true
+                });
+
+                Object.defineProperty(pointerEvent, 'offsetX', { value: offsetX });
+                Object.defineProperty(pointerEvent, 'offsetY', { value: offsetY });
+                canvas.dispatchEvent(pointerEvent);
+            }
+
             document.dispatchEvent(new MouseEvent('mousemove', eventInit));
             window.dispatchEvent(new MouseEvent('mousemove', eventInit));
-
-            // Também chama handlers capturados diretamente
-            const fakeEvent = {
-                clientX: x, clientY: y,
-                pageX: x, pageY: y,
-                screenX: x, screenY: y,
-                offsetX, offsetY,
-                movementX: x - currentPos.x,
-                movementY: y - currentPos.y,
-                target: canvas,
-                currentTarget: canvas,
-                bubbles: true,
-                cancelable: true,
-                preventDefault: () => { },
-                stopPropagation: () => { }
-            };
-
-            mouseHandlers.forEach(({ handler }) => {
-                try { handler(fakeEvent); } catch (e) { }
-            });
 
             currentPos = { x, y };
         };
 
-        // Animação de movimento automático
-        const runIdleAnimation = () => {
-            if (!isIdle) return;
+        const flushInteraction = (now = performance.now()) => {
+            interactionAnimationId = null;
+            if (!pendingPointer || document.visibilityState !== 'visible') return;
 
-            const time = Date.now() * 0.0003;
+            if (now - lastInteractionFrame < interactionFrameInterval) {
+                interactionAnimationId = requestAnimationFrame(flushInteraction);
+                return;
+            }
+
+            lastInteractionFrame = now;
+            const { x, y } = pendingPointer;
+            pendingPointer = null;
+            dispatchSyntheticMove(x, y);
+        };
+
+        const queueInteraction = (x, y) => {
+            pendingPointer = { x, y };
+            if (interactionAnimationId === null) {
+                interactionAnimationId = requestAnimationFrame(flushInteraction);
+            }
+        };
+
+        const runIdleAnimation = (now = performance.now()) => {
+            if (!isIdle || document.visibilityState !== 'visible') {
+                idleAnimationId = null;
+                return;
+            }
+
+            idleAnimationId = requestAnimationFrame(runIdleAnimation);
+            if (now - lastIdleFrame < idleFrameInterval) return;
+            lastIdleFrame = now;
+
+            const time = now * 0.0003;
             const centerX = window.innerWidth / 2;
             const centerY = window.innerHeight / 2;
             const radiusX = window.innerWidth * 0.4;
             const radiusY = window.innerHeight * 0.3;
 
-            // Movimento orgânico em lemniscata
             const x = centerX + Math.sin(time) * radiusX * Math.cos(time * 0.5);
             const y = centerY + Math.sin(time * 1.3) * radiusY * 0.7 + Math.cos(time * 0.4) * radiusY * 0.3;
 
-            simulateMouseMove(x, y);
-            idleAnimationId = requestAnimationFrame(runIdleAnimation);
+            queueInteraction(x, y);
         };
 
-        // Verificar inatividade
-        const checkIdle = () => {
-            if (Date.now() - lastActivityTime > 2000 && !isIdle) {
-                isIdle = true;
-                console.log('Starting idle animation');
-                runIdleAnimation();
-            }
-        };
-
-        setInterval(checkIdle, 100);
-
-        // Parar idle quando há movimento real
-        const stopIdle = () => {
-            lastActivityTime = Date.now();
-            if (isIdle) {
-                isIdle = false;
-                if (idleAnimationId) {
-                    cancelAnimationFrame(idleAnimationId);
-                    idleAnimationId = null;
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                if (isIdle && idleAnimationId === null) {
+                    lastIdleFrame = 0;
+                    idleAnimationId = requestAnimationFrame(runIdleAnimation);
                 }
+                if (pendingPointer && interactionAnimationId === null) {
+                    interactionAnimationId = requestAnimationFrame(flushInteraction);
+                }
+                return;
+            }
+
+            if (idleAnimationId !== null) {
+                cancelAnimationFrame(idleAnimationId);
+                idleAnimationId = null;
+            }
+            if (interactionAnimationId !== null) {
+                cancelAnimationFrame(interactionAnimationId);
+                interactionAnimationId = null;
             }
         };
 
-        // Detectar movimento real do mouse (antes de ser processado pela lib)
-        originalAddEventListener('mousemove', (e) => {
-            stopIdle();
-            currentPos = { x: e.clientX, y: e.clientY };
-        });
+        window.addEventListener('message', (event) => {
+            if (!event || !event.data) return;
 
-        originalAddEventListener('pointermove', (e) => {
-            stopIdle();
-            currentPos = { x: e.clientX, y: e.clientY };
-        });
-
-        // Mensagens do parent (iframe)
-        originalWindowAddEventListener('message', (event) => {
             if (event.data.type === 'randomize') {
-                const colors = randomColors(6);
-                const lightsColors = randomColors(5);
-                try {
-                    app.tubes.setColors(colors);
-                    app.tubes.setLightsColors(lightsColors);
-                } catch (e) { }
+                randomizeColors();
+                return;
             }
 
-            if (event.data.type === 'mousemove') {
-                stopIdle();
-                const { clientX, clientY } = event.data;
-                simulateMouseMove(clientX, clientY);
-            }
+            if (event.data.type !== 'mousemove') return;
+
+            stopIdle();
+            queueInteraction(event.data.clientX, event.data.clientY);
         });
 
-        // Click para randomizar
-        originalAddEventListener('click', () => {
-            const colors = randomColors(6);
-            const lightsColors = randomColors(5);
-            try {
-                app.tubes.setColors(colors);
-                app.tubes.setLightsColors(lightsColors);
-            } catch (e) { }
-        });
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        // Iniciar movimento automático IMEDIATAMENTE ao carregar
-        // Não espera por inatividade - começa movendo e para quando detecta mouse real
-        isIdle = true;
-        console.log('Auto-starting idle animation immediately');
-        runIdleAnimation();
+        idleAnimationId = requestAnimationFrame(runIdleAnimation);
     </script>
 </body>
 

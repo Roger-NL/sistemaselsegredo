@@ -15,6 +15,33 @@ export interface InviteCode {
     isActive: boolean;
 }
 
+function isInviteCode(value: unknown): value is InviteCode {
+    if (!value || typeof value !== "object") {
+        return false;
+    }
+
+    const inviteCode = value as Partial<InviteCode>;
+    return (
+        typeof inviteCode.id === "string" &&
+        typeof inviteCode.code === "string" &&
+        typeof inviteCode.maxUses === "number" &&
+        typeof inviteCode.currentUses === "number" &&
+        typeof inviteCode.createdBy === "string" &&
+        typeof inviteCode.createdAt === "string" &&
+        typeof inviteCode.isActive === "boolean"
+    );
+}
+
+function parseInviteCodes(rawData: string): InviteCode[] {
+    try {
+        const parsed: unknown = JSON.parse(rawData);
+        return Array.isArray(parsed) ? parsed.filter(isInviteCode) : [];
+    } catch (error) {
+        console.error("[InviteCodes] Failed to parse stored codes:", error);
+        return [];
+    }
+}
+
 /**
  * Generate unique code
  */
@@ -82,7 +109,14 @@ export function getAllCodes(): InviteCode[] {
         initInviteCodes();
         return getAllCodes();
     }
-    return JSON.parse(data);
+
+    const codes = parseInviteCodes(data);
+    if (codes.length === 0) {
+        initInviteCodes();
+        return getAllCodes();
+    }
+
+    return codes;
 }
 
 /**

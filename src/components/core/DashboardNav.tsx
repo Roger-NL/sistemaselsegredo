@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProgress } from "@/context/ProgressContext";
-import { getRank } from "@/utils/ranks";
+import { getRank, getRankIndex } from "@/utils/ranks";
 import { LeaderboardModal } from "@/features/dashboard/LeaderboardModal";
+import { RankGuideModal } from "@/features/dashboard/RankGuideModal";
 import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard/service"; // Added Import
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/lib/routes";
@@ -20,6 +21,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
     const { getCompletedCount, getGlobalProgress } = useProgress();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
+    const [isRankGuideOpen, setIsRankGuideOpen] = useState(false);
 
     // Mini Leaderboard State
     const [miniLeaderboard, setMiniLeaderboard] = useState<LeaderboardUser[]>([]);
@@ -32,6 +34,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
 
     const completedCount = getCompletedCount();
     const currentRank = getRank(completedCount);
+    const currentRankIndex = getRankIndex(completedCount);
     const globalProgress = getGlobalProgress();
 
     // Mock streak data
@@ -76,9 +79,14 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                             </div>
 
                             {/* Rank Badge */}
-                            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-[#EEF4D4]/10 border border-[#EEF4D4]/20">
+                            <button
+                                type="button"
+                                onClick={() => setIsRankGuideOpen(true)}
+                                className="flex items-center gap-1 rounded-full border border-[#EEF4D4]/20 bg-[#EEF4D4]/10 px-2 py-1 transition-colors hover:bg-[#EEF4D4]/15"
+                                aria-label="Ver todas as patentes"
+                            >
                                 <span className="text-[#EEF4D4] text-[10px] font-bold truncate max-w-[50px]">{currentRank}</span>
-                            </div>
+                            </button>
                         </div>
 
                         {/* Row 2: Progress + Actions */}
@@ -265,10 +273,15 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                                 <span className="hidden sm:inline">Ranking</span>
                             </button>
 
-                            <div className="bean-button bean-button-rank">
+                            <button
+                                type="button"
+                                onClick={() => setIsRankGuideOpen(true)}
+                                className="bean-button bean-button-rank transition-colors hover:bg-[#EEF4D4]/10"
+                                aria-label="Ver todas as patentes"
+                            >
                                 <span className="text-[9px] uppercase tracking-wider text-[#EEF4D4]/60">Patente</span>
                                 <span className="font-bold text-xs text-[#EEF4D4]">{currentRank}</span>
-                            </div>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -278,6 +291,12 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
             <LeaderboardModal
                 isOpen={isLeaderboardOpen}
                 onClose={() => setIsLeaderboardOpen(false)}
+            />
+
+            <RankGuideModal
+                isOpen={isRankGuideOpen}
+                onClose={() => setIsRankGuideOpen(false)}
+                currentRankIndex={currentRankIndex}
             />
         </>
     );

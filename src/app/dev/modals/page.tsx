@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Timestamp } from "firebase/firestore";
 import ConciergeModal from "@/components/core/ConciergeModal";
 import { LeaderboardModal } from "@/features/dashboard/LeaderboardModal";
 import { PillarExamViewModal } from "@/features/study/exam/PillarExamViewModal";
@@ -20,7 +21,7 @@ const mockExamApproved: PillarExam = {
   status: "approved",
   adminFeedback:
     "Excelente aplicacao pratica. Continue com consistencia e avance para o proximo modulo.",
-  createdAt: { toDate: () => new Date("2026-03-10T14:30:00Z") },
+  createdAt: Timestamp.fromDate(new Date("2026-03-10T14:30:00Z")),
 };
 
 const mockExamRejected: PillarExam = {
@@ -31,7 +32,7 @@ const mockExamRejected: PillarExam = {
   quizScore: 61,
   adminFeedback:
     "Precisa reforcar os exemplos de uso em contexto real. Refaça com foco em clareza e aplicacao no dia a dia.",
-  createdAt: { toDate: () => new Date("2026-03-12T09:20:00Z") },
+  createdAt: Timestamp.fromDate(new Date("2026-03-12T09:20:00Z")),
 };
 
 export default function DevModalsPage() {

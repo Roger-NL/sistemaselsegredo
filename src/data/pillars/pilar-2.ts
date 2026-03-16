@@ -40,12 +40,15 @@ export const PILAR_2_DATA: PillarData = {
                     type: "list",
                     content: [
                         "**1. {{Passenger|Passageiro}}:** Você está apenas observando o sistema.",
-                        "**2. {{Check-in Complete|Check-in Realizado}}:** Seus dados básicos foram validados.",
-                        "**3. {{Frequent Flyer|Viajante Frequente}}:** Você já tem exposição constante ao sinal.",
-                        "**4. {{Crew Member|Tripulante}}:** Você começou a operar o sistema de forma ativa.",
-                        "**5. {{Co-Pilot|Co-piloto}}:** Domínio técnico avançado e suporte operacional.",
-                        "**6. {{Captain|Capitão}}:** Autonomia total em situações de voo real.",
-                        "**7. {{Commander|Comandante}} (Elite):** Você é a autoridade máxima e referência no campo."
+                        "**2. {{Flight Cadet|Cadete de Voo}}:** Você entrou em formação e começou a treinar com método.",
+                        "**3. {{Route Navigator|Navegador de Rota}}:** Você identifica caminhos e mantém direção sob pressão.",
+                        "**4. {{Crew Operator|Tripulante de Bordo}}:** Você já participa da operação de forma ativa.",
+                        "**5. {{Cabin Operator|Operador de Cabine}}:** Você organiza processos e mantém o controle do ambiente.",
+                        "**6. {{Co-Pilot|Co-piloto}}:** Domínio técnico avançado e suporte operacional.",
+                        "**7. {{First Officer|Primeiro Oficial}}:** Você assume decisões rápidas e sustenta a missão em campo.",
+                        "**8. {{Captain|Capitão}}:** Autonomia total em situações de voo real.",
+                        "**9. {{Senior Captain|Capitão Sênior}}:** Alta consistência, leitura de risco e liderança operacional.",
+                        "**10. {{Commander|Comandante}}:** Autoridade máxima e referência de performance no sistema."
                     ]
                 },
                 {

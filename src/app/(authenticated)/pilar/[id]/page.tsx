@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { Suspense } from "react";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
 import PillarPageClient from "@/features/study/PillarPageClient";
 
@@ -31,9 +32,11 @@ export default async function PillarPage({ params }: { params: Promise<{ id: str
     }
 
     return (
-        <PillarPageClient
-            pillarId={pillarId}
-            initialContent={pillarData}
-        />
+        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white">Carregando...</div>}>
+            <PillarPageClient
+                pillarId={pillarId}
+                initialContent={pillarData}
+            />
+        </Suspense>
     );
 }

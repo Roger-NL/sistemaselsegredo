@@ -66,6 +66,24 @@ export interface AuthResult {
     error?: string;
 }
 
+type FirestoreUserData = Partial<Omit<User, "id">> & {
+    subscriptionStatus?: SubscriptionStatus | "active";
+};
+
+function isStringArray(value: unknown): value is string[] {
+    return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function isCompletedModulesMap(value: unknown): value is Record<string, number[]> {
+    if (!value || typeof value !== "object") {
+        return false;
+    }
+
+    return Object.values(value).every(
+        (entry) => Array.isArray(entry) && entry.every((item) => typeof item === "number")
+    );
+}
+
 function getFirebaseErrorCode(error: unknown): string | null {
     if (typeof error === "object" && error !== null && "code" in error) {
         return (error as FirebaseError).code;
@@ -93,14 +111,49 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
     const userDoc = await getDoc(userDocRef);
 
     if (userDoc.exists()) {
-        const data = userDoc.data() as User;
+        const data = userDoc.data() as FirestoreUserData;
 
         // MIGRATION / COMPATIBILITY: Map 'active' (legacy) to 'free' or 'premium' based on fields?
         // For now, let's treat 'active' as 'free' unless we prove otherwise.
         // Actually, if 'active' was the default for everything, it is effectively 'free'.
-        const status = normalizeSubscriptionStatus(data.subscriptionStatus as User["subscriptionStatus"] | "active" | undefined);
+        const status = normalizeSubscriptionStatus(data.subscriptionStatus);
 
-        return { ...data, subscriptionStatus: status, id: fbUser.uid }; // Ensure ID matches
+        return {
+            id: fbUser.uid,
+            name: typeof data.name === "string" ? data.name : fbUser.displayName || "Usuário",
+            email: typeof data.email === "string" ? data.email : fbUser.email || "",
+            createdAt: typeof data.createdAt === "string" ? data.createdAt : fbUser.metadata.creationTime || new Date().toISOString(),
+            currentStreak: typeof data.currentStreak === "number" ? data.currentStreak : 0,
+            lastLoginDate: typeof data.lastLoginDate === "string" ? data.lastLoginDate : undefined,
+            subscriptionStatus: status,
+            subscriptionExpiresAt: typeof data.subscriptionExpiresAt === "string" ? data.subscriptionExpiresAt : undefined,
+            inviteCodeUsed: typeof data.inviteCodeUsed === "string" ? data.inviteCodeUsed : undefined,
+            paymentId: typeof data.paymentId === "string" ? data.paymentId : undefined,
+            phone: typeof data.phone === "string" ? data.phone : undefined,
+            approvedPillar: typeof data.approvedPillar === "number" ? data.approvedPillar : undefined,
+            chosenSpecialization:
+                typeof data.chosenSpecialization === "string" || data.chosenSpecialization === null
+                    ? data.chosenSpecialization
+                    : undefined,
+            specializationStatus:
+                data.specializationStatus === "studying" ||
+                data.specializationStatus === "pending_approval" ||
+                data.specializationStatus === "completed" ||
+                data.specializationStatus === null
+                    ? data.specializationStatus
+                    : undefined,
+            completedSpecializations: isStringArray(data.completedSpecializations) ? data.completedSpecializations : undefined,
+            completedModules: isCompletedModulesMap(data.completedModules) ? data.completedModules : undefined,
+            completedPillarModules: isStringArray(data.completedPillarModules) ? data.completedPillarModules : undefined,
+            hasSeenMissionComplete:
+                typeof data.hasSeenMissionComplete === "boolean" ? data.hasSeenMissionComplete : undefined,
+            localPillarStatus:
+                data.localPillarStatus && typeof data.localPillarStatus === "object"
+                    ? Object.fromEntries(
+                        Object.entries(data.localPillarStatus).filter(([, value]) => typeof value === "string")
+                    )
+                    : undefined,
+        };
     }
     return null;
 }

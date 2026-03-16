@@ -12,10 +12,12 @@ interface StudentSummary {
     id: string;
     name?: string;
     email?: string;
+    phone?: string;
+    currentStreak?: number;
     subscriptionStatus?: string;
     approvedPillar?: number;
     inviteCodeUsed?: string;
-    createdAt?: string;
+    createdAt?: string | Date;
 }
 
 interface StudentDetailModalProps {

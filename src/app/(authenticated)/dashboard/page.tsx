@@ -293,161 +293,159 @@ export default function Page() {
 
 
         <div
-          className="absolute z-10 pointer-events-none"
+          className="absolute left-1/2 top-1/2 z-10 pointer-events-none"
           style={{
-            top: "50%",
-            left: "50%",
             transform: "translate(-50%, -50%)"
           }}
         >
-          {/* Globo (com ajuste fino isolado - 36px X, 20px Y no Desktop) */}
-          <div className="transform transition-transform duration-300 lg:translate-x-[36px] lg:translate-y-[20px]">
-            {/* Área clicável circular - apenas o globo */}
+          <div className="relative lg:translate-x-[36px] lg:translate-y-[20px]">
             <div
-              onClick={handleGlobeClick}
-              className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full overflow-hidden cursor-pointer pointer-events-auto hover:scale-105 transition-transform duration-300"
-            >
-              <RotatingEarth
-                width={500}
-                height={500}
-                className="w-[300px] h-[300px] md:w-[500px] md:h-[500px] transition-transform duration-700 ease-out"
-              />
-            </div>
-          </div>
-
-          {/* Conteúdo central sobre o globo - apenas números */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-
-            {/* Número de pilares ou progresso da especialização */}
-            <div className="flex flex-col items-center">
-              {completedCount === 9 ? (
-                <div className="flex flex-col items-center">
-                  <span
-                    className="text-8xl md:text-[8rem] font-serif font-black"
-                    style={{
-                      color: '#ddd6fe',
-                      textShadow: '0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3)'
-                    }}
-                  >
-                    {Math.min(100, Math.max(0, Math.round((globalProgress - 50) * 2))) + "%"}
-                  </span>
-                  <span
-                    className="text-xs md:text-sm font-mono font-bold uppercase tracking-widest mt-2"
-                    style={{ color: '#a78bfa' }}
-                  >
-                    Especialização
-                  </span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center">
-                  <span
-                    className="text-7xl md:text-9xl font-serif font-black tracking-tighter"
-                    style={{
-                      color: '#EEF4D4',
-                      textShadow: '0 0 30px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)'
-                    }}
-                  >
-                    {completedCount}
-                    <span className="text-4xl md:text-6xl align-top ml-2 opacity-80">/9</span>
-                  </span>
-                  <span
-                    className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-[0.5em] mt-2"
-                    style={{ color: '#EEF4D4', textShadow: '0 2px 8px rgba(0,0,0,0.7)' }}
-                  >
-                    PILARES
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* CTA Button e Nome do Pilar - FORA do globo, abaixo dele */}
-        <div className="absolute z-20 pointer-events-auto flex flex-col items-center"
-          style={{
-            top: "calc(50% + 180px)",
-            left: "50%",
-            transform: "translateX(-50%)"
-          }}
-        >
-          {/* CTA Button */}
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-              if (currentSpec) router.push(`${ROUTES.app.specialties}/${currentSpec.id}`);
-              else if (completedCount < 9) router.push(`${ROUTES.app.pillar}/${currentPillarNumber}`);
-              else router.push(ROUTES.app.specialties);
-            }}
-            className="cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95"
-          >
-            <span
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm ${currentSpec
-                ? "border-violet-500/40 bg-violet-500/10 hover:bg-violet-500/20"
-                : "border-[#EEF4D4]/40 bg-[#EEF4D4]/10 hover:bg-[#EEF4D4]/20"
-                }`}
+              className="group relative pointer-events-auto select-none"
               style={{
-                boxShadow: currentSpec
-                  ? '0 0 20px rgba(139, 92, 246, 0.3)'
-                  : '0 0 20px rgba(238, 244, 212, 0.2)'
+                width: "min(500px, 82vw, 62dvh)",
+                height: "min(500px, 82vw, 62dvh)"
               }}
             >
-              <span className={`w-2 h-2 rounded-full animate-pulse ${currentSpec ? "bg-violet-400" : "bg-[#EEF4D4]"}`} />
-              <span className={`text-xs md:text-sm font-medium uppercase tracking-wider ${currentSpec ? "text-violet-300" : "text-[#EEF4D4]"}`}>
-                {currentSpec
-                  ? "Continuar Estudo"
-                  : specializationStatus === "completed"
-                    ? "Especialização Concluída"
-                  : completedCount === 9
-                    ? "Escolher Especialidade"
-                    : completedCount === 0
-                      ? "Começar os Estudos"
-                      : "Continuar Estudo"
-                }
-              </span>
-            </span>
-          </div>
+              <button
+                type="button"
+                onClick={handleGlobeClick}
+                className="absolute inset-0 overflow-hidden rounded-full border-0 bg-transparent p-0 cursor-pointer transition-transform duration-300 group-hover:scale-[1.02] active:scale-[0.99]"
+                aria-label="Abrir visão dos pilares"
+              >
+                <RotatingEarth
+                  width={500}
+                  height={500}
+                  className="size-full transition-transform duration-700 ease-out"
+                />
+              </button>
 
-          {/* Nome do pilar atual OU especialização */}
-          <div className="mt-4 text-center">
-            {currentSpec ? (
-              <>
-                <p
-                  className="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full inline-block"
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-transform duration-300 group-hover:scale-[1.02]">
+                <div className="flex flex-col items-center">
+                  {completedCount === 9 ? (
+                    <div className="flex flex-col items-center">
+                      <span
+                        className="text-[clamp(4.75rem,18vw,8rem)] font-serif font-black leading-none"
+                        style={{
+                          color: '#ddd6fe',
+                          textShadow: '0 0 40px rgba(139, 92, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3)'
+                        }}
+                      >
+                        {Math.min(100, Math.max(0, Math.round((globalProgress - 50) * 2))) + "%"}
+                      </span>
+                      <span
+                        className="mt-2 text-[10px] md:text-sm font-mono font-bold uppercase tracking-[0.35em]"
+                        style={{ color: '#a78bfa' }}
+                      >
+                        Especialização
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <span
+                        className="font-serif font-black tracking-tighter leading-none"
+                        style={{
+                          color: '#EEF4D4',
+                          textShadow: '0 0 30px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6)',
+                          fontSize: 'clamp(4.5rem, 18vw, 8rem)'
+                        }}
+                      >
+                        {completedCount}
+                        <span
+                          className="align-top ml-2 opacity-80"
+                          style={{ fontSize: 'clamp(2rem, 7vw, 4rem)' }}
+                        >
+                          /9
+                        </span>
+                      </span>
+                      <span
+                        className="mt-2 text-[10px] md:text-xs font-mono font-bold uppercase tracking-[0.5em]"
+                        style={{ color: '#EEF4D4', textShadow: '0 2px 8px rgba(0,0,0,0.7)' }}
+                      >
+                        PILARES
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="absolute left-1/2 top-full z-20 mt-5 -translate-x-1/2 pointer-events-auto flex flex-col items-center">
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (currentSpec) router.push(`${ROUTES.app.specialties}/${currentSpec.id}`);
+                  else if (completedCount < 9) router.push(`${ROUTES.app.pillar}/${currentPillarNumber}`);
+                  else router.push(ROUTES.app.specialties);
+                }}
+                className="cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95"
+              >
+                <span
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm ${currentSpec
+                    ? "border-violet-500/40 bg-violet-500/10 hover:bg-violet-500/20"
+                    : "border-[#EEF4D4]/40 bg-[#EEF4D4]/10 hover:bg-[#EEF4D4]/20"
+                    }`}
                   style={{
-                    color: '#c4b5fd',
-                    backgroundColor: 'rgba(139, 92, 246, 0.25)',
-                    textShadow: '0 0 10px rgba(139, 92, 246, 0.5)'
+                    boxShadow: currentSpec
+                      ? '0 0 20px rgba(139, 92, 246, 0.3)'
+                      : '0 0 20px rgba(238, 244, 212, 0.2)'
                   }}
                 >
-                  {currentSpec.title}
-                </p>
-                <div className="mt-2 w-32 mx-auto">
-                  <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-500"
-                      style={{ width: `${Math.max(globalProgress - 50, 0) * 2}%` }}
-                    />
-                  </div>
-                  <p className="text-[9px] text-violet-300 mt-1 font-mono font-bold">{globalProgress}% concluído</p>
-                </div>
-              </>
-            ) : (
-              <p
-                className="text-[10px] md:text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full inline-block"
-                style={{
-                  color: '#EEF4D4',
-                  backgroundColor: 'rgba(238, 244, 212, 0.15)',
-                  textShadow: '0 1px 4px rgba(0,0,0,0.5)'
-                }}
-              >
-                {completedCount === 9
-                  ? (specializationStatus === "completed" ? "Especialização concluída com sucesso" : "Escolher Especialidade")
-                  : `Pilar ${currentPillarNumber}: ${currentPillar?.title || "Pilar 1"}`}
-              </p>
-            )}
+                  <span className={`w-2 h-2 rounded-full animate-pulse ${currentSpec ? "bg-violet-400" : "bg-[#EEF4D4]"}`} />
+                  <span className={`text-xs md:text-sm font-medium uppercase tracking-wider ${currentSpec ? "text-violet-300" : "text-[#EEF4D4]"}`}>
+                    {currentSpec
+                      ? "Continuar Estudo"
+                      : specializationStatus === "completed"
+                        ? "Especialização Concluída"
+                      : completedCount === 9
+                        ? "Escolher Especialidade"
+                        : completedCount === 0
+                          ? "Começar os Estudos"
+                          : "Continuar Estudo"
+                    }
+                  </span>
+                </span>
+              </div>
+
+              <div className="mt-4 text-center">
+                {currentSpec ? (
+                  <>
+                    <p
+                      className="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full inline-block"
+                      style={{
+                        color: '#c4b5fd',
+                        backgroundColor: 'rgba(139, 92, 246, 0.25)',
+                        textShadow: '0 0 10px rgba(139, 92, 246, 0.5)'
+                      }}
+                    >
+                      {currentSpec.title}
+                    </p>
+                    <div className="mt-2 w-32 mx-auto">
+                      <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-500"
+                          style={{ width: `${Math.max(globalProgress - 50, 0) * 2}%` }}
+                        />
+                      </div>
+                      <p className="text-[9px] text-violet-300 mt-1 font-mono font-bold">{globalProgress}% concluído</p>
+                    </div>
+                  </>
+                ) : (
+                  <p
+                    className="text-[10px] md:text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full inline-block"
+                    style={{
+                      color: '#EEF4D4',
+                      backgroundColor: 'rgba(238, 244, 212, 0.15)',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.5)'
+                    }}
+                  >
+                    {completedCount === 9
+                      ? (specializationStatus === "completed" ? "Especialização concluída com sucesso" : "Escolher Especialidade")
+                      : `Pilar ${currentPillarNumber}: ${currentPillar?.title || "Pilar 1"}`}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
-
-
         </div>
       </div>
 

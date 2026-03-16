@@ -46,11 +46,13 @@ export default function BoletimPage() {
 
                 snapshot.docs.forEach(doc => {
                     const data = { id: doc.id, ...doc.data() } as PillarExam;
+                    const currentCreatedAt = data.createdAt?.seconds ?? 0;
+                    const previousCreatedAt = examsMap[data.pillarId]?.createdAt?.seconds ?? 0;
                     // Keep the latest if multiple (though UI usually enforces one active)
                     // Or keep the one with highest status?
                     // Simple logic: if exists, overwrite if newer.
                     // Actually, let's just use the one found.
-                    if (!examsMap[data.pillarId] || (data.createdAt?.seconds > (examsMap[data.pillarId]?.createdAt?.seconds || 0))) {
+                    if (!examsMap[data.pillarId] || currentCreatedAt > previousCreatedAt) {
                         examsMap[data.pillarId] = data;
                     }
                 });

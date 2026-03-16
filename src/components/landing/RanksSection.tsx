@@ -1,13 +1,12 @@
 "use client";
 
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import { AnimatePresence, motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import Image from "next/image";
 import { RANKS } from "@/utils/ranks";
-import { Quote } from "lucide-react";
 import { useLandingTheme } from "@/context/LandingThemeContext";
 import { useRef } from "react";
 import { Star, ChevronLeft, ChevronRight, Quote as QuoteIcon } from "lucide-react";
 import { useState, useEffect } from "react";
-import { AnimatePresence } from "framer-motion";
 
 // Animated Rank Badge with Spread Effect
 function RankBadge({
@@ -224,9 +223,12 @@ function ReviewsCarousel() {
                             {/* Avatar */}
                             <div className="relative shrink-0">
                                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-full p-[2px] bg-gradient-to-tr from-violet-500 to-emerald-500">
-                                    <img
+                                    <Image
                                         src={REVIEWS[current].image}
                                         alt={REVIEWS[current].name}
+                                        width={80}
+                                        height={80}
+                                        unoptimized
                                         className="w-full h-full rounded-full object-cover border-2 border-black"
                                     />
                                 </div>
@@ -247,7 +249,7 @@ function ReviewsCarousel() {
                                     </div>
                                 </div>
                                 <p className="text-[#EEF4D4]/80 text-sm md:text-base leading-relaxed italic">
-                                    "{REVIEWS[current].content}"
+                                    &ldquo;{REVIEWS[current].content}&rdquo;
                                 </p>
                             </div>
                         </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from "framer-motion";
-import { Star, Quote, Mic, TrendingUp, Award, Headphones, ChevronLeft, ChevronRight, LucideIcon } from "lucide-react";
+import Image from "next/image";
+import { Star, Quote, Mic, TrendingUp, Award, ChevronLeft, ChevronRight, LucideIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useLandingTheme } from "@/context/LandingThemeContext";
 
@@ -45,13 +46,11 @@ const RESULTS = [
 // Animated Stat Card with Spread Effect
 function StatCard({
     result,
-    index,
     distanceFromCenter,
     scrollProgress,
     isDark
 }: {
     result: { value: string; label: string; icon: LucideIcon };
-    index: number;
     distanceFromCenter: number;
     scrollProgress: MotionValue<number>;
     isDark: boolean;
@@ -176,7 +175,6 @@ export function ResultsSection() {
                             <StatCard
                                 key={index}
                                 result={result}
-                                index={index}
                                 distanceFromCenter={distanceFromCenter}
                                 scrollProgress={statsScroll}
                                 isDark={isDark}
@@ -214,9 +212,12 @@ export function ResultsSection() {
                                 >
                                     <div className="flex items-center gap-4 mb-8">
                                         <div className="relative">
-                                            <img
+                                            <Image
                                                 src={TESTIMONIALS[activeTestimonial].image}
                                                 alt={TESTIMONIALS[activeTestimonial].name}
+                                                width={64}
+                                                height={64}
+                                                unoptimized
                                                 className="w-16 h-16 rounded-full border-2 border-violet-500"
                                             />
                                             <div className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full bg-violet-500 text-[10px] font-mono text-white uppercase">
@@ -230,7 +231,7 @@ export function ResultsSection() {
                                     </div>
 
                                     <p className={`text-xl md:text-2xl font-serif font-bold leading-relaxed mb-8 italic shadow-black drop-shadow-sm ${isDark ? "text-white/95" : "text-gray-800"}`}>
-                                        "{TESTIMONIALS[activeTestimonial].quote}"
+                                        &ldquo;{TESTIMONIALS[activeTestimonial].quote}&rdquo;
                                     </p>
 
                                     <div className="flex gap-8">
@@ -290,9 +291,12 @@ export function ResultsSection() {
                                         : 'opacity-50 hover:opacity-100'
                                         }`}
                                 >
-                                    <img
+                                    <Image
                                         src={testimonial.image}
                                         alt={testimonial.name}
+                                        width={48}
+                                        height={48}
+                                        unoptimized
                                         className="w-12 h-12 rounded-full"
                                     />
                                 </motion.button>

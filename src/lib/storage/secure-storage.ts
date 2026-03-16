@@ -8,7 +8,7 @@ export const secureStorage = {
     /**
      * Save data encrypted to localStorage
      */
-    setItem: (key: string, value: any): void => {
+    setItem: <T>(key: string, value: T): void => {
         if (typeof window === 'undefined') return;
 
         try {
@@ -45,7 +45,7 @@ export const secureStorage = {
             // OR invalid ciphertext. Let's try parsing the original storedValue.
             throw new Error("Decryption failed or returned empty");
 
-        } catch (e) {
+        } catch {
             // 4. Fallback: Try to parse as plain JSON (Migration Strategy)
             try {
                 const plainData = JSON.parse(storedValue);

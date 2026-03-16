@@ -274,6 +274,7 @@ export function StaggerOnScroll({ children, className = "", staggerDelay = 0.1 }
         <motion.div
             ref={ref}
             style={{ opacity }}
+            transition={{ delay: staggerDelay }}
             className={className}
         >
             {children}

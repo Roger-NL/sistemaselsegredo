@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, ReactNode } from "react";
 
 type Theme = "dark" | "light";
 
@@ -14,15 +14,13 @@ interface LandingThemeContextType {
 const LandingThemeContext = createContext<LandingThemeContextType | undefined>(undefined);
 
 export function LandingThemeProvider({ children }: { children: ReactNode }) {
-    const theme = "dark";
-
     // Toggle is now disabled/no-op as we enforce dark mode
     const toggleTheme = () => {
         // console.log("Theme is locked to dark mode");
     };
 
     const value = {
-        theme: "dark" as Theme,
+        theme: "dark" as const satisfies Theme,
         toggleTheme,
         isDark: true,
         isLight: false,

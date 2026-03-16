@@ -40,10 +40,16 @@ export default function AdminApprovalsPage() {
 
     const handleAction = async (status: 'approved' | 'rejected') => {
         if (!selectedExam) return;
-        setProcessingId(selectedExam.id);
+        const examId = selectedExam.id;
+        if (!examId) {
+            alert("Esta missão não possui identificador válido.");
+            return;
+        }
+
+        setProcessingId(examId);
         
         try {
-            const result = await gradeExam(selectedExam.id!, status, feedback);
+            const result = await gradeExam(examId, status, feedback);
             if (!result.success) {
                 throw new Error(result.error || "Falha ao avaliar");
             }

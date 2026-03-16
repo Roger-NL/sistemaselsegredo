@@ -3,23 +3,17 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
-import { BarChart, Activity, Users } from "lucide-react";
+import { Activity } from "lucide-react";
 
 export default function AdminAnalyticsPage() {
-    const [loading, setLoading] = useState(true);
-    const [pillarDistribution, setPillarDistribution] = useState<number[]>(new Array(10).fill(0));
     const [conversionRate, setConversionRate] = useState(0);
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoading(true);
             try {
                 const usersSnap = await getDocs(collection(db, "users"));
                 const totalUsers = usersSnap.size;
                 let premiumUsers = 0;
-                
-                // Array index 0 = Pilar 1, index 8 = Pilar 9
-                const dist = new Array(10).fill(0); 
 
                 usersSnap.forEach(doc => {
                     const data = doc.data();
@@ -34,11 +28,8 @@ export default function AdminAnalyticsPage() {
                 });
 
                 setConversionRate(totalUsers > 0 ? (premiumUsers / totalUsers) * 100 : 0);
-                setPillarDistribution(dist); // Placeholder until we sync progress
             } catch (error) {
                 console.error(error);
-            } finally {
-                setLoading(false);
             }
         };
 

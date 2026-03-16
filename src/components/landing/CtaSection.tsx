@@ -1,8 +1,7 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Shield, Clock, Zap, CheckCircle2, Sparkles, Headphones } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { ArrowRight, Shield, Clock, CheckCircle2, Sparkles, Headphones } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useLandingTheme } from "@/context/LandingThemeContext";
 import { useRef } from "react";
@@ -15,7 +14,6 @@ const BENEFITS = [
 ];
 
 export function CtaSection() {
-    const router = useRouter();
     const { isAuthenticated } = useAuth();
 
     // Theme - with safe fallback
@@ -27,21 +25,12 @@ export function CtaSection() {
         // Default to dark if outside provider
     }
 
-    const handleCta = () => {
-        router.push(isAuthenticated ? "/dashboard" : "/login");
-    };
-
     // Scroll animations
     const sectionRef = useRef<HTMLElement>(null);
     const benefitsRef = useRef<HTMLDivElement>(null);
 
     const { scrollYProgress } = useScroll({
         target: sectionRef,
-        offset: ["start end", "center center"]
-    });
-
-    const { scrollYProgress: benefitsScroll } = useScroll({
-        target: benefitsRef,
         offset: ["start end", "center center"]
     });
 

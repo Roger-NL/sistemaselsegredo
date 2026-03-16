@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,6 +10,25 @@ import ConciergeModal from "@/components/core/ConciergeModal";
 import { ROUTES, isSafeInternalCallbackPath } from "@/lib/routes";
 
 export default function LoginPage() {
+    return (
+        <Suspense fallback={<LoginPageFallback />}>
+            <LoginPageContent />
+        </Suspense>
+    );
+}
+
+function LoginPageFallback() {
+    return (
+        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#050505] p-4">
+            <AuthBackground />
+            <div className="relative z-10 w-full max-w-md bg-[#0A0A0A]/60 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
+                <div className="text-center text-slate-400 text-sm">Carregando acesso...</div>
+            </div>
+        </div>
+    );
+}
+
+function LoginPageContent() {
     const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");

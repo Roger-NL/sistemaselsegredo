@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable react/no-unescaped-entities */
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
@@ -258,7 +257,7 @@ const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat'
                                             "bg-slate-800/80 border-slate-600 text-slate-200"
                                 )}
                             >
-                                "{data[currentIndex].text}"
+                                &ldquo;{data[currentIndex].text}&rdquo;
                             </motion.div>
                         </AnimatePresence>
 
@@ -342,7 +341,7 @@ const AudioDecodeGame = ({ data }: { data: { phonetic: string; options: string[]
                         <p className="text-slate-400 text-sm text-center mb-2 uppercase tracking-wide font-bold">O que o nativo disse?</p>
                         <div className="bg-black/50 border border-slate-700 rounded-lg p-6 mb-8 text-center backdrop-blur shadow-inner">
                             <span className="font-mono text-2xl md:text-3xl font-bold text-cyan-300 animate-pulse">
-                                "{data[currentStep].phonetic}"
+                                &ldquo;{data[currentStep].phonetic}&rdquo;
                             </span>
                         </div>
 
@@ -509,7 +508,7 @@ const ScenarioCard = ({ data }: { data: { context: string; situation: string; wr
             <div className="p-4 md:p-6 bg-slate-900/50 border-b border-slate-800">
                 <h4 className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🎯 SITUAÇÃO</h4>
                 <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700 font-mono text-cyan-300 text-sm md:text-base">
-                    "{parseTextWithTranslations(data.situation)}"
+                    &ldquo;{parseTextWithTranslations(data.situation)}&rdquo;
                 </div>
             </div>
 
@@ -818,7 +817,7 @@ const PhraseAnalysis = ({ data }: { data: { phrase: string; phonetic: string; gr
                 </div>
 
                 <p className="text-xl md:text-2xl font-bold text-white mb-3 font-serif">
-                    "{parseTextWithTranslations(data.phrase)}"
+                    &ldquo;{parseTextWithTranslations(data.phrase)}&rdquo;
                 </p>
 
                 <button
@@ -1099,7 +1098,7 @@ const AnchorBuilder = ({ data }: { data: { title: string; instruction: string; e
                 <p className="text-slate-300 text-sm md:text-base mb-2">{data.instruction}</p>
                 <div className="bg-black/40 p-3 rounded border border-slate-800 mb-8 mt-2">
                     <p className="text-[11px] font-mono text-slate-500 uppercase mb-1">Padrão Tático de Exemplo:</p>
-                    <p className="text-xs md:text-sm text-blue-300 italic">"{parseTextWithTranslations(data.example)}"</p>
+                    <p className="text-xs md:text-sm text-blue-300 italic">&ldquo;{parseTextWithTranslations(data.example)}&rdquo;</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1242,8 +1241,8 @@ const FinalNote = ({ content }: { content: string }) => (
     <div className="my-12 relative">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-800/30 to-slate-900/30 rounded-2xl" />
         <div className="relative px-8 md:px-16 py-10 md:py-14 text-center">
-            <div className="absolute left-4 top-4 text-slate-600 text-6xl font-serif leading-none select-none">"</div>
-            <div className="absolute right-4 bottom-4 text-slate-600 text-6xl font-serif leading-none select-none rotate-180">"</div>
+            <div className="absolute left-4 top-4 text-slate-600 text-6xl font-serif leading-none select-none">&ldquo;</div>
+            <div className="absolute right-4 bottom-4 text-slate-600 text-6xl font-serif leading-none select-none rotate-180">&rdquo;</div>
             {content.split('\n\n').map((para, idx) => (
                 <p key={idx} className={cn(
                     "font-light leading-loose",
@@ -1376,7 +1375,7 @@ const ImperfectInput = ({ data }: { data: { title: string; instruction: string; 
                         <div key={sIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
                             <div className="flex items-center gap-3 mb-3">
                                 <AudioButton text={sample.input} size="sm" />
-                                <span className="text-sm md:text-base font-mono text-yellow-200 font-bold italic">"{sample.input}"</span>
+                                <span className="text-sm md:text-base font-mono text-yellow-200 font-bold italic">&ldquo;{sample.input}&rdquo;</span>
                             </div>
                             <p className="text-xs text-slate-500 mb-3 font-mono">{parseTextWithTranslations(sample.question)}</p>
                             <div className="grid grid-cols-1 gap-2">
@@ -1426,7 +1425,7 @@ const EmotionalOverlay = ({ data }: { data: { title: string; instruction: string
                         <div key={sIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
                             <div className="flex items-center gap-3 mb-2">
                                 <AudioButton text={sc.audio} size="sm" />
-                                <span className="text-sm md:text-base font-mono text-white font-bold">"{sc.audio}"</span>
+                                <span className="text-sm md:text-base font-mono text-white font-bold">&ldquo;{sc.audio}&rdquo;</span>
                             </div>
                             <div className="flex items-center gap-2 mb-4">
                                 <span className="text-[10px] uppercase font-mono text-slate-500 tracking-wider">Emoção detectada:</span>
@@ -1806,7 +1805,7 @@ const EmphasisShift = ({ data }: { data: { title: string; instruction: string; b
             <div className="p-4 md:p-6">
                 <div className="bg-slate-800/80 rounded-lg p-3 border border-amber-500/20 mb-5 text-center">
                     <span className="text-[10px] uppercase font-mono text-slate-500 tracking-widest">Base phrase</span>
-                    <p className="text-base font-mono text-slate-300 italic mt-1">"{data.base}"</p>
+                    <p className="text-base font-mono text-slate-300 italic mt-1">&ldquo;{data.base}&rdquo;</p>
                 </div>
                 <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
                 <div className="space-y-6">
@@ -1814,7 +1813,7 @@ const EmphasisShift = ({ data }: { data: { title: string; instruction: string; b
                         <div key={vIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
                             <div className="flex items-center gap-3 mb-3">
                                 <AudioButton text={v.stressed} size="sm" />
-                                <span className="text-sm md:text-base font-mono text-amber-200 font-bold italic">"{v.stressed}"</span>
+                                <span className="text-sm md:text-base font-mono text-amber-200 font-bold italic">&ldquo;{v.stressed}&rdquo;</span>
                             </div>
                             <div className="grid grid-cols-1 gap-2">
                                 {v.options.map((opt, oIdx) => (
@@ -1864,7 +1863,7 @@ const TriageDrill = ({ data }: { data: { title: string; instruction: string; ent
                         <div key={idx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
                             <div className="flex items-center gap-3 mb-3">
                                 <AudioButton text={entry.input} size="sm" />
-                                <span className="text-sm font-mono text-white italic">"{entry.input}"</span>
+                                <span className="text-sm font-mono text-white italic">&ldquo;{entry.input}&rdquo;</span>
                             </div>
                             <button
                                 onClick={() => toggle(idx)}
@@ -1970,7 +1969,7 @@ const ControlResponses = ({ data }: { data: { title: string; instruction: string
                             <div className="flex items-start gap-3 mb-3">
                                 <div className="flex-none">
                                     <div className="text-[10px] font-mono text-slate-500 uppercase mb-1">Você ouviu</div>
-                                    <div className="text-base font-mono text-white font-bold italic">"{sit.heard}"</div>
+                                    <div className="text-base font-mono text-white font-bold italic">&ldquo;{sit.heard}&rdquo;</div>
                                 </div>
                                 <div className="flex-none ml-4">
                                     <div className="text-[10px] font-mono text-slate-500 uppercase mb-1">Você sabe</div>
@@ -1991,7 +1990,7 @@ const ControlResponses = ({ data }: { data: { title: string; instruction: string
                                                 : "bg-slate-900/50 border-slate-700 text-slate-300 hover:border-emerald-500/30"
                                         )}
                                     >
-                                        "{opt}"
+                                        &ldquo;{opt}&rdquo;
                                     </button>
                                 ))}
                             </div>
@@ -2195,7 +2194,7 @@ const BlockDecode = ({ data }: { data: { title: string; instruction: string; sam
                         <div key={sIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
                             <div className="flex items-center gap-3 mb-4">
                                 <AudioButton text={sample.audio} size="sm" />
-                                <span className="text-sm md:text-base font-mono text-white font-bold italic">"{sample.audio}"</span>
+                                <span className="text-sm md:text-base font-mono text-white font-bold italic">&ldquo;{sample.audio}&rdquo;</span>
                             </div>
                             <div className="grid grid-cols-1 gap-2">
                                 {sample.options.map((opt, oIdx) => (

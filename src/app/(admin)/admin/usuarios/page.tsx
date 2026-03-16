@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, limit, getDocs, where } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, where, Timestamp } from "firebase/firestore";
 import { Loader2, User } from "lucide-react";
 import { StudentDetailModal } from "@/features/admin/StudentDetailModal";
 
@@ -13,6 +13,7 @@ type AdminUserRow = {
     subscriptionStatus?: string;
     inviteCodeUsed?: string;
     approvedPillar?: number;
+    createdAt?: string;
 };
 
 export default function AdminUsersPage() {
@@ -53,10 +54,22 @@ export default function AdminUsersPage() {
                 }
 
                 const snapshot = await getDocs(q);
-                const data = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
+                const data = snapshot.docs.map((doc): AdminUserRow => {
+                    const userData = doc.data() as Omit<AdminUserRow, "id" | "createdAt"> & {
+                        createdAt?: string | Timestamp | Date | null;
+                    };
+
+                    return {
+                        id: doc.id,
+                        ...userData,
+                        createdAt:
+                            userData.createdAt instanceof Timestamp
+                                ? userData.createdAt.toDate().toISOString()
+                                : userData.createdAt instanceof Date
+                                    ? userData.createdAt.toISOString()
+                                    : userData.createdAt ?? undefined,
+                    };
+                });
                 setUsers(data);
             } catch (error) {
                 console.error("Erro ao buscar usuários:", error);

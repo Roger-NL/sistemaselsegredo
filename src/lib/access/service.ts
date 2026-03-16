@@ -11,6 +11,8 @@ import {
 } from "firebase/firestore";
 import { User } from "@/lib/auth/service";
 
+type AccessRequestUser = Pick<User, "name" | "email" | "approvedPillar">;
+
 /**
  * Request Access to Next Pillar
  */
@@ -21,11 +23,11 @@ export async function requestPillarAccess(userId: string, currentPillar: number)
         
         if (!userSnap.exists()) return { success: false, error: "Usuário não encontrado." };
         
-        const userData = userSnap.data() as User;
+        const userData = userSnap.data() as Partial<AccessRequestUser>;
         const requestedPillar = currentPillar + 1;
 
         // Check if already approved
-        if ((userData.approvedPillar || 1) >= requestedPillar) {
+        if ((typeof userData.approvedPillar === "number" ? userData.approvedPillar : 1) >= requestedPillar) {
             return { success: true }; // Already approved
         }
 
@@ -46,8 +48,8 @@ export async function requestPillarAccess(userId: string, currentPillar: number)
         // Create Request
         await addDoc(collection(db, "access_requests"), {
             userId,
-            userName: userData.name,
-            userEmail: userData.email,
+            userName: typeof userData.name === "string" ? userData.name : "Aluno",
+            userEmail: typeof userData.email === "string" ? userData.email : "",
             currentPillar,
             requestedPillar,
             status: "pending",

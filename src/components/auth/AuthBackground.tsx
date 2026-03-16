@@ -1,13 +1,20 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Brain, Headphones, Zap, Shield } from "lucide-react";
-import { useEffect, useState } from "react";
+import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from "framer-motion";
+import { Brain, Headphones, Zap, Shield, type LucideIcon } from "lucide-react";
+import { useEffect } from "react";
+
+interface FloatingIconProps {
+    icon: LucideIcon;
+    className: string;
+    delay: number;
+    moveX: MotionValue<number>;
+    moveY: MotionValue<number>;
+}
 
 export default function AuthBackground() {
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
-    const [mounted, setMounted] = useState(false);
 
     const springConfig = { damping: 30, stiffness: 100 };
     const springX = useSpring(mouseX, springConfig);
@@ -21,7 +28,6 @@ export default function AuthBackground() {
     const layer2Y = useTransform(springY, [-0.5, 0.5], [-100, 100]);
 
     useEffect(() => {
-        setMounted(true);
         const handleMouseMove = (e: MouseEvent) => {
             const x = (e.clientX / window.innerWidth) - 0.5;
             const y = (e.clientY / window.innerHeight) - 0.5;
@@ -32,8 +38,6 @@ export default function AuthBackground() {
         window.addEventListener("mousemove", handleMouseMove);
         return () => window.removeEventListener("mousemove", handleMouseMove);
     }, [mouseX, mouseY]);
-
-    if (!mounted) return <div className="absolute inset-0 bg-[#050505]" />;
 
     return (
         <div className="absolute inset-0 bg-[#050505] overflow-hidden pointer-events-none">
@@ -101,7 +105,7 @@ export default function AuthBackground() {
     );
 }
 
-function FloatingIcon({ icon: Icon, className, delay, moveX, moveY }: any) {
+function FloatingIcon({ icon: Icon, className, delay, moveX, moveY }: FloatingIconProps) {
     return (
         <motion.div
             style={{ x: moveX, y: moveY }}

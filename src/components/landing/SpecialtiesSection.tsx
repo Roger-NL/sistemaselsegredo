@@ -1,13 +1,22 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type TargetAndTransition } from "framer-motion";
 import {
     Clapperboard, Heart, ShoppingBag, Briefcase,
     Plane, BarChart3, Rocket, ArrowRight, Star, LucideIcon
 } from "lucide-react";
 import { useLandingTheme } from "@/context/LandingThemeContext";
 
-const SPECIALTIES = [
+interface Specialty {
+    id: string;
+    title: string;
+    desc: string;
+    icon: LucideIcon;
+    color: string;
+    examples: string[];
+}
+
+const SPECIALTIES: Specialty[] = [
     {
         id: "spec-popculture",
         title: "Cultura Pop",
@@ -59,8 +68,7 @@ const SPECIALTIES = [
 ];
 
 // Unique animation per specialty icon
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ICON_ANIMS: any[] = [
+const ICON_ANIMS: TargetAndTransition[] = [
     { rotate: [0, -8, 8, 0], transition: { duration: 2.5, repeat: Infinity, ease: "easeInOut" } },   // Clapperboard wobbles
     { scale: [1, 1.3, 1, 1.3, 1], transition: { duration: 1.2, repeat: Infinity } },                  // Heart beats
     { y: [0, -4, 0], transition: { duration: 2, repeat: Infinity, ease: "easeInOut" } },               // ShoppingBag bounces
@@ -75,7 +83,7 @@ function SpecialtyCard({
     index,
     isDark
 }: {
-    spec: typeof SPECIALTIES[0];
+    spec: Specialty;
     index: number;
     isDark: boolean;
 }) {

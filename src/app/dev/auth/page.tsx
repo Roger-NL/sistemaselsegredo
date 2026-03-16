@@ -38,7 +38,7 @@ function removeCookie(name: string): void {
 
 export default function DevAuthPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const [pathname, setPathname] = useState(ROUTES.app.dashboard);
+  const [pathname, setPathname] = useState<string>(ROUTES.app.dashboard);
   const [token, setToken] = useState(() =>
     typeof window === "undefined" ? "" : readCookie("es_session_token")
   );

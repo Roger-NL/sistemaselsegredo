@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 interface TranslationContextType {
     alwaysShowTranslations: boolean;
@@ -9,19 +9,20 @@ interface TranslationContextType {
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
-export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [alwaysShowTranslations, setAlwaysShowTranslations] = useState(false);
+function getInitialTranslationPreference(): boolean {
+    if (typeof window === "undefined") {
+        return false;
+    }
 
-    // Load from localStorage on mount
-    useEffect(() => {
-        const saved = localStorage.getItem('alwaysShowTranslations');
-        if (saved !== null) {
-            setAlwaysShowTranslations(JSON.parse(saved));
-        }
-    }, []);
+    const saved = localStorage.getItem("alwaysShowTranslations");
+    return saved !== null ? Boolean(JSON.parse(saved)) : false;
+}
+
+export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [alwaysShowTranslations, setAlwaysShowTranslations] = useState<boolean>(getInitialTranslationPreference);
 
     const toggleAlwaysShowTranslations = () => {
-        setAlwaysShowTranslations(prev => {
+        setAlwaysShowTranslations((prev: boolean) => {
             const newValue = !prev;
             localStorage.setItem('alwaysShowTranslations', JSON.stringify(newValue));
             return newValue;

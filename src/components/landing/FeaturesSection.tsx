@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Shield, Lock, Unlock, Zap, Ear, Mic, Brain, Globe, Briefcase, Plane, ShoppingBag, Heart, Clapperboard, BarChart3, Target, ArrowRight } from "lucide-react";
 
@@ -112,7 +113,13 @@ export function FeaturesSection() {
 
                 {/* Decorative Geometric Element */}
                 <div className="absolute top-20 right-0 w-96 h-96 opacity-30 md:opacity-50 mix-blend-screen pointer-events-none translate-x-1/3 -translate-y-1/3 z-0">
-                    <img src="/geometric-amber.png" alt="Geometric Abstract" className="w-full h-full object-contain" />
+                    <Image
+                        src="/geometric-amber.png"
+                        alt="Geometric Abstract"
+                        fill
+                        sizes="(max-width: 768px) 0px, 384px"
+                        className="object-contain"
+                    />
                 </div>
 
                 {/* Grid de Pilares */}
@@ -194,7 +201,13 @@ export function FeaturesSection() {
                         <div className="relative group">
                             <div className="absolute inset-0 bg-purple-500 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700" />
                             <div className="relative z-10 w-32 h-32 md:w-48 md:h-48 group-hover:scale-110 transition-transform duration-700">
-                                <img src="/geometric-dark.png" alt="Abstract 3D Shape" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]" />
+                                <Image
+                                    src="/geometric-dark.png"
+                                    alt="Abstract 3D Shape"
+                                    fill
+                                    sizes="(max-width: 768px) 128px, 192px"
+                                    className="object-contain drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+                                />
                             </div>
                         </div>
                     </div>
