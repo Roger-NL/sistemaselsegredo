@@ -1,5 +1,6 @@
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { isFirestorePermissionError } from "@/lib/auth/service";
 
 export interface LeaderboardUser {
     id: string;
@@ -34,7 +35,9 @@ export async function getLeaderboard(limitCount = 5): Promise<LeaderboardUser[]>
 
         return users;
     } catch (error) {
-        console.error("Error fetching leaderboard:", error);
+        if (!isFirestorePermissionError(error)) {
+            console.error("Error fetching leaderboard:", error);
+        }
         return [];
     }
 }

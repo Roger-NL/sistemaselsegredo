@@ -70,6 +70,18 @@ type FirestoreUserData = Partial<Omit<User, "id">> & {
     subscriptionStatus?: SubscriptionStatus | "active";
 };
 
+function buildFallbackUserFromAuth(fbUser: FirebaseUser): User {
+    return {
+        id: fbUser.uid,
+        name: fbUser.displayName || "Usuário",
+        email: fbUser.email || "",
+        createdAt: fbUser.metadata.creationTime || new Date().toISOString(),
+        currentStreak: 0,
+        subscriptionStatus: "free",
+        approvedPillar: 1,
+    };
+}
+
 function isStringArray(value: unknown): value is string[] {
     return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
@@ -94,6 +106,11 @@ function getFirebaseErrorCode(error: unknown): string | null {
 
 function normalizeSubscriptionStatus(status: User["subscriptionStatus"] | "active" | undefined): SubscriptionStatus {
     return status === "active" ? "free" : (status ?? "free");
+}
+
+export function isFirestorePermissionError(error: unknown): boolean {
+    const errorCode = getFirebaseErrorCode(error);
+    return errorCode === "permission-denied" || errorCode === "firestore/permission-denied";
 }
 
 /**
@@ -166,34 +183,36 @@ export async function loginWithGoogle(): Promise<AuthResult> {
         const provider = new GoogleAuthProvider();
         const result = await signInWithPopup(auth, provider);
         const fbUser = result.user;
+        const fallbackUser = buildFallbackUserFromAuth(fbUser);
 
-        // Check if user exists in Firestore
-        const userDocRef = doc(db, "users", fbUser.uid);
-        const userDoc = await getDoc(userDocRef);
+        let user: User = fallbackUser;
 
-        let user: User;
+        try {
+            const userDocRef = doc(db, "users", fbUser.uid);
+            const userDoc = await getDoc(userDocRef);
 
-        if (userDoc.exists()) {
-            // User exists, just update last login
-            await updateDoc(userDocRef, {
-                lastLoginDate: new Date().toISOString()
-            });
-            user = (await mapFirebaseUser(fbUser))!;
-        } else {
-            // New User via Google
-            const newUser: User = {
-                id: fbUser.uid,
-                name: fbUser.displayName || "Usuário Google",
-                email: fbUser.email || "",
-                createdAt: new Date().toISOString(),
-                currentStreak: 1,
-                lastLoginDate: new Date().toISOString(),
-                subscriptionStatus: 'free',
-                approvedPillar: 1
-            };
+            if (userDoc.exists()) {
+                await updateDoc(userDocRef, {
+                    lastLoginDate: new Date().toISOString()
+                });
+                user = (await mapFirebaseUser(fbUser)) ?? fallbackUser;
+            } else {
+                const newUser: User = {
+                    ...fallbackUser,
+                    name: fbUser.displayName || "Usuário Google",
+                    currentStreak: 1,
+                    lastLoginDate: new Date().toISOString(),
+                };
 
-            await setDoc(userDocRef, newUser);
-            user = newUser;
+                await setDoc(userDocRef, newUser);
+                user = newUser;
+            }
+        } catch (firestoreError) {
+            if (!isFirestorePermissionError(firestoreError)) {
+                throw firestoreError;
+            }
+
+            console.warn("Google login succeeded, but Firestore profile access was denied. Using auth fallback user.", firestoreError);
         }
 
         // Cookies
@@ -218,43 +237,53 @@ export async function login(identifier: string, password: string): Promise<AuthR
         // Firebase Login
         const userCredential = await signInWithEmailAndPassword(auth, identifier, password);
         const fbUser = userCredential.user;
+        const fallbackUser = buildFallbackUserFromAuth(fbUser);
 
-        // Fetch User Data from Firestore
-        const user = await mapFirebaseUser(fbUser);
+        let user = fallbackUser;
 
-        if (!user) {
-            return { success: false, error: 'Dados de usuário não encontrados.' };
-        }
+        try {
+            const firestoreUser = await mapFirebaseUser(fbUser);
 
-        // --- STREAK LOGIC ---
-        const today = new Date().toISOString().split('T')[0];
-        const lastLogin = user.lastLoginDate ? user.lastLoginDate.split('T')[0] : null;
-        let newStreak = user.currentStreak || 0;
-
-        if (lastLogin !== today) {
-            if (lastLogin) {
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-                if (lastLogin === yesterdayStr) {
-                    newStreak += 1;
-                } else {
-                    newStreak = 1; // Reset
-                }
-            } else {
-                newStreak = 1; // First login
+            if (!firestoreUser) {
+                return { success: false, error: 'Dados de usuário não encontrados.' };
             }
 
-            // Update Firestore
-            const userRef = doc(db, "users", user.id);
-            await updateDoc(userRef, {
-                currentStreak: newStreak,
-                lastLoginDate: new Date().toISOString()
-            });
-            user.currentStreak = newStreak;
+            user = firestoreUser;
+
+            // --- STREAK LOGIC ---
+            const today = new Date().toISOString().split('T')[0];
+            const lastLogin = user.lastLoginDate ? user.lastLoginDate.split('T')[0] : null;
+            let newStreak = user.currentStreak || 0;
+
+            if (lastLogin !== today) {
+                if (lastLogin) {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+                    if (lastLogin === yesterdayStr) {
+                        newStreak += 1;
+                    } else {
+                        newStreak = 1; // Reset
+                    }
+                } else {
+                    newStreak = 1; // First login
+                }
+
+                const userRef = doc(db, "users", user.id);
+                await updateDoc(userRef, {
+                    currentStreak: newStreak,
+                    lastLoginDate: new Date().toISOString()
+                });
+                user.currentStreak = newStreak;
+            }
+        } catch (firestoreError) {
+            if (!isFirestorePermissionError(firestoreError)) {
+                throw firestoreError;
+            }
+
+            console.warn("Email login succeeded, but Firestore profile access was denied. Using auth fallback user.", firestoreError);
         }
-        // --------------------
 
         // Set Middleware Cookie
         Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
@@ -309,11 +338,18 @@ export async function register(
             approvedPillar: 1, // Start at Pillar 1
         };
 
-        // Run Firestore creation and Profile update in parallel to avoid race conditions
-        await Promise.all([
-            setDoc(doc(db, "users", fbUser.uid), newUser),
-            firebaseUpdateProfile(fbUser, { displayName: name })
-        ]);
+        try {
+            await Promise.all([
+                setDoc(doc(db, "users", fbUser.uid), newUser),
+                firebaseUpdateProfile(fbUser, { displayName: name })
+            ]);
+        } catch (firestoreError) {
+            if (!isFirestorePermissionError(firestoreError)) {
+                throw firestoreError;
+            }
+
+            console.warn("Registration succeeded, but Firestore profile creation was denied. Using auth fallback user.", firestoreError);
+        }
 
         // Set Middleware Cookie
         Cookies.set('es_session_token', newUser.id, { expires: 7, path: '/' });
@@ -585,7 +621,9 @@ export async function updateUserProgress(userId: string, progressData: Partial<U
             await updateDoc(userRef, safeUpdate);
         }
     } catch (error) {
-        console.error("Error syncing progress to Firebase:", error);
+        if (!isFirestorePermissionError(error)) {
+            console.error("Error syncing progress to Firebase:", error);
+        }
         // Silently fail or retry - we don't want to block the UI for this background sync
     }
 }

@@ -21,7 +21,10 @@ import {
     User,
     AuthResult,
     SubscriptionStatus,
+    isFirestorePermissionError,
 } from "@/lib/auth/service";
+
+import type { User as FirebaseUser } from "firebase/auth";
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -41,6 +44,18 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
+function buildFallbackUser(firebaseUser: FirebaseUser): User {
+    return {
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName || "Usuário",
+        email: firebaseUser.email || "",
+        createdAt: firebaseUser.metadata.creationTime || new Date().toISOString(),
+        currentStreak: 0,
+        subscriptionStatus: "free",
+        approvedPillar: 1,
+    };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
@@ -68,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
+                const fallbackUser = buildFallbackUser(firebaseUser);
                 // User is signed in, fetch Firestore data
                 try {
                     const userDocRef = doc(db, "users", firebaseUser.uid);
@@ -137,13 +153,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                         setUser(fullUser);
                     } else {
-                        // User exists in Auth but not in Firestore (Rare edge case)
-                        console.error("User authenticated but no Firestore profile found after retries.");
-                        setUser(null);
+                        setUser(fallbackUser);
                     }
                 } catch (error) {
-                    console.error("Error fetching user profile:", error);
-                    setUser(null);
+                    if (isFirestorePermissionError(error)) {
+                        setUser(fallbackUser);
+                    } else {
+                        console.error("Error fetching user profile:", error);
+                        setUser(null);
+                    }
                 }
             } else {
                 // User is signed out
@@ -226,9 +244,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (userDoc.exists()) {
                 const userData = userDoc.data() as User;
                 setUser({ ...userData, id: auth.currentUser.uid });
+            } else {
+                setUser(buildFallbackUser(auth.currentUser));
             }
         } catch (error) {
-            console.error("Error refreshing user profile:", error);
+            if (isFirestorePermissionError(error)) {
+                setUser(buildFallbackUser(auth.currentUser));
+            } else {
+                console.error("Error refreshing user profile:", error);
+            }
         }
     };
 

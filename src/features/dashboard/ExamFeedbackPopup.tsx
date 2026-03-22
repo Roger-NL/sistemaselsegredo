@@ -10,6 +10,7 @@ import { type PillarExam } from "@/lib/exam/service";
 import { ROUTES } from "@/lib/routes";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { isFirestorePermissionError } from "@/lib/auth/service";
 
 export function ExamFeedbackPopup() {
     const { user } = useAuth();
@@ -22,25 +23,31 @@ export function ExamFeedbackPopup() {
         const checkFeedback = async () => {
             if (!user) return;
 
-            const examsQuery = query(collection(db, "pillar_exams"), where("userId", "==", user.id));
-            const snapshot = await getDocs(examsQuery);
+            try {
+                const examsQuery = query(collection(db, "pillar_exams"), where("userId", "==", user.id));
+                const snapshot = await getDocs(examsQuery);
 
-            const gradedExams = snapshot.docs
-                .map((doc) => ({ id: doc.id, ...doc.data() } as PillarExam))
-                .filter((exam) => exam.status === "approved" || exam.status === "rejected")
-                .sort((a, b) => {
-                    const left = a.gradedAt?.toMillis?.() ?? a.createdAt?.toMillis?.() ?? 0;
-                    const right = b.gradedAt?.toMillis?.() ?? b.createdAt?.toMillis?.() ?? 0;
-                    return right - left;
-                });
+                const gradedExams = snapshot.docs
+                    .map((doc) => ({ id: doc.id, ...doc.data() } as PillarExam))
+                    .filter((exam) => exam.status === "approved" || exam.status === "rejected")
+                    .sort((a, b) => {
+                        const left = a.gradedAt?.toMillis?.() ?? a.createdAt?.toMillis?.() ?? 0;
+                        const right = b.gradedAt?.toMillis?.() ?? b.createdAt?.toMillis?.() ?? 0;
+                        return right - left;
+                    });
 
-            const unseenExam = gradedExams.find(
-                (exam) => !localStorage.getItem(`exam_feedback_seen_${exam.id}`)
-            );
+                const unseenExam = gradedExams.find(
+                    (exam) => !localStorage.getItem(`exam_feedback_seen_${exam.id}`)
+                );
 
-            if (unseenExam) {
-                setExamData(unseenExam);
-                setIsOpen(true);
+                if (unseenExam) {
+                    setExamData(unseenExam);
+                    setIsOpen(true);
+                }
+            } catch (error) {
+                if (!isFirestorePermissionError(error)) {
+                    console.error("Error checking exam feedback:", error);
+                }
             }
         };
 
