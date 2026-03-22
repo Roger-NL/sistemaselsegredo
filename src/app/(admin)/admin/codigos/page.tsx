@@ -58,7 +58,7 @@ export default function AdminCodesPage() {
         try {
             const batchPromises = [];
             for (let i = 0; i < amount; i++) {
-                const code = `ES-${generateRandomString()}-${generateRandomString()}`;
+                const code = `BS-${generateRandomString()}-${generateRandomString()}`;
                 batchPromises.push(
                     addDoc(collection(db, "invite_codes"), {
                         code: code,

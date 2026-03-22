@@ -1,5 +1,5 @@
 // ============================================================================
-// ES English Academy - Curriculum Data
+// BasedSpeak - Curriculum Data
 // O "cérebro" do sistema: fonte única de verdade para pilares e especializações
 // ============================================================================
 

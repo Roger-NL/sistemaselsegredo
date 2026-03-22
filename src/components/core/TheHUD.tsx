@@ -281,7 +281,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
 
                         {/* Footer Status */}
                         <div className="border-t border-[#EEF4D4]/10 p-4 bg-[#EEF4D4]/5 flex justify-between items-center text-[10px] font-mono text-[#EEF4D4]/40 uppercase tracking-widest">
-                            <span>ES Academy v4.0</span>
+                            <span>BasedSpeak v4.0</span>
                             <span className="flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                                 Online

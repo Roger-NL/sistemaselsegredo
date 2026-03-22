@@ -1,5 +1,5 @@
 // ============================================================================ 
-// ES English Academy - Quiz Questions Data
+// BasedSpeak - Quiz Questions Data
 // Perguntas organizadas por pilar para validar o aprendizado
 // ============================================================================ 
 
@@ -22,7 +22,7 @@ export const QUIZ_DATA: PillarQuiz[] = [
         questions: [
             {
                 id: "q1-1",
-                question: "Qual é o principal objetivo do método ES English?",
+                question: "Qual é o principal objetivo do método BasedSpeak?",
                 options: [
                     "Decorar regras gramaticais",
                     "Desenvolver autonomia e comunicação real",

@@ -1,39 +1,32 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, Rocket, Unlock } from "lucide-react";
+import { Rocket, Brain, Ear, Shield } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { useState, useEffect } from "react";
 import GradientButton from "@/components/ui/GradientButton";
 
-const TypingText = ({ text, cursorClassName = "text-emerald-500" }: { text: string, cursorClassName?: string }) => {
-    const [subIndex, setSubIndex] = useState(0);
-    const [blink, setBlink] = useState(true);
-
-    useEffect(() => {
-        const timeout2 = setInterval(() => {
-            setBlink((prev) => !prev);
-        }, 500);
-        return () => clearInterval(timeout2);
-    }, []);
-
-    useEffect(() => {
-        if (subIndex < text.length) {
-            const timeout = setTimeout(() => {
-                setSubIndex((prev) => prev + 1);
-            }, 30);
-            return () => clearTimeout(timeout);
-        }
-    }, [subIndex, text]);
-
-    return (
-        <span>
-            {text.substring(0, subIndex)}
-            <span className={`${blink ? "opacity-100" : "opacity-0"} ${cursorClassName}`}>|</span>
-        </span>
-    );
-};
+const metodoPilares = [
+    {
+        icon: Brain,
+        label: "Mindset",
+        colorClass: "text-violet-400",
+        glowColor: "rgba(139,92,246,0.25)",
+    },
+    {
+        icon: Ear,
+        label: "Listening",
+        colorClass: "text-emerald-400",
+        glowColor: "rgba(16,185,129,0.25)",
+    },
+    {
+        icon: Shield,
+        label: "Sobrevivência",
+        colorClass: "text-fuchsia-400",
+        glowColor: "rgba(217,70,239,0.25)",
+    },
+];
 
 export function HeroSection() {
     const router = useRouter();
@@ -44,188 +37,165 @@ export function HeroSection() {
     };
 
     return (
-        <section className="relative flex flex-col items-center justify-start overflow-hidden min-h-[min(100vh,800px)] pt-20 md:pt-24 pb-12 md:pb-20 px-4 md:px-8 mt-0">
-            {/* Background elements managed by parent */}
-            <div className="absolute inset-0 z-0 backdrop-blur-[3px] pointer-events-none" />
+        <section className="relative overflow-hidden px-5 pt-20 pb-8 md:px-8 md:pt-28 md:pb-16 min-h-[100dvh] flex flex-col justify-between">
+            <div className="absolute inset-0 z-0 pointer-events-none backdrop-blur-[2px]" />
 
-            <div className="container mx-auto max-w-6xl grid md:grid-cols-2 gap-6 md:gap-10 items-center relative z-10">
+            {/* ── Background hero image — semi-transparent, full bleed, no visible edges ── */}
+            <div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden">
+                <Image
+                    src="/assets/hero-chill.png"
+                    alt=""
+                    fill
+                    priority
+                    className="object-cover opacity-[0.35] scale-[1.15]"
+                    aria-hidden="true"
+                />
+                {/* Gradient overlays to fade edges seamlessly into dark bg */}
+                <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/90 via-transparent to-[#050505]/90 z-10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/80 via-transparent to-[#050505]/80 z-10" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#050505_75%)] z-10" />
+            </div>
 
-                {/* Left Column: Text & CTA */}
-                <div className="flex flex-col items-center md:items-center text-center pointer-events-auto order-1 relative">
+            <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 lg:flex-row lg:items-center lg:gap-16">
 
-                    {/* Smoky Glow Effect - Behind Headline */}
-                    <div className="absolute top-10 left-1/2 md:left-0 -translate-x-1/2 md:translate-x-0 w-[300px] h-[300px] bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none z-[-1]" />
+                {/* ── Text + CTA ── */}
+                <div className="relative flex flex-1 flex-col items-center text-center lg:items-start lg:text-left">
+                    {/* Ambient glow */}
+                    <div className="pointer-events-none absolute -left-10 top-10 h-[160px] w-[160px] rounded-full bg-violet-500/12 blur-[90px]" />
 
-                    {/* Badge / Raio Horizontal */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                    {/* Headline */}
+                    <motion.h1
+                        initial={{ opacity: 0, y: 18 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
-                        className="relative group inline-flex items-center px-6 py-1.5 md:py-2 w-fit mb-3 md:mb-5 mx-auto md:mx-0 cursor-default"
+                        className="max-w-[480px] [font-family:var(--font-inter)] text-[clamp(2.4rem,8vw,3.6rem)] font-bold leading-[1.08] tracking-[-0.03em] text-white"
                     >
-                        {/* Fundo com formato de raio/velocidade (Skew) */}
-                        <div className="absolute inset-0 bg-[#050505]/80 backdrop-blur-md border border-fuchsia-500/50 shadow-[0_0_15px_rgba(217,70,239,0.2)] -skew-x-[16deg] group-hover:border-fuchsia-400 group-hover:shadow-[0_0_25px_rgba(217,70,239,0.4)] transition-all duration-300" />
-
-                        {/* Brilho de Velocidade animado por trás */}
-                        <div className="absolute inset-0 overflow-hidden transform -skew-x-[16deg]">
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-fuchsia-400/20 to-transparent w-full -translate-x-full group-hover:translate-x-full transition-transform duration-[1500ms] ease-in-out" />
-                        </div>
-
-                        <span className="relative z-10 text-[9px] sm:text-[10px] md:text-xs font-mono text-fuchsia-400/90 tracking-[0.15em] uppercase font-bold italic drop-shadow-[0_0_8px_rgba(217,70,239,0.6)] px-2">
-                            Sistema de acesso restrito. Validação de ponta a ponta.
-                        </span>
-                    </motion.div>
-
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.1 }}
-                        viewport={{ once: true }}
-                        className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl font-serif font-bold text-white leading-[0.85] md:leading-[0.9] tracking-[-0.05em] mb-4 italic text-center flex flex-col"
-                    >
-                        <span className="text-white/90">Entenda e</span>
-                        <span className="text-white/90">fale inglês</span>
-                        <span className="text-emerald-100/90">funcional em</span>
-                        <span>
-                            <span className="text-emerald-100/90 mr-2">até</span>
-                            <span className="text-emerald-400 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">120 dias.</span>
+                        Desbloqueie seu inglês com o{" "}
+                        <span
+                            style={{
+                                background: "linear-gradient(to right, #6ee7b7, #34d399, #2dd4bf)",
+                                WebkitBackgroundClip: "text",
+                                WebkitTextFillColor: "transparent",
+                                backgroundClip: "text",
+                            }}
+                        >
+                            based método.
                         </span>
                     </motion.h1>
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                    {/* Subtitle */}
+                    <motion.p
+                        initial={{ opacity: 0, y: 12 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.15 }}
+                        transition={{ duration: 0.7, delay: 0.08 }}
                         viewport={{ once: true }}
-                        className="flex justify-center w-full mb-6 md:mb-8 min-h-[72px] md:min-h-[56px]"
+                        className="mt-5 max-w-[320px] [font-family:var(--font-geist-sans)] text-[1.05rem] leading-[1.55] text-white/45 md:text-[1.08rem] lg:max-w-[360px]"
                     >
-                        <div
-                            className="relative bg-[#F2F2F7] sm:bg-[#E9E9EB] sm:dark:bg-white text-black text-[15px] md:text-[17px] px-4 py-[10px] md:px-[18px] md:py-[12px] rounded-[20px] max-w-[290px] md:max-w-[400px] shadow-[0_4px_20px_rgba(0,0,0,0.5)] text-left"
-                            style={{
-                                fontFamily: "'-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-                                letterSpacing: "-0.015em",
-                                lineHeight: "1.35",
-                                fontWeight: 400
-                            }}
-                        >
-                            {/* iPhone SMS Tail (Received Message - Left) */}
-                            <svg className="absolute bottom-0 -left-[6px] w-[15px] h-[15px] text-[#F2F2F7] sm:text-[#E9E9EB] sm:dark:text-white fill-current pointer-events-none transform -scale-x-100" viewBox="0 0 15 15">
-                                <path d="M15 15H0C5 15 8 13 10 9C10 12 12 15 15 15Z" />
-                            </svg>
-                            <TypingText text="Chega de consumo passivo. Execute missões diárias, valide com humanos e destrave sua comunicação real." cursorClassName="text-black/40" />
-                        </div>
-                    </motion.div>
+                        Correção humana. Sem videoaula. Resultados em 120 dias.
+                    </motion.p>
 
-
-
-                    {/* Main CTA - Kept exactly as requested */}
+                    {/* CTA Button */}
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 14 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.3 }}
+                        transition={{ duration: 0.7, delay: 0.16 }}
                         viewport={{ once: true }}
-                        className="flex flex-col items-center gap-3 w-full"
+                        className="mt-10 w-full max-w-[280px] lg:max-w-[340px]"
                     >
-                        {/* Exclusivity Micro-copy */}
-                        <p className="text-[10px] md:text-xs font-mono font-bold text-white/50 uppercase tracking-widest pl-1 text-center">
-                            Validação técnica de ponta a ponta.
-                        </p>
-
-                        <div className="w-full flex justify-center" onClick={handleCta}>
+                        <div className="relative">
+                            <div className="pointer-events-none absolute -inset-x-3 -inset-y-3 rounded-[40px] bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.32),rgba(16,185,129,0.12),transparent_72%)] blur-xl" />
                             <GradientButton
-                                className="group px-8 relative inline-flex items-center justify-center max-w-[340px]"
+                                onClick={handleCta}
+                                className="group px-5"
                                 width="100%"
-                                height="56px"
+                                height="58px"
                             >
-                                <span className="relative z-10 flex flex-row items-center justify-center gap-3 text-[10px] sm:text-xs md:text-sm leading-tight text-center drop-shadow-sm">
-                                    <Rocket className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 flex-shrink-0 rotate-45 text-violet-400" />
-                                    <span className="font-bold opacity-90 group-hover:opacity-100 transition-opacity whitespace-nowrap">INICIAR PROTOCOLO <span className="opacity-50 font-normal ml-1">(ACESSO AO PILAR 1)</span></span>
+                                <span className="relative z-10 flex w-full items-center justify-between gap-3 px-1.5 text-left">
+                                    <span className="flex items-center gap-3">
+                                        <span className="rounded-full border border-violet-400/20 bg-violet-500/10 p-2">
+                                            <Rocket className="h-4 w-4 rotate-45 text-violet-300 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                                        </span>
+                                        <span className="[font-family:var(--font-geist-sans)] text-sm font-semibold uppercase tracking-[0.1em] text-white">
+                                            começar agora
+                                        </span>
+                                    </span>
+                                    <span className="[font-family:var(--font-geist-mono)] text-[11px] uppercase tracking-[0.2em] text-emerald-300/90">
+                                        grátis
+                                    </span>
                                 </span>
                             </GradientButton>
-                        </div>
-
-                        {/* Conversion Boosters */}
-                        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px] md:text-xs font-mono font-bold text-white/40 uppercase tracking-widest pl-1 mt-2">
-                            <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-emerald-400" /> Sem cartão de crédito</span>
-                            <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-cyan-400" /> Acesso imediato</span>
-                            <span className="flex items-center gap-1.5"><Check className="w-3 h-3 text-violet-400" /> Mentoria Inclusa</span>
                         </div>
                     </motion.div>
                 </div>
 
-                {/* Right Column: Visual (Subtle & Supporting) */}
+                {/* ── RIGHT: System illustration (non-interactive) ── */}
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 1, delay: 0.2 }}
-                    className="relative flex justify-center items-center order-2 mt-8 md:mt-0"
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.12 }}
+                    viewport={{ once: true }}
+                    className="relative w-full flex-1 lg:max-w-[400px]"
                 >
-                    {/* Compact Glow - Multi-color Neon */}
-                    <div className="absolute w-[250px] h-[250px] bg-gradient-to-tr from-violet-500/10 via-fuchsia-500/10 to-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
+                    <div className="pointer-events-none absolute -right-6 top-4 h-[180px] w-[180px] rounded-full bg-gradient-to-tr from-violet-500/8 via-fuchsia-500/6 to-transparent blur-[80px]" />
 
-                    {/* Compact Card Container - With Neon Border Effect strictly on edge */}
-                    <div
-                        className="relative z-10 w-full max-w-[320px] sm:max-w-[380px] rotatingGradient rounded-2xl p-[1px] shadow-[0_0_20px_rgba(139,92,246,0.3)] transform md:rotate-1 hover:rotate-0 transition-all duration-500"
-                        style={{ '--r': '0deg' } as React.CSSProperties}
-                    >
-                        <div className="bg-[#050505] rounded-[15px] p-4 md:p-5 w-full h-full relative z-10">
-                            {/* Header */}
-                            <div className="flex items-center justify-between mb-4 md:mb-6 pb-4 border-b border-white/5">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500/50 animate-pulse" />
-                                    <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Ao Vivo</span>
-                                </div>
-                                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Plano de Voo</span>
-                            </div>
+                    {/* System flow illustration */}
+                    <div className="relative rounded-[22px] border border-white/6 bg-white/[0.02] p-5 backdrop-blur-sm md:p-6">
+                        {/* Header */}
+                        <div className="mb-5 flex items-center gap-2">
+                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-400/70" />
+                            <span className="[font-family:var(--font-geist-mono)] text-[9px] uppercase tracking-[0.26em] text-white/30">
+                                como funciona o sistema
+                            </span>
+                        </div>
 
-                            {/* Active Pillar - Dark Theme */}
-                            <div className="relative mb-3 bg-white/[0.02] rounded-lg p-4 border border-white/5 hover:bg-white/[0.04] transition-colors">
-                                <div className="absolute -top-2 -right-2 bg-black text-white/50 text-[9px] font-bold px-2 py-0.5 rounded overflow-hidden uppercase tracking-widest border border-white/5">
-                                    Atual
-                                </div>
-                                <div className="flex justify-between items-center mb-2">
-                                    <h4 className="text-white/90 font-serif font-bold text-base md:text-lg">Pilar 01</h4>
-                                    <Unlock className="w-4 h-4 text-white/50" />
-                                </div>
-                                <p className="text-white/50 text-[10px] md:text-xs font-mono leading-tight">
-                                    Mindset & Inteligência. <br />
-                                    <span className="text-[10px] opacity-60 font-medium mt-1 block text-violet-400">STATUS: EM ANDAMENTO</span>
-                                </p>
-                            </div>
+                        {/* 3 Pillar Illustrations — purely visual */}
+                        <div className="space-y-3">
+                            {metodoPilares.map((pilar, i) => {
+                                const Icon = pilar.icon;
+                                return (
+                                    <div
+                                        key={pilar.label}
+                                        className="flex items-center gap-4"
+                                    >
+                                        {/* Step number */}
+                                        <span className="[font-family:var(--font-geist-mono)] text-[11px] text-white/15 tabular-nums w-5">
+                                            {String(i + 1).padStart(2, "0")}
+                                        </span>
 
-                            {/* Locked Pillar 2 */}
-                            <div className="mb-2 bg-white/[0.01] rounded-lg p-3 border border-white/5 opacity-40 flex items-center justify-between">
-                                <div>
-                                    <h4 className="text-white font-serif text-sm">Pilar 02</h4>
-                                    <p className="text-white/30 text-[10px] font-mono">Imersão Auditiva</p>
-                                </div>
-                                <div className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
-                                    <span className="text-white/20 text-[10px]">🔒</span>
-                                </div>
-                            </div>
+                                        {/* Icon */}
+                                        <div
+                                            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px] bg-white/[0.04]"
+                                            style={{ boxShadow: `0 0 20px ${pilar.glowColor}` }}
+                                        >
+                                            <Icon className={`h-4 w-4 ${pilar.colorClass}`} />
+                                        </div>
 
-                            {/* Locked Pillar 3 */}
-                            <div className="bg-white/[0.01] rounded-lg p-3 border border-white/5 opacity-30 flex items-center justify-between">
-                                <div>
-                                    <h4 className="text-white font-serif text-sm">Pilar 03</h4>
-                                    <p className="text-white/30 text-[10px] font-mono">Sobrevivência</p>
-                                </div>
-                                <div className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
-                                    <span className="text-white/20 text-[10px]">🔒</span>
-                                </div>
-                            </div>
+                                        {/* Label */}
+                                        <span className="[font-family:var(--font-geist-sans)] text-[0.92rem] text-white/60">
+                                            {pilar.label}
+                                        </span>
 
-                            {/* Validation Note */}
-                            <div className="mt-6 text-center border-t border-white/5 pt-4">
-                                <p className="text-white/20 text-[10px] font-mono uppercase tracking-widest">
-                                    *Validação obrigatória p/ avançar
-                                </p>
-                            </div>
+                                        {/* Connecting line */}
+                                        <div className="flex-1 border-b border-dashed border-white/6" />
+
+                                        {/* Status dot */}
+                                        <div className={`h-1.5 w-1.5 rounded-full ${i === 0 ? "bg-emerald-400/70" : "bg-white/12"}`} />
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Flow label */}
+                        <div className="mt-5 flex items-center justify-center gap-2">
+                            <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+                            <span className="[font-family:var(--font-geist-mono)] text-[8px] uppercase tracking-[0.3em] text-white/18">
+                                progressão linear
+                            </span>
+                            <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
                         </div>
                     </div>
                 </motion.div>
-
             </div>
         </section>
     );

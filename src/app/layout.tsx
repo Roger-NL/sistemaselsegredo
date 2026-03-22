@@ -27,12 +27,17 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.elsegredo.com"),
+  metadataBase: new URL("https://basedspeak.com"),
   title: {
-    default: "ES English Academy | Global Command Center",
-    template: "%s | ES English Academy",
+    default: "BasedSpeak | Global Command Center",
+    template: "%s | BasedSpeak",
   },
-  description: "Aprenda inglês com uma metodologia revolucionária gamificada.",
+  description: "Aprenda inglês com o sistema gamificado da BasedSpeak.",
+  icons: {
+    icon: [{ url: "/basedspeak-tab.png", type: "image/png" }],
+    shortcut: ["/basedspeak-tab.png"],
+    apple: ["/basedspeak-tab.png"],
+  },
   robots: {
     index: true,
     follow: true,

@@ -71,7 +71,7 @@ export default function AdminLayout({
                 <div className="p-6 border-b border-slate-800 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <ShieldAlert className="w-6 h-6 text-emerald-400" />
-                        <span className="font-bold tracking-tight">ES Admin</span>
+                        <span className="font-bold tracking-tight">BasedSpeak Admin</span>
                     </div>
                     <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400">
                         <X className="w-5 h-5" />

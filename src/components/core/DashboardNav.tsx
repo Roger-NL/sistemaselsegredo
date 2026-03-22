@@ -56,8 +56,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                                 onClick={() => router.push(ROUTES.app.dashboard)}
                                 className="flex items-baseline gap-1 hover:opacity-80 transition-opacity"
                             >
-                                <span className="text-sm font-bold text-[#EEF4D4]">ES</span>
-                                <span className="text-xs text-white/60">Academy</span>
+                                <span className="text-xs font-semibold tracking-wide text-[#EEF4D4]">BasedSpeak</span>
                             </button>
 
                             {/* Student Name */}
@@ -203,7 +202,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                                 className="flex flex-col hover:opacity-80 transition-opacity cursor-pointer"
                             >
                                 <h1 className="text-lg font-bold tracking-tight text-white">
-                                    <span className="text-[#EEF4D4]">ES</span> Academy
+                                    <span className="text-[#EEF4D4]">BasedSpeak</span>
                                 </h1>
                                 <span className="text-[8px] text-white/30 uppercase tracking-[0.2em]">System V4.0</span>
                             </button>

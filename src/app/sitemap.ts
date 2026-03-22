@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://www.elsegredo.com'
+    const baseUrl = 'https://basedspeak.com'
 
     // Define your static routes here
     const routes = [

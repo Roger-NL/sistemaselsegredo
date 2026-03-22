@@ -207,7 +207,7 @@ export const PILAR_1_DATA: PillarData = {
                             "result": "\"{{I apologize. I arrived late because the traffic was very intense. Please, do not be angry.|Peço desculpas. Cheguei atrasado porque o trânsito estava muito intenso. Por favor, não fique brava.}}\" — Soa frio, distante e mecânico."
                         },
                         "right": {
-                            "action": "O Operador (Mentalidade ES): Usa linguagem real com expressões de nativo. Admite o erro com naturalidade. Oferece solução prática.",
+                            "action": "O Operador (Mentalidade BasedSpeak): Usa linguagem real com expressões de nativo. Admite o erro com naturalidade. Oferece solução prática.",
                             "result": "\"{{Hey, my bad. I messed up with the time. Traffic was a total nightmare, seriously. Let's just eat, okay? My treat.|Ei, foi mal. Eu errei com o horário. O trânsito estava um pesadelo total, sério. Vamos só comer, tá bom? Eu pago.}}\" — Humano, tático, resolve o conflito."
                         }
                     })
@@ -228,7 +228,7 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "elite-insight",
                     title: "💡 INSIGHT DE ELITE",
-                    content: "Eu não criei a ES Academy porque sou um gênio das línguas. Eu a criei porque eu senti a humilhação de ser um adulto 'mudo'. Minha missão é garantir que você não precise passar por quatro anos de mentiras para só então começar a viver o idioma na prática."
+                    content: "Eu não criei a BasedSpeak porque sou um gênio das línguas. Eu a criei porque eu senti a humilhação de ser um adulto 'mudo'. Minha missão é garantir que você não precise passar por quatro anos de mentiras para só então começar a viver o idioma na prática."
                 },
                 {
                     type: "box-warning",
@@ -267,7 +267,7 @@ export const PILAR_1_DATA: PillarData = {
                         "steps": [
                             "Input Passivo: Ler regras e ouvir áudios lentos gera sinapses fracas. Seu cérebro deleta isso em 24h porque não vê risco nem recompensa.",
                             "A Mordaça Gramatical: Ao tentar 'calcular' a regra antes de falar, você gera um delay de processamento. A conversa avança e você fica para trás.",
-                            "Recuperação Ativa (ES): Nós não ensinamos a regra. Nós te jogamos no fogo. O cérebro só grava o que é necessário para surpreender."
+                            "Recuperação Ativa (BasedSpeak): Nós não ensinamos a regra. Nós te jogamos no fogo. O cérebro só grava o que é necessário para surpreender."
                         ]
                     })
                 },
@@ -623,7 +623,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "A ES Academy nasceu desse grito contido. Ela nasceu para que você nunca mais sinta que é 'menos' só porque não consegue conjugar o verbo. **A fluência não é um troféu; é a sua voz sendo devolvida a você.**"
+                    content: "A BasedSpeak nasceu desse grito contido. Ela nasceu para que você nunca mais sinta que é 'menos' só porque não consegue conjugar o verbo. **A fluência não é um troféu; é a sua voz sendo devolvida a você.**"
                 },
                 {
                     type: "brain-diagram",

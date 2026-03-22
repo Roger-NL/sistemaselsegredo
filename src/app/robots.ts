@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
             userAgent: '*',
             allow: '/',
         },
-        sitemap: 'https://www.elsegredo.com/sitemap.xml',
+        sitemap: 'https://basedspeak.com/sitemap.xml',
     }
 }

@@ -118,7 +118,7 @@ export default function PagamentoPage() {
             {/* Nav Simplificada */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-md border-b border-white/5 h-16 flex items-center justify-between px-6">
                 <div className="font-bold tracking-tighter text-xl">
-                    ES ACADEMY <span className="text-violet-500">PRO</span>
+                    BASEDSPEAK <span className="text-violet-500">PRO</span>
                 </div>
                 <button onClick={() => router.push(ROUTES.home)} className="text-xs text-white/50 hover:text-white transition-colors uppercase tracking-widest">
                     Voltar
@@ -148,7 +148,7 @@ export default function PagamentoPage() {
 
                         <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
                             Seu desempenho no Pilar 1 desbloqueou uma condição única para acessar o
-                            protocolo completo de fluência da ES Academy.
+                            protocolo completo de fluência da BasedSpeak.
                         </p>
                     </motion.div>
                 </div>

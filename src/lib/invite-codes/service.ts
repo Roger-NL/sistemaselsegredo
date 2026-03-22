@@ -51,7 +51,7 @@ function generateCode(): string {
     for (let i = 0; i < 8; i++) {
         code += chars[Math.floor(Math.random() * chars.length)];
     }
-    return `ES-${code}`;
+    return `BS-${code}`;
 }
 
 /**
@@ -67,7 +67,7 @@ export function initInviteCodes(): void {
     const seedCodes: InviteCode[] = [
         {
             id: 'inv_1',
-            code: 'ES-FRIENDS',
+            code: 'BS-FRIENDS',
             maxUses: 100,
             currentUses: 0,
             createdBy: 'system',
@@ -76,7 +76,7 @@ export function initInviteCodes(): void {
         },
         {
             id: 'inv_2',
-            code: 'ES-VIP2024',
+            code: 'BS-VIP2024',
             maxUses: 50,
             currentUses: 0,
             createdBy: 'system',
@@ -85,7 +85,7 @@ export function initInviteCodes(): void {
         },
         {
             id: 'inv_3',
-            code: 'ES-BETA',
+            code: 'BS-BETA',
             maxUses: 10,
             currentUses: 0,
             createdBy: 'system',

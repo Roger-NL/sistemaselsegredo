@@ -83,18 +83,18 @@ function LandingInner({ isDark, isAuthenticated, isLoading }: {
             <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between md:justify-end px-4 py-4 md:px-12 md:py-6 pointer-events-none">
                 <div
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className={`font-serif text-sm md:text-xl md:absolute md:left-1/2 md:-translate-x-1/2 tracking-[0.2em] font-light pointer-events-auto cursor-pointer transition-colors
+                    className={`[font-family:var(--font-inter)] text-sm md:text-[1.45rem] md:absolute md:left-1/2 md:-translate-x-1/2 tracking-[0.28em] font-semibold uppercase pointer-events-auto cursor-pointer transition-colors
                         ${isDark ? "text-white hover:text-[#EEF4D4]" : "text-gray-900 hover:text-violet-600"}
                     `}
                 >
-                    ES ENGLISH ACADEMY
+                    BASEDSPEAK
                 </div>
 
                 <div className="flex items-center gap-4 pointer-events-auto">
 
                     <button
                         onClick={() => document.getElementById('method')?.scrollIntoView({ behavior: 'smooth' })}
-                        className={`hidden md:block px-4 py-2 font-mono text-xs uppercase tracking-widest transition-colors
+                        className={`hidden md:block px-4 py-2 [font-family:var(--font-geist-mono)] text-[11px] uppercase tracking-[0.24em] transition-colors
                             ${isDark ? "text-white/60 hover:text-white" : "text-gray-600 hover:text-gray-900"}
                         `}
                     >
@@ -155,7 +155,7 @@ function LandingInner({ isDark, isAuthenticated, isLoading }: {
                     <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                         <div>
                             <div className={`font-serif text-2xl mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>
-                                ES ENGLISH ACADEMY
+                                BasedSpeak
                             </div>
                             <p className={`font-mono text-xs ${isDark ? "text-white/30" : "text-gray-500"}`}>
                                 Metodologia de alta performance para adultos desde 2023
@@ -171,7 +171,7 @@ function LandingInner({ isDark, isAuthenticated, isLoading }: {
 
                     <div className={`mt-12 pt-8 border-t text-center ${isDark ? "border-white/5" : "border-gray-200"}`}>
                         <p className={`font-mono text-xs ${isDark ? "text-white/20" : "text-gray-400"}`}>
-                            © 2026 ES ENGLISH ACADEMY. TODOS OS DIREITOS RESERVADOS.
+                            © 2026 BASEDSPEAK. TODOS OS DIREITOS RESERVADOS.
                         </p>
                     </div>
                 </div>

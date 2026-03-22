@@ -19,7 +19,7 @@ export default function DevLayout({
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-6 py-4">
           <div className="mr-4">
             <p className="text-xs uppercase tracking-[0.3em] text-emerald-400">
-              ES Lab
+              BasedSpeak Lab
             </p>
             <h1 className="text-lg font-semibold text-white">
               Ambiente isolado de validacao
