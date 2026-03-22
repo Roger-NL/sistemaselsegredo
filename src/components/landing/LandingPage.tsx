@@ -9,16 +9,42 @@ import { ResultsSection } from "./ResultsSection";
 import { CtaSection } from "./CtaSection";
 import { RanksSection } from "./RanksSection";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
 import { LandingThemeProvider } from "@/context/LandingThemeContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FaqSection } from "./FaqSection";
 import { ROUTES } from "@/lib/routes";
+
+function hasSessionCookie() {
+    if (typeof document === "undefined") return false;
+    return document.cookie.split("; ").some((cookie) => cookie.startsWith("es_session_token="));
+}
+
+function useLandingSessionState() {
+    const [state, setState] = useState({
+        isAuthenticated: false,
+        isLoading: true,
+    });
+
+    useEffect(() => {
+        const frameId = window.requestAnimationFrame(() => {
+            setState({
+                isAuthenticated: hasSessionCookie(),
+                isLoading: false,
+            });
+        });
+
+        return () => {
+            window.cancelAnimationFrame(frameId);
+        };
+    }, []);
+
+    return state;
+}
 
 // Inner Content with Theme Access - NOW ENFORCED DARK
 function LandingContent() {
     const router = useRouter();
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated, isLoading } = useLandingSessionState();
 
     // Auto-redirect to dashboard if logged in
     useEffect(() => {
@@ -117,7 +143,7 @@ function LandingInner({ isDark, isAuthenticated, isLoading }: {
             </nav>
 
             {/* Seções com CTAs intercalados */}
-            <HeroSection />
+            <HeroSection isAuthenticated={isAuthenticated} />
             <DifferentiatorsSection />
 
             <InlineCta
@@ -145,7 +171,7 @@ function LandingInner({ isDark, isAuthenticated, isLoading }: {
             />
 
             <FaqSection />
-            <CtaSection />
+            <CtaSection isAuthenticated={isAuthenticated} />
 
             {/* Footer */}
             <footer className={`py-16 border-t relative z-10 transition-colors duration-500

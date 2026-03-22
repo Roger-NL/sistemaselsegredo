@@ -4,10 +4,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Shield, Lock, Unlock, Zap, Ear, Mic, Brain, Globe, Briefcase, Plane, ShoppingBag, Heart, Clapperboard, BarChart3, Target, ArrowRight } from "lucide-react";
 
-import { useAuth } from "@/context/AuthContext";
-
-export function FeaturesSection() {
-    const { isAuthenticated } = useAuth();
+export function FeaturesSection({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
     const pillars = [
         {
             title: "Pilar 1: Base & Inteligência",

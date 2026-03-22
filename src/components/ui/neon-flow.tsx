@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect, memo } from 'react';
+import React, { useRef, useState, useEffect, memo, useCallback } from 'react';
 import { cn } from "@/lib/ui/cn";
 import { neonTubesHtml } from './neon-tubes-html';
 
@@ -16,23 +16,78 @@ function TubesBackgroundComponent({
 }: TubesBackgroundProps) {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [showIframe, setShowIframe] = useState(false);
+    const hasActivatedIframeRef = useRef(false);
     const pendingPointerRef = useRef<{ x: number; y: number } | null>(null);
     const lastPostedPointerRef = useRef<{ x: number; y: number } | null>(null);
     const animationFrameRef = useRef<number | null>(null);
     const frameBudgetRef = useRef(1000 / 36);
     const lastPostedAtRef = useRef(0);
+    const activationTimerRef = useRef<number | null>(null);
+    const fallbackTimerRef = useRef<number | null>(null);
+
+    const activateIframe = useCallback(() => {
+        if (hasActivatedIframeRef.current) return;
+        hasActivatedIframeRef.current = true;
+        setShowIframe(true);
+    }, []);
 
     useEffect(() => {
-        // Carrega iframe depois de 500ms
-        const timer = setTimeout(() => {
-            setShowIframe(true);
-        }, 500);
-
         const navigatorProfile = navigator as Navigator & { deviceMemory?: number };
+        const connectionProfile = navigatorProfile as Navigator & {
+            connection?: { saveData?: boolean };
+        };
         const deviceMemory = typeof navigatorProfile.deviceMemory === "number" ? navigatorProfile.deviceMemory : 8;
         const hardwareConcurrency = navigatorProfile.hardwareConcurrency ?? 8;
-        const isLowPowerDevice = hardwareConcurrency <= 4 || deviceMemory <= 4;
+        const isLowPowerDevice = hardwareConcurrency <= 4 || deviceMemory <= 4 || connectionProfile.connection?.saveData === true;
+        const isMobilePointer = window.matchMedia("(pointer: coarse)").matches;
         frameBudgetRef.current = 1000 / (isLowPowerDevice ? 24 : 36);
+
+        if (isLowPowerDevice || isMobilePointer) {
+            const activateOnInteraction = () => {
+                activateIframe();
+            };
+
+            window.addEventListener("pointerdown", activateOnInteraction, { passive: true, once: true });
+            window.addEventListener("touchstart", activateOnInteraction, { passive: true, once: true });
+            window.addEventListener("keydown", activateOnInteraction, { once: true });
+            window.addEventListener("scroll", activateOnInteraction, { passive: true, once: true });
+
+            activationTimerRef.current = window.setTimeout(() => {
+                activateIframe();
+            }, 2400);
+
+            fallbackTimerRef.current = window.setTimeout(() => {
+                activateIframe();
+            }, 5200);
+
+            return () => {
+                if (activationTimerRef.current !== null) {
+                    window.clearTimeout(activationTimerRef.current);
+                }
+                if (fallbackTimerRef.current !== null) {
+                    window.clearTimeout(fallbackTimerRef.current);
+                }
+
+                window.removeEventListener("pointerdown", activateOnInteraction);
+                window.removeEventListener("touchstart", activateOnInteraction);
+                window.removeEventListener("keydown", activateOnInteraction);
+                window.removeEventListener("scroll", activateOnInteraction);
+            };
+        }
+
+        activationTimerRef.current = window.setTimeout(() => {
+            activateIframe();
+        }, 500);
+
+        return () => {
+            if (activationTimerRef.current !== null) {
+                window.clearTimeout(activationTimerRef.current);
+            }
+        };
+    }, [activateIframe]);
+
+    useEffect(() => {
+        if (!showIframe) return;
 
         const flushPointerUpdate = (now: number) => {
             animationFrameRef.current = null;
@@ -75,6 +130,7 @@ function TubesBackgroundComponent({
         };
 
         const handleGlobalPointerMove = (event: PointerEvent) => {
+            if (!iframeRef.current?.contentWindow) return;
             pendingPointerRef.current = { x: event.clientX, y: event.clientY };
             schedulePointerSync();
         };
@@ -89,7 +145,6 @@ function TubesBackgroundComponent({
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
-            clearTimeout(timer);
             if (animationFrameRef.current !== null) {
                 window.cancelAnimationFrame(animationFrameRef.current);
             }
@@ -97,7 +152,7 @@ function TubesBackgroundComponent({
             window.removeEventListener('pointermove', handleGlobalPointerMove);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-    }, []);
+    }, [showIframe]);
 
     return (
         <div className={cn("relative w-full min-h-screen min-h-[100dvh] bg-[#050505]", className)}>

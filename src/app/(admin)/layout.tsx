@@ -1,5 +1,6 @@
 "use client";
 
+import AppProviders from "@/app/AppProviders";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -20,6 +21,18 @@ import {
 const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"]; 
 
 export default function AdminLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    return (
+        <AppProviders>
+            <AdminLayoutInner>{children}</AdminLayoutInner>
+        </AppProviders>
+    );
+}
+
+function AdminLayoutInner({
     children,
 }: {
     children: React.ReactNode;

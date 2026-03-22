@@ -2,7 +2,6 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Shield, Clock, CheckCircle2, Sparkles, Headphones } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
 import { useLandingTheme } from "@/context/LandingThemeContext";
 import { useRef } from "react";
 
@@ -13,9 +12,7 @@ const BENEFITS = [
     "Estrutura de Alto Valor — Eliminação de Vícios"
 ];
 
-export function CtaSection() {
-    const { isAuthenticated } = useAuth();
-
+export function CtaSection({ isAuthenticated }: { isAuthenticated: boolean }) {
     // Theme - with safe fallback
     let isDark = true;
     try {

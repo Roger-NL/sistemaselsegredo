@@ -53,25 +53,50 @@ export const neonTubesHtml = `<!DOCTYPE html>
         const navigatorProfile = navigator;
         const deviceMemory = typeof navigatorProfile.deviceMemory === 'number' ? navigatorProfile.deviceMemory : 8;
         const hardwareConcurrency = navigatorProfile.hardwareConcurrency || 8;
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
         const isLowPowerDevice = hardwareConcurrency <= 4 || deviceMemory <= 4;
-        const interactionFrameInterval = 1000 / (isLowPowerDevice ? 24 : 36);
-        const idleFrameInterval = 1000 / (isLowPowerDevice ? 18 : 24);
+        const useLowerQuality = isLowPowerDevice || pixelRatio > 1.75;
+        const interactionFrameInterval = 1000 / (isLowPowerDevice ? 20 : 30);
+        const idleFrameInterval = 1000 / (isLowPowerDevice ? 10 : 16);
+        const tubesPreset = useLowerQuality
+            ? {
+                count: 8,
+                radius: 0.07,
+                radiusSegments: 6,
+                tubularSegments: 120,
+                length: 32,
+                spread: { x: 3.2, y: 0.7, z: 1.8 },
+                flow: 0.35,
+                rotation: 0.08,
+                lightIntensity: 100,
+            }
+            : {
+                count: 12,
+                radius: 0.08,
+                radiusSegments: 8,
+                tubularSegments: 200,
+                length: 40,
+                spread: { x: 3.5, y: 0.8, z: 2.0 },
+                flow: 0.4,
+                rotation: 0.1,
+                lightIntensity: 150,
+            };
 
         // Initialize TubesCursor
         const app = TubesCursor(canvas, {
             tubes: {
-                count: 12,
+                count: tubesPreset.count,
                 colors: ["#d4af37", "#8b5cf6", "#ec4899", "#3b82f6", "#14b8a6", "#f59e0b"],
                 geometry: {
-                    radius: 0.08,
-                    radiusSegments: 8,
-                    tubularSegments: 200,
-                    length: 40,
-                    spread: { x: 3.5, y: 0.8, z: 2.0 }
+                    radius: tubesPreset.radius,
+                    radiusSegments: tubesPreset.radiusSegments,
+                    tubularSegments: tubesPreset.tubularSegments,
+                    length: tubesPreset.length,
+                    spread: tubesPreset.spread
                 },
-                speed: { flow: 0.4, rotation: 0.1 },
+                speed: { flow: tubesPreset.flow, rotation: tubesPreset.rotation },
                 lights: {
-                    intensity: 150,
+                    intensity: tubesPreset.lightIntensity,
                     colors: ["#d4af37", "#8b5cf6", "#ec4899", "#3b82f6", "#14b8a6"]
                 }
             }
@@ -136,6 +161,7 @@ export const neonTubesHtml = `<!DOCTYPE html>
             const offsetY = y - rect.top;
             const movementX = x - currentPos.x;
             const movementY = y - currentPos.y;
+            if (Math.abs(movementX) < 0.2 && Math.abs(movementY) < 0.2) return;
 
             const eventInit = {
                 view: window,
@@ -169,7 +195,6 @@ export const neonTubesHtml = `<!DOCTYPE html>
                 canvas.dispatchEvent(pointerEvent);
             }
 
-            document.dispatchEvent(new MouseEvent('mousemove', eventInit));
             window.dispatchEvent(new MouseEvent('mousemove', eventInit));
 
             currentPos = { x, y };

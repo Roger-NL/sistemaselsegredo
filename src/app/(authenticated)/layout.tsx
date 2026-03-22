@@ -1,5 +1,6 @@
 "use client";
 
+import AppProviders from "@/app/AppProviders";
 import { useAuth } from "@/context/AuthContext";
 import { ProgressProvider } from "@/context/ProgressContext";
 import { useRouter } from "next/navigation";
@@ -8,6 +9,18 @@ import { TubesBackground } from "@/components/ui/neon-flow";
 import { ROUTES } from "@/lib/routes";
 
 export default function AuthenticatedLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    return (
+        <AppProviders>
+            <AuthenticatedLayoutInner>{children}</AuthenticatedLayoutInner>
+        </AppProviders>
+    );
+}
+
+function AuthenticatedLayoutInner({
     children,
 }: {
     children: React.ReactNode;
