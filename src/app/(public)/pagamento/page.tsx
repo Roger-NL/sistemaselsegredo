@@ -128,7 +128,7 @@ export default function PagamentoPage() {
             <main className="pt-24 pb-20">
 
                 {/* Hero Section */}
-                <div className="max-w-4xl mx-auto px-4 text-center mb-16">
+                <div className="relative max-w-4xl mx-auto px-4 text-center mb-16">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
