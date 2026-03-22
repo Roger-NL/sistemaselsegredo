@@ -56,10 +56,10 @@ export function HeroSection() {
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#050505_75%)] z-10" />
             </div>
 
-            <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 lg:flex-row lg:items-center lg:gap-16">
+            <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-1 flex-col items-center gap-12 lg:gap-16">
 
                 {/* ── Text + CTA ── */}
-                <div className="relative flex flex-1 flex-col items-center text-center lg:items-start lg:text-left">
+                <div className="relative flex flex-col items-center text-center">
                     {/* Ambient glow */}
                     <div className="pointer-events-none absolute -left-10 top-10 h-[160px] w-[160px] rounded-full bg-violet-500/12 blur-[90px]" />
 
@@ -129,18 +129,18 @@ export function HeroSection() {
                     </motion.div>
                 </div>
 
-                {/* ── RIGHT: System illustration (non-interactive) ── */}
+                {/* ── System illustration (non-interactive) ── */}
                 <motion.div
                     initial={{ opacity: 0, y: 16 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.12 }}
                     viewport={{ once: true }}
-                    className="relative w-full flex-1 lg:max-w-[400px]"
+                    className="relative w-full max-w-[400px]"
                 >
                     <div className="pointer-events-none absolute -right-6 top-4 h-[180px] w-[180px] rounded-full bg-gradient-to-tr from-violet-500/8 via-fuchsia-500/6 to-transparent blur-[80px]" />
 
                     {/* System flow illustration */}
-                    <div className="relative rounded-[22px] border border-white/6 bg-white/[0.02] p-5 backdrop-blur-sm md:p-6">
+                    <div className="relative rounded-[22px] border border-white/6 bg-white/[0.02] p-5 backdrop-blur-sm md:p-6 mx-auto lg:mx-0 max-w-[360px] lg:max-w-none">
                         {/* Header */}
                         <div className="mb-5 flex items-center gap-2">
                             <div className="h-1.5 w-1.5 rounded-full bg-emerald-400/70" />
