@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, type TargetAndTransition } from "framer-motion";
+import { motion, useInView, type TargetAndTransition } from "framer-motion";
+import { useRef } from "react";
 import {
     Clapperboard, Heart, ShoppingBag, Briefcase,
     Plane, BarChart3, Rocket, ArrowRight, Star, LucideIcon
@@ -87,8 +88,11 @@ function SpecialtyCard({
     index: number;
     isDark: boolean;
 }) {
+    const cardRef = useRef<HTMLDivElement>(null);
+    const isInView = useInView(cardRef, { once: false, margin: "-10% 0px" });
     return (
         <motion.div
+            ref={cardRef}
             initial={{ opacity: 0, y: 25 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
@@ -124,7 +128,7 @@ function SpecialtyCard({
                             borderColor: `${spec.color}35`
                         }}
                     >
-                        <motion.div animate={ICON_ANIMS[index]}>
+                        <motion.div animate={isInView ? ICON_ANIMS[index] : undefined}>
                             <spec.icon
                                 className="w-5 h-5"
                                 style={{ color: spec.color }}
@@ -133,7 +137,7 @@ function SpecialtyCard({
 
                         {/* Neon pulse dot */}
                         <motion.div
-                            animate={{ scale: [1, 1.6, 1], opacity: [0.9, 0.3, 0.9] }}
+                            animate={isInView ? { scale: [1, 1.6, 1], opacity: [0.9, 0.3, 0.9] } : { scale: 1, opacity: 0.9 }}
                             transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
                             className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
                             style={{ backgroundColor: spec.color }}

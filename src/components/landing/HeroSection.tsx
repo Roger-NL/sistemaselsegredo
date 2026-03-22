@@ -36,7 +36,7 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
 
     return (
         <section className="relative overflow-hidden px-5 pt-20 pb-8 md:px-8 md:pt-28 md:pb-16 min-h-[100dvh] flex flex-col justify-between">
-            <div className="absolute inset-0 z-0 pointer-events-none backdrop-blur-[2px]" />
+            <div className="absolute inset-0 z-0 pointer-events-none bg-black/10" />
 
             {/* ── Background hero image — semi-transparent, full bleed, no visible edges ── */}
             <div className="pointer-events-none absolute inset-0 z-[1] overflow-hidden">

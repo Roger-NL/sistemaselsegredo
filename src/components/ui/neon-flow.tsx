@@ -40,7 +40,7 @@ function TubesBackgroundComponent({
         const hardwareConcurrency = navigatorProfile.hardwareConcurrency ?? 8;
         const isLowPowerDevice = hardwareConcurrency <= 4 || deviceMemory <= 4 || connectionProfile.connection?.saveData === true;
         const isMobilePointer = window.matchMedia("(pointer: coarse)").matches;
-        frameBudgetRef.current = 1000 / (isLowPowerDevice ? 24 : 36);
+        frameBudgetRef.current = 1000 / (isLowPowerDevice ? 16 : 36);
 
         if (isLowPowerDevice || isMobilePointer) {
             const activateOnInteraction = () => {
@@ -54,11 +54,11 @@ function TubesBackgroundComponent({
 
             activationTimerRef.current = window.setTimeout(() => {
                 activateIframe();
-            }, 2400);
+            }, 4000);
 
             fallbackTimerRef.current = window.setTimeout(() => {
                 activateIframe();
-            }, 5200);
+            }, 7000);
 
             return () => {
                 if (activationTimerRef.current !== null) {

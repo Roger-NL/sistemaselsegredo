@@ -2,7 +2,7 @@
 
 import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from "framer-motion";
 import { Brain, Headphones, Zap, Shield, type LucideIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface FloatingIconProps {
     icon: LucideIcon;
@@ -10,6 +10,7 @@ interface FloatingIconProps {
     delay: number;
     moveX: MotionValue<number>;
     moveY: MotionValue<number>;
+    isVisible: boolean;
 }
 
 export default function AuthBackground() {
@@ -38,6 +39,14 @@ export default function AuthBackground() {
         window.addEventListener("mousemove", handleMouseMove);
         return () => window.removeEventListener("mousemove", handleMouseMove);
     }, [mouseX, mouseY]);
+
+    // Track page visibility to pause animations when tab is hidden
+    const [isPageVisible, setIsPageVisible] = useState(true);
+    useEffect(() => {
+        const handleVisibility = () => setIsPageVisible(document.visibilityState === "visible");
+        document.addEventListener("visibilitychange", handleVisibility);
+        return () => document.removeEventListener("visibilitychange", handleVisibility);
+    }, []);
 
     return (
         <div className="absolute inset-0 bg-[#050505] overflow-hidden pointer-events-none">
@@ -69,6 +78,7 @@ export default function AuthBackground() {
                 delay={0}
                 moveX={layer2X}
                 moveY={layer2Y}
+                isVisible={isPageVisible}
             />
 
             {/* Listening - Top Right */}
@@ -78,6 +88,7 @@ export default function AuthBackground() {
                 delay={1.5}
                 moveX={layer1X}
                 moveY={layer1Y}
+                isVisible={isPageVisible}
             />
 
             {/* Reflex - Bottom Left */}
@@ -87,6 +98,7 @@ export default function AuthBackground() {
                 delay={0.8}
                 moveX={layer1X}
                 moveY={layer1Y}
+                isVisible={isPageVisible}
             />
 
             {/* Security - Bottom Right */}
@@ -96,6 +108,7 @@ export default function AuthBackground() {
                 delay={2.2}
                 moveX={layer2X}
                 moveY={layer2Y}
+                isVisible={isPageVisible}
             />
 
             <div className="absolute bottom-6 left-0 right-0 text-center text-[10px] text-slate-700 font-mono tracking-widest opacity-40">
@@ -105,7 +118,7 @@ export default function AuthBackground() {
     );
 }
 
-function FloatingIcon({ icon: Icon, className, delay, moveX, moveY }: FloatingIconProps) {
+function FloatingIcon({ icon: Icon, className, delay, moveX, moveY, isVisible }: FloatingIconProps) {
     return (
         <motion.div
             style={{ x: moveX, y: moveY }}
@@ -115,7 +128,7 @@ function FloatingIcon({ icon: Icon, className, delay, moveX, moveY }: FloatingIc
             transition={{ duration: 1, delay }}
         >
             <motion.div
-                animate={{ y: [0, -15, 0] }}
+                animate={isVisible ? { y: [0, -15, 0] } : { y: 0 }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay }}
                 className={`
                     relative w-12 h-12 lg:w-16 lg:h-16 rounded-2xl 

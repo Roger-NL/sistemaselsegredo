@@ -478,7 +478,7 @@
 .rotatingGradient {
   /* The border is created by the background visible through the inset 'after' element */
   background: conic-gradient(from var(--r) at 50% 50%, #7c3aed 0%, #4c1d95 25%, #7c3aed 50%, #c4b5fd 75%, #7c3aed 100%);
-  animation: rotate 4s linear infinite;
+  animation: rotate 6s linear infinite;
   box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
   /* Purple Neon Glow */
   transition: all 0.3s ease;
@@ -742,4 +742,43 @@
 
 .before\:content-\[attr\(data-content\)\]::before {
   content: attr(data-content);
+}
+
+/* ============================================================
+   REDUCED MOTION - Respects OS/user preference for reduced motion.
+   Common on degraded phones where the OS enables this automatically.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .rotatingGradient {
+    animation: none;
+  }
+
+  .animate-spin-slow,
+  .animate-spin,
+  .animate-pulse {
+    animation: none;
+  }
+
+  .animate-gradient-foreground-1,
+  .animate-gradient-foreground-2,
+  .animate-gradient-foreground-3 {
+    animation: none;
+    opacity: 1;
+  }
+
+  .before\:animate-gradient-background-1::before,
+  .before\:animate-gradient-background-2::before,
+  .before\:animate-gradient-background-3::before {
+    animation: none;
+    opacity: 1;
+  }
+
+  .translatable-text::after {
+    animation: none;
+  }
+
+  .animate-fade-in {
+    animation: none;
+    opacity: 1;
+  }
 }

@@ -33,6 +33,10 @@ export const GlowingEffect = memo(
         const lastPosition = useRef({ x: 0, y: 0 });
         const animationFrameRef = useRef<number>(0);
 
+        // Auto-disable on touch/mobile devices — glow follows mouse, useless on touch
+        const isTouchDevice = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+        const isEffectivelyDisabled = disabled || isTouchDevice;
+
         const handleMove = useCallback(
             (e?: MouseEvent | { x: number; y: number }) => {
                 if (!containerRef.current) return;
@@ -102,7 +106,7 @@ export const GlowingEffect = memo(
         );
 
         useEffect(() => {
-            if (disabled) return;
+            if (isEffectivelyDisabled) return;
 
             const handleResize = () => handleMove();
             const handleScroll = () => handleMove();
@@ -114,10 +118,10 @@ export const GlowingEffect = memo(
                 window.removeEventListener("resize", handleResize);
                 window.removeEventListener("scroll", handleScroll);
             };
-        }, [handleMove, disabled]);
+        }, [handleMove, isEffectivelyDisabled]);
 
         useEffect(() => {
-            if (disabled) return;
+            if (isEffectivelyDisabled) return;
 
             const onMouseMove = (e: MouseEvent) => handleMove(e);
 
@@ -126,7 +130,7 @@ export const GlowingEffect = memo(
             return () => {
                 document.body.removeEventListener("mousemove", onMouseMove);
             };
-        }, [handleMove, disabled]);
+        }, [handleMove, isEffectivelyDisabled]);
 
         return (
             <div

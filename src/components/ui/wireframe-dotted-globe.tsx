@@ -65,7 +65,7 @@ function saveToStorage(data: typeof memoryCache) {
 
 function getGlobePerformanceProfile() {
     if (typeof navigator === "undefined") {
-        return { maxDpr: 2, targetFps: 45 }
+        return { maxDpr: 2, targetFps: 45, dotStep: 1.5 }
     }
 
     const navigatorProfile = navigator as PerformanceNavigator
@@ -74,8 +74,9 @@ function getGlobePerformanceProfile() {
     const isLowPowerDevice = hardwareConcurrency <= 4 || deviceMemory <= 4
 
     return {
-        maxDpr: isLowPowerDevice ? 1.5 : 2,
-        targetFps: isLowPowerDevice ? 30 : 45,
+        maxDpr: isLowPowerDevice ? 1 : 2,
+        targetFps: isLowPowerDevice ? 18 : 45,
+        dotStep: isLowPowerDevice ? 2.5 : 1.5,
     }
 }
 
@@ -101,7 +102,8 @@ async function loadGlobeCache(): Promise<GlobeCache | null> {
                     throw new Error("Invalid globe data format")
                 }
 
-                const dots = generateDots(data)
+                const { dotStep } = getGlobePerformanceProfile()
+                const dots = generateDots(data, dotStep)
                 const cache = { landData: data, dots }
                 saveToStorage(cache)
                 memoryCache = cache
@@ -159,9 +161,9 @@ function pointInFeature(point: [number, number], feature: LandFeature): boolean 
     return false
 }
 
-function generateDots(features: LandData) {
+function generateDots(features: LandData, step = 1.5) {
     const dots: GlobeDot[] = []
-    const step = 1.5
+    // step controls dot density — higher = fewer dots = less CPU per frame
 
     features.features.forEach((feature) => {
         const bounds = d3.geoBounds(feature)

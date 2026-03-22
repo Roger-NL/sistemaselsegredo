@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 import {
     Brain, Mic,
     TrendingUp, Zap, Target, ShieldCheck
@@ -68,17 +69,17 @@ const WAVE_BARS = Array.from({ length: 16 }, (_, index) => ({
 }));
 
 
-// Visual Widget - Auto animated
-function PillarVisual({ type, colorHex }: { type: string; colorHex: string }) {
+// Visual Widget - Auto animated only when in viewport
+function PillarVisual({ type, colorHex, isInView }: { type: string; colorHex: string; isInView: boolean }) {
     if (type === "waves") {
         return (
             <div className="flex items-center justify-center gap-0.5 h-12 w-24">
                 {WAVE_BARS.map((bar) => (
                     <motion.div
                         key={bar.id}
-                        animate={{
+                        animate={isInView ? {
                             height: [4, bar.height, 4],
-                        }}
+                        } : { height: 4 }}
                         transition={{
                             duration: bar.duration,
                             repeat: Infinity,
@@ -120,19 +121,19 @@ function PillarVisual({ type, colorHex }: { type: string; colorHex: string }) {
             <div className="relative w-14 h-14 flex items-center justify-center">
                 <Brain className="w-10 h-10" style={{ color: `${colorHex}60` }} />
                 <motion.div
-                    animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.6, 0.2] }}
+                    animate={isInView ? { scale: [1, 1.5, 1], opacity: [0.2, 0.6, 0.2] } : { scale: 1, opacity: 0.2 }}
                     transition={{ duration: 2, repeat: Infinity }}
                     className="absolute inset-0 rounded-full border-2"
                     style={{ borderColor: colorHex }}
                 />
                 <motion.div
-                    animate={{ opacity: [0, 1, 0] }}
+                    animate={isInView ? { opacity: [0, 1, 0] } : { opacity: 0 }}
                     transition={{ duration: 0.4, repeat: Infinity, delay: 0.1 }}
                     className="absolute w-1.5 h-1.5 rounded-full top-2 left-3"
                     style={{ backgroundColor: colorHex }}
                 />
                 <motion.div
-                    animate={{ opacity: [0, 1, 0] }}
+                    animate={isInView ? { opacity: [0, 1, 0] } : { opacity: 0 }}
                     transition={{ duration: 0.4, repeat: Infinity, delay: 0.5 }}
                     className="absolute w-1.5 h-1.5 rounded-full bottom-3 right-2"
                     style={{ backgroundColor: colorHex }}
@@ -146,9 +147,12 @@ function PillarVisual({ type, colorHex }: { type: string; colorHex: string }) {
 // Single Step Row — compact version with all content
 function StepRow({ step, index, isDark }: { step: typeof METHOD_STEPS[0]; index: number; isDark: boolean }) {
     const isEven = index % 2 === 0;
+    const stepRef = useRef<HTMLDivElement>(null);
+    const isInView = useInView(stepRef, { once: false, margin: "-10% 0px" });
 
     return (
         <motion.div
+            ref={stepRef}
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
@@ -167,7 +171,7 @@ function StepRow({ step, index, isDark }: { step: typeof METHOD_STEPS[0]; index:
                 style={{ backgroundColor: step.colorHex, boxShadow: `0 0 15px ${step.colorHex}` }}
             >
                 <motion.div
-                    animate={{ scale: [1, 2, 1], opacity: [0.8, 0, 0.8] }}
+                    animate={isInView ? { scale: [1, 2, 1], opacity: [0.8, 0, 0.8] } : { scale: 1, opacity: 0.8 }}
                     transition={{ duration: 2, repeat: Infinity }}
                     className="absolute inset-0 rounded-full"
                     style={{ border: `2px solid ${step.colorHex}` }}
@@ -220,7 +224,7 @@ function StepRow({ step, index, isDark }: { step: typeof METHOD_STEPS[0]; index:
                         <div className="flex flex-row gap-3 items-center">
                             {/* Visual Widget — slightly smaller */}
                             <div className="flex-shrink-0">
-                                <PillarVisual type={step.visual} colorHex={step.colorHex} />
+                                <PillarVisual type={step.visual} colorHex={step.colorHex} isInView={isInView} />
                             </div>
 
                             {/* Stats — compact */}
@@ -347,6 +351,7 @@ export function MethodSection() {
                             }}
                             transition={{ duration: 2, repeat: Infinity }}
                             className="relative w-28 h-28 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center border-4 border-green-400"
+                            style={{ boxShadow: "0 0 40px rgba(16,185,129,0.3)" }}
                         >
                             <div className="text-center">
                                 <Target className="w-9 h-9 text-white mx-auto mb-0.5" />

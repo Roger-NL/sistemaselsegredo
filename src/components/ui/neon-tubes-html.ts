@@ -55,18 +55,19 @@ export const neonTubesHtml = `<!DOCTYPE html>
         const hardwareConcurrency = navigatorProfile.hardwareConcurrency || 8;
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
         const isLowPowerDevice = hardwareConcurrency <= 4 || deviceMemory <= 4;
+        const isVeryLowPower = hardwareConcurrency <= 2 || deviceMemory <= 2;
         const useLowerQuality = isLowPowerDevice || pixelRatio > 1.75;
-        const interactionFrameInterval = 1000 / (isLowPowerDevice ? 20 : 30);
-        const idleFrameInterval = 1000 / (isLowPowerDevice ? 10 : 16);
+        const interactionFrameInterval = 1000 / (isLowPowerDevice ? 14 : 30);
+        const idleFrameInterval = 1000 / (isLowPowerDevice ? 6 : 10);
         const tubesPreset = useLowerQuality
             ? {
-                count: 8,
+                count: 5,
                 radius: 0.07,
-                radiusSegments: 6,
-                tubularSegments: 120,
-                length: 32,
+                radiusSegments: 5,
+                tubularSegments: 80,
+                length: 28,
                 spread: { x: 3.2, y: 0.7, z: 1.8 },
-                flow: 0.35,
+                flow: 0.3,
                 rotation: 0.08,
                 lightIntensity: 100,
             }
@@ -120,7 +121,8 @@ export const neonTubesHtml = `<!DOCTYPE html>
         let pendingPointer = null;
         let currentPos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
-        const scheduleIdleStart = (delay = 2000) => {
+        const idleDelay = isLowPowerDevice ? 4000 : 2000;
+        const scheduleIdleStart = (delay = idleDelay) => {
             if (idleStartTimeoutId) {
                 clearTimeout(idleStartTimeoutId);
             }
