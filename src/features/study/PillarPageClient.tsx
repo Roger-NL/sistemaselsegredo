@@ -270,11 +270,11 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                             // === CASO: PENDENTE ===
                                             pillarId === 1 && subscriptionStatus !== 'premium' ? (
                                                 <div className="flex flex-col items-center gap-1">
-                                                    <span className="text-xs font-normal text-white/50 normal-case tracking-normal">
-                                                        Análise em andamento...
+                                                    <span className="text-xs font-normal text-emerald-400 normal-case tracking-widest uppercase">
+                                                        Missão Recebida com Sucesso
                                                     </span>
                                                     <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-yellow-400 animate-pulse">
-                                                        <span>FURAR FILA (CORREÇÃO IMEDIATA)</span>
+                                                        <span>ADQUIRIR PREMIUM AGORA</span>
                                                         <ArrowRight className="w-5 h-5" />
                                                     </div>
                                                 </div>

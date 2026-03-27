@@ -301,20 +301,20 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                     <>
                                         <div>
                                             <h3 className="text-2xl font-bold text-white mb-2">Relatório Recebido!</h3>
-                                            <p className="text-white/50 text-sm max-w-sm mx-auto leading-relaxed">
-                                                Sua missão foi salva. Para furar a fila de correção e desbloquear os próximos 8 destinos <strong>agora mesmo</strong>, ative sua licença.
+                                            <p className="text-white/60 text-sm max-w-sm mx-auto leading-relaxed">
+                                                Sua missão foi salva. Adquira o Passe Premium para receber a resposta imediatamente e desbloquear os próximos 8 destinos <strong>agora mesmo</strong>.
                                             </p>
                                         </div>
                                         <div className="space-y-3">
                                             <FlightButton variant="neon" className="w-full py-4 text-lg border-yellow-500/50 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500" onClick={() => { router.push('/pagamento'); onClose(); }}>
-                                                QUERO FURAR A FILA (PREMIUM)
+                                                ADQUIRIR PREMIUM AGORA
                                                 <ArrowRight className="ml-2 w-5 h-5" />
                                             </FlightButton>
                                             <button
                                                 onClick={() => { onSuccess(); onClose(); }}
                                                 className="text-white/30 text-xs hover:text-white transition-colors uppercase tracking-widest mt-4 block mx-auto underline decoration-white/10 underline-offset-4"
                                             >
-                                                Aguardar análise padrão (Gratuito)
+                                                Voltar ao Dashboard
                                             </button>
                                         </div>
                                     </>
