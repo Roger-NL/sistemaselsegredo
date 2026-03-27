@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle2, ArrowRight, Loader2, ClipboardCheck, MessageSquare, AlertCircle, ShieldCheck, Phone } from "lucide-react";
 import { FlightButton } from "@/components/ui/FlightCard";
@@ -30,6 +30,38 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
 
     const quiz = getQuizByPillarNumber(pillarId);
     const questions = quiz?.questions || [];
+    const storageKey = `exam-progress-pilar-${pillarId}`;
+
+    // Memory Card: Restore State
+    useEffect(() => {
+        if (!isOpen) return; // Only process if opened
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.step) setStep(parsed.step);
+                if (parsed.quizIndex) setQuizIndex(parsed.quizIndex);
+                if (parsed.answers) setAnswers(parsed.answers);
+                if (parsed.writtenText) setWrittenAnswer(parsed.writtenText);
+                if (parsed.whatsapp) setWhatsapp(parsed.whatsapp);
+            } catch (e) { console.error("Error parsing memory card state", e); }
+        }
+    }, [isOpen, pillarId]);
+
+    // Memory Card: Save State
+    useEffect(() => {
+        if (!isOpen) return;
+        if (step !== 'success' && step !== 'sending') {
+            localStorage.setItem(storageKey, JSON.stringify({
+                isOpen: true,
+                step,
+                quizIndex,
+                answers,
+                writtenText,
+                whatsapp
+            }));
+        }
+    }, [isOpen, step, quizIndex, answers, writtenText, whatsapp, storageKey]);
 
     const handleNextStep = () => {
         if (step === 'intro') setStep('quiz');

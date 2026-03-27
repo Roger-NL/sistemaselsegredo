@@ -54,6 +54,28 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
     const hasFeedbackQuery = searchParams?.get("feedback") === "true";
 
+    // Poll para mudanças na prova (upsell/correção)
+    useEffect(() => {
+        if (!exam) return;
+        const interval = setInterval(() => {
+            refreshExamStatus();
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [exam]);
+
+    // Memory Card: Restaurar modal aberto caso ele recarregue a página
+    useEffect(() => {
+        const savedState = localStorage.getItem(`exam-progress-pilar-${pillarId}`);
+        if (savedState) {
+            try {
+                const parsed = JSON.parse(savedState);
+                if (parsed.isOpen && parsed.step !== 'success') {
+                    setIsExamModalOpen(true);
+                }
+            } catch (e) {}
+        }
+    }, [pillarId]);
+
     useEffect(() => {
         let isMounted = true;
 
@@ -66,7 +88,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
         return () => {
             isMounted = false;
-        }
+        };
     }, [refreshExamStatus]);
 
     useEffect(() => {
@@ -324,8 +346,16 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                             <PillarExamModal
                                 pillarId={pillarId}
                                 isOpen={isExamModalOpen}
-                                onClose={() => setIsExamModalOpen(false)}
-                                onSuccess={refreshExamStatus}
+                                onClose={() => {
+                                    setIsExamModalOpen(false);
+                                    // Limpa o estado se ele fechar a prova no X
+                                    localStorage.removeItem(`exam-progress-pilar-${pillarId}`);
+                                }}
+                                onSuccess={() => {
+                                    refreshExamStatus();
+                                    // Limpa o estado após completar
+                                    localStorage.removeItem(`exam-progress-pilar-${pillarId}`);
+                                }}
                             />
 
                             {/* Modal de Visualização (Leitura) */}
