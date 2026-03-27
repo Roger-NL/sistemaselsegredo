@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
   try {
     const asaasToken = req.headers.get("asaas-access-token");
@@ -31,8 +33,12 @@ export async function POST(req: Request) {
       // Contornando as security rules normais.
       const userRef = adminDb.collection("users").doc(externalReference);
       
+      const userDoc = await userRef.get();
+      const currentApprovedPillar = userDoc.exists ? Number(userDoc.data()?.approvedPillar || 1) : 1;
+      
       await userRef.set({
         subscriptionStatus: "premium",
+        approvedPillar: Math.max(currentApprovedPillar, 2), // Libera instantaneamente o Pilar 2 (o que "fura a fila")
         updatedAt: new Date(),
       }, { merge: true });
 

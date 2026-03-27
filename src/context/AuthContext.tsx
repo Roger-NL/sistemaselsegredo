@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, updateDoc, getDocFromServer } from "firebase/firestore";
@@ -236,7 +236,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return await authResetPassword(email);
     };
 
-    const refreshUser = async () => {
+    const refreshUser = useCallback(async () => {
         if (!auth.currentUser) return;
         try {
             const userDocRef = doc(db, "users", auth.currentUser.uid);
@@ -257,7 +257,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 console.error("Error refreshing user profile:", error);
             }
         }
-    };
+    }, [auth.currentUser]);
 
     const logout = async () => {
         await authLogout();
