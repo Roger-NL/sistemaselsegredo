@@ -19,7 +19,7 @@ import {
 
 export default function PagamentoPage() {
     const router = useRouter();
-    const { user, subscriptionStatus, activateWithInvite, activateWithPayment, isAuthenticated, isLoading } = useAuth();
+    const { user, subscriptionStatus, activateWithInvite, activateWithPayment, isAuthenticated, isLoading, refreshUser } = useAuth();
 
     // UI States
     const [showCodeInput, setShowCodeInput] = useState(false);
@@ -35,6 +35,19 @@ export default function PagamentoPage() {
             router.replace(ROUTES.app.thankYou);
         }
     }, [router, subscriptionStatus]);
+
+    // Polling for subscription status update after QR Code is generated
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (qrCodeData && subscriptionStatus !== 'premium') {
+            interval = setInterval(() => {
+                refreshUser();
+            }, 5000);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [qrCodeData, subscriptionStatus, refreshUser]);
 
     const redirectToLogin = () => {
         router.push(`${ROUTES.auth.login}?callbackUrl=${encodeURIComponent(ROUTES.public.payment)}`);
