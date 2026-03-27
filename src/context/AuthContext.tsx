@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, getDocFromServer } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import Cookies from 'js-cookie';
 
@@ -240,10 +240,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!auth.currentUser) return;
         try {
             const userDocRef = doc(db, "users", auth.currentUser.uid);
-            const userDoc = await getDoc(userDocRef);
+            // IMPORTANTE: Forçar leitura direto do servidor para evitar ler cache antigo (caso o webhook tenha atualizado)
+            const userDoc = await getDocFromServer(userDocRef);
             if (userDoc.exists()) {
                 const userData = userDoc.data() as User;
                 setUser({ ...userData, id: auth.currentUser.uid });
+                // Atualizar cookie também para o SSR (Layouts) saber
+                Cookies.set('subscriptionStatus', userData.subscriptionStatus || 'free', { expires: 30, path: '/' });
             } else {
                 setUser(buildFallbackUser(auth.currentUser));
             }
