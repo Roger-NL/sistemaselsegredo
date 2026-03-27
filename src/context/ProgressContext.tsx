@@ -316,16 +316,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             return true;
         }
 
-        // Regra Premium: Pilar 2+ exige assinatura ativa OU aprovação manual (já checada acima)
+        // Regra Premium: Pilar 2+ exige assinatura ativa
         if (subscriptionStatus !== 'premium') return false;
 
-        // Se for Premium, ele pode acessar se o pilar anterior estiver marcado como completed
-        // OU se ele for o próximo na sequência natural de progresso local.
-        const prevPillarId = `pilar-${pillarNumber - 1}`;
-        const currentPillarStatus = pillarStatus[`pilar-${pillarNumber}`];
-        const prevPillarStatus = pillarStatus[prevPillarId];
-
-        return prevPillarStatus === "completed" || currentPillarStatus === "unlocked" || currentPillarStatus === "completed";
+        // Utilizar o `pillarStatus` como fonte única de verdade
+        const status = pillarStatus[`pilar-${pillarNumber}`];
+        return status === "unlocked" || status === "completed";
     };
 
     // Retorna pilares com status atualizado

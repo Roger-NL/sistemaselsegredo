@@ -78,18 +78,20 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
     // Helper functions
     const handleAction = async () => {
-        // NEW: Intercept Pillar 1 (Premium Logic) - CLICK ANYTIME
+        // Intercept Pillar 1 (Premium Logic) - FLOW
         if (pillarId === 1 && subscriptionStatus !== 'premium') {
-            router.push(ROUTES.public.payment);
-            return;
+            // Se já fez a prova (está aguardando correção ou já foi aprovado), joga pro pagamento (Upsell)
+            if ((user?.approvedPillar || 1) >= 2 || exam?.status === 'pending') {
+                router.push(ROUTES.public.payment);
+                return;
+            }
+            // Se ainda não fez a prova, continua o fluxo normal e abre o modal da prova
         }
 
         const nextPillar = pillarId + 1;
 
-        // Caso 1: Já está aprovado para o próximo -> Apenas avança
-        const isUnlocked = isPillarUnlocked(nextPillar);
-        if (isUnlocked) {
-            completePillar(pillarId);
+        // Caso 1: Já está aprovado pelo Comando (Server Authority) -> Apenas avança
+        if ((user?.approvedPillar || 1) >= nextPillar) {
             if (pillarId < 9) {
                 router.push(`${ROUTES.app.pillar}/${nextPillar}`);
             } else {
