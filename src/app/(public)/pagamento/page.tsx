@@ -32,7 +32,7 @@ export default function PagamentoPage() {
 
     useEffect(() => {
         if (subscriptionStatus === 'premium') {
-            router.replace(ROUTES.app.dashboard);
+            router.replace(ROUTES.app.thankYou);
         }
     }, [router, subscriptionStatus]);
 

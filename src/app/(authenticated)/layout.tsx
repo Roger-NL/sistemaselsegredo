@@ -25,7 +25,7 @@ function AuthenticatedLayoutInner({
 }: {
     children: React.ReactNode;
 }) {
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated, isLoading, user, subscriptionStatus } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
@@ -33,7 +33,14 @@ function AuthenticatedLayoutInner({
             router.push(ROUTES.auth.login);
             return;
         }
-    }, [isAuthenticated, isLoading, router]);
+
+        if (!isLoading && isAuthenticated && user) {
+            const isAdmin = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"].includes(user.email);
+            if (subscriptionStatus !== 'premium' && !isAdmin) {
+                router.replace(ROUTES.public.payment);
+            }
+        }
+    }, [isAuthenticated, isLoading, router, user, subscriptionStatus]);
 
     if (isLoading) {
         return (
@@ -47,7 +54,11 @@ function AuthenticatedLayoutInner({
         return null; // Will redirect to login
     }
 
-    // Freemium: no subscription check needed — all authenticated users have access
+    // Proteção rigorosa de renderização
+    const isAdmin = user && ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"].includes(user.email);
+    if (subscriptionStatus !== 'premium' && !isAdmin) {
+        return null; // Don't render anything while redirecting
+    }
 
     return (
         <ProgressProvider>
