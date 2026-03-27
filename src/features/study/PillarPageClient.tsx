@@ -270,11 +270,11 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                             // === CASO: PENDENTE ===
                                             pillarId === 1 && subscriptionStatus !== 'premium' ? (
                                                 <div className="flex flex-col items-center gap-1">
-                                                    <span className="text-[10px] font-mono font-medium text-white/50 uppercase tracking-[0.2em]">
-                                                        Relatório Sob Análise do Comando
+                                                    <span className="text-[10px] font-medium text-white/70 uppercase tracking-widest">
+                                                        Avaliação em Andamento
                                                     </span>
-                                                    <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-yellow-500 animate-[pulse_3s_ease-in-out_infinite]">
-                                                        <span>DESTRAVAR ACESSO DE ELITE IMEDIATO</span>
+                                                    <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-emerald-400 hover:text-emerald-300 transition-colors">
+                                                        <span>Desbloquear Acesso Premium</span>
                                                         <ArrowRight className="w-5 h-5" />
                                                     </div>
                                                 </div>

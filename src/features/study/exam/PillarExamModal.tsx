@@ -292,43 +292,49 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
 
                         {/* SUCCESS */}
                         {step === 'success' && (
-                            <motion.div key="success" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="py-10 text-center space-y-6">
-                                <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30">
-                                    <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+                            <motion.div key="success" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="py-12 bg-white rounded-2xl text-center space-y-6 px-4 -m-8 mt-0 border-t border-white/10">
+                                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                                    <CheckCircle2 className="w-10 h-10 text-emerald-500" />
                                 </div>
 
                                 {pillarId === 1 ? (
                                     <>
                                         <div>
-                                            <h3 className="text-2xl font-bold text-white mb-2">Relatório Registrado no QG</h3>
-                                            <p className="text-white/60 text-sm max-w-[400px] mx-auto leading-relaxed">
-                                                Sua missão está em posse do Comando. Para revelar sua aprovação em tempo real e receber alvará de acionamento imediato para os próximos 8 Pilares, eleve seu Nível Operacional.
+                                            <h3 className="text-3xl font-bold text-neutral-900 mb-3 tracking-tight">Avaliação Recebida!</h3>
+                                            <p className="text-neutral-600 text-base max-w-[400px] mx-auto leading-relaxed">
+                                                Sua resposta foi salva com sucesso. Assine o plano <strong>Premium</strong> para receber sua nota imediatamente e desbloquear o acesso total aos próximos 8 módulos.
                                             </p>
                                         </div>
-                                        <div className="space-y-3">
-                                            <FlightButton variant="neon" className="w-full py-4 text-lg border-yellow-500/50 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500" onClick={() => { router.push('/pagamento'); onClose(); }}>
-                                                DESTRAVAR MEU ACESSO DE ELITE
+                                        <div className="space-y-4 pt-6 max-w-sm mx-auto">
+                                            <button 
+                                                className="w-full py-4 text-base font-bold rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-[0_4px_20px_rgba(124,58,237,0.4)] transition-all flex items-center justify-center hover:-translate-y-1" 
+                                                onClick={() => { router.push('/pagamento'); onClose(); }}
+                                            >
+                                                Desbloquear Acesso Premium
                                                 <ArrowRight className="ml-2 w-5 h-5" />
-                                            </FlightButton>
+                                            </button>
                                             <button
                                                 onClick={() => { onSuccess(); onClose(); }}
-                                                className="text-white/30 text-[11px] hover:text-white transition-colors uppercase tracking-widest mt-4 block mx-auto underline decoration-white/10 underline-offset-4"
+                                                className="text-neutral-400 text-xs hover:text-neutral-700 transition-colors uppercase tracking-widest font-semibold block mx-auto underline decoration-neutral-200 underline-offset-4"
                                             >
-                                                Apenas Voltar Para a Base
+                                                Voltar ao Dashboard
                                             </button>
                                         </div>
                                     </>
                                 ) : (
                                     <>
                                         <div>
-                                            <h3 className="text-2xl font-bold text-white mb-2">Relatório Recebido</h3>
-                                            <p className="text-white/50 text-sm max-w-sm mx-auto">
-                                                Sua missão foi registrada. Nossa equipe de instrutores analisará seu relatório em até 24h.
+                                            <h3 className="text-2xl font-bold text-neutral-900 mb-2">Relatório Recebido</h3>
+                                            <p className="text-neutral-600 text-sm max-w-sm mx-auto">
+                                                Sua missão foi registrada. Nossa equipe de instrutores analisará seu relatório em até 48h.
                                             </p>
                                         </div>
-                                        <FlightButton variant="ghost" className="w-full" onClick={() => { onSuccess(); onClose(); }}>
+                                        <button 
+                                            className="mt-6 px-8 py-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 rounded-lg font-medium transition-colors"
+                                            onClick={() => { onSuccess(); onClose(); }}
+                                        >
                                             Voltar ao Dashboard
-                                        </FlightButton>
+                                        </button>
                                     </>
                                 )}
                             </motion.div>
