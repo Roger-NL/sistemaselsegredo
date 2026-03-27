@@ -117,18 +117,25 @@ export async function gradeExam(examId: string, status: 'approved' | 'rejected',
                 ...examSnapshot.data(),
             } as PillarExam;
 
+            // REGRAS DO FIRESTORE: Todas as "leituras" PRECISAM vir antes das "escritas"
+            let userRef = null;
+            let currentApprovedPillar = 1;
+
+            if (status === "approved") {
+                userRef = doc(db, "users", exam.userId);
+                const userSnapshot = await transaction.get(userRef);
+                currentApprovedPillar = Number(userSnapshot.data()?.approvedPillar || 1);
+            }
+
+            // Agora sim, as "escritas" (updates/sets)
             transaction.update(examRef, {
                 status,
                 adminFeedback: feedback || "",
                 gradedAt: serverTimestamp()
             });
 
-            if (status === "approved") {
-                const userRef = doc(db, "users", exam.userId);
-                const userSnapshot = await transaction.get(userRef);
-                const currentApprovedPillar = Number(userSnapshot.data()?.approvedPillar || 1);
+            if (status === "approved" && userRef) {
                 const nextApprovedPillar = Math.max(currentApprovedPillar, exam.pillarId + 1);
-
                 transaction.update(userRef, {
                     approvedPillar: nextApprovedPillar,
                 });
