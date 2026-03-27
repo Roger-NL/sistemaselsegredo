@@ -19,11 +19,13 @@ import {
 
 export default function PagamentoPage() {
     const router = useRouter();
-    const { subscriptionStatus, activateWithInvite, activateWithPayment, isAuthenticated, isLoading } = useAuth();
+    const { user, subscriptionStatus, activateWithInvite, activateWithPayment, isAuthenticated, isLoading } = useAuth();
 
     // UI States
     const [showCodeInput, setShowCodeInput] = useState(false);
     const [inviteCode, setInviteCode] = useState('');
+    const [cpf, setCpf] = useState('');
+    const [qrCodeData, setQrCodeData] = useState<{ encodedImage: string, payload: string } | null>(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -65,26 +67,40 @@ export default function PagamentoPage() {
     const handlePayment = async () => {
         setError('');
 
-        if (!isAuthenticated) {
+        if (!isAuthenticated || !user) {
             redirectToLogin();
+            return;
+        }
+
+        if (cpf.replace(/\\D/g, '').length < 11) {
+            setError('Por favor, informe um CPF válido.');
             return;
         }
 
         setLoading(true);
 
-        // Simulate payment processing
-        // In production, integrate with Stripe/Mercado Pago
-        const mockPaymentId = `pay_${Date.now()}`;
+        try {
+            const res = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: user.name || "Novo Aluno",
+                    email: user.email,
+                    cpfCnpj: cpf.replace(/\\D/g, ''),
+                    userId: user.id
+                })
+            });
 
-        const result = await activateWithPayment(mockPaymentId);
+            const data = await res.json();
 
-        if (result.success) {
-            setSuccess(true);
-            setTimeout(() => {
-                router.push(ROUTES.app.dashboard);
-            }, 2000);
-        } else {
-            setError(result.error || 'Erro no pagamento');
+            if (!res.ok) {
+                throw new Error(data.error || 'Erro ao gerar cobrança');
+            }
+
+            setQrCodeData({ encodedImage: data.qrCode, payload: data.qrCodePayload });
+        } catch (err: any) {
+            setError(err.message || 'Erro de comunicação com o servidor.');
+        } finally {
             setLoading(false);
         }
     };
@@ -263,23 +279,78 @@ export default function PagamentoPage() {
                                 </div>
                             )}
 
-                            <FlightButton
-                                onClick={handlePayment}
-                                disabled={loading}
-                                className="w-full py-6 text-xl font-bold shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:shadow-[0_0_50px_rgba(139,92,246,0.5)]"
-                                variant="neon"
-                            >
-                                {loading ? (
-                                    <span className="flex items-center gap-2">
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                        PROCESSANDO...
-                                    </span>
-                                ) : (
-                                    "DESBLOQUEAR ACESSO AGORA"
-                                )}
-                            </FlightButton>
+                            {qrCodeData ? (
+                                <motion.div 
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="bg-white rounded-xl p-6 text-black flex flex-col items-center shadow-lg"
+                                >
+                                    <h3 className="text-xl font-bold mb-2">Escaneie para Pagar</h3>
+                                    <p className="text-sm text-slate-500 mb-4 text-center">Abra o app do seu banco e escaneie o QR Code abaixo via PIX.</p>
+                                    
+                                    <div className="bg-slate-100 p-2 rounded-lg mb-4">
+                                        <img 
+                                            src={`data:image/png;base64,${qrCodeData.encodedImage}`} 
+                                            alt="PIX QR Code" 
+                                            className="w-48 h-48 mix-blend-multiply"
+                                        />
+                                    </div>
 
-                            <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-slate-500 uppercase tracking-wider">
+                                    <div className="w-full">
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Copia e Cola</p>
+                                        <div className="flex gap-2">
+                                            <input 
+                                                type="text" 
+                                                readOnly 
+                                                value={qrCodeData.payload} 
+                                                className="flex-1 bg-slate-50 border border-slate-200 rounded px-3 py-2 text-xs text-slate-600 focus:outline-none"
+                                                onClick={(e) => e.currentTarget.select()}
+                                            />
+                                            <button 
+                                                onClick={() => navigator.clipboard.writeText(qrCodeData.payload)}
+                                                className="bg-violet-500 hover:bg-violet-600 text-white px-3 py-2 rounded text-xs font-bold transition-colors"
+                                            >
+                                                COPIAR
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <p className="text-xs text-center text-slate-400 mt-4 flex items-center gap-2 justify-center">
+                                        <Loader2 className="w-3 h-3 animate-spin text-violet-500" />
+                                        Aguardando confirmação do pagamento...
+                                    </p>
+                                </motion.div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="text-left w-full relative">
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Seu CPF (Para emissão da nota)</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Ex: 000.000.000-00"
+                                            value={cpf}
+                                            onChange={(e) => setCpf(e.target.value)}
+                                            className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-mono"
+                                        />
+                                    </div>
+                                    <FlightButton
+                                        onClick={handlePayment}
+                                        disabled={loading}
+                                        className="w-full py-6 text-xl font-bold shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:shadow-[0_0_50px_rgba(139,92,246,0.5)]"
+                                        variant="neon"
+                                    >
+                                        {loading ? (
+                                            <span className="flex items-center gap-2">
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                GERANDO PIX...
+                                            </span>
+                                        ) : (
+                                            "GERAR PIX DE ACESSO"
+                                        )}
+                                    </FlightButton>
+                                </div>
+                            )}
+
+                            <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 text-[10px] text-slate-500 uppercase tracking-wider">
                                 <Lock className="w-3 h-3" />
                                 Ambiente Criptografado 256-bit
                             </div>

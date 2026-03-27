@@ -50,7 +50,7 @@ function AdminLayoutInner({
                 return;
             }
             // Simple Email Check for MVP
-            if (user && !ADMIN_EMAILS.includes(user.email)) {
+            if (user && user.email && !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
                 router.push(ROUTES.app.dashboard); // Kick regular users out
             }
         }
@@ -62,8 +62,21 @@ function AdminLayoutInner({
         </div>
     );
 
-    // If not admin (and effect hasn't redirected yet), hide content
-    if (user && !ADMIN_EMAILS.includes(user.email)) return null;
+    // Proteção rigorosa: Não renderiza o conteúdo enquanto redireciona
+    if (!isAuthenticated) return null;
+
+    // Se estiver logado mas não for admin (e o redirecionamento ainda não bateu), também não renderiza
+    if (!user || !user.email || !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 text-center">
+                <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
+                    <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold text-slate-900 mb-2">Acesso Restrito</h2>
+                    <p className="text-slate-500 mb-4">Seu e-mail ({user?.email}) não possui permissões administrativas.</p>
+                </div>
+            </div>
+        );
+    }
 
     const navItems = [
         { name: "Visão Geral", href: "/admin/dashboard", icon: LayoutDashboard },

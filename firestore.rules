@@ -13,8 +13,10 @@ service cloud.firestore {
     
     // 2. Proteção das Contas dos Alunos
     match /users/{userId} {
-      // O próprio aluno pode ler/escrever a sua conta, MAS os Admins também podem forçar a entrada
-      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      // O próprio aluno pode ler/escrever a sua conta
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Admins têm acesso total
+      allow read, write: if isAdmin();
     }
 
     // 3. Proteção das Provas (Exames)
@@ -24,9 +26,16 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
     }
     
-    // 4. Fallback (Regra para o resto da base de dados)
+    // 4. Proteção de Códigos de Convite
+    match /invite_codes/{codeId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // 5. Fallback (Regra para o resto da base de dados)
     match /{document=**} {
       allow read, write: if request.auth != null;
     }
   }
 }
+
