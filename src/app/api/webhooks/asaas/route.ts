@@ -4,9 +4,10 @@ import { adminDb } from "@/lib/firebase-admin";
 export async function POST(req: Request) {
   try {
     const asaasToken = req.headers.get("asaas-access-token");
+    const expectedToken = process.env.ASAAS_WEBHOOK_SECRET?.trim();
     
     // Proteção Máxima: Só aceitar requisições que têm a senha gerada pelo Asaas
-    if (asaasToken !== process.env.ASAAS_WEBHOOK_SECRET) {
+    if (asaasToken !== expectedToken) {
         console.error("Webhook recusado: Token inválido");
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
