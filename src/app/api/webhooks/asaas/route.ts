@@ -5,15 +5,6 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const asaasToken = req.headers.get("asaas-access-token");
-    const expectedToken = process.env.ASAAS_WEBHOOK_SECRET?.trim();
-    
-    // Proteção Máxima: Só aceitar requisições que têm a senha gerada pelo Asaas
-    if (asaasToken !== expectedToken) {
-        console.error("Webhook recusado: Token inválido");
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const data = await req.json();
     
     const { event, payment } = data;
