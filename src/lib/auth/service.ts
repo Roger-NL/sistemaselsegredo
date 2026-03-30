@@ -37,6 +37,16 @@ const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gm
 // Types
 export type SubscriptionStatus = 'free' | 'premium' | 'expired';
 
+export interface PendingPixPayment {
+    paymentId: string;
+    qrCode: string;
+    qrCodePayload: string;
+    createdAt: string;
+    expiresAt: string;
+    status: string;
+    plan: "lifetime";
+}
+
 export interface User {
     id: string;
     name: string;
@@ -48,6 +58,8 @@ export interface User {
     subscriptionExpiresAt?: string;
     inviteCodeUsed?: string;
     paymentId?: string;
+    purchasedPlan?: "lifetime";
+    pendingPixPayment?: PendingPixPayment | null;
     phone?: string;
     approvedPillar?: number; // Controle manual de progressão
     // New Progress Fields that persist to Firebase
@@ -93,6 +105,24 @@ function isCompletedModulesMap(value: unknown): value is Record<string, number[]
 
     return Object.values(value).every(
         (entry) => Array.isArray(entry) && entry.every((item) => typeof item === "number")
+    );
+}
+
+function isPendingPixPayment(value: unknown): value is PendingPixPayment {
+    if (!value || typeof value !== "object") {
+        return false;
+    }
+
+    const candidate = value as Record<string, unknown>;
+
+    return (
+        typeof candidate.paymentId === "string" &&
+        typeof candidate.qrCode === "string" &&
+        typeof candidate.qrCodePayload === "string" &&
+        typeof candidate.createdAt === "string" &&
+        typeof candidate.expiresAt === "string" &&
+        typeof candidate.status === "string" &&
+        candidate.plan === "lifetime"
     );
 }
 
@@ -146,6 +176,12 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
             subscriptionExpiresAt: typeof data.subscriptionExpiresAt === "string" ? data.subscriptionExpiresAt : undefined,
             inviteCodeUsed: typeof data.inviteCodeUsed === "string" ? data.inviteCodeUsed : undefined,
             paymentId: typeof data.paymentId === "string" ? data.paymentId : undefined,
+            purchasedPlan: data.purchasedPlan === "lifetime" ? data.purchasedPlan : undefined,
+            pendingPixPayment: data.pendingPixPayment === null
+                ? null
+                : isPendingPixPayment(data.pendingPixPayment)
+                    ? data.pendingPixPayment
+                    : undefined,
             phone: typeof data.phone === "string" ? data.phone : undefined,
             approvedPillar: typeof data.approvedPillar === "number" ? data.approvedPillar : undefined,
             chosenSpecialization:

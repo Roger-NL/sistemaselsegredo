@@ -29,8 +29,11 @@ export async function POST(req: Request) {
       
       await userRef.set({
         subscriptionStatus: "premium",
+        purchasedPlan: "lifetime",
+        paymentId: payment.id,
+        pendingPixPayment: null,
         approvedPillar: Math.max(currentApprovedPillar, 2), // Libera instantaneamente o Pilar 2 (o que "fura a fila")
-        updatedAt: new Date(),
+        updatedAt: new Date().toISOString(),
       }, { merge: true });
 
       return NextResponse.json({ success: true, message: `Access granted safely for ${externalReference}` });
@@ -39,9 +42,10 @@ export async function POST(req: Request) {
     // Se for outro evento de pagamento, a gente apenas dá 200 pro Asaas parar de tentar enviar
     return NextResponse.json({ success: true, ignoredEvent: event });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Asaas Webhook Error:", error);
     // Erros 500 informam ao Asaas para tentar disparar o Webhook novamente mais tarde
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Unexpected webhook error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -6,6 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { FlightButton } from "@/components/ui/FlightCard";
 import { ROUTES } from "@/lib/routes";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import {
     Check,
     AlertCircle,
@@ -19,35 +21,148 @@ import {
 
 export default function PagamentoPage() {
     const router = useRouter();
-    const { user, subscriptionStatus, activateWithInvite, activateWithPayment, isAuthenticated, isLoading, refreshUser } = useAuth();
+    const { user, subscriptionStatus, activateWithInvite, isAuthenticated, isLoading, refreshUser } = useAuth();
 
     // UI States
     const [showCodeInput, setShowCodeInput] = useState(false);
     const [inviteCode, setInviteCode] = useState('');
     const [cpf, setCpf] = useState('');
     const [qrCodeData, setQrCodeData] = useState<{ encodedImage: string, payload: string } | null>(null);
+    const [paymentId, setPaymentId] = useState<string | null>(null);
+    const [pixExpiresAt, setPixExpiresAt] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [recoveringPix, setRecoveringPix] = useState(false);
     const [success, setSuccess] = useState(false);
+    const pixExpired = Boolean(pixExpiresAt && new Date(pixExpiresAt).getTime() <= Date.now());
 
+    // Redirect if already premium (on load or after status update)
     useEffect(() => {
-        if (subscriptionStatus === 'premium') {
+        if (!isLoading && subscriptionStatus === 'premium') {
             router.replace(ROUTES.app.thankYou);
         }
-    }, [router, subscriptionStatus]);
+    }, [router, subscriptionStatus, isLoading]);
 
-    // Polling for subscription status update after QR Code is generated
     useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (qrCodeData && subscriptionStatus !== 'premium') {
-            interval = setInterval(() => {
-                refreshUser();
-            }, 5000);
+        const pendingPixPayment = user?.pendingPixPayment;
+
+        if (!pendingPixPayment) {
+            return;
         }
-        return () => {
-            if (interval) clearInterval(interval);
+
+        const isValid = new Date(pendingPixPayment.expiresAt).getTime() > Date.now();
+
+        if (!isValid) {
+            return;
+        }
+
+        setPaymentId(pendingPixPayment.paymentId);
+        setQrCodeData({
+            encodedImage: pendingPixPayment.qrCode,
+            payload: pendingPixPayment.qrCodePayload,
+        });
+        setPixExpiresAt(pendingPixPayment.expiresAt);
+    }, [user?.pendingPixPayment]);
+
+    useEffect(() => {
+        if (!user?.id || isLoading || qrCodeData || subscriptionStatus === 'premium') {
+            return;
+        }
+
+        let cancelled = false;
+
+        const recoverCheckoutState = async () => {
+            setRecoveringPix(true);
+            try {
+                const res = await fetch(`/api/checkout?userId=${encodeURIComponent(user.id)}`, {
+                    cache: 'no-store',
+                });
+                const data = await res.json();
+
+                if (cancelled) {
+                    return;
+                }
+
+                if (data.alreadyPremium) {
+                    await refreshUser();
+                    router.replace(ROUTES.app.thankYou);
+                    return;
+                }
+
+                if (data.hasPendingPix) {
+                    setPaymentId(data.paymentId);
+                    setQrCodeData({ encodedImage: data.qrCode, payload: data.qrCodePayload });
+                    setPixExpiresAt(data.expiresAt || null);
+                }
+            } catch {
+                // silent fallback to manual generation
+            } finally {
+                if (!cancelled) {
+                    setRecoveringPix(false);
+                }
+            }
         };
-    }, [qrCodeData, subscriptionStatus, refreshUser]);
+
+        void recoverCheckoutState();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [user?.id, isLoading, qrCodeData, subscriptionStatus, refreshUser, router]);
+
+    // Primary: Poll /api/verify-payment directly (does not depend on webhook)
+    // Secondary: onSnapshot listens for Firestore change (works if webhook fires)
+    useEffect(() => {
+        if (!qrCodeData || !paymentId || !user?.id || subscriptionStatus === 'premium') return;
+
+        let stopped = false;
+
+        const checkPayment = async () => {
+            if (stopped) return;
+            try {
+                const res = await fetch('/api/verify-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId, userId: user.id }),
+                });
+                const data = await res.json();
+                if (data.isPaid && !stopped) {
+                    stopped = true;
+                    await refreshUser();
+                    router.replace(ROUTES.app.thankYou);
+                }
+            } catch {
+                // silent — will retry
+            }
+        };
+
+        // Check immediately, then every 5s
+        checkPayment();
+        const interval = setInterval(checkPayment, 5000);
+
+        // Firestore onSnapshot as secondary channel (if webhook works)
+        const userRef = doc(db, "users", user.id);
+        const unsubscribe = onSnapshot(userRef, (snapshot) => {
+            if (snapshot.exists() && snapshot.data()?.subscriptionStatus === 'premium' && !stopped) {
+                stopped = true;
+                clearInterval(interval);
+                router.replace(ROUTES.app.thankYou);
+            }
+        });
+
+        // Refresh on tab return (mobile bank app scenario)
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') checkPayment();
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            stopped = true;
+            clearInterval(interval);
+            unsubscribe();
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [qrCodeData, paymentId, user?.id, subscriptionStatus, router, refreshUser]);
 
     const redirectToLogin = () => {
         router.push(`${ROUTES.auth.login}?callbackUrl=${encodeURIComponent(ROUTES.public.payment)}`);
@@ -85,7 +200,7 @@ export default function PagamentoPage() {
             return;
         }
 
-        if (cpf.replace(/\\D/g, '').length < 11) {
+        if (cpf.replace(/\D/g, '').length < 11) {
             setError('Por favor, informe um CPF válido.');
             return;
         }
@@ -99,20 +214,28 @@ export default function PagamentoPage() {
                 body: JSON.stringify({
                     name: user.name || "Novo Aluno",
                     email: user.email,
-                    cpfCnpj: cpf.replace(/\\D/g, ''),
+                    cpfCnpj: cpf.replace(/\D/g, ''),
                     userId: user.id
                 })
             });
 
             const data = await res.json();
 
+            if (data.alreadyPremium) {
+                await refreshUser();
+                router.replace(ROUTES.app.thankYou);
+                return;
+            }
+
             if (!res.ok) {
                 throw new Error(data.error || 'Erro ao gerar cobrança');
             }
 
+            setPaymentId(data.paymentId);
             setQrCodeData({ encodedImage: data.qrCode, payload: data.qrCodePayload });
-        } catch (err: any) {
-            setError(err.message || 'Erro de comunicação com o servidor.');
+            setPixExpiresAt(data.expiresAt || null);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Erro de comunicação com o servidor.');
         } finally {
             setLoading(false);
         }
@@ -138,7 +261,14 @@ export default function PagamentoPage() {
     }
 
     if (!isLoading && subscriptionStatus === 'premium') {
-        return null;
+        return (
+            <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="w-10 h-10 text-violet-500 animate-spin mx-auto mb-4" />
+                    <p className="text-slate-400 text-sm">Redirecionando...</p>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -285,6 +415,13 @@ export default function PagamentoPage() {
                                 </li>
                             </ul>
 
+                            {pixExpired && !qrCodeData && (
+                                <div className="mb-6 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-yellow-400 text-sm flex items-center justify-center gap-2">
+                                    <AlertCircle className="w-4 h-4" />
+                                    Seu PIX expirou. Gere um novo para continuar.
+                                </div>
+                            )}
+
                             {error && (
                                 <div className="mb-6 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center justify-center gap-2">
                                     <AlertCircle className="w-4 h-4" />
@@ -292,8 +429,15 @@ export default function PagamentoPage() {
                                 </div>
                             )}
 
+                            {recoveringPix && !qrCodeData && (
+                                <div className="mb-6 p-3 bg-white/5 border border-white/10 rounded-lg text-slate-300 text-sm flex items-center justify-center gap-2">
+                                    <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
+                                    Recuperando seu Pix atual...
+                                </div>
+                            )}
+
                             {qrCodeData ? (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     className="bg-white rounded-xl p-6 text-black flex flex-col items-center shadow-lg"
@@ -332,6 +476,11 @@ export default function PagamentoPage() {
                                         <Loader2 className="w-3 h-3 animate-spin text-violet-500" />
                                         Aguardando confirmação do pagamento...
                                     </p>
+                                    {pixExpiresAt && (
+                                        <p className="text-[11px] text-center text-slate-500 mt-2">
+                                            Este Pix fica reservado para voce ate {new Date(pixExpiresAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}.
+                                        </p>
+                                    )}
                                 </motion.div>
                             ) : (
                                 <div className="space-y-4">
@@ -347,14 +496,14 @@ export default function PagamentoPage() {
                                     </div>
                                     <FlightButton
                                         onClick={handlePayment}
-                                        disabled={loading}
+                                        disabled={loading || recoveringPix}
                                         className="w-full py-6 text-xl font-bold shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:shadow-[0_0_50px_rgba(139,92,246,0.5)]"
                                         variant="neon"
                                     >
-                                        {loading ? (
+                                        {loading || recoveringPix ? (
                                             <span className="flex items-center gap-2">
                                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                                GERANDO PIX...
+                                                {recoveringPix ? 'RECUPERANDO PIX...' : 'GERANDO PIX...'}
                                             </span>
                                         ) : (
                                             "GERAR PIX DE ACESSO"

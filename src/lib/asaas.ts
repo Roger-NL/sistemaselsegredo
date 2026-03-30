@@ -68,7 +68,8 @@ export interface AsaasPayment {
   invoiceUrl: string;
   invoiceNumber: string;
   pixTransaction?: string;
-  payload?: any;
+  payload?: unknown;
+  externalReference?: string;
 }
 
 /**
@@ -111,6 +112,24 @@ export async function createPixPayment(
   }
 
   return await res.json();
+}
+
+export async function getPayment(paymentId: string): Promise<AsaasPayment> {
+  const res = await fetch(`${ASAAS_API_URL}/payments/${paymentId}`, {
+    headers: getHeaders(),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(`Asaas Error (Get Payment): ${JSON.stringify(errorData)}`);
+  }
+
+  return await res.json();
+}
+
+export function isPaymentPaid(status: string): boolean {
+  return status === "RECEIVED" || status === "CONFIRMED";
 }
 
 /**
