@@ -6,8 +6,10 @@ if (!admin.apps.length) {
   if (raw) {
     try {
       const lastBrace = raw.lastIndexOf('}');
-      const serviceAccountKey = lastBrace !== -1 ? raw.slice(0, lastBrace + 1) : raw;
-      const serviceAccount = JSON.parse(serviceAccountKey);
+      const trimmed = lastBrace !== -1 ? raw.slice(0, lastBrace + 1) : raw;
+      const cleaned = trimmed.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+      const serviceAccount = JSON.parse(cleaned);
+      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
       });
