@@ -2,10 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Crown, Sparkles, ArrowRight } from "lucide-react";
 import RotatingEarth from "@/components/ui/wireframe-dotted-globe";
 import { DevControls } from "@/components/core/DevControls";
 import { useProgress } from "@/context/ProgressContext";
 import { PILLARS } from "@/data/curriculum";
+import { PILAR_1_DATA } from "@/data/pillars/pilar-1";
 import { TheHUD } from "@/components/core/TheHUD";
 import { GlobalStatusPanel } from "@/features/dashboard/GlobalStatusPanel";
 import { Typewriter } from "@/components/ui/typewriter";
@@ -19,13 +21,14 @@ import { ROUTES } from "@/lib/routes";
 
 export default function Page() {
   const router = useRouter();
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, subscriptionStatus } = useAuth();
   const {
     getCompletedCount,
     getCurrentPillarNumber,
     specializationStatus,
     getCurrentSpecialization,
-    getGlobalProgress
+    getGlobalProgress,
+    completedPillarModules
   } = useProgress();
 
   const completedCount = getCompletedCount();
@@ -33,6 +36,11 @@ export default function Page() {
   const currentPillar = PILLARS[currentPillarNumber - 1];
   const currentSpec = getCurrentSpecialization();
   const globalProgress = getGlobalProgress();
+  const pillarOneModuleIds = PILAR_1_DATA.modules?.map((module) => module.id) ?? [];
+  const hasFinishedPillarOne =
+    (user?.approvedPillar || 1) >= 2 ||
+    (pillarOneModuleIds.length > 0 && pillarOneModuleIds.every((moduleId) => completedPillarModules.includes(moduleId)));
+  const shouldShowPremiumCTA = subscriptionStatus !== "premium" && hasFinishedPillarOne;
 
   // NÃO mostrar DecisionMatrix automaticamente
   // O usuário acessa via HUD clicando no Pilar 10 (Especialidades)
@@ -105,6 +113,50 @@ export default function Page() {
         studentName={user?.name || "Rogério Augusto"}
         studentStreak={user?.currentStreak || 0}
       />
+
+      {shouldShowPremiumCTA && (
+        <div className="absolute top-24 left-1/2 z-40 w-[min(92vw,640px)] -translate-x-1/2 pointer-events-auto px-4">
+          <button
+            type="button"
+            onClick={() => router.push(ROUTES.public.payment)}
+            className="group w-full rounded-3xl border border-emerald-400/30 bg-[linear-gradient(135deg,rgba(5,12,10,0.95),rgba(8,30,24,0.92),rgba(9,50,42,0.88))] px-5 py-4 text-left shadow-[0_0_40px_rgba(16,185,129,0.18)] backdrop-blur-xl transition-all duration-300 hover:scale-[1.01] hover:border-emerald-300/60 hover:shadow-[0_0_65px_rgba(16,185,129,0.28)] md:px-6 md:py-5"
+          >
+            <div className="flex items-start gap-4">
+              <div className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-300/30 bg-emerald-400/10 text-emerald-300 shadow-[0_0_18px_rgba(16,185,129,0.22)]">
+                <Crown className="h-5 w-5" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-300">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Premium liberado
+                </div>
+
+                <h2 className="text-base font-black uppercase tracking-[0.12em] text-white md:text-lg">
+                  Desbloqueie o acesso premium agora
+                </h2>
+                <p className="mt-1 max-w-[46ch] text-sm leading-relaxed text-emerald-50/78 md:text-[15px]">
+                  Você concluiu o Pilar 1. Seu acesso ao upgrade vitalício já está disponível aqui no dashboard.
+                </p>
+              </div>
+
+              <div className="hidden shrink-0 items-center gap-2 self-center rounded-full border border-emerald-300/30 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-emerald-200 md:flex">
+                Desbloquear
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-[11px] uppercase tracking-[0.22em] text-emerald-100/70">
+              <span>Acesso vitalício</span>
+              <span>Pagamento único</span>
+              <span className="md:hidden inline-flex items-center gap-1 font-bold text-emerald-200">
+                Ir agora
+                <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* Global Status Panel (Lateral) - Absolute para não afetar centralização */}
       <div className="absolute inset-0 pointer-events-none z-30">
@@ -396,11 +448,11 @@ export default function Page() {
                       ? "Continuar Estudo"
                       : specializationStatus === "completed"
                         ? "Especialização Concluída"
-                      : completedCount === 9
-                        ? "Escolher Especialidade"
-                        : completedCount === 0
-                          ? "Começar os Estudos"
-                          : "Continuar Estudo"
+                        : completedCount === 9
+                          ? "Escolher Especialidade"
+                          : completedCount === 0
+                            ? "Começar os Estudos"
+                            : "Continuar Estudo"
                     }
                   </span>
                 </span>
@@ -434,7 +486,7 @@ export default function Page() {
                     className="text-[10px] md:text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full inline-block"
                     style={{
                       color: '#EEF4D4',
-                      backgroundColor: 'rgba(238, 244, 212, 0.15)',
+                      backgroundColor: 'rgba(240, 17, 248, 0.15)',
                       textShadow: '0 1px 4px rgba(0,0,0,0.5)'
                     }}
                   >
