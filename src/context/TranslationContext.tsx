@@ -10,7 +10,7 @@ const TranslationContext = createContext<TranslationContextType | undefined>(und
 
 export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return (
-        <TranslationContext.Provider value={{ alwaysShowTranslations: true }}>
+        <TranslationContext.Provider value={{ alwaysShowTranslations: false }}>
             {children}
         </TranslationContext.Provider>
     );

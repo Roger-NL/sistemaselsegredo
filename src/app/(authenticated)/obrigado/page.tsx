@@ -28,9 +28,9 @@ export default function ObrigadoPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="relative z-10 w-full max-w-xl"
+                className="relative z-10 w-full max-w-2xl"
             >
-                <div className="p-10 md:p-14 text-center rounded-3xl bg-white/5 border border-white/10 backdrop-blur-2xl shadow-2xl">
+                <div className="rounded-3xl bg-white/5 border border-white/10 p-6 text-center shadow-2xl backdrop-blur-2xl sm:p-8 md:p-14">
                     
                     {/* Animated Checkmark Sequence */}
                     <div className="flex justify-center mb-8 relative">
@@ -58,11 +58,11 @@ export default function ObrigadoPage() {
                         />
                     </div>
 
-                    <h1 className="text-3xl md:text-4xl font-light text-white mb-4 tracking-tight">
+                    <h1 className="mb-4 text-3xl font-light tracking-tight text-white md:text-4xl">
                         Acesso Liberado
                     </h1>
 
-                    <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-md mx-auto mb-10 font-light">
+                    <p className="mx-auto mb-8 max-w-lg text-base leading-relaxed text-slate-400 sm:mb-10 md:text-lg">
                         Seu pagamento foi confirmado com sucesso. Você agora faz parte da <span className="text-white font-medium">elite operacional</span> e tem acesso vitalício à ferramenta.
                     </p>
 
@@ -71,34 +71,34 @@ export default function ObrigadoPage() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.8, duration: 0.6 }}
-                        className="grid grid-cols-2 gap-4 mb-10 text-left"
+                        className="mb-8 grid grid-cols-1 gap-3 text-left sm:mb-10 sm:grid-cols-2 sm:gap-4"
                     >
-                        <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                            <Fingerprint className="w-5 h-5 text-emerald-400/80 mt-0.5" strokeWidth={1.5} />
-                            <div>
-                                <p className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Manejo dos Pilares</p>
-                                <p className="text-[10px] text-slate-500">Acesso profundo aos 9 fundamentos</p>
+                        <div className="flex min-h-[104px] items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:min-h-[132px]">
+                            <Fingerprint className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400/80" strokeWidth={1.5} />
+                            <div className="min-w-0">
+                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Manejo dos Pilares</p>
+                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Acesso profundo aos 9 fundamentos</p>
                             </div>
                         </div>
-                        <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                            <BookOpen className="w-5 h-5 text-emerald-400/80 mt-0.5" strokeWidth={1.5} />
-                            <div>
-                                <p className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Especializações</p>
-                                <p className="text-[10px] text-slate-500">Módulos avançados liberados</p>
+                        <div className="flex min-h-[104px] items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:min-h-[132px]">
+                            <BookOpen className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400/80" strokeWidth={1.5} />
+                            <div className="min-w-0">
+                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Especializações</p>
+                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Módulos avançados liberados</p>
                             </div>
                         </div>
-                        <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                            <Award className="w-5 h-5 text-emerald-400/80 mt-0.5" strokeWidth={1.5} />
-                            <div>
-                                <p className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Certificações</p>
-                                <p className="text-[10px] text-slate-500">Suporte a testes OPIc e internacionais</p>
+                        <div className="flex min-h-[104px] items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:min-h-[132px]">
+                            <Award className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400/80" strokeWidth={1.5} />
+                            <div className="min-w-0">
+                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Certificações</p>
+                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Suporte a testes OPIc e internacionais</p>
                             </div>
                         </div>
-                        <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.05]">
-                            <Users className="w-5 h-5 text-emerald-400/80 mt-0.5" strokeWidth={1.5} />
-                            <div>
-                                <p className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Squads & Lobbies</p>
-                                <p className="text-[10px] text-slate-500">Acesso à nossa comunidade</p>
+                        <div className="flex min-h-[104px] items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:min-h-[132px]">
+                            <Users className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400/80" strokeWidth={1.5} />
+                            <div className="min-w-0">
+                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Squads e Lobbies</p>
+                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Acesso direto à nossa comunidade</p>
                             </div>
                         </div>
                     </motion.div>
@@ -107,11 +107,11 @@ export default function ObrigadoPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 1.2, duration: 0.5 }}
-                        className="flex flex-col sm:flex-row items-center gap-3 w-full"
+                        className="flex w-full flex-col items-center gap-3 sm:flex-row"
                     >
                         <button
                             onClick={handlePillar2}
-                            className="w-full relative group overflow-hidden rounded-xl bg-white text-black py-4 font-semibold text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            className="group relative w-full overflow-hidden rounded-xl bg-white py-4 text-sm font-semibold text-black transition-all hover:scale-[1.02] active:scale-[0.98]"
                         >
                             <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-black/10 to-transparent skew-x-12" />
                             <span className="flex items-center justify-center gap-2">
@@ -122,7 +122,7 @@ export default function ObrigadoPage() {
                         
                         <button
                             onClick={handleDashboard}
-                            className="w-full rounded-xl bg-transparent border border-white/20 text-white py-4 font-semibold text-sm transition-all hover:bg-white/5 active:scale-[0.98]"
+                            className="w-full rounded-xl border border-white/20 bg-transparent py-4 text-sm font-semibold text-white transition-all hover:bg-white/5 active:scale-[0.98]"
                         >
                             MENU PRINCIPAL
                         </button>
