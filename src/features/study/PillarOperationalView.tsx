@@ -10,9 +10,7 @@ import {
 import { ContentBlock, PillarData } from "@/types/study";
 import { cn } from "@/lib/ui/cn";
 import { useProgress } from "@/context/ProgressContext";
-import { useTranslation } from "@/context/TranslationContext";
 import { AudioButton } from "@/components/ui/AudioButton";
-import { Languages } from "lucide-react";
 import { parseTranslatable, extractTranslatableText, parseTextWithTranslations } from "@/utils/translation";
 
 interface PillarOperationalViewProps {
@@ -2643,36 +2641,18 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
     const [highlightedModuleId, setHighlightedModuleId] = useState<string | null>(null);
 
     const { markPillarModuleAsCompleted, isPillarModuleCompleted } = useProgress();
-    const { alwaysShowTranslations, toggleAlwaysShowTranslations } = useTranslation();
 
     const scrollToModuleAnchor = (
         moduleId: string,
-        options?: { delay?: number; behavior?: ScrollBehavior; settle?: boolean }
+        options?: { delay?: number; behavior?: ScrollBehavior }
     ) => {
-        const { delay = 80, behavior = "auto", settle = false } = options || {};
-
-        const align = (scrollBehavior: ScrollBehavior = "auto") => {
-            const moduleCard = document.getElementById(`module-${moduleId}`);
-            const anchor = document.getElementById(`module-anchor-${moduleId}`);
-            const target = moduleCard || anchor;
-            if (!target) return;
-
-            const top = Math.max(0, target.getBoundingClientRect().top + window.scrollY - 16);
-            window.scrollTo({ top, behavior: scrollBehavior });
-        };
+        const { delay = 80, behavior = "auto" } = options || {};
 
         window.setTimeout(() => {
-            align(behavior);
-
-            if (!settle) {
-                requestAnimationFrame(() => align("auto"));
-                return;
-            }
-
-            // Extra passes to neutralize layout shifts from accordion animation and focus shifts.
-            requestAnimationFrame(() => requestAnimationFrame(() => align("auto")));
-            [80, 180, 320, 520, 760].forEach((ms) => {
-                window.setTimeout(() => align("auto"), ms);
+            requestAnimationFrame(() => {
+                const anchor = document.getElementById(`module-anchor-${moduleId}`);
+                if (!anchor) return;
+                anchor.scrollIntoView({ behavior, block: "start" });
             });
         }, delay);
     };
@@ -2699,7 +2679,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
 
         // Scroll to module if opening
         if (newActiveId) {
-            scrollToModuleAnchor(moduleId, { delay: 90, behavior: "auto", settle: true });
+            scrollToModuleAnchor(moduleId, { delay: 90, behavior: "auto" });
         }
     };
 
@@ -2711,33 +2691,21 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         // Mark as completed
         markPillarModuleAsCompleted(currentModuleId);
 
-        // Scroll to the CURRENT module (which is consistent/stable at the top)
-        // Scroll to the CURRENT module logic removed to favor Next Module focus
-        // setTimeout(() => {
-        //     const currentAnchor = document.getElementById(`module-anchor-${currentModuleId}`);
-        //     if (currentAnchor) {
-        //         currentAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        //     }
-        // }, 10);
-
-        // Find next module
         const nextModule = data.modules![currentIndex + 1];
 
         if (nextModule) {
             setHighlightedModuleId(nextModule.id);
             setActiveModuleId(nextModule.id);
 
-            // Wait for the accordion transition to settle, then align viewport.
-            scrollToModuleAnchor(nextModule.id, { delay: 90, behavior: "auto", settle: true });
+            scrollToModuleAnchor(nextModule.id, { delay: 120, behavior: "smooth" });
 
             // Stop blinking after 3 seconds
             setTimeout(() => {
                 setHighlightedModuleId(null);
             }, 3000);
         } else {
-            // If no next module, scroll to current to show completion state clearly
             setActiveModuleId(null);
-            scrollToModuleAnchor(currentModuleId, { delay: 90, behavior: "auto", settle: true });
+            scrollToModuleAnchor(currentModuleId, { delay: 120, behavior: "smooth" });
         }
     };
 
@@ -2752,53 +2720,6 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                 <p className="text-xl text-slate-400 max-w-2xl font-light leading-relaxed">
                     {parseTextWithTranslations(data.subtitle)}
                 </p>
-
-                {/* TRANSLATION TOGGLE */}
-                <div className="mt-8 flex items-center">
-                    <button
-                        type="button"
-                        onClick={toggleAlwaysShowTranslations}
-                        className={cn(
-                            "flex items-center gap-3 px-4 py-2 rounded-full border transition-all duration-300 group relative overflow-hidden",
-                            alwaysShowTranslations
-                                ? "bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
-                                : "bg-slate-900/50 border-slate-700 text-slate-500 hover:border-slate-500"
-                        )}
-                    >
-                        <div className={cn(
-                            "absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity",
-                            alwaysShowTranslations && "opacity-100"
-                        )} />
-
-                        <Languages className={cn(
-                            "w-5 h-5 transition-transform duration-500",
-                            alwaysShowTranslations ? "rotate-0 scale-110" : "rotate-12 scale-100"
-                        )} />
-
-                        <div className="flex flex-col items-start leading-none relative z-10">
-                            <span className="text-[10px] uppercase font-bold tracking-widest mb-0.5 opacity-60">Study Mode</span>
-                            <span className="text-sm font-bold">
-                                {alwaysShowTranslations ? "Sempre Traduzir: ON" : "Sempre Traduzir: OFF"}
-                            </span>
-                        </div>
-
-                        <div className={cn(
-                            "w-8 h-4 rounded-full relative transition-colors duration-300 ml-2 border",
-                            alwaysShowTranslations ? "bg-cyan-500 border-cyan-400" : "bg-slate-800 border-slate-700"
-                        )}>
-                            <div className={cn(
-                                "absolute top-0.5 w-2.5 h-2.5 rounded-full bg-white transition-all duration-300 shadow-sm",
-                                alwaysShowTranslations ? "left-4.5" : "left-0.5"
-                            )} />
-                        </div>
-                    </button>
-
-                    <p className="ml-4 text-[10px] text-slate-500 max-w-[180px] leading-tight hidden sm:block italic">
-                        {alwaysShowTranslations
-                            ? "Traduções fixas ativadas para imersão técnica."
-                            : "Ative para exibir traduções sem precisar pairar."}
-                    </p>
-                </div>
             </div>
 
             {/* CASCADING MODULES */}
