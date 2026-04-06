@@ -547,17 +547,18 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                 <p className="text-sm text-slate-100">{parseTextWithTranslations(cfg.context)}</p>
             </div>
 
-            <div className="rounded-xl border border-slate-700/70 bg-gradient-to-br from-slate-950/80 to-slate-900/60 p-4 mb-4">
-                <div className="grid grid-cols-1 md:grid-cols-[repeat(6,minmax(0,1fr))] gap-3 items-stretch">
+            <div className="rounded-xl border border-slate-700/70 bg-gradient-to-br from-slate-950/80 to-slate-900/60 p-4 mb-4 overflow-hidden">
+                <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
                     <div className={cn(
-                        "rounded-lg border p-3 min-h-[92px] flex flex-col justify-between",
-                        position === 0 ? "border-cyan-500/60 bg-cyan-950/20" : "border-slate-700 bg-slate-900/60"
+                        "snap-start shrink-0 rounded-xl border p-4 w-[220px] md:w-[240px] min-h-[168px] flex flex-col justify-between",
+                        position === 0 ? "border-cyan-500/60 bg-cyan-950/20 shadow-[0_0_24px_rgba(6,182,212,0.12)]" : "border-slate-700 bg-slate-900/60"
                     )}>
                         <div>
-                            <p className="text-[11px] uppercase tracking-wider font-mono text-slate-400">Início</p>
-                            <p className="text-sm text-slate-200 mt-1">Você entra na conversa.</p>
+                            <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-slate-400">Início</p>
+                            <p className="text-2xl mt-3">🙂</p>
+                            <p className="text-lg text-slate-100 mt-3 leading-snug">Você entra na conversa.</p>
                         </div>
-                        <p className="text-lg">{position === 0 ? "🙂" : "•"}</p>
+                        <p className="text-xs text-slate-400">Primeiro passo: abrir contato sem pressão.</p>
                     </div>
 
                     {stages.map((stage, index) => {
@@ -566,40 +567,65 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                         const isHere = position === index + 1;
                         const wasVisited = visitedStage === index;
                         return (
-                            <div key={stage.id || `${stage.title}-${index}`} className="flex items-center gap-3">
-                                <div className="hidden md:block h-px flex-1 bg-gradient-to-r from-cyan-500/40 to-slate-700" />
+                            <React.Fragment key={stage.id || `${stage.title}-${index}`}>
+                                <div className="hidden md:flex shrink-0 items-center justify-center w-12">
+                                    <div className={cn(
+                                        "h-px w-full",
+                                        isCompleted ? "bg-emerald-500/60" : isActive || isHere ? "bg-cyan-500/60" : "bg-slate-700"
+                                    )} />
+                                </div>
                                 <div className={cn(
-                                    "rounded-lg border p-3 min-h-[92px] flex-1 min-w-0",
+                                    "snap-start shrink-0 rounded-xl border p-4 w-[220px] md:w-[260px] min-h-[168px] flex flex-col justify-between transition-all",
                                     isCompleted
-                                        ? "border-emerald-500/50 bg-emerald-950/20"
+                                        ? "border-emerald-500/50 bg-emerald-950/20 shadow-[0_0_20px_rgba(16,185,129,0.12)]"
                                         : isActive
-                                            ? "border-cyan-500/60 bg-cyan-950/20"
+                                            ? "border-cyan-500/60 bg-cyan-950/20 shadow-[0_0_24px_rgba(6,182,212,0.12)]"
                                             : isHere
                                                 ? "border-amber-500/60 bg-amber-950/20"
                                                 : wasVisited
                                                     ? "border-rose-500/40 bg-rose-950/10"
                                                     : "border-slate-700 bg-slate-900/60"
                                 )}>
-                                    <div className="flex items-center justify-between gap-2">
-                                        <p className="text-[11px] uppercase tracking-wider font-mono text-slate-400">Checkpoint {index + 1}</p>
-                                        <span className="text-base">{isCompleted ? "✓" : isActive ? "●" : isHere ? "🙂" : "○"}</span>
+                                    <div>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-slate-400">Checkpoint {index + 1}</p>
+                                            <span className="text-base">{isCompleted ? "✓" : isActive ? "●" : isHere ? "🙂" : "○"}</span>
+                                        </div>
+                                        <p className="text-lg text-slate-100 mt-3 leading-tight">{parseTextWithTranslations(stage.title)}</p>
+                                        <p className="text-sm text-slate-400 mt-3 leading-relaxed">{parseTextWithTranslations(stage.situation)}</p>
                                     </div>
-                                    <p className="text-sm text-slate-100 mt-1">{parseTextWithTranslations(stage.title)}</p>
-                                    <p className="text-xs text-slate-400 mt-2">{parseTextWithTranslations(stage.situation)}</p>
+                                    <p className="text-xs text-slate-500">
+                                        {isCompleted ? "Etapa concluída." : isActive ? "Você está decidindo agora." : "Avance para destravar esta etapa."}
+                                    </p>
                                 </div>
-                            </div>
+                            </React.Fragment>
                         );
                     })}
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 max-w-[240px]">
-                <span />
-                <button disabled className="py-3 rounded border text-slate-500 text-lg border-slate-700">↑</button>
-                <span />
-                <button onClick={() => move("back")} disabled={position === 0} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", position === 0 ? "border-slate-700 text-slate-500" : "border-slate-600")}>←</button>
-                <button disabled className="py-3 rounded border text-slate-500 text-lg border-slate-700">↓</button>
-                <button onClick={() => move("forward")} disabled={isFinished} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", isFinished ? "border-slate-700 text-slate-500" : "border-slate-600")}>→</button>
+            <div className="flex flex-wrap items-center gap-2">
+                <button
+                    onClick={() => move("back")}
+                    disabled={position === 0}
+                    className={cn(
+                        "px-4 py-3 rounded-lg border text-slate-200 text-lg active:scale-95 min-w-[72px]",
+                        position === 0 ? "border-slate-700 text-slate-500" : "border-slate-600 hover:border-cyan-500/60"
+                    )}
+                >
+                    ←
+                </button>
+                <button
+                    onClick={() => move("forward")}
+                    disabled={isFinished}
+                    className={cn(
+                        "px-4 py-3 rounded-lg border text-slate-200 text-lg active:scale-95 min-w-[72px]",
+                        isFinished ? "border-slate-700 text-slate-500" : "border-slate-600 hover:border-cyan-500/60"
+                    )}
+                >
+                    →
+                </button>
+                <p className="text-xs text-slate-500 font-mono ml-1">Use esquerda/direita para navegar pela rota.</p>
             </div>
 
             <div className="mt-3 text-xs text-slate-400 font-mono">
