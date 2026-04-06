@@ -338,7 +338,7 @@ const DEFAULT_MAZE: Required<MazeConfig> = {
     ],
 };
 
-const MazeGame = ({ data }: { data: MazeConfig }) => {
+const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => void }) => {
     const cfg = { ...DEFAULT_MAZE, ...data };
     const variants = React.useMemo(
         () => (cfg.mazeVariants?.length ? cfg.mazeVariants : [cfg.grid]),
@@ -371,6 +371,7 @@ const MazeGame = ({ data }: { data: MazeConfig }) => {
     const [activeQuestion, setActiveQuestion] = useState<(typeof cfg.questions)[number] | null>(null);
     const [wallFeedback, setWallFeedback] = useState<string | null>(null);
     const usedEasyRef = useRef<Set<number>>(new Set([0]));
+    const completionNotifiedRef = useRef(false);
 
     const canMove = useCallback((r: number, c: number) => {
         if (r < 0 || c < 0 || r >= mazeMeta.grid.length || c >= mazeMeta.grid[0].length) return false;
@@ -411,6 +412,7 @@ const MazeGame = ({ data }: { data: MazeConfig }) => {
         setMoveBudget(0);
         setGateFeedback("Responda uma pergunta para liberar 2 movimentos.");
         usedEasyRef.current = new Set([0]);
+        completionNotifiedRef.current = false;
         if (withSound) playUiSfx("click");
     }, [advanceMaze, easyPool]);
 
@@ -468,6 +470,10 @@ const MazeGame = ({ data }: { data: MazeConfig }) => {
 
         if (nr === mazeMeta.end[0] && nc === mazeMeta.end[1]) {
             setCompleted(true);
+            if (!completionNotifiedRef.current) {
+                completionNotifiedRef.current = true;
+                onComplete?.();
+            }
             playUiSfx("success");
             return;
         }
@@ -475,7 +481,7 @@ const MazeGame = ({ data }: { data: MazeConfig }) => {
         if (nextBudget === 0) {
             nextGateQuestion();
         }
-    }, [activeQuestion, canMove, completed, mazeMeta.end, nextGateQuestion, triggerQuestion]);
+    }, [activeQuestion, canMove, completed, mazeMeta.end, nextGateQuestion, onComplete, triggerQuestion]);
 
     const answerGateQuestion = (idx: number) => {
         if (!gateQuestion || activeQuestion || completed) return;
@@ -640,6 +646,8 @@ const MazeGame = ({ data }: { data: MazeConfig }) => {
         </div>
     );
 };
+
+type ModuleChallengeQuestion = { question: string; answer: boolean };
 
 const RevealBox = ({ title, children }: { title: string, children: React.ReactNode }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -950,6 +958,315 @@ const AudioDecodeGame = ({ data }: { data: { phonetic: string; options: string[]
                                 );
                             })}
                         </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const ConsolidationGame = ({
+    data,
+    onComplete,
+}: {
+    data: {
+        title?: string;
+        subtitle?: string;
+        rounds: Array<{
+            label: string;
+            objective?: string;
+            tasks?: Array<
+                | { type: "select"; prompt: string; options: string[]; answer: number; feedback?: string }
+                | { type: "order"; prompt: string; pieces: string[]; expected: string; feedback?: string }
+            >;
+            // Backward compatibility
+            prompt?: string;
+            options?: string[];
+            answer?: number;
+            feedback?: string;
+        }>;
+    };
+    onComplete?: () => void;
+}) => {
+    type SelectTask = { type: "select"; prompt: string; options: string[]; answer: number; feedback?: string };
+    type OrderTask = { type: "order"; prompt: string; pieces: string[]; expected: string; feedback?: string };
+    type LearnTask = SelectTask | OrderTask;
+
+    const rounds = React.useMemo(() => {
+        return data.rounds.map((round) => {
+            if (round.tasks?.length) return { label: round.label, objective: round.objective, tasks: round.tasks as LearnTask[] };
+            const fallbackPrompt = round.prompt || "Escolha a melhor resposta.";
+            const fallbackOptions = round.options || [];
+            const fallbackAnswer = typeof round.answer === "number" ? round.answer : 0;
+            return {
+                label: round.label,
+                objective: round.objective,
+                tasks: [
+                    {
+                        type: "select",
+                        prompt: fallbackPrompt,
+                        options: fallbackOptions,
+                        answer: fallbackAnswer,
+                        feedback: round.feedback,
+                    } as SelectTask,
+                ] as LearnTask[],
+            };
+        });
+    }, [data.rounds]);
+
+    const totalTasks = React.useMemo(
+        () => rounds.reduce((acc, r) => acc + r.tasks.length, 0),
+        [rounds]
+    );
+
+    const [roundIndex, setRoundIndex] = useState(0);
+    const [taskIndex, setTaskIndex] = useState(0);
+    const [score, setScore] = useState(0);
+    const [finished, setFinished] = useState(false);
+    const [selectedOption, setSelectedOption] = useState<number | null>(null);
+    const [feedback, setFeedback] = useState<string | null>(null);
+    const [taskValidated, setTaskValidated] = useState(false);
+    const completionNotifiedRef = useRef(false);
+    const getTaskByPosition = useCallback((rIdx: number, tIdx: number): LearnTask | null => {
+        const round = rounds[rIdx];
+        if (!round) return null;
+        return round.tasks[tIdx] || null;
+    }, [rounds]);
+
+    const currentRound = rounds[Math.min(roundIndex, rounds.length - 1)];
+    const currentTask = currentRound.tasks[Math.min(taskIndex, currentRound.tasks.length - 1)] as LearnTask;
+    const [orderSelected, setOrderSelected] = useState<string[]>([]);
+    const [orderPool, setOrderPool] = useState<string[]>(
+        () => currentTask?.type === "order" ? shuffle(currentTask.pieces) : []
+    );
+
+    const currentTaskNumber = React.useMemo(() => {
+        let count = 0;
+        for (let r = 0; r < roundIndex; r++) count += rounds[r].tasks.length;
+        return count + taskIndex + 1;
+    }, [roundIndex, rounds, taskIndex]);
+
+    const moveNext = () => {
+        if (!taskValidated) return;
+        setSelectedOption(null);
+        setFeedback(null);
+        setTaskValidated(false);
+
+        const isLastTaskInRound = taskIndex + 1 >= currentRound.tasks.length;
+        const isLastRound = roundIndex + 1 >= rounds.length;
+
+        if (isLastTaskInRound && isLastRound) {
+            setFinished(true);
+            if (!completionNotifiedRef.current) {
+                completionNotifiedRef.current = true;
+                onComplete?.();
+            }
+            playUiSfx("success");
+            return;
+        }
+        if (isLastTaskInRound) {
+            const nextTask = getTaskByPosition(roundIndex + 1, 0);
+            setOrderSelected([]);
+            setOrderPool(nextTask?.type === "order" ? shuffle(nextTask.pieces) : []);
+            setRoundIndex((v) => v + 1);
+            setTaskIndex(0);
+            return;
+        }
+        const nextTask = getTaskByPosition(roundIndex, taskIndex + 1);
+        setOrderSelected([]);
+        setOrderPool(nextTask?.type === "order" ? shuffle(nextTask.pieces) : []);
+        setTaskIndex((v) => v + 1);
+    };
+
+    const checkSelect = (idx: number) => {
+        if (taskValidated || finished || currentTask.type !== "select") return;
+        setSelectedOption(idx);
+        const correct = idx === currentTask.answer;
+        if (correct) setScore((s) => s + 1);
+        setFeedback(currentTask.feedback || (correct ? "Boa escolha. Você soou natural e gentil." : "Quase. Pense no tom + clareza + confirmação."));
+        setTaskValidated(true);
+        playUiSfx(correct ? "success" : "error");
+    };
+
+    const pickOrderPiece = (piece: string, idx: number) => {
+        if (taskValidated || currentTask.type !== "order") return;
+        setOrderSelected((prev) => [...prev, piece]);
+        setOrderPool((prev) => prev.filter((_, i) => i !== idx));
+        playUiSfx("click");
+    };
+
+    const removeOrderPiece = (piece: string, idx: number) => {
+        if (taskValidated || currentTask.type !== "order") return;
+        setOrderPool((prev) => [...prev, piece]);
+        setOrderSelected((prev) => prev.filter((_, i) => i !== idx));
+        playUiSfx("click");
+    };
+
+    const checkOrder = () => {
+        if (taskValidated || currentTask.type !== "order") return;
+        const built = orderSelected.join(" ").trim().toLowerCase();
+        const expected = currentTask.expected.trim().toLowerCase();
+        const correct = built === expected;
+        if (correct) setScore((s) => s + 1);
+        setFeedback(currentTask.feedback || (correct ? "Estrutura correta. Frase clara e educada." : "A ordem não ficou natural. Tente de novo com a estrutura mais gentil."));
+        setTaskValidated(true);
+        playUiSfx(correct ? "success" : "error");
+    };
+
+    const restart = () => {
+        setRoundIndex(0);
+        setTaskIndex(0);
+        setScore(0);
+        setFinished(false);
+        setSelectedOption(null);
+        setFeedback(null);
+        setTaskValidated(false);
+        completionNotifiedRef.current = false;
+        const firstTask = getTaskByPosition(0, 0);
+        setOrderSelected([]);
+        setOrderPool(firstTask?.type === "order" ? shuffle(firstTask.pieces) : []);
+        playUiSfx("click");
+    };
+
+    return (
+        <div className="my-8 rounded-xl border border-emerald-500/30 overflow-hidden bg-slate-900 shadow-xl">
+            <div className="bg-gradient-to-r from-emerald-900/40 to-cyan-900/30 px-4 py-3 md:px-6 md:py-4 border-b border-emerald-500/30 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <Target className="w-5 h-5 text-emerald-400" />
+                    <span className="font-bold text-emerald-300 font-mono text-xs md:text-sm tracking-wider">
+                        {parseTextWithTranslations(data.title || "TREINO DE CONSOLIDAÇÃO")}
+                    </span>
+                </div>
+                <span className="font-mono text-xs text-emerald-300/90 bg-emerald-950/40 px-2 py-1 rounded">
+                    Etapa {finished ? totalTasks : currentTaskNumber}/{totalTasks}
+                </span>
+            </div>
+
+            <div className="p-4 md:p-6">
+                {data.subtitle && (
+                    <p className="text-slate-300 text-sm md:text-base mb-3">{parseTextWithTranslations(data.subtitle)}</p>
+                )}
+                {!finished && (
+                    <>
+                        <div className="mb-3 rounded-md border border-slate-700 bg-slate-950/40 p-3">
+                            <p className="text-[11px] uppercase tracking-wider font-mono text-cyan-300 mb-1">{parseTextWithTranslations(currentRound.label)}</p>
+                            {currentRound.objective && (
+                                <p className="text-xs text-slate-400 mb-1">{parseTextWithTranslations(currentRound.objective)}</p>
+                            )}
+                            <p className="text-sm text-slate-100">{parseTextWithTranslations(currentTask.prompt)}</p>
+                        </div>
+
+                        {currentTask.type === "select" ? (
+                            <div className="grid gap-2">
+                                {currentTask.options.map((opt, idx) => {
+                                    const isCorrect = idx === currentTask.answer;
+                                    const isSelected = selectedOption === idx;
+                                    return (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            onClick={() => checkSelect(idx)}
+                                            disabled={taskValidated}
+                                            className={cn(
+                                                "text-left px-3 py-3 rounded border text-sm transition",
+                                                taskValidated && isCorrect
+                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
+                                                    : taskValidated && isSelected && !isCorrect
+                                                        ? "bg-red-900/40 border-red-500/50 text-red-100"
+                                                        : "border-slate-600 bg-slate-900/60 text-slate-100 hover:border-cyan-500/50"
+                                            )}
+                                        >
+                                            {parseTextWithTranslations(opt)}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                <div className="rounded-md border border-emerald-700/40 bg-emerald-950/20 p-2 min-h-[46px]">
+                                    {orderSelected.length ? (
+                                        <div className="flex flex-wrap gap-2">
+                                            {orderSelected.map((piece, idx) => (
+                                                <button
+                                                    key={`${piece}-${idx}`}
+                                                    type="button"
+                                                    onClick={() => removeOrderPiece(piece, idx)}
+                                                    disabled={taskValidated}
+                                                    className="px-2.5 py-1.5 rounded bg-emerald-800/50 text-emerald-100 text-xs border border-emerald-500/40"
+                                                >
+                                                    {piece}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-emerald-200/80">Toque nas palavras para montar a frase.</p>
+                                    )}
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                    {orderPool.map((piece, idx) => (
+                                        <button
+                                            key={`${piece}-pool-${idx}`}
+                                            type="button"
+                                            onClick={() => pickOrderPiece(piece, idx)}
+                                            disabled={taskValidated}
+                                            className="px-2.5 py-1.5 rounded bg-slate-800 text-slate-100 text-xs border border-slate-600 hover:border-cyan-500/50"
+                                        >
+                                            {piece}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={checkOrder}
+                                    disabled={taskValidated || orderSelected.length !== currentTask.pieces.length}
+                                    className={cn(
+                                        "px-3 py-2 rounded text-sm font-medium",
+                                        taskValidated || orderSelected.length !== currentTask.pieces.length
+                                            ? "bg-slate-700 text-slate-400"
+                                            : "bg-cyan-600 text-white hover:bg-cyan-500"
+                                    )}
+                                >
+                                    Validar frase
+                                </button>
+                            </div>
+                        )}
+
+                        {feedback && (
+                            <div className="mt-3 rounded-md border border-cyan-500/40 bg-cyan-950/20 p-3 text-sm text-cyan-100">
+                                {parseTextWithTranslations(feedback)}
+                            </div>
+                        )}
+
+                        <div className="mt-4 flex items-center justify-between gap-3">
+                            <div className="text-xs font-mono text-slate-400">Pontos: {score}/{totalTasks}</div>
+                            <button
+                                type="button"
+                                onClick={moveNext}
+                                disabled={!taskValidated}
+                                className={cn(
+                                    "px-4 py-2 rounded-md text-sm font-medium",
+                                    taskValidated ? "bg-emerald-600 hover:bg-emerald-500 text-white" : "bg-slate-700 text-slate-400"
+                                )}
+                            >
+                                {currentTaskNumber >= totalTasks ? "Finalizar desafio" : "Próxima tarefa"}
+                            </button>
+                        </div>
+                    </>
+                )}
+
+                {finished && (
+                    <div className="mt-2 rounded border border-emerald-500/40 bg-emerald-900/20 text-emerald-200 p-4 text-sm">
+                        <p className="font-semibold mb-1">Desafio concluído</p>
+                        <p>Você terminou o treino com {score}/{totalTasks} acertos. Refaça para fixar ainda mais.</p>
+                        <button
+                            type="button"
+                            onClick={restart}
+                            className="mt-3 px-3 py-2 rounded border border-emerald-400/50 hover:bg-emerald-500/15"
+                        >
+                            Jogar novamente
+                        </button>
                     </div>
                 )}
             </div>
@@ -2888,7 +3205,15 @@ const TowerStamp = ({ content }: { content: string }) => (
     </div>
 );
 
-const RenderBlock = ({ block }: { block: ContentBlock }) => {
+const RenderBlock = ({
+    block,
+    moduleId,
+    onGameComplete,
+}: {
+    block: ContentBlock;
+    moduleId?: string;
+    onGameComplete?: (moduleId: string) => void;
+}) => {
     if (block.type.startsWith("box-") || block.type === "pillar-end" || block.type === "micro-win") {
         const boxClass = BoxStyles[block.type as keyof typeof BoxStyles] || "";
         return (
@@ -3003,18 +3328,20 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
             return <CombatSortGame data={JSON.parse(block.content as string)} />;
         case "audio-decode-game":
             return <AudioDecodeGame data={JSON.parse(block.content as string)} />;
+        case "consolidation-game":
+            return <ConsolidationGame data={JSON.parse(block.content as string)} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} />;
         case "maze-game":
             if (typeof block.content === "string") {
                 const raw = (block.content as string).trim();
                 if (raw.startsWith("{")) {
                     try {
-                        return <MazeGame data={JSON.parse(raw)} />;
+                        return <MazeGame data={JSON.parse(raw)} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} />;
                     } catch {
-                        return <MazeGame data={{}} />;
+                        return <MazeGame data={{}} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} />;
                     }
                 }
             }
-            return <MazeGame data={{}} />;
+            return <MazeGame data={{}} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} />;
         case "reveal-box":
             return <RevealBox title={parseTextWithTranslations(block.title || "Detalhes") as string}>{parseTextWithTranslations(block.content as string)}</RevealBox>;
         case "audio-player":
@@ -3255,6 +3582,11 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
     const [challengePassed, setChallengePassed] = useState<Record<string, boolean>>({});
     const [challengeLockUntil, setChallengeLockUntil] = useState<Record<string, number>>({});
     const [challengeFeedback, setChallengeFeedback] = useState<Record<string, "ok" | "error" | null>>({});
+    const [challengeQuestions, setChallengeQuestions] = useState<Record<string, ModuleChallengeQuestion[]>>({});
+    const challengeUsedQuestionIdsRef = useRef<Record<string, Set<number>>>({});
+    const challengeCursorRef = useRef<Record<string, number>>({});
+    const [mazePassedByModule, setMazePassedByModule] = useState<Record<string, boolean>>({});
+    const [mazeHintByModule, setMazeHintByModule] = useState<Record<string, string | null>>({});
     const [clockNow, setClockNow] = useState(() => Date.now());
     const accordionTimerRef = useRef<number | null>(null);
     const viewRootRef = useRef<HTMLDivElement | null>(null);
@@ -3401,45 +3733,152 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         }
     };
 
-    const getModuleChallenge = (moduleId: string, moduleTitle: string) => {
+    const getChallengePool = (moduleId: string, moduleTitle: string): ModuleChallengeQuestion[] => {
+        const title = moduleTitle.toLowerCase();
+
+        if (moduleId.startsWith("p3-")) {
+            if (title.includes("base social")) {
+                return [
+                    { question: "Falar com gentileza melhora a resposta do outro lado?", answer: true },
+                    { question: "Ser extremamente direto sempre soa natural em inglês?", answer: false },
+                    { question: "Pedir repetição com educação ajuda a manter a conversa?", answer: true },
+                    { question: "Fingir que entendeu evita problema no longo prazo?", answer: false },
+                    { question: "Frases curtas e claras podem ser mais eficazes que frases longas?", answer: true },
+                    { question: "Usar 'please' e 'thank you' é opcional em todo contexto formal?", answer: false },
+                ];
+            }
+            if (title.includes("restaurante") || title.includes("café")) {
+                return [
+                    { question: "No restaurante, 'I'd like...' costuma soar mais natural que 'I want...'? ", answer: true },
+                    { question: "Se o pedido vier errado, a melhor abordagem é atacar o atendente?", answer: false },
+                    { question: "Confirmar conta e itens antes de pagar evita confusão?", answer: true },
+                    { question: "Em pedidos com alergia, ser vago é suficiente?", answer: false },
+                    { question: "Pedir para dividir a conta é uma situação comum e válida?", answer: true },
+                    { question: "Evitar qualquer pergunta sobre o menu ajuda na clareza?", answer: false },
+                ];
+            }
+            if (title.includes("hotel")) {
+                return [
+                    { question: "No hotel, explicar problema + pedido de solução é uma boa estrutura?", answer: true },
+                    { question: "Reclamar sem contexto costuma resolver mais rápido?", answer: false },
+                    { question: "Pedir troca de quarto com educação aumenta chance de ajuda?", answer: true },
+                    { question: "Para check-in/check-out, não precisa confirmar horário?", answer: false },
+                    { question: "Pedir ajuda para bagagem/itens perdidos é apropriado?", answer: true },
+                    { question: "Silêncio total quando há problema no quarto é a melhor estratégia?", answer: false },
+                ];
+            }
+            if (title.includes("transporte") || title.includes("aeroporto")) {
+                return [
+                    { question: "Confirmar destino no app antes de sair reduz erro de rota?", answer: true },
+                    { question: "Em caso de voo atrasado, ficar sem perguntar opções ajuda?", answer: false },
+                    { question: "Perguntar portão e horário de embarque é essencial?", answer: true },
+                    { question: "Se perdeu conexão, é melhor não avisar ninguém?", answer: false },
+                    { question: "Em transporte, pedido claro e curto facilita entendimento?", answer: true },
+                    { question: "No aeroporto, adivinhar informações é melhor que confirmar?", answer: false },
+                ];
+            }
+            if (title.includes("saúde") || title.includes("farmácia")) {
+                return [
+                    { question: "Em saúde, descrever sintoma e intensidade ajuda atendimento?", answer: true },
+                    { question: "Falar de alergia não é importante em consulta?", answer: false },
+                    { question: "Em emergência, frases curtas e diretas são recomendadas?", answer: true },
+                    { question: "Evitar pedir esclarecimento sobre dose de remédio é seguro?", answer: false },
+                    { question: "Pedir recibo/relatório pode ser necessário para seguro?", answer: true },
+                    { question: "Esperar piorar sem comunicar sintomas graves é boa prática?", answer: false },
+                ];
+            }
+        }
+
         if (moduleId === "p1-m1") {
             return [
                 { question: "Quando der branco, pedir desculpa pelo inglês é a melhor saída?", answer: false },
                 { question: "Usar frases curtas (como pedir repetição) ajuda a manter controle da conversa?", answer: true },
+                { question: "Respirar e ganhar 1 segundo pode evitar o travamento?", answer: true },
+                { question: "Fingir entendimento total sempre te protege da confusão?", answer: false },
             ];
         }
 
-        if (moduleTitle.toLowerCase().includes("pareto")) {
+        if (title.includes("pareto")) {
             return [
                 { question: "Você precisa saber todas as palavras para se comunicar bem?", answer: false },
                 { question: "Focar no vocabulário de maior uso acelera o resultado?", answer: true },
+                { question: "Praticar os blocos mais frequentes costuma trazer retorno rápido?", answer: true },
+                { question: "Distribuir esforço igual em tudo é sempre o mais eficiente?", answer: false },
             ];
         }
 
-        if (moduleTitle.toLowerCase().includes("som")) {
+        if (title.includes("som")) {
             return [
                 { question: "Fala conectada pode parecer mais rápida, mas é sobre ligação de sons?", answer: true },
                 { question: "Adicionar vogal no fim de toda palavra em inglês melhora sua clareza?", answer: false },
+                { question: "Perceber cortes e conexões de som ajuda no listening?", answer: true },
+                { question: "Ignorar ritmo e entonação não impacta compreensão?", answer: false },
             ];
         }
 
         return [
             { question: "Neste módulo, a prática real vale mais do que perfeição travada?", answer: true },
             { question: "Fingir entendimento quando você não entendeu é uma boa estratégia?", answer: false },
+            { question: "Pedir confirmação pode evitar erros em cadeia?", answer: true },
+            { question: "Evitar tentar por medo de errar é o melhor caminho?", answer: false },
         ];
     };
 
+    const pickModuleChallenge = (moduleId: string, moduleTitle: string): ModuleChallengeQuestion[] => {
+        const pool = getChallengePool(moduleId, moduleTitle);
+        const used = challengeUsedQuestionIdsRef.current[moduleId] ?? new Set<number>();
+        const available = pool.map((_, idx) => idx).filter((idx) => !used.has(idx));
+
+        let source = available.length >= 2
+            ? available
+            : pool.map((_, idx) => idx);
+
+        if (available.length < 2) {
+            challengeUsedQuestionIdsRef.current[moduleId] = new Set<number>();
+            source = pool.map((_, idx) => idx);
+        }
+        const cursor = challengeCursorRef.current[moduleId] ?? 0;
+        const pickedIdx = [
+            source[cursor % source.length],
+            source[(cursor + 1) % source.length],
+        ];
+        challengeCursorRef.current[moduleId] = (cursor + 2) % Math.max(source.length, 1);
+        const newUsed = challengeUsedQuestionIdsRef.current[moduleId] ?? new Set<number>();
+        pickedIdx.forEach((idx) => newUsed.add(idx));
+        challengeUsedQuestionIdsRef.current[moduleId] = newUsed;
+
+        return pickedIdx.map((idx) => pool[idx]);
+    };
+
     const handleStartCompletionFlow = (moduleId: string, moduleTitle: string, index: number) => {
+        const moduleRef = data.modules?.find((m) => m.id === moduleId);
+        const hasInlineGameGate = !!moduleRef?.blocks?.some((b) => b.type === "maze-game" || b.type === "consolidation-game");
+
+        if (hasInlineGameGate) {
+            if (!mazePassedByModule[moduleId]) {
+                setMazeHintByModule((prev) => ({
+                    ...prev,
+                    [moduleId]: "Conclua o desafio deste módulo para liberar o avanço.",
+                }));
+                return;
+            }
+            handleCompleteModule(moduleId, index);
+            return;
+        }
+
         if (challengePassed[moduleId]) {
             handleCompleteModule(moduleId, index);
             return;
         }
 
+        setMazeHintByModule((prev) => ({ ...prev, [moduleId]: null }));
+        const moduleQuestions = pickModuleChallenge(moduleId, moduleTitle);
+        setChallengeQuestions((prev) => ({ ...prev, [moduleId]: moduleQuestions }));
         setChallengeFeedback((prev) => ({ ...prev, [moduleId]: null }));
         setChallengeTarget({ moduleId, index });
         setChallengeAnswers((prev) => ({
             ...prev,
-            [moduleId]: prev[moduleId] ?? [null, null],
+            [moduleId]: [null, null],
         }));
     };
 
@@ -3458,7 +3897,10 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         const lockUntil = challengeLockUntil[moduleId] ?? 0;
         if (lockUntil > clockNow) return;
 
-        const questions = getModuleChallenge(moduleId, moduleTitle);
+        const questions = challengeQuestions[moduleId] ?? pickModuleChallenge(moduleId, moduleTitle);
+        if (!challengeQuestions[moduleId]) {
+            setChallengeQuestions((prev) => ({ ...prev, [moduleId]: questions }));
+        }
         const answers = challengeAnswers[moduleId] ?? [null, null];
         const allAnswered = answers.every((value) => value !== null);
         if (!allAnswered) return;
@@ -3477,6 +3919,11 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         setChallengeTarget(null);
         playUiSfx("success");
         handleCompleteModule(moduleId, index);
+    };
+
+    const handleGameComplete = (moduleId: string) => {
+        setMazePassedByModule((prev) => ({ ...prev, [moduleId]: true }));
+        setMazeHintByModule((prev) => ({ ...prev, [moduleId]: "Desafio concluído. Você já pode avançar para o próximo módulo." }));
     };
 
     return (
@@ -3500,6 +3947,8 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                     const isFirstUnlockedIncomplete = index === 0 || isPillarModuleCompleted(data.modules![index - 1]?.id);
                     const isLocked = module.status === 'locked' && !isCompleted && !isFirstUnlockedIncomplete;
                     const isHighlighted = highlightedModuleId === module.id;
+                    const hasInlineGameGate = module.blocks.some((b) => b.type === "maze-game" || b.type === "consolidation-game");
+                    const blockedByMaze = hasInlineGameGate && !mazePassedByModule[module.id];
 
                     return (
                         <div key={module.id} className="relative">
@@ -3609,7 +4058,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
 
                                                 <div className="pt-8 space-y-2">
                                                     {module.blocks.map((block, idx) => (
-                                                        <RenderBlock key={idx} block={block} />
+                                                        <RenderBlock key={idx} block={block} moduleId={module.id} onGameComplete={handleGameComplete} />
                                                     ))}
                                                 </div>
 
@@ -3632,9 +4081,14 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                                                 e.currentTarget.blur();
                                                                 handleStartCompletionFlow(module.id, module.title, index);
                                                             }}
-                                                            className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white px-6 py-3 rounded font-bold transition-all shadow-[0_0_20px_rgba(8,145,178,0.4)] hover:shadow-[0_0_30px_rgba(8,145,178,0.6)] group"
+                                                            className={cn(
+                                                                "flex items-center gap-2 px-6 py-3 rounded font-bold transition-all group",
+                                                                blockedByMaze
+                                                                    ? "bg-amber-700/80 hover:bg-amber-600 text-white"
+                                                                    : "bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white shadow-[0_0_20px_rgba(8,145,178,0.4)] hover:shadow-[0_0_30px_rgba(8,145,178,0.6)]"
+                                                            )}
                                                         >
-                                                            <span>Concluir e avançar</span>
+                                                            <span>{blockedByMaze ? "Concluir (faça o desafio)" : "Concluir e avançar"}</span>
                                                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                                         </button>
                                                     ) : index < data.modules!.length - 1 ? (
@@ -3657,6 +4111,12 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                                     ) : null}
                                                 </div>
 
+                                                {mazeHintByModule[module.id] && !isCompleted && (
+                                                    <p className="mt-4 text-cyan-300 text-sm">
+                                                        {mazeHintByModule[module.id]}
+                                                    </p>
+                                                )}
+
                                                 {challengeTarget?.moduleId === module.id && !isCompleted && (
                                                     <div className="mt-6 rounded-xl border border-cyan-500/30 bg-slate-900/60 p-4 md:p-6">
                                                         <div className="flex items-center justify-between gap-4 mb-4">
@@ -3675,7 +4135,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                                         </div>
 
                                                         <div className="space-y-4">
-                                                            {getModuleChallenge(module.id, module.title).map((q, qIndex) => {
+                                                            {(challengeQuestions[module.id] ?? []).map((q, qIndex) => {
                                                                 const answerValue = challengeAnswers[module.id]?.[qIndex] ?? null;
                                                                 return (
                                                                     <div key={`${module.id}-q-${qIndex}`} className="rounded-lg border border-slate-700/70 bg-slate-950/50 p-3">

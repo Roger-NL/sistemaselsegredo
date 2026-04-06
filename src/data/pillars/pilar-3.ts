@@ -17,15 +17,33 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "h2",
-                    content: "Aqui você aprende a abrir portas com linguagem simples"
+                    content: "Aqui você aprende a destravar conversas sem parecer duro, travado ou robótico"
                 },
                 {
                     type: "paragraph",
-                    content: "No inglês real, não basta saber palavras. O que muda o jogo é: tom, gentileza e clareza. Este módulo cria sua base para falar sem travar em situações comuns."
+                    content: "No inglês do dia a dia, quase nunca vence quem sabe a frase mais bonita. Vence quem consegue ser claro, gentil e rápido. Este módulo não é sobre decorar falas prontas. É sobre entender o padrão que faz você soar natural em situações comuns."
+                },
+                {
+                    type: "box-insight",
+                    title: "O que este módulo muda",
+                    content: "Você vai perceber que, em muitos contextos, o problema não é vocabulário. É tom. A pessoa sabe o que quer dizer, mas fala de um jeito seco, duro ou confuso. Quando você aprende a suavizar o pedido e fechar com clareza, seu inglês imediatamente parece melhor."
                 },
                 {
                     type: "h3",
-                    content: "1.1 Polidez prática: direto sem soar seco"
+                    content: "1.1 O problema real: saber a frase, mas soar seco"
+                },
+                {
+                    type: "paragraph",
+                    content: "Muita gente traduz do português de forma direta: \"eu quero água\", \"me dá o menu\", \"repete\". Em inglês, isso até pode ser entendido, mas muitas vezes soa brusco. Não porque esteja totalmente errado. E sim porque falta o amortecedor social que o inglês usa o tempo inteiro."
+                },
+                {
+                    type: "box-action",
+                    title: "Ideia central",
+                    content: "Em inglês social, você não precisa falar muito. Você precisa suavizar. Pequenas palavras como \"could\", \"please\", \"I'd like\" e \"thank you\" mudam muito a percepção."
+                },
+                {
+                    type: "h3",
+                    content: "1.2 Comparando o impacto: o que muda no ouvido do outro"
                 },
                 {
                     type: "table",
@@ -38,25 +56,50 @@ export const PILAR_3_DATA: PillarData = {
                     ]
                 },
                 {
+                    type: "paragraph",
+                    content: "Repare no padrão: quanto mais a frase vira um pedido social em vez de uma ordem direta, melhor ela encaixa no inglês real. Você não está ficando fraco. Você está ficando mais fácil de ouvir."
+                },
+                {
                     type: "h3",
-                    content: "1.2 Estrutura universal de pedidos"
+                    content: "1.3 O padrão universal que resolve metade da vida"
                 },
                 {
                     type: "list",
                     content: [
-                        "Abrir: \"{{Hi, excuse me.|Oi, com licença.}}\"",
-                        "Pedido: \"{{Could I ...?|Eu poderia ...?}}\" ou \"{{I'd like ...|Eu gostaria de ...}}\"",
-                        "Fechar: \"{{please|por favor}}\" + \"{{thank you|obrigado(a)}}\""
+                        "Abrir contato: \"{{Hi, excuse me.|Oi, com licença.}}\"",
+                        "Fazer o pedido: \"{{Could I ...?|Eu poderia ...?}}\" ou \"{{I'd like ...|Eu gostaria de ...}}\"",
+                        "Fechar bem: \"{{please|por favor}}\" + \"{{thank you|obrigado(a)}}\""
                     ]
                 },
                 {
                     type: "box-insight",
                     title: "Padrão ouro",
-                    content: "Frase curta + tom gentil + pedido claro quase sempre funciona melhor que frase longa e perfeita."
+                    content: "Frase curta + tom gentil + pedido claro quase sempre funciona melhor do que frase longa e perfeita. O objetivo não é impressionar. É fazer a conversa andar."
                 },
                 {
                     type: "h3",
-                    content: "1.3 Micro respostas para não travar"
+                    content: "1.4 Como reaproveitar isso sem decorar 50 frases"
+                },
+                {
+                    type: "paragraph",
+                    content: "Quando você aprende um molde, não aprende uma frase só. Aprende uma ferramenta. Se você domina \"Could I have...\", pode trocar o final e usar em café, loja, recepção, aeroporto e atendimento."
+                },
+                {
+                    type: "cards-grid",
+                    content: [
+                        "Pedido básico|{{Could I have some water, please?|Posso pedir água, por favor?}}",
+                        "No café|{{Could I have a coffee, please?|Posso pedir um café, por favor?}}",
+                        "Na loja|{{Could I have this in a larger size?|Pode me trazer isso em um tamanho maior?}}",
+                        "No atendimento|{{Could I have the receipt, please?|Pode me trazer o recibo, por favor?}}"
+                    ]
+                },
+                {
+                    type: "h3",
+                    content: "1.5 Micro respostas para não travar no meio"
+                },
+                {
+                    type: "paragraph",
+                    content: "Travamento não acontece só por falta de palavra. Muitas vezes acontece porque a pessoa acha que precisa responder com perfeição. Não precisa. Você só precisa ganhar tempo sem quebrar o clima da conversa."
                 },
                 {
                     type: "cards-grid",
@@ -76,12 +119,12 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "box-action",
-                    title: "Drill de 3 minutos",
-                    content: "Repita 10x, em voz alta: \"{{Hi, could I have ... please?|Oi, eu poderia ter ... por favor?}}\". Troque apenas o objeto (water, coffee, menu, receipt)."
+                    title: "Por que essa parte melhora seu inglês",
+                    content: "Porque ela reduz o pânico. Quando você tem 5 ou 6 respostas de apoio prontas, seu cérebro para de travar tentando construir tudo do zero. A fluidez começa quando você tem pontos de apoio simples."
                 },
                 {
                     type: "h3",
-                    content: "1.4 Frases de abertura por contexto"
+                    content: "1.6 Aberturas úteis por contexto"
                 },
                 {
                     type: "cards-grid",
@@ -93,8 +136,12 @@ export const PILAR_3_DATA: PillarData = {
                     ]
                 },
                 {
+                    type: "paragraph",
+                    content: "Essas frases funcionam porque começam com aproximação social antes da necessidade. Em vez de jogar a demanda na mesa, você abre a conversa e aí faz o pedido. Isso deixa o inglês mais natural."
+                },
+                {
                     type: "h3",
-                    content: "1.5 Erros comuns de tom (e como ajustar)"
+                    content: "1.7 Onde brasileiros normalmente pesam a mão"
                 },
                 {
                     type: "table",
@@ -107,8 +154,17 @@ export const PILAR_3_DATA: PillarData = {
                     ]
                 },
                 {
+                    type: "box-warning",
+                    title: "O erro não é sempre de gramática",
+                    content: "Muitas vezes a frase é compreensível. O problema é que ela chega no outro lado com uma energia errada: muito seca, muito abrupta ou muito vaga. Ajustar o tom já melhora muito sua comunicação."
+                },
+                {
                     type: "h3",
-                    content: "1.6 Script de 30 segundos para não travar"
+                    content: "1.8 Um roteiro curto para quando sua cabeça travar"
+                },
+                {
+                    type: "paragraph",
+                    content: "Quando bate o branco, o melhor caminho não é inventar. É voltar para um roteiro pequeno e confiável. Esse formato abaixo funciona porque organiza a fala em quatro pedaços simples."
                 },
                 {
                     type: "dialogue",
@@ -123,7 +179,11 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "h3",
-                    content: "1.7 Como pedir repetição sem parecer inseguro"
+                    content: "1.9 Pedir repetição sem parecer perdido"
+                },
+                {
+                    type: "paragraph",
+                    content: "Em inglês natural, pedir repetição não passa fraqueza. Passa cuidado. O que soa ruim não é pedir de novo. É fingir que entendeu e gerar confusão depois."
                 },
                 {
                     type: "list",
@@ -145,16 +205,16 @@ export const PILAR_3_DATA: PillarData = {
                 {
                     type: "box-insight",
                     title: "Regra prática de fluidez",
-                    content: "Quando faltar palavra, não pare a conversa. Use frase de apoio + pedido curto + confirmação final."
+                    content: "Quando faltar palavra, não pare a conversa. Use frase de apoio + pedido curto + confirmação final. Isso mantém o diálogo vivo e te dá tempo para pensar."
                 },
                 {
                     type: "box-action",
-                    title: "Prática guiada (7 minutos)",
-                    content: "Passo a passo:\n1) Min 1-2: faça 5 pedidos educados usando \"Could I...\".\n2) Min 3-4: pratique 5 frases para pedir repetição.\n3) Min 5: faça 3 confirmações de entendimento (\"So, just to confirm...\").\n4) Min 6-7: rode 1 diálogo completo em voz alta (abertura + pedido + confirmação + fechamento).\n\nObjetivo: responder sem travar, com clareza e tom gentil."
+                    title: "Como funciona o Desafio Labirinto (Foco)",
+                    content: "Neste módulo, o Labirinto de Foco é o seu desafio de avanço.\n\nO que ele treina:\n- resposta rápida sem perder a calma;\n- reconhecimento de frases básicas úteis;\n- atenção sob leve pressão.\n\nRegras simples:\n1) Use as setas (teclado ou botões) para sair do S e chegar no E.\n2) Para liberar movimentos, responda perguntas fáceis de inglês.\n3) Se bater em parede, aparece uma pergunta de recuperação.\n4) Se acertar a pergunta de recuperação, você continua.\n5) Se errar, reinicia a rodada e tenta de novo.\n\nComo passar melhor:\n- responda sem pressa;\n- faça trajetos curtos;\n- pense nas estruturas educadas que você viu neste módulo.\n\nQuando concluir o labirinto, este módulo já fica liberado para avançar."
                 },
                 {
                     type: "maze-game",
-                    content: "{\"title\":\"Desafio Labirinto (Foco)\",\"subtitle\":\"Mini game leve para treinar resposta sob pressão.\",\"goal\":\"Chegue ao E com as setas ou botões. Sempre que bater na parede, respire e tente de novo.\",\"grid\":[\"#########\",\"#S....#.#\",\"###.#.#.#\",\"#...#...#\",\"#.###.###\",\"#...#...#\",\"#.#.###.#\",\"#.#....E#\",\"#########\"],\"start\":[1,1],\"end\":[7,7]}"
+                    content: "{\"title\":\"Desafio Labirinto (Foco)\",\"subtitle\":\"Treino leve de decisão rápida com inglês simples.\",\"goal\":\"Saia do S e chegue no E. Movimento é liberado por pergunta fácil. Se bater na parede: acertou continua, errou reinicia a rodada.\",\"grid\":[\"#########\",\"#S....#.#\",\"###.#.#.#\",\"#...#...#\",\"#.###.###\",\"#...#...#\",\"#.#.###.#\",\"#.#....E#\",\"#########\"],\"start\":[1,1],\"end\":[7,7]}"
                 }
             ]
         },
@@ -165,16 +225,29 @@ export const PILAR_3_DATA: PillarData = {
             status: "locked",
             blocks: [
                 {
+                    type: "system-status",
+                    content: "{{SERVICE FLOW|FLUXO DE ATENDIMENTO}}: {{ACTIVE|ATIVO}}. {{Order, adjustment and payment patterns loaded|Padrões de pedido, ajuste e pagamento carregados}}."
+                },
+                {
                     type: "h2",
-                    content: "Você vai dominar o fluxo inteiro de atendimento"
+                    content: "Aqui você aprende a atravessar o restaurante inteiro sem tensão: entrar, pedir, ajustar e pagar"
                 },
                 {
                     type: "paragraph",
-                    content: "Este módulo cobre o ciclo completo: chegar, pedir, ajustar pedido, resolver erro, pedir conta e pagar."
+                    content: "Muita gente até conhece palavras de comida, mas trava no fluxo: chegada, pedido, ajuste, erro, conta. Este módulo ensina esse caminho inteiro com lógica. Não é decorar frases de cardápio. É entender como o atendimento se organiza em inglês."
+                },
+                {
+                    type: "box-insight",
+                    title: "Como pensar este módulo",
+                    content: "Restaurante e café funcionam em blocos. Primeiro você abre contato. Depois faz o pedido. Se precisar, ajusta. Se der problema, corrige. No fim, fecha com conta e pagamento. Quando você enxerga o fluxo, o inglês fica muito mais previsível."
                 },
                 {
                     type: "h3",
-                    content: "2.1 Chegada e mesa"
+                    content: "2.1 Entrando sem travar: reserva, mesa e primeiro contato"
+                },
+                {
+                    type: "paragraph",
+                    content: "O começo costuma travar porque a pessoa tenta responder rápido demais. Mas, na prática, a entrada em restaurante quase sempre gira em torno de poucas coisas: reserva, número de pessoas e espera. Você não precisa improvisar muito."
                 },
                 {
                     type: "dialogue",
@@ -187,7 +260,11 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "h3",
-                    content: "2.2 Fazendo pedido de forma natural"
+                    content: "2.2 Fazer pedido do jeito que soa natural"
+                },
+                {
+                    type: "paragraph",
+                    content: "No pedido, o objetivo não é falar bonito. É ser fácil de atender. Frases como \"I'll have...\" e \"I'd like...\" funcionam muito bem porque passam decisão sem agressividade. Isso deixa o atendimento fluindo."
                 },
                 {
                     type: "dialogue",
@@ -200,8 +277,17 @@ export const PILAR_3_DATA: PillarData = {
                     ]
                 },
                 {
+                    type: "box-action",
+                    title: "Por que isso funciona",
+                    content: "\"I'll have...\" e \"I'd like...\" ajudam porque transformam a sua fala em pedido social, não em ordem. O tom fica leve e o atendente entende rápido."
+                },
+                {
                     type: "h3",
-                    content: "2.3 Ajustes e restrições alimentares"
+                    content: "2.3 Ajustes e restrições: clareza acima de tudo"
+                },
+                {
+                    type: "paragraph",
+                    content: "Quando existe ajuste, o inglês precisa ficar mais objetivo. Aqui não adianta ser vago. Quanto mais claro você for, menor a chance de erro. E quando for saúde, clareza é mais importante do que elegância."
                 },
                 {
                     type: "list",
@@ -219,7 +305,11 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "h3",
-                    content: "2.4 Resolver erro no pedido"
+                    content: "2.4 Corrigir erro sem criar atrito"
+                },
+                {
+                    type: "paragraph",
+                    content: "Quando algo vem errado, muita gente oscila entre dois extremos: falar duro demais ou ficar educado demais e não resolver. O melhor caminho é simples: pedir desculpa pelo incômodo, apontar o erro com clareza e pedir checagem."
                 },
                 {
                     type: "dialogue",
@@ -232,7 +322,11 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "h3",
-                    content: "2.5 Conta, gorjeta e divisão"
+                    content: "2.5 Conta, divisão e pagamento"
+                },
+                {
+                    type: "paragraph",
+                    content: "O final do atendimento também segue padrão. Em vez de tentar inventar, use frases curtas e diretas. É uma parte muito previsível da conversa, então vale aprender o molde e reaproveitar."
                 },
                 {
                     type: "list",
@@ -253,7 +347,11 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "h3",
-                    content: "2.6 Café da manhã, brunch e pedidos específicos"
+                    content: "2.6 Café da manhã e pedidos específicos"
+                },
+                {
+                    type: "paragraph",
+                    content: "Quando o pedido fica mais detalhado, o segredo é quebrar a fala em partes simples. Item principal, complemento e fechamento. Isso evita embolar e também ajuda o atendente a confirmar corretamente."
                 },
                 {
                     type: "dialogue",
@@ -276,7 +374,11 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "h3",
-                    content: "2.7 Fast-food e pedido rápido sem confusão"
+                    content: "2.7 Pedido rápido sem perder clareza"
+                },
+                {
+                    type: "paragraph",
+                    content: "No fast-food ou em filas rápidas, você não precisa parecer sofisticado. Precisa ser rápido e claro. A boa notícia é que o idioma aqui é muito repetitivo, então meia dúzia de padrões já cobre muita coisa."
                 },
                 {
                     type: "cards-grid",
@@ -293,7 +395,11 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "h3",
-                    content: "2.8 Alergias e restrições (com segurança)"
+                    content: "2.8 Alergia e segurança: aqui a clareza vale ouro"
+                },
+                {
+                    type: "paragraph",
+                    content: "Se for alergia, não suavize demais. Não tenha medo de ser claro. Você não está sendo chato. Está protegendo sua saúde. Em contextos de risco, inglês funcional é inglês explícito."
                 },
                 {
                     type: "box-warning",
@@ -312,7 +418,11 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "h3",
-                    content: "2.9 Pedido por delivery/app e retirada"
+                    content: "2.9 Delivery, retirada e confirmação"
+                },
+                {
+                    type: "paragraph",
+                    content: "No delivery, a conversa muda um pouco: o foco sai da mesa e vai para conferência. Endereço, tempo e total viram mais importantes. Por isso a habilidade principal aqui é confirmar."
                 },
                 {
                     type: "dialogue",
@@ -337,6 +447,10 @@ export const PILAR_3_DATA: PillarData = {
                     content: "2.10 Quando a cobrança vem errada"
                 },
                 {
+                    type: "paragraph",
+                    content: "Cobrança errada é um ótimo exemplo de inglês funcional: você não precisa atacar, nem se enrolar. Basta apontar o problema, mostrar o item e pedir verificação. Esse padrão serve em vários países."
+                },
+                {
                     type: "dialogue",
                     title: "Conferência de conta",
                     content: [
@@ -351,7 +465,11 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "h3",
-                    content: "2.11 Small talk rápido com atendimento"
+                    content: "2.11 Pequeno contato humano também ajuda"
+                },
+                {
+                    type: "paragraph",
+                    content: "Você não precisa virar conversador profissional. Mas pequenos toques sociais deixam tudo mais leve: um \"hi\", um \"thanks\", um fechamento gentil. Isso muda o clima da interação e muitas vezes melhora a resposta do atendimento."
                 },
                 {
                     type: "cards-grid",
@@ -364,7 +482,11 @@ export const PILAR_3_DATA: PillarData = {
                 },
                 {
                     type: "h3",
-                    content: "2.12 Simulação final do módulo"
+                    content: "2.12 Juntando tudo em um único fluxo"
+                },
+                {
+                    type: "paragraph",
+                    content: "Agora o objetivo é perceber que restaurante não é um monte de frases soltas. É um roteiro previsível. Quando você entende o roteiro, consegue adaptar mesmo sem saber todas as palavras."
                 },
                 {
                     type: "dialogue",
@@ -380,9 +502,8 @@ export const PILAR_3_DATA: PillarData = {
                     ]
                 },
                 {
-                    type: "box-action",
-                    title: "Treino de consolidação (10 minutos)",
-                    content: "Faça 3 rodadas: 1) pedido normal, 2) ajuste de restrição, 3) correção de conta. Sempre usando tom gentil + pedido claro + confirmação final."
+                    type: "consolidation-game",
+                    content: "{\"title\":\"Desafio de missão (aprendendo jogando)\",\"subtitle\":\"Você avança cumprindo micro tarefas reais de inglês: escolher frase certa e montar frase na ordem correta.\",\"rounds\":[{\"label\":\"Rodada 1: pedido normal\",\"objective\":\"Falar com educação ao pedir algo simples.\",\"tasks\":[{\"type\":\"select\",\"prompt\":\"No café, qual opção soa mais natural e educada?\",\"options\":[\"{{Give me coffee.|Me dá café.}}\",\"{{Could I have a coffee, please?|Posso pedir um café, por favor?}}\",\"{{Coffee now.|Café agora.}}\"],\"answer\":1,\"feedback\":\"Boa. Pedido curto + gentil.\"},{\"type\":\"order\",\"prompt\":\"Monte a frase educada para pedir água.\",\"pieces\":[\"Could\",\"I\",\"have\",\"some\",\"water,\",\"please?\"],\"expected\":\"Could I have some water, please?\",\"feedback\":\"Excelente. Essa estrutura funciona em várias situações.\"}]},{\"label\":\"Rodada 2: ajuste de restrição\",\"objective\":\"Fazer ajuste com clareza e confirmar no final.\",\"tasks\":[{\"type\":\"select\",\"prompt\":\"Você precisa pedir sem cebola. Qual opção é melhor?\",\"options\":[\"{{No onions. Fast.|Sem cebola. Rápido.}}\",\"{{Could I have this without onions, please?|Pode ser sem cebola, por favor?}}\",\"{{I can't onions.|Eu não posso cebolas.}}\"],\"answer\":1,\"feedback\":\"Perfeito. Ajuste direto e educado.\"},{\"type\":\"order\",\"prompt\":\"Monte a frase de confirmação final.\",\"pieces\":[\"Just\",\"to\",\"confirm:\",\"no\",\"onions,\",\"right?\"],\"expected\":\"Just to confirm: no onions, right?\",\"feedback\":\"Ótimo. Confirmar evita erro no pedido.\"}]},{\"label\":\"Rodada 3: correção de conta\",\"objective\":\"Corrigir problema sem atrito.\",\"tasks\":[{\"type\":\"select\",\"prompt\":\"A conta veio com item extra. Melhor abordagem?\",\"options\":[\"{{This bill is wrong. Fix it.|Essa conta está errada. Corrige isso.}}\",\"{{Sorry, I think there's a mistake on the bill. Could you check it, please?|Desculpa, acho que tem um erro na conta. Pode verificar, por favor?}}\",\"{{I don't pay this.|Eu não pago isso.}}\"],\"answer\":1,\"feedback\":\"Muito bom. Firme, claro e respeitoso.\"},{\"type\":\"order\",\"prompt\":\"Monte uma frase curta para fechar com educação.\",\"pieces\":[\"Great,\",\"thank\",\"you!\"],\"expected\":\"Great, thank you!\",\"feedback\":\"Fechamento positivo melhora a comunicação.\"}]}]}"
                 }
             ]
         },

@@ -7,7 +7,7 @@ export type ContentBlockType =
   // Interactive types for Pilar 1
   | 'brain-diagram' | 'comparison-table' | 'scenario-card' | 'phonetic-breakdown' | 'elite-insight' | 'micro-win'
   // New types for Part 2
-  | 'brave-insight' | 'micro-win' | 'scramble-exercise' | 'combat-sort-game' | 'audio-decode-game'
+  | 'brave-insight' | 'micro-win' | 'scramble-exercise' | 'combat-sort-game' | 'audio-decode-game' | 'consolidation-game'
   // New types for Part 2
   | 'memory-diagram' | 'baby-learning' | 'phrase-analysis'
   | 'audio-minimal-pairs' | 'phoneme-grid' | 'quick-check'
