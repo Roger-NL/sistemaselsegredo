@@ -430,6 +430,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
     const [stageFeedback, setStageFeedback] = useState<string | null>(null);
     const [statusText, setStatusText] = useState("Avance checkpoint por checkpoint e complete a conversa do jeito que este módulo ensina.");
     const [attempts, setAttempts] = useState(0);
+    const [builtConversation, setBuiltConversation] = useState<Record<number, string>>({});
     const completionNotifiedRef = useRef(false);
     const currentStage = activeStage !== null ? stages[activeStage] : null;
     const isFinished = completedStages.length === stages.length;
@@ -443,6 +444,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
         setStageFeedback(null);
         setStatusText("Avance checkpoint por checkpoint e complete a conversa do jeito que este módulo ensina.");
         setAttempts(0);
+        setBuiltConversation({});
         completionNotifiedRef.current = false;
         if (withSound) playUiSfx("click");
     }, []);
@@ -487,6 +489,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
 
         if (correct) {
             setCompletedStages((prev) => prev.includes(activeStage) ? prev : [...prev, activeStage]);
+            setBuiltConversation((prev) => ({ ...prev, [activeStage]: stage.options[stage.answer] }));
             setStageFeedback(stage.explain || stage.successText || "Boa decisão.");
             setStatusText(stage.successText || "Checkpoint concluído. Agora a conversa pode seguir.");
             setActiveStage(null);
@@ -632,6 +635,36 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                 Checkpoints concluídos: {completedStages.length}/{stages.length} · Tentativas: {attempts}
             </div>
             <div className="mt-2 text-xs text-cyan-200">{parseTextWithTranslations(statusText)}</div>
+
+            <motion.div
+                layout
+                className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-950/10 p-4"
+            >
+                <div className="flex items-center justify-between gap-3 mb-3">
+                    <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-emerald-300">Conversa Em Construção</p>
+                    <span className="text-xs text-emerald-200/70">{Object.keys(builtConversation).length}/{stages.length} partes</span>
+                </div>
+                <div className="space-y-2">
+                    {stages.map((stage, index) => {
+                        const builtLine = builtConversation[index];
+                        return (
+                            <motion.div
+                                key={`built-${stage.id || index}`}
+                                layout
+                                className={cn(
+                                    "rounded-lg border px-3 py-2 text-sm transition-colors",
+                                    builtLine
+                                        ? "border-emerald-500/35 bg-emerald-950/20 text-emerald-100"
+                                        : "border-slate-700 bg-slate-950/30 text-slate-500"
+                                )}
+                            >
+                                <span className="text-[11px] uppercase tracking-wider font-mono mr-2 opacity-70">{stage.title}:</span>
+                                {builtLine ? parseTextWithTranslations(builtLine) : "Ainda não resolvido"}
+                            </motion.div>
+                        );
+                    })}
+                </div>
+            </motion.div>
 
             {currentStage && (
                 <div className="mt-4 p-4 rounded-lg border border-cyan-500/40 bg-cyan-950/15">
