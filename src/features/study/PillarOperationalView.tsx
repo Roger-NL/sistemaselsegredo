@@ -103,6 +103,10 @@ type MazeConfig = {
         explain?: string;
         successText?: string;
         errorText?: string;
+        userLabel?: string;
+        partnerLabel?: string;
+        partnerReplyCorrect?: string;
+        partnerReplyWrong?: string;
     }[];
     grid?: string[];
     start?: [number, number];
@@ -122,6 +126,8 @@ type MazeConfig = {
     mazeVariants?: string[][];
 };
 
+type MazeStage = NonNullable<MazeConfig["stages"]>[number];
+
 const shuffle = <T,>(arr: T[]): T[] => {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -129,6 +135,20 @@ const shuffle = <T,>(arr: T[]): T[] => {
         [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
+};
+
+const getOptionTranslation = (text: string): { english: string; portuguese: string | null } => {
+    const match = text.match(/^\{\{([^|]+)\|([^}]+)\}\}$/);
+    if (!match) {
+        return {
+            english: extractTranslatableText(text),
+            portuguese: null,
+        };
+    }
+    return {
+        english: match[1],
+        portuguese: match[2],
+    };
 };
 
 const DEFAULT_MAZE: Required<MazeConfig> = {
@@ -148,6 +168,10 @@ const DEFAULT_MAZE: Required<MazeConfig> = {
             explain: "\"Hi, excuse me\" abre espaço social antes do pedido. Soa leve e respeitoso.",
             successText: "Contato aberto sem pressão.",
             errorText: "Essa abertura até chama atenção, mas não prepara bem o resto da conversa.",
+            userLabel: "Voce",
+            partnerLabel: "Atendente",
+            partnerReplyCorrect: "Hi! Sure, how can I help you?",
+            partnerReplyWrong: "Yes? What do you need?",
         },
         {
             id: "make-request",
@@ -159,6 +183,10 @@ const DEFAULT_MAZE: Required<MazeConfig> = {
             explain: "\"Could I have... please?\" transforma a fala em pedido social, não em ordem seca.",
             successText: "Pedido feito com clareza.",
             errorText: "Foi entendido, mas soou mais duro do que precisava.",
+            userLabel: "Voce",
+            partnerLabel: "Atendente",
+            partnerReplyCorrect: "Of course. One coffee.",
+            partnerReplyWrong: "Okay... one coffee.",
         },
         {
             id: "handle-fast-speech",
@@ -170,6 +198,10 @@ const DEFAULT_MAZE: Required<MazeConfig> = {
             explain: "Pedir repetição com gentileza mostra cuidado, não fraqueza.",
             successText: "Você manteve a conversa andando.",
             errorText: "Aqui o melhor é pedir ajuda sem quebrar o clima da conversa.",
+            userLabel: "Voce",
+            partnerLabel: "Atendente",
+            partnerReplyCorrect: "Sure, no problem. One coffee.",
+            partnerReplyWrong: "Okay.",
         },
         {
             id: "confirm",
@@ -181,6 +213,10 @@ const DEFAULT_MAZE: Required<MazeConfig> = {
             explain: "Confirmar em resumo evita erro e ainda mostra organização.",
             successText: "Confirmação feita sem atrito.",
             errorText: "Faltou um fechamento mais claro e natural nessa etapa.",
+            userLabel: "Voce",
+            partnerLabel: "Atendente",
+            partnerReplyCorrect: "Yes, thats right.",
+            partnerReplyWrong: "Yes... thats it.",
         },
         {
             id: "close",
@@ -192,6 +228,10 @@ const DEFAULT_MAZE: Required<MazeConfig> = {
             explain: "Fechamento gentil melhora a percepção do seu inglês e encerra a conversa com naturalidade.",
             successText: "Você fechou a interação com naturalidade.",
             errorText: "Dá para fechar melhor com uma resposta curta e gentil.",
+            userLabel: "Voce",
+            partnerLabel: "Atendente",
+            partnerReplyCorrect: "Youre welcome. Have a nice day!",
+            partnerReplyWrong: "Okay, bye.",
         },
     ],
     grid: [
@@ -404,7 +444,7 @@ const DEFAULT_MAZE: Required<MazeConfig> = {
 
 const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => void }) => {
     const cfg = { ...DEFAULT_MAZE, ...data };
-    const fallbackStages = React.useMemo(() => {
+    const fallbackStages = React.useMemo<MazeStage[]>(() => {
         const pool = cfg.questions?.length ? cfg.questions : DEFAULT_MAZE.questions;
         return pool.map((q, index) => ({
             id: `fallback-${index}`,
@@ -416,9 +456,13 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
             explain: q.explain,
             successText: "Boa decisão.",
             errorText: "Essa escolha dificultaria a conversa.",
+            userLabel: "Voce",
+            partnerLabel: "Pessoa",
+            partnerReplyCorrect: "Sure, no problem.",
+            partnerReplyWrong: "Okay.",
         }));
     }, [cfg.questions]);
-    const stages = React.useMemo(
+    const stages = React.useMemo<MazeStage[]>(
         () => (cfg.stages?.length ? cfg.stages : fallbackStages),
         [cfg.stages, fallbackStages]
     );
@@ -431,6 +475,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
     const [statusText, setStatusText] = useState("Avance checkpoint por checkpoint e complete a conversa do jeito que este módulo ensina.");
     const [attempts, setAttempts] = useState(0);
     const [builtConversation, setBuiltConversation] = useState<Record<number, string>>({});
+    const [openTranslations, setOpenTranslations] = useState<Record<string, boolean>>({});
     const completionNotifiedRef = useRef(false);
     const currentStage = activeStage !== null ? stages[activeStage] : null;
     const isFinished = completedStages.length === stages.length;
@@ -446,6 +491,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
         setStatusText("Avance checkpoint por checkpoint e complete a conversa do jeito que este módulo ensina.");
         setAttempts(0);
         setBuiltConversation({});
+        setOpenTranslations({});
         completionNotifiedRef.current = false;
         if (withSound) playUiSfx("click");
     }, []);
@@ -486,6 +532,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
         const stage = stages[activeStage];
         const correct = idx === stage.answer;
         setSelectedOption(idx);
+        setOpenTranslations({});
         setAttempts((prev) => prev + 1);
 
         if (correct) {
@@ -659,12 +706,69 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                             : "border-slate-600 bg-slate-900/50 text-slate-100"
                                 )}
                             >
-                                {parseTextWithTranslations(opt)}
+                                <div className="space-y-2">
+                                    <p>{getOptionTranslation(opt).english}</p>
+                                    {getOptionTranslation(opt).portuguese && openTranslations[`${currentStage.id || activeStage}-${idx}`] && (
+                                        <p className="text-xs text-cyan-200/90 border-t border-cyan-500/20 pt-2">
+                                            {getOptionTranslation(opt).portuguese}
+                                        </p>
+                                    )}
+                                    {getOptionTranslation(opt).portuguese && (
+                                        <div className="flex justify-end">
+                                            <span
+                                                role="button"
+                                                tabIndex={0}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    const key = `${currentStage.id || activeStage}-${idx}`;
+                                                    setOpenTranslations((prev) => ({ ...prev, [key]: !prev[key] }));
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter" || e.key === " ") {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        const key = `${currentStage.id || activeStage}-${idx}`;
+                                                        setOpenTranslations((prev) => ({ ...prev, [key]: !prev[key] }));
+                                                    }
+                                                }}
+                                                className="text-[11px] uppercase tracking-wider font-mono text-cyan-300 hover:text-cyan-200"
+                                            >
+                                                {openTranslations[`${currentStage.id || activeStage}-${idx}`] ? "Ocultar traducao" : "Ver traducao"}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                             </button>
                             );
                         })}
                     </div>
                     {stageFeedback && <p className="text-xs text-cyan-100 mt-3 leading-relaxed">{parseTextWithTranslations(stageFeedback)}</p>}
+                    {selectedOption !== null && (
+                        <div className="mt-3 space-y-2">
+                            <div className="flex justify-end">
+                                <div className="max-w-[88%] rounded-2xl rounded-br-md bg-cyan-600/20 border border-cyan-500/30 px-3 py-2 text-sm text-cyan-50">
+                                    <p className="text-[11px] uppercase tracking-wider font-mono text-cyan-300 mb-1">{currentStage.userLabel || "Voce"}</p>
+                                    <p>{getOptionTranslation(currentStage.options[selectedOption]).english}</p>
+                                    {getOptionTranslation(currentStage.options[selectedOption]).portuguese && (
+                                        <p className="text-xs text-cyan-200/80 mt-1">{getOptionTranslation(currentStage.options[selectedOption]).portuguese}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex justify-start">
+                                <div className="max-w-[88%] rounded-2xl rounded-bl-md bg-slate-800/90 border border-slate-600 px-3 py-2 text-sm text-slate-100">
+                                    <p className="text-[11px] uppercase tracking-wider font-mono text-slate-400 mb-1">{currentStage.partnerLabel || "Pessoa"}</p>
+                                    <p>
+                                        {parseTextWithTranslations(
+                                            selectedOption === currentStage.answer
+                                                ? currentStage.partnerReplyCorrect || "Sure, no problem."
+                                                : currentStage.partnerReplyWrong || "Okay."
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     <div className="mt-3 flex flex-wrap gap-2">
                         {canRetryCurrentStage && (
                             <button
