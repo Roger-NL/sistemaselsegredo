@@ -434,6 +434,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
     const completionNotifiedRef = useRef(false);
     const currentStage = activeStage !== null ? stages[activeStage] : null;
     const isFinished = completedStages.length === stages.length;
+    const canRetryCurrentStage = selectedOption !== null && activeStage !== null && selectedOption !== currentStage?.answer;
 
     const reset = useCallback((withSound = true) => {
         setPosition(0);
@@ -538,28 +539,28 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                 </div>
                 <button
                     onClick={() => reset()}
-                    className="px-3 py-2 rounded-md border border-slate-600 text-slate-300 hover:border-cyan-500/60 text-xs font-mono"
+                    className="px-3 py-2 rounded-md border border-slate-600 text-slate-300 hover:border-cyan-500/60 text-xs font-mono shrink-0"
                 >
                     Reiniciar
                 </button>
             </div>
 
-            <p className="text-slate-300 text-xs md:text-sm mb-3">{parseTextWithTranslations(cfg.goal)}</p>
-            <div className="rounded-lg border border-slate-700/70 bg-slate-950/40 p-3 mb-4">
+            <p className="text-slate-300 text-xs md:text-sm mb-2">{parseTextWithTranslations(cfg.goal)}</p>
+            <div className="rounded-lg border border-slate-700/70 bg-slate-950/40 p-3 mb-3">
                 <p className="text-[11px] uppercase tracking-wider font-mono text-cyan-300 mb-1">Cenário</p>
-                <p className="text-sm text-slate-100">{parseTextWithTranslations(cfg.context)}</p>
+                <p className="text-xs md:text-sm text-slate-100 leading-relaxed">{parseTextWithTranslations(cfg.context)}</p>
             </div>
 
-            <div className="rounded-xl border border-slate-700/70 bg-gradient-to-br from-slate-950/80 to-slate-900/60 p-4 mb-4 overflow-hidden">
+            <div className="rounded-xl border border-slate-700/70 bg-gradient-to-br from-slate-950/80 to-slate-900/60 p-3 md:p-4 mb-3 overflow-hidden">
                 <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
                     <div className={cn(
-                        "snap-start shrink-0 rounded-xl border p-4 w-[220px] md:w-[240px] min-h-[168px] flex flex-col justify-between",
+                        "snap-start shrink-0 rounded-xl border p-3 md:p-4 w-[200px] md:w-[220px] min-h-[140px] md:min-h-[152px] flex flex-col justify-between",
                         position === 0 ? "border-cyan-500/60 bg-cyan-950/20 shadow-[0_0_24px_rgba(6,182,212,0.12)]" : "border-slate-700 bg-slate-900/60"
                     )}>
                         <div>
                             <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-slate-400">Início</p>
-                            <p className="text-2xl mt-3">🙂</p>
-                            <p className="text-lg text-slate-100 mt-3 leading-snug">Você entra na conversa.</p>
+                            <p className="text-xl mt-2">🙂</p>
+                            <p className="text-base md:text-lg text-slate-100 mt-2 leading-snug">Você entra na conversa.</p>
                         </div>
                         <p className="text-xs text-slate-400">Primeiro passo: abrir contato sem pressão.</p>
                     </div>
@@ -578,7 +579,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                     )} />
                                 </div>
                                 <div className={cn(
-                                    "snap-start shrink-0 rounded-xl border p-4 w-[220px] md:w-[260px] min-h-[168px] flex flex-col justify-between transition-all",
+                                    "snap-start shrink-0 rounded-xl border p-3 md:p-4 w-[200px] md:w-[230px] min-h-[140px] md:min-h-[152px] flex flex-col justify-between transition-all",
                                     isCompleted
                                         ? "border-emerald-500/50 bg-emerald-950/20 shadow-[0_0_20px_rgba(16,185,129,0.12)]"
                                         : isActive
@@ -594,8 +595,8 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                             <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-slate-400">Checkpoint {index + 1}</p>
                                             <span className="text-base">{isCompleted ? "✓" : isActive ? "●" : isHere ? "🙂" : "○"}</span>
                                         </div>
-                                        <p className="text-lg text-slate-100 mt-3 leading-tight">{parseTextWithTranslations(stage.title)}</p>
-                                        <p className="text-sm text-slate-400 mt-3 leading-relaxed">{parseTextWithTranslations(stage.situation)}</p>
+                                        <p className="text-base md:text-lg text-slate-100 mt-2 leading-tight">{parseTextWithTranslations(stage.title)}</p>
+                                        <p className="text-xs md:text-sm text-slate-400 mt-2 leading-relaxed line-clamp-4">{parseTextWithTranslations(stage.situation)}</p>
                                     </div>
                                     <p className="text-xs text-slate-500">
                                         {isCompleted ? "Etapa concluída." : isActive ? "Você está decidindo agora." : "Avance para destravar esta etapa."}
@@ -612,7 +613,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                     onClick={() => move("back")}
                     disabled={position === 0}
                     className={cn(
-                        "px-4 py-3 rounded-lg border text-slate-200 text-lg active:scale-95 min-w-[72px]",
+                        "px-3 py-2.5 md:px-4 md:py-3 rounded-lg border text-slate-200 text-lg active:scale-95 min-w-[64px] md:min-w-[72px]",
                         position === 0 ? "border-slate-700 text-slate-500" : "border-slate-600 hover:border-cyan-500/60"
                     )}
                 >
@@ -622,23 +623,83 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                     onClick={() => move("forward")}
                     disabled={isFinished}
                     className={cn(
-                        "px-4 py-3 rounded-lg border text-slate-200 text-lg active:scale-95 min-w-[72px]",
+                        "px-3 py-2.5 md:px-4 md:py-3 rounded-lg border text-slate-200 text-lg active:scale-95 min-w-[64px] md:min-w-[72px]",
                         isFinished ? "border-slate-700 text-slate-500" : "border-slate-600 hover:border-cyan-500/60"
                     )}
                 >
                     →
                 </button>
-                <p className="text-xs text-slate-500 font-mono ml-1">Use esquerda/direita para navegar pela rota.</p>
+                <p className="text-[11px] md:text-xs text-slate-500 font-mono ml-1">Use esquerda/direita para navegar.</p>
             </div>
 
-            <div className="mt-3 text-xs text-slate-400 font-mono">
+            <div className="mt-2 text-[11px] md:text-xs text-slate-400 font-mono">
                 Checkpoints concluídos: {completedStages.length}/{stages.length} · Tentativas: {attempts}
             </div>
-            <div className="mt-2 text-xs text-cyan-200">{parseTextWithTranslations(statusText)}</div>
+            <div className="mt-1 text-[11px] md:text-xs text-cyan-200">{parseTextWithTranslations(statusText)}</div>
+
+            {currentStage && (
+                <div className="mt-3 p-3 md:p-4 rounded-lg border border-cyan-500/40 bg-cyan-950/15">
+                    <div className="text-xs font-mono uppercase tracking-wider text-cyan-300 mb-2">{parseTextWithTranslations(currentStage.title)}</div>
+                    <p className="text-slate-100 text-sm mb-3 leading-relaxed">{parseTextWithTranslations(currentStage.prompt)}</p>
+                    <div className="grid gap-2">
+                        {currentStage.options.map((opt, idx) => {
+                            const isCorrect = idx === currentStage.answer;
+                            const isSelected = idx === selectedOption;
+                            return (
+                            <button
+                                key={idx}
+                                onClick={() => answerStage(idx)}
+                                disabled={selectedOption !== null}
+                                className={cn(
+                                    "w-full text-left px-3 py-2.5 md:py-3 rounded-md border text-sm active:scale-[0.99]",
+                                    selectedOption !== null && isCorrect
+                                        ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
+                                        : selectedOption !== null && isSelected && !isCorrect
+                                            ? "bg-red-900/40 border-red-500/50 text-red-100"
+                                            : "border-slate-600 bg-slate-900/50 text-slate-100"
+                                )}
+                            >
+                                {parseTextWithTranslations(opt)}
+                            </button>
+                            );
+                        })}
+                    </div>
+                    {stageFeedback && <p className="text-xs text-cyan-100 mt-3 leading-relaxed">{parseTextWithTranslations(stageFeedback)}</p>}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        {canRetryCurrentStage && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSelectedOption(null);
+                                    setStageFeedback("Tente outra opção. O objetivo é manter a conversa mais natural.");
+                                    setStatusText("Você pode tentar este checkpoint novamente.");
+                                    playUiSfx("click");
+                                }}
+                                className="px-3 py-2 rounded-md border border-cyan-500/40 text-cyan-100 hover:bg-cyan-500/10 text-sm"
+                            >
+                                Tentar novamente
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            onClick={() => reset()}
+                            className="px-3 py-2 rounded-md border border-slate-600 text-slate-300 hover:border-cyan-500/40 text-sm"
+                        >
+                            Reiniciar rota
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {isFinished && (
+                <div className="mt-4 p-3 rounded border border-emerald-500/40 bg-emerald-900/20 text-emerald-200 text-sm">
+                    {parseTextWithTranslations(cfg.winMessage)}
+                </div>
+            )}
 
             <motion.div
                 layout
-                className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-950/10 p-4"
+                className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-950/10 p-3 md:p-4"
             >
                 <div className="flex items-center justify-between gap-3 mb-3">
                     <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-emerald-300">Conversa Em Construção</p>
@@ -652,7 +713,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                 key={`built-${stage.id || index}`}
                                 layout
                                 className={cn(
-                                    "rounded-lg border px-3 py-2 text-sm transition-colors",
+                                    "rounded-lg border px-3 py-2 text-sm transition-colors leading-relaxed",
                                     builtLine
                                         ? "border-emerald-500/35 bg-emerald-950/20 text-emerald-100"
                                         : "border-slate-700 bg-slate-950/30 text-slate-500"
@@ -665,43 +726,6 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                     })}
                 </div>
             </motion.div>
-
-            {currentStage && (
-                <div className="mt-4 p-4 rounded-lg border border-cyan-500/40 bg-cyan-950/15">
-                    <div className="text-xs font-mono uppercase tracking-wider text-cyan-300 mb-2">{parseTextWithTranslations(currentStage.title)}</div>
-                    <p className="text-slate-100 text-sm mb-3">{parseTextWithTranslations(currentStage.prompt)}</p>
-                    <div className="grid gap-2">
-                        {currentStage.options.map((opt, idx) => {
-                            const isCorrect = idx === currentStage.answer;
-                            const isSelected = idx === selectedOption;
-                            return (
-                            <button
-                                key={idx}
-                                onClick={() => answerStage(idx)}
-                                disabled={selectedOption !== null}
-                                className={cn(
-                                    "w-full text-left px-3 py-3 rounded-md border text-sm active:scale-[0.99]",
-                                    selectedOption !== null && isCorrect
-                                        ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
-                                        : selectedOption !== null && isSelected && !isCorrect
-                                            ? "bg-red-900/40 border-red-500/50 text-red-100"
-                                            : "border-slate-600 bg-slate-900/50 text-slate-100"
-                                )}
-                            >
-                                {parseTextWithTranslations(opt)}
-                            </button>
-                            );
-                        })}
-                    </div>
-                    {stageFeedback && <p className="text-xs text-cyan-100 mt-3">{parseTextWithTranslations(stageFeedback)}</p>}
-                </div>
-            )}
-
-            {isFinished && (
-                <div className="mt-4 p-3 rounded border border-emerald-500/40 bg-emerald-900/20 text-emerald-200 text-sm">
-                    {parseTextWithTranslations(cfg.winMessage)}
-                </div>
-            )}
         </div>
     );
 };
