@@ -91,6 +91,19 @@ type MazeConfig = {
     title?: string;
     subtitle?: string;
     goal?: string;
+    context?: string;
+    winMessage?: string;
+    stages?: {
+        id?: string;
+        title: string;
+        situation: string;
+        prompt: string;
+        options: string[];
+        answer: number;
+        explain?: string;
+        successText?: string;
+        errorText?: string;
+    }[];
     grid?: string[];
     start?: [number, number];
     end?: [number, number];
@@ -118,18 +131,69 @@ const shuffle = <T,>(arr: T[]): T[] => {
     return a;
 };
 
-const findMarker = (grid: string[], marker: string): [number, number] | null => {
-    for (let r = 0; r < grid.length; r++) {
-        const c = grid[r].indexOf(marker);
-        if (c >= 0) return [r, c];
-    }
-    return null;
-};
-
 const DEFAULT_MAZE: Required<MazeConfig> = {
-    title: "Labirinto de Clareza",
-    subtitle: "Chegue ao objetivo usando frases de apoio.",
-    goal: "Saia do S e chegue no E. Só existem paredes estáticas (#).",
+    title: "Rota da Conversa",
+    subtitle: "Transforme o que o módulo ensinou em uma interação completa.",
+    goal: "Saia do primeiro contato e chegue ao fechamento da conversa usando escolhas que soam naturais.",
+    context: "Cenário: você entrou em um café e quer pedir algo sem soar seco. Cada checkpoint representa uma etapa real da conversa.",
+    winMessage: "Interação concluída. Você abriu contato, pediu, ajustou e fechou com naturalidade.",
+    stages: [
+        {
+            id: "start-contact",
+            title: "Abrir contato",
+            situation: "Você quer chamar o atendente sem parecer brusco.",
+            prompt: "Qual abertura cria contato do jeito mais natural?",
+            options: ["Hey.", "Hi, excuse me.", "I need you."],
+            answer: 1,
+            explain: "\"Hi, excuse me\" abre espaço social antes do pedido. Soa leve e respeitoso.",
+            successText: "Contato aberto sem pressão.",
+            errorText: "Essa abertura até chama atenção, mas não prepara bem o resto da conversa.",
+        },
+        {
+            id: "make-request",
+            title: "Fazer pedido",
+            situation: "Agora você vai pedir algo simples.",
+            prompt: "Qual pedido mantém tom gentil e claro?",
+            options: ["I want a coffee.", "Could I have a coffee, please?", "Coffee now."],
+            answer: 1,
+            explain: "\"Could I have... please?\" transforma a fala em pedido social, não em ordem seca.",
+            successText: "Pedido feito com clareza.",
+            errorText: "Foi entendido, mas soou mais duro do que precisava.",
+        },
+        {
+            id: "handle-fast-speech",
+            title: "Ganhar tempo",
+            situation: "A pessoa respondeu rápido e você não pegou tudo.",
+            prompt: "Qual resposta mantém a conversa viva sem fingir que entendeu?",
+            options: ["What?", "Could you repeat that, please?", "Never mind."],
+            answer: 1,
+            explain: "Pedir repetição com gentileza mostra cuidado, não fraqueza.",
+            successText: "Você manteve a conversa andando.",
+            errorText: "Aqui o melhor é pedir ajuda sem quebrar o clima da conversa.",
+        },
+        {
+            id: "confirm",
+            title: "Confirmar",
+            situation: "Você quer ter certeza de que o pedido ficou certo.",
+            prompt: "Qual frase confirma sem soar travado?",
+            options: ["So, just to confirm: one coffee, right?", "You understand me?", "Coffee. Right. Okay."],
+            answer: 0,
+            explain: "Confirmar em resumo evita erro e ainda mostra organização.",
+            successText: "Confirmação feita sem atrito.",
+            errorText: "Faltou um fechamento mais claro e natural nessa etapa.",
+        },
+        {
+            id: "close",
+            title: "Fechar bem",
+            situation: "A interação terminou. Agora é hora de sair bem.",
+            prompt: "Qual fechamento deixa a conversa leve até o final?",
+            options: ["Okay.", "Great, thank you!", "Done."],
+            answer: 1,
+            explain: "Fechamento gentil melhora a percepção do seu inglês e encerra a conversa com naturalidade.",
+            successText: "Você fechou a interação com naturalidade.",
+            errorText: "Dá para fechar melhor com uma resposta curta e gentil.",
+        },
+    ],
     grid: [
         "#########",
         "#S....#.#",
@@ -340,205 +404,125 @@ const DEFAULT_MAZE: Required<MazeConfig> = {
 
 const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => void }) => {
     const cfg = { ...DEFAULT_MAZE, ...data };
-    const variants = React.useMemo(
-        () => (cfg.mazeVariants?.length ? cfg.mazeVariants : [cfg.grid]),
-        [cfg.mazeVariants, cfg.grid]
+    const fallbackStages = React.useMemo(() => {
+        const pool = cfg.questions?.length ? cfg.questions : DEFAULT_MAZE.questions;
+        return pool.map((q, index) => ({
+            id: `fallback-${index}`,
+            title: `Checkpoint ${index + 1}`,
+            situation: "Escolha a opção que ajuda a conversa a continuar melhor.",
+            prompt: q.q,
+            options: q.options,
+            answer: q.answer,
+            explain: q.explain,
+            successText: "Boa decisão.",
+            errorText: "Essa escolha dificultaria a conversa.",
+        }));
+    }, [cfg.questions]);
+    const stages = React.useMemo(
+        () => (cfg.stages?.length ? cfg.stages : fallbackStages),
+        [cfg.stages, fallbackStages]
     );
-    const [variantOrder, setVariantOrder] = useState<number[]>(() => shuffle(Array.from({ length: variants.length }, (_, i) => i)));
-    const [variantPos, setVariantPos] = useState(0);
-    const mazeMeta = React.useMemo(() => {
-        const grid = variants[variantOrder[variantPos] ?? 0] || variants[0];
-        return {
-            grid,
-            start: findMarker(grid, "S") || cfg.start,
-            end: findMarker(grid, "E") || cfg.end,
-        };
-    }, [cfg.end, cfg.start, variantOrder, variantPos, variants]);
-
-    const easyPool = cfg.easyQuestions?.length ? cfg.easyQuestions : DEFAULT_MAZE.easyQuestions;
-    const [pos, setPos] = useState<[number, number]>(mazeMeta.start);
-    const posRef = useRef<[number, number]>(mazeMeta.start);
-    const [moves, setMoves] = useState(0);
-    const [completed, setCompleted] = useState(false);
-    const [startedAt, setStartedAt] = useState(() => Date.now());
-    const [elapsed, setElapsed] = useState(0);
-    const [questionCursor, setQuestionCursor] = useState(0);
-    const easyCursorRef = useRef(1);
-    const [gateQuestion, setGateQuestion] = useState<(typeof easyPool)[number] | null>(easyPool[0] ?? null);
-    const [moveBudget, setMoveBudget] = useState(0);
-    const moveBudgetRef = useRef(0);
-    const [gateFeedback, setGateFeedback] = useState<string | null>("Responda uma pergunta para liberar 2 movimentos.");
-    const [activeQuestion, setActiveQuestion] = useState<(typeof cfg.questions)[number] | null>(null);
-    const [wallFeedback, setWallFeedback] = useState<string | null>(null);
-    const usedEasyRef = useRef<Set<number>>(new Set([0]));
+    const [position, setPosition] = useState(0);
+    const [visitedStage, setVisitedStage] = useState<number | null>(null);
+    const [completedStages, setCompletedStages] = useState<number[]>([]);
+    const [activeStage, setActiveStage] = useState<number | null>(0);
+    const [selectedOption, setSelectedOption] = useState<number | null>(null);
+    const [stageFeedback, setStageFeedback] = useState<string | null>(null);
+    const [statusText, setStatusText] = useState("Avance checkpoint por checkpoint e complete a conversa do jeito que este módulo ensina.");
+    const [attempts, setAttempts] = useState(0);
     const completionNotifiedRef = useRef(false);
-
-    const canMove = useCallback((r: number, c: number) => {
-        if (r < 0 || c < 0 || r >= mazeMeta.grid.length || c >= mazeMeta.grid[0].length) return false;
-        if (mazeMeta.grid[r][c] === "#") return false;
-        return true;
-    }, [mazeMeta.grid]);
-
-    const advanceMaze = useCallback(() => {
-        setVariantPos((prev) => {
-            let next = prev + 1;
-            if (next >= variantOrder.length) {
-                const newOrder = shuffle(Array.from({ length: variants.length }, (_, i) => i));
-                setVariantOrder(newOrder);
-                next = 0;
-                const grid = variants[newOrder[0] ?? 0] || variants[0];
-                const start = findMarker(grid, "S") || cfg.start;
-                setPos(start);
-                posRef.current = start;
-                return next;
-            }
-            const grid = variants[variantOrder[next] ?? 0] || variants[0];
-            const start = findMarker(grid, "S") || cfg.start;
-            setPos(start);
-            posRef.current = start;
-            return next;
-        });
-    }, [cfg.start, variantOrder, variants]);
+    const currentStage = activeStage !== null ? stages[activeStage] : null;
+    const isFinished = completedStages.length === stages.length;
 
     const reset = useCallback((withSound = true) => {
-        advanceMaze();
-        setMoves(0);
-        setCompleted(false);
-        setElapsed(0);
-        setStartedAt(Date.now());
-        easyCursorRef.current = 1;
-        setGateQuestion(easyPool[0] ?? null);
-        moveBudgetRef.current = 0;
-        setMoveBudget(0);
-        setGateFeedback("Responda uma pergunta para liberar 2 movimentos.");
-        usedEasyRef.current = new Set([0]);
+        setPosition(0);
+        setVisitedStage(null);
+        setCompletedStages([]);
+        setActiveStage(0);
+        setSelectedOption(null);
+        setStageFeedback(null);
+        setStatusText("Avance checkpoint por checkpoint e complete a conversa do jeito que este módulo ensina.");
+        setAttempts(0);
         completionNotifiedRef.current = false;
         if (withSound) playUiSfx("click");
-    }, [advanceMaze, easyPool]);
+    }, []);
 
-    const nextGateQuestion = useCallback(() => {
-        const available = easyPool
-            .map((_, i) => i)
-            .filter((i) => !usedEasyRef.current.has(i));
-        if (!available.length) {
-            setGateQuestion(null);
-            moveBudgetRef.current = 2;
-            setMoveBudget(2);
-            setGateFeedback("Perguntas concluídas sem repetição nesta rodada. +2 movimentos.");
-            return;
-        }
-        const idx = available[Math.floor(Math.random() * available.length)];
-        usedEasyRef.current.add(idx);
-        setGateQuestion(easyPool[idx]);
-        easyCursorRef.current += 1;
-        moveBudgetRef.current = 0;
-        setMoveBudget(0);
-        setGateFeedback("Responda para liberar 2 movimentos.");
-    }, [easyPool]);
-
-    const triggerQuestion = useCallback(() => {
-        const pool = cfg.questions?.length ? cfg.questions : DEFAULT_MAZE.questions;
-        const q = pool[questionCursor % pool.length];
-        setQuestionCursor((v) => v + 1);
-        setActiveQuestion(q);
-        setWallFeedback(null);
-        playUiSfx("error");
-    }, [cfg.questions, questionCursor]);
-
-    const move = useCallback((dr: number, dc: number) => {
-        if (activeQuestion || completed || moveBudgetRef.current <= 0) return;
-        setGateFeedback(null);
-        const [r, c] = posRef.current;
-        const nr = r + dr;
-        const nc = c + dc;
-
-        if (!canMove(nr, nc)) {
-            triggerQuestion();
+    const move = useCallback((dir: "back" | "forward") => {
+        if (isFinished) return;
+        if (dir === "back") {
+            setPosition((prev) => Math.max(0, prev - 1));
+            setStatusText("Você voltou um passo para revisar a rota da conversa.");
+            playUiSfx("click");
             return;
         }
 
-        const next: [number, number] = [nr, nc];
-        posRef.current = next;
-        setPos(next);
-        setMoves((m) => m + 1);
-
-        const nextBudget = Math.max(0, moveBudgetRef.current - 1);
-        moveBudgetRef.current = nextBudget;
-        setMoveBudget(nextBudget);
-
-        playUiSfx("click");
-
-        if (nr === mazeMeta.end[0] && nc === mazeMeta.end[1]) {
-            setCompleted(true);
-            if (!completionNotifiedRef.current) {
-                completionNotifiedRef.current = true;
-                onComplete?.();
-            }
-            playUiSfx("success");
-            return;
-        }
-
-        if (nextBudget === 0) {
-            nextGateQuestion();
-        }
-    }, [activeQuestion, canMove, completed, mazeMeta.end, nextGateQuestion, onComplete, triggerQuestion]);
-
-    const answerGateQuestion = (idx: number) => {
-        if (!gateQuestion || activeQuestion || completed) return;
-        const correct = idx === gateQuestion.answer;
-        if (correct) {
-            moveBudgetRef.current = 2;
-            setMoveBudget(2);
-            setGateQuestion(null);
-            setGateFeedback(gateQuestion.explain || "Correto. Agora você tem 2 movimentos.");
-            playUiSfx("success");
-        } else {
-            moveBudgetRef.current = 0;
-            setMoveBudget(0);
-            setGateFeedback(gateQuestion.explain || "Quase. Tente outra pergunta.");
+        if (activeStage !== null) {
+            setStatusText("Resolva este checkpoint primeiro para continuar a interação.");
             playUiSfx("error");
-            window.setTimeout(() => nextGateQuestion(), 350);
+            return;
         }
-    };
 
-    const answerWallQuestion = (idx: number) => {
-        if (!activeQuestion) return;
-        const correct = idx === activeQuestion.answer;
-        setWallFeedback(activeQuestion.explain || (correct ? "Resposta correta." : "Vamos tentar de novo."));
-        playUiSfx(correct ? "success" : "error");
-        window.setTimeout(() => {
-            setActiveQuestion(null);
-            setWallFeedback(null);
-            if (!correct) {
-                reset(false);
+        setPosition((prev) => {
+            const next = Math.min(stages.length, prev + 1);
+            if (next < stages.length && !completedStages.includes(next)) {
+                setActiveStage(next);
+                setVisitedStage(next);
+                setSelectedOption(null);
+                setStageFeedback(null);
+                setStatusText("Novo checkpoint. Escolha a opção que faz a conversa seguir melhor.");
+            } else if (next === stages.length && completedStages.length === stages.length) {
+                setStatusText(cfg.winMessage);
             }
-        }, 550);
+            playUiSfx("click");
+            return next;
+        });
+    }, [activeStage, cfg.winMessage, completedStages, isFinished, stages.length]);
+
+    const answerStage = (idx: number) => {
+        if (activeStage === null || isFinished) return;
+        const stage = stages[activeStage];
+        const correct = idx === stage.answer;
+        setSelectedOption(idx);
+        setAttempts((prev) => prev + 1);
+
+        if (correct) {
+            setCompletedStages((prev) => prev.includes(activeStage) ? prev : [...prev, activeStage]);
+            setStageFeedback(stage.explain || stage.successText || "Boa decisão.");
+            setStatusText(stage.successText || "Checkpoint concluído. Agora a conversa pode seguir.");
+            setActiveStage(null);
+            playUiSfx("success");
+
+            const nextCompletedCount = completedStages.includes(activeStage) ? completedStages.length : completedStages.length + 1;
+            if (nextCompletedCount === stages.length && !completionNotifiedRef.current) {
+                completionNotifiedRef.current = true;
+                window.setTimeout(() => {
+                    setPosition(stages.length);
+                    setStatusText(cfg.winMessage);
+                    onComplete?.();
+                }, 220);
+            }
+            return;
+        }
+
+        const fallbackPosition = Math.max(0, activeStage - 1);
+        setPosition(fallbackPosition);
+        setActiveStage(fallbackPosition < stages.length ? fallbackPosition : null);
+        setVisitedStage(activeStage);
+        setStageFeedback(stage.errorText || "Essa escolha empurra a conversa para um tom pior. Volte e tente uma opção mais natural.");
+        setStatusText(stage.errorText || "A conversa perdeu fluidez. Volte um passo e ajuste o tom.");
+        playUiSfx("error");
     };
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-                e.preventDefault();
-            }
-            if (e.key === "ArrowUp") move(-1, 0);
-            if (e.key === "ArrowDown") move(1, 0);
-            if (e.key === "ArrowLeft") move(0, -1);
-            if (e.key === "ArrowRight") move(0, 1);
+            if (!["ArrowLeft", "ArrowRight"].includes(e.key)) return;
+            e.preventDefault();
+            if (e.key === "ArrowLeft") move("back");
+            if (e.key === "ArrowRight") move("forward");
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, [move]);
-
-    useEffect(() => {
-        const id = window.setInterval(() => {
-            setElapsed(Math.max(0, Math.floor((Date.now() - startedAt) / 1000)));
-        }, 1000);
-        return () => window.clearInterval(id);
-    }, [startedAt]);
-
-    useEffect(() => {
-        posRef.current = pos;
-    }, [pos]);
 
     return (
         <div className="my-8 rounded-xl border border-cyan-700/40 bg-slate-900/40 p-3 md:p-5">
@@ -558,89 +542,105 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
             </div>
 
             <p className="text-slate-300 text-xs md:text-sm mb-3">{parseTextWithTranslations(cfg.goal)}</p>
+            <div className="rounded-lg border border-slate-700/70 bg-slate-950/40 p-3 mb-4">
+                <p className="text-[11px] uppercase tracking-wider font-mono text-cyan-300 mb-1">Cenário</p>
+                <p className="text-sm text-slate-100">{parseTextWithTranslations(cfg.context)}</p>
+            </div>
 
-            <div className="flex flex-col md:flex-row gap-3 md:gap-5 items-start">
-                <div className="inline-grid gap-1 p-2 rounded-lg bg-slate-950/70 border border-slate-800">
-                    {mazeMeta.grid.map((row, r) => (
-                        <div key={r} className="flex gap-1">
-                            {row.split("").map((cell, c) => {
-                                const isPlayer = pos[0] === r && pos[1] === c;
-                                const isWall = cell === "#";
-                                const isEnd = r === mazeMeta.end[0] && c === mazeMeta.end[1];
-                                return (
-                                    <div
-                                        key={`${r}-${c}`}
-                                        className={cn(
-                                            "w-6 h-6 md:w-7 md:h-7 rounded-sm border text-[10px] flex items-center justify-center font-mono",
-                                            isWall ? "bg-slate-800 border-slate-700" : "bg-slate-900 border-slate-700",
-                                            isEnd && "bg-emerald-900/40 border-emerald-600/50 text-emerald-300"
-                                        )}
-                                    >
-                                        {isPlayer ? "🙂" : isEnd ? "E" : ""}
+            <div className="rounded-xl border border-slate-700/70 bg-gradient-to-br from-slate-950/80 to-slate-900/60 p-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-[repeat(6,minmax(0,1fr))] gap-3 items-stretch">
+                    <div className={cn(
+                        "rounded-lg border p-3 min-h-[92px] flex flex-col justify-between",
+                        position === 0 ? "border-cyan-500/60 bg-cyan-950/20" : "border-slate-700 bg-slate-900/60"
+                    )}>
+                        <div>
+                            <p className="text-[11px] uppercase tracking-wider font-mono text-slate-400">Início</p>
+                            <p className="text-sm text-slate-200 mt-1">Você entra na conversa.</p>
+                        </div>
+                        <p className="text-lg">{position === 0 ? "🙂" : "•"}</p>
+                    </div>
+
+                    {stages.map((stage, index) => {
+                        const isCompleted = completedStages.includes(index);
+                        const isActive = activeStage === index;
+                        const isHere = position === index + 1;
+                        const wasVisited = visitedStage === index;
+                        return (
+                            <div key={stage.id || `${stage.title}-${index}`} className="flex items-center gap-3">
+                                <div className="hidden md:block h-px flex-1 bg-gradient-to-r from-cyan-500/40 to-slate-700" />
+                                <div className={cn(
+                                    "rounded-lg border p-3 min-h-[92px] flex-1 min-w-0",
+                                    isCompleted
+                                        ? "border-emerald-500/50 bg-emerald-950/20"
+                                        : isActive
+                                            ? "border-cyan-500/60 bg-cyan-950/20"
+                                            : isHere
+                                                ? "border-amber-500/60 bg-amber-950/20"
+                                                : wasVisited
+                                                    ? "border-rose-500/40 bg-rose-950/10"
+                                                    : "border-slate-700 bg-slate-900/60"
+                                )}>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <p className="text-[11px] uppercase tracking-wider font-mono text-slate-400">Checkpoint {index + 1}</p>
+                                        <span className="text-base">{isCompleted ? "✓" : isActive ? "●" : isHere ? "🙂" : "○"}</span>
                                     </div>
-                                );
-                            })}
-                        </div>
-                    ))}
-                </div>
-
-                <div className="w-full md:w-auto">
-                    {gateQuestion && !activeQuestion && !completed && moveBudget === 0 && (
-                        <div className="mb-3 p-3 rounded-md border border-cyan-600/40 bg-cyan-900/15 max-w-[340px]">
-                            <p className="text-[11px] uppercase tracking-wider font-mono text-cyan-300 mb-2">Pergunta para liberar movimento</p>
-                            <p className="text-sm text-slate-100 mb-2">{parseTextWithTranslations(gateQuestion.q)}</p>
-                            <div className="grid gap-2">
-                                {gateQuestion.options.map((opt, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => answerGateQuestion(idx)}
-                                        className="text-left px-3 py-2 rounded border border-slate-600 bg-slate-900/60 text-slate-100 text-sm active:scale-[0.99]"
-                                    >
-                                        {parseTextWithTranslations(opt)}
-                                    </button>
-                                ))}
+                                    <p className="text-sm text-slate-100 mt-1">{parseTextWithTranslations(stage.title)}</p>
+                                    <p className="text-xs text-slate-400 mt-2">{parseTextWithTranslations(stage.situation)}</p>
+                                </div>
                             </div>
-                        </div>
-                    )}
-
-                    <div className="grid grid-cols-3 gap-2 max-w-[240px]">
-                        <span />
-                        <button disabled={moveBudget <= 0 || !!activeQuestion || completed} onClick={() => move(-1, 0)} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", (moveBudget <= 0 || !!activeQuestion || completed) ? "border-slate-700 text-slate-500" : "border-slate-600")}>↑</button>
-                        <span />
-                        <button disabled={moveBudget <= 0 || !!activeQuestion || completed} onClick={() => move(0, -1)} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", (moveBudget <= 0 || !!activeQuestion || completed) ? "border-slate-700 text-slate-500" : "border-slate-600")}>←</button>
-                        <button disabled={moveBudget <= 0 || !!activeQuestion || completed} onClick={() => move(1, 0)} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", (moveBudget <= 0 || !!activeQuestion || completed) ? "border-slate-700 text-slate-500" : "border-slate-600")}>↓</button>
-                        <button disabled={moveBudget <= 0 || !!activeQuestion || completed} onClick={() => move(0, 1)} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", (moveBudget <= 0 || !!activeQuestion || completed) ? "border-slate-700 text-slate-500" : "border-slate-600")}>→</button>
-                    </div>
-
-                    <div className="mt-3 text-xs text-slate-400 font-mono">
-                        Movimentos: {moves} · Tempo: {elapsed}s · Créditos: {moveBudget}
-                    </div>
-                    {gateFeedback && !activeQuestion && <div className="mt-2 text-xs text-cyan-200">{parseTextWithTranslations(gateFeedback)}</div>}
+                        );
+                    })}
                 </div>
             </div>
 
-            {completed && (
-                <div className="mt-3 p-3 rounded border border-emerald-500/40 bg-emerald-900/20 text-emerald-200 text-sm">
-                    Desafio concluído. Ótimo foco.
-                </div>
-            )}
+            <div className="grid grid-cols-3 gap-2 max-w-[240px]">
+                <span />
+                <button disabled className="py-3 rounded border text-slate-500 text-lg border-slate-700">↑</button>
+                <span />
+                <button onClick={() => move("back")} disabled={position === 0} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", position === 0 ? "border-slate-700 text-slate-500" : "border-slate-600")}>←</button>
+                <button disabled className="py-3 rounded border text-slate-500 text-lg border-slate-700">↓</button>
+                <button onClick={() => move("forward")} disabled={isFinished} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", isFinished ? "border-slate-700 text-slate-500" : "border-slate-600")}>→</button>
+            </div>
 
-            {activeQuestion && (
-                <div className="mt-4 p-4 rounded-lg border border-amber-500/40 bg-amber-900/20">
-                    <div className="text-xs font-mono uppercase tracking-wider text-amber-300 mb-2">Bateu na parede: responda para reiniciar</div>
-                    <p className="text-slate-100 text-sm mb-3">{parseTextWithTranslations(activeQuestion.q)}</p>
+            <div className="mt-3 text-xs text-slate-400 font-mono">
+                Checkpoints concluídos: {completedStages.length}/{stages.length} · Tentativas: {attempts}
+            </div>
+            <div className="mt-2 text-xs text-cyan-200">{parseTextWithTranslations(statusText)}</div>
+
+            {currentStage && (
+                <div className="mt-4 p-4 rounded-lg border border-cyan-500/40 bg-cyan-950/15">
+                    <div className="text-xs font-mono uppercase tracking-wider text-cyan-300 mb-2">{parseTextWithTranslations(currentStage.title)}</div>
+                    <p className="text-slate-100 text-sm mb-3">{parseTextWithTranslations(currentStage.prompt)}</p>
                     <div className="grid gap-2">
-                        {activeQuestion.options.map((opt, idx) => (
+                        {currentStage.options.map((opt, idx) => {
+                            const isCorrect = idx === currentStage.answer;
+                            const isSelected = idx === selectedOption;
+                            return (
                             <button
                                 key={idx}
-                                onClick={() => answerWallQuestion(idx)}
-                                className="w-full text-left px-3 py-3 rounded-md border border-slate-600 bg-slate-900/50 text-slate-100 text-sm active:scale-[0.99]"
+                                onClick={() => answerStage(idx)}
+                                disabled={selectedOption !== null}
+                                className={cn(
+                                    "w-full text-left px-3 py-3 rounded-md border text-sm active:scale-[0.99]",
+                                    selectedOption !== null && isCorrect
+                                        ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
+                                        : selectedOption !== null && isSelected && !isCorrect
+                                            ? "bg-red-900/40 border-red-500/50 text-red-100"
+                                            : "border-slate-600 bg-slate-900/50 text-slate-100"
+                                )}
                             >
                                 {parseTextWithTranslations(opt)}
                             </button>
-                        ))}
+                            );
+                        })}
                     </div>
-                    {wallFeedback && <p className="text-xs text-amber-200 mt-3">{parseTextWithTranslations(wallFeedback)}</p>}
+                    {stageFeedback && <p className="text-xs text-cyan-100 mt-3">{parseTextWithTranslations(stageFeedback)}</p>}
+                </div>
+            )}
+
+            {isFinished && (
+                <div className="mt-4 p-3 rounded border border-emerald-500/40 bg-emerald-900/20 text-emerald-200 text-sm">
+                    {parseTextWithTranslations(cfg.winMessage)}
                 </div>
             )}
         </div>
