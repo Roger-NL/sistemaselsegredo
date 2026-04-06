@@ -3,7 +3,7 @@ export type ContentBlockType =
   | 'box-goal' | 'box-insight' | 'box-warning' | 'box-action' | 'pillar-end'
   | 'video' | 'table' | 'dialogue'
   | 'system-status' | 'terminal-view' | 'interactive-quiz' | 'reveal-box'
-  | 'comparison' | 'audio-player' | 'cards-grid' | 'decision-tree'
+  | 'comparison' | 'audio-player' | 'cards-grid' | 'decision-tree' | 'maze-game'
   // Interactive types for Pilar 1
   | 'brain-diagram' | 'comparison-table' | 'scenario-card' | 'phonetic-breakdown' | 'elite-insight' | 'micro-win'
   // New types for Part 2

@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { parseQuizContent, splitOutsideTranslatable } from "@/utils/content-parsers";
+import { parseTextWithTranslations } from "@/utils/translation";
 import { AlertCircle, CheckCircle2, Lightbulb, Target, Zap, Play, Table as TableIcon, MessageSquare, Cpu, HelpCircle, Eye, ChevronDown } from "lucide-react";
 import { ContentBlock, PillarData } from "@/types/study";
 import { cn } from "@/lib/ui/cn";
@@ -270,14 +272,12 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
         </div>
       );
     case "interactive-quiz":
-      // Expecting content to be JSON string or specific structure. 
-      // For simplicity, let's assume content is "Question|Option1,Option2,Option3|AnswerIndex"
-      const [q, opts, ans] = (block.content as string).split('|');
+      const quiz = parseQuizContent(block.content as string);
       return (
         <InteractiveQuiz
-          question={q}
-          options={opts.split(',')}
-          answer={parseInt(ans)}
+          question={quiz.question}
+          options={quiz.options}
+          answer={quiz.answer}
         />
       );
     case "reveal-box":
@@ -305,14 +305,15 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-8">
           {(block.content as string[]).map((card, i) => {
-            const [title, desc] = card.split('|');
+            const [title, ...descParts] = splitOutsideTranslatable(card, '|');
+            const desc = descParts.join('|');
             return (
               <div key={i} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow hover:border-violet-200 group">
                 <h4 className="font-bold text-slate-800 mb-2 group-hover:text-violet-600 transition-colors flex items-center gap-2">
                   <Cpu className="w-4 h-4 text-slate-400" />
-                  {title}
+                  {parseTextWithTranslations(title)}
                 </h4>
-                <p className="text-sm text-slate-600">{desc}</p>
+                <p className="text-sm text-slate-600">{parseTextWithTranslations(desc)}</p>
               </div>
             )
           })}
@@ -354,12 +355,12 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
             <table className="w-full text-sm text-left">
               <tbody className="divide-y divide-slate-100">
                 {(block.content as string[]).map((row, i) => {
-                  const cols = row.split('|');
+                  const cols = splitOutsideTranslatable(row, '|');
                   return (
                     <tr key={i} className={i === 0 ? "bg-slate-50 font-bold text-slate-700" : "bg-white hover:bg-slate-50 transition-colors"}>
                       {cols.map((col, j) => (
                         <td key={j} className="px-6 py-4 whitespace-nowrap text-slate-600 first:font-medium first:text-slate-900">
-                          {col}
+                          {parseTextWithTranslations(col)}
                         </td>
                       ))}
                     </tr>

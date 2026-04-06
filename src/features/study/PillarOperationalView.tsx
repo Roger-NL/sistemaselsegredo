@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
     AlertCircle, CheckCircle2, Lightbulb, Target, Zap, Play,
@@ -12,6 +12,8 @@ import { cn } from "@/lib/ui/cn";
 import { useProgress } from "@/context/ProgressContext";
 import { AudioButton } from "@/components/ui/AudioButton";
 import { parseTranslatable, extractTranslatableText, parseTextWithTranslations } from "@/utils/translation";
+import { parseQuizContent, splitOutsideTranslatable } from "@/utils/content-parsers";
+import { playUiSfx } from "@/utils/ui-sfx";
 
 interface PillarOperationalViewProps {
     data: PillarData;
@@ -50,13 +52,14 @@ const InteractiveQuiz = ({ question, options, answer }: { question: string, opti
     const handleSelect = (idx: number) => {
         setSelected(idx);
         setShowResult(true);
+        playUiSfx(idx === answer ? "success" : "error");
     };
 
     return (
         <div className="my-6 bg-slate-900/50 border border-slate-700/50 rounded-lg p-4 md:p-6 backdrop-blur-sm">
             <div className="flex items-center gap-3 mb-4">
                 <HelpCircle className="w-5 h-5 text-cyan-400" />
-                <h4 className="font-bold text-slate-200 font-mono text-xs md:text-sm tracking-wider">TACTICAL QUIZ</h4>
+                <h4 className="font-bold text-slate-200 font-mono text-xs md:text-sm tracking-wider">QUIZ RÁPIDO</h4>
             </div>
             <p className="text-base md:text-lg text-slate-300 mb-6 leading-relaxed">{parseTextWithTranslations(question)}</p>
             <div className="grid gap-3">
@@ -80,6 +83,560 @@ const InteractiveQuiz = ({ question, options, answer }: { question: string, opti
                     </button>
                 ))}
             </div>
+        </div>
+    );
+};
+
+type MazeConfig = {
+    title?: string;
+    subtitle?: string;
+    goal?: string;
+    grid?: string[];
+    start?: [number, number];
+    end?: [number, number];
+    questions?: {
+        q: string;
+        options: string[];
+        answer: number;
+        explain?: string;
+    }[];
+    easyQuestions?: {
+        q: string;
+        options: string[];
+        answer: number;
+        explain?: string;
+    }[];
+    mazeVariants?: string[][];
+};
+
+const shuffle = <T,>(arr: T[]): T[] => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+};
+
+const findMarker = (grid: string[], marker: string): [number, number] | null => {
+    for (let r = 0; r < grid.length; r++) {
+        const c = grid[r].indexOf(marker);
+        if (c >= 0) return [r, c];
+    }
+    return null;
+};
+
+const DEFAULT_MAZE: Required<MazeConfig> = {
+    title: "Labirinto de Clareza",
+    subtitle: "Chegue ao objetivo usando frases de apoio.",
+    goal: "Saia do S e chegue no E. Só existem paredes estáticas (#).",
+    grid: [
+        "#########",
+        "#S....#.#",
+        "###.#.#.#",
+        "#...#...#",
+        "#.###.###",
+        "#...#...#",
+        "#.#.###.#",
+        "#.#....E#",
+        "#########",
+    ],
+    mazeVariants: [
+        [
+            "#########",
+            "#S....#.#",
+            "###.#.#.#",
+            "#...#...#",
+            "#.###.###",
+            "#...#...#",
+            "#.#.###.#",
+            "#.#....E#",
+            "#########",
+        ],
+        [
+            "#########",
+            "#S#.....#",
+            "#.#.###.#",
+            "#.#...#.#",
+            "#.###.#.#",
+            "#...#.#.#",
+            "###.#.#.#",
+            "#....#E.#",
+            "#########",
+        ],
+        [
+            "#########",
+            "#S......#",
+            "###.###.#",
+            "#...#...#",
+            "#.###.###",
+            "#...#...#",
+            "#.###.#.#",
+            "#.....#E#",
+            "#########",
+        ],
+        [
+            "#########",
+            "#S#...#E#",
+            "#.#.#.#.#",
+            "#.#.#.#.#",
+            "#...#...#",
+            "###.###.#",
+            "#.......#",
+            "#.#####.#",
+            "#########",
+        ],
+        [
+            "#########",
+            "#S..#...#",
+            "#.#.#.#.#",
+            "#.#...#.#",
+            "#.#####.#",
+            "#.....#.#",
+            "###.#.#.#",
+            "#...#..E#",
+            "#########",
+        ],
+    ],
+    start: [1, 1],
+    end: [7, 7],
+    questions: [
+        {
+            q: "Qual frase é mais educada para pedir algo?",
+            options: ["Give me water.", "Could I have some water, please?", "Water now."],
+            answer: 1,
+            explain: "Pedidos com 'Could I...' + 'please' soam mais naturais.",
+        },
+        {
+            q: "Se não entendeu o que a pessoa disse, qual é a melhor resposta?",
+            options: ["What?", "I don't understand English.", "Could you repeat that, please?"],
+            answer: 2,
+            explain: "Pedir repetição de forma gentil mantém a conversa fluindo.",
+        },
+        {
+            q: "Qual fechamento passa mais clareza e educação?",
+            options: ["Okay.", "Great, thank you!", "Hmm..."],
+            answer: 1,
+            explain: "Fechamento positivo ajuda na percepção da sua comunicação.",
+        },
+    ],
+    easyQuestions: [
+        {
+            q: "Como se diz \"água\" em inglês?",
+            options: ["Water", "House", "Car"],
+            answer: 0,
+            explain: "Correto: água em inglês é \"water\".",
+        },
+        {
+            q: "Como se diz \"obrigado\" em inglês?",
+            options: ["Please", "Thank you", "Sorry"],
+            answer: 1,
+            explain: "Correto: obrigado = thank you.",
+        },
+        {
+            q: "Qual dessas palavras é uma saudação em inglês?",
+            options: ["Goodbye", "Hello", "Later"],
+            answer: 1,
+            explain: "Correto: \"Hello\" é uma saudação.",
+        },
+        {
+            q: "Complete a expressão: \"Good ____\"",
+            options: ["morning", "banana", "street"],
+            answer: 0,
+            explain: "Correto: \"Good morning\" é uma expressão básica.",
+        },
+        {
+            q: "Qual é o significado de \"blue\"?",
+            options: ["Verde", "Azul", "Preto"],
+            answer: 1,
+            explain: "Correto: blue = azul.",
+        },
+        {
+            q: "Como se diz \"bom dia\" em inglês?",
+            options: ["Good night", "Good morning", "Good bye"],
+            answer: 1,
+            explain: "Correto: bom dia = good morning.",
+        },
+        {
+            q: "Qual palavra significa \"obrigado(a)\"?",
+            options: ["Please", "Thanks / Thank you", "Excuse me"],
+            answer: 1,
+            explain: "Correto: obrigado(a) = thank you.",
+        },
+        {
+            q: "Como se diz \"por favor\" em inglês?",
+            options: ["Please", "Sorry", "Maybe"],
+            answer: 0,
+            explain: "Correto: por favor = please.",
+        },
+        {
+            q: "Qual dessas é uma despedida?",
+            options: ["Hello", "Goodbye", "Morning"],
+            answer: 1,
+            explain: "Correto: goodbye é despedida.",
+        },
+        {
+            q: "Como se diz \"sim\" em inglês?",
+            options: ["No", "Yes", "Maybe"],
+            answer: 1,
+            explain: "Correto: sim = yes.",
+        },
+        {
+            q: "Como se diz \"não\" em inglês?",
+            options: ["No", "Now", "Know"],
+            answer: 0,
+            explain: "Correto: não = no.",
+        },
+        {
+            q: "Qual significa \"desculpa\" em inglês?",
+            options: ["Sorry", "Sure", "Some"],
+            answer: 0,
+            explain: "Correto: desculpa = sorry.",
+        },
+        {
+            q: "Como se diz \"com licença\" em inglês?",
+            options: ["Excuse me", "Help me", "Take me"],
+            answer: 0,
+            explain: "Correto: com licença = excuse me.",
+        },
+        {
+            q: "Qual palavra significa \"casa\"?",
+            options: ["Horse", "House", "Hot"],
+            answer: 1,
+            explain: "Correto: house = casa.",
+        },
+        {
+            q: "Qual palavra significa \"carro\"?",
+            options: ["Car", "Card", "Care"],
+            answer: 0,
+            explain: "Correto: car = carro.",
+        },
+        {
+            q: "Como se diz \"até logo\" em inglês?",
+            options: ["See you", "Thank you", "Good morning"],
+            answer: 0,
+            explain: "Correto: até logo = see you.",
+        },
+        {
+            q: "Qual dessas frases é um pedido educado?",
+            options: ["Give me coffee.", "Could I have coffee, please?", "Coffee now."],
+            answer: 1,
+            explain: "Correto: com \"Could I... please\" fica educado.",
+        },
+        {
+            q: "Como se diz \"boa noite\" (ao se despedir)?",
+            options: ["Good morning", "Good night", "Good noon"],
+            answer: 1,
+            explain: "Correto: boa noite = good night.",
+        },
+        {
+            q: "Qual cor é \"red\"?",
+            options: ["Azul", "Vermelho", "Verde"],
+            answer: 1,
+            explain: "Correto: red = vermelho.",
+        },
+    ],
+};
+
+const MazeGame = ({ data }: { data: MazeConfig }) => {
+    const cfg = { ...DEFAULT_MAZE, ...data };
+    const variants = React.useMemo(
+        () => (cfg.mazeVariants?.length ? cfg.mazeVariants : [cfg.grid]),
+        [cfg.mazeVariants, cfg.grid]
+    );
+    const [variantOrder, setVariantOrder] = useState<number[]>(() => shuffle(Array.from({ length: variants.length }, (_, i) => i)));
+    const [variantPos, setVariantPos] = useState(0);
+    const mazeMeta = React.useMemo(() => {
+        const grid = variants[variantOrder[variantPos] ?? 0] || variants[0];
+        return {
+            grid,
+            start: findMarker(grid, "S") || cfg.start,
+            end: findMarker(grid, "E") || cfg.end,
+        };
+    }, [cfg.end, cfg.start, variantOrder, variantPos, variants]);
+
+    const easyPool = cfg.easyQuestions?.length ? cfg.easyQuestions : DEFAULT_MAZE.easyQuestions;
+    const [pos, setPos] = useState<[number, number]>(mazeMeta.start);
+    const posRef = useRef<[number, number]>(mazeMeta.start);
+    const [moves, setMoves] = useState(0);
+    const [completed, setCompleted] = useState(false);
+    const [startedAt, setStartedAt] = useState(() => Date.now());
+    const [elapsed, setElapsed] = useState(0);
+    const [questionCursor, setQuestionCursor] = useState(0);
+    const easyCursorRef = useRef(1);
+    const [gateQuestion, setGateQuestion] = useState<(typeof easyPool)[number] | null>(easyPool[0] ?? null);
+    const [moveBudget, setMoveBudget] = useState(0);
+    const moveBudgetRef = useRef(0);
+    const [gateFeedback, setGateFeedback] = useState<string | null>("Responda uma pergunta para liberar 2 movimentos.");
+    const [activeQuestion, setActiveQuestion] = useState<(typeof cfg.questions)[number] | null>(null);
+    const [wallFeedback, setWallFeedback] = useState<string | null>(null);
+    const usedEasyRef = useRef<Set<number>>(new Set([0]));
+
+    const canMove = useCallback((r: number, c: number) => {
+        if (r < 0 || c < 0 || r >= mazeMeta.grid.length || c >= mazeMeta.grid[0].length) return false;
+        if (mazeMeta.grid[r][c] === "#") return false;
+        return true;
+    }, [mazeMeta.grid]);
+
+    const advanceMaze = useCallback(() => {
+        setVariantPos((prev) => {
+            let next = prev + 1;
+            if (next >= variantOrder.length) {
+                const newOrder = shuffle(Array.from({ length: variants.length }, (_, i) => i));
+                setVariantOrder(newOrder);
+                next = 0;
+                const grid = variants[newOrder[0] ?? 0] || variants[0];
+                const start = findMarker(grid, "S") || cfg.start;
+                setPos(start);
+                posRef.current = start;
+                return next;
+            }
+            const grid = variants[variantOrder[next] ?? 0] || variants[0];
+            const start = findMarker(grid, "S") || cfg.start;
+            setPos(start);
+            posRef.current = start;
+            return next;
+        });
+    }, [cfg.start, variantOrder, variants]);
+
+    const reset = useCallback((withSound = true) => {
+        advanceMaze();
+        setMoves(0);
+        setCompleted(false);
+        setElapsed(0);
+        setStartedAt(Date.now());
+        easyCursorRef.current = 1;
+        setGateQuestion(easyPool[0] ?? null);
+        moveBudgetRef.current = 0;
+        setMoveBudget(0);
+        setGateFeedback("Responda uma pergunta para liberar 2 movimentos.");
+        usedEasyRef.current = new Set([0]);
+        if (withSound) playUiSfx("click");
+    }, [advanceMaze, easyPool]);
+
+    const nextGateQuestion = useCallback(() => {
+        const available = easyPool
+            .map((_, i) => i)
+            .filter((i) => !usedEasyRef.current.has(i));
+        if (!available.length) {
+            setGateQuestion(null);
+            moveBudgetRef.current = 2;
+            setMoveBudget(2);
+            setGateFeedback("Perguntas concluídas sem repetição nesta rodada. +2 movimentos.");
+            return;
+        }
+        const idx = available[Math.floor(Math.random() * available.length)];
+        usedEasyRef.current.add(idx);
+        setGateQuestion(easyPool[idx]);
+        easyCursorRef.current += 1;
+        moveBudgetRef.current = 0;
+        setMoveBudget(0);
+        setGateFeedback("Responda para liberar 2 movimentos.");
+    }, [easyPool]);
+
+    const triggerQuestion = useCallback(() => {
+        const pool = cfg.questions?.length ? cfg.questions : DEFAULT_MAZE.questions;
+        const q = pool[questionCursor % pool.length];
+        setQuestionCursor((v) => v + 1);
+        setActiveQuestion(q);
+        setWallFeedback(null);
+        playUiSfx("error");
+    }, [cfg.questions, questionCursor]);
+
+    const move = useCallback((dr: number, dc: number) => {
+        if (activeQuestion || completed || moveBudgetRef.current <= 0) return;
+        setGateFeedback(null);
+        const [r, c] = posRef.current;
+        const nr = r + dr;
+        const nc = c + dc;
+
+        if (!canMove(nr, nc)) {
+            triggerQuestion();
+            return;
+        }
+
+        const next: [number, number] = [nr, nc];
+        posRef.current = next;
+        setPos(next);
+        setMoves((m) => m + 1);
+
+        const nextBudget = Math.max(0, moveBudgetRef.current - 1);
+        moveBudgetRef.current = nextBudget;
+        setMoveBudget(nextBudget);
+
+        playUiSfx("click");
+
+        if (nr === mazeMeta.end[0] && nc === mazeMeta.end[1]) {
+            setCompleted(true);
+            playUiSfx("success");
+            return;
+        }
+
+        if (nextBudget === 0) {
+            nextGateQuestion();
+        }
+    }, [activeQuestion, canMove, completed, mazeMeta.end, nextGateQuestion, triggerQuestion]);
+
+    const answerGateQuestion = (idx: number) => {
+        if (!gateQuestion || activeQuestion || completed) return;
+        const correct = idx === gateQuestion.answer;
+        if (correct) {
+            moveBudgetRef.current = 2;
+            setMoveBudget(2);
+            setGateQuestion(null);
+            setGateFeedback(gateQuestion.explain || "Correto. Agora você tem 2 movimentos.");
+            playUiSfx("success");
+        } else {
+            moveBudgetRef.current = 0;
+            setMoveBudget(0);
+            setGateFeedback(gateQuestion.explain || "Quase. Tente outra pergunta.");
+            playUiSfx("error");
+            window.setTimeout(() => nextGateQuestion(), 350);
+        }
+    };
+
+    const answerWallQuestion = (idx: number) => {
+        if (!activeQuestion) return;
+        const correct = idx === activeQuestion.answer;
+        setWallFeedback(activeQuestion.explain || (correct ? "Resposta correta." : "Vamos tentar de novo."));
+        playUiSfx(correct ? "success" : "error");
+        window.setTimeout(() => {
+            setActiveQuestion(null);
+            setWallFeedback(null);
+            if (!correct) {
+                reset(false);
+            }
+        }, 550);
+    };
+
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+                e.preventDefault();
+            }
+            if (e.key === "ArrowUp") move(-1, 0);
+            if (e.key === "ArrowDown") move(1, 0);
+            if (e.key === "ArrowLeft") move(0, -1);
+            if (e.key === "ArrowRight") move(0, 1);
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [move]);
+
+    useEffect(() => {
+        const id = window.setInterval(() => {
+            setElapsed(Math.max(0, Math.floor((Date.now() - startedAt) / 1000)));
+        }, 1000);
+        return () => window.clearInterval(id);
+    }, [startedAt]);
+
+    useEffect(() => {
+        posRef.current = pos;
+    }, [pos]);
+
+    return (
+        <div className="my-8 rounded-xl border border-cyan-700/40 bg-slate-900/40 p-3 md:p-5">
+            <div className="flex items-start justify-between gap-3 mb-4">
+                <div>
+                    <h4 className="font-mono text-cyan-300 text-sm md:text-base font-bold uppercase tracking-wider">
+                        {parseTextWithTranslations(cfg.title)}
+                    </h4>
+                    <p className="text-slate-400 text-sm mt-1">{parseTextWithTranslations(cfg.subtitle)}</p>
+                </div>
+                <button
+                    onClick={() => reset()}
+                    className="px-3 py-2 rounded-md border border-slate-600 text-slate-300 hover:border-cyan-500/60 text-xs font-mono"
+                >
+                    Reiniciar
+                </button>
+            </div>
+
+            <p className="text-slate-300 text-xs md:text-sm mb-3">{parseTextWithTranslations(cfg.goal)}</p>
+
+            <div className="flex flex-col md:flex-row gap-3 md:gap-5 items-start">
+                <div className="inline-grid gap-1 p-2 rounded-lg bg-slate-950/70 border border-slate-800">
+                    {mazeMeta.grid.map((row, r) => (
+                        <div key={r} className="flex gap-1">
+                            {row.split("").map((cell, c) => {
+                                const isPlayer = pos[0] === r && pos[1] === c;
+                                const isWall = cell === "#";
+                                const isEnd = r === mazeMeta.end[0] && c === mazeMeta.end[1];
+                                return (
+                                    <div
+                                        key={`${r}-${c}`}
+                                        className={cn(
+                                            "w-6 h-6 md:w-7 md:h-7 rounded-sm border text-[10px] flex items-center justify-center font-mono",
+                                            isWall ? "bg-slate-800 border-slate-700" : "bg-slate-900 border-slate-700",
+                                            isEnd && "bg-emerald-900/40 border-emerald-600/50 text-emerald-300"
+                                        )}
+                                    >
+                                        {isPlayer ? "🙂" : isEnd ? "E" : ""}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </div>
+
+                <div className="w-full md:w-auto">
+                    {gateQuestion && !activeQuestion && !completed && moveBudget === 0 && (
+                        <div className="mb-3 p-3 rounded-md border border-cyan-600/40 bg-cyan-900/15 max-w-[340px]">
+                            <p className="text-[11px] uppercase tracking-wider font-mono text-cyan-300 mb-2">Pergunta para liberar movimento</p>
+                            <p className="text-sm text-slate-100 mb-2">{parseTextWithTranslations(gateQuestion.q)}</p>
+                            <div className="grid gap-2">
+                                {gateQuestion.options.map((opt, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => answerGateQuestion(idx)}
+                                        className="text-left px-3 py-2 rounded border border-slate-600 bg-slate-900/60 text-slate-100 text-sm active:scale-[0.99]"
+                                    >
+                                        {parseTextWithTranslations(opt)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-3 gap-2 max-w-[240px]">
+                        <span />
+                        <button disabled={moveBudget <= 0 || !!activeQuestion || completed} onClick={() => move(-1, 0)} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", (moveBudget <= 0 || !!activeQuestion || completed) ? "border-slate-700 text-slate-500" : "border-slate-600")}>↑</button>
+                        <span />
+                        <button disabled={moveBudget <= 0 || !!activeQuestion || completed} onClick={() => move(0, -1)} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", (moveBudget <= 0 || !!activeQuestion || completed) ? "border-slate-700 text-slate-500" : "border-slate-600")}>←</button>
+                        <button disabled={moveBudget <= 0 || !!activeQuestion || completed} onClick={() => move(1, 0)} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", (moveBudget <= 0 || !!activeQuestion || completed) ? "border-slate-700 text-slate-500" : "border-slate-600")}>↓</button>
+                        <button disabled={moveBudget <= 0 || !!activeQuestion || completed} onClick={() => move(0, 1)} className={cn("py-3 rounded border text-slate-200 text-lg active:scale-95", (moveBudget <= 0 || !!activeQuestion || completed) ? "border-slate-700 text-slate-500" : "border-slate-600")}>→</button>
+                    </div>
+
+                    <div className="mt-3 text-xs text-slate-400 font-mono">
+                        Movimentos: {moves} · Tempo: {elapsed}s · Créditos: {moveBudget}
+                    </div>
+                    {gateFeedback && !activeQuestion && <div className="mt-2 text-xs text-cyan-200">{parseTextWithTranslations(gateFeedback)}</div>}
+                </div>
+            </div>
+
+            {completed && (
+                <div className="mt-3 p-3 rounded border border-emerald-500/40 bg-emerald-900/20 text-emerald-200 text-sm">
+                    Desafio concluído. Ótimo foco.
+                </div>
+            )}
+
+            {activeQuestion && (
+                <div className="mt-4 p-4 rounded-lg border border-amber-500/40 bg-amber-900/20">
+                    <div className="text-xs font-mono uppercase tracking-wider text-amber-300 mb-2">Bateu na parede: responda para reiniciar</div>
+                    <p className="text-slate-100 text-sm mb-3">{parseTextWithTranslations(activeQuestion.q)}</p>
+                    <div className="grid gap-2">
+                        {activeQuestion.options.map((opt, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => answerWallQuestion(idx)}
+                                className="w-full text-left px-3 py-3 rounded-md border border-slate-600 bg-slate-900/50 text-slate-100 text-sm active:scale-[0.99]"
+                            >
+                                {parseTextWithTranslations(opt)}
+                            </button>
+                        ))}
+                    </div>
+                    {wallFeedback && <p className="text-xs text-amber-200 mt-3">{parseTextWithTranslations(wallFeedback)}</p>}
+                </div>
+            )}
         </div>
     );
 };
@@ -108,7 +665,13 @@ const RevealBox = ({ title, children }: { title: string, children: React.ReactNo
     )
 }
 
-const ScrambleExercise = ({ targetSentence }: { targetSentence: string }) => {
+const ScrambleExercise = ({
+    targetSentence,
+    translation,
+}: {
+    targetSentence: string;
+    translation?: string;
+}) => {
     // Basic tokenizer - split by spaces, keep punctuation simple for now
     const initialWords = targetSentence.split(' ').map((word, id) => ({ id: `${id}-${word}`, text: word }));
 
@@ -123,6 +686,7 @@ const ScrambleExercise = ({ targetSentence }: { targetSentence: string }) => {
     });
 
     const [isMobile, setIsMobile] = useState(false);
+    const [showAnswer, setShowAnswer] = useState(false);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -188,6 +752,25 @@ const ScrambleExercise = ({ targetSentence }: { targetSentence: string }) => {
                         <strong>Sucesso!</strong> A estrutura está perfeita.
                     </motion.div>
                 )}
+
+                <div className="w-full mt-5 border-t border-violet-500/20 pt-4">
+                    <button
+                        type="button"
+                        onClick={() => setShowAnswer((prev) => !prev)}
+                        className="px-4 py-2 rounded-md text-sm font-medium bg-violet-500/15 text-violet-200 border border-violet-400/30 hover:bg-violet-500/25 transition"
+                    >
+                        {showAnswer ? "Ocultar resposta" : "Ver resposta"}
+                    </button>
+
+                    {showAnswer && (
+                        <div className="mt-3 p-3 rounded-lg border border-violet-400/30 bg-violet-950/20 text-sm">
+                            <p className="text-violet-100 font-medium">{targetSentence}</p>
+                            {translation && (
+                                <p className="text-violet-200/80 mt-1">Tradução: {translation}</p>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -205,6 +788,7 @@ const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat'
 
         const isCorrect = data[currentIndex].type === choice;
         if (isCorrect) setScore(s => s + 1);
+        playUiSfx(isCorrect ? "success" : "error");
 
         setFeedback(isCorrect ? 'correct' : 'wrong');
 
@@ -223,7 +807,7 @@ const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat'
             <div className="bg-gradient-to-r from-amber-900/40 to-slate-900/40 px-4 py-3 md:px-6 md:py-4 border-b border-amber-500/30 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Crosshair className="w-5 h-5 text-amber-400" />
-                    <span className="font-bold text-amber-400 font-mono text-xs md:text-sm tracking-wider">FILTRO TÁTICO: O Radar</span>
+                    <span className="font-bold text-amber-400 font-mono text-xs md:text-sm tracking-wider">LEITURA RÁPIDA DA FRASE</span>
                 </div>
                 {!isFinished && (
                     <span className="font-mono text-xs text-amber-500 bg-amber-950/50 px-2 py-1 rounded">
@@ -238,7 +822,7 @@ const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat'
                         <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
                         <h4 className="text-xl md:text-2xl font-bold text-slate-100 mb-2">Simulação Concluída!</h4>
                         <p className="text-slate-400 mb-6">Precisão: {Math.round((score / data.length) * 100)}% ({score}/{data.length})</p>
-                        <button onClick={() => { setCurrentIndex(0); setScore(0); setIsFinished(false); }} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition">Reiniciar Radar</button>
+                        <button onClick={() => { setCurrentIndex(0); setScore(0); setIsFinished(false); }} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition">Tentar novamente</button>
                     </motion.div>
                 ) : (
                     <div className="w-full max-w-lg">
@@ -266,15 +850,15 @@ const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat'
                                 className="p-4 rounded-lg font-bold border-2 border-red-900/50 bg-red-950/20 text-red-400 hover:bg-red-900/40 hover:border-red-500/50 transition-all flex flex-col items-center gap-2"
                             >
                                 <span className="text-2xl">📚</span>
-                                <span className="text-xs md:text-sm uppercase tracking-wider">Inglês de Laboratório</span>
+                                <span className="text-xs md:text-sm uppercase tracking-wider">Inglês travado</span>
                             </button>
                             <button
                                 onClick={() => handleSort('combat')}
                                 disabled={feedback !== null}
                                 className="p-4 rounded-lg font-bold border-2 border-emerald-900/50 bg-emerald-950/20 text-emerald-400 hover:bg-emerald-900/40 hover:border-emerald-500/50 transition-all flex flex-col items-center gap-2"
                             >
-                                <span className="text-2xl">⚔️</span>
-                                <span className="text-xs md:text-sm uppercase tracking-wider">Inglês de Combate</span>
+                                <span className="text-2xl">✅</span>
+                                <span className="text-xs md:text-sm uppercase tracking-wider">Inglês natural</span>
                             </button>
                         </div>
                     </div>
@@ -300,6 +884,7 @@ const AudioDecodeGame = ({ data }: { data: { phonetic: string; options: string[]
         if (idx === data[currentStep].answer) {
             setScore(s => s + 1);
         }
+        playUiSfx(idx === data[currentStep].answer ? "success" : "error");
 
         setTimeout(() => {
             setShowResult(false);
@@ -492,8 +1077,8 @@ const ScenarioCard = ({ data }: { data: { context: string; situation: string; wr
             {/* Header */}
             <div className="rounded-t-xl bg-gradient-to-r from-amber-900/40 to-orange-900/30 px-4 py-3 md:px-6 md:py-4 border-b border-amber-500/30 flex items-center gap-3">
                 <Crosshair className="w-5 h-5 text-amber-400" />
-                <span className="font-bold text-amber-400 font-mono text-xs md:text-sm tracking-wider">⚔️ CENÁRIO DE COMBATE</span>
-                <span className="ml-auto text-[10px] md:text-xs bg-red-500/20 text-red-400 px-2 py-0.5 md:px-3 md:py-1 rounded-full font-mono">STRESS: HIGH</span>
+                <span className="font-bold text-amber-400 font-mono text-xs md:text-sm tracking-wider">SITUAÇÃO REAL</span>
+                <span className="ml-auto text-[10px] md:text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 md:px-3 md:py-1 rounded-full font-mono">RITMO ALTO</span>
             </div>
 
             {/* Context */}
@@ -521,7 +1106,7 @@ const ScenarioCard = ({ data }: { data: { context: string; situation: string; wr
                             : "bg-gradient-to-r from-cyan-600 to-cyan-500 text-white shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)]"
                     )}
                 >
-                    {showSolution ? "OCULTAR ANÁLISE" : "REVELAR ANÁLISE TÁTICA"}
+                    {showSolution ? "OCULTAR ANÁLISE" : "VER ANÁLISE"}
                     <ChevronDown className={cn("w-5 h-5 transition-transform", showSolution && "rotate-180")} />
                 </button>
 
@@ -539,7 +1124,7 @@ const ScenarioCard = ({ data }: { data: { context: string; situation: string; wr
                                 <div className="bg-red-950/20 border border-red-500/30 rounded-lg p-4 md:p-5">
                                     <h5 className="font-bold text-red-400 text-xs md:text-sm mb-3 flex items-center gap-2">
                                         <AlertCircle className="w-4 h-4" />
-                                        ❌ O TRAVAMENTO
+                                        ❌ RESPOSTA QUE ATRAPALHA
                                     </h5>
                                     <p className="text-slate-400 text-sm mb-3 leading-relaxed">{parseTextWithTranslations(data.wrong.action)}</p>
                                     <div className="bg-red-900/20 p-3 rounded text-red-300 text-xs md:text-sm font-mono leading-relaxed">
@@ -551,7 +1136,7 @@ const ScenarioCard = ({ data }: { data: { context: string; situation: string; wr
                                 <div className="bg-emerald-950/20 border border-emerald-500/30 rounded-lg p-4 md:p-5">
                                     <h5 className="font-bold text-emerald-400 text-xs md:text-sm mb-3 flex items-center gap-2">
                                         <CheckCircle2 className="w-4 h-4" />
-                                        ✅ RESPOSTA DE ELITE
+                                        ✅ RESPOSTA QUE FUNCIONA
                                     </h5>
                                     <p className="text-slate-400 text-sm mb-3 leading-relaxed">{parseTextWithTranslations(data.right.action)}</p>
                                     <div className="bg-emerald-900/20 p-3 rounded text-emerald-300 text-xs md:text-sm font-mono leading-relaxed">
@@ -588,7 +1173,7 @@ const PhoneticBreakdown = ({ data }: { data: { formal: { text: string; analysis:
 
                     {/* Combat */}
                     <div className="bg-cyan-950/20 rounded-lg p-4 md:p-5 border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.1)]">
-                        <h4 className="text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider mb-3">⚔️ FORMA DE COMBATE</h4>
+                        <h4 className="text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider mb-3">FORMA NATURAL</h4>
                         <div className="bg-slate-900/50 p-3 md:p-4 rounded font-mono text-xl md:text-2xl text-cyan-300 text-center mb-3">
                             {parseTextWithTranslations(data.combat.text)}
                         </div>
@@ -1672,7 +2257,7 @@ const RadarConsole = ({ content }: { content: string }) => (
     <div className="my-6 bg-slate-950 border border-red-500/30 rounded-xl overflow-hidden">
         <div className="flex items-center gap-2 bg-red-500/10 px-4 py-2 border-b border-red-500/20">
             <Crosshair className="w-4 h-4 text-red-400 animate-pulse" />
-            <span className="text-red-400 font-mono text-xs uppercase tracking-widest">Radar Console</span>
+            <span className="text-red-400 font-mono text-xs uppercase tracking-widest">Painel de foco</span>
         </div>
         <pre className="text-red-300/80 font-mono text-xs md:text-sm p-4 md:p-6 whitespace-pre-wrap leading-relaxed">
             {content.split('\n').map((line, i) => (
@@ -2367,12 +2952,12 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
             );
         case "system-status":
             return (
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3 bg-slate-950 text-emerald-500 p-4 rounded border border-emerald-900/50 my-6 font-mono text-sm shadow-[inset_0_0_20px_rgba(16,185,129,0.05)]">
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3 bg-[#111313] text-emerald-200 p-4 rounded-xl border border-emerald-700/35 my-6 text-sm shadow-[0_8px_24px_rgba(0,0,0,0.22)]">
                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                        <span className="uppercase tracking-widest font-bold">SYSTEM STATUS:</span>
+                        <div className="w-2 h-2 bg-emerald-300 rounded-full animate-pulse shadow-[0_0_10px_rgba(110,231,183,0.65)]" />
+                        <span className="uppercase tracking-wider font-semibold text-emerald-100/90">Status da aula</span>
                     </div>
-                    <span className="text-emerald-500/80">{parseTranslatable(block.content as string)}</span>
+                    <span className="text-emerald-50/85">{parseTextWithTranslations(block.content as string)}</span>
                 </div>
             );
         case "terminal-view":
@@ -2384,7 +2969,7 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
                             <div className="w-2.5 h-2.5 rounded-full bg-amber-500/50" />
                             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/50" />
                         </div>
-                        <span className="text-white/20 text-xs ml-2">secure_uplink.sh</span>
+                        <span className="text-white/20 text-xs ml-2">painel-aula</span>
                     </div>
                     <div className="p-4 text-emerald-400/90 leading-relaxed font-mono overflow-x-auto">
                         <div className="min-w-[300px]">
@@ -2397,22 +2982,47 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
                 </div>
             );
         case "interactive-quiz":
-            const [q, opts, ans] = (block.content as string).split('|');
-            return <InteractiveQuiz question={q} options={opts ? opts.split(',') : []} answer={parseInt(ans) || 0} />;
+            const quiz = parseQuizContent(block.content as string);
+            return <InteractiveQuiz question={quiz.question} options={quiz.options} answer={quiz.answer || 0} />;
         case "scramble-exercise":
+            if (typeof block.content === "string") {
+                const raw = (block.content as string).trim();
+                if (raw.startsWith("{")) {
+                    try {
+                        const parsed = JSON.parse(raw) as { sentence?: string; translation?: string };
+                        if (parsed?.sentence) {
+                            return <ScrambleExercise targetSentence={parsed.sentence} translation={parsed.translation} />;
+                        }
+                    } catch {
+                        // Keep backward compatibility with plain-string content.
+                    }
+                }
+            }
             return <ScrambleExercise targetSentence={block.content as string} />;
         case "combat-sort-game":
             return <CombatSortGame data={JSON.parse(block.content as string)} />;
         case "audio-decode-game":
             return <AudioDecodeGame data={JSON.parse(block.content as string)} />;
+        case "maze-game":
+            if (typeof block.content === "string") {
+                const raw = (block.content as string).trim();
+                if (raw.startsWith("{")) {
+                    try {
+                        return <MazeGame data={JSON.parse(raw)} />;
+                    } catch {
+                        return <MazeGame data={{}} />;
+                    }
+                }
+            }
+            return <MazeGame data={{}} />;
         case "reveal-box":
-            return <RevealBox title={parseTextWithTranslations(block.title || "ENCRYPTED DATA") as string}>{parseTextWithTranslations(block.content as string)}</RevealBox>;
+            return <RevealBox title={parseTextWithTranslations(block.title || "Detalhes") as string}>{parseTextWithTranslations(block.content as string)}</RevealBox>;
         case "audio-player":
             return (
                 <div className="my-6 p-4 bg-slate-900/50 border border-slate-700 rounded-lg flex items-center gap-4 hover:border-cyan-500/50 transition-colors group">
                     <AudioButton text={block.content as string} size="lg" />
                     <div className="flex-1">
-                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Audio Log</div>
+                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Áudio de apoio</div>
                         <div className="text-slate-300 font-medium text-sm md:text-base">{block.content}</div>
                     </div>
                 </div>
@@ -2421,14 +3031,15 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
             return (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-8">
                     {(block.content as string[]).map((card, i) => {
-                        const [title, desc] = card.split('|');
+                        const [title, ...descParts] = splitOutsideTranslatable(card, '|');
+                        const desc = descParts.join('|');
                         return (
                             <div key={i} className="bg-slate-900/40 p-4 md:p-6 rounded-lg border border-slate-700 hover:border-cyan-500/50 transition-all group backdrop-blur-sm">
                                 <h4 className="font-bold text-slate-200 mb-2 group-hover:text-cyan-400 transition-colors flex items-center gap-2 font-mono text-sm md:text-base">
                                     <Cpu className="w-4 h-4 text-slate-500" />
-                                    {title}
+                                    {parseTextWithTranslations(title)}
                                 </h4>
-                                <p className="text-xs md:text-sm text-slate-400">{desc}</p>
+                                <p className="text-xs md:text-sm text-slate-400">{parseTextWithTranslations(desc)}</p>
                             </div>
                         )
                     })}
@@ -2440,7 +3051,7 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
                     <div className="bg-slate-900/80 backdrop-blur px-4 py-3 flex items-center justify-between border-b border-white/10">
                         <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs uppercase tracking-widest">
                             <Play className="w-4 h-4 fill-current" />
-                            <span>Visual Intel</span>
+                            <span>Vídeo de apoio</span>
                         </div>
                         <span className="text-white/40 text-[10px] md:text-xs font-mono">{block.title}</span>
                     </div>
@@ -2454,18 +3065,18 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
                 <div className="my-8 md:my-10 rounded border border-slate-700/50 overflow-hidden bg-slate-900/20 backdrop-blur">
                     <div className="bg-slate-900/50 px-4 py-3 border-b border-slate-700/50 flex items-center gap-2">
                         <TableIcon className="w-4 h-4 text-slate-500" />
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{block.title || "Reference Data"}</span>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{block.title || "Tabela de apoio"}</span>
                     </div>
                     <div className="overflow-x-auto pb-2">
                         <table className="w-full text-sm text-left min-w-[500px]">
                             <tbody className="divide-y divide-slate-800">
                                 {(block.content as string[]).map((row, i) => {
-                                    const cols = row.split('|');
+                                    const cols = splitOutsideTranslatable(row, '|');
                                     return (
                                         <tr key={i} className={i === 0 ? "bg-slate-900/80 font-bold text-cyan-400 font-mono text-xs uppercase" : "hover:bg-white/5 transition-colors"}>
                                             {cols.map((col, j) => (
                                                 <td key={j} className="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-slate-400 first:text-slate-200 text-xs md:text-sm">
-                                                    {col}
+                                                    {parseTextWithTranslations(col)}
                                                 </td>
                                             ))}
                                         </tr>
@@ -2481,7 +3092,7 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
                 <div className="my-10 bg-slate-900/30 rounded border border-slate-700 overflow-hidden">
                     <div className="bg-slate-900/80 px-4 py-3 border-b border-slate-700 flex items-center gap-2">
                         <MessageSquare className="w-4 h-4 text-cyan-500" />
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Intercepted Comms: {parseTextWithTranslations(block.title || "")}</span>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Diálogo guiado: {parseTextWithTranslations(block.title || "")}</span>
                     </div>
                     <div className="p-6 space-y-4">
                         {(block.content as string[]).map((line, i) => {
@@ -2639,8 +3250,53 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         data.modules?.[0]?.id || null
     );
     const [highlightedModuleId, setHighlightedModuleId] = useState<string | null>(null);
+    const [challengeTarget, setChallengeTarget] = useState<{ moduleId: string; index: number } | null>(null);
+    const [challengeAnswers, setChallengeAnswers] = useState<Record<string, Array<boolean | null>>>({});
+    const [challengePassed, setChallengePassed] = useState<Record<string, boolean>>({});
+    const [challengeLockUntil, setChallengeLockUntil] = useState<Record<string, number>>({});
+    const [challengeFeedback, setChallengeFeedback] = useState<Record<string, "ok" | "error" | null>>({});
+    const [clockNow, setClockNow] = useState(() => Date.now());
+    const accordionTimerRef = useRef<number | null>(null);
+    const viewRootRef = useRef<HTMLDivElement | null>(null);
 
     const { markPillarModuleAsCompleted, isPillarModuleCompleted } = useProgress();
+
+    useEffect(() => {
+        const timer = window.setInterval(() => {
+            setClockNow(Date.now());
+        }, 1000);
+        return () => window.clearInterval(timer);
+    }, []);
+
+    useEffect(() => {
+        const root = viewRootRef.current;
+        if (!root) return;
+
+        let lastPlayed = 0;
+        const onClick = (event: Event) => {
+            const target = event.target as HTMLElement | null;
+            if (!target) return;
+            const clickable = target.closest('button, [role="button"]');
+            if (!clickable) return;
+
+            const now = Date.now();
+            if (now - lastPlayed < 40) return;
+            lastPlayed = now;
+            playUiSfx("click");
+        };
+
+        root.addEventListener("click", onClick, { capture: true });
+        return () => root.removeEventListener("click", onClick, { capture: true });
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (accordionTimerRef.current) {
+                window.clearTimeout(accordionTimerRef.current);
+                accordionTimerRef.current = null;
+            }
+        };
+    }, []);
 
     const scrollToModuleAnchor = (
         moduleId: string,
@@ -2652,7 +3308,8 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
             requestAnimationFrame(() => {
                 const anchor = document.getElementById(`module-anchor-${moduleId}`);
                 if (!anchor) return;
-                anchor.scrollIntoView({ behavior, block: "start" });
+                const targetY = Math.max(0, window.scrollY + anchor.getBoundingClientRect().top - 86);
+                window.scrollTo({ top: targetY, behavior });
             });
         }, delay);
     };
@@ -2661,11 +3318,39 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
     if (!data.modules) {
         return (
             <div className="text-center p-10 text-white">
-                <h2 className="text-xl text-red-400">Legacy Data Detected</h2>
-                <p className="text-white/60">Please migrate this pillar to the new Module System.</p>
+                <h2 className="text-xl text-red-400">Conteúdo antigo detectado</h2>
+                <p className="text-white/60">Migre este pilar para o novo formato de módulos.</p>
             </div>
         );
     }
+
+    const openModuleFromTop = (
+        moduleId: string,
+        options?: { behavior?: ScrollBehavior; closeCurrentFirst?: boolean }
+    ) => {
+        const { behavior = "smooth", closeCurrentFirst = true } = options || {};
+
+        if (accordionTimerRef.current) {
+            window.clearTimeout(accordionTimerRef.current);
+            accordionTimerRef.current = null;
+        }
+
+        const openNow = () => {
+            setActiveModuleId(moduleId);
+            scrollToModuleAnchor(moduleId, { delay: 120, behavior });
+        };
+
+        if (closeCurrentFirst && activeModuleId && activeModuleId !== moduleId) {
+            setActiveModuleId(null);
+            accordionTimerRef.current = window.setTimeout(() => {
+                openNow();
+                accordionTimerRef.current = null;
+            }, 260);
+            return;
+        }
+
+        openNow();
+    };
 
     const handleModuleClick = (moduleId: string, status: string | undefined, index: number) => {
         // Allow clicking on completed or active modules
@@ -2674,13 +3359,22 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
 
         if (status === 'locked' && !isCompleted && !isUnlocked) return;
 
-        const newActiveId = activeModuleId === moduleId ? null : moduleId;
-        setActiveModuleId(newActiveId);
-
-        // Scroll to module if opening
-        if (newActiveId) {
-            scrollToModuleAnchor(moduleId, { delay: 90, behavior: "auto" });
+        // Fecha painel de desafio quando muda de modulo.
+        if (challengeTarget?.moduleId && challengeTarget.moduleId !== moduleId) {
+            setChallengeTarget(null);
         }
+
+        const newActiveId = activeModuleId === moduleId ? null : moduleId;
+        if (!newActiveId) {
+            if (accordionTimerRef.current) {
+                window.clearTimeout(accordionTimerRef.current);
+                accordionTimerRef.current = null;
+            }
+            setActiveModuleId(null);
+            return;
+        }
+
+        openModuleFromTop(moduleId, { behavior: "smooth", closeCurrentFirst: true });
     };
 
     const handleCompleteModule = (currentModuleId: string, currentIndex: number) => {
@@ -2695,9 +3389,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
 
         if (nextModule) {
             setHighlightedModuleId(nextModule.id);
-            setActiveModuleId(nextModule.id);
-
-            scrollToModuleAnchor(nextModule.id, { delay: 120, behavior: "smooth" });
+            openModuleFromTop(nextModule.id, { behavior: "smooth", closeCurrentFirst: true });
 
             // Stop blinking after 3 seconds
             setTimeout(() => {
@@ -2709,8 +3401,86 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         }
     };
 
+    const getModuleChallenge = (moduleId: string, moduleTitle: string) => {
+        if (moduleId === "p1-m1") {
+            return [
+                { question: "Quando der branco, pedir desculpa pelo inglês é a melhor saída?", answer: false },
+                { question: "Usar frases curtas (como pedir repetição) ajuda a manter controle da conversa?", answer: true },
+            ];
+        }
+
+        if (moduleTitle.toLowerCase().includes("pareto")) {
+            return [
+                { question: "Você precisa saber todas as palavras para se comunicar bem?", answer: false },
+                { question: "Focar no vocabulário de maior uso acelera o resultado?", answer: true },
+            ];
+        }
+
+        if (moduleTitle.toLowerCase().includes("som")) {
+            return [
+                { question: "Fala conectada pode parecer mais rápida, mas é sobre ligação de sons?", answer: true },
+                { question: "Adicionar vogal no fim de toda palavra em inglês melhora sua clareza?", answer: false },
+            ];
+        }
+
+        return [
+            { question: "Neste módulo, a prática real vale mais do que perfeição travada?", answer: true },
+            { question: "Fingir entendimento quando você não entendeu é uma boa estratégia?", answer: false },
+        ];
+    };
+
+    const handleStartCompletionFlow = (moduleId: string, moduleTitle: string, index: number) => {
+        if (challengePassed[moduleId]) {
+            handleCompleteModule(moduleId, index);
+            return;
+        }
+
+        setChallengeFeedback((prev) => ({ ...prev, [moduleId]: null }));
+        setChallengeTarget({ moduleId, index });
+        setChallengeAnswers((prev) => ({
+            ...prev,
+            [moduleId]: prev[moduleId] ?? [null, null],
+        }));
+    };
+
+    const handleChallengeAnswer = (moduleId: string, questionIndex: number, answer: boolean) => {
+        setChallengeAnswers((prev) => {
+            const current = [...(prev[moduleId] ?? [null, null])];
+            current[questionIndex] = answer;
+            return {
+                ...prev,
+                [moduleId]: current,
+            };
+        });
+    };
+
+    const handleChallengeSubmit = (moduleId: string, moduleTitle: string, index: number) => {
+        const lockUntil = challengeLockUntil[moduleId] ?? 0;
+        if (lockUntil > clockNow) return;
+
+        const questions = getModuleChallenge(moduleId, moduleTitle);
+        const answers = challengeAnswers[moduleId] ?? [null, null];
+        const allAnswered = answers.every((value) => value !== null);
+        if (!allAnswered) return;
+
+        const isCorrect = questions.every((q, qIndex) => answers[qIndex] === q.answer);
+
+        if (!isCorrect) {
+            setChallengeFeedback((prev) => ({ ...prev, [moduleId]: "error" }));
+            setChallengeLockUntil((prev) => ({ ...prev, [moduleId]: Date.now() + 30_000 }));
+            playUiSfx("error");
+            return;
+        }
+
+        setChallengeFeedback((prev) => ({ ...prev, [moduleId]: "ok" }));
+        setChallengePassed((prev) => ({ ...prev, [moduleId]: true }));
+        setChallengeTarget(null);
+        playUiSfx("success");
+        handleCompleteModule(moduleId, index);
+    };
+
     return (
-        <div className="w-full max-w-5xl mx-auto pb-32">
+        <div ref={viewRootRef} className="w-full max-w-5xl mx-auto pb-32">
             {/* HEADER */}
             <div className="mb-12 relative">
                 <div className="absolute top-0 left-0 w-20 h-1 bg-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.8)]" />
@@ -2809,8 +3579,8 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                                 "flex items-center gap-2 text-xs md:text-sm font-mono tracking-widest transition-opacity",
                                                 isActive ? "opacity-100 text-cyan-400" : "opacity-0"
                                             )}>
-                                                <span className="hidden md:inline">ACCESSING</span>
-                                                <span className="md:hidden">OPEN</span>
+                                                <span className="hidden md:inline">ABRINDO</span>
+                                                <span className="md:hidden">ABRIR</span>
                                                 <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-cyan-400 rounded-full animate-pulse" />
                                             </div>
                                         )}
@@ -2848,7 +3618,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                                     {isCompleted ? (
                                                         <span className="text-emerald-400 font-mono text-sm flex items-center gap-2">
                                                             <CheckCircle2 className="w-5 h-5" />
-                                                            Módulo Completado
+                                                            Módulo concluído
                                                         </span>
                                                     ) : (
                                                         <span />
@@ -2860,11 +3630,11 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                                             onClick={(e) => {
                                                                 e.preventDefault();
                                                                 e.currentTarget.blur();
-                                                                handleCompleteModule(module.id, index);
+                                                                handleStartCompletionFlow(module.id, module.title, index);
                                                             }}
                                                             className="flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white px-6 py-3 rounded font-bold transition-all shadow-[0_0_20px_rgba(8,145,178,0.4)] hover:shadow-[0_0_30px_rgba(8,145,178,0.6)] group"
                                                         >
-                                                            <span>COMPLETAR E AVANÇAR</span>
+                                                            <span>Concluir e avançar</span>
                                                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                                         </button>
                                                     ) : index < data.modules!.length - 1 ? (
@@ -2881,11 +3651,94 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                                             }}
                                                             className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded font-bold transition-all"
                                                         >
-                                                            <span>IR PARA PRÓXIMA PARTE</span>
+                                                            <span>Ir para próxima parte</span>
                                                             <ArrowRight className="w-5 h-5" />
                                                         </button>
                                                     ) : null}
                                                 </div>
+
+                                                {challengeTarget?.moduleId === module.id && !isCompleted && (
+                                                    <div className="mt-6 rounded-xl border border-cyan-500/30 bg-slate-900/60 p-4 md:p-6">
+                                                        <div className="flex items-center justify-between gap-4 mb-4">
+                                                            <h4 className="text-cyan-300 font-semibold text-sm md:text-base">
+                                                                Desafio rápido (2 perguntas Sim/Não)
+                                                            </h4>
+                                                            {(() => {
+                                                                const leftMs = (challengeLockUntil[module.id] ?? 0) - clockNow;
+                                                                if (leftMs <= 0) return null;
+                                                                return (
+                                                                    <span className="text-amber-300 text-xs md:text-sm">
+                                                                        Nova tentativa em {Math.ceil(leftMs / 1000)}s
+                                                                    </span>
+                                                                );
+                                                            })()}
+                                                        </div>
+
+                                                        <div className="space-y-4">
+                                                            {getModuleChallenge(module.id, module.title).map((q, qIndex) => {
+                                                                const answerValue = challengeAnswers[module.id]?.[qIndex] ?? null;
+                                                                return (
+                                                                    <div key={`${module.id}-q-${qIndex}`} className="rounded-lg border border-slate-700/70 bg-slate-950/50 p-3">
+                                                                        <p className="text-slate-200 text-sm mb-3">{q.question}</p>
+                                                                        <div className="flex gap-2">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleChallengeAnswer(module.id, qIndex, true)}
+                                                                                className={cn(
+                                                                                    "px-4 py-2 rounded text-sm border transition",
+                                                                                    answerValue === true
+                                                                                        ? "bg-emerald-600/30 border-emerald-400/50 text-emerald-200"
+                                                                                        : "bg-slate-800 border-slate-600 text-slate-300 hover:border-emerald-400/40"
+                                                                                )}
+                                                                            >
+                                                                                Sim
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleChallengeAnswer(module.id, qIndex, false)}
+                                                                                className={cn(
+                                                                                    "px-4 py-2 rounded text-sm border transition",
+                                                                                    answerValue === false
+                                                                                        ? "bg-red-600/25 border-red-400/50 text-red-200"
+                                                                                        : "bg-slate-800 border-slate-600 text-slate-300 hover:border-red-400/40"
+                                                                                )}
+                                                                            >
+                                                                                Não
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+
+                                                        {challengeFeedback[module.id] === "error" && (
+                                                            <p className="mt-4 text-red-300 text-sm">
+                                                                Respostas incorretas. Revise o módulo e tente novamente após 30 segundos.
+                                                            </p>
+                                                        )}
+
+                                                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleChallengeSubmit(module.id, module.title, index)}
+                                                                disabled={
+                                                                    (challengeLockUntil[module.id] ?? 0) > clockNow ||
+                                                                    (challengeAnswers[module.id] ?? [null, null]).some((v) => v === null)
+                                                                }
+                                                                className="px-4 py-2 rounded bg-cyan-600 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cyan-500 transition"
+                                                            >
+                                                                Enviar respostas
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setChallengeTarget(null)}
+                                                                className="px-4 py-2 rounded border border-slate-600 text-slate-300 text-sm hover:bg-slate-800 transition"
+                                                            >
+                                                                Fechar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </motion.div>
                                     )}
