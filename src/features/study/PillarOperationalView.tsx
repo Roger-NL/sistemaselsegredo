@@ -971,90 +971,328 @@ const ScrambleExercise = ({
     );
 };
 
-// Game 1: Sort between Formal (Lab) and Combat English
+// Game 1: Upgrade stiff phrases into real-world English
 const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat' }[] }) => {
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [score, setScore] = useState(0);
-    const [isFinished, setIsFinished] = useState(false);
-    const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
-
-    const handleSort = (choice: 'lab' | 'combat') => {
-        if (isFinished || feedback) return;
-
-        const isCorrect = data[currentIndex].type === choice;
-        if (isCorrect) setScore(s => s + 1);
-        playUiSfx(isCorrect ? "success" : "error");
-
-        setFeedback(isCorrect ? 'correct' : 'wrong');
-
-        setTimeout(() => {
-            setFeedback(null);
-            if (currentIndex + 1 < data.length) {
-                setCurrentIndex(curr => curr + 1);
-            } else {
-                setIsFinished(true);
-            }
-        }, 800);
+    type CombatRound = {
+        stiff: string;
+        natural: string;
+        choices: string[];
+        choiceAnswer: number;
+        reasonChoices: string[];
+        reasonAnswer: number;
+        reasonText: string;
+        tags: string[];
     };
 
+    const getNaturalReason = (phrase: string) => {
+        const lower = phrase.toLowerCase();
+        if (/(gonna|gotta|wanna|ain't|i'm|nex'|don't|can't|that's)/.test(lower)) {
+            return "Porque encurta o som e fica mais parecida com fala real.";
+        }
+        if (/(my bad|come again|wait|i'm lost|messed up)/.test(lower)) {
+            return "Porque soa mais humana, direta e natural numa conversa.";
+        }
+        return "Porque vai mais direto ao ponto e perde a cara de frase decorada.";
+    };
+
+    const getNaturalTags = (phrase: string) => {
+        const lower = phrase.toLowerCase();
+        const tags = ["mais falado"];
+        if (/(gonna|gotta|wanna|ain't|i'm|nex'|don't|can't|that's)/.test(lower)) tags.push("som encurtado");
+        if (/(my bad|come again|wait|i'm lost|messed up)/.test(lower)) tags.push("mais humano");
+        if (phrase.length < 28) tags.push("mais direto");
+        return Array.from(new Set(tags)).slice(0, 3);
+    };
+
+    const rounds = React.useMemo<CombatRound[]>(() => {
+        const parsedRounds: CombatRound[] = [];
+        const allNatural = data.filter(item => item.type === "combat").map(item => item.text);
+
+        for (let i = 0; i < data.length; i += 2) {
+            const pair = data.slice(i, i + 2);
+            const stiff = pair.find(item => item.type === "lab")?.text;
+            const natural = pair.find(item => item.type === "combat")?.text;
+            if (!stiff || !natural) continue;
+
+            const distractors = shuffle(allNatural.filter(option => option !== natural)).slice(0, 2);
+            const choices = shuffle([natural, ...distractors]);
+            const reasonText = getNaturalReason(natural);
+            const reasonChoices = shuffle([
+                reasonText,
+                "Porque fica mais longa e mais formal, como inglês de livro.",
+                "Porque evita cortes e deixa o som mais escolar.",
+            ]);
+
+            parsedRounds.push({
+                stiff,
+                natural,
+                choices,
+                choiceAnswer: choices.indexOf(natural),
+                reasonChoices,
+                reasonAnswer: reasonChoices.indexOf(reasonText),
+                reasonText,
+                tags: getNaturalTags(natural),
+            });
+        }
+
+        return parsedRounds;
+    }, [data]);
+
+    const [currentRound, setCurrentRound] = useState(0);
+    const [phase, setPhase] = useState<"choose" | "reason" | "result">("choose");
+    const [finished, setFinished] = useState(false);
+    const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
+    const [selectedReason, setSelectedReason] = useState<number | null>(null);
+    const [choiceError, setChoiceError] = useState<string | null>(null);
+    const [reasonError, setReasonError] = useState<string | null>(null);
+    const [score, setScore] = useState(0);
+
+    const round = rounds[currentRound];
+
+    const resetRoundState = () => {
+        setPhase("choose");
+        setSelectedChoice(null);
+        setSelectedReason(null);
+        setChoiceError(null);
+        setReasonError(null);
+    };
+
+    const handleChoice = (idx: number) => {
+        if (finished || phase !== "choose") return;
+
+        setSelectedChoice(idx);
+        if (idx === round.choiceAnswer) {
+            setScore(s => s + 1);
+            setChoiceError(null);
+            setPhase("reason");
+            playUiSfx("success");
+        } else {
+            setChoiceError("Essa até funciona no papel, mas ainda tem cara de frase montada. Tenta achar a que soa mais viva.");
+            playUiSfx("error");
+        }
+    };
+
+    const handleReason = (idx: number) => {
+        if (finished || phase !== "reason") return;
+
+        setSelectedReason(idx);
+        if (idx === round.reasonAnswer) {
+            setReasonError(null);
+            setPhase("result");
+            playUiSfx("success");
+        } else {
+            setReasonError("Quase. Aqui o foco é perceber por que a frase fica mais natural na boca de quem fala.");
+            playUiSfx("error");
+        }
+    };
+
+    const goNext = () => {
+        if (currentRound + 1 < rounds.length) {
+            setCurrentRound(prev => prev + 1);
+            resetRoundState();
+        } else {
+            setFinished(true);
+            playUiSfx("success");
+        }
+    };
+
+    const restart = () => {
+        setCurrentRound(0);
+        setFinished(false);
+        setScore(0);
+        resetRoundState();
+    };
+
+    if (!rounds.length) return null;
+
     return (
-        <div className="my-8 rounded-xl border border-amber-500/30 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-950 to-black shadow-2xl relative">
-            <div className="bg-gradient-to-r from-amber-900/40 to-slate-900/40 px-4 py-3 md:px-6 md:py-4 border-b border-amber-500/30 flex items-center justify-between">
+        <div className="my-8 rounded-2xl border border-amber-500/25 overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 shadow-2xl">
+            <div className="border-b border-amber-500/20 bg-gradient-to-r from-amber-950/40 to-slate-900/40 px-4 py-3 md:px-5 md:py-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <Crosshair className="w-5 h-5 text-amber-400" />
-                    <span className="font-bold text-amber-400 font-mono text-xs md:text-sm tracking-wider">LEITURA RÁPIDA DA FRASE</span>
+                    <Crosshair className="w-5 h-5 text-amber-300" />
+                    <div>
+                        <p className="font-bold text-amber-300 text-xs md:text-sm tracking-wider uppercase">Upgrade de fala</p>
+                        <p className="text-slate-400 text-[11px] md:text-xs">Troque frase dura por inglês que anda sozinho.</p>
+                    </div>
                 </div>
-                {!isFinished && (
-                    <span className="font-mono text-xs text-amber-500 bg-amber-950/50 px-2 py-1 rounded">
-                        {currentIndex + 1}/{data.length}
+                {!finished && (
+                    <span className="rounded-full bg-amber-950/60 px-2.5 py-1 text-[11px] md:text-xs font-mono text-amber-300">
+                        Rodada {currentRound + 1}/{rounds.length}
                     </span>
                 )}
             </div>
 
-            <div className="p-6 md:p-8 flex flex-col items-center justify-center min-h-[300px]">
-                {isFinished ? (
-                    <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center">
-                        <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-                        <h4 className="text-xl md:text-2xl font-bold text-slate-100 mb-2">Simulação Concluída!</h4>
-                        <p className="text-slate-400 mb-6">Precisão: {Math.round((score / data.length) * 100)}% ({score}/{data.length})</p>
-                        <button onClick={() => { setCurrentIndex(0); setScore(0); setIsFinished(false); }} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition">Tentar novamente</button>
+            <div className="p-4 md:p-6">
+                {finished ? (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-emerald-500/20 bg-emerald-950/20 p-5 md:p-6 text-center">
+                        <CheckCircle2 className="w-14 h-14 text-emerald-400 mx-auto mb-3" />
+                        <h4 className="text-lg md:text-xl font-bold text-slate-100 mb-2">Desafio concluído</h4>
+                        <p className="text-slate-300 text-sm md:text-base">
+                            Você percebeu melhor o que deixa uma frase mais solta e mais falada.
+                        </p>
+                        <p className="text-slate-400 text-sm mt-2 mb-5">
+                            Acertos de primeira etapa: {score}/{rounds.length}
+                        </p>
+                        <button
+                            onClick={restart}
+                            className="inline-flex items-center justify-center rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-700"
+                        >
+                            Jogar de novo
+                        </button>
                     </motion.div>
                 ) : (
-                    <div className="w-full max-w-lg">
-                        <AnimatePresence mode="popLayout">
-                            <motion.div
-                                key={currentIndex}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                                className={cn(
-                                    "p-6 md:p-10 mb-8 rounded-xl border text-center font-mono text-xl md:text-2xl font-bold shadow-lg transition-colors",
-                                    feedback === 'correct' ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-400" :
-                                        feedback === 'wrong' ? "bg-red-950/60 border-red-500/50 text-red-400" :
-                                            "bg-slate-800/80 border-slate-600 text-slate-200"
-                                )}
-                            >
-                                &ldquo;{data[currentIndex].text}&rdquo;
-                            </motion.div>
-                        </AnimatePresence>
+                    <div className="space-y-4">
+                        <div className="grid gap-3 md:grid-cols-[1.05fr_1.2fr]">
+                            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+                                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 mb-2">Frase base</p>
+                                <p className="text-base md:text-lg font-medium text-slate-100 leading-relaxed">
+                                    “{round.stiff}”
+                                </p>
+                                <p className="mt-3 text-sm text-slate-400">
+                                    A ideia é a mesma. O jogo aqui é achar a versão que soaria mais viva numa conversa real.
+                                </p>
+                            </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                onClick={() => handleSort('lab')}
-                                disabled={feedback !== null}
-                                className="p-4 rounded-lg font-bold border-2 border-red-900/50 bg-red-950/20 text-red-400 hover:bg-red-900/40 hover:border-red-500/50 transition-all flex flex-col items-center gap-2"
-                            >
-                                <span className="text-2xl">📚</span>
-                                <span className="text-xs md:text-sm uppercase tracking-wider">Inglês travado</span>
-                            </button>
-                            <button
-                                onClick={() => handleSort('combat')}
-                                disabled={feedback !== null}
-                                className="p-4 rounded-lg font-bold border-2 border-emerald-900/50 bg-emerald-950/20 text-emerald-400 hover:bg-emerald-900/40 hover:border-emerald-500/50 transition-all flex flex-col items-center gap-2"
-                            >
-                                <span className="text-2xl">✅</span>
-                                <span className="text-xs md:text-sm uppercase tracking-wider">Inglês natural</span>
-                            </button>
+                            <div className="rounded-2xl border border-amber-500/20 bg-amber-950/10 p-4">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                        <p className="text-[11px] uppercase tracking-[0.24em] text-amber-300/80">
+                                            {phase === "choose" ? "Etapa 1" : phase === "reason" ? "Etapa 2" : "Fechamento"}
+                                        </p>
+                                        <h4 className="mt-1 text-base md:text-lg font-semibold text-slate-100">
+                                            {phase === "choose" && "Qual versão soa mais natural?"}
+                                            {phase === "reason" && "Agora perceba o porquê"}
+                                            {phase === "result" && "Upgrade concluído"}
+                                        </h4>
+                                    </div>
+                                    <div className="flex gap-1.5">
+                                        {[0, 1].map((step) => (
+                                            <span
+                                                key={step}
+                                                className={cn(
+                                                    "h-2.5 w-8 rounded-full",
+                                                    (phase === "reason" && step === 0) || (phase === "result" && step <= 1) || (phase === "choose" && step === 0)
+                                                        ? "bg-amber-400"
+                                                        : "bg-slate-700"
+                                                )}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {phase === "choose" && (
+                                    <>
+                                        <p className="mt-3 text-sm text-slate-300">
+                                            Escolha a frase que você usaria na rua, não a que parece saída de exercício.
+                                        </p>
+                                        <div className="mt-4 grid gap-3">
+                                            {round.choices.map((choice, idx) => (
+                                                <button
+                                                    key={`${currentRound}-choice-${idx}`}
+                                                    onClick={() => handleChoice(idx)}
+                                                    className={cn(
+                                                        "rounded-xl border px-4 py-3 text-left text-sm md:text-base transition",
+                                                        selectedChoice === idx && idx === round.choiceAnswer
+                                                            ? "border-emerald-500/50 bg-emerald-950/30 text-emerald-100"
+                                                            : selectedChoice === idx
+                                                                ? "border-red-500/50 bg-red-950/30 text-red-100"
+                                                                : "border-slate-700 bg-slate-900/70 text-slate-200 hover:border-amber-400/50"
+                                                    )}
+                                                >
+                                                    {choice}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {choiceError && (
+                                            <div className="mt-3 rounded-xl border border-red-500/20 bg-red-950/20 p-3 text-sm text-red-100">
+                                                <p>{choiceError}</p>
+                                                <button
+                                                    onClick={() => { setSelectedChoice(null); setChoiceError(null); }}
+                                                    className="mt-2 text-red-200 underline underline-offset-4"
+                                                >
+                                                    Tentar novamente
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+                                {phase === "reason" && (
+                                    <>
+                                        <div className="mt-3 rounded-xl border border-emerald-500/20 bg-emerald-950/15 p-3">
+                                            <p className="text-[11px] uppercase tracking-[0.22em] text-emerald-300/80 mb-1">Versão escolhida</p>
+                                            <p className="text-sm md:text-base text-emerald-100 font-medium">“{round.natural}”</p>
+                                        </div>
+                                        <p className="mt-3 text-sm text-slate-300">
+                                            Beleza. Agora marca a razão principal que faz essa frase soar melhor.
+                                        </p>
+                                        <div className="mt-4 grid gap-3">
+                                            {round.reasonChoices.map((reason, idx) => (
+                                                <button
+                                                    key={`${currentRound}-reason-${idx}`}
+                                                    onClick={() => handleReason(idx)}
+                                                    className={cn(
+                                                        "rounded-xl border px-4 py-3 text-left text-sm transition",
+                                                        selectedReason === idx && idx === round.reasonAnswer
+                                                            ? "border-emerald-500/50 bg-emerald-950/30 text-emerald-100"
+                                                            : selectedReason === idx
+                                                                ? "border-red-500/50 bg-red-950/30 text-red-100"
+                                                                : "border-slate-700 bg-slate-900/70 text-slate-200 hover:border-amber-400/50"
+                                                    )}
+                                                >
+                                                    {reason}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {reasonError && (
+                                            <div className="mt-3 rounded-xl border border-red-500/20 bg-red-950/20 p-3 text-sm text-red-100">
+                                                <p>{reasonError}</p>
+                                                <button
+                                                    onClick={() => { setSelectedReason(null); setReasonError(null); }}
+                                                    className="mt-2 text-red-200 underline underline-offset-4"
+                                                >
+                                                    Tentar novamente
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+
+                                {phase === "result" && (
+                                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-3 space-y-3">
+                                        <div className="grid gap-2">
+                                            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3">
+                                                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 mb-1">Antes</p>
+                                                <p className="text-sm md:text-base text-slate-300">“{round.stiff}”</p>
+                                            </div>
+                                            <div className="flex justify-center">
+                                                <ArrowRight className="w-4 h-4 text-amber-300" />
+                                            </div>
+                                            <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-3">
+                                                <p className="text-[11px] uppercase tracking-[0.22em] text-emerald-300/80 mb-1">Depois</p>
+                                                <p className="text-sm md:text-base text-emerald-100">“{round.natural}”</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {round.tags.map((tag) => (
+                                                <span
+                                                    key={tag}
+                                                    className="rounded-full border border-amber-500/20 bg-amber-950/20 px-3 py-1 text-[11px] uppercase tracking-wide text-amber-200"
+                                                >
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <p className="text-sm text-slate-300">{round.reasonText}</p>
+                                        <button
+                                            onClick={goNext}
+                                            className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-400"
+                                        >
+                                            {currentRound + 1 < rounds.length ? "Próxima rodada" : "Fechar desafio"}
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
