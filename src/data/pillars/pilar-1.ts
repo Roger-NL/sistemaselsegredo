@@ -603,10 +603,50 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "audio-decode-game",
                     content: JSON.stringify([
-                        { "phonetic": "Whaddya-havin?", "options": ["What do you have?", "What are you having?", "What have you?"], "answer": 1 },
-                        { "phonetic": "I gotta split", "options": ["I got to spit", "I have got to go", "I got a split"], "answer": 1 },
-                        { "phonetic": "I coulda dunnit", "options": ["I could do it", "I could have done it", "I cold donut"], "answer": 1 },
-                        { "phonetic": "Outta here!", "options": ["Out of here", "Outside here", "Ought to hear"], "answer": 0 }
+                        {
+                            "phonetic": "Whaddya-havin?",
+                            "decoded": "{{What are you having?|O que voce vai pedir?}}",
+                            "translation": "O que voce vai pedir?",
+                            "options": [
+                                "{{What do you have?|O que voce tem?}}",
+                                "{{What are you having?|O que voce vai pedir?}}",
+                                "{{What have you?|O que voce possui?}}"
+                            ],
+                            "answer": 1
+                        },
+                        {
+                            "phonetic": "I gotta split",
+                            "decoded": "{{I have got to go.|Eu tenho que ir.}}",
+                            "translation": "Tenho que ir embora.",
+                            "options": [
+                                "{{I got to spit.|Eu cheguei a cuspir.}}",
+                                "{{I have got to go.|Eu tenho que ir.}}",
+                                "{{I got a split.|Eu consegui uma rachadura.}}"
+                            ],
+                            "answer": 1
+                        },
+                        {
+                            "phonetic": "I coulda dunnit",
+                            "decoded": "{{I could have done it.|Eu poderia ter feito isso.}}",
+                            "translation": "Eu poderia ter feito isso.",
+                            "options": [
+                                "{{I could do it.|Eu poderia fazer isso.}}",
+                                "{{I could have done it.|Eu poderia ter feito isso.}}",
+                                "{{I cold donut.|Eu rosquinha gelada.}}"
+                            ],
+                            "answer": 1
+                        },
+                        {
+                            "phonetic": "Outta here!",
+                            "decoded": "{{Out of here!|Sai daqui!}}",
+                            "translation": "Sai daqui!",
+                            "options": [
+                                "{{Out of here!|Sai daqui!}}",
+                                "{{Outside here.|Do lado de fora daqui.}}",
+                                "{{Ought to hear.|Deveria ouvir.}}"
+                            ],
+                            "answer": 0
+                        }
                     ])
                 }
             ]

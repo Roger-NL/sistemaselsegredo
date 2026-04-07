@@ -1350,7 +1350,7 @@ const AudioDecodeGame = ({
     data,
     onComplete,
 }: {
-    data: { phonetic: string; options: string[]; answer: number }[];
+    data: { phonetic: string; options: string[]; answer: number; decoded?: string; translation?: string }[];
     onComplete?: () => void;
 }) => {
     const passingScore = Math.max(1, data.length - 1);
@@ -1372,15 +1372,20 @@ const AudioDecodeGame = ({
         completionNotifiedRef.current = false;
     }, []);
 
+    const currentItem = data[currentStep];
+    const phoneticDisplay = getOptionTranslation(currentItem?.phonetic || "");
+    const decodedDisplay = currentItem?.decoded ? getOptionTranslation(currentItem.decoded) : null;
+    const topTranslation = currentItem?.translation || phoneticDisplay.portuguese || decodedDisplay?.portuguese || null;
+
     const handleSelect = useCallback((idx: number) => {
         if (showResult || isFinished) return;
         setSelectedOption(idx);
         setShowResult(true);
 
-        if (idx === data[currentStep].answer) {
+        if (idx === currentItem.answer) {
             setScore(s => s + 1);
         }
-        playUiSfx(idx === data[currentStep].answer ? "success" : "error");
+        playUiSfx(idx === currentItem.answer ? "success" : "error");
 
         setTimeout(() => {
             setShowResult(false);
@@ -1388,7 +1393,7 @@ const AudioDecodeGame = ({
             if (currentStep + 1 < data.length) {
                 setCurrentStep(c => c + 1);
             } else {
-                const finalScore = score + (idx === data[currentStep].answer ? 1 : 0);
+                const finalScore = score + (idx === currentItem.answer ? 1 : 0);
                 const passed = finalScore >= passingScore;
                 setDidPass(passed);
                 setIsFinished(true);
@@ -1403,7 +1408,7 @@ const AudioDecodeGame = ({
                 }
             }
         }, 1200);
-    }, [currentStep, data, isFinished, onComplete, passingScore, resetGame, score, showResult]);
+    }, [currentItem, currentStep, data, isFinished, onComplete, passingScore, resetGame, score, showResult]);
 
     return (
         <div className="my-8 rounded-xl border border-cyan-500/30 overflow-hidden bg-slate-900 shadow-xl">
@@ -1442,13 +1447,24 @@ const AudioDecodeGame = ({
                         <p className="text-slate-400 text-sm text-center mb-2 uppercase tracking-wide font-bold">O que o nativo disse?</p>
                         <div className="bg-black/50 border border-slate-700 rounded-lg p-6 mb-8 text-center backdrop-blur shadow-inner">
                             <span className="font-mono text-2xl md:text-3xl font-bold text-cyan-300 animate-pulse">
-                                &ldquo;{data[currentStep].phonetic}&rdquo;
+                                &ldquo;{phoneticDisplay.english}&rdquo;
                             </span>
+                            {decodedDisplay && (
+                                <p className="mt-4 text-sm md:text-base text-slate-200">
+                                    Forma completa: <span className="font-mono text-cyan-200">{decodedDisplay.english}</span>
+                                </p>
+                            )}
+                            {topTranslation && (
+                                <p className="mt-2 text-sm text-slate-400">
+                                    Tradução: {topTranslation}
+                                </p>
+                            )}
                         </div>
 
                         <div className="grid gap-3">
-                            {data[currentStep].options.map((opt, idx) => {
-                                const isCorrect = idx === data[currentStep].answer;
+                            {currentItem.options.map((opt, idx) => {
+                                const display = getOptionTranslation(opt);
+                                const isCorrect = idx === currentItem.answer;
                                 const isSelected = idx === selectedOption;
                                 return (
                                     <button
@@ -1462,7 +1478,14 @@ const AudioDecodeGame = ({
                                                     "bg-slate-800 border-slate-700 text-slate-300 hover:border-cyan-500/50"
                                         )}
                                     >
-                                        <span>{opt}</span>
+                                        <span className="block">
+                                            <span className="block">{display.english}</span>
+                                            {display.portuguese && (
+                                                <span className="mt-1 block text-xs text-slate-400">
+                                                    {display.portuguese}
+                                                </span>
+                                            )}
+                                        </span>
                                         {showResult && isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
                                     </button>
                                 );
