@@ -22,7 +22,9 @@ import {
     AuthResult,
     SubscriptionStatus,
     isFirestorePermissionError,
+    updateUserProgress,
 } from "@/lib/auth/service";
+import { getUserExamStatus } from "@/lib/exam/service";
 
 import type { User as FirebaseUser } from "firebase/auth";
 
@@ -173,6 +175,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Cleanup subscription
         return () => unsubscribe();
     }, []);
+
+    useEffect(() => {
+        const syncPremiumPillarOneUnlock = async () => {
+            if (!user?.id) return;
+
+            const isPremiumUser = checkSubscriptionStatus(user) === "premium";
+            if (!isPremiumUser) return;
+            if ((user.approvedPillar || 1) >= 2) return;
+
+            try {
+                const pillarOneExam = await getUserExamStatus(user.id, 1);
+
+                if (!pillarOneExam) return;
+
+                await updateUserProgress(user.id, {
+                    approvedPillar: 2,
+                });
+
+                setUser((prev) => prev ? { ...prev, approvedPillar: Math.max(prev.approvedPillar || 1, 2) } : prev);
+            } catch (error) {
+                console.error("Error syncing premium Pillar 1 unlock:", error);
+            }
+        };
+
+        syncPremiumPillarOneUnlock();
+    }, [user]);
 
     const login = async (identifier: string, password: string): Promise<AuthResult> => {
         const result = await authLogin(identifier, password);
