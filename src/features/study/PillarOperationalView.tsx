@@ -14,6 +14,7 @@ import { AudioButton } from "@/components/ui/AudioButton";
 import { parseTranslatable, extractTranslatableText, parseTextWithTranslations } from "@/utils/translation";
 import { parseQuizContent, splitOutsideTranslatable } from "@/utils/content-parsers";
 import { playUiSfx } from "@/utils/ui-sfx";
+import { secureStorage } from "@/lib/storage/secure-storage";
 
 interface PillarOperationalViewProps {
     data: PillarData;
@@ -150,6 +151,9 @@ const getOptionTranslation = (text: string): { english: string; portuguese: stri
         portuguese: match[2],
     };
 };
+
+const makeGameStorageKey = (storageKey: string | undefined, suffix: string) =>
+    storageKey ? `study-game:${storageKey}:${suffix}` : null;
 
 const DEFAULT_MAZE: Required<MazeConfig> = {
     title: "Rota da Conversa",
@@ -975,9 +979,11 @@ const ScrambleExercise = ({
 const CombatSortGame = ({
     data,
     onComplete,
+    storageKey,
 }: {
     data: { text: string; type: 'lab' | 'combat' }[];
     onComplete?: () => void;
+    storageKey?: string;
 }) => {
     type CombatRound = {
         stiff: string;
@@ -988,6 +994,15 @@ const CombatSortGame = ({
         reasonAnswer: number;
         reasonText: string;
         tags: string[];
+    };
+    type CombatHistoryEntry = {
+        roundIndex: number;
+        stiff: string;
+        natural: string;
+        selectedChoice: number | null;
+        selectedReason: number | null;
+        choiceCorrect: boolean;
+        reasonCorrect: boolean;
     };
 
     const getNaturalReason = (phrase: string) => {
@@ -1052,15 +1067,30 @@ const CombatSortGame = ({
         return parsedRounds;
     }, [data]);
 
-    const [currentRound, setCurrentRound] = useState(0);
-    const [phase, setPhase] = useState<"choose" | "reason" | "result">("choose");
-    const [finished, setFinished] = useState(false);
-    const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
-    const [selectedReason, setSelectedReason] = useState<number | null>(null);
+    const stateStorageKey = React.useMemo(() => makeGameStorageKey(storageKey, "state"), [storageKey]);
+    const initialStoredCombatState = React.useMemo(() => {
+        if (!stateStorageKey) return null;
+        return secureStorage.getItem<{
+            currentRound: number;
+            phase: "choose" | "reason" | "result";
+            finished: boolean;
+            selectedChoice: number | null;
+            selectedReason: number | null;
+            score: number;
+            history: CombatHistoryEntry[];
+        }>(stateStorageKey);
+    }, [stateStorageKey]);
+
+    const [currentRound, setCurrentRound] = useState(() => Math.min(initialStoredCombatState?.currentRound ?? 0, Math.max(0, rounds.length - 1)));
+    const [phase, setPhase] = useState<"choose" | "reason" | "result">(() => initialStoredCombatState?.phase ?? "choose");
+    const [finished, setFinished] = useState(() => Boolean(initialStoredCombatState?.finished));
+    const [selectedChoice, setSelectedChoice] = useState<number | null>(() => initialStoredCombatState?.selectedChoice ?? null);
+    const [selectedReason, setSelectedReason] = useState<number | null>(() => initialStoredCombatState?.selectedReason ?? null);
     const [choiceError, setChoiceError] = useState<string | null>(null);
     const [reasonError, setReasonError] = useState<string | null>(null);
-    const [score, setScore] = useState(0);
-    const completionNotifiedRef = useRef(false);
+    const [score, setScore] = useState(() => initialStoredCombatState?.score ?? 0);
+    const [history, setHistory] = useState<CombatHistoryEntry[]>(() => initialStoredCombatState?.history ?? []);
+    const completionNotifiedRef = useRef(Boolean(initialStoredCombatState?.finished));
 
     const round = rounds[currentRound];
     const stiffDisplay = getOptionTranslation(round.stiff);
@@ -1073,6 +1103,19 @@ const CombatSortGame = ({
         setChoiceError(null);
         setReasonError(null);
     };
+
+    useEffect(() => {
+        if (!stateStorageKey) return;
+        secureStorage.setItem(stateStorageKey, {
+            currentRound,
+            phase,
+            finished,
+            selectedChoice,
+            selectedReason,
+            score,
+            history,
+        });
+    }, [currentRound, finished, history, phase, score, selectedChoice, selectedReason, stateStorageKey]);
 
     const handleChoice = (idx: number) => {
         if (finished || phase !== "choose") return;
@@ -1095,10 +1138,36 @@ const CombatSortGame = ({
         setSelectedReason(idx);
         if (idx === round.reasonAnswer) {
             setReasonError(null);
+            setHistory((prev) => {
+                const next = [...prev];
+                next[currentRound] = {
+                    roundIndex: currentRound,
+                    stiff: round.stiff,
+                    natural: round.natural,
+                    selectedChoice,
+                    selectedReason: idx,
+                    choiceCorrect: selectedChoice === round.choiceAnswer,
+                    reasonCorrect: true,
+                };
+                return next;
+            });
             setPhase("result");
             playUiSfx("success");
         } else {
             setReasonError("Quase. Aqui o foco é perceber por que a frase fica mais natural na boca de quem fala.");
+            setHistory((prev) => {
+                const next = [...prev];
+                next[currentRound] = {
+                    roundIndex: currentRound,
+                    stiff: round.stiff,
+                    natural: round.natural,
+                    selectedChoice,
+                    selectedReason: idx,
+                    choiceCorrect: selectedChoice === round.choiceAnswer,
+                    reasonCorrect: false,
+                };
+                return next;
+            });
             playUiSfx("error");
         }
     };
@@ -1121,6 +1190,7 @@ const CombatSortGame = ({
         setCurrentRound(0);
         setFinished(false);
         setScore(0);
+        setHistory([]);
         completionNotifiedRef.current = false;
         resetRoundState();
     };
@@ -1155,6 +1225,25 @@ const CombatSortGame = ({
                         <p className="text-slate-400 text-sm mt-2 mb-5">
                             Acertos de primeira etapa: {score}/{rounds.length}
                         </p>
+                        {history.length > 0 && (
+                            <div className="mb-5 rounded-xl border border-slate-700 bg-slate-900/60 p-4 text-left">
+                                <p className="mb-3 text-xs uppercase tracking-[0.22em] text-slate-400">Seu histórico</p>
+                                <div className="space-y-3">
+                                    {history.map((entry) => {
+                                        if (!entry) return null;
+                                        const before = getOptionTranslation(entry.stiff);
+                                        const after = getOptionTranslation(entry.natural);
+                                        return (
+                                            <div key={`combat-history-${entry.roundIndex}`} className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                                                <p className="text-xs text-slate-500">Rodada {entry.roundIndex + 1}</p>
+                                                <p className="mt-1 text-sm text-slate-300">Antes: {before.english}</p>
+                                                <p className="text-sm text-emerald-200">Natural: {after.english}</p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                         <button
                             onClick={restart}
                             className="inline-flex items-center justify-center rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-700"
@@ -1349,19 +1438,43 @@ const CombatSortGame = ({
 const AudioDecodeGame = ({
     data,
     onComplete,
+    storageKey,
 }: {
     data: { phonetic: string; options: string[]; answer: number; decoded?: string; translation?: string }[];
     onComplete?: () => void;
+    storageKey?: string;
 }) => {
+    type AudioHistoryEntry = {
+        step: number;
+        phonetic: string;
+        decoded?: string;
+        translation?: string;
+        selectedOption: number;
+        correct: boolean;
+    };
     const passingScore = Math.max(1, data.length - 1);
-    const [currentStep, setCurrentStep] = useState(0);
-    const [score, setScore] = useState(0);
+    const stateStorageKey = React.useMemo(() => makeGameStorageKey(storageKey, "state"), [storageKey]);
+    const initialStoredAudioState = React.useMemo(() => {
+        if (!stateStorageKey) return null;
+        return secureStorage.getItem<{
+            currentStep: number;
+            score: number;
+            isFinished: boolean;
+            didPass: boolean;
+            showHints: boolean;
+            history: AudioHistoryEntry[];
+        }>(stateStorageKey);
+    }, [stateStorageKey]);
+
+    const [currentStep, setCurrentStep] = useState(() => Math.min(initialStoredAudioState?.currentStep ?? 0, Math.max(0, data.length - 1)));
+    const [score, setScore] = useState(() => initialStoredAudioState?.score ?? 0);
     const [showResult, setShowResult] = useState(false);
-    const [isFinished, setIsFinished] = useState(false);
+    const [isFinished, setIsFinished] = useState(() => Boolean(initialStoredAudioState?.isFinished));
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
-    const [didPass, setDidPass] = useState(false);
-    const [showHints, setShowHints] = useState(false);
-    const completionNotifiedRef = useRef(false);
+    const [didPass, setDidPass] = useState(() => Boolean(initialStoredAudioState?.didPass));
+    const [showHints, setShowHints] = useState(() => Boolean(initialStoredAudioState?.showHints));
+    const [history, setHistory] = useState<AudioHistoryEntry[]>(() => initialStoredAudioState?.history ?? []);
+    const completionNotifiedRef = useRef(Boolean(initialStoredAudioState?.isFinished && initialStoredAudioState?.didPass));
 
     const resetGame = useCallback(() => {
         setCurrentStep(0);
@@ -1371,6 +1484,7 @@ const AudioDecodeGame = ({
         setSelectedOption(null);
         setDidPass(false);
         setShowHints(false);
+        setHistory([]);
         completionNotifiedRef.current = false;
     }, []);
 
@@ -1379,15 +1493,40 @@ const AudioDecodeGame = ({
     const decodedDisplay = currentItem?.decoded ? getOptionTranslation(currentItem.decoded) : null;
     const topTranslation = currentItem?.translation || phoneticDisplay.portuguese || decodedDisplay?.portuguese || null;
 
+    useEffect(() => {
+        if (!stateStorageKey) return;
+        secureStorage.setItem(stateStorageKey, {
+            currentStep,
+            score,
+            isFinished,
+            didPass,
+            showHints,
+            history,
+        });
+    }, [currentStep, didPass, history, isFinished, score, showHints, stateStorageKey]);
+
     const handleSelect = useCallback((idx: number) => {
         if (showResult || isFinished) return;
         setSelectedOption(idx);
         setShowResult(true);
 
-        if (idx === currentItem.answer) {
+        const isCorrect = idx === currentItem.answer;
+        if (isCorrect) {
             setScore(s => s + 1);
         }
-        playUiSfx(idx === currentItem.answer ? "success" : "error");
+        setHistory((prev) => {
+            const next = [...prev];
+            next[currentStep] = {
+                step: currentStep,
+                phonetic: currentItem.phonetic,
+                decoded: currentItem.decoded,
+                translation: currentItem.translation,
+                selectedOption: idx,
+                correct: isCorrect,
+            };
+            return next;
+        });
+        playUiSfx(isCorrect ? "success" : "error");
 
         setTimeout(() => {
             setShowResult(false);
@@ -1501,6 +1640,32 @@ const AudioDecodeGame = ({
                                 );
                             })}
                         </div>
+                        {history.length > 0 && (
+                            <div className="mt-5 rounded-xl border border-slate-700 bg-slate-900/60 p-4">
+                                <p className="mb-3 text-xs text-slate-400 uppercase tracking-[0.22em]">Perguntas respondidas</p>
+                                <div className="space-y-3">
+                                    {history.map((entry) => {
+                                        if (!entry) return null;
+                                        const chosen = getOptionTranslation(data[entry.step]?.options?.[entry.selectedOption] || "");
+                                        const decoded = entry.decoded ? getOptionTranslation(entry.decoded) : null;
+                                        return (
+                                            <div key={`audio-history-${entry.step}`} className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                                                <p className="text-xs text-slate-500">Sinal {entry.step + 1}</p>
+                                                <p className="mt-1 font-mono text-cyan-200">{entry.phonetic}</p>
+                                                <p className="mt-2 text-sm text-slate-300">Sua resposta: {chosen.english}</p>
+                                                {chosen.portuguese && <p className="text-xs text-slate-400">{chosen.portuguese}</p>}
+                                                {decoded && (
+                                                    <>
+                                                        <p className="mt-2 text-sm text-emerald-200">Leitura correta: {decoded.english}</p>
+                                                        {decoded.portuguese && <p className="text-xs text-emerald-300/80">{decoded.portuguese}</p>}
+                                                    </>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
                         {!showHints && (
                             <div className="mt-4 flex justify-center">
                                 <button
@@ -3880,9 +4045,9 @@ const RenderBlock = ({
             }
             return <ScrambleExercise targetSentence={block.content as string} />;
         case "combat-sort-game":
-            return <CombatSortGame data={JSON.parse(block.content as string)} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} />;
+            return <CombatSortGame data={JSON.parse(block.content as string)} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} storageKey={moduleId ? `${moduleId}:combat-sort-game` : undefined} />;
         case "audio-decode-game":
-            return <AudioDecodeGame data={JSON.parse(block.content as string)} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} />;
+            return <AudioDecodeGame data={JSON.parse(block.content as string)} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} storageKey={moduleId ? `${moduleId}:audio-decode-game` : undefined} />;
         case "consolidation-game":
             return <ConsolidationGame data={JSON.parse(block.content as string)} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} />;
         case "maze-game":
