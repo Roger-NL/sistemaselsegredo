@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, updateDoc, getDocFromServer } from "firebase/firestore";
+import { doc, getDoc, updateDoc, getDocFromServer, onSnapshot } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import Cookies from 'js-cookie';
 
@@ -177,6 +177,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     useEffect(() => {
+        if (!auth.currentUser) return;
+
+        const userDocRef = doc(db, "users", auth.currentUser.uid);
+        const unsubscribe = onSnapshot(userDocRef, (snapshot) => {
+            if (!snapshot.exists()) return;
+
+            const liveUser = snapshot.data() as User;
+            setUser((prev) => {
+                const nextUser = { ...liveUser, id: auth.currentUser!.uid };
+
+                if (
+                    prev &&
+                    prev.subscriptionStatus === nextUser.subscriptionStatus &&
+                    prev.approvedPillar === nextUser.approvedPillar &&
+                    prev.phone === nextUser.phone &&
+                    prev.currentStreak === nextUser.currentStreak &&
+                    prev.name === nextUser.name &&
+                    prev.email === nextUser.email
+                ) {
+                    return prev;
+                }
+
+                return nextUser;
+            });
+        }, (error) => {
+            if (!isFirestorePermissionError(error)) {
+                console.error("Error subscribing to live user profile:", error);
+            }
+        });
+
+        return () => unsubscribe();
+    }, [user?.id]);
+
+    useEffect(() => {
         const syncPremiumPillarOneUnlock = async () => {
             if (!user?.id) return;
 
@@ -274,7 +308,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const userData = userDoc.data() as User;
                 setUser({ ...userData, id: auth.currentUser.uid });
                 // Atualizar cookie também para o SSR (Layouts) saber
-                Cookies.set('subscriptionStatus', userData.subscriptionStatus || 'free', { expires: 30, path: '/' });
+                Cookies.set('es_user_status', userData.subscriptionStatus || 'free', { expires: 30, path: '/' });
             } else {
                 setUser(buildFallbackUser(auth.currentUser));
             }

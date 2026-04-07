@@ -98,6 +98,7 @@ function getInitialStatus(): Record<string, PillarStatus> {
 // Provider
 export function ProgressProvider({ children }: { children: ReactNode }) {
     const { user, subscriptionStatus } = useAuth(); // NOW using user
+    const isAdminUser = !!user?.email && ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"].includes(user.email);
     const [pillarStatus, setPillarStatus] = useState<Record<string, PillarStatus>>(getInitialStatus);
     const [chosenSpecialization, setChosenSpecialization] = useState<string | null>(null);
     const [specializationStatus, setSpecializationStatus] = useState<'studying' | 'pending_approval' | 'completed' | null>(null);
@@ -283,6 +284,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // Retorna número do pilar atual
     const getCurrentPillarNumber = (): number => {
+        if (!isAdminUser && subscriptionStatus !== "premium") {
+            return 1;
+        }
+
         // First trust the user object if available
         if (user?.approvedPillar) return user.approvedPillar;
 
@@ -310,14 +315,14 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         // Regra de Ouro: Pilar 1 é sempre livre (Freemium)
         if (pillarNumber === 1) return true;
 
+        // Pilar 2+ exige premium sem excecao.
+        if (!isAdminUser && subscriptionStatus !== 'premium') return false;
+
         // Regra de Admin/Progresso:
         // Se user.approvedPillar for definido, ele tem prioridade absoluta.
         if (user?.approvedPillar && pillarNumber <= user.approvedPillar) {
             return true;
         }
-
-        // Regra Premium: Pilar 2+ exige assinatura ativa
-        if (subscriptionStatus !== 'premium') return false;
 
         // Utilizar o `pillarStatus` como fonte única de verdade
         const status = pillarStatus[`pilar-${pillarNumber}`];
@@ -326,6 +331,13 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // Retorna pilares com status atualizado
     const getPillarsWithStatus = (): Pillar[] => {
+        if (!isAdminUser && subscriptionStatus !== "premium") {
+            return PILLARS.map((pillar, index) => ({
+                ...pillar,
+                status: index === 0 ? (pillarStatus[pillar.id] || "unlocked") : "locked",
+            }));
+        }
+
         return PILLARS.map((pillar) => ({
             ...pillar,
             status: pillarStatus[pillar.id] || "locked",
