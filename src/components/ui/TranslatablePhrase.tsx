@@ -18,17 +18,28 @@ export const TranslatablePhrase: React.FC<TranslatablePhraseProps> = ({
     portuguese,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const toggleOpen = (event?: React.SyntheticEvent) => {
+        event?.preventDefault();
+        event?.stopPropagation();
+        setIsOpen((prev) => !prev);
+    };
 
     return (
         <span className="inline-flex items-center gap-1.5 align-bottom">
             <span className="translatable-phrase">
-                <button
-                    type="button"
-                    onClick={() => setIsOpen((prev) => !prev)}
-                    className="translatable-text bg-transparent border-0 p-0"
+                <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={toggleOpen}
+                    onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                            toggleOpen(event);
+                        }
+                    }}
+                    className="translatable-text bg-transparent border-0 p-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/60 rounded-sm"
                 >
                     {english}
-                </button>
+                </span>
                 {isOpen && (
                     <span className="translatable-tooltip">
                         <span className="tooltip-label">PT</span>
