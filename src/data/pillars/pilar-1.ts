@@ -13,40 +13,53 @@ export const PILAR_1_DATA: PillarData = {
             blocks: [
                 {
                     type: "h2",
-                    content: "Bem-vindo, Recruta ✈️"
+                    content: "Bem-vindo(a)! Vamos começar"
                 },
                 {
                     type: "paragraph",
-                    content: "Você está prestes a iniciar sua primeira missão. Este é o Flight Check, o momento de desprogramar velhos hábitos e se preparar para voar alto em inglês.\n\nNão se preocupe com termos técnicos ou métodos complicados. Aqui, tudo é prático. Cada passo que você dá é uma vitória real."
+                    content: "Você está começando a primeira parte do curso. E já vale deixar uma coisa clara: aqui a gente não vai te jogar naquele inglês duro de escola.\n\nA ideia é outra. Você vai entender por que trava, como sair desse travamento e o que falar quando a mente der branco. Tudo com foco em conversa real, não em frase bonita de prova."
                 },
                 {
                     type: "h3",
-                    content: "🚀 Missão 1 – Por que o inglês tradicional falha"
+                    content: "1.0 Por que tanta gente trava mesmo depois de estudar"
                 },
                 {
                     type: "paragraph",
-                    content: "Muitas pessoas aprendem inglês assistindo vídeos ou memorizando regras. Resultado? Elas travam na hora de falar.\n\nAqui vamos:\n\n• Entender de forma prática como o inglês funciona\n• Treinar o cérebro para pensar no idioma, não traduzir\n• Criar confiança desde o primeiro minuto"
+                    content: "Muita gente estuda por anos, entende exercícios, reconhece palavras, mas na hora de abrir a boca trava. Isso acontece porque o ensino tradicional acostuma você a pensar no inglês como matéria, não como ferramenta.\n\nNeste módulo, a gente vai fazer três coisas:\n\n• entender por que o branco aparece;\n• aprender frases curtas que te salvam na hora;\n• trocar vergonha por controle."
                 },
                 {
                     type: "box-action",
-                    title: "Mini-exercício",
-                    content: "Essas palavras estão embaralhadas. Arrume-as nas frases abaixo:"
+                    title: "Aquecimento rápido",
+                    content: "Essas frases estão embaralhadas. A ideia aqui não é decorar regra. É fazer seu cérebro entrar em modo prático desde o começo."
                 },
                 {
                     type: "scramble-exercise",
-                    content: "I eat breakfast at 8 am."
+                    content: JSON.stringify({
+                        sentence: "I eat breakfast at 8 am.",
+                        translation: "Eu tomo café da manhã às 8."
+                    })
                 },
                 {
                     type: "scramble-exercise",
-                    content: "Today, I went to the park."
+                    content: JSON.stringify({
+                        sentence: "Today, I went to the park.",
+                        translation: "Hoje, eu fui ao parque."
+                    })
+                },
+                {
+                    type: "scramble-exercise",
+                    content: JSON.stringify({
+                        sentence: "Can you say that again?",
+                        translation: "Pode falar isso de novo?"
+                    })
                 },
                 {
                     type: "paragraph",
-                    content: "Sinta a diferença: você está construindo inglês de verdade, não copiando regras."
+                    content: "Sinta a diferença: você não está olhando uma regra e tentando parecer perfeito. Você está montando inglês real com a mão na massa."
                 },
                 {
                     type: "system-status",
-                    content: "{{COCKPIT CHECK|CHECK-IN NA CABINE}}: {{SCANNING EMOTIONAL STATE|Escanendo Estado Emocional}}... {{PANIC SIGNAL DETECTED|Sinal de Pânico Detectado}}... {{BYPASSING AMYGDALA|Contornando Amígdala}}..."
+                    content: "{{CHECK-IN DA AULA|Check-in da aula}}: {{LENDO SEU MOMENTO|Lendo seu momento}}... {{NERVOSISMO IDENTIFICADO|Nervosismo identificado}}... {{VOLTANDO AO CONTROLE|Voltando ao controle}}..."
                 },
                 {
                     type: "paragraph",
@@ -59,31 +72,31 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "h2",
-                    content: "1.1 A Primeira Ferramenta de Controle (O Fim das Desculpas)"
+                    content: "1.1 O que fazer quando der branco"
                 },
                 {
                     type: "paragraph",
-                    content: "Quando o \"branco\" vier, o pior erro é baixar a cabeça e dizer \"{{Sorry, my English is bad|Desculpe, meu inglês é ruim}}\". Isso reforça o pânico e te encolhe na conversa. \n\n**Onde você vai usar isso?** No aeroporto, em uma {{Business Call|chamada de trabalho}} ou conhecendo alguém novo."
+                    content: "Quando o branco vier, o pior erro é se diminuir com frases como \"{{Sorry, my English is bad|desculpa, meu inglês é ruim}}\". Isso piora o nervosismo e ainda faz você perder presença.\n\nO melhor caminho é simples: ganhar tempo com uma frase curta, retomar o que ouviu e seguir a conversa sem se humilhar."
                 },
                 {
                     type: "box-action",
-                    title: "🎯 MINI-EXERCÍCIO: O COMANDO DE VOZ",
-                    content: "Em vez de pedir desculpas, você vai comandar a conversa. Se não entendeu, use esta frase curta e poderosa:\n\n**\"{{Say that again.|Fala isso de novo.}}\"**\n\n**Tarefa:** Repita em voz alta agora, com firmeza: **/sêi-dét-ə-guén/**. \nSinta a diferença. Você não está pedindo permissão; está mantendo a conversa viva."
+                    title: "Frase de apoio que salva",
+                    content: "Em vez de pedir desculpas, use uma frase curta que segura a conversa:\n\n**\"{{Say that again.|Fala isso de novo.}}\"**\n\nRepita em voz alta agora: **/sêi-dét-ə-guén/**.\n\nA lógica aqui é simples: você não trava, não some e não finge que entendeu. Você só puxa a conversa de volta para um lugar seguro."
                 },
                 {
                     type: "micro-win",
-                    content: "**VITÓRIA IMEDIATA:** Você acaba de aprender a manter sua autoridade mesmo quando não entende uma frase. Você substituiu uma frase de \"vítima\" por uma frase de {{Operator|Operador}}."
+                    content: "**Vitória imediata:** você já tem uma resposta prática para quando travar. Isso parece pequeno, mas muda muito a forma como você entra numa conversa."
                 },
                 {
                     type: "paragraph",
-                    content: "Ao final deste Pilar, você terá que responder a um desafio que avalia o que aprendeu. Seu progresso será registrado."
+                    content: "Ao final deste Pilar, você vai fazer um desafio para mostrar que entendeu a lógica do método. A ideia não é perfeição. É mostrar que você já consegue reagir melhor do que antes."
                 }
             ]
         },
         {
             id: "p1-m2",
-            title: "MÓDULO 2: O BATISMO DE FOGO",
-            subtitle: "A 'Ponte Húngara' e a prova de que a necessidade extrema vence qualquer método tradicional.",
+            title: "MÓDULO 2: A VIRADA DE CHAVE",
+            subtitle: "A 'Ponte Húngara' e a prova de que necessidade real acelera seu inglês.",
             status: "locked",
             blocks: [
                 {
@@ -239,8 +252,8 @@ export const PILAR_1_DATA: PillarData = {
         },
         {
             id: "p1-m3",
-            title: "MÓDULO 3: O NECROTÉRIO TRADICIONAL",
-            subtitle: "Autópsia no método das franquias — por que o sistema precisa que você falhe para lucrar.",
+            title: "MÓDULO 3: ONDE O MÉTODO TRAVA",
+            subtitle: "Por que o ensino tradicional costuma falhar na conversa real.",
             status: "locked",
             blocks: [
                 {
@@ -355,7 +368,7 @@ export const PILAR_1_DATA: PillarData = {
         {
             id: "p1-m4",
             title: "MÓDULO 4: A LEI DE PARETO",
-            subtitle: "O Segredo dos 20% — como resolver 80% das situações com vocabulário cirúrgico e tático.",
+            subtitle: "O segredo dos 20%: resolver 80% das situações com vocabulário útil.",
             status: "locked",
             blocks: [
                 {
@@ -453,7 +466,7 @@ export const PILAR_1_DATA: PillarData = {
         {
             id: "p1-m5",
             title: "MÓDULO 5: ANATOMIA DO SOM REAL",
-            subtitle: "Decodificando a 'Metralhadora' Nativa — hackear o seu sistema auditivo para entender filmes e nativos.",
+            subtitle: "Entendendo o ritmo real da fala nativa para ouvir com mais clareza.",
             status: "locked",
             blocks: [
                 {
@@ -601,7 +614,7 @@ export const PILAR_1_DATA: PillarData = {
         {
             id: "p1-m6",
             title: "MÓDULO 6: O ELO FINAL",
-            subtitle: "O Nascimento da sua Liberdade — selar a conexão emocional e preparar para o Teste de Fogo.",
+            subtitle: "Fechando o Pilar 1 com confiança e preparo para a avaliação.",
             status: "locked",
             blocks: [
                 {
