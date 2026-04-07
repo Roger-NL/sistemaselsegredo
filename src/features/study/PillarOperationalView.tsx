@@ -1013,7 +1013,7 @@ const CombatSortGame = ({
 
     const rounds = React.useMemo<CombatRound[]>(() => {
         const parsedRounds: CombatRound[] = [];
-        const allNatural = data.filter(item => item.type === "combat").map(item => item.text);
+        const allLab = data.filter(item => item.type === "lab").map(item => item.text);
 
         for (let i = 0; i < data.length; i += 2) {
             const pair = data.slice(i, i + 2);
@@ -1021,18 +1021,21 @@ const CombatSortGame = ({
             const natural = pair.find(item => item.type === "combat")?.text;
             if (!stiff || !natural) continue;
 
-            const distractors = allNatural.filter(option => option !== natural).slice(0, 2);
+            const roundIndex = Math.floor(i / 2);
+            const distractors = allLab.filter(option => option !== stiff).slice(0, 2);
             const baseChoices = [natural, ...distractors];
-            const correctSlot = i % baseChoices.length;
+            const correctSlot = roundIndex % baseChoices.length;
             const choices = [...baseChoices];
             const [correctChoice] = choices.splice(0, 1);
             choices.splice(correctSlot, 0, correctChoice);
             const reasonText = getNaturalReason(natural);
-            const reasonChoices = [
+            const reasonDistractors = [
                 "Porque fica mais longa e mais formal, como inglês de livro.",
-                reasonText,
                 "Porque evita cortes e deixa o som mais escolar.",
             ];
+            const reasonCorrectSlot = (correctSlot + 1) % 3;
+            const reasonChoices = [...reasonDistractors];
+            reasonChoices.splice(reasonCorrectSlot, 0, reasonText);
 
             parsedRounds.push({
                 stiff,
@@ -1040,7 +1043,7 @@ const CombatSortGame = ({
                 choices,
                 choiceAnswer: choices.indexOf(natural),
                 reasonChoices,
-                reasonAnswer: reasonChoices.indexOf(reasonText),
+                reasonAnswer: reasonCorrectSlot,
                 reasonText,
                 tags: getNaturalTags(natural),
             });
