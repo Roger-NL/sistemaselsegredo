@@ -355,12 +355,12 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "combat-sort-game",
                     content: JSON.stringify([
-                        { "text": "I apologize for the inconveniences", "type": "lab" },
-                        { "text": "My bad, I messed up", "type": "combat" },
-                        { "text": "I am going to travel next year", "type": "lab" },
-                        { "text": "I'm gonna travel nex' year", "type": "combat" },
-                        { "text": "Could you repeat that slowly?", "type": "lab" },
-                        { "text": "Wait, I'm lost. Come again?", "type": "combat" }
+                        { "text": "{{I apologize for the inconvenience.|Peço desculpas pelo inconveniente.}}", "type": "lab" },
+                        { "text": "{{My bad, I messed up.|Foi mal, eu vacilei.}}", "type": "combat" },
+                        { "text": "{{I am going to travel next year.|Eu vou viajar no ano que vem.}}", "type": "lab" },
+                        { "text": "{{I'm gonna travel nex' year.|Vou viajar ano que vem.}}", "type": "combat" },
+                        { "text": "{{Could you repeat that slowly?|Você poderia repetir isso devagar?}}", "type": "lab" },
+                        { "text": "{{Wait, I'm lost. Come again?|Pera, me perdi. Fala de novo?}}", "type": "combat" }
                     ])
                 }
             ]

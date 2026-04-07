@@ -991,7 +991,7 @@ const CombatSortGame = ({
     };
 
     const getNaturalReason = (phrase: string) => {
-        const lower = phrase.toLowerCase();
+        const lower = getOptionTranslation(phrase).english.toLowerCase();
         if (/(gonna|gotta|wanna|ain't|i'm|nex'|don't|can't|that's)/.test(lower)) {
             return "Porque encurta o som e fica mais parecida com fala real.";
         }
@@ -1002,11 +1002,12 @@ const CombatSortGame = ({
     };
 
     const getNaturalTags = (phrase: string) => {
-        const lower = phrase.toLowerCase();
+        const english = getOptionTranslation(phrase).english;
+        const lower = english.toLowerCase();
         const tags = ["mais falado"];
         if (/(gonna|gotta|wanna|ain't|i'm|nex'|don't|can't|that's)/.test(lower)) tags.push("som encurtado");
         if (/(my bad|come again|wait|i'm lost|messed up)/.test(lower)) tags.push("mais humano");
-        if (phrase.length < 28) tags.push("mais direto");
+        if (english.length < 28) tags.push("mais direto");
         return Array.from(new Set(tags)).slice(0, 3);
     };
 
@@ -1020,14 +1021,18 @@ const CombatSortGame = ({
             const natural = pair.find(item => item.type === "combat")?.text;
             if (!stiff || !natural) continue;
 
-            const distractors = shuffle(allNatural.filter(option => option !== natural)).slice(0, 2);
-            const choices = shuffle([natural, ...distractors]);
+            const distractors = allNatural.filter(option => option !== natural).slice(0, 2);
+            const baseChoices = [natural, ...distractors];
+            const correctSlot = i % baseChoices.length;
+            const choices = [...baseChoices];
+            const [correctChoice] = choices.splice(0, 1);
+            choices.splice(correctSlot, 0, correctChoice);
             const reasonText = getNaturalReason(natural);
-            const reasonChoices = shuffle([
-                reasonText,
+            const reasonChoices = [
                 "Porque fica mais longa e mais formal, como inglês de livro.",
+                reasonText,
                 "Porque evita cortes e deixa o som mais escolar.",
-            ]);
+            ];
 
             parsedRounds.push({
                 stiff,
@@ -1055,6 +1060,8 @@ const CombatSortGame = ({
     const completionNotifiedRef = useRef(false);
 
     const round = rounds[currentRound];
+    const stiffDisplay = getOptionTranslation(round.stiff);
+    const naturalDisplay = getOptionTranslation(round.natural);
 
     const resetRoundState = () => {
         setPhase("choose");
@@ -1158,8 +1165,13 @@ const CombatSortGame = ({
                             <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
                                 <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 mb-2">Frase base</p>
                                 <p className="text-base md:text-lg font-medium text-slate-100 leading-relaxed">
-                                    “{round.stiff}”
+                                    “{stiffDisplay.english}”
                                 </p>
+                                {stiffDisplay.portuguese && (
+                                    <p className="mt-2 text-sm text-slate-400">
+                                        {stiffDisplay.portuguese}
+                                    </p>
+                                )}
                                 <p className="mt-3 text-sm text-slate-400">
                                     A ideia é a mesma. O jogo aqui é achar a versão que soaria mais viva numa conversa real.
                                 </p>
@@ -1198,7 +1210,9 @@ const CombatSortGame = ({
                                             Escolha a frase que você usaria na rua, não a que parece saída de exercício.
                                         </p>
                                         <div className="mt-4 grid gap-3">
-                                            {round.choices.map((choice, idx) => (
+                                            {round.choices.map((choice, idx) => {
+                                                const display = getOptionTranslation(choice);
+                                                return (
                                                 <button
                                                     key={`${currentRound}-choice-${idx}`}
                                                     onClick={() => handleChoice(idx)}
@@ -1211,9 +1225,15 @@ const CombatSortGame = ({
                                                                 : "border-slate-700 bg-slate-900/70 text-slate-200 hover:border-amber-400/50"
                                                     )}
                                                 >
-                                                    {choice}
+                                                    <span className="block">{display.english}</span>
+                                                    {display.portuguese && (
+                                                        <span className="mt-1 block text-xs text-slate-400">
+                                                            {display.portuguese}
+                                                        </span>
+                                                    )}
                                                 </button>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                         {choiceError && (
                                             <div className="mt-3 rounded-xl border border-red-500/20 bg-red-950/20 p-3 text-sm text-red-100">
@@ -1233,7 +1253,10 @@ const CombatSortGame = ({
                                     <>
                                         <div className="mt-3 rounded-xl border border-emerald-500/20 bg-emerald-950/15 p-3">
                                             <p className="text-[11px] uppercase tracking-[0.22em] text-emerald-300/80 mb-1">Versão escolhida</p>
-                                            <p className="text-sm md:text-base text-emerald-100 font-medium">“{round.natural}”</p>
+                                            <p className="text-sm md:text-base text-emerald-100 font-medium">“{naturalDisplay.english}”</p>
+                                            {naturalDisplay.portuguese && (
+                                                <p className="mt-1 text-xs text-emerald-200/80">{naturalDisplay.portuguese}</p>
+                                            )}
                                         </div>
                                         <p className="mt-3 text-sm text-slate-300">
                                             Beleza. Agora marca a razão principal que faz essa frase soar melhor.
@@ -1275,14 +1298,20 @@ const CombatSortGame = ({
                                         <div className="grid gap-2">
                                             <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3">
                                                 <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 mb-1">Antes</p>
-                                                <p className="text-sm md:text-base text-slate-300">“{round.stiff}”</p>
+                                                <p className="text-sm md:text-base text-slate-300">“{stiffDisplay.english}”</p>
+                                                {stiffDisplay.portuguese && (
+                                                    <p className="mt-1 text-xs text-slate-400">{stiffDisplay.portuguese}</p>
+                                                )}
                                             </div>
                                             <div className="flex justify-center">
                                                 <ArrowRight className="w-4 h-4 text-amber-300" />
                                             </div>
                                             <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-3">
                                                 <p className="text-[11px] uppercase tracking-[0.22em] text-emerald-300/80 mb-1">Depois</p>
-                                                <p className="text-sm md:text-base text-emerald-100">“{round.natural}”</p>
+                                                <p className="text-sm md:text-base text-emerald-100">“{naturalDisplay.english}”</p>
+                                                {naturalDisplay.portuguese && (
+                                                    <p className="mt-1 text-xs text-emerald-200/80">{naturalDisplay.portuguese}</p>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
