@@ -33,6 +33,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     const { isPillarUnlocked, getCurrentPillarNumber, isPillarModuleCompleted } = useProgress();
     const { user, subscriptionStatus, isLoading: authLoading } = useAuth(); // Auth Check
     const isAdminUser = !!user?.email && ADMIN_EMAILS.includes(user.email);
+    const isPremiumLike = subscriptionStatus === "premium" || isAdminUser;
 
     const pillar = PILLARS[pillarId - 1];
     const isUnlocked = isPillarUnlocked(pillarId);
@@ -101,7 +102,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     // Helper functions
     const handleAction = async () => {
         // Intercept Pillar 1 (Premium Logic) - FLOW
-        if (pillarId === 1 && subscriptionStatus !== 'premium') {
+        if (pillarId === 1 && !isPremiumLike) {
             // Se já fez a prova (está aguardando correção ou já foi aprovado), joga pro pagamento (Upsell)
             if ((user?.approvedPillar || 1) >= 2 || exam?.status === 'pending') {
                 router.push(ROUTES.public.payment);
@@ -111,6 +112,11 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
         }
 
         const nextPillar = pillarId + 1;
+
+        if (pillarId === 1 && isPremiumLike && exam?.status === "pending") {
+            router.push(`${ROUTES.app.pillar}/2`);
+            return;
+        }
 
         // Caso 1: Já está aprovado pelo Comando (Server Authority) -> Apenas avança
         if ((user?.approvedPillar || 1) >= nextPillar) {
@@ -186,6 +192,11 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     const areAllModulesCompleted = activeContent?.modules
         ? activeContent.modules.every(m => isPillarModuleCompleted(m.id))
         : true;
+    const isPendingReview = exam?.status === "pending";
+    const canAdvanceWithPendingReview = pillarId === 1 && isPremiumLike;
+    const canContinueToPaymentWhilePending = pillarId === 1 && !isPremiumLike;
+    const isActionBlockedByPendingReview =
+        isPendingReview && !canAdvanceWithPendingReview && !canContinueToPaymentWhilePending;
 
     return (
         <div className="min-h-screen min-h-[100dvh] w-full overflow-y-auto pointer-events-auto">
@@ -258,10 +269,10 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                             {/* Ação Final do Pilar */}
                             <div className="mt-12 flex justify-center pb-20">
                                 <FlightButton
-                                    variant={areAllModulesCompleted ? (exam?.status === 'pending' ? "ghost" : "neon") : "ghost"}
-                                    onClick={areAllModulesCompleted && (exam?.status !== 'pending' || (pillarId === 1 && subscriptionStatus !== 'premium')) ? handleAction : undefined}
-                                    disabled={!areAllModulesCompleted || isCheckingExam || (exam?.status === 'pending' && !(pillarId === 1 && subscriptionStatus !== 'premium'))}
-                                    className={`py-4 px-8 text-lg ${(!areAllModulesCompleted || (exam?.status === 'pending' && !(pillarId === 1 && subscriptionStatus !== 'premium'))) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    variant={areAllModulesCompleted ? (isPendingReview && !canAdvanceWithPendingReview ? "ghost" : "neon") : "ghost"}
+                                    onClick={areAllModulesCompleted && !isActionBlockedByPendingReview ? handleAction : undefined}
+                                    disabled={!areAllModulesCompleted || isCheckingExam || isActionBlockedByPendingReview}
+                                    className={`py-4 px-8 text-lg ${(!areAllModulesCompleted || isActionBlockedByPendingReview) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <span className="flex items-center gap-3">
                                         {!areAllModulesCompleted ? (
@@ -271,7 +282,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                             </>
                                         ) : (user?.approvedPillar || 1) >= pillarId + 1 ? (
                                             // === CASO: APROVADO ===
-                                            pillarId === 1 && subscriptionStatus !== 'premium' ? (
+                                            pillarId === 1 && !isPremiumLike ? (
                                                 <div className="flex flex-col items-center gap-1">
                                                     <span className="text-xs font-normal text-emerald-300 normal-case tracking-normal">
                                                         Missão Cumprida!
@@ -290,7 +301,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                             )
                                         ) : exam?.status === 'pending' ? (
                                             // === CASO: PENDENTE ===
-                                            pillarId === 1 && subscriptionStatus !== 'premium' ? (
+                                            pillarId === 1 && !isPremiumLike ? (
                                                 <div className="flex flex-col items-center gap-1">
                                                     <span className="text-[10px] font-medium text-white/70 uppercase tracking-widest">
                                                         Avaliação em Andamento
@@ -300,16 +311,20 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                                         <ArrowRight className="w-5 h-5" />
                                                     </div>
                                                 </div>
-                                            ) : subscriptionStatus === 'premium' ? (
-                                                <>
-                                                    <CheckCircle2 className="w-6 h-6" />
-                                                    Concluir e Avançar
-                                                    <ArrowRight className="w-5 h-5" />
-                                                </>
+                                            ) : pillarId === 1 && isPremiumLike ? (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <span className="text-[10px] font-medium text-emerald-300 uppercase tracking-widest">
+                                                        Pilar 2 liberado
+                                                    </span>
+                                                    <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-emerald-400">
+                                                        <span>Concluir e Avançar</span>
+                                                        <ArrowRight className="w-5 h-5" />
+                                                    </div>
+                                                </div>
                                             ) : (
                                                 <>
                                                     <div className="animate-spin h-5 w-5 border-2 border-white/30 border-t-white rounded-full mr-2" />
-                                                    Aguardando Aprovação...
+                                                    Avaliação em breve
                                                 </>
                                             )
                                         ) : exam?.status === 'rejected' ? (
@@ -341,6 +356,17 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                     </button>
                                 )}
                             </div>
+
+                            {areAllModulesCompleted && pillarId >= 2 && exam?.status === "pending" && (
+                                <div className="mx-auto mb-16 mt-4 max-w-2xl rounded-2xl border border-amber-500/20 bg-amber-500/5 px-5 py-4 text-center">
+                                    <p className="text-sm font-medium text-amber-200">
+                                        Sua prova será avaliada em breve para liberar o próximo pilar.
+                                    </p>
+                                    <p className="mt-2 text-sm leading-relaxed text-white/65">
+                                        Se a equipe achar necessário, você poderá refazer essa etapa com os ajustes indicados.
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Modal de Avaliação Híbrida (Prova) */}
                             <PillarExamModal

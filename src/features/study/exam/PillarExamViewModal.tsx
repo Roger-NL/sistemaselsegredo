@@ -59,6 +59,15 @@ export function PillarExamViewModal({ pillarId, exam, isOpen, onClose }: PillarE
                         </div>
                     </div>
 
+                    {exam.status === "pending" && pillarId >= 2 && (
+                        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-relaxed text-white/70">
+                            <p className="font-medium text-amber-200">Avaliação em breve</p>
+                            <p className="mt-2">
+                                Sua prova está na fila de análise para liberar o próximo pilar. Se a equipe achar necessário, você poderá refazer essa etapa com os ajustes sugeridos.
+                            </p>
+                        </div>
+                    )}
+
                     {/* Sua Resposta */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 text-white/80">

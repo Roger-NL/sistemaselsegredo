@@ -8,6 +8,7 @@ import { getQuizByPillarNumber } from "@/data/quizzes";
 import { submitExam } from "@/lib/exam/service";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/lib/routes";
 
 interface PillarExamModalProps {
     pillarId: number;
@@ -19,7 +20,7 @@ interface PillarExamModalProps {
 type Step = 'intro' | 'quiz' | 'written' | 'whatsapp' | 'sending' | 'success';
 
 export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: PillarExamModalProps) {
-    const { user, updateProfile } = useAuth();
+    const { user, updateProfile, refreshUser, subscriptionStatus } = useAuth();
     const router = useRouter();
     const [step, setStep] = useState<Step>('intro');
     const [quizIndex, setQuizIndex] = useState(0);
@@ -32,6 +33,7 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
     const questions = quiz?.questions || [];
     const storageKey = `exam-progress-pilar-${pillarId}`;
     const isPillarOne = pillarId === 1;
+    const isPremiumPillarOne = isPillarOne && subscriptionStatus === "premium";
 
     // Memory Card: Restore State
     useEffect(() => {
@@ -146,6 +148,17 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
         });
 
         if (result.success) {
+            if (isPremiumPillarOne) {
+                try {
+                    const { updateUserProgress } = await import("@/lib/auth/service");
+                    await updateUserProgress(user!.id, {
+                        approvedPillar: Math.max(user?.approvedPillar || 1, 2),
+                    });
+                    await refreshUser();
+                } catch (unlockError) {
+                    console.error("Failed to unlock Pillar 2 after premium Pillar 1 submission:", unlockError);
+                }
+            }
             setStep('success');
             // Check if Pillar 1, aim for immediate upsell logic
         } else {
@@ -386,34 +399,66 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
 
                                 {pillarId === 1 ? (
                                     <>
-                                        <div>
-                                            <h3 className="text-3xl font-bold text-neutral-900 mb-3 tracking-tight">Avaliação recebida</h3>
-                                            <p className="text-neutral-600 text-base max-w-[500px] mx-auto leading-relaxed">
-                                                Sua resposta foi salva com sucesso. Você concluiu a parte gratuita e já viu a lógica do método funcionando por dentro. A próxima etapa aprofunda isso com sequência completa, correção humana e continuidade guiada.
-                                            </p>
-                                        </div>
-                                        <div className="space-y-4 pt-6 max-w-sm mx-auto">
-                                            <button 
-                                                className="w-full py-4 text-base font-bold rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-[0_4px_20px_rgba(124,58,237,0.4)] transition-all flex items-center justify-center hover:-translate-y-1" 
-                                                onClick={() => { router.push('/pagamento'); onClose(); }}
-                                            >
-                                                Continuar para a próxima etapa
-                                                <ArrowRight className="ml-2 w-5 h-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => { onSuccess(); onClose(); }}
-                                                className="text-neutral-400 text-xs hover:text-neutral-700 transition-colors uppercase tracking-widest font-semibold block mx-auto underline decoration-neutral-200 underline-offset-4"
-                                            >
-                                                Ficar por aqui por enquanto
-                                            </button>
-                                        </div>
+                                        {isPremiumPillarOne ? (
+                                            <>
+                                                <div>
+                                                    <h3 className="text-3xl font-bold text-neutral-900 mb-3 tracking-tight">Pilar 2 já está liberado</h3>
+                                                    <p className="text-neutral-600 text-base max-w-[560px] mx-auto leading-relaxed">
+                                                        Sua avaliação foi recebida e segue para leitura da equipe, mas você não precisa esperar para continuar. Se aparecer algum ajuste importante, a gente te sinaliza depois.
+                                                    </p>
+                                                </div>
+                                                <div className="space-y-4 pt-6 max-w-sm mx-auto">
+                                                    <button
+                                                        className="w-full py-4 text-base font-bold rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-[0_4px_20px_rgba(124,58,237,0.4)] transition-all flex items-center justify-center hover:-translate-y-1"
+                                                        onClick={() => {
+                                                            onSuccess();
+                                                            onClose();
+                                                            router.push(`${ROUTES.app.pillar}/2`);
+                                                        }}
+                                                    >
+                                                        Ir para o Pilar 2
+                                                        <ArrowRight className="ml-2 w-5 h-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => { onSuccess(); onClose(); }}
+                                                        className="text-neutral-400 text-xs hover:text-neutral-700 transition-colors uppercase tracking-widest font-semibold block mx-auto underline decoration-neutral-200 underline-offset-4"
+                                                    >
+                                                        Ficar por aqui por enquanto
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div>
+                                                    <h3 className="text-3xl font-bold text-neutral-900 mb-3 tracking-tight">Avaliação recebida</h3>
+                                                    <p className="text-neutral-600 text-base max-w-[500px] mx-auto leading-relaxed">
+                                                        Sua resposta foi salva com sucesso. Você concluiu a parte gratuita e já viu a lógica do método funcionando por dentro. A próxima etapa aprofunda isso com sequência completa, correção humana e continuidade guiada.
+                                                    </p>
+                                                </div>
+                                                <div className="space-y-4 pt-6 max-w-sm mx-auto">
+                                                    <button
+                                                        className="w-full py-4 text-base font-bold rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-[0_4px_20px_rgba(124,58,237,0.4)] transition-all flex items-center justify-center hover:-translate-y-1"
+                                                        onClick={() => { router.push(ROUTES.public.payment); onClose(); }}
+                                                    >
+                                                        Continuar para a próxima etapa
+                                                        <ArrowRight className="ml-2 w-5 h-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => { onSuccess(); onClose(); }}
+                                                        className="text-neutral-400 text-xs hover:text-neutral-700 transition-colors uppercase tracking-widest font-semibold block mx-auto underline decoration-neutral-200 underline-offset-4"
+                                                    >
+                                                        Ficar por aqui por enquanto
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
                                     </>
                                 ) : (
                                     <>
                                         <div>
-                                            <h3 className="text-2xl font-bold text-neutral-900 mb-2">Relatório Recebido</h3>
-                                            <p className="text-neutral-600 text-sm max-w-sm mx-auto">
-                                                Sua missão foi registrada. Nossa equipe de instrutores analisará seu relatório em até 48h.
+                                            <h3 className="text-2xl font-bold text-neutral-900 mb-2">Avaliação recebida</h3>
+                                            <p className="text-neutral-600 text-sm max-w-[460px] mx-auto leading-relaxed">
+                                                Sua prova será avaliada em breve para liberar o próximo pilar. Se a equipe achar necessário, você poderá refazer essa etapa com os ajustes indicados.
                                             </p>
                                         </div>
                                         <button 
