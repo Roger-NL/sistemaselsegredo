@@ -1321,14 +1321,26 @@ const AudioDecodeGame = ({
     data: { phonetic: string; options: string[]; answer: number }[];
     onComplete?: () => void;
 }) => {
+    const passingScore = Math.max(1, data.length - 1);
     const [currentStep, setCurrentStep] = useState(0);
     const [score, setScore] = useState(0);
     const [showResult, setShowResult] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
+    const [didPass, setDidPass] = useState(false);
     const completionNotifiedRef = useRef(false);
 
-    const handleSelect = (idx: number) => {
+    const resetGame = useCallback(() => {
+        setCurrentStep(0);
+        setScore(0);
+        setShowResult(false);
+        setIsFinished(false);
+        setSelectedOption(null);
+        setDidPass(false);
+        completionNotifiedRef.current = false;
+    }, []);
+
+    const handleSelect = useCallback((idx: number) => {
         if (showResult || isFinished) return;
         setSelectedOption(idx);
         setShowResult(true);
@@ -1344,14 +1356,22 @@ const AudioDecodeGame = ({
             if (currentStep + 1 < data.length) {
                 setCurrentStep(c => c + 1);
             } else {
+                const finalScore = score + (idx === data[currentStep].answer ? 1 : 0);
+                const passed = finalScore >= passingScore;
+                setDidPass(passed);
                 setIsFinished(true);
-                if (!completionNotifiedRef.current) {
+                if (passed && !completionNotifiedRef.current) {
                     completionNotifiedRef.current = true;
                     onComplete?.();
                 }
+                if (!passed) {
+                    window.setTimeout(() => {
+                        resetGame();
+                    }, 1800);
+                }
             }
         }, 1200);
-    };
+    }, [currentStep, data, isFinished, onComplete, passingScore, resetGame, score, showResult]);
 
     return (
         <div className="my-8 rounded-xl border border-cyan-500/30 overflow-hidden bg-slate-900 shadow-xl">
@@ -1370,13 +1390,23 @@ const AudioDecodeGame = ({
             <div className="p-6 md:p-8">
                 {isFinished ? (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-6">
-                        <Unlock className="w-16 h-16 text-cyan-400 mx-auto mb-4" />
-                        <h4 className="text-xl md:text-2xl font-bold text-slate-100 mb-2">Decodificação Completa</h4>
-                        <p className="text-slate-400 mb-6">Taxa de sucesso: {Math.round((score / data.length) * 100)}% ({score}/{data.length})</p>
-                        <button onClick={() => { setCurrentStep(0); setScore(0); setIsFinished(false); completionNotifiedRef.current = false; }} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition font-mono uppercase text-xs">Re-inicializar Scanner</button>
+                        <Unlock className={cn("w-16 h-16 mx-auto mb-4", didPass ? "text-cyan-400" : "text-amber-400")} />
+                        <h4 className="text-xl md:text-2xl font-bold text-slate-100 mb-2">
+                            {didPass ? "Decodificação completa" : "Quase lá"}
+                        </h4>
+                        <p className="text-slate-400 mb-2">Taxa de sucesso: {Math.round((score / data.length) * 100)}% ({score}/{data.length})</p>
+                        <p className={cn("text-sm mb-6", didPass ? "text-emerald-300" : "text-amber-300")}>
+                            {didPass
+                                ? `Meta batida. Você acertou o mínimo de ${passingScore}/${data.length} e já pode avançar.`
+                                : `Para liberar o módulo, precisa acertar pelo menos ${passingScore}/${data.length}. O desafio vai reiniciar automaticamente.`}
+                        </p>
+                        <button onClick={resetGame} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition font-mono uppercase text-xs">Re-inicializar Scanner</button>
                     </motion.div>
                 ) : (
                     <div className="max-w-xl mx-auto">
+                        <p className="text-cyan-300 text-xs text-center mb-3 uppercase tracking-[0.18em] font-bold">
+                            Acerte pelo menos {passingScore}/{data.length} para liberar o próximo módulo
+                        </p>
                         <p className="text-slate-400 text-sm text-center mb-2 uppercase tracking-wide font-bold">O que o nativo disse?</p>
                         <div className="bg-black/50 border border-slate-700 rounded-lg p-6 mb-8 text-center backdrop-blur shadow-inner">
                             <span className="font-mono text-2xl md:text-3xl font-bold text-cyan-300 animate-pulse">
