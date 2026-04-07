@@ -3985,6 +3985,17 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
             ];
         }
 
+        if (moduleId === "p1-m2") {
+            return [
+                { question: "Necessidade real de conexão costuma acelerar o inglês mais do que estudo só na teoria?", answer: true },
+                { question: "Saber muita regra já garante conversa natural sob pressão?", answer: false },
+                { question: "Errar, ajustar e repetir faz parte do caminho para falar melhor?", answer: true },
+                { question: "Para soar natural, o melhor é sempre usar a frase mais formal e mais longa possível?", answer: false },
+                { question: "Quando a frase vira reflexo, o cérebro para de depender tanto de tradução?", answer: true },
+                { question: "Esperar perfeição antes de falar é a forma mais rápida de evoluir?", answer: false },
+            ];
+        }
+
         if (title.includes("pareto")) {
             return [
                 { question: "Você precisa saber todas as palavras para se comunicar bem?", answer: false },
