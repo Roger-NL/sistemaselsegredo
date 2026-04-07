@@ -29,8 +29,8 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "box-action",
-                    title: "Aquecimento rápido",
-                    content: "Essas frases estão embaralhadas. A ideia aqui não é decorar regra. É fazer seu cérebro entrar em modo prático desde o começo."
+                    title: "Diagnóstico rápido",
+                    content: "Essas frases estão embaralhadas porque elas ajudam a gente a sentir seu nível logo no começo. Não é prova e nem pegadinha. É só uma forma leve de ver como você organiza o inglês na prática, sem depender de regra decorada."
                 },
                 {
                     type: "scramble-exercise",
