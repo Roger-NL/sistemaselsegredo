@@ -4050,7 +4050,12 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
 
     const handleStartCompletionFlow = (moduleId: string, moduleTitle: string, index: number) => {
         const moduleRef = data.modules?.find((m) => m.id === moduleId);
-        const hasInlineGameGate = !!moduleRef?.blocks?.some((b) => b.type === "maze-game" || b.type === "consolidation-game");
+        const hasInlineGameGate = !!moduleRef?.blocks?.some((b) =>
+            b.type === "maze-game" ||
+            b.type === "consolidation-game" ||
+            b.type === "combat-sort-game" ||
+            b.type === "audio-decode-game"
+        );
 
         if (hasInlineGameGate) {
             if (!mazePassedByModule[moduleId]) {
@@ -4145,7 +4150,12 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                     const isFirstUnlockedIncomplete = index === 0 || isPillarModuleCompleted(data.modules![index - 1]?.id);
                     const isLocked = module.status === 'locked' && !isCompleted && !isFirstUnlockedIncomplete;
                     const isHighlighted = highlightedModuleId === module.id;
-                    const hasInlineGameGate = module.blocks.some((b) => b.type === "maze-game" || b.type === "consolidation-game");
+                    const hasInlineGameGate = module.blocks.some((b) =>
+                        b.type === "maze-game" ||
+                        b.type === "consolidation-game" ||
+                        b.type === "combat-sort-game" ||
+                        b.type === "audio-decode-game"
+                    );
                     const blockedByMaze = hasInlineGameGate && !mazePassedByModule[module.id];
 
                     return (
