@@ -4724,11 +4724,26 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                 )}
                             >
                                 {/* Module Header / Trigger */}
-                                <button
-                                    type="button"
-                                    onClick={() => handleModuleClick(module.id, module.status, index)}
-                                    className="w-full flex items-center justify-between p-6 text-left relative z-10"
-                                    disabled={isLocked}
+                                <div
+                                    role="button"
+                                    tabIndex={isLocked ? -1 : 0}
+                                    aria-expanded={isActive}
+                                    aria-disabled={isLocked}
+                                    onClick={() => {
+                                        if (isLocked) return;
+                                        handleModuleClick(module.id, module.status, index);
+                                    }}
+                                    onKeyDown={(event) => {
+                                        if (isLocked) return;
+                                        if (event.key === "Enter" || event.key === " ") {
+                                            event.preventDefault();
+                                            handleModuleClick(module.id, module.status, index);
+                                        }
+                                    }}
+                                    className={cn(
+                                        "w-full flex items-center justify-between p-6 text-left relative z-10 outline-none",
+                                        !isLocked && "cursor-pointer focus-visible:ring-2 focus-visible:ring-cyan-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                                    )}
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className={cn(
@@ -4785,7 +4800,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                             isActive ? "rotate-180 text-cyan-500" : isCompleted ? "text-emerald-500" : "text-slate-500"
                                         )} />
                                     </div>
-                                </button>
+                                </div>
 
                                 {/* Module Content (Drawer) */}
                                 <AnimatePresence>
