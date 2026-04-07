@@ -31,6 +31,7 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
     const quiz = getQuizByPillarNumber(pillarId);
     const questions = quiz?.questions || [];
     const storageKey = `exam-progress-pilar-${pillarId}`;
+    const isPillarOne = pillarId === 1;
 
     // Memory Card: Restore State
     useEffect(() => {
@@ -46,7 +47,7 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                 if (parsed.whatsapp) setWhatsapp(parsed.whatsapp);
             } catch (e) { console.error("Error parsing memory card state", e); }
         }
-    }, [isOpen, pillarId]);
+    }, [isOpen, pillarId, storageKey]);
 
     // Memory Card: Save State
     useEffect(() => {
@@ -191,18 +192,72 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                         {/* INTRO */}
                         {step === 'intro' && (
                             <motion.div key="intro" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: -20 }} className="space-y-6">
-                                <div className="p-6 bg-white/[0.03] border border-white/5 rounded-xl">
-                                    <h3 className="text-lg font-medium text-white mb-4">Você chegou ao final do treinamento.</h3>
-                                    <p className="text-white/60 leading-relaxed">
-                                        Para avançar para a próxima etapa, o Comando exige uma validação dupla:
+                                <div className="rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-500/10 via-slate-900 to-slate-950 p-6 md:p-7">
+                                    <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/20 bg-violet-500/10 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-violet-200">
+                                        {isPillarOne ? "Fim da etapa gratuita" : "Validação da etapa"}
+                                    </div>
+                                    <h3 className="mt-4 text-2xl md:text-3xl font-bold text-white tracking-tight">
+                                        {isPillarOne ? "Você chegou até aqui com base real." : "Você chegou ao fechamento deste pilar."}
+                                    </h3>
+                                    <p className="mt-3 text-sm md:text-base text-white/70 leading-relaxed">
+                                        {isPillarOne
+                                            ? "O que vem agora não é uma pegadinha. É uma validação curta para mostrar seu momento atual e preparar a próxima fase do curso, que entra em um nível mais acompanhado e mais profundo."
+                                            : "Agora entra uma validação curta para registrar o que ficou sólido e o que ainda precisa de ajuste antes da próxima etapa."}
                                     </p>
-                                    <ul className="mt-4 space-y-3 text-sm text-white/50">
-                                        <li className="flex gap-3"><ClipboardCheck className="w-4 h-4 text-emerald-400 shrink-0" /> <strong>Check-in Técnico:</strong> Um rápido quiz sobre os conceitos chave.</li>
-                                        <li className="flex gap-3"><MessageSquare className="w-4 h-4 text-emerald-400 shrink-0" /> <strong>Relatório de Campo:</strong> Feedback escrito e 3 exemplos práticos de uso.</li>
-                                    </ul>
+                                    <div className="mt-5 grid gap-3 md:grid-cols-2">
+                                        <div className="rounded-xl border border-white/8 bg-black/20 p-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10">
+                                                    <ClipboardCheck className="h-5 w-5 text-emerald-300" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-white">Parte 1</p>
+                                                    <p className="text-xs uppercase tracking-[0.18em] text-white/35">Perguntas rápidas</p>
+                                                </div>
+                                            </div>
+                                            <p className="mt-3 text-sm text-white/60">
+                                                Você responde perguntas objetivas para confirmar os pontos centrais do pilar.
+                                            </p>
+                                        </div>
+                                        <div className="rounded-xl border border-white/8 bg-black/20 p-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/10">
+                                                    <MessageSquare className="h-5 w-5 text-cyan-300" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-white">Parte 2</p>
+                                                    <p className="text-xs uppercase tracking-[0.18em] text-white/35">Resposta escrita</p>
+                                                </div>
+                                            </div>
+                                            <p className="mt-3 text-sm text-white/60">
+                                                Você escreve com suas palavras o que entendeu e como aplicaria isso na prática.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
+                                    <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/5 p-5">
+                                        <h4 className="text-sm font-semibold text-emerald-300 mb-3">Regras simples para ir bem</h4>
+                                        <ul className="space-y-3 text-sm text-white/65">
+                                            <li className="flex gap-3"><CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" /> Use suas próprias palavras.</li>
+                                            <li className="flex gap-3"><CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" /> Inglês simples vale. O importante é ser real.</li>
+                                            <li className="flex gap-3"><CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" /> Erro honesto ajuda mais do que resposta perfeita copiada.</li>
+                                            <li className="flex gap-3"><CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" /> Se puder, evite tradutor e IA para a equipe ver seu ponto atual de verdade.</li>
+                                        </ul>
+                                    </div>
+
+                                    {isPillarOne && (
+                                        <div className="rounded-2xl border border-amber-500/15 bg-amber-500/5 p-5">
+                                            <h4 className="text-sm font-semibold text-amber-200 mb-3">Depois desta etapa</h4>
+                                            <p className="text-sm text-white/65 leading-relaxed">
+                                                A próxima fase aprofunda o método com continuidade guiada, correção humana e acesso ao restante da jornada. Aqui você já viu a base. Depois daqui, começa a parte mais acompanhada.
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                                 <FlightButton variant="neon" className="w-full py-4 text-lg" onClick={handleNextStep}>
-                                    Iniciar Missão
+                                    {isPillarOne ? "Começar minha avaliação" : "Iniciar avaliação"}
                                     <ArrowRight className="ml-2 w-5 h-5" />
                                 </FlightButton>
                             </motion.div>
@@ -241,14 +296,14 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                         {step === 'written' && (
                             <motion.div key="written" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                                 <div>
-                                    <h3 className="text-lg font-medium text-white mb-2">Relatório de Campo</h3>
+                                    <h3 className="text-lg font-medium text-white mb-2">Sua resposta final</h3>
                                     <p className="text-sm text-white/50 mb-4">
-                                        Descreva brevemente o que mais te marcou neste pilar e liste **3 exemplos reais** de como você aplicará este conhecimento na sua rotina.
+                                        Conte o que mais mexeu com você neste pilar e traga **3 exemplos reais** de como isso pode aparecer na sua rotina. Não precisa soar bonito. Precisa soar seu.
                                     </p>
                                     <textarea
                                         value={writtenText}
                                         onChange={(e) => setWrittenAnswer(e.target.value)}
-                                        placeholder="Minha experiência foi... Usarei o inglês para..."
+                                        placeholder="O que mais me marcou foi... Na prática, eu usaria isso quando..."
                                         className="w-full h-48 bg-black border border-white/10 rounded-xl p-4 text-white placeholder:text-white/20 focus:outline-none focus:border-violet-500/50 transition-colors resize-none"
                                     />
                                     <div className="flex justify-between mt-2">
@@ -279,9 +334,9 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                     <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <Phone className="w-8 h-8 text-emerald-400" />
                                     </div>
-                                    <h3 className="text-lg font-medium text-white mb-2">Canal de Comunicação Prioritário</h3>
+                                    <h3 className="text-lg font-medium text-white mb-2">Se quiser, deixe seu WhatsApp</h3>
                                     <p className="text-white/60 text-sm mb-6 max-w-sm mx-auto">
-                                        Para receber o feedback do seu relatório diretamente no seu celular (mais rápido), informe seu WhatsApp abaixo.
+                                        Assim o retorno da sua avaliação pode chegar mais rápido. Se preferir não colocar, tudo bem: você ainda consegue acompanhar a resposta por aqui.
                                     </p>
 
                                     <div className="max-w-xs mx-auto">
@@ -332,9 +387,9 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                 {pillarId === 1 ? (
                                     <>
                                         <div>
-                                            <h3 className="text-3xl font-bold text-neutral-900 mb-3 tracking-tight">Avaliação Recebida!</h3>
-                                            <p className="text-neutral-600 text-base max-w-[400px] mx-auto leading-relaxed">
-                                                Sua resposta foi salva com sucesso. Assine o plano <strong>Premium</strong> para receber sua nota imediatamente e desbloquear o acesso total aos próximos 8 módulos.
+                                            <h3 className="text-3xl font-bold text-neutral-900 mb-3 tracking-tight">Avaliação recebida</h3>
+                                            <p className="text-neutral-600 text-base max-w-[500px] mx-auto leading-relaxed">
+                                                Sua resposta foi salva com sucesso. Você concluiu a parte gratuita e já viu a lógica do método funcionando por dentro. A próxima etapa aprofunda isso com sequência completa, correção humana e continuidade guiada.
                                             </p>
                                         </div>
                                         <div className="space-y-4 pt-6 max-w-sm mx-auto">
@@ -342,14 +397,14 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                                 className="w-full py-4 text-base font-bold rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-[0_4px_20px_rgba(124,58,237,0.4)] transition-all flex items-center justify-center hover:-translate-y-1" 
                                                 onClick={() => { router.push('/pagamento'); onClose(); }}
                                             >
-                                                Desbloquear Acesso Premium
+                                                Continuar para a próxima etapa
                                                 <ArrowRight className="ml-2 w-5 h-5" />
                                             </button>
                                             <button
                                                 onClick={() => { onSuccess(); onClose(); }}
                                                 className="text-neutral-400 text-xs hover:text-neutral-700 transition-colors uppercase tracking-widest font-semibold block mx-auto underline decoration-neutral-200 underline-offset-4"
                                             >
-                                                Voltar ao Dashboard
+                                                Ficar por aqui por enquanto
                                             </button>
                                         </div>
                                     </>

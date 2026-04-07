@@ -30,7 +30,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
     // Note: pillarId is passed as prop, no need to read params
 
-    const { isPillarUnlocked, getCurrentPillarNumber, isPillarModuleCompleted, completePillar } = useProgress();
+    const { isPillarUnlocked, getCurrentPillarNumber, isPillarModuleCompleted } = useProgress();
     const { user, subscriptionStatus, isLoading: authLoading } = useAuth(); // Auth Check
     const isAdminUser = !!user?.email && ADMIN_EMAILS.includes(user.email);
 
@@ -61,7 +61,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
             refreshExamStatus();
         }, 5000);
         return () => clearInterval(interval);
-    }, [exam]);
+    }, [exam, refreshExamStatus]);
 
     // Memory Card: Restaurar modal aberto caso ele recarregue a página
     useEffect(() => {
@@ -70,9 +70,9 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
             try {
                 const parsed = JSON.parse(savedState);
                 if (parsed.isOpen && parsed.step !== 'success') {
-                    setIsExamModalOpen(true);
+                    window.setTimeout(() => setIsExamModalOpen(true), 0);
                 }
-            } catch (e) {}
+            } catch {}
         }
     }, [pillarId]);
 
@@ -296,7 +296,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                                         Avaliação em Andamento
                                                     </span>
                                                     <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-emerald-400 hover:text-emerald-300 transition-colors">
-                                                        <span>Desbloquear Acesso Premium</span>
+                                                        <span>Continuar para a próxima etapa</span>
                                                         <ArrowRight className="w-5 h-5" />
                                                     </div>
                                                 </div>
@@ -323,7 +323,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                             // === CASO: NÃO INICIADO ===
                                             <>
                                                 <ShieldCheck className="w-6 h-6" />
-                                                Iniciar Missão Final do Pilar {pillarId}
+                                                {pillarId === 1 ? "Fazer minha primeira avaliação" : `Iniciar Missão Final do Pilar ${pillarId}`}
                                                 <ArrowRight className="w-5 h-5" />
                                             </>
                                         )}

@@ -4341,12 +4341,18 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
 
     const handleStartCompletionFlow = (moduleId: string, moduleTitle: string, index: number) => {
         const moduleRef = data.modules?.find((m) => m.id === moduleId);
+        const skipsCompletionChallenge = !!moduleRef?.blocks?.some((b) => b.type === "pillar-end");
         const hasInlineGameGate = !!moduleRef?.blocks?.some((b) =>
             b.type === "maze-game" ||
             b.type === "consolidation-game" ||
             b.type === "combat-sort-game" ||
             b.type === "audio-decode-game"
         );
+
+        if (skipsCompletionChallenge) {
+            handleCompleteModule(moduleId, index);
+            return;
+        }
 
         if (hasInlineGameGate) {
             if (!mazePassedByModule[moduleId]) {

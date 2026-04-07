@@ -619,79 +619,79 @@ export const PILAR_1_DATA: PillarData = {
             blocks: [
                 {
                     type: "system-status",
-                    content: "{{IDENTITY PROCEDURE|PROCEDIMENTO DE IDENTIDADE}}: {{OPERATOR_ALLIANCE.exe INITIALIZING|ALIANÇA_DO_OPERADOR.exe INICIALIZANDO}}... {{HUMAN VERIFICATION REQUIRED|VERIFICAÇÃO HUMANA NECESSÁRIA}}..."
+                    content: "{{TRANSIÇÃO DE ETAPA|TRANSIÇÃO DE ETAPA}}: {{FREE ACCESS COMPLETE|ACESSO GRATUITO CONCLUÍDO}}... {{NEXT STEP AVAILABLE|PRÓXIMA ETAPA DISPONÍVEL}}..."
                 },
                 {
                     type: "box-goal",
-                    title: "Objetivo Tático",
-                    content: "Este é o ponto de não retorno. Não estamos aqui para \"tentar\" aprender inglês. Estamos aqui para assassinar o velho \"eu\" que tinha medo de falar. O objetivo deste módulo é selar um pacto biológico e preparar você para o **Checkpoint de Elite**."
+                    title: "Objetivo desta etapa",
+                    content: "Você chegou ao fim da parte gratuita do Pilar 1. E isso já diz bastante: você não está mais no inglês decorado. Agora a próxima etapa é confirmar, de um jeito leve e real, o que já começou a mudar no seu ouvido, na sua confiança e na sua forma de pensar o idioma."
                 },
                 {
                     type: "h2",
-                    content: "6.1 A Conclusão da Jornada de Roger: O Fim do Silêncio"
+                    content: "6.1 O que muda depois desta etapa"
                 },
                 {
                     type: "paragraph",
-                    content: "A minha história (Parte 2) não terminou apenas com um vocabulário novo. Ela terminou quando eu percebi que o inglês era a única coisa que me separava da pessoa que eu amava. Eu me lembro vividamente de estar em uma mesa, querendo dizer algo profundo, e a gramática de livro ser uma **mordaça na minha boca**."
+                    content: "Muita gente chega até aqui achando que o mais difícil era começar. Mas, na prática, o ponto de virada vem quando a pessoa percebe que já não quer mais voltar para aquele inglês travado, cheio de medo e tradução mental."
                 },
                 {
                     type: "paragraph",
-                    content: "A BasedSpeak nasceu desse grito contido. Ela nasceu para que você nunca mais sinta que é 'menos' só porque não consegue conjugar o verbo. **A fluência não é um troféu; é a sua voz sendo devolvida a você.**"
+                    content: "Daqui para frente, o curso entra numa camada mais acompanhada: mais aplicação, mais direção e mais correção humana. Não é sobre jogar mais conteúdo em cima de você. É sobre pegar o que já começou a nascer e transformar isso em uso real, com segurança."
                 },
                 {
                     type: "brain-diagram",
                     content: JSON.stringify({
-                        "title": "🧠 O EFEITO SALIÊNCIA (Por que você vai ser testado)",
+                        "title": "🧠 Por que existe uma validação humana",
                         "steps": [
-                            "O Cérebro Preguiçoso: Se você sabe que ninguém vai ver o seu trabalho, seu cérebro economiza energia e não retém a informação.",
-                            "A Pressão Social (Accountability): Saber que um HUMANO REAL vai ler e julgar suas palavras ativa o sistema de alerta do cérebro. A adrenalina sobe. A memória grava.",
-                            "A Validação: Receber um 'Aprovado' de um especialista gera uma descarga de dopamina 10x maior do que passar em um quiz automático."
+                            "Quando ninguém vê o que você faz, o cérebro tende a tratar aquilo como algo descartável.",
+                            "Quando uma pessoa real lê sua resposta, você presta mais atenção, organiza melhor o raciocínio e grava mais.",
+                            "Quando recebe um retorno humano, você entende com mais clareza onde já melhorou e o que ainda precisa ajustar."
                         ]
                     })
                 },
                 {
                     type: "h2",
-                    content: "6.2 O Checkpoint Humano (A Prova de Fogo)"
+                    content: "6.2 Como funciona sua primeira avaliação"
                 },
                 {
                     type: "paragraph",
-                    content: "Você chegou ao fim do conteúdo teórico. Mas, no Global Command, teoria sem execução é alucinação. Para desbloquear o **Pilar 2 (Superpoderes Auditivos)**, você passará por duas etapas agora:\n\n1. **O Quiz Tático:** Perguntas rápidas para verificar se você entendeu os conceitos (Filtro Afetivo, Pareto, etc).\n2. **A Prova de Texto (O Desafio Real):** Você terá que escrever. E é aqui que separamos os meninos dos lobos."
+                    content: "Agora entra uma avaliação curta, prática e honesta. Ela existe para mostrar seu ponto atual e preparar sua passagem para a próxima fase.\n\nVocê vai passar por duas partes:\n\n1. **Perguntas rápidas:** para confirmar as ideias principais deste pilar.\n2. **Resposta escrita:** para mostrar, com suas palavras, o que você entendeu e como aplicaria isso na vida real."
                 },
                 {
                     type: "box-warning",
-                    title: "🚫 PROTOCOLO ANTI-IA (LEIA COM ATENÇÃO)",
-                    content: "**NÃO USE CHATGPT. NÃO USE TRADUTOR.**\n\nSua prova será corrigida por um **Tutor Humano de Elite**, não por uma máquina. Nossos tutores são treinados para detectar padrões sintéticos de IA.\n\nSe detectarmos que seu texto foi gerado por robô:\n1. Sua prova será anulada.\n2. Você perderá o respeito do comando.\n\n**O que nós queremos:** Queremos o seu inglês \"quebrado\", real, sujo e honesto. Queremos ver o seu esforço, não a perfeição de um algoritmo. **Prefiro um erro honesto do que um acerto mentiroso.**"
+                    title: "Regras da avaliação",
+                    content: "Esta etapa é simples:\n\n1. Responda com suas próprias palavras.\n2. Pode usar inglês simples. Não precisa inventar frase bonita.\n3. Erro honesto vale muito mais do que texto perfeito copiado.\n4. Evite tradutor e IA. O objetivo aqui é enxergar seu momento real.\n\nSeu texto será lido por uma pessoa da equipe. A ideia não é te punir. É entender seu nível com clareza para a próxima fase fazer sentido de verdade."
                 },
                 {
                     type: "elite-insight",
-                    title: "💎 O VALOR DO FEEDBACK SINCERO",
-                    content: "No mundo lá fora, as pessoas mentem para serem educadas. Elas dizem \"seu inglês é bom\" enquanto riem por dentro. Aqui, nós vendemos a **VERDADE**.\n\nVocê receberá um feedback brutalmente honesto, cirúrgico e humano. Alguém vai ler cada palavra sua, analisar sua lógica e te dizer exatamente onde você está errando e como corrigir. Esse nível de atenção personalizada é o que custa milhares de dólares em consultorias. Aqui, é o padrão."
+                    title: "💎 O que vem depois da parte gratuita",
+                    content: "O Pilar 1 te mostra que o método funciona na prática. A etapa seguinte aprofunda isso com correção humana, continuidade guiada e uma progressão mais completa entre os pilares.\n\nÉ nessa hora que o curso deixa de ser só conteúdo e vira acompanhamento de verdade."
                 },
                 {
                     type: "h2",
-                    content: "⚔️ O Pacto Final"
+                    content: "6.3 Antes de seguir"
                 },
                 {
                     type: "paragraph",
-                    content: "Antes de clicar em \"Iniciar Prova\", faça um acordo com você mesmo. Você não vai trapacear. Você não vai se esconder. Você vai colocar sua cara a tapa."
+                    content: "Não pense nisso como uma prova para te expor. Pense como um retrato sincero do seu momento. Quanto mais honesta for sua resposta, mais útil essa etapa vai ser para você."
                 },
                 {
                     type: "phrase-analysis",
                     content: JSON.stringify({
-                        "phrase": "{{Bring it on.|Manda ver.}}",
-                        "phonetic": "/brin-guiron/ — O som conecta tudo. Postura de ataque.",
-                        "grammarNote": "Atitude de Combate: Usado quando você está pronto para o desafio, não importa quão difícil seja. É o oposto de recuar."
+                        "phrase": "{{Let's do it.|Vamos nessa.}}",
+                        "phonetic": "/lets du it/ — curto, leve e com energia de começo.",
+                        "grammarNote": "É o tipo de frase simples que combina com essa etapa: sem drama, sem pose e com disposição para seguir."
                     })
                 },
                 {
                     type: "box-action",
-                    title: "📋 BRIEFING PRÉ-PROVA",
-                    content: "Você está prestes a entrar na zona de avaliação.\n\n**Sua Missão:** Provar que entendeu a mentalidade do Operador.\n**Seu Juiz:** Um ser humano real, especialista e incorruptível.\n**Sua Recompensa:** A verdade sobre o seu nível e a chave para o Pilar 2."
+                    title: "📋 O que você vai encontrar agora",
+                    content: "Ao tocar em iniciar avaliação, você verá:\n\n• uma parte curta de perguntas objetivas\n• uma resposta escrita simples\n• a opção de deixar seu WhatsApp para receber retorno mais rápido\n\nTudo foi pensado para ser direto, leve e útil."
                 },
                 {
                     type: "pillar-end",
-                    title: "🎖️ PILAR 1: FASE TEÓRICA CONCLUÍDA",
-                    content: "A teoria acabou. A prática começa agora. Respire fundo. Beba água. E mostre-nos quem você realmente é. **Aos vencedores, o Pilar 2 os aguarda.**"
+                    title: "Pilar 1 concluído",
+                    content: "Você atravessou a parte gratuita e já viu que aprender inglês pode ser mais claro, mais leve e muito mais real.\n\nAgora vem a etapa que transforma isso em direção concreta: sua primeira avaliação humana.\n\nRespira, faz com calma e segue. O próximo nível começa logo depois daqui."
                 }
             ]
         }
