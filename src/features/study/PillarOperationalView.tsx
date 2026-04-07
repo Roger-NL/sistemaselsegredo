@@ -972,7 +972,13 @@ const ScrambleExercise = ({
 };
 
 // Game 1: Upgrade stiff phrases into real-world English
-const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat' }[] }) => {
+const CombatSortGame = ({
+    data,
+    onComplete,
+}: {
+    data: { text: string; type: 'lab' | 'combat' }[];
+    onComplete?: () => void;
+}) => {
     type CombatRound = {
         stiff: string;
         natural: string;
@@ -1046,6 +1052,7 @@ const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat'
     const [choiceError, setChoiceError] = useState<string | null>(null);
     const [reasonError, setReasonError] = useState<string | null>(null);
     const [score, setScore] = useState(0);
+    const completionNotifiedRef = useRef(false);
 
     const round = rounds[currentRound];
 
@@ -1092,6 +1099,10 @@ const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat'
             resetRoundState();
         } else {
             setFinished(true);
+            if (!completionNotifiedRef.current) {
+                completionNotifiedRef.current = true;
+                onComplete?.();
+            }
             playUiSfx("success");
         }
     };
@@ -1100,6 +1111,7 @@ const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat'
         setCurrentRound(0);
         setFinished(false);
         setScore(0);
+        completionNotifiedRef.current = false;
         resetRoundState();
     };
 
@@ -1302,12 +1314,19 @@ const CombatSortGame = ({ data }: { data: { text: string; type: 'lab' | 'combat'
 };
 
 // Game 2: Decode native pronunciation
-const AudioDecodeGame = ({ data }: { data: { phonetic: string; options: string[]; answer: number }[] }) => {
+const AudioDecodeGame = ({
+    data,
+    onComplete,
+}: {
+    data: { phonetic: string; options: string[]; answer: number }[];
+    onComplete?: () => void;
+}) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [score, setScore] = useState(0);
     const [showResult, setShowResult] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
+    const completionNotifiedRef = useRef(false);
 
     const handleSelect = (idx: number) => {
         if (showResult || isFinished) return;
@@ -1326,6 +1345,10 @@ const AudioDecodeGame = ({ data }: { data: { phonetic: string; options: string[]
                 setCurrentStep(c => c + 1);
             } else {
                 setIsFinished(true);
+                if (!completionNotifiedRef.current) {
+                    completionNotifiedRef.current = true;
+                    onComplete?.();
+                }
             }
         }, 1200);
     };
@@ -1350,7 +1373,7 @@ const AudioDecodeGame = ({ data }: { data: { phonetic: string; options: string[]
                         <Unlock className="w-16 h-16 text-cyan-400 mx-auto mb-4" />
                         <h4 className="text-xl md:text-2xl font-bold text-slate-100 mb-2">Decodificação Completa</h4>
                         <p className="text-slate-400 mb-6">Taxa de sucesso: {Math.round((score / data.length) * 100)}% ({score}/{data.length})</p>
-                        <button onClick={() => { setCurrentStep(0); setScore(0); setIsFinished(false); }} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition font-mono uppercase text-xs">Re-inicializar Scanner</button>
+                        <button onClick={() => { setCurrentStep(0); setScore(0); setIsFinished(false); completionNotifiedRef.current = false; }} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition font-mono uppercase text-xs">Re-inicializar Scanner</button>
                     </motion.div>
                 ) : (
                     <div className="max-w-xl mx-auto">
@@ -3750,9 +3773,9 @@ const RenderBlock = ({
             }
             return <ScrambleExercise targetSentence={block.content as string} />;
         case "combat-sort-game":
-            return <CombatSortGame data={JSON.parse(block.content as string)} />;
+            return <CombatSortGame data={JSON.parse(block.content as string)} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} />;
         case "audio-decode-game":
-            return <AudioDecodeGame data={JSON.parse(block.content as string)} />;
+            return <AudioDecodeGame data={JSON.parse(block.content as string)} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} />;
         case "consolidation-game":
             return <ConsolidationGame data={JSON.parse(block.content as string)} onComplete={moduleId ? () => onGameComplete?.(moduleId) : undefined} />;
         case "maze-game":
