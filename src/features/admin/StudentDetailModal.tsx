@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { X, User, Mail, Phone, Calendar, TrendingUp, ShieldCheck, CheckCircle2, AlertCircle, Clock, BookOpen } from "lucide-react";
+import { X, User, Mail, Phone, Calendar, TrendingUp, ShieldCheck, CheckCircle2, AlertCircle, Clock, BookOpen, RotateCcw, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 import { PillarExam } from "@/lib/exam/service";
+import { resetUserCourseProgress } from "@/lib/admin/reset-user-course-progress";
 
 interface StudentSummary {
     id: string;
@@ -31,6 +32,7 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
     const [loadingExams, setLoadingExams] = useState(false);
     const [expandedExam, setExpandedExam] = useState<string | null>(null);
     const [currentPillarLevel, setCurrentPillarLevel] = useState(1);
+    const [isResettingProgress, setIsResettingProgress] = useState(false);
     const { user: currentUser, refreshUser } = useAuth();
 
     const fetchExams = useCallback(async () => {
@@ -71,6 +73,43 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
             setCurrentPillarLevel(1);
         }
     }, [fetchExams, isOpen, user]);
+
+    const handleResetProgress = async () => {
+        if (!user || isResettingProgress) return;
+
+        const confirmed = window.confirm(
+            `Tem certeza que deseja resetar a conta de ${user.name || "este aluno"}?\n\n` +
+            `Isso vai apagar:\n` +
+            `• progresso dos pilares\n` +
+            `• módulos concluídos\n` +
+            `• provas e respostas enviadas\n` +
+            `• histórico acadêmico do curso\n\n` +
+            `O status Premium será mantido.`
+        );
+
+        if (!confirmed) return;
+
+        setIsResettingProgress(true);
+
+        try {
+            const result = await resetUserCourseProgress(user.id);
+            user.approvedPillar = 1;
+            setCurrentPillarLevel(1);
+            setExams([]);
+            setExpandedExam(null);
+
+            if (currentUser?.id === user.id) {
+                await refreshUser();
+            }
+
+            window.alert(`Conta resetada com sucesso. ${result.deletedExams} prova(s) apagada(s).`);
+        } catch (error) {
+            console.error(error);
+            window.alert("Nao foi possivel resetar a conta agora.");
+        } finally {
+            setIsResettingProgress(false);
+        }
+    };
 
     if (!isOpen || !user) return null;
 
@@ -193,6 +232,24 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
                                         <option key={num} value={num}>Pilar {num}</option>
                                     ))}
                                 </select>
+                                <button
+                                    type="button"
+                                    onClick={handleResetProgress}
+                                    disabled={isResettingProgress}
+                                    className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    {isResettingProgress ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Resetando...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <RotateCcw className="w-4 h-4" />
+                                            Resetar conta
+                                        </>
+                                    )}
+                                </button>
                             </div>
                         </div>
 

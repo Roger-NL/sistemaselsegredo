@@ -147,16 +147,16 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             // 1. Pillar Logic (Server Authority for Level)
             if (user.approvedPillar) {
                 const approvedLevel = user.approvedPillar;
+                const hasRemoteLocalPillarStatus = user.localPillarStatus !== undefined;
                 const newStatus: Record<string, PillarStatus> = {};
                 PILLARS.forEach((pillar, index) => {
                     const pillarNum = index + 1;
                     if (pillarNum < approvedLevel) {
                         newStatus[pillar.id] = "completed";
                     } else if (pillarNum === approvedLevel) {
-                        // FIX: If locally completed (from storage OR user.localPillarStatus), keep it completed.
-                        // We check both sources.
-                        const localCompleted = initialStatus[pillar.id] === "completed" ||
-                            (user.localPillarStatus?.[pillar.id] === "completed");
+                        const localCompleted = hasRemoteLocalPillarStatus
+                            ? user.localPillarStatus?.[pillar.id] === "completed"
+                            : initialStatus[pillar.id] === "completed" || user.localPillarStatus?.[pillar.id] === "completed";
 
                         if (localCompleted) {
                             newStatus[pillar.id] = "completed";
@@ -177,10 +177,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             if (user.completedSpecializations !== undefined) setCompletedSpecializations(user.completedSpecializations);
 
             // For complex objects, we might want to merge or prefer server. Let's prefer server if present.
-            if (user.completedModules !== undefined && Object.keys(user.completedModules).length > 0) {
+            if (user.completedModules !== undefined) {
                 setCompletedModules(user.completedModules);
             }
-            if (user.completedPillarModules !== undefined && user.completedPillarModules.length > 0) {
+            if (user.completedPillarModules !== undefined) {
                 setCompletedPillarModules(user.completedPillarModules);
             }
             if (user.hasSeenMissionComplete !== undefined) setHasSeenMissionComplete(user.hasSeenMissionComplete);

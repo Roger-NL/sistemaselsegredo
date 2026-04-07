@@ -4,7 +4,6 @@ import AppProviders from "@/app/AppProviders";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
 import { 
     LayoutDashboard, 
@@ -124,19 +123,23 @@ function AdminLayoutInner({
                         
                         const isActive = pathname.startsWith(item.href);
                         return (
-                            <Link 
-                                key={item.href} 
-                                href={item.href}
+                            <button
+                                key={item.href}
+                                type="button"
+                                onClick={() => {
+                                    setSidebarOpen(false);
+                                    router.push(item.href);
+                                }}
                                 className={`
-                                    flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors
-                                    ${isActive 
-                                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20" 
+                                    relative z-10 w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-left pointer-events-auto
+                                    ${isActive
+                                        ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20"
                                         : "text-slate-400 hover:bg-slate-800 hover:text-white"}
                                 `}
                             >
                                 <item.icon className="w-5 h-5" />
                                 {item.name}
-                            </Link>
+                            </button>
                         )
                     })}
                 </nav>
@@ -151,13 +154,14 @@ function AdminLayoutInner({
                             <p className="text-xs text-slate-500 truncate">Admin</p>
                         </div>
                     </div>
-                    <Link 
-                        href={ROUTES.app.dashboard}
+                    <button
+                        type="button"
+                        onClick={() => router.push(ROUTES.app.dashboard)}
                         className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors mb-1"
                     >
                         <LayoutDashboard className="w-4 h-4" />
                         Voltar ao Site
-                    </Link>
+                    </button>
                     <button 
                         onClick={logout}
                         className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-950/30 rounded-lg transition-colors"
