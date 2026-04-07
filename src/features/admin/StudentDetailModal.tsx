@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { X, User, Mail, Phone, Calendar, TrendingUp, ShieldCheck, CheckCircle2, AlertCircle, Clock, BookOpen, RotateCcw, Loader2 } from "lucide-react";
+import { X, User, Mail, Phone, Calendar, TrendingUp, ShieldCheck, CheckCircle2, AlertCircle, Clock, BookOpen, RotateCcw, Loader2, Crown } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
+import { collection, query, where, getDocs, updateDoc, doc, deleteField } from "firebase/firestore";
 import { PillarExam } from "@/lib/exam/service";
 import { resetUserCourseProgress } from "@/lib/admin/reset-user-course-progress";
 
@@ -33,6 +33,7 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
     const [expandedExam, setExpandedExam] = useState<string | null>(null);
     const [currentPillarLevel, setCurrentPillarLevel] = useState(1);
     const [isResettingProgress, setIsResettingProgress] = useState(false);
+    const [isUpdatingPremium, setIsUpdatingPremium] = useState(false);
     const { user: currentUser, refreshUser } = useAuth();
 
     const fetchExams = useCallback(async () => {
@@ -111,6 +112,57 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
         }
     };
 
+    const handleTogglePremium = async () => {
+        if (!user || isUpdatingPremium) return;
+
+        const isPremium = user.subscriptionStatus === "premium";
+        const confirmed = window.confirm(
+            isPremium
+                ? `Tem certeza que deseja remover o Premium de ${user.name || "este aluno"}?\n\nO acesso volta para o modo free imediatamente.`
+                : `Tem certeza que deseja liberar o Premium para ${user.name || "este aluno"}?\n\nO acesso premium será liberado imediatamente.`
+        );
+
+        if (!confirmed) return;
+
+        setIsUpdatingPremium(true);
+
+        try {
+            const userRef = doc(db, "users", user.id);
+
+            if (isPremium) {
+                await updateDoc(userRef, {
+                    subscriptionStatus: "free",
+                    subscriptionExpiresAt: deleteField(),
+                    purchasedPlan: deleteField(),
+                    paymentId: deleteField(),
+                    pendingPixPayment: deleteField(),
+                });
+                user.subscriptionStatus = "free";
+            } else {
+                await updateDoc(userRef, {
+                    subscriptionStatus: "premium",
+                    purchasedPlan: "lifetime",
+                });
+                user.subscriptionStatus = "premium";
+            }
+
+            if (currentUser?.id === user.id) {
+                await refreshUser();
+            }
+
+            window.alert(
+                isPremium
+                    ? "Premium removido com sucesso."
+                    : "Premium liberado com sucesso."
+            );
+        } catch (error) {
+            console.error(error);
+            window.alert("Nao foi possivel atualizar o status premium agora.");
+        } finally {
+            setIsUpdatingPremium(false);
+        }
+    };
+
     if (!isOpen || !user) return null;
 
     return (
@@ -139,13 +191,29 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
                         </div>
                         <div>
                             <h2 className="text-2xl font-bold text-slate-900">{user.name || "Sem Nome"}</h2>
-                            <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 mt-1">
                                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${user.subscriptionStatus === 'premium'
                                     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                     : "bg-slate-100 text-slate-500 border-slate-200"
                                     }`}>
                                     {user.subscriptionStatus === 'premium' ? "Premium" : "Free"}
                                 </span>
+                                <button
+                                    type="button"
+                                    onClick={handleTogglePremium}
+                                    disabled={isUpdatingPremium}
+                                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${user.subscriptionStatus === 'premium'
+                                        ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                                        : "border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100"
+                                        } disabled:cursor-not-allowed disabled:opacity-60`}
+                                >
+                                    {isUpdatingPremium ? (
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                        <Crown className="w-3.5 h-3.5" />
+                                    )}
+                                    {user.subscriptionStatus === 'premium' ? "Remover Premium" : "Liberar Premium"}
+                                </button>
                                 <span>•</span>
                                 <span className="font-mono text-xs">ID: {user.id}</span>
                             </div>
