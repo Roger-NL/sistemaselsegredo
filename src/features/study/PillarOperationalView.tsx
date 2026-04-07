@@ -1360,6 +1360,7 @@ const AudioDecodeGame = ({
     const [isFinished, setIsFinished] = useState(false);
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [didPass, setDidPass] = useState(false);
+    const [showHints, setShowHints] = useState(false);
     const completionNotifiedRef = useRef(false);
 
     const resetGame = useCallback(() => {
@@ -1369,6 +1370,7 @@ const AudioDecodeGame = ({
         setIsFinished(false);
         setSelectedOption(null);
         setDidPass(false);
+        setShowHints(false);
         completionNotifiedRef.current = false;
     }, []);
 
@@ -1391,6 +1393,7 @@ const AudioDecodeGame = ({
             setShowResult(false);
             setSelectedOption(null);
             if (currentStep + 1 < data.length) {
+                setShowHints(false);
                 setCurrentStep(c => c + 1);
             } else {
                 const finalScore = score + (idx === currentItem.answer ? 1 : 0);
@@ -1409,6 +1412,13 @@ const AudioDecodeGame = ({
             }
         }, 1200);
     }, [currentItem, currentStep, data, isFinished, onComplete, passingScore, resetGame, score, showResult]);
+
+    const handleRevealHints = () => {
+        if (showHints) return;
+        const confirmed = window.confirm("Tem certeza que deseja ver a ajuda desta pergunta? Isso vai mostrar a forma completa e as traducoes.");
+        if (!confirmed) return;
+        setShowHints(true);
+    };
 
     return (
         <div className="my-8 rounded-xl border border-cyan-500/30 overflow-hidden bg-slate-900 shadow-xl">
@@ -1449,12 +1459,12 @@ const AudioDecodeGame = ({
                             <span className="font-mono text-2xl md:text-3xl font-bold text-cyan-300 animate-pulse">
                                 &ldquo;{phoneticDisplay.english}&rdquo;
                             </span>
-                            {decodedDisplay && (
+                            {showHints && decodedDisplay && (
                                 <p className="mt-4 text-sm md:text-base text-slate-200">
                                     Forma completa: <span className="font-mono text-cyan-200">{decodedDisplay.english}</span>
                                 </p>
                             )}
-                            {topTranslation && (
+                            {showHints && topTranslation && (
                                 <p className="mt-2 text-sm text-slate-400">
                                     Tradução: {topTranslation}
                                 </p>
@@ -1480,7 +1490,7 @@ const AudioDecodeGame = ({
                                     >
                                         <span className="block">
                                             <span className="block">{display.english}</span>
-                                            {display.portuguese && (
+                                            {showHints && display.portuguese && (
                                                 <span className="mt-1 block text-xs text-slate-400">
                                                     {display.portuguese}
                                                 </span>
@@ -1491,6 +1501,18 @@ const AudioDecodeGame = ({
                                 );
                             })}
                         </div>
+                        {!showHints && (
+                            <div className="mt-4 flex justify-center">
+                                <button
+                                    type="button"
+                                    onClick={handleRevealHints}
+                                    className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/30 bg-cyan-950/20 px-4 py-2 text-xs md:text-sm text-cyan-200 transition hover:bg-cyan-950/35"
+                                >
+                                    <Eye className="w-4 h-4" />
+                                    Ver ajuda desta pergunta
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
