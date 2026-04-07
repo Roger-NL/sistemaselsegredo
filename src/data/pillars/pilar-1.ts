@@ -63,12 +63,12 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Quando o \"branco\" vier, o pior erro é baixar a cabeça e dizer \"{{Sorry, my English is bad|Desculpe, meu inglês é ruim}}\". Isso reforça o pânico e te coloca em posição de submissão. \n\n**Onde você vai usar isso?** No aeroporto, em uma {{Business Call|Chamada de Trabalho}} ou conhecendo alguém novo."
+                    content: "Quando o \"branco\" vier, o pior erro é baixar a cabeça e dizer \"{{Sorry, my English is bad|Desculpe, meu inglês é ruim}}\". Isso reforça o pânico e te encolhe na conversa. \n\n**Onde você vai usar isso?** No aeroporto, em uma {{Business Call|chamada de trabalho}} ou conhecendo alguém novo."
                 },
                 {
                     type: "box-action",
                     title: "🎯 MINI-EXERCÍCIO: O COMANDO DE VOZ",
-                    content: "Em vez de pedir desculpas, você vai comandar a conversa. Se não entendeu, use esta frase curta e poderosa:\n\n**\"{{Say that again?|Diga de novo?}}\"**\n\n**Tarefa:** Repita em voz alta agora, com firmeza: **/sêi-dát-ə-guén/**. \nSinta a diferença. Você não está pedindo permissão; você está ajustando a frequência do rádio."
+                    content: "Em vez de pedir desculpas, você vai comandar a conversa. Se não entendeu, use esta frase curta e poderosa:\n\n**\"{{Say that again.|Fala isso de novo.}}\"**\n\n**Tarefa:** Repita em voz alta agora, com firmeza: **/sêi-dét-ə-guén/**. \nSinta a diferença. Você não está pedindo permissão; está mantendo a conversa viva."
                 },
                 {
                     type: "micro-win",
@@ -142,10 +142,10 @@ export const PILAR_1_DATA: PillarData = {
                     content: JSON.stringify({
                         "headers": ["Situação", "Inglês de Livro (Engessado)", "Inglês de Combate (Real)", "Análise de Eficiência"],
                         "rows": [
-                            ["Expressar Sentimento", "{{I am very happy to be here.|Estou muito feliz de estar aqui.}}", "{{I'm so glad I made it.|Estou tão feliz que consegui.}}", "{{Glad|Contente}} é mais orgânico; {{Made it|Consegui}} foca no esforço."],
-                            ["Dificuldade de Entendimento", "{{Could you repeat that slowly?|Poderia repetir devagar?}}", "{{Wait, I'm lost. Come again?|Espera, me perdi. Pode repetir?}}", "Metáforas de movimento ({{lost|perdido}}) são 10x mais comuns."],
+                            ["Expressar Sentimento", "{{I am very happy to be here.|Estou muito feliz de estar aqui.}}", "{{I'm so glad I made it.|Estou feliz demais de ter conseguido chegar.}}", "{{Glad|Contente}} é mais orgânico; {{Made it|Consegui chegar}} foca no esforço."],
+                            ["Dificuldade de Entendimento", "{{Could you repeat that slowly?|Poderia repetir devagar?}}", "{{Wait, I'm lost. Come again?|Espera, me perdi. Fala de novo?}}", "Metáforas de movimento ({{lost|perdido}}) são muito mais comuns."],
                             ["Sair de Casa", "{{We must go to the restaurant.|Devemos ir ao restaurante.}}", "{{Let's head out. I'm starving.|Vamos indo. Tô faminto.}}", "{{Head out|Sair/Partir}} é um phrasal verb vital."],
-                            ["Resolver Conflito", "{{I do not agree with your opinion.|Não concordo com sua opinião.}}", "{{I don't see it that way.|Não vejo dessa forma.}}", "Menos agressivo, mais tático."]
+                            ["Resolver Conflito", "{{I do not agree with your opinion.|Não concordo com sua opinião.}}", "{{I don't see it that way.|Eu não vejo assim.}}", "Menos agressivo, mais natural."]
                         ]
                     })
                 },
@@ -215,7 +215,7 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "reveal-box",
                     title: "🔍 Análise do Sucesso (Clique para expandir)",
-                    content: "'{{My bad|Foi mal}} / {{I messed up|Eu errei}}': Admite o erro de forma humana e rápida. Baixa o cortisol do interlocutor. '{{Total nightmare|Pesadelo total}}': Usa uma imagem mental forte em vez de adjetivos técnicos (intense traffic). '{{My treat|Por minha conta}}': Resolve o conflito com uma ação prática (eu pago). A frase do Operador tem 15 palavras vs 21 do Recruta, e comunica 3x mais emoção."
+                    content: "'{{My bad|Foi mal}} / {{I messed up|Eu vacilei}}': admite o erro de forma humana e rápida. '{{Total nightmare|Pesadelo total}}': usa imagem simples em vez de frase engessada. '{{My treat|Por minha conta}}': resolve com ação prática. A frase natural fala menos e comunica muito mais."
                 },
                 {
                     type: "h2",
@@ -430,7 +430,7 @@ export const PILAR_1_DATA: PillarData = {
                         "situation": "\"{{Where is the report? We were expecting it yesterday!|Onde está o relatório? Estávamos esperando ontem!}}\"",
                         "wrong": {
                             "action": "O Recruta tenta ser 'educado demais' com palavras complexas e gagueja.",
-                            "result": "\"{{I apologize for the inconveniences. We are having difficulties...|Peço desculpas pelas inconveniências. Estamos tendo dificuldades...}}\" (Você soa inseguro e culpado)"
+                            "result": "\"{{I apologize for the inconveniences. We are having difficulties...|Peço desculpas pelas inconveniências. Estamos tendo dificuldades...}}\" (Você soa distante e inseguro.)"
                         },
                         "right": {
                             "action": "O Operador usa Pareto. Direto ao ponto. Foco no resultado.",
@@ -545,7 +545,7 @@ export const PILAR_1_DATA: PillarData = {
                         "headers": ["Elemento", "Formal (Acadêmico)", "Street (Operacional)", "Por que fazem isso?"],
                         "rows": [
                             ["Got to", "{{I have got to go.|Eu tenho que ir.}}", "{{I gotta split.|Tenho que vazar.}}", "Eficiência máxima de movimento."],
-                            ["Could have", "{{I could have done it.|Eu poderia ter feito.}}", "{{I coulda dunnit.|Podia ter feito.}}", "Redução de 4 sílabas para 2."],
+                            ["Could have", "{{I could have done it.|Eu poderia ter feito.}}", "{{I coulda done it.|Eu podia ter feito.}}", "Redução de 4 sílabas para 2."],
                             ["Out of", "{{Get out of here.|Saia daqui.}}", "{{Outta here!|Zarpa daqui!}}", "O 't' vira 'r' e as palavras se fundem."]
                         ]
                     })
@@ -570,7 +570,7 @@ export const PILAR_1_DATA: PillarData = {
                         },
                         "right": {
                             "action": "O Operador Elite reconhece o som /whaddya/ como um bloco único. Foca na entonação de pergunta.",
-                            "result": "\"{{A black coffee, please. That's it.|Um café preto, por favor. Só isso.}}\" (Curto, grosso e funcional. Missão cumprida.)"
+                            "result": "\"{{Black coffee. That's it.|Café preto. Só isso.}}\" (Curto, claro e funcional.)"
                         }
                     })
                 },
