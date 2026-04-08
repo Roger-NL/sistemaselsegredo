@@ -247,34 +247,34 @@ export const PILAR_2_DATA: PillarData = {
         },
         {
             id: "p2-m3",
-            title: "MÓDULO 3: {{FREQUENCY SYNC|SINCRONIZAÇÃO DE FREQUÊNCIA}}",
-            subtitle: "Conectando o sinal. Onde palavras isoladas viram blocos operacionais.",
+            title: "MÓDULO 3: {{CONNECTED SPEECH|SOM CONECTADO}}",
+            subtitle: "Entendendo por que o ingles falado parece colado e rapido quando chega no ouvido.",
             status: "locked",
             blocks: [
                 {
                     type: "tower-log",
                     content:
-                        "TOWER LOG #02 — {{FREQUENCY SYNC|SINCRONIZAÇÃO DE FREQUÊNCIA}}\n• Channel: {{CONTINUOUS AUDIO|ÁUDIO CONTÍNUO}}\n• Mode: {{BLOCK DECODING|DECODIFICAÇÃO DE BLOCO}}\n• Previous State: {{ISOLATED SOUNDS|SONS ISOLADOS}}\n• Target State: {{CONTINUOUS FLOW|FLUXO CONTÍNUO}}\n\nNota da Torre: entender palavra por palavra é lento demais para o mundo real."
+                        "AUDIO LOG #02 — {{CONNECTED SPEECH|SOM CONECTADO}}\n• Focus: {{LISTENING IN BLOCKS|ESCUTAR EM BLOCOS}}\n• Before: {{ISOLATED SOUNDS|SONS ISOLADOS}}\n• Now: {{FLOWING SPEECH|FALA CORRIDA}}\n\nNota: no ingles real, as palavras quase nunca chegam uma por uma do jeito que aparecem na tela."
                 },
 
                 {
                     type: "h2",
-                    content: "O inglês real não chega em palavras. Ele chega em blocos."
+                    content: "O ingles real quase nunca chega em palavras separadas. Ele chega em blocos."
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Depois de limpar o ruído grosso, surge um novo problema: **velocidade percebida**.\n\nAqui está a verdade operacional:\n\nO inglês não soa rápido porque as pessoas falam depressa. Ele soa rápido porque **as fronteiras entre palavras desaparecem**.\n\nNeste módulo, você vai parar de procurar espaços inexistentes."
+                        "Depois que voce comeca a separar melhor os sons, aparece outro problema: a sensacao de velocidade.\n\nMas o ingles nao parece rapido so porque a pessoa fala correndo. Ele parece rapido porque **as palavras se ligam, se encurtam e se empurram umas nas outras**.\n\nNeste modulo, voce vai aprender a ouvir isso do jeito certo."
                 },
 
                 {
                     type: "h3",
-                    content: "3.1 {{Word Boundary Illusion|Ilusão de Fronteira de Palavra}}"
+                    content: "3.1 {{Word Boundary Illusion|A ilusao de que existe um espacinho entre cada palavra}}"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Seu cérebro foi treinado para acreditar que cada palavra começa e termina de forma clara.\n\nNo inglês falado, isso é falso.\n\nO que existe são **ondas contínuas**, e o significado vem do bloco, não da palavra."
+                        "Seu cerebro foi treinado por texto, legenda e exercicio escolar. Por isso ele espera que cada palavra apareca certinha, com comeco e fim bem marcados.\n\nNo ingles falado, isso quase nunca acontece. O que chega no ouvido e uma corrente continua. O sentido vem do bloco inteiro, nao de cada pedacinho isolado."
                 },
 
                 {
@@ -282,22 +282,22 @@ export const PILAR_2_DATA: PillarData = {
                     content: JSON.stringify({
                         title: "{{Boundary Illusion|Ilusão de Fronteira}} — Onde a palavra começa?",
                         instruction:
-                            "Ouça o áudio e marque onde você ACHA que a palavra começa. Depois veja a segmentação real.",
+                            "Ouça o audio e marque onde voce acha que a palavra comeca. Depois compare com o jeito como o som realmente veio.",
                         example:
-                            "{{what do you want|o que você quer}} → /wʌdjəˈwɑnə/\n\nNão existem três palavras audíveis. Existe um único bloco.",
+                            "{{what do you want|o que voce quer}} → /wʌdjəˈwɑnə/\n\nVoce nao escuta tres palavras certinhas. Voce escuta um bloco so.",
                         insight:
-                            "Quanto mais você procura espaços, mais você se perde."
+                            "Quanto mais voce tenta achar espacos certinhos no meio do audio, mais atrasado voce fica."
                     })
                 },
 
                 {
                     type: "h3",
-                    content: "3.2 {{Linking|Ligação}}: soldando frequências"
+                    content: "3.2 {{Linking|Ligacao}}: quando uma palavra puxa a outra"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Quando um som termina aberto e o próximo começa aberto, o cérebro nativo **solda** tudo.\n\nNão é escolha. É economia de energia.\n\nVocê não precisa falar assim agora. Mas precisa **ouvir assim**."
+                        "Quando um som termina de um jeito e o proximo comeca logo em seguida, o ingles falado costuma ligar tudo. Isso nao e teatro. E so o jeito normal da fala correr.\n\nVoce nao precisa forcar isso na sua fala agora. Mas precisa reconhecer quando ouvir."
                 },
 
                 {
@@ -308,32 +308,32 @@ export const PILAR_2_DATA: PillarData = {
                             {
                                 pattern: "{{Consonant → Vowel|Consoante → Vogal}}",
                                 example: "{{turn it off|desligar}} → tur-ni-toff",
-                                note: "A palavra nunca 'para'. Ela escorre."
+                                note: "O som nao para no meio. Ele desliza."
                             },
                             {
                                 pattern: "{{Same Sound Merge|Fusão de Som Igual}}",
                                 example: "{{black cat|gato preto}} → bla-cat",
-                                note: "O cérebro ouve uma pancada só."
+                                note: "Seu ouvido sente uma batida so."
                             },
                             {
                                 pattern: "{{Soft Transition|Transição Suave}}",
                                 example: "{{see you|te vejo}} → seeyou",
-                                note: "Nenhum espaço audível."
+                                note: "Nao tem espacinho claro no meio."
                             }
                         ],
                         rule:
-                            "Se você espera ouvir cada palavra separada, você sempre chegará atrasado."
+                            "Se voce esperar ouvir cada palavra separadinha, sempre vai parecer que o ingles esta correndo mais do que voce."
                     })
                 },
 
                 {
                     type: "h3",
-                    content: "3.3 {{Compression|Compressão}}: quando o inglês espreme o áudio"
+                    content: "3.3 {{Compression|Reducao}}: quando o ingles encurta o som"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Além de conectar, o inglês **comprime**.\n\nSílabas fracas perdem forma. Sons inteiros desaparecem.\n\nIsso não é erro. É eficiência."
+                        "O ingles nao so conecta. Ele tambem encurta.\n\nPartes menos importantes da frase perdem forca, encolhem ou quase somem. Isso nao e erro. E so fala natural."
                 },
 
                 {
@@ -345,40 +345,89 @@ export const PILAR_2_DATA: PillarData = {
                                 written: "{{going to|indo para}}",
                                 compressed: "gonna",
                                 why:
-                                    "O cérebro mantém apenas o núcleo informacional."
+                                    "Na fala do dia a dia, o som encurta e fica mais leve."
                             },
                             {
                                 written: "{{want to|querer}}",
                                 compressed: "wanna",
                                 why:
-                                    "Redução elimina esforço desnecessário."
+                                    "O bloco fica mais rapido de dizer e mais comum de ouvir."
                             },
                             {
                                 written: "{{got to|ter que}}",
                                 compressed: "gotta",
                                 why:
-                                    "Som fraco não sobrevive à velocidade real."
+                                    "A forma completa perde espaco na fala corrida."
                             },
                             {
                                 written: "{{out of|fora de}}",
                                 compressed: "outta",
                                 why:
-                                    "Fronteira de palavra colapsa."
+                                    "As bordas entre palavras somem."
                             }
                         ],
                         warning:
-                            "Você não está autorizado a falar assim ainda. Sua missão aqui é reconhecer."
+                            "Neste momento, o foco nao e imitar. E reconhecer quando isso aparece."
                     })
+                },
+                {
+                    type: "audio-decode-game",
+                    content: JSON.stringify([
+                        {
+                            "phonetic": "Whatcha wanna do?",
+                            "decoded": "{{What do you want to do?|O que voce quer fazer?}}",
+                            "translation": "O que voce quer fazer?",
+                            "options": [
+                                "{{What do you want to do?|O que voce quer fazer?}}",
+                                "{{What are you doing?|O que voce esta fazendo?}}",
+                                "{{What do you do?|O que voce faz?}}"
+                            ],
+                            "answer": 0
+                        },
+                        {
+                            "phonetic": "We gotta move",
+                            "decoded": "{{We have got to move.|A gente tem que se mexer.}}",
+                            "translation": "A gente tem que se mexer.",
+                            "options": [
+                                "{{We got a movie.|A gente conseguiu um filme.}}",
+                                "{{We have got to move.|A gente tem que se mexer.}}",
+                                "{{We are moving.|A gente esta se mudando.}}"
+                            ],
+                            "answer": 1
+                        },
+                        {
+                            "phonetic": "I'm gonna call 'em",
+                            "decoded": "{{I'm going to call them.|Vou ligar pra eles.}}",
+                            "translation": "Vou ligar pra eles.",
+                            "options": [
+                                "{{I'm gonna call them.|Vou ligar pra eles.}}",
+                                "{{I'm calling him.|Estou ligando para ele.}}",
+                                "{{I got a call from them.|Recebi uma ligacao deles.}}"
+                            ],
+                            "answer": 0
+                        },
+                        {
+                            "phonetic": "D'you wanna go?",
+                            "decoded": "{{Do you want to go?|Voce quer ir?}}",
+                            "translation": "Voce quer ir?",
+                            "options": [
+                                "{{Did you go?|Voce foi?}}",
+                                "{{Do you want to go?|Voce quer ir?}}",
+                                "{{Do you want it?|Voce quer isso?}}"
+                            ],
+                            "answer": 1
+                        }
+                    ])
                 },
 
                 {
                     type: "h3",
-                    content: "3.4 {{Block Decoding|Decodificação de Bloco}}: entender sem traduzir"
+                    content: "3.4 {{Block Decoding|Ouvir em bloco}}: entender sem depender de cada palavra"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Agora vem a mudança crítica.\n\nVocê vai ouvir blocos completos e responder apenas a isso:\n\n• O que está acontecendo?\n• Qual é a intenção?\n• Existe urgência ou não?\n\nPalavras específicas são secundárias."
+                        "Agora entra uma virada importante: em vez de tentar capturar palavra por palavra, voce vai responder a perguntas mais inteligentes:\n\n• O que esta acontecendo?\n• O que a pessoa quer?\n• Tem pressa ou nao?\n\nQuando voce pega isso, ja pegou a parte mais importante."
                 },
 
                 {
@@ -386,7 +435,7 @@ export const PILAR_2_DATA: PillarData = {
                     content: JSON.stringify({
                         title: "{{Block Decode|Decodificação de Bloco}} — resposta operacional",
                         instruction:
-                            "Ouça o bloco e escolha a interpretação correta. Não tente lembrar palavras.",
+                            "Ouça o bloco e escolha a interpretacao correta. Nao tente decorar som por som.",
                         samples: [
                             {
                                 audio: "we gotta push this back",
@@ -408,7 +457,7 @@ export const PILAR_2_DATA: PillarData = {
                             }
                         ],
                         goal:
-                            "Se você capturou intenção, você venceu o {{listening|escuta}}."
+                            "Se voce captou a intencao principal, sua escuta ja esta funcionando melhor."
                     })
                 },
 
@@ -417,54 +466,54 @@ export const PILAR_2_DATA: PillarData = {
                     content: JSON.stringify({
                         title: "{{Latency Check|Checagem de Latência}} — você ainda está atrasado?",
                         description:
-                            "Responda honestamente:",
+                            "Responda com sinceridade:",
                         items: [
                             "Eu ainda tento ouvir palavra por palavra.",
                             "Eu entendo o bloco, mas me perco nos detalhes.",
                             "Eu já consigo captar intenção rapidamente."
                         ],
                         interpretation:
-                            "Se marcou a última opção, sua frequência começou a sincronizar."
+                            "Se a ultima opcao ja parece mais real para voce, seu ouvido comecou a acompanhar melhor o ritmo."
                     })
                 },
 
                 {
                     type: "tower-stamp",
                     content:
-                        "TOWER STAMP — {{FREQUENCY SYNC COMPLETE|SINCRONIZAÇÃO DE FREQUÊNCIA CONCLUÍDA}}\n\nVocê parou de caçar palavras isoladas.\nVocê começou a ouvir blocos reais.\n\nPróxima etapa: filtrar o que importa e ignorar o resto.\nPrepare o radar."
+                        "ETAPA CONCLUIDA — {{CONNECTED SPEECH|SOM CONECTADO}}\n\nVoce parou de esperar palavras separadas demais e comecou a ouvir grupos de som mais reais.\n\nNa proxima etapa, voce vai aprender a pegar o que importa numa frase: tom, enfase e intencao."
                 }
             ]
         },
         {
             id: "p2-m4",
-            title: "MÓDULO 4: {{RADAR LOCK|TRAVA DE RADAR}}",
-            subtitle: "Filtrando o sinal. {{Stress|Ênfase}}, entonação e intenção — a leitura que acontece acima das palavras.",
+            title: "MÓDULO 4: {{CATCH THE INTENTION|PEGAR A INTENCAO}}",
+            subtitle: "Lendo enfase, entonacao e clima da frase para entender o que realmente importa.",
             status: "locked",
             blocks: [
                 {
                     type: "radar-console",
                     content:
-                        "{{RADAR CONSOLE|CONSOLE DE RADAR}} — {{LOCK SEQUENCE|SEQUÊNCIA DE TRAVA}}\n• Input: {{Continuous Speech|Fala Contínua}}\n• Target: {{INTENTION|INTENÇÃO}} + {{URGENCY|URGÊNCIA}} + {{DIRECTION|DIREÇÃO}}\n• Rule: {{Words are optional. Signals are mandatory.|Palavras são opcionais. Sinais são obrigatórios.}}\n\nNota da Torre: um operador não entende tudo. Um operador entende o que importa."
+                        "{{INTENTION MODE|MODO INTENCAO}} — {{ACTIVE|ATIVO}}\n• Input: {{Continuous Speech|Fala corrida}}\n• Focus: {{INTENTION|INTENCAO}} + {{URGENCY|URGÊNCIA}} + {{TONE|TOM}}\n• Rule: {{You do not need every word to understand the point|Voce nao precisa de cada palavra para entender o ponto}}\n\nNota: ouvir bem nao e ouvir tudo. E perceber o que carrega o sentido principal."
                 },
 
                 {
                     type: "h2",
-                    content: "Você não precisa ouvir tudo. Você precisa travar o radar no que carrega intenção."
+                    content: "Voce nao precisa ouvir tudo. Precisa perceber onde esta a intencao da frase."
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Até aqui você já limpou ruído e começou a reconhecer blocos.\n\nAgora vem a camada que separa amador de operador: **priorização**.\n\nO inglês falado tem duas pistas que quase ninguém treina:\n• **{{Stress|Ênfase}}** (onde a frase bate)\n• **{{Intonation|Entonação}}** (para onde a frase aponta)\n\nQuando você aprende a ler essas duas coisas, você consegue operar mesmo quando perde palavras."
+                        "Ate aqui, voce ja comecou a limpar o som e a ouvir em bloco. Agora entra uma camada muito importante: **priorizacao**.\n\nNo ingles falado, duas pistas ajudam muito:\n• **{{Stress|Enfase}}**: onde a frase bate mais forte\n• **{{Intonation|Entonacao}}**: para onde a frase aponta\n\nQuando voce aprende a ler isso, para de depender de entender cada palavra."
                 },
 
                 {
                     type: "h3",
-                    content: "4.1 O princípio do {{Radar|Radar}}: a frase tem picos"
+                    content: "4.1 A frase tem picos"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Toda frase tem picos de energia. Esses picos são onde mora a informação real.\n\nSeu cérebro brasileiro tende a dar o mesmo peso para tudo. No inglês, isso é suicídio auditivo.\n\nAqui você vai treinar a enxergar a fala como **{{energy map|mapa de energia}}**."
+                        "Toda frase tem partes que batem mais forte. Geralmente e ali que mora a informacao principal.\n\nMuita gente tenta dar o mesmo peso para tudo. So que, no ingles falado, isso cansa o ouvido e atrasa a compreensao.\n\nAqui voce vai treinar a perceber a fala como um **{{energy map|mapa de energia}}**."
                 },
 
                 {
@@ -494,18 +543,18 @@ export const PILAR_2_DATA: PillarData = {
                             }
                         ],
                         rule:
-                            "Se você captar os picos, você não entra em pânico. Você sabe do que se trata."
+                            "Se voce pegar os picos, ja para de se sentir completamente perdido."
                     })
                 },
 
                 {
                     type: "h3",
-                    content: "4.2 {{Intonation Trace|Traçado de Entonação}}: a seta invisível"
+                    content: "4.2 {{Intonation Trace|Entonacao}}: a direcao invisivel da frase"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "{{Intonation|Entonação}} é direção.\n\nEla responde perguntas como:\n• é pergunta ou afirmação?\n• é certeza ou dúvida?\n• é convite ou ordem?\n• é ironia ou literal?\n\nVocê não precisa entender todas as palavras para capturar isso. Você precisa ler a curva."
+                        "{{Intonation|Entonacao}} mostra direcao.\n\nEla ajuda voce a perceber coisas como:\n• e pergunta ou afirmacao?\n• e certeza ou duvida?\n• e convite, aviso ou ordem?\n• tem calor, tensao, ironia?\n\nVoce nao precisa entender todas as palavras para perceber isso. Precisa treinar a curva da fala."
                 },
 
                 {
@@ -545,18 +594,18 @@ export const PILAR_2_DATA: PillarData = {
                             }
                         ],
                         rule:
-                            "A curva te dá intenção antes da palavra te dar detalhe."
+                            "Muitas vezes a curva da frase ja entrega a intencao antes de voce entender o detalhe."
                     })
                 },
 
                 {
                     type: "h3",
-                    content: "4.3 {{Meaning Shift|Mudança de Significado}}: a mesma frase, três missões diferentes"
+                    content: "4.3 {{Meaning Shift|Mesma frase, sentido diferente}}"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Agora você vai ver por que 'entender palavras' é frágil.\n\nCom as mesmas palavras, o {{stress|ênfase}} muda a missão.\n\nVocê vai treinar a detectar **onde o falante colocou o peso** — porque isso muda o alvo."
+                        "Aqui fica claro por que entender so as palavras nao basta.\n\nCom a mesma frase, a enfase muda o foco do recado. O que muda nao e o vocabulario. E o lugar onde o peso caiu."
                 },
 
                 {
@@ -602,18 +651,29 @@ export const PILAR_2_DATA: PillarData = {
                             }
                         ],
                         rule:
-                            "{{Stress|Ênfase}} = mira. A mira define o que você responde."
+                            "{{Stress|Enfase}} muda o foco. E o foco muda a resposta."
                     })
+                },
+                {
+                    type: "combat-sort-game",
+                    content: JSON.stringify([
+                        { "text": "{{Could you please repeat the full sentence slowly for me?|Voce poderia repetir a frase inteira devagar para mim?}}", "type": "lab" },
+                        { "text": "{{So you need this by tomorrow, right?|Entao voce precisa disso ate amanha, certo?}}", "type": "combat" },
+                        { "text": "{{I did not understand your statement.|Eu nao entendi sua afirmacao.}}", "type": "lab" },
+                        { "text": "{{Wait, so the main point is the deadline?|Pera, entao o principal aqui e o prazo?}}", "type": "combat" },
+                        { "text": "{{Could you clarify your intention in another manner?|Voce poderia esclarecer sua intencao de outra maneira?}}", "type": "lab" },
+                        { "text": "{{Got it. You're not saying no forever, just not now.|Entendi. Voce nao esta dizendo nao para sempre, so nao agora.}}", "type": "combat" }
+                    ])
                 },
 
                 {
                     type: "h3",
-                    content: "4.4 {{Priority Extraction|Extração de Prioridade}}: capturar missão em 3 sinais"
+                    content: "4.4 {{Priority Extraction|Pegar o principal em 3 sinais}}"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Quando o áudio vier caótico, seu cérebro quer entrar em modo pânico.\n\nAqui você instala um protocolo de extração em três sinais:\n\n1) **{{ACTION|AÇÃO}}** (o que está sendo feito/pedido)\n2) **{{TIME|TEMPO}}** (agora, depois, amanhã, urgente)\n3) **{{TONE|TOM}}** (leve, tenso, irritado, incerto)\n\nVocê vai treinar isso sem depender de texto."
+                        "Quando o audio vier baguncado, seu cerebro vai querer entrar em panico. Para nao cair nisso, voce vai treinar um filtro bem simples:\n\n1) **{{ACTION|ACAO}}**: o que esta sendo pedido ou feito\n2) **{{TIME|TEMPO}}**: quando isso importa\n3) **{{TONE|TOM}}**: como a pessoa esta vindo\n\nEsses tres sinais ja ajudam muito."
                 },
 
                 {
@@ -643,18 +703,18 @@ export const PILAR_2_DATA: PillarData = {
                             }
                         ],
                         rule:
-                            "Se você sai com tags corretas, você está operacional mesmo sem transcrição."
+                            "Se voce sai com essas tres tags, ja consegue responder muito melhor, mesmo sem entender tudo."
                     })
                 },
 
                 {
                     type: "h3",
-                    content: "4.5 {{Jamming Simulation|Simulação de Interferência}}: ruído seletivo (treino de foco real)"
+                    content: "4.5 {{Jamming Simulation|Interferencia seletiva}}: foco mesmo sem audio limpo"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "O mundo real não te dá áudio limpo.\n\nNesta simulação, você vai sofrer interferência em palavras 'de baixa importância'.\n\nObjetivo: manter o radar travado nos picos e na curva, ignorando o resto."
+                        "No mundo real, o audio nao vem limpinho. Tem palavra comida, barulho, microfone ruim, fala cortada.\n\nNesta simulacao, a ideia e voce continuar pegando o principal mesmo com parte da frase encoberta."
                 },
 
                 {
@@ -686,18 +746,18 @@ export const PILAR_2_DATA: PillarData = {
                             }
                         ],
                         rule:
-                            "Se você precisa de cada palavra para entender, você não tem controle — você tem dependência."
+                            "Se voce depende de cada palavra para entender, qualquer ruido te derruba."
                     })
                 },
 
                 {
                     type: "h3",
-                    content: "4.6 {{Response Protocol|Protocolo de Resposta}}: como responder quando você só pegou o essencial"
+                    content: "4.6 {{Response Protocol|Como responder quando voce so pegou o essencial}}"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Agora a parte mais valiosa: não basta entender. Você precisa responder sem parecer perdido.\n\nVocê vai usar {{control responses|respostas de controle}} que:\n• confirmam intenção\n• pedem ajuste mínimo\n• mantêm você no comando\n\nSem se justificar. Sem pedir desculpas. Sem cair no modo frágil."
+                        "Agora vem uma das partes mais uteis: nao basta entender mais ou menos. Voce precisa responder sem se desmontar.\n\nAqui voce vai treinar respostas curtas que:\n• confirmam o que voce captou\n• pedem so o ajuste necessario\n• mantem a conversa andando\n\nSem drama. Sem desculpa desnecessaria. Sem travar."
                 },
 
                 {
@@ -745,20 +805,20 @@ export const PILAR_2_DATA: PillarData = {
                             }
                         ],
                         rule:
-                            "Você responde ao que a frase QUER, não ao que a frase DIZ palavra por palavra."
+                            "A melhor resposta costuma ser para a intencao da frase, nao para cada palavra isolada."
                     })
                 },
 
                 {
                     type: "operator-notes",
                     content:
-                        "NOTAS DO OPERADOR (gravadas no sistema)\n\nSe você travou neste módulo, não é porque ele é difícil.\nÉ porque ele ataca a sua crença antiga de que 'entender = palavras'.\n\nAqui você instalou outro padrão:\n• entender = picos + curva + intenção\n\nIsso reduz pânico em tempo real."
+                        "ANOTACAO FINAL\n\nSe este modulo te mexeu, e porque ele cutuca uma ideia antiga: a de que entender = ouvir todas as palavras.\n\nAqui voce treinou outra base:\n• entender = perceber picos + curva + intencao\n\nIsso deixa a escuta mais leve e a resposta mais firme."
                 },
 
                 {
                     type: "completion-seal",
                     content:
-                        "{{RADAR LOCK|TRAVA DE RADAR}} — {{COMPLETE|CONCLUÍDO}}\nVocê aprendeu a:\n• localizar picos de informação\n• ler intenção pela {{intonation|entonação}}\n• extrair missão em 3 sinais\n• responder com controle mesmo com áudio incompleto\n\nPróxima etapa: caos real — sotaques, ruído e condições adversas.\nA Torre vai testar seu sistema em espectro total."
+                        "{{CATCH THE INTENTION|PEGAR A INTENCAO}} — {{COMPLETE|CONCLUIDO}}\nVoce aprendeu a:\n• notar onde a frase bate mais forte\n• ler intencao pela entonacao\n• extrair o principal em poucos sinais\n• responder melhor mesmo sem audio perfeito\n\nNa proxima etapa, voce vai aplicar isso em fala mais baguncada, sotaque e pressao real."
                 }
             ]
         },
