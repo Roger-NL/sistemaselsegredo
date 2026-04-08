@@ -17,7 +17,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Você está começando a primeira parte do curso. E já vale deixar uma coisa clara: aqui a gente não vai te jogar naquele inglês duro de escola.\n\nA ideia é outra. Você vai entender por que trava, como sair desse travamento e o que falar quando a mente der branco. Tudo com foco em conversa real, não em frase bonita de prova."
+                    content: "Você está começando a primeira parte do curso. E já vale deixar uma coisa clara: aqui a gente não vai te empurrar aquele inglês duro de escola.\n\nA ideia é outra. Você vai entender por que trava, como sair desse travamento e o que falar quando a mente der branco. Tudo com foco em conversa real, não em frase bonita de prova.\n\nSe você já estudou, tentou e mesmo assim sentiu que na hora de responder o inglês simplesmente evaporava, este módulo foi feito exatamente para esse ponto."
                 },
                 {
                     type: "h3",
@@ -25,7 +25,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Muita gente estuda por anos, entende exercícios, reconhece palavras, mas na hora de abrir a boca trava. Isso acontece porque o ensino tradicional acostuma você a pensar no inglês como matéria, não como ferramenta.\n\nNeste módulo, a gente vai fazer três coisas:\n\n• entender por que o branco aparece;\n• aprender frases curtas que te salvam na hora;\n• trocar vergonha por controle."
+                    content: "Muita gente estuda por anos, entende exercícios, reconhece palavras, mas na hora de abrir a boca trava. Isso acontece porque o ensino tradicional acostuma você a tratar o inglês como matéria, não como ferramenta.\n\nNo papel parece que sabe. Na conversa, parece que sumiu tudo.\n\nNeste módulo, a gente vai fazer três coisas:\n\n• entender por que o branco aparece;\n• aprender frases curtas que te salvam na hora;\n• trocar vergonha por controle."
                 },
                 {
                     type: "box-action",
@@ -55,7 +55,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Sinta a diferença: você não está olhando uma regra e tentando parecer perfeito. Você está montando inglês real com a mão na massa."
+                    content: "Sinta a diferença: você não está olhando uma regra e tentando parecer perfeito. Você está mexendo no inglês com a mão na massa.\n\nE isso já mostra uma coisa importante: talvez seu problema nunca tenha sido capacidade. Talvez você só tenha treinado do jeito errado até aqui."
                 },
                 {
                     type: "system-status",
@@ -63,12 +63,12 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Você já esteve em uma reunião ou viagem, alguém te fez uma pergunta simples e... **PUFT**. Sua mente virou uma TV fora do ar. O coração disparou, a mão suou e a palavra sumiu. \n\n**Isso não é falta de inteligência.** É biologia. Seu cérebro entrou em {{Panic Mode|Modo de Pânico}} e desligou sua capacidade de pensar em inglês para tentar te proteger do julgamento alheio."
+                    content: "Você já esteve numa reunião, numa viagem ou numa conversa simples, alguém te fez uma pergunta e o branco veio na hora. O coração acelerou, a mão suou e a palavra sumiu.\n\nSe isso já aconteceu com você, presta atenção: **isso não é falta de inteligência.** É biologia. Seu cérebro entrou em {{Panic Mode|Modo de Pânico}} e reduziu sua capacidade de pensar em inglês para tentar te proteger do julgamento alheio."
                 },
                 {
                     type: "elite-insight",
                     title: "💡 POR QUE ISSO IMPORTA?",
-                    content: "Enquanto você estiver no \"modo pânico\", seu cérebro bloqueia a parte que sabe gramática. Se você não souber desativar esse \"interruptor\", você vai estudar 10 anos e continuar travando na {{Real Life|Vida Real}}."
+                    content: "Enquanto você estiver no \"modo pânico\", seu cérebro bloqueia a parte que sabe gramática. Se você não souber desativar esse \"interruptor\", pode estudar por muito tempo e continuar travando na {{Real Life|Vida Real}}."
                 },
                 {
                     type: "h2",
@@ -76,20 +76,20 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Quando o branco vier, o pior erro é se diminuir com frases como \"{{Sorry, my English is bad|desculpa, meu inglês é ruim}}\". Isso piora o nervosismo e ainda faz você perder presença.\n\nO melhor caminho é simples: ganhar tempo com uma frase curta, retomar o que ouviu e seguir a conversa sem se humilhar."
+                    content: "Quando o branco vier, o pior erro é se diminuir com frases como \"{{Sorry, my English is bad|desculpa, meu inglês é ruim}}\". Isso piora o nervosismo e ainda faz você perder presença.\n\nO melhor caminho é simples: ganhar tempo com uma frase curta, retomar o que ouviu e seguir a conversa sem se apagar."
                 },
                 {
                     type: "box-action",
                     title: "Frase de apoio que salva",
-                    content: "Em vez de pedir desculpas, use uma frase curta que segura a conversa:\n\n**\"{{Say that again.|Fala isso de novo.}}\"**\n\nRepita em voz alta agora: **/sêi-dét-ə-guén/**.\n\nA lógica aqui é simples: você não trava, não some e não finge que entendeu. Você só puxa a conversa de volta para um lugar seguro."
+                    content: "Em vez de pedir desculpas, use uma frase curta que segura a conversa:\n\n**\"{{Say that again.|Fala isso de novo.}}\"**\n\nRepita em voz alta agora: **/sêi-dét-ə-guén/**.\n\nA lógica aqui é simples: você não trava, não some e não finge que entendeu. Você puxa a conversa de volta para um lugar seguro e ganha mais alguns segundos de controle."
                 },
                 {
                     type: "micro-win",
-                    content: "**Vitória imediata:** você já tem uma resposta prática para quando travar. Isso parece pequeno, mas muda muito a forma como você entra numa conversa."
+                    content: "**Vitória imediata:** você já tem uma resposta prática para quando travar. Isso parece pequeno, mas muda muito a forma como você entra numa conversa. Muita gente passa anos estudando sem ter nem essa primeira saída."
                 },
                 {
                     type: "paragraph",
-                    content: "Ao final deste Pilar, você vai fazer um desafio para mostrar que entendeu a lógica do método. A ideia não é perfeição. É mostrar que você já consegue reagir melhor do que antes."
+                    content: "Ao final deste Pilar, você vai fazer um desafio para mostrar que entendeu a lógica do método. A ideia não é perfeição. É mostrar que você já reage melhor do que antes.\n\nÉ assim que a confiança começa: quando você percebe que já não responde do mesmo jeito de antes."
                 }
             ]
         },
