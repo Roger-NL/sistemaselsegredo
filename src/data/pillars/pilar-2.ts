@@ -2,108 +2,103 @@ import { PillarData } from "@/types/study";
 
 export const PILAR_2_DATA: PillarData = {
     id: 2,
-    title: "PILAR 2: TOWER CONTROL",
-    subtitle: "A primeira fase técnica. Reprogramando seu hardware auditivo para operar em frequências nativas.",
+    title: "PILAR 2: OUVIR O INGLES REAL",
+    subtitle: "Treinando seu ouvido para reconhecer som conectado, ritmo e intencao no ingles falado de verdade.",
     modules: [
         {
             id: "p2-intro",
             title: "MÓDULO 1: {{START HERE|COMECE POR AQUI}}",
-            subtitle: "Briefing de missão e mentalidade técnica necessária para a fase de áudio.",
+            subtitle: "O ajuste de mentalidade para parar de ouvir ingles como se fosse portugues.",
             status: "active",
             blocks: [
                 {
                     type: "system-status",
-                    content: "{{ACCESSING...|ACESSANDO...}} {{SYSTEM STATUS: TECHNICAL PHASE INITIALIZED|STATUS DO SISTEMA: FASE TÉCNICA INICIALIZADA}}... {{ERROR PROTOCOL: EXPECTED|PROTOCOLO DE ERRO: ESPERADO}}..."
+                    content: "{{AUDIO PHASE READY|FASE DE AUDIO PRONTA}}... {{REAL LISTENING MODE ON|MODO DE ESCUTA REAL ATIVADO}}... {{GETTING IT WRONG AT FIRST IS NORMAL|ERRAR NO COMECO E NORMAL}}..."
                 },
                 {
                     type: "h2",
-                    content: "Bem-vindo à Grade, Operador."
+                    content: "Agora o foco muda: o trabalho e no ouvido."
                 },
                 {
                     type: "paragraph",
-                    content: "Você venceu o Pilar 1. Sua mentalidade foi resetada. Agora, o treinamento técnico começa de verdade. O **{{Pillar 2: Tower Control|Pilar 2: Controle de Torre}}** é o seu rito de passagem."
+                    content: "No Pilar 1, voce entendeu por que travava. Aqui, voce comeca a resolver isso na pratica. O Pilar 2 existe para te mostrar que o problema quase nunca e 'falta de vocabulario'. Na maioria das vezes, o problema e ouvir o ingles do jeito errado."
                 },
                 {
                     type: "box-warning",
-                    title: "⚠️ O {{ERROR PROTOCOL|PROTOCOLO DE ERRO}}",
-                    content: "Nesta fase, o erro não é apenas permitido, ele é esperado. Se você entender tudo de primeira, você está no treinamento errado. Cada falha de percepção é um dado de calibração para o seu sistema."
+                    title: "⚠️ Antes de comecar",
+                    content: "Nesta fase, errar faz parte do processo. Se no comeco tudo parecer embolado, isso nao quer dizer que voce nao leva jeito. Quer dizer so que seu ouvido ainda esta aprendendo a separar o que antes chegava como um bloco so."
                 },
                 {
                     type: "h3",
-                    content: "1.2 Sistema de Ranks ({{Flight Career|Carreira de Voo}})"
+                    content: "1.1 O que voce vai aprender aqui"
                 },
                 {
                     type: "paragraph",
-                    content: "Seu progresso não é medido por 'aulas assistidas', mas por **patentes de comando**. Cada nível exige mais precisão auditiva e controle operacional:"
+                    content: "Este pilar nao e sobre decorar regra. E sobre perceber o que realmente acontece no audio. A progressao aqui e simples:"
                 },
                 {
                     type: "list",
                     content: [
-                        "**1. {{Passenger|Passageiro}}:** Você está apenas observando o sistema.",
-                        "**2. {{Flight Cadet|Cadete de Voo}}:** Você entrou em formação e começou a treinar com método.",
-                        "**3. {{Route Navigator|Navegador de Rota}}:** Você identifica caminhos e mantém direção sob pressão.",
-                        "**4. {{Crew Operator|Tripulante de Bordo}}:** Você já participa da operação de forma ativa.",
-                        "**5. {{Cabin Operator|Operador de Cabine}}:** Você organiza processos e mantém o controle do ambiente.",
-                        "**6. {{Co-Pilot|Co-piloto}}:** Domínio técnico avançado e suporte operacional.",
-                        "**7. {{First Officer|Primeiro Oficial}}:** Você assume decisões rápidas e sustenta a missão em campo.",
-                        "**8. {{Captain|Capitão}}:** Autonomia total em situações de voo real.",
-                        "**9. {{Senior Captain|Capitão Sênior}}:** Alta consistência, leitura de risco e liderança operacional.",
-                        "**10. {{Commander|Comandante}}:** Autoridade máxima e referência de performance no sistema."
+                        "**1. {{Notice the sound|Perceber o som}}:** parar de tratar tudo como um ruido so.",
+                        "**2. {{Separate what sounds similar|Separar sons parecidos}}:** notar diferencas que antes passavam batido.",
+                        "**3. {{Hear the block|Ouvir o bloco}}:** captar frases inteiras sem depender de cada palavra.",
+                        "**4. {{Catch intention|Pegar a intencao}}:** entender o que a pessoa quer mesmo quando o audio nao vem perfeito.",
+                        "**5. {{Stay steady|Ficar firme}}:** continuar ouvindo e respondendo sem entrar em panico."
                     ]
                 },
                 {
                     type: "elite-insight",
-                    title: "🛑 A REGRA DE {{STOP|PARADA}} ({{Safety Protocol|Protocolo de Segurança}})",
-                    content: "Você NÃO poderá avançar para o Pilar 3 sem avaliação e aprovação de um instrutor de elite. Isso não é uma punição, é segurança operacional. Não enviamos operadores para o campo sem rádio funcional."
+                    title: "Importante sobre o proximo passo",
+                    content: "Ao fim do Pilar 2, sua prova vai passar pela leitura da equipe antes de liberar o Pilar 3. A ideia aqui nao e te segurar: e confirmar se essa base auditiva realmente firmou. Se precisar, voce ajusta antes de seguir."
                 }
             ]
         },
         {
             id: "p2-p1",
-            title: "MÓDULO 2: {{SIGNAL DECONSTRUCTION|DESCONSTRUÇÃO DE SINAL}}",
-            subtitle: "Limpando o ruído. Isolando os fonemas que seu cérebro colapsa em 1 só som.",
+            title: "MÓDULO 2: {{SOUND SEPARATION|SEPARACAO DOS SONS}}",
+            subtitle: "Percebendo sons que parecem iguais quando o ouvido ainda mistura tudo.",
             status: "active",
             blocks: [
                 {
                     type: "tower-log",
                     content:
-                        "TOWER LOG #01 — {{SESSION START|INÍCIO DA SESSÃO}}\n• Channel: {{AUDIO_IN|ENTRADA_DE_ÁUDIO}}\n• Mode: {{ANALYTICAL HEARING|AUDIÇÃO ANALÍTICA}}\n• Threat: {{PORTUGUESE AUTO-INTERPRETER|AUTO-INTÉRPRETE DE PORTUGUÊS}}\n• Goal: {{Separate signal from noise|Separar sinal de ruído}}\n\nNota da Torre: aqui você não aprende palavras. Você aprende a OUVIR."
+                        "AUDIO LOG #01 — {{LISTENING START|INICIO DA ESCUTA}}\n• Focus: {{REAL SOUND|SOM REAL}}\n• Risk: {{Hearing everything as one blur|Ouvir tudo como um bloco so}}\n• Goal: {{Separate what your ear is still mixing|Separar o que seu ouvido ainda mistura}}\n\nNota: aqui voce nao vai aprender palavra nova. Vai aprender a ouvir melhor."
                 },
-                { type: "h2", content: "O que você acha que é “{{fast English|inglês rápido}}” é só áudio mal decodificado." },
+                { type: "h2", content: "O que muita gente chama de '{{fast English|ingles rapido}}' e, na verdade, audio mal separado." },
                 {
                     type: "paragraph",
                     content:
-                        "Seu cérebro faz um truque sujo: ele pega sons diferentes e **amassa tudo em um só** pra economizar energia. \n\nIsso funciona no português. No inglês, isso te destrói.\n\nNesta Parte 1, você vai fazer o que um controlador faz: **isolar sinal**. Se você não isola, você não controla."
+                        "Seu cerebro tenta economizar energia o tempo todo. Entao, quando ouve ingles, ele junta sons parecidos e transforma tudo numa massa so. No portugues isso quase nunca te atrapalha. No ingles, atrapalha bastante.\n\nNeste modulo, voce vai comecar a separar o que antes chegava embaralhado."
                 },
                 {
                     type: "sonic-scan",
                     content: JSON.stringify({
-                        title: "{{Sonic Scan|Varredura Sônica}} — Autoavaliação de Hardware",
+                        title: "{{Quick Ear Check|Checagem Rapida do Ouvido}}",
                         instructions:
-                            "Marque o que acontece com você. Não é vergonha. É diagnóstico.",
+                            "Marque o que acontece com voce. Isso aqui nao e julgamento. E so um retrato do seu ponto de partida.",
                         items: [
-                            "Quando um nativo fala, eu sinto um ‘paredão’ de som.",
-                            "Eu entendo no texto, mas no áudio parece outra língua.",
+                            "Quando um nativo fala, eu sinto um 'paredao' de som.",
+                            "Eu entendo no texto, mas no audio parece outra lingua.",
                             "Eu confundo palavras curtas (ex: {{bit/beat|bit/beat}}, {{ship/sheep|ship/sheep}}).",
-                            "Eu ouço ‘{{ready|pronto}}’ quando a pessoa disse ‘{{red|vermelho}}’.",
-                            "Eu tento traduzir e perco o resto da frase."
+                            "Eu ouco '{{ready|pronto}}' quando a pessoa disse '{{red|vermelho}}'.",
+                            "Eu tento traduzir e, quando vejo, ja perdi o resto."
                         ],
                         output:
-                            "Se marcou 2+ itens, seu problema não é vocabulário. É {{DECODING|DECODIFICAÇÃO}}."
+                            "Se marcou 2+ itens, o seu gargalo principal nao e vocabulario. E escuta."
                     })
                 },
-                { type: "h3", content: "1.1 {{Frequency Sweep|Varredura de Frequência}}: você vai ouvir em camadas" },
+                { type: "h3", content: "2.1 O primeiro ajuste: perceber que nao e tudo igual" },
                 {
                     type: "paragraph",
                     content:
-                        "A Torre não ouve tudo de uma vez. Ela faz varredura. \n\nVocê vai treinar em 3 camadas:\n\n1) **Diferença mínima** (sons quase idênticos)\n2) **Final seco** (parar no fim sem inventar vogal)\n3) **Identificação rápida** (reagir sem pensar)\n\nSe você pensa demais, seu cérebro chama o tradutor interno e você perde o controle."
+                        "Voce vai treinar em 3 camadas bem simples:\n\n1) **sons quase iguais**\n2) **final seco**\n3) **resposta rapida**\n\nA ideia nao e ficar analisando demais. E ensinar seu ouvido a notar contraste mais cedo."
                 },
                 {
                     type: "a-b-snaptest",
                     content: JSON.stringify({
-                        title: "{{A/B SnapTest|Teste Rápido A/B}} — 2 segundos por alvo",
+                        title: "{{A/B SnapTest|Teste Rapido A/B}} — 2 segundos por alvo",
                         rule:
-                            "Sem legenda. Sem pausa mental. Você escolhe A ou B no instinto. O objetivo é TREINAR SEU RADAR, não sua gramática.",
+                            "Sem legenda. Sem pensar demais. Voce escolhe A ou B no instinto. O objetivo aqui e comecar a acordar o ouvido, nao provar que sabe gramatica.",
                         items: [
                             { id: "ab1", label: "Alvo 1", a: "{{ship|navio}}", b: "{{sheep|ovelha}}" },
                             { id: "ab2", label: "Alvo 2", a: "{{bit|um pouco}}", b: "{{beat|batida}}" },
@@ -112,39 +107,39 @@ export const PILAR_2_DATA: PillarData = {
                             { id: "ab5", label: "Alvo 5", a: "{{live|morar/viver}}", b: "{{leave|sair/partir}}" }
                         ],
                         scoring:
-                            "Você não precisa acertar tudo. Você precisa descobrir quais pares te quebram — esses serão seus ‘pontos cegos’."
+                            "Voce nao precisa acertar tudo. Voce precisa descobrir quais pares ainda te confundem."
                     })
                 },
                 {
                     type: "latency-meter",
                     content: JSON.stringify({
-                        title: "{{Latency Meter|Medidor de Latência}} — o inimigo invisível",
+                        title: "{{Reaction Check|Checagem de Reacao}} — onde voce trava",
                         description:
-                            "Seu cérebro perde a conversa não porque erra — mas porque demora. Marque seu padrão:",
+                            "Muita gente perde a conversa nao porque erra, mas porque demora demais para reagir. Marque seu padrao:",
                         options: [
                             "Eu respondo rápido mesmo errando.",
                             "Eu travo tentando ter certeza.",
                             "Eu traduzo mentalmente antes de escolher."
                         ],
                         verdicts: [
-                            "Rápido mesmo errando = operador treinável.",
-                            "Travar = ansiedade de performance (precisa de protocolo).",
-                            "Traduzir = {{bug of configuration|erro de configuração}} (vamos remover aos poucos)."
+                            "Responder rapido, mesmo errando, e um bom sinal: seu ouvido ja esta se movendo.",
+                            "Travar mostra medo de errar. A gente vai aliviar isso ao longo do pilar.",
+                            "Traduzir antes de reagir deixa tudo mais lento. Vamos soltar isso aos poucos."
                         ]
                     })
                 },
-                { type: "h3", content: "1.2 {{Noise Gate|Portão de Ruído}}: o treino do {{DRY ENDING|FINAL SECO}}" },
+                { type: "h3", content: "2.2 {{Dry Ending|Final seco}}: cortar no lugar certo" },
                 {
                     type: "paragraph",
                     content:
-                        "Aqui é onde o brasileiro se entrega sem perceber: ele adiciona um som fantasma depois da consoante final. \n\nA Torre chama isso de **{{Noise Gate|Portão de Ruído}}**: você precisa cortar o áudio exatamente no final. \n\nNão é ‘pronúncia bonita’. É **clareza de sinal**."
+                        "Aqui esta um erro muito comum de brasileiro: colocar uma vogalzinha no fim da palavra sem perceber. Em vez de parar seco, a pessoa estica. \n\nNao e questao de pronuncia bonita. E questao de fazer o som terminar onde ele realmente termina."
                 },
                 {
                     type: "cutoff-drill",
                     content: JSON.stringify({
-                        title: "{{Cutoff Drill|Treino de Corte}} — Trava no penhasco",
+                        title: "{{Cutoff Drill|Treino de Corte}} — parar no fim certo",
                         instruction:
-                            "Fale e PARE. Não deslize para nenhuma vogal extra. Repita 5x cada.",
+                            "Fale e pare. Sem deixar escapar vogal extra no final. Repita 5x cada.",
                         items: [
                             { word: "{{stop|parar}}", cutoff: "p" },
                             { word: "{{back|atrás}}", cutoff: "k" },
@@ -153,49 +148,49 @@ export const PILAR_2_DATA: PillarData = {
                             { word: "{{hot|quente}}", cutoff: "t" }
                         ],
                         warning:
-                            "Se você ouvir um ‘i’ no final (stopi/backi), seu {{Noise Gate|Portão de Ruído}} falhou."
+                            "Se aparecer um som extra no final (tipo stopi/backi), seu ouvido ainda esta empurrando a palavra alem do ponto."
                     })
                 },
                 {
                     type: "misfire-cases",
                     content: JSON.stringify({
-                        title: "{{Misfire Cases|Casos de Falha de Disparo}} — quando 1 som te derruba",
+                        title: "{{Misfire Cases|Casos de Troca de Som}} — quando um detalhe muda tudo",
                         cases: [
                             {
                                 whatYouSay: "{{redi|redi}}",
                                 whatTheyHear: "{{ready|pronto}}",
                                 whyItHurts:
-                                    "Você acha que falou cor. O nativo entende estado. Isso muda decisões em call."
+                                    "Voce acha que falou cor. A outra pessoa entende estado. Em conversa real, isso muda tudo."
                             },
                             {
                                 whatYouSay: "{{stopy|stopy}}",
                                 whatTheyHear: "{{stop|parar}}",
                                 whyItHurts:
-                                    "Parece infantil, incerto, inseguro — e ainda atrapalha a percepção do comando."
+                                    "Soa menos firme e ainda embaralha o som que deveria ser curto."
                             },
                             {
                                 whatYouSay: "{{cabi|cabi}}",
                                 whatTheyHear: "{{cab|táxi/cabine}}",
                                 whyItHurts:
-                                    "Você acha que está falando boné. Pode soar como táxi."
+                                    "Voce acha que esta falando uma coisa e o ouvido do outro pode puxar para outra."
                             }
                         ],
                         note:
-                            "Não é ‘sotaque’. É ambiguidade de sinal."
+                            "Nem sempre isso e sotaque. Muitas vezes e so som mal fechado."
                     })
                 },
-                { type: "h3", content: "1.3 {{Anchor Lock|Bloqueio de Âncora}}: criando âncoras sonoras (sem tradução)" },
+                { type: "h3", content: "2.3 {{Sound Anchors|Ancoras de som}}: criar contraste sem decorar regra" },
                 {
                     type: "paragraph",
                     content:
-                        "Seu cérebro aprende melhor com âncora do que com regra. \n\nUma âncora sonora é um **contraste brutal** que você nunca mais esquece. \n\nVocê vai escolher 2 âncoras pessoais agora."
+                        "Seu cerebro lembra melhor de contraste do que de explicacao tecnica. Por isso, em vez de decorar regra, voce vai criar duas ancoras sonoras que facam sentido para voce."
                 },
                 {
                     type: "anchor-builder",
                     content: JSON.stringify({
-                        title: "{{Anchor Builder|Construtor de Âncoras}} — escolha suas 2 âncoras",
+                        title: "{{Anchor Builder|Construtor de Ancoras}} — escolha suas 2 ancoras",
                         instruction:
-                            "Escolha 2 pares que mais te confundiram e crie uma âncora com sensação, não com tradução.",
+                            "Escolha 2 pares que mais te confundiram e crie uma ancora com sensacao, nao com regra.",
                         example:
                             "{{ship vs sheep|ship vs sheep}} → {{ship|navio}} = curto (corte), {{sheep|ovelha}} = longo (esticado).",
                         fields: [
@@ -209,33 +204,33 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "checksum",
                     content: JSON.stringify({
-                        title: "{{Checksum|Soma de Verificação}} — validação rápida",
+                        title: "{{Quick Wrap-Up|Fechamento Rapido}} — checagem final",
                         rule:
-                            "Se você consegue responder isso sem pensar, seu sinal começou a limpar.",
+                            "Se voce ja consegue responder isso com mais clareza, seu ouvido comecou a ajustar.",
                         questions: [
                             {
-                                q: "Qual é o objetivo real desta Parte 1?",
+                                q: "Qual e o objetivo real deste modulo?",
                                 options: [
-                                    "Aprender muitas palavras novas",
-                                    "Separar sons que meu cérebro colapsa",
-                                    "Estudar regras de gramática"
+                                    "Aprender varias palavras novas",
+                                    "Separar sons que meu ouvido ainda mistura",
+                                    "Estudar regras de gramatica"
                                 ],
                                 answer: 1
                             },
                             {
-                                q: "O que é o {{Noise Gate|Portão de Ruído}} aqui?",
+                                q: "O que significa treinar o {{Dry Ending|final seco}} aqui?",
                                 options: [
                                     "Falar mais alto para ser entendido",
-                                    "Cortar no final seco sem vogal extra",
-                                    "Falar devagar para soar correto"
+                                    "Parar a palavra no ponto certo, sem vogal extra",
+                                    "Falar mais devagar para soar correto"
                                 ],
                                 answer: 1
                             },
                             {
-                                q: "Qual é o inimigo nº1 do listening no início?",
+                                q: "Qual e o inimigo mais comum da escuta no comeco?",
                                 options: [
-                                    "Vocabulário pequeno",
-                                    "Ambiguidade sonora + demora de processamento",
+                                    "Vocabulario pequeno",
+                                    "Som embaralhado + demora para reagir",
                                     "Falta de legenda"
                                 ],
                                 answer: 1
@@ -246,7 +241,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "tower-stamp",
                     content:
-                        "TOWER STAMP — {{PART 1 COMPLETE|PARTE 1 CONCLUÍDA}}\nVocê não ‘aprendeu inglês’. Você instalou controle de sinal.\n\nPróxima etapa: você vai sincronizar frequência e perceber que o “rápido” era só conexão + redução.\n\nCâmbio."
+                        "ETAPA CONCLUIDA — {{SOUND SEPARATION|SEPARACAO DOS SONS}}\nVoce ainda nao precisa entender tudo. O importante aqui era comecar a ouvir diferenca onde antes parecia tudo igual.\n\nNa proxima etapa, voce vai perceber por que o ingles parece rapido quando, na verdade, o som e que vem conectado."
                 }
             ]
         },
