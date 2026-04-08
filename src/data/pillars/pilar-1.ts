@@ -105,8 +105,8 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "box-goal",
-                    title: "Objetivo Tático",
-                    content: "Analisar o estudo de caso real da 'Ponte Húngara'. Vamos decompor como a necessidade extrema de conexão e a falha do ensino tradicional brasileiro forçaram o cérebro a abandonar a gramática de livro em favor da sobrevivência funcional."
+                    title: "Objetivo deste módulo",
+                    content: "Olhar para o caso real da 'Ponte Húngara' e entender por que a necessidade real mudou o jeito de aprender. A ideia aqui é simples: mostrar por que regra sozinha não sustenta conversa e por que uso real acelera muito mais."
                 },
                 {
                     type: "h2",
@@ -147,13 +147,13 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "box-warning",
-                    title: "⚠️ A Dor Mais Profunda",
+                    title: "⚠️ O ponto que mudou tudo",
                     content: "Foi ali que eu senti uma dor que muita gente adulta conhece, mas quase nunca sabe nomear: a sensação de perder a própria presença. Em português, eu sabia quem eu era. Em inglês, eu parecia menor do que realmente era. Eu não conseguia explicar o que sentia, nem sustentar uma conversa do jeito que eu sustentaria na minha língua. Foi isso que me fez mudar o método."
                 },
                 {
                     type: "comparison-table",
                     content: JSON.stringify({
-                        "headers": ["Situação", "Inglês de Livro (Engessado)", "Inglês de Combate (Real)", "Análise de Eficiência"],
+                        "headers": ["Situação", "Inglês de Livro (Engessado)", "Inglês Real", "Análise de Eficiência"],
                         "rows": [
                             ["Expressar Sentimento", "{{I am very happy to be here.|Estou muito feliz de estar aqui.}}", "{{I'm so glad I made it.|Estou feliz demais de ter conseguido chegar.}}", "{{Glad|Contente}} é mais orgânico; {{Made it|Consegui chegar}} foca no esforço."],
                             ["Dificuldade de Entendimento", "{{Could you repeat that slowly?|Poderia repetir devagar?}}", "{{Wait, I'm lost. Come again?|Espera, me perdi. Fala de novo?}}", "Metáforas de movimento ({{lost|perdido}}) são muito mais comuns."],
@@ -173,7 +173,7 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "baby-learning",
                     content: JSON.stringify({
-                        "title": "As 4 Fases de Aquisição Tática",
+                        "title": "As 4 Fases dessa Virada",
                         "phases": [
                             {
                                 "name": "Observação",
@@ -208,7 +208,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "h2",
-                    content: "⚔️ Cenário de Combate: A 'DR' sem Google Tradutor"
+                    content: "Cenário real: a 'DR' sem Google Tradutor"
                 },
                 {
                     type: "scenario-card",
@@ -232,16 +232,16 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "h2",
-                    content: "🎙️ Tom e Voz: A Mentalidade de Elite"
+                    content: "🎙️ Tom e Voz: O ponto da virada"
                 },
                 {
                     type: "paragraph",
-                    content: "**Pare de se desculpar o tempo todo.** O vício brasileiro de dizer \"{{Sorry for my bad English|Desculpe pelo meu inglês ruim}}\" enfraquece sua presença antes mesmo da conversa andar. Na \"Ponte Húngara\", eu entendi que, se eu começasse me diminuindo, eu perdia a conversa antes de ela começar. O inglês é o meio, não o palco. Se o sinal vier com ruído, você ajusta e continua."
+                    content: "**Pare de se desculpar o tempo todo.** O vício brasileiro de dizer \"{{Sorry for my bad English|Desculpe pelo meu inglês ruim}}\" enfraquece sua presença antes mesmo da conversa andar. Na \"Ponte Húngara\", eu entendi uma coisa simples: se eu começasse me diminuindo, eu perdia a conversa antes de ela começar. O inglês é o meio, não o palco. Se o sinal vier com ruído, você ajusta e continua."
                 },
                 {
                     type: "elite-insight",
                     title: "💡 INSIGHT DE ELITE",
-                    content: "Eu não criei a BasedSpeak porque sou um gênio das línguas. Eu criei porque vivi na pele o que acontece quando um adulto sabe mais do que consegue mostrar. O método nasceu para encurtar esse caminho e transformar estudo em uso real mais cedo."
+                    content: "Eu não criei a BasedSpeak porque sou um gênio das línguas. Eu criei porque vivi na pele o que acontece quando um adulto sabe mais do que consegue mostrar. O método nasceu para encurtar esse caminho e transformar estudo em uso real mais cedo. E é por isso que ele funciona: menos teoria solta, mais reação, repetição e contexto vivo."
                 },
                 {
                     type: "box-warning",
