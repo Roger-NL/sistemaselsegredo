@@ -824,34 +824,34 @@ export const PILAR_2_DATA: PillarData = {
         },
         {
             id: "p2-m5",
-            title: "MÓDULO 5: {{FULL SPECTRUM OPERATIONS|OPERAÇÕES EM ESPECTRO TOTAL}}",
-            subtitle: "Operando sob pressão. Quando o inglês vem sujo, imperfeito e sem aviso.",
+            title: "MÓDULO 5: {{MESSY ENGLISH, REAL LIFE|INGLES BAGUNCADO, VIDA REAL}}",
+            subtitle: "Quando o audio vem com sotaque, emocao, frase quebrada e voce mesmo assim precisa entender o suficiente.",
             status: "locked",
             blocks: [
                 {
                     type: "spectrum-init",
                     content:
-                        "{{FULL SPECTRUM MODE|MODO ESPECTRO TOTAL}} — ENABLED\n• {{Signal Quality|Qualidade do Sinal}}: UNSTABLE\n• {{Noise Level|Nível de Ruído}}: VARIABLE\n• {{Accent Drift|Deriva de Sotaque}}: ACTIVE\n• {{Expectation|Expectativa}}: ZERO\n\nNota da Torre: se você só entende inglês limpo, você não entende inglês.\nEste módulo não tem condições ideais. Isso é intencional."
+                        "{{REAL WORLD MODE|MODO MUNDO REAL}} — {{ACTIVE|ATIVO}}\n• {{Signal Quality|Qualidade do Audio}}: VARIABLE\n• {{Noise Level|Ruido}}: REAL\n• {{Accent Variation|Variacao de Sotaque}}: PRESENTE\n• {{Perfect Conditions|Condicoes Perfeitas}}: ZERO\n\nNota: se voce so entende ingles limpinho, pausado e bem certinho, seu ouvido ainda esta treinado para aula e nao para vida real."
                 },
 
                 {
                     type: "h2",
-                    content: "O inglês do mundo real não coopera com você."
+                    content: "O ingles da vida real nao coopera com voce."
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Até agora, você treinou com intenção clara.\n\nNeste módulo, isso acaba.\n\nAqui o áudio vem:\n• cortado\n• apressado\n• emocional\n• com {{accent|sotaque}}\n• com erros\n\nE mesmo assim, **você precisa entender o suficiente para agir**.\n\nEsta é a diferença entre operador e estudante."
+                        "Ate aqui, voce treinou por partes. Agora entra a etapa em que tudo mistura.\n\nAqui o audio pode vir:\n• cortado\n• acelerado\n• emocional\n• com {{accent|sotaque}}\n• com erro de quem esta falando\n\nE mesmo assim, voce ainda precisa entender o suficiente para agir. Esse e o treino que mais parece com conversa real."
                 },
 
                 {
                     type: "h3",
-                    content: "5.1 {{Accent Drift|Deriva de Sotaque}}: quando o inglês muda de forma"
+                    content: "5.1 {{Accent Drift|Sotaque muda o som, nao a missao}}"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Não existe um inglês único.\n\nO som muda conforme quem fala — e você vai ouvir todos os tipos no campo real.\n\nNeste ponto, muitos alunos quebram porque tentam comparar tudo com o inglês 'ideal' da cabeça deles.\n\nVocê vai aprender a aceitar variação sem travar. A missão não muda porque o sotaque mudou."
+                        "Nao existe um ingles unico. O som muda de pessoa para pessoa, de lugar para lugar e de contexto para contexto.\n\nMuita gente trava porque compara tudo com um ingles idealizado da propria cabeca. O problema e que, fora da aula, a fala real nao pede permissao para vir bonita.\n\nAqui voce vai treinar a aceitar variacao sem sair do eixo."
                 },
 
                 {
@@ -859,7 +859,7 @@ export const PILAR_2_DATA: PillarData = {
                     content: JSON.stringify({
                         title: "{{Accent Drift Map|Mapa de Deriva de Sotaque}} — o que muda de verdade",
                         instruction:
-                            "Observe os padrões. Não memorize sotaques. Identifique tendências e extraia missão apesar delas.",
+                            "Observe os padroes. Nao e para decorar sotaque. E para notar tendencias e continuar entendendo a ideia principal.",
                         accents: [
                             {
                                 profile: "{{Fast / Reduced|Rápido / Reduzido}}",
@@ -869,7 +869,7 @@ export const PILAR_2_DATA: PillarData = {
                                     "{{aggressive rhythm|ritmo agressivo}}"
                                 ],
                                 risk:
-                                    "Parece pressa ou raiva — mas pode ser apenas estilo."
+                                    "Pode soar como pressa ou raiva sem necessariamente ser isso."
                             },
                             {
                                 profile: "{{Flat / Low Intonation|Plano / Entonação Baixa}}",
@@ -879,7 +879,7 @@ export const PILAR_2_DATA: PillarData = {
                                     "{{constant rhythm|ritmo constante}}"
                                 ],
                                 risk:
-                                    "Soa desinteressado — mas pode ser totalmente neutro."
+                                    "Pode soar frio ou distante, mesmo sendo neutro."
                             },
                             {
                                 profile: "{{Heavy Stress Shifts|Mudanças de Ênfase Intensas}}",
@@ -889,22 +889,22 @@ export const PILAR_2_DATA: PillarData = {
                                     "pausas onde não se espera"
                                 ],
                                 risk:
-                                    "O aluno perde o foco tentando entender o 'jeito' e perde o conteúdo."
+                                    "Quem tenta entender o jeito antes do conteudo geralmente se perde."
                             }
                         ],
                         rule:
-                            "Não lute contra o sotaque. Extraia a missão apesar dele."
+                            "Nao lute contra o sotaque. Escute atraves dele."
                     })
                 },
 
                 {
                     type: "h3",
-                    content: "5.2 {{Imperfect English|Inglês Imperfeito}}: quando o erro vem do outro lado"
+                    content: "5.2 {{Imperfect English|Quando o ingles ruim vem do outro lado}}"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Nem todo mundo fala inglês bem. E isso vai acontecer — com clientes, parceiros, colegas.\n\nVocê vai ouvir:\n• gramática quebrada\n• frases incompletas\n• ordem estranha de palavras\n\nIsso é libertador: **se o outro erra e ainda é entendido, você também pode**.\n\nMas primeiro, você precisa entender o inglês imperfeito deles."
+                        "Nem todo mundo fala ingles bem. E isso vai acontecer com cliente, colega, parceiro, motorista, atendente, qualquer pessoa.\n\nVoce vai ouvir:\n• gramatica quebrada\n• frase pela metade\n• ordem estranha de palavras\n\nIsso pode parecer ruim no comeco, mas tem um lado bom: mostra que comunicacao real nao depende de perfeicao. Primeiro, porem, voce precisa conseguir entender o ingles imperfeito deles."
                 },
 
                 {
@@ -912,7 +912,7 @@ export const PILAR_2_DATA: PillarData = {
                     content: JSON.stringify({
                         title: "{{Imperfect Input|Entrada Imperfeita}} — compreensão sem correção",
                         instruction:
-                            "Ignore a forma. Capture a função. O que importa não é o que está gramaticalmente correto — é o que está sendo comunicado.",
+                            "Ignore a forma. Capture a funcao. O que importa aqui nao e a frase bonita. E o que a pessoa esta tentando comunicar.",
                         samples: [
                             {
                                 input: "Yesterday he no come meeting.",
@@ -924,7 +924,7 @@ export const PILAR_2_DATA: PillarData = {
                                 ],
                                 answer: 1,
                                 insight:
-                                    "A forma está errada. A mensagem está clara. 'No come' = 'didn't come'."
+                                    "A forma esta errada. A mensagem continua clara."
                             },
                             {
                                 input: "We try fix tomorrow maybe.",
@@ -936,7 +936,7 @@ export const PILAR_2_DATA: PillarData = {
                                 ],
                                 answer: 1,
                                 insight:
-                                    "'{{Try|Tentar}}' + '{{maybe|talvez}}' = baixa certeza. Não é compromisso."
+                                    "'{{Try|Tentar}}' + '{{maybe|talvez}}' = baixa certeza. Nao e promessa."
                             },
                             {
                                 input: "I not understand why decision this.",
@@ -948,22 +948,22 @@ export const PILAR_2_DATA: PillarData = {
                                 ],
                                 answer: 1,
                                 insight:
-                                    "Mesmo com estrutura quebrada, '{{not understand|não entender}}' + '{{decision|decisão}}' = questionamento claro."
+                                    "Mesmo com a estrutura torta, a intencao aparece."
                             }
                         ],
                         rule:
-                            "Campo real não dá nota de gramática. Ele cobra entendimento."
+                            "Conversa real nao da nota de gramatica. Ela cobra entendimento."
                     })
                 },
 
                 {
                     type: "h3",
-                    content: "5.3 {{Emotional Overlay|Sobreposição Emocional}}: quando emoção distorce o áudio"
+                    content: "5.3 {{Emotional Overlay|Quando a emocao muda o jeito da fala}}"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Emoção muda tudo — velocidade, volume, clareza e escolha de palavras.\n\nO erro mais comum: reagir à emoção em vez de responder à missão.\n\nAqui você vai aprender a separar **{{emotion|emoção}}** de **{{content|conteúdo}}** para nunca reagir errado sob pressão."
+                        "Emocao muda a fala inteira: velocidade, volume, clareza e ate escolha de palavra.\n\nO erro mais comum e responder ao calor da emocao em vez de responder ao que a pessoa realmente quer.\n\nAqui voce vai aprender a separar **{{emotion|emocao}}** de **{{content|conteudo}}**."
                 },
 
                 {
@@ -1011,18 +1011,18 @@ export const PILAR_2_DATA: PillarData = {
                             }
                         ],
                         rule:
-                            "Responder à emoção gera conflito. Responder à missão gera controle."
+                            "Responder so ao tom costuma piorar a conversa. Responder ao ponto principal costuma melhorar."
                     })
                 },
 
                 {
                     type: "h3",
-                    content: "5.4 {{Partial Loss|Perda Parcial}}: quando você perde 30–40% do áudio"
+                    content: "5.4 {{Partial Loss|Quando voce perde parte do audio}}"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Você não vai entender tudo. Nunca. Nem mesmo em português.\n\nIsso não é falha de inglês. É realidade de comunicação real.\n\nFalha é não saber o que fazer quando isso acontece.\n\nOperador não espera áudio perfeito — ele executa com o que tem."
+                        "Voce nao vai entender tudo. Nem em ingles, nem em portugues. Isso e normal.\n\nO problema nao e perder parte do audio. O problema e nao saber o que fazer quando isso acontece.\n\nAqui o treino e exatamente esse: seguir em frente com o que voce conseguiu captar."
                 },
 
                 {
@@ -1067,18 +1067,18 @@ export const PILAR_2_DATA: PillarData = {
                             }
                         ],
                         rule:
-                            "Não espere clareza total para agir. Campo não funciona assim."
+                            "Nao espere clareza total para agir. Conversa real quase nunca funciona assim."
                     })
                 },
 
                 {
                     type: "h3",
-                    content: "5.5 {{Self-Regulation|Autorregulação}}: manter o sistema estável"
+                    content: "5.5 {{Self-Regulation|Ficar estavel por dentro}}"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "O maior inimigo neste módulo não é o áudio difícil.\n\nÉ a reação interna.\n\nPânico fecha o ouvido. Desculpa fragiliza posição. Silêncio excessivo sinaliza colapso.\n\nAqui você instala um protocolo de estabilidade que funciona em tempo real — mesmo quando você sente que perdeu o controle."
+                        "O maior inimigo aqui nao e o audio dificil. E a reacao interna.\n\nQuando bate panico, o ouvido fecha. Quando voce se encolhe, a resposta sai pior. Quando trava demais, a conversa te atropela.\n\nPor isso voce vai treinar uma sequencia simples para voltar ao eixo."
                 },
 
                 {
@@ -1089,44 +1089,55 @@ export const PILAR_2_DATA: PillarData = {
                             {
                                 number: 1,
                                 action: "{{Breathing|Respiração}} curta e silenciosa — 2 ciclos",
-                                why: "Reduz ativação do {{panic response|resposta de pânico}} antes de qualquer palavra."
+                                why: "Baixa a aceleracao interna antes da resposta."
                             },
                             {
                                 number: 2,
                                 action: "{{Confirm what was understood|Confirmar o que foi entendido}}",
-                                why: "Demonstra que você está no controle — mesmo sem entender tudo."
+                                why: "Mostra que voce continua dentro da conversa, mesmo sem ter pego tudo."
                             },
                             {
                                 number: 3,
                                 action: "{{One directed question|Uma pergunta direcionada — apenas uma}}",
-                                why: "Pedir tudo de novo ao mesmo tempo soa como colapso. Uma pergunta soa como precisão."
+                                why: "Uma pergunta bem colocada ajuda mais do que pedir tudo de novo de uma vez."
                             },
                             {
                                 number: 4,
                                 action: "{{Simple action or calibration request|Ação simples ou pedido de ajuste}}",
-                                why: "Encerra o ciclo com movimento — não com desculpa."
+                                why: "Fecha a resposta com movimento, e nao com desculpa."
                             }
                         ],
                         warning:
-                            "Pedir desculpa não regula sistema. Estrutura regula.\n'Sorry, my English is bad' não é humildade — é desarmamento."
+                            "Pedir desculpa nao organiza sua escuta. Estrutura organiza.\n'Sorry, my English is bad' quase sempre te deixa menor do que a situacao pede."
                     })
+                },
+                {
+                    type: "combat-sort-game",
+                    content: JSON.stringify([
+                        { "text": "{{I did not completely understand your speech.|Eu nao compreendi completamente a sua fala.}}", "type": "lab" },
+                        { "text": "{{I got the main part. Can you say that last bit again?|Peguei a parte principal. Pode repetir o finalzinho?}}", "type": "combat" },
+                        { "text": "{{Please repeat everything from the beginning very slowly.|Por favor, repita tudo desde o comeco bem devagar.}}", "type": "lab" },
+                        { "text": "{{So the issue is the budget, right?|Entao a questao aqui e o orcamento, certo?}}", "type": "combat" },
+                        { "text": "{{I am sorry, my listening is insufficient.|Desculpe, minha escuta e insuficiente.}}", "type": "lab" },
+                        { "text": "{{Wait, I missed one part. What's the main blocker?|Pera, perdi uma parte. Qual e o principal travamento?}}", "type": "combat" }
+                    ])
                 },
 
                 {
                     type: "h3",
-                    content: "5.6 {{Readiness Check|Verificação de Prontidão}}: você está pronto para o voo real?"
+                    content: "5.6 {{Readiness Check|Checagem final}}: onde sua escuta esta agora"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Este é o último {{checkpoint|ponto de verificação}} técnico antes da validação humana.\n\nResponda com honestidade absoluta — não com o que você quer que seja verdade."
+                        "Este e o ultimo ponto tecnico antes da avaliacao do tutor.\n\nResponda com honestidade. Nao com o que voce queria que ja estivesse perfeito."
                 },
 
                 {
                     type: "readiness-check",
                     content: JSON.stringify({
                         title: "{{Readiness Check|Verificação de Prontidão}} — diagnóstico final",
-                        description: "Marque apenas o que é verdadeiro agora, não o que você quer que seja.",
+                        description: "Marque apenas o que e verdadeiro agora, nao o que voce queria que ja fosse.",
                         questions: [
                             {
                                 text: "Consigo entender {{intention|intenção}} mesmo perdendo palavras?",
@@ -1146,43 +1157,43 @@ export const PILAR_2_DATA: PillarData = {
                             }
                         ],
                         interpretation:
-                            "4 marcados: sistema funcional. Você está pronto para o {{Check-Ride|Voo de Verificação}}.\n3 marcados: bom — a aula ao vivo vai ajustar o gap.\n2 ou menos: o {{Check-Ride|Voo de Verificação}} vai revelar exatamente onde ajustar."
+                            "4 marcados: sua base auditiva esta bem firme.\n3 marcados: voce ja avancou bastante e a avaliacao vai mostrar o ajuste fino.\n2 ou menos: a avaliacao vai te mostrar com clareza onde apertar mais."
                     })
                 },
 
                 {
                     type: "transition-brief",
                     content:
-                        "{{TRANSITION BRIEF|BRIEFING DE TRANSIÇÃO}} — PREPARAÇÃO PARA VALIDAÇÃO\n\nVocê treinou em espectro total.\nAgora vem o voo acompanhado.\n\nNo próximo módulo, um profissional vai:\n• testar seu {{listening|escuta}} em tempo real\n• observar suas reações sob pressão\n• confirmar se seu controle é real — não ensaiado\n\nIsso não é prova de inglês.\nÉ prova de {{readiness|prontidão}}."
+                        "{{TRANSITION BRIEF|PASSAGEM PARA A AVALIACAO}}\n\nVoce treinou com audio limpo, com som conectado, com intencao e com fala baguncada.\n\nNo proximo modulo, voce fecha essa etapa e envia sua avaliacao.\nDepois disso, a equipe vai olhar sua resposta para confirmar se essa base auditiva esta pronta para sustentar o Pilar 3."
                 },
 
                 {
                     type: "completion-seal",
                     content:
-                        "{{FULL SPECTRUM|ESPECTRO TOTAL}} — {{COMPLETE|CONCLUÍDO}}\n\nVocê não entende tudo.\nMas você entende o suficiente.\n\nIsso é {{functional fluency|fluência funcional}}.\nA Torre aguarda seu {{Check-Ride|Voo de Verificação}}."
+                        "{{MESSY ENGLISH, REAL LIFE|INGLES BAGUNCADO, VIDA REAL}} — {{COMPLETE|CONCLUIDO}}\n\nVoce nao precisa entender tudo para agir bem.\nPrecisa entender o suficiente para manter a conversa viva, fazer perguntas certas e nao desabar quando o audio vem imperfeito.\n\nEssa e a base real que este modulo queria construir."
                 }
             ]
         },
         {
             id: "p2-m6",
-            title: "MÓDULO 6: {{CLEARANCE|LIBERAÇÃO}}",
-            subtitle: "Você chegou. Respire fundo. O difícil ficou para trás.",
+            title: "MÓDULO 6: {{CLOSING THIS STAGE|FECHANDO ESTA ETAPA}}",
+            subtitle: "Fechando o Pilar 2 com clareza, calma e preparo para a avaliacao.",
             status: "locked",
             blocks: [
                 {
                     type: "soft-status",
                     content:
-                        "{{SYSTEM STATUS|STATUS DO SISTEMA}}\n• {{Technical Phase|Fase Técnica}}: COMPLETED\n• {{Cognitive Load|Carga Cognitiva}}: REDUCED\n• {{Next Step|Próximo Passo}}: {{HUMAN VALIDATION|VALIDAÇÃO HUMANA}}\n\nNota da Torre: respire. Você fez a parte difícil."
+                        "{{STATUS DA ETAPA|STATUS DA ETAPA}}\n• {{Listening Base|Base de escuta}}: {{BUILT|CONSTRUIDA}}\n• {{Cognitive Load|Carga mental}}: {{LIGHTER|MAIS LEVE}}\n• {{Next Step|Proximo passo}}: {{TUTOR REVIEW|ANALISE DO TUTOR}}\n\nRespira. A parte mais densa ficou para tras."
                 },
 
                 {
                     type: "h2",
-                    content: "Pare um segundo. Você merece isso."
+                    content: "Para um segundo. Voce merece fechar isso com calma."
                 },
                 {
                     type: "paragraph",
                     content:
-                        "Antes de qualquer próxima etapa, faça algo simples:\n\nPare.\n\nVocê acabou de atravessar a fase mais densa de todo o método.\n\nNenhum dos módulos anteriores foi fácil. E nenhum foi por acaso.\nCada exercício existia por um motivo. Cada desconforto tinha uma função."
+                        "Antes de pensar no proximo pilar, vale reconhecer o que aconteceu aqui.\n\nO Pilar 2 foi a parte mais pesada da escuta. E isso nao foi por acaso. Cada modulo apertou um ponto que costuma travar o brasileiro quando o ingles sai da tela e entra no audio."
                 },
 
                 {
@@ -1192,7 +1203,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "paragraph",
                     content:
-                        "Você pode não sentir isso claramente ainda — e tudo bem.\n\nAlgumas mudanças são silenciosas no começo.\n\nMas algumas coisas já não são mais as mesmas — e isso é o que importa."
+                        "Talvez voce ainda nao sinta tudo isso com nitidez. E tudo bem.\n\nEscuta melhora primeiro por dentro. Muitas vezes a pessoa so percebe o quanto avancou quando volta para uma situacao que antes derrubava."
                 },
 
                 {
@@ -1201,8 +1212,8 @@ export const PILAR_2_DATA: PillarData = {
                         "Você aprendeu a ouvir sem traduzir palavra por palavra",
                         "Você aprendeu a aceitar imperfeição como parte do processo",
                         "Você aprendeu a responder mesmo sem certeza total",
-                        "Você aprendeu a manter controle quando o inglês vem difícil",
-                        "Você treinou algo que a maioria nunca treina: {{composure|compostura}} sob pressão real"
+                        "Você aprendeu a se manter mais inteiro quando o inglês vem difícil",
+                        "Você treinou algo que a maioria nunca treina: {{composure|calma}} sob pressão real"
                     ]
                 },
 
@@ -1213,30 +1224,30 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "paragraph",
                     content:
-                        "Daqui para frente, o sistema muda de forma.\n\nVocê não vai avançar sozinho.\n\nUm profissional vai ouvir você, observar como você reage — e confirmar se o que foi construído aqui já é real.\n\nNão é avaliação de inglês.\nÉ {{calibration|calibração}}."
+                        "Daqui para frente, o processo muda.\n\nDepois da sua prova, a equipe vai avaliar o que voce enviou para confirmar se essa base auditiva realmente firmou.\n\nSe estiver tudo certo, o proximo pilar e liberado. Se ainda precisar de ajuste, voce recebe o direcionamento para refazer com mais clareza."
                 },
 
                 {
                     type: "paragraph",
                     content:
-                        "Não tem certo ou errado.\nNão tem nota.\nNão tem armadilha.\n\nTem apenas presença — a sua."
+                        "Nao e para te pegar. Nao e para te humilhar. Nao e para te provar que voce nao sabe.\n\nE so uma checagem seria para garantir que o proximo passo esta vindo na hora certa."
                 },
 
                 {
                     type: "h3",
-                    content: "Sobre o agendamento"
+                    content: "Sobre a sua avaliacao"
                 },
                 {
                     type: "paragraph",
                     content:
-                        "No próximo passo, você verá um calendário com horários disponíveis.\n\nEscolha um e pronto.\n\nOs horários são limitados intencionalmente — para garantir atenção real ao seu caso e respeito pelo seu tempo."
+                        "No proximo passo, voce vai responder a avaliacao final deste pilar.\n\nDepois de enviada, ela fica em analise. E a partir do Pilar 2 essa aprovacao passa a ser obrigatoria para liberar o proximo nivel."
                 },
 
                 {
                     type: "soft-warning",
-                    title: "Uma coisa importante antes de marcar",
+                    title: "Uma coisa importante antes de enviar",
                     content:
-                        "Você não precisa estudar mais nada agora.\n\nNão revise.\nNão decore.\nNão tente parecer melhor do que você é.\n\nVenha exatamente como está — porque é assim que a validação funciona de verdade."
+                        "Voce nao precisa tentar parecer melhor do que esta agora.\n\nNao decore. Nao force frase bonita. Nao tente adivinhar o que a equipe quer ler.\n\nA ideia e mostrar seu ponto real. E isso ajuda muito mais na sua evolucao."
                 },
 
                 {
@@ -1246,20 +1257,20 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "paragraph",
                     content:
-                        "Normal. Completamente normal.\n\nO ouvido demora mais para 'assentar' do que a mente.\n\nMuitas conexões acontecem depois que você para de forçar.\n\nConfie no processo — e confie no que você já construiu."
+                        "Normal. Completamente normal.\n\nO ouvido demora um pouco para assentar. Algumas conexoes aparecem enquanto voce pratica, e outras so ficam nitidas depois.\n\nConfia no processo e no que voce ja construiu ate aqui."
                 },
 
                 {
                     type: "final-note",
                     content:
-                        "Você não terminou o Pilar 2 tentando entender inglês.\n\nVocê terminou aprendendo a lidar com ele.\n\nIsso muda tudo."
+                        "Voce nao terminou o Pilar 2 tentando ouvir ingles como aluno de escola.\n\nVoce terminou aprendendo a lidar com ingles falado de verdade.\n\nIsso muda bastante coisa daqui para frente."
                 },
 
                 {
                     type: "pilar2-end",
-                    title: "PILAR 2 — {{COMPLETE|CONCLUÍDO}}",
+                    title: "PILAR 2 — {{COMPLETE|CONCLUIDO}}",
                     content:
-                        "A fase técnica foi encerrada.\n\nAgora é humano com humano.\n\nA Torre aguarda seu agendamento."
+                        "A parte mais tecnica da sua escuta foi fechada.\n\nAgora vem a avaliacao desta etapa.\n\nDepois do envio, a equipe analisa e libera o Pilar 3 quando essa base estiver pronta."
                 }
             ]
         }
