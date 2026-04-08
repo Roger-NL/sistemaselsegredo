@@ -118,7 +118,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "O sistema tradicional é desenhado para criar **Linguistas de Auditório**, não **Operadores de Campo**. Eles te ensinam a anatomia da arma, mas nunca te levam para o estande de tiro."
+                    content: "O sistema tradicional é desenhado para criar gente que sabe explicar inglês, não usar inglês sob pressão. Eles te ensinam a teoria, mas quase nunca te colocam para reagir de verdade."
                 },
                 {
                     type: "memory-diagram",
@@ -127,14 +127,14 @@ export const PILAR_1_DATA: PillarData = {
                         "declarative": {
                             "title": "Memória Declarativa",
                             "icon": "📚",
-                            "description": "É o foco das escolas tradicionais. Armazena fatos e regras (ex: 'A estrutura do {{Present Perfect|Presente Perfeito}} é {{have|ter}} + particípio'). É um processo lento, consciente e exige que o Córtex Pré-Frontal 'calcule' a frase antes de falar. Sob estresse, esse cálculo trava."
+                            "description": "É o foco das escolas tradicionais. Armazena fatos e regras (ex: 'A estrutura do {{Present Perfect|Presente Perfeito}} é {{have|ter}} + particípio'). Funciona para prova e explicação, mas é lenta demais quando você precisa responder na hora."
                         },
                         "procedural": {
                             "title": "Memória Procedural",
                             "icon": "🎯",
-                            "description": "É a memória de habilidades motoras (como dirigir ou lutar). Ela reside nos Gânglios da Base. É automática, rápida e não requer pensamento consciente. É a base da fluência real."
+                            "description": "É a memória de habilidade e reflexo. É ela que entra quando você dirige, reage ou fala sem precisar montar tudo na cabeça antes. É a base da fluência real."
                         },
-                        "diagnosis": "No Brasil, o Roger tinha muita informação declarativa, mas zero treino procedural. Quando a pressão subiu, o cérebro dele tentou calcular a regra, gerou um erro de processamento e ele travou. O aprendizado real só acontece quando a língua migra da regra (declarativa) para o reflexo (procedural)."
+                        "diagnosis": "No Brasil, o Roger tinha muita informação declarativa, mas quase nenhum treino procedural. Quando a pressão subiu, o cérebro tentou calcular a regra em vez de reagir. E travou. Em outras palavras: regra sozinha não vira reflexo."
                     })
                 },
                 {
@@ -143,12 +143,12 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "A minha história mudou por causa de uma necessidade visceral. Em Portugal, conheci minha primeira namorada, uma húngara. Ela não falava português. Eu não falava húngaro. O inglês era nossa **única ponte possível**."
+                    content: "A minha história mudou quando o inglês deixou de ser matéria e virou necessidade real. Em Portugal, conheci minha primeira namorada, uma húngara. Ela não falava português. Eu não falava húngaro. O inglês era a única forma de a gente se encontrar no meio."
                 },
                 {
                     type: "box-warning",
                     title: "⚠️ A Dor Mais Profunda",
-                    content: "Foi ali que senti a dor mais profunda do adulto que não fala inglês: a perda da identidade. Em português, eu sou inteligente, articulado e engraçado. Em inglês, eu me sentia uma criança de 5 anos em um corpo de adulto, incapaz de expressar por que estava chateado ou o que eu realmente sentia. Essa humilhação foi o que me fez resetar o método."
+                    content: "Foi ali que eu senti uma dor que muita gente adulta conhece, mas quase nunca sabe nomear: a sensação de perder a própria presença. Em português, eu sabia quem eu era. Em inglês, eu parecia menor do que realmente era. Eu não conseguia explicar o que sentia, nem sustentar uma conversa do jeito que eu sustentaria na minha língua. Foi isso que me fez mudar o método."
                 },
                 {
                     type: "comparison-table",
@@ -168,7 +168,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Sob a pressão do relacionamento, meu cérebro parou de tentar 'estudar' e começou a **adquirir** o idioma através de quatro fases táticas:"
+                    content: "Sob essa necessidade real, meu cérebro parou de tentar 'estudar' e começou a adquirir o idioma de outro jeito. O processo, na prática, passou por quatro fases simples:"
                 },
                 {
                     type: "baby-learning",
@@ -178,22 +178,22 @@ export const PILAR_1_DATA: PillarData = {
                             {
                                 "name": "Observação",
                                 "icon": "👁️",
-                                "description": "Reconhecimento de Padrão: Eu não focava nas palavras, mas nas reações dela. Se eu falava de um jeito e ela sorria, o padrão era validado. O feedback emocional é mais poderoso que qualquer correção gramatical."
+                                "description": "Eu não focava só nas palavras, mas nas reações. Se eu falava de um jeito e ela entendia, aquilo ganhava força. O cérebro aprende mais rápido quando sente resultado."
                             },
                             {
                                 "name": "Associação",
                                 "icon": "🔗",
-                                "description": "Âncora Química: Eu não traduzia a palavra '{{Missed|Senti falta}}'. Eu associava o som /míst/ ao sentimento de saudade quando ela viajava. Isso criou uma âncora dopaminérgica — a palavra virou sensação, não tradução."
+                                "description": "Eu não traduzia cada palavra. Eu associava som com situação, contexto e sensação. A palavra deixava de ser teoria e começava a ter vida."
                             },
                             {
                                 "name": "Erro",
                                 "icon": "⚡",
-                                "description": "Calibragem de Mira: Eu falava errado, era corrigido ou não era entendido, e meu cérebro ajustava o som. O erro era apenas um dado técnico de ajuste de mira, não uma falha moral."
+                                "description": "Eu falava errado, era corrigido ou não era entendido, e meu cérebro ajustava. O erro deixava de ser vergonha e virava ajuste."
                             },
                             {
                                 "name": "Repetição",
                                 "icon": "🔄",
-                                "description": "Mielinização: O que funcionava, eu usava de novo e de novo até que os músculos da minha boca não precisassem mais de comando consciente. O reflexo substituiu o cálculo."
+                                "description": "O que funcionava, eu usava de novo e de novo até não precisar mais pensar tanto. Aos poucos, o reflexo foi entrando no lugar do cálculo."
                             }
                         ]
                     })
@@ -203,7 +203,7 @@ export const PILAR_1_DATA: PillarData = {
                     content: JSON.stringify({
                         "phrase": "{{I'm not sure I follow you.|Não tenho certeza se te acompanho.}}",
                         "phonetic": "/aim-nó-ʃôr-ai-fó-lou-iu/ — O 't' final desaparece para dar lugar ao 'f'. Ninguém diz {{I am not|Eu não sou}} /ai/ /æm/ /nɒt/. O som real é um bloco único.",
-                        "grammarNote": "Eu removi o '{{that|que}}' (I'm not sure THAT I...). No método operacional, se uma palavra não adiciona significado, ela é descartada para economizar largura de banda cerebral."
+                        "grammarNote": "Eu removi o '{{that|que}}' (I'm not sure THAT I...). A lógica aqui é simples: se uma palavra não ajuda a mensagem a andar, ela pesa mais do que ajuda."
                     })
                 },
                 {
@@ -216,19 +216,19 @@ export const PILAR_1_DATA: PillarData = {
                         "context": "Você e sua parceira/o estão em um restaurante. Houve um mal-entendido sobre o horário. O clima está pesado. Você precisa resolver isso sem parecer um robô ou um dicionário ambulante.",
                         "situation": "Você chegou atrasado e precisa se desculpar e resolver a situação.",
                         "wrong": {
-                            "action": "O Recruta (Mentalidade de Franquia): Tenta montar a frase perfeita na cabeça antes de falar. Fica calculando preposições.",
+                            "action": "A cabeça treinada por escola tenta montar a frase perfeita antes de falar. Fica calculando palavra, preposição e ordem.",
                             "result": "\"{{I apologize. I arrived late because the traffic was very intense. Please, do not be angry.|Peço desculpas. Cheguei atrasado porque o trânsito estava muito intenso. Por favor, não fique brava.}}\" — Soa frio, distante e mecânico."
                         },
                         "right": {
-                            "action": "O Operador (Mentalidade BasedSpeak): Usa linguagem real com expressões de nativo. Admite o erro com naturalidade. Oferece solução prática.",
-                            "result": "\"{{Hey, my bad. I messed up with the time. Traffic was a total nightmare, seriously. Let's just eat, okay? My treat.|Ei, foi mal. Eu errei com o horário. O trânsito estava um pesadelo total, sério. Vamos só comer, tá bom? Eu pago.}}\" — Humano, tático, resolve o conflito."
+                            "action": "A mentalidade BasedSpeak usa linguagem real, admite o erro sem teatro e leva a conversa para uma saída prática.",
+                            "result": "\"{{Hey, my bad. I messed up with the time. Traffic was a total nightmare, seriously. Let's just eat, okay? My treat.|Ei, foi mal. Eu errei com o horário. O trânsito estava um pesadelo total, sério. Vamos só comer, tá bom? Eu pago.}}\" — Soa humano, natural e útil."
                         }
                     })
                 },
                 {
                     type: "reveal-box",
                     title: "🔍 Análise do Sucesso (Clique para expandir)",
-                    content: "'{{My bad|Foi mal}} / {{I messed up|Eu vacilei}}': admite o erro de forma humana e rápida. '{{Total nightmare|Pesadelo total}}': usa imagem simples em vez de frase engessada. '{{My treat|Por minha conta}}': resolve com ação prática. A frase natural fala menos e comunica muito mais."
+                    content: "'{{My bad|Foi mal}} / {{I messed up|Eu vacilei}}': admite o erro de forma humana e rápida. '{{Total nightmare|Pesadelo total}}': troca frase dura por imagem simples. '{{My treat|Por minha conta}}': resolve com ação prática. A frase natural fala menos, mas move mais."
                 },
                 {
                     type: "h2",
@@ -236,17 +236,17 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "**Pare de se desculpar.** O vício brasileiro de dizer \"{{Sorry for my bad English|Desculpe pelo meu inglês ruim}}\" é um sinal de submissão que sabota sua autoridade. Na \"Ponte Húngara\", eu entendi que se eu ficasse me desculpando, eu nunca lideraria a conversa. O inglês é apenas o cabo que conecta dois computadores; se o sinal tiver ruído, você não joga o computador fora, você apenas **ajusta a frequência**."
+                    content: "**Pare de se desculpar o tempo todo.** O vício brasileiro de dizer \"{{Sorry for my bad English|Desculpe pelo meu inglês ruim}}\" enfraquece sua presença antes mesmo da conversa andar. Na \"Ponte Húngara\", eu entendi que, se eu começasse me diminuindo, eu perdia a conversa antes de ela começar. O inglês é o meio, não o palco. Se o sinal vier com ruído, você ajusta e continua."
                 },
                 {
                     type: "elite-insight",
                     title: "💡 INSIGHT DE ELITE",
-                    content: "Eu não criei a BasedSpeak porque sou um gênio das línguas. Eu a criei porque eu senti a humilhação de ser um adulto 'mudo'. Minha missão é garantir que você não precise passar por quatro anos de mentiras para só então começar a viver o idioma na prática."
+                    content: "Eu não criei a BasedSpeak porque sou um gênio das línguas. Eu criei porque vivi na pele o que acontece quando um adulto sabe mais do que consegue mostrar. O método nasceu para encurtar esse caminho e transformar estudo em uso real mais cedo."
                 },
                 {
                     type: "box-warning",
                     title: "🔓 OPEN LOOP: A COLA SONORA",
-                    content: "A técnica que salvou Roger na 'Ponte Húngara' depende de uma coisa: decodificar a velocidade nativa. No próximo pilar, revelaremos o segredo do '{{Connected Speech|Fala Conectada}}', a razão pela qual '{{What do you want|O que você quer}}' vira '{{Whaddya-wanna|O que cê quer}}'."
+                    content: "A técnica que salvou Roger na 'Ponte Húngara' depende de uma coisa: conseguir ouvir o som real como ele vem. No próximo pilar, você vai entender por que '{{What do you want|O que você quer}}' vira '{{Whaddya-wanna|O que cê quer}}' e por que isso muda tudo na escuta."
                 }
             ]
         },
