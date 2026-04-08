@@ -372,52 +372,64 @@ export const PILAR_2_DATA: PillarData = {
                 },
                 {
                     type: "audio-decode-game",
-                    content: JSON.stringify([
-                        {
-                            "phonetic": "Whatcha wanna do?",
-                            "decoded": "{{What do you want to do?|O que voce quer fazer?}}",
-                            "translation": "O que voce quer fazer?",
-                            "options": [
-                                "{{What do you want to do?|O que voce quer fazer?}}",
-                                "{{What are you doing?|O que voce esta fazendo?}}",
-                                "{{What do you do?|O que voce faz?}}"
-                            ],
-                            "answer": 0
-                        },
-                        {
-                            "phonetic": "We gotta move",
-                            "decoded": "{{We have got to move.|A gente tem que se mexer.}}",
-                            "translation": "A gente tem que se mexer.",
-                            "options": [
-                                "{{We got a movie.|A gente conseguiu um filme.}}",
-                                "{{We have got to move.|A gente tem que se mexer.}}",
-                                "{{We are moving.|A gente esta se mudando.}}"
-                            ],
-                            "answer": 1
-                        },
-                        {
-                            "phonetic": "I'm gonna call 'em",
-                            "decoded": "{{I'm going to call them.|Vou ligar pra eles.}}",
-                            "translation": "Vou ligar pra eles.",
-                            "options": [
-                                "{{I'm gonna call them.|Vou ligar pra eles.}}",
-                                "{{I'm calling him.|Estou ligando para ele.}}",
-                                "{{I got a call from them.|Recebi uma ligacao deles.}}"
-                            ],
-                            "answer": 0
-                        },
-                        {
-                            "phonetic": "D'you wanna go?",
-                            "decoded": "{{Do you want to go?|Voce quer ir?}}",
-                            "translation": "Voce quer ir?",
-                            "options": [
-                                "{{Did you go?|Voce foi?}}",
-                                "{{Do you want to go?|Voce quer ir?}}",
-                                "{{Do you want it?|Voce quer isso?}}"
-                            ],
-                            "answer": 1
-                        }
-                    ])
+                    content: JSON.stringify({
+                        title: "LEITURA DE BLOCO",
+                        subtitle: "Aqui o foco e perceber o sentido da fala corrida, nao decorar som isolado.",
+                        stepLabel: "Bloco",
+                        passLabel: "Acerte pelo menos {passing}/{total} para provar que seu ouvido ja pegou o ritmo",
+                        promptLabel: "O que essa fala corrida quer dizer?",
+                        successTitle: "Leitura fechada",
+                        failTitle: "Mais uma rodada",
+                        restartLabel: "Recomeçar leitura",
+                        helpButtonLabel: "Ver ajuda deste bloco",
+                        helpConfirmMessage: "Tem certeza que deseja ver a ajuda deste bloco? Isso vai mostrar a forma completa e as traducoes.",
+                        items: [
+                            {
+                                phonetic: "Lemme know",
+                                decoded: "{{Let me know.|Me avisa.}}",
+                                translation: "Me avisa.",
+                                options: [
+                                    "{{Let me know.|Me avisa.}}",
+                                    "{{Leave me alone.|Me deixa em paz.}}",
+                                    "{{Let me go.|Me deixa ir.}}"
+                                ],
+                                answer: 0
+                            },
+                            {
+                                phonetic: "We kinda rushed it",
+                                decoded: "{{We kind of rushed it.|A gente fez isso meio na correria.}}",
+                                translation: "A gente fez isso meio na correria.",
+                                options: [
+                                    "{{We can rush it.|A gente consegue acelerar isso.}}",
+                                    "{{We kind of rushed it.|A gente fez isso meio na correria.}}",
+                                    "{{We rushed to it.|A gente correu ate la.}}"
+                                ],
+                                answer: 1
+                            },
+                            {
+                                phonetic: "You gotta be kidding",
+                                decoded: "{{You have got to be kidding.|Voce so pode estar zoando.}}",
+                                translation: "Voce so pode estar zoando.",
+                                options: [
+                                    "{{You need to be careful.|Voce precisa tomar cuidado.}}",
+                                    "{{You have got to be kidding.|Voce so pode estar zoando.}}",
+                                    "{{You are getting hidden.|Voce esta ficando escondido.}}"
+                                ],
+                                answer: 1
+                            },
+                            {
+                                phonetic: "I ain't ready yet",
+                                decoded: "{{I am not ready yet.|Eu ainda nao estou pronto.}}",
+                                translation: "Eu ainda nao estou pronto.",
+                                options: [
+                                    "{{I am not ready yet.|Eu ainda nao estou pronto.}}",
+                                    "{{I already read it.|Eu ja li isso.}}",
+                                    "{{I am ready now.|Agora eu estou pronto.}}"
+                                ],
+                                answer: 0
+                            }
+                        ]
+                    })
                 },
 
                 {

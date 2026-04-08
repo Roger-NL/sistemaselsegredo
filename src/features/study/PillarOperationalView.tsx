@@ -1440,7 +1440,21 @@ const AudioDecodeGame = ({
     onComplete,
     storageKey,
 }: {
-    data: { phonetic: string; options: string[]; answer: number; decoded?: string; translation?: string }[];
+    data:
+        | { phonetic: string; options: string[]; answer: number; decoded?: string; translation?: string }[]
+        | {
+            title?: string;
+            subtitle?: string;
+            stepLabel?: string;
+            passLabel?: string;
+            promptLabel?: string;
+            successTitle?: string;
+            failTitle?: string;
+            restartLabel?: string;
+            helpButtonLabel?: string;
+            helpConfirmMessage?: string;
+            items: { phonetic: string; options: string[]; answer: number; decoded?: string; translation?: string }[];
+        };
     onComplete?: () => void;
     storageKey?: string;
 }) => {
@@ -1452,7 +1466,36 @@ const AudioDecodeGame = ({
         selectedOption: number;
         correct: boolean;
     };
-    const passingScore = Math.max(1, data.length - 1);
+    const gameConfig = Array.isArray(data)
+        ? {
+            title: "HACKER FONÉTICO",
+            subtitle: undefined,
+            stepLabel: "Sinal",
+            passLabel: "Acerte pelo menos {passing}/{total} para liberar o próximo módulo",
+            promptLabel: "O que o nativo disse?",
+            successTitle: "Decodificação completa",
+            failTitle: "Quase lá",
+            restartLabel: "Re-inicializar Scanner",
+            helpButtonLabel: "Ver ajuda desta pergunta",
+            helpConfirmMessage: "Tem certeza que deseja ver a ajuda desta pergunta? Isso vai mostrar a forma completa e as traducoes.",
+            items: data,
+        }
+        : {
+            title: data.title ?? "HACKER FONÉTICO",
+            subtitle: data.subtitle,
+            stepLabel: data.stepLabel ?? "Sinal",
+            passLabel: data.passLabel ?? "Acerte pelo menos {passing}/{total} para liberar o próximo módulo",
+            promptLabel: data.promptLabel ?? "O que o nativo disse?",
+            successTitle: data.successTitle ?? "Decodificação completa",
+            failTitle: data.failTitle ?? "Quase lá",
+            restartLabel: data.restartLabel ?? "Re-inicializar Scanner",
+            helpButtonLabel: data.helpButtonLabel ?? "Ver ajuda desta pergunta",
+            helpConfirmMessage: data.helpConfirmMessage ?? "Tem certeza que deseja ver a ajuda desta pergunta? Isso vai mostrar a forma completa e as traducoes.",
+            items: data.items,
+        };
+
+    const items = gameConfig.items;
+    const passingScore = Math.max(1, items.length - 1);
     const stateStorageKey = React.useMemo(() => makeGameStorageKey(storageKey, "state"), [storageKey]);
     const initialStoredAudioState = React.useMemo(() => {
         if (!stateStorageKey) return null;
@@ -1466,7 +1509,7 @@ const AudioDecodeGame = ({
         }>(stateStorageKey);
     }, [stateStorageKey]);
 
-    const [currentStep, setCurrentStep] = useState(() => Math.min(initialStoredAudioState?.currentStep ?? 0, Math.max(0, data.length - 1)));
+    const [currentStep, setCurrentStep] = useState(() => Math.min(initialStoredAudioState?.currentStep ?? 0, Math.max(0, items.length - 1)));
     const [score, setScore] = useState(() => initialStoredAudioState?.score ?? 0);
     const [showResult, setShowResult] = useState(false);
     const [isFinished, setIsFinished] = useState(() => Boolean(initialStoredAudioState?.isFinished));
@@ -1488,7 +1531,7 @@ const AudioDecodeGame = ({
         completionNotifiedRef.current = false;
     }, []);
 
-    const currentItem = data[currentStep];
+    const currentItem = items[currentStep];
     const phoneticDisplay = getOptionTranslation(currentItem?.phonetic || "");
     const decodedDisplay = currentItem?.decoded ? getOptionTranslation(currentItem.decoded) : null;
     const topTranslation = currentItem?.translation || phoneticDisplay.portuguese || decodedDisplay?.portuguese || null;
@@ -1505,7 +1548,7 @@ const AudioDecodeGame = ({
         });
     }, [currentStep, didPass, history, isFinished, score, showHints, stateStorageKey]);
 
-    const handleSelect = useCallback((idx: number) => {
+    const handleSelect = (idx: number) => {
         if (showResult || isFinished) return;
         setSelectedOption(idx);
         setShowResult(true);
@@ -1531,7 +1574,7 @@ const AudioDecodeGame = ({
         setTimeout(() => {
             setShowResult(false);
             setSelectedOption(null);
-            if (currentStep + 1 < data.length) {
+            if (currentStep + 1 < items.length) {
                 setShowHints(false);
                 setCurrentStep(c => c + 1);
             } else {
@@ -1550,11 +1593,11 @@ const AudioDecodeGame = ({
                 }
             }
         }, 1200);
-    }, [currentItem, currentStep, data, isFinished, onComplete, passingScore, resetGame, score, showResult]);
+    };
 
     const handleRevealHints = () => {
         if (showHints) return;
-        const confirmed = window.confirm("Tem certeza que deseja ver a ajuda desta pergunta? Isso vai mostrar a forma completa e as traducoes.");
+        const confirmed = window.confirm(gameConfig.helpConfirmMessage);
         if (!confirmed) return;
         setShowHints(true);
     };
@@ -1564,11 +1607,16 @@ const AudioDecodeGame = ({
             <div className="bg-gradient-to-r from-cyan-900/40 to-blue-900/40 px-4 py-3 md:px-6 md:py-4 border-b border-cyan-500/30 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <Terminal className="w-5 h-5 text-cyan-400" />
-                    <span className="font-bold text-cyan-400 font-mono text-xs md:text-sm tracking-wider">HACKER FONÉTICO</span>
+                    <div>
+                        <span className="font-bold text-cyan-400 font-mono text-xs md:text-sm tracking-wider">{gameConfig.title}</span>
+                        {gameConfig.subtitle && (
+                            <p className="mt-1 text-[11px] text-slate-400">{gameConfig.subtitle}</p>
+                        )}
+                    </div>
                 </div>
                 {!isFinished && (
                     <span className="font-mono text-xs text-cyan-500 bg-cyan-950/50 px-2 py-1 rounded">
-                        Sinal {currentStep + 1}/{data.length}
+                        {gameConfig.stepLabel} {currentStep + 1}/{items.length}
                     </span>
                 )}
             </div>
@@ -1578,22 +1626,22 @@ const AudioDecodeGame = ({
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-6">
                         <Unlock className={cn("w-16 h-16 mx-auto mb-4", didPass ? "text-cyan-400" : "text-amber-400")} />
                         <h4 className="text-xl md:text-2xl font-bold text-slate-100 mb-2">
-                            {didPass ? "Decodificação completa" : "Quase lá"}
+                            {didPass ? gameConfig.successTitle : gameConfig.failTitle}
                         </h4>
-                        <p className="text-slate-400 mb-2">Taxa de sucesso: {Math.round((score / data.length) * 100)}% ({score}/{data.length})</p>
+                        <p className="text-slate-400 mb-2">Taxa de sucesso: {Math.round((score / items.length) * 100)}% ({score}/{items.length})</p>
                         <p className={cn("text-sm mb-6", didPass ? "text-emerald-300" : "text-amber-300")}>
                             {didPass
-                                ? `Meta batida. Você acertou o mínimo de ${passingScore}/${data.length} e já pode avançar.`
-                                : `Para liberar o módulo, precisa acertar pelo menos ${passingScore}/${data.length}. O desafio vai reiniciar automaticamente.`}
+                                ? `Meta batida. Você acertou o mínimo de ${passingScore}/${items.length} e já pode avançar.`
+                                : `Para liberar o módulo, precisa acertar pelo menos ${passingScore}/${items.length}. O desafio vai reiniciar automaticamente.`}
                         </p>
-                        <button onClick={resetGame} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition font-mono uppercase text-xs">Re-inicializar Scanner</button>
+                        <button onClick={resetGame} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition font-mono uppercase text-xs">{gameConfig.restartLabel}</button>
                     </motion.div>
                 ) : (
                     <div className="max-w-xl mx-auto">
                         <p className="text-cyan-300 text-xs text-center mb-3 uppercase tracking-[0.18em] font-bold">
-                            Acerte pelo menos {passingScore}/{data.length} para liberar o próximo módulo
+                            {gameConfig.passLabel.replace("{passing}", String(passingScore)).replace("{total}", String(items.length))}
                         </p>
-                        <p className="text-slate-400 text-sm text-center mb-2 uppercase tracking-wide font-bold">O que o nativo disse?</p>
+                        <p className="text-slate-400 text-sm text-center mb-2 uppercase tracking-wide font-bold">{gameConfig.promptLabel}</p>
                         <div className="bg-black/50 border border-slate-700 rounded-lg p-6 mb-8 text-center backdrop-blur shadow-inner">
                             <span className="font-mono text-2xl md:text-3xl font-bold text-cyan-300 animate-pulse">
                                 &ldquo;{phoneticDisplay.english}&rdquo;
@@ -1646,11 +1694,11 @@ const AudioDecodeGame = ({
                                 <div className="space-y-3">
                                     {history.map((entry) => {
                                         if (!entry) return null;
-                                        const chosen = getOptionTranslation(data[entry.step]?.options?.[entry.selectedOption] || "");
+                                        const chosen = getOptionTranslation(items[entry.step]?.options?.[entry.selectedOption] || "");
                                         const decoded = entry.decoded ? getOptionTranslation(entry.decoded) : null;
                                         return (
                                             <div key={`audio-history-${entry.step}`} className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                                                <p className="text-xs text-slate-500">Sinal {entry.step + 1}</p>
+                                                <p className="text-xs text-slate-500">{gameConfig.stepLabel} {entry.step + 1}</p>
                                                 <p className="mt-1 font-mono text-cyan-200">{entry.phonetic}</p>
                                                 <p className="mt-2 text-sm text-slate-300">Sua resposta: {chosen.english}</p>
                                                 {chosen.portuguese && <p className="text-xs text-slate-400">{chosen.portuguese}</p>}
@@ -1674,7 +1722,7 @@ const AudioDecodeGame = ({
                                     className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/30 bg-cyan-950/20 px-4 py-2 text-xs md:text-sm text-cyan-200 transition hover:bg-cyan-950/35"
                                 >
                                     <Eye className="w-4 h-4" />
-                                    Ver ajuda desta pergunta
+                                    {gameConfig.helpButtonLabel}
                                 </button>
                             </div>
                         )}
