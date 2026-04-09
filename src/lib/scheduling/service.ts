@@ -7,6 +7,12 @@ const COLLECTION = 'live_sessions';
 const PURCHASE_WINDOW_DAYS = 7;
 const RESCHEDULE_DEADLINE_HOURS = 24;
 
+function stripUndefined<T extends object>(value: T): T {
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).filter(([, entryValue]) => entryValue !== undefined)
+  ) as T;
+}
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -86,7 +92,7 @@ export async function releaseLiveSessionAfterApproval(options: {
       : 'Sua primeira sessão ao vivo já pode ser marcada.',
   };
 
-  await adminDb.collection(COLLECTION).doc(sessionId).set(session, { merge: true });
+  await adminDb.collection(COLLECTION).doc(sessionId).set(stripUndefined(session), { merge: true });
   return session;
 }
 
@@ -125,7 +131,7 @@ async function syncSessionWithCalendar(session: LiveSessionBooking) {
       } : {}),
     };
 
-    await adminDb.collection(COLLECTION).doc(session.id!).set(updatedSession, { merge: true });
+    await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined(updatedSession), { merge: true });
 
     if (shouldUnlockPillarThree) {
       const userRef = adminDb.collection('users').doc(session.userId);
@@ -285,11 +291,11 @@ export async function requestLiveSessionBooking(options: {
 
   const calendarEvent = await createCalendarEventForBooking(nextSession);
 
-  await adminDb.collection(COLLECTION).doc(sessionId).set({
+  await adminDb.collection(COLLECTION).doc(sessionId).set(stripUndefined({
     ...nextSession,
     calendarEventId: calendarEvent?.eventId,
     calendarHtmlLink: calendarEvent?.htmlLink,
-  }, { merge: true });
+  }), { merge: true });
 
   return {
     ...nextSession,
@@ -321,7 +327,7 @@ export async function cancelLiveSessionBooking(userId: string) {
     ? 'awaiting_release_window'
     : 'ready_to_schedule';
 
-  await adminDb.collection(COLLECTION).doc(status.session.id!).set({
+  await adminDb.collection(COLLECTION).doc(status.session.id!).set(stripUndefined({
     status: nextStatus,
     requestedSlotStart: null,
     requestedSlotEnd: null,
@@ -330,7 +336,7 @@ export async function cancelLiveSessionBooking(userId: string) {
     cancelledAt: nowIso(),
     updatedAt: nowIso(),
     lastActionMessage: 'Seu pedido foi cancelado. Quando quiser, escolha um novo horário válido.',
-  }, { merge: true });
+  }), { merge: true });
 }
 
 export async function getAdminSchedulingSnapshot() {
