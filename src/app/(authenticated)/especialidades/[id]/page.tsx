@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useProgress } from "@/context/ProgressContext";
 import { ROUTES } from "@/lib/routes";
@@ -24,11 +25,17 @@ export default function EspecialidadePage() {
     const params = useParams();
     const router = useRouter();
     const { finishCurrentSpecialization, areAllPillarsComplete } = useProgress();
+    const allPillarsComplete = areAllPillarsComplete();
 
     // Logic Hardening: Anti-Cheat
     // Prevent direct access via URL if pillars are not complete
-    if (!areAllPillarsComplete()) {
-        if (typeof window !== 'undefined') router.push(ROUTES.app.dashboard);
+    useEffect(() => {
+        if (!allPillarsComplete) {
+            router.replace(ROUTES.app.dashboard);
+        }
+    }, [allPillarsComplete, router]);
+
+    if (!allPillarsComplete) {
         return null;
     }
 
