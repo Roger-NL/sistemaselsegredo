@@ -149,23 +149,23 @@ export async function createCalendarEventForBooking(booking: LiveSessionBooking)
     return null;
   }
 
-  const attendees = [booking.studentEmail, booking.tutorEmail || DEFAULT_TUTOR_EMAIL]
-    .filter((email): email is string => Boolean(email))
-    .map((email) => ({ email }));
-
   const response = await calendar.events.insert({
     calendarId: DEFAULT_CALENDAR_ID,
-    sendUpdates: attendees.length ? 'all' : 'none',
     requestBody: {
-      summary: `Sessão ao vivo • ${booking.studentName || 'Aluno'} • Pilar ${booking.sourcePillarId}`,
+      summary: `[PENDENTE] Sessão ao vivo • ${booking.studentName || 'Aluno'} • Pilar ${booking.sourcePillarId}`,
       description: [
         `Aluno: ${booking.studentName || '-'}`,
         `Email: ${booking.studentEmail || '-'}`,
         `Telefone: ${booking.studentPhone || '-'}`,
         `Pilar de origem: ${booking.sourcePillarId}`,
         `Booking ID: ${booking.id || '-'}`,
+        `Tutor principal: ${booking.tutorEmail || DEFAULT_TUTOR_EMAIL || '-'}`,
         '',
         'Status inicial: pendente de confirmação do tutor.',
+        '',
+        'Aprovacao pelo telemovel:',
+        '- Para confirmar: troque [PENDENTE] por [CONFIRMADO] no titulo.',
+        '- Para recusar/remarcar: troque [PENDENTE] por [RECUSAR] no titulo.',
       ].join('\n'),
       start: {
         dateTime: booking.requestedSlotStart,
@@ -175,7 +175,7 @@ export async function createCalendarEventForBooking(booking: LiveSessionBooking)
         dateTime: booking.requestedSlotEnd,
         timeZone: DEFAULT_TIMEZONE,
       },
-      attendees,
+      colorId: '5',
       reminders: {
         useDefault: true,
       },
@@ -199,15 +199,10 @@ export async function getCalendarEventState(eventId: string) {
     });
 
     const event = response.data;
-    const tutorEmail = DEFAULT_TUTOR_EMAIL;
-    const tutorAttendee = tutorEmail
-      ? event.attendees?.find((attendee) => attendee.email?.toLowerCase() === tutorEmail.toLowerCase())
-      : undefined;
-
     return {
       status: event.status,
       htmlLink: event.htmlLink || undefined,
-      tutorResponse: tutorAttendee?.responseStatus,
+      summary: event.summary || undefined,
     };
   } catch (error) {
     console.error('[scheduling] Falha ao consultar evento no Google Calendar', error);
@@ -223,7 +218,6 @@ export async function cancelCalendarEvent(eventId: string) {
     await calendar.events.delete({
       calendarId: DEFAULT_CALENDAR_ID,
       eventId,
-      sendUpdates: 'all',
     });
   } catch (error) {
     console.error('[scheduling] Falha ao cancelar evento no Google Calendar', error);

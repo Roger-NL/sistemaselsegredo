@@ -105,11 +105,14 @@ async function syncSessionWithCalendar(session: LiveSessionBooking) {
   let nextStatus = session.status;
   let nextMessage = session.lastActionMessage;
   let shouldUnlockPillarThree = false;
+  const normalizedSummary = calendarState.summary?.toUpperCase() || '';
+  const confirmedByMarker = normalizedSummary.includes('[CONFIRMADO]') || normalizedSummary.includes('[OK]');
+  const rejectedByMarker = normalizedSummary.includes('[RECUSAR]') || normalizedSummary.includes('[CANCELAR]');
 
-  if (calendarState.status === 'cancelled' || calendarState.tutorResponse === 'declined') {
+  if (calendarState.status === 'cancelled' || rejectedByMarker) {
     nextStatus = 'ready_to_schedule';
     nextMessage = 'Esse horário não foi confirmado. Escolha outro horário para continuar.';
-  } else if (calendarState.tutorResponse === 'accepted') {
+  } else if (confirmedByMarker) {
     nextStatus = 'confirmed';
     nextMessage = 'Sua aula ao vivo foi confirmada. O Pilar 3 já está liberado para você continuar.';
     shouldUnlockPillarThree = session.sourcePillarId === 2;
