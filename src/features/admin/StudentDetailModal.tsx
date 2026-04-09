@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { X, User, Mail, Phone, Calendar, TrendingUp, ShieldCheck, CheckCircle2, AlertCircle, Clock, BookOpen, RotateCcw, Loader2, Crown } from "lucide-react";
+import { X, User, Mail, Phone, Calendar, TrendingUp, ShieldCheck, CheckCircle2, AlertCircle, Clock, BookOpen, RotateCcw, Loader2, Crown, CalendarClock, ArrowUpRight, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, updateDoc, doc, deleteField } from "firebase/firestore";
 import { PillarExam } from "@/lib/exam/service";
 import { resetUserCourseProgress } from "@/lib/admin/reset-user-course-progress";
+import type { LiveSessionBooking } from "@/lib/scheduling/types";
 
 interface StudentSummary {
     id: string;
@@ -29,6 +30,7 @@ interface StudentDetailModalProps {
 
 export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModalProps) {
     const [exams, setExams] = useState<PillarExam[]>([]);
+    const [liveSession, setLiveSession] = useState<LiveSessionBooking | null>(null);
     const [loadingExams, setLoadingExams] = useState(false);
     const [expandedExam, setExpandedExam] = useState<string | null>(null);
     const [currentPillarLevel, setCurrentPillarLevel] = useState(1);
@@ -57,6 +59,22 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
             });
 
             setExams(data);
+
+            const liveSessionQuery = query(
+                collection(db, "live_sessions"),
+                where("userId", "==", user.id),
+            );
+
+            const liveSessionSnapshot = await getDocs(liveSessionQuery);
+            const liveSessionData = liveSessionSnapshot.docs
+                .map((sessionDoc) => ({ id: sessionDoc.id, ...sessionDoc.data() } as LiveSessionBooking))
+                .sort((a, b) => {
+                    const timeA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+                    const timeB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+                    return timeB - timeA;
+                });
+
+            setLiveSession(liveSessionData[0] ?? null);
         } catch (error) {
             console.error("Erro ao buscar exames:", error);
         } finally {
@@ -70,6 +88,7 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
             fetchExams();
         } else {
             setExams([]);
+            setLiveSession(null);
             setExpandedExam(null);
             setCurrentPillarLevel(1);
         }
@@ -97,6 +116,7 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
             user.approvedPillar = 1;
             setCurrentPillarLevel(1);
             setExams([]);
+            setLiveSession(null);
             setExpandedExam(null);
 
             if (currentUser?.id === user.id) {
@@ -166,6 +186,46 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
     };
 
     if (!isOpen || !user) return null;
+
+    const schedulingTone = liveSession?.status === "confirmed"
+        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+        : liveSession?.status === "pending_confirmation"
+            ? "bg-cyan-50 text-cyan-700 border-cyan-200"
+            : liveSession?.status === "ready_to_schedule"
+                ? "bg-violet-50 text-violet-700 border-violet-200"
+                : "bg-slate-100 text-slate-600 border-slate-200";
+
+    const schedulingLabel = liveSession?.status === "confirmed"
+        ? "Confirmada"
+        : liveSession?.status === "pending_confirmation"
+            ? "Pedido enviado"
+            : liveSession?.status === "ready_to_schedule"
+                ? "Liberada para marcar"
+                : liveSession?.status === "awaiting_release_window"
+                    ? "Aguardando janela"
+                    : liveSession?.status === "awaiting_pillar_approval"
+                        ? "Aguardando aprovação"
+                        : "Sem sessão ativa";
+
+    const currentStageLabel = liveSession
+        ? liveSession.status === "confirmed"
+            ? "Sessão já integrada ao progresso"
+            : liveSession.status === "pending_confirmation"
+                ? "Tutor ainda precisa confirmar"
+                : liveSession.status === "ready_to_schedule"
+                    ? "Aluno já pode escolher horário"
+                    : "Fluxo ao vivo aguardando o momento certo"
+        : "Ainda sem sessão liberada";
+
+    const formatDate = (value?: string | Date | null) => {
+        if (!value) return "—";
+        return new Date(value).toLocaleString("pt-BR", {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    };
 
     return (
         <div className="fixed inset-0 z-[50] flex items-center justify-center p-4">
@@ -262,6 +322,66 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
                                 {user.currentStreak || 0} dias <span className="text-orange-500">🔥</span>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200 bg-[linear-gradient(135deg,rgba(255,255,255,0.95),rgba(248,250,252,0.98),rgba(244,255,251,0.98))] p-5 shadow-sm">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                            <div className="max-w-2xl">
+                                <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-700">
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    Fluxo premium ao vivo
+                                </div>
+                                <h3 className="mt-4 text-xl font-bold text-slate-900">
+                                    Leitura rápida da jornada deste aluno
+                                </h3>
+                                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                                    Aqui você enxerga de forma direta em que ponto a pessoa está: acesso premium, avanço acadêmico, provas enviadas e status da sessão ao vivo ligada ao Pilar 2.
+                                </p>
+                            </div>
+
+                            <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${schedulingTone}`}>
+                                <CalendarClock className="w-4 h-4" />
+                                {schedulingLabel}
+                            </div>
+                        </div>
+
+                        <div className="mt-5 grid gap-4 md:grid-cols-3">
+                            <div className="rounded-xl border border-slate-200 bg-white/80 p-4">
+                                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Etapa atual</p>
+                                <p className="mt-2 text-sm font-semibold text-slate-900">{currentStageLabel}</p>
+                                <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                                    {liveSession?.lastActionMessage || "Quando a sessão existir, este bloco mostra o momento mais recente da jornada ao vivo."}
+                                </p>
+                            </div>
+                            <div className="rounded-xl border border-slate-200 bg-white/80 p-4">
+                                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Próximo horário</p>
+                                <p className="mt-2 text-sm font-semibold text-slate-900">{formatDate(liveSession?.requestedSlotStart || liveSession?.earliestScheduleAt)}</p>
+                                <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                                    {liveSession?.requestedSlotStart
+                                        ? "Esse é o horário atualmente preso ao pedido ou à sessão confirmada."
+                                        : "Se ainda não houver pedido, aparece aqui a primeira janela útil da conta premium."}
+                                </p>
+                            </div>
+                            <div className="rounded-xl border border-slate-200 bg-white/80 p-4">
+                                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Acesso liberado</p>
+                                <p className="mt-2 text-sm font-semibold text-slate-900">Até Pilar {currentPillarLevel}</p>
+                                <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                                    Esse painel continua servindo como controle rápido para testar travas, progresso e liberação premium sem sair do contexto do aluno.
+                                </p>
+                            </div>
+                        </div>
+
+                        {liveSession?.calendarHtmlLink && (
+                            <a
+                                href={liveSession.calendarHtmlLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                            >
+                                Abrir sessão no Google Calendar
+                                <ArrowUpRight className="w-4 h-4" />
+                            </a>
+                        )}
                     </div>
 
                     {/* Progress Section */}
