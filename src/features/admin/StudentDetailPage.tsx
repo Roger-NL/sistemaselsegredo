@@ -151,7 +151,13 @@ export default function StudentDetailPage({ studentId }: StudentDetailPageProps)
             if (status === "approved") {
                 setStudent((prev) =>
                     prev
-                        ? { ...prev, approvedPillar: Math.max(prev.approvedPillar || 1, exam.pillarId + 1) }
+                        ? {
+                            ...prev,
+                            approvedPillar: Math.max(
+                                prev.approvedPillar || 1,
+                                exam.pillarId === 2 ? 2 : exam.pillarId + 1
+                            ),
+                        }
                         : prev
                 );
             }

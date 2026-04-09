@@ -453,6 +453,21 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                             </>
                                         )}
                                     </>
+                                ) : pillarId === 2 ? (
+                                    <>
+                                        <div>
+                                            <h3 className="text-2xl font-bold text-neutral-900 mb-2">Avaliação recebida</h3>
+                                            <p className="text-neutral-600 text-sm max-w-[520px] mx-auto leading-relaxed">
+                                                Sua prova do Pilar 2 entrou para avaliação humana. Quando a equipe aprovar esta etapa, a sua primeira aula ao vivo aparece na área de agendamentos para você pedir um horário válido.
+                                            </p>
+                                        </div>
+                                        <button 
+                                            className="mt-6 px-8 py-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 rounded-lg font-medium transition-colors"
+                                            onClick={() => { onSuccess(); onClose(); }}
+                                        >
+                                            Voltar ao Dashboard
+                                        </button>
+                                    </>
                                 ) : (
                                     <>
                                         <div>

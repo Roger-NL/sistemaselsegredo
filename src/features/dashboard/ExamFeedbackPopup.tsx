@@ -67,6 +67,9 @@ export function ExamFeedbackPopup() {
         if (examData.pillarId === 1) {
             handleClose();
             router.push(ROUTES.public.payment);
+        } else if (examData.pillarId === 2 && examData.status === "approved") {
+            handleClose();
+            router.push(ROUTES.app.scheduling);
         } else {
             // Stay on dashboard, open view modal
             // Do NOT close the main popup yet? Or close it and open the other one?

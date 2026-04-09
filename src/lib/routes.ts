@@ -9,6 +9,7 @@ export const ROUTES = {
   },
   app: {
     dashboard: "/dashboard",
+    scheduling: "/agendamentos",
     boletim: "/boletim",
     settings: "/configuracoes",
     specialties: "/especialidades",
@@ -38,6 +39,7 @@ export const AUTH_ENTRY_ROUTE_PREFIXES = [ROUTES.auth.login, ROUTES.auth.signup]
 
 export const PROTECTED_ROUTE_PREFIXES = [
   ROUTES.app.dashboard,
+  ROUTES.app.scheduling,
   ROUTES.app.boletim,
   ROUTES.app.settings,
   ROUTES.app.specialties,

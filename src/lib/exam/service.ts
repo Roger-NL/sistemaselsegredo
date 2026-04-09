@@ -3,6 +3,7 @@ import {
     collection,
     addDoc,
     updateDoc,
+    deleteDoc,
     doc,
     getDocs,
     getDoc,
@@ -135,12 +136,15 @@ export async function gradeExam(examId: string, status: 'approved' | 'rejected',
             });
 
             if (status === "approved" && userRef) {
-                const nextApprovedPillar = Math.max(currentApprovedPillar, exam.pillarId + 1);
+                const nextApprovedPillar = exam.pillarId === 2
+                    ? Math.max(currentApprovedPillar, 2)
+                    : Math.max(currentApprovedPillar, exam.pillarId + 1);
                 transaction.update(userRef, {
                     approvedPillar: nextApprovedPillar,
                 });
             }
         });
+
         return { success: true };
     } catch (error) {
         console.error("Erro ao avaliar prova:", error);
@@ -181,5 +185,21 @@ export async function getExamById(examId: string): Promise<PillarExam | null> {
     } catch (error) {
         console.error("Erro ao buscar prova:", error);
         return null;
+    }
+}
+
+export async function deleteUserExams(userId: string) {
+    try {
+        const examsQuery = query(
+            collection(db, COLLECTION),
+            where("userId", "==", userId)
+        );
+
+        const snapshot = await getDocs(examsQuery);
+        await Promise.all(snapshot.docs.map((examDoc) => deleteDoc(examDoc.ref)));
+        return { success: true, deletedExams: snapshot.docs.length };
+    } catch (error) {
+        console.error("Erro ao apagar provas do usuário:", error);
+        return { success: false, error: "Erro ao limpar provas." };
     }
 }

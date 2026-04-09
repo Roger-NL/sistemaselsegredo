@@ -6,7 +6,7 @@ import { PILLARS } from "@/data/curriculum";
 import { useAuth } from "@/context/AuthContext";
 import { PremiumWall } from "@/features/subscription/PremiumWall";
 import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
-import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Lock, X, ShieldCheck, MessageSquare } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, CheckCircle2, Lock, X, ShieldCheck, MessageSquare } from "lucide-react";
 import { StudyViewer } from "@/features/study/StudyViewer";
 import { PillarOperationalView } from "@/features/study/PillarOperationalView";
 import { getUserExamStatus, PillarExam } from "@/lib/exam/service";
@@ -115,6 +115,11 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
         if (pillarId === 1 && isPremiumLike && exam?.status === "pending") {
             router.push(`${ROUTES.app.pillar}/2`);
+            return;
+        }
+
+        if (pillarId === 2 && exam?.status === "approved" && (user?.approvedPillar || 1) < 3) {
+            router.push(ROUTES.app.scheduling);
             return;
         }
 
@@ -327,6 +332,12 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                                     Avaliação em breve
                                                 </>
                                             )
+                                        ) : exam?.status === 'approved' && pillarId === 2 && (user?.approvedPillar || 1) < 3 ? (
+                                            <>
+                                                <CalendarDays className="w-6 h-6" />
+                                                Ir para meus agendamentos
+                                                <ArrowRight className="w-5 h-5" />
+                                            </>
                                         ) : exam?.status === 'rejected' ? (
                                             // === CASO: REPROVADO ===
                                             <>
@@ -364,6 +375,17 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                     </p>
                                     <p className="mt-2 text-sm leading-relaxed text-white/65">
                                         Se a equipe achar necessário, você poderá refazer essa etapa com os ajustes indicados.
+                                    </p>
+                                </div>
+                            )}
+
+                            {areAllModulesCompleted && pillarId === 2 && exam?.status === "approved" && (user?.approvedPillar || 1) < 3 && (
+                                <div className="mx-auto mb-16 mt-4 max-w-2xl rounded-2xl border border-cyan-500/20 bg-cyan-500/5 px-5 py-4 text-center">
+                                    <p className="text-sm font-medium text-cyan-200">
+                                        Sua prova foi aprovada. Agora a primeira aula ao vivo foi liberada para marcação.
+                                    </p>
+                                    <p className="mt-2 text-sm leading-relaxed text-white/65">
+                                        Assim que o tutor confirmar esse horário pelo calendário, o Pilar 3 abre automaticamente para você.
                                     </p>
                                 </div>
                             )}

@@ -103,7 +103,7 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
                 await refreshUser();
             }
 
-            window.alert(`Conta resetada com sucesso. ${result.deletedExams} prova(s) apagada(s).`);
+            window.alert(`Conta resetada com sucesso. ${result.deletedExams} prova(s) e ${result.deletedSessions || 0} sessão(ões) apagada(s).`);
         } catch (error) {
             console.error(error);
             window.alert("Nao foi possivel resetar a conta agora.");
@@ -133,6 +133,7 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
                 await updateDoc(userRef, {
                     subscriptionStatus: "free",
                     subscriptionExpiresAt: deleteField(),
+                    premiumActivatedAt: deleteField(),
                     purchasedPlan: deleteField(),
                     paymentId: deleteField(),
                     pendingPixPayment: deleteField(),
@@ -141,6 +142,7 @@ export function StudentDetailModal({ user, isOpen, onClose }: StudentDetailModal
             } else {
                 await updateDoc(userRef, {
                     subscriptionStatus: "premium",
+                    premiumActivatedAt: new Date().toISOString(),
                     purchasedPlan: "lifetime",
                 });
                 user.subscriptionStatus = "premium";

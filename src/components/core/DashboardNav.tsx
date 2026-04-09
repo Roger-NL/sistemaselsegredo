@@ -10,6 +10,8 @@ import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard/service"; // 
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/lib/routes";
 
+const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
+
 interface DashboardNavProps {
     studentName?: string;
     studentStreak?: number;
@@ -17,7 +19,7 @@ interface DashboardNavProps {
 
 export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: DashboardNavProps) {
     const router = useRouter();
-    const { logout, user } = useAuth(); // Destructure user
+    const { logout, user, subscriptionStatus } = useAuth(); // Destructure user
     const { getCompletedCount, getGlobalProgress } = useProgress();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
@@ -36,6 +38,16 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
     const currentRank = getRank(completedCount);
     const currentRankIndex = getRankIndex(completedCount);
     const globalProgress = getGlobalProgress();
+    const canAccessScheduling = subscriptionStatus === "premium" || ADMIN_EMAILS.includes(user?.email || "");
+
+    const menuActions = [
+        { label: "👤 Meu Perfil", action: () => router.push(ROUTES.app.profile) },
+        { label: "⚙️ Configurações", action: () => router.push(ROUTES.app.settings) },
+        { label: "📊 Boletim", action: () => router.push(ROUTES.app.boletim) },
+        ...(canAccessScheduling
+            ? [{ label: "🗓️ Agendamentos", action: () => router.push(ROUTES.app.scheduling) }]
+            : []),
+    ];
 
     // Mock streak data
     // const currentStreak = 7;
@@ -136,24 +148,15 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                         {/* Mobile Dropdown */}
                         {isMenuOpen && (
                             <div className="absolute top-full left-3 right-3 mt-1 py-2 rounded-xl bg-black/90 backdrop-blur-xl border border-white/10 shadow-2xl z-50">
-                                <button
-                                    onClick={() => { setIsMenuOpen(false); router.push(ROUTES.app.profile); }}
-                                    className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10"
-                                >
-                                    👤 Meu Perfil
-                                </button>
-                                <button
-                                    onClick={() => { setIsMenuOpen(false); router.push(ROUTES.app.settings); }}
-                                    className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10"
-                                >
-                                    ⚙️ Configurações
-                                </button>
-                                <button
-                                    onClick={() => { setIsMenuOpen(false); router.push(ROUTES.app.boletim); }}
-                                    className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10"
-                                >
-                                    📊 Boletim
-                                </button>
+                                {menuActions.map((item) => (
+                                    <button
+                                        key={item.label}
+                                        onClick={() => { setIsMenuOpen(false); item.action(); }}
+                                        className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10"
+                                    >
+                                        {item.label}
+                                    </button>
+                                ))}
                                 <div className="my-2 border-t border-white/10" />
                                 {/* Mini Leaderboard in Dropdown - kept for quick glance, but button now opens full modal */}
                                 <div className="px-4 py-2">
@@ -224,8 +227,15 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
 
                                 {isMenuOpen && (
                                     <div className="absolute top-full left-0 mt-2 w-48 py-2 rounded-xl bg-black/80 backdrop-blur-xl border border-white/10 shadow-2xl z-50">
-                                        <button onClick={() => { setIsMenuOpen(false); router.push(ROUTES.app.profile); }} className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10">👤 Meu Perfil</button>
-                                        <button onClick={() => { setIsMenuOpen(false); router.push(ROUTES.app.settings); }} className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10">⚙️ Configurações</button>
+                                        {menuActions.map((item) => (
+                                            <button
+                                                key={item.label}
+                                                onClick={() => { setIsMenuOpen(false); item.action(); }}
+                                                className="w-full px-4 py-2 text-left text-sm text-white/80 hover:bg-white/10"
+                                            >
+                                                {item.label}
+                                            </button>
+                                        ))}
                                         <div className="my-2 border-t border-white/10" />
                                         <button onClick={() => { setIsMenuOpen(false); logout(); }} className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-red-500/10">🚪 Sair</button>
                                     </div>
@@ -264,6 +274,13 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                             <button onClick={() => router.push(ROUTES.app.boletim)} className="bean-button bean-button-accent">
                                 <span className="hidden sm:inline">Boletim</span>
                             </button>
+
+                            {canAccessScheduling && (
+                                <button onClick={() => router.push(ROUTES.app.scheduling)} className="bean-button bean-button-accent">
+                                    <span className="hidden sm:inline">Agendamentos</span>
+                                    <span className="sm:hidden">🗓️</span>
+                                </button>
+                            )}
 
                             <button onClick={() => setIsLeaderboardOpen(true)} className="bean-button bean-button-accent">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

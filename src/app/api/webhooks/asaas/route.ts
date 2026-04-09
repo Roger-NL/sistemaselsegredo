@@ -30,6 +30,7 @@ export async function POST(req: Request) {
       await userRef.set({
         subscriptionStatus: "premium",
         purchasedPlan: "lifetime",
+        premiumActivatedAt: new Date().toISOString(),
         paymentId: payment.id,
         pendingPixPayment: null,
         approvedPillar: Math.max(currentApprovedPillar, 2), // Libera instantaneamente o Pilar 2 (o que "fura a fila")

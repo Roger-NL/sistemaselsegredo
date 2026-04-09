@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 
 const EXAMS_COLLECTION = "pillar_exams";
+const LIVE_SESSIONS_COLLECTION = "live_sessions";
 const USERS_COLLECTION = "users";
 const BATCH_LIMIT = 400;
 
@@ -26,9 +27,14 @@ export async function resetUserCourseProgress(userId: string) {
     const examsSnapshot = await getDocs(
         query(collection(db, EXAMS_COLLECTION), where("userId", "==", userId))
     );
+    const liveSessionsSnapshot = await getDocs(
+        query(collection(db, LIVE_SESSIONS_COLLECTION), where("userId", "==", userId))
+    );
 
     const examDocs = examsSnapshot.docs as QueryDocumentSnapshot<DocumentData>[];
-    const batches = chunkDocs(examDocs, BATCH_LIMIT);
+    const liveSessionDocs = liveSessionsSnapshot.docs as QueryDocumentSnapshot<DocumentData>[];
+    const allDocs = [...examDocs, ...liveSessionDocs];
+    const batches = chunkDocs(allDocs, BATCH_LIMIT);
     const userRef = doc(db, USERS_COLLECTION, userId);
 
     if (batches.length === 0) {
@@ -45,7 +51,7 @@ export async function resetUserCourseProgress(userId: string) {
             currentStreak: 0,
         });
         await batch.commit();
-        return { success: true, deletedExams: 0 };
+        return { success: true, deletedExams: 0, deletedSessions: 0 };
     }
 
     for (let index = 0; index < batches.length; index++) {
@@ -69,5 +75,5 @@ export async function resetUserCourseProgress(userId: string) {
         await batch.commit();
     }
 
-    return { success: true, deletedExams: examDocs.length };
+    return { success: true, deletedExams: examDocs.length, deletedSessions: liveSessionDocs.length };
 }

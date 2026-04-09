@@ -10,7 +10,9 @@ export default function AdminDashboardPage() {
         totalUsers: 0,
         activeCodes: 0,
         usedCodes: 0,
-        revenue: 0
+        revenue: 0,
+        pendingSessions: 0,
+        confirmedSessions: 0,
     });
 
     useEffect(() => {
@@ -31,11 +33,21 @@ export default function AdminDashboardPage() {
 
                 const usedCount = usedSnapshot.data().count;
 
+                const liveSessionsColl = collection(db, "live_sessions");
+                const pendingSessionsSnapshot = await getCountFromServer(
+                    query(liveSessionsColl, where("status", "==", "pending_confirmation"))
+                );
+                const confirmedSessionsSnapshot = await getCountFromServer(
+                    query(liveSessionsColl, where("status", "==", "confirmed"))
+                );
+
                 setStats({
                     totalUsers: usersSnapshot.data().count,
                     activeCodes: activeSnapshot.data().count,
                     usedCodes: usedCount,
-                    revenue: usedCount * 297
+                    revenue: usedCount * 297,
+                    pendingSessions: pendingSessionsSnapshot.data().count,
+                    confirmedSessions: confirmedSessionsSnapshot.data().count,
                 });
             } catch (error) {
                 console.error("Erro ao carregar stats:", error);
@@ -50,6 +62,8 @@ export default function AdminDashboardPage() {
         { title: "Receita Estimada", value: `R$ ${stats.revenue.toLocaleString('pt-BR')}`, icon: DollarSign, color: "text-emerald-600", bg: "bg-emerald-50" },
         { title: "Códigos Disponíveis", value: stats.activeCodes, icon: Ticket, color: "text-amber-600", bg: "bg-amber-50" },
         { title: "Códigos Resgatados", value: stats.usedCodes, icon: TrendingUp, color: "text-purple-600", bg: "bg-purple-50" },
+        { title: "Sessões Pendentes", value: stats.pendingSessions, icon: Ticket, color: "text-cyan-600", bg: "bg-cyan-50" },
+        { title: "Sessões Confirmadas", value: stats.confirmedSessions, icon: Users, color: "text-fuchsia-600", bg: "bg-fuchsia-50" },
     ];
 
     return (

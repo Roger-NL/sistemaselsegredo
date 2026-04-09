@@ -27,6 +27,7 @@ export async function POST(req: Request) {
       await userRef.set({
         subscriptionStatus: "premium",
         purchasedPlan: "lifetime",
+        premiumActivatedAt: new Date().toISOString(),
         paymentId,
         pendingPixPayment: null,
         approvedPillar: Math.max(currentApprovedPillar, 2),

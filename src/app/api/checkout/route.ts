@@ -53,6 +53,7 @@ async function grantLifetimeAccess(userId: string, paymentId: string) {
     {
       subscriptionStatus: "premium",
       purchasedPlan: "lifetime",
+      premiumActivatedAt: new Date().toISOString(),
       paymentId,
       pendingPixPayment: null,
       approvedPillar: Math.max(currentApprovedPillar, 2),

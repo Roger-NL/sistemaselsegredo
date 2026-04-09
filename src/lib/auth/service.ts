@@ -56,6 +56,7 @@ export interface User {
     currentStreak: number;
     subscriptionStatus: SubscriptionStatus;
     subscriptionExpiresAt?: string;
+    premiumActivatedAt?: string;
     inviteCodeUsed?: string;
     paymentId?: string;
     purchasedPlan?: "lifetime";
@@ -174,6 +175,7 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
             lastLoginDate: typeof data.lastLoginDate === "string" ? data.lastLoginDate : undefined,
             subscriptionStatus: status,
             subscriptionExpiresAt: typeof data.subscriptionExpiresAt === "string" ? data.subscriptionExpiresAt : undefined,
+            premiumActivatedAt: typeof data.premiumActivatedAt === "string" ? data.premiumActivatedAt : undefined,
             inviteCodeUsed: typeof data.inviteCodeUsed === "string" ? data.inviteCodeUsed : undefined,
             paymentId: typeof data.paymentId === "string" ? data.paymentId : undefined,
             purchasedPlan: data.purchasedPlan === "lifetime" ? data.purchasedPlan : undefined,
@@ -543,6 +545,7 @@ export async function activateWithInvite(userId: string, code: string): Promise<
             await updateDoc(userRef, {
                 subscriptionStatus: 'premium',
                 subscriptionExpiresAt: expiresAt.toISOString(),
+                premiumActivatedAt: new Date().toISOString(),
                 inviteCodeUsed: 'ADMIN-TEST-KEY'
             });
             const user = await mapFirebaseUser(auth.currentUser!);
@@ -581,6 +584,7 @@ export async function activateWithInvite(userId: string, code: string): Promise<
         batch.update(userRef, {
             subscriptionStatus: 'premium',
             subscriptionExpiresAt: expiresAt.toISOString(),
+            premiumActivatedAt: new Date().toISOString(),
             inviteCodeUsed: code
         });
 
@@ -607,6 +611,7 @@ export async function activateWithPayment(userId: string, paymentId: string): Pr
         await updateDoc(userRef, {
             subscriptionStatus: 'premium',
             subscriptionExpiresAt: expiresAt.toISOString(),
+            premiumActivatedAt: new Date().toISOString(),
             paymentId
         });
 

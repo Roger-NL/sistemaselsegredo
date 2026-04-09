@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Crown, Sparkles, ArrowRight } from "lucide-react";
+import { Crown, Sparkles, ArrowRight, CalendarClock } from "lucide-react";
+import type { LiveSessionStatusPayload } from "@/lib/scheduling/types";
 import RotatingEarth from "@/components/ui/wireframe-dotted-globe";
 import { DevControls } from "@/components/core/DevControls";
 import { useProgress } from "@/context/ProgressContext";
@@ -50,6 +51,7 @@ export default function Page() {
   const [showCommsModal, setShowCommsModal] = useState(false);
 
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
+  const [schedulingStatus, setSchedulingStatus] = useState<LiveSessionStatusPayload | null>(null);
 
   // Carregar Leaderboard
   useEffect(() => {
@@ -59,6 +61,28 @@ export default function Page() {
     }
     loadData();
   }, []);
+
+  useEffect(() => {
+    async function loadSchedulingStatus() {
+      if (!user?.id || subscriptionStatus !== "premium") {
+        setSchedulingStatus(null);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/scheduling/status?userId=${user.id}`, {
+          cache: "no-store",
+        });
+        const payload = await response.json();
+        if (!response.ok) return;
+        setSchedulingStatus(payload);
+      } catch (error) {
+        console.error("Erro ao carregar status de agendamento:", error);
+      }
+    }
+
+    loadSchedulingStatus();
+  }, [subscriptionStatus, user?.id]);
 
   // Trigger: Verifica conexão WhatsApp ao entrar (delay 3s)
   useEffect(() => {
@@ -153,6 +177,41 @@ export default function Page() {
                 Ir agora
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
+            </div>
+          </button>
+        </div>
+      )}
+
+      {subscriptionStatus === "premium" && (
+        <div className="absolute top-24 left-1/2 z-30 w-[min(92vw,720px)] -translate-x-1/2 pointer-events-auto px-4">
+          <button
+            type="button"
+            onClick={() => router.push(ROUTES.app.scheduling)}
+            className="group w-full rounded-3xl border border-cyan-400/20 bg-[linear-gradient(135deg,rgba(6,12,17,0.92),rgba(8,24,33,0.92),rgba(8,33,31,0.92))] px-5 py-4 text-left shadow-[0_0_40px_rgba(34,211,238,0.08)] backdrop-blur-xl transition-all duration-300 hover:scale-[1.01] hover:border-cyan-300/50 hover:shadow-[0_0_65px_rgba(34,211,238,0.16)] md:px-6 md:py-5"
+          >
+            <div className="flex items-start gap-4">
+              <div className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 text-cyan-300 shadow-[0_0_18px_rgba(34,211,238,0.15)]">
+                <CalendarClock className="h-5 w-5" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-200">
+                  Sessão Ao Vivo
+                </div>
+
+                <h2 className="text-base font-black uppercase tracking-[0.12em] text-white md:text-lg">
+                  Área de agendamentos já disponível
+                </h2>
+                <p className="mt-1 max-w-[52ch] text-sm leading-relaxed text-cyan-50/78 md:text-[15px]">
+                  {schedulingStatus?.waitingReason ||
+                    "Seu espaço de agendamento já faz parte da conta premium. Quando a etapa certa for aprovada, ele vira sua área prática de marcação."}
+                </p>
+              </div>
+
+              <div className="hidden shrink-0 items-center gap-2 self-center rounded-full border border-cyan-300/30 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-cyan-200 md:flex">
+                Abrir
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </div>
             </div>
           </button>
         </div>
