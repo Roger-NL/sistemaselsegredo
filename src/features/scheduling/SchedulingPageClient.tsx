@@ -13,6 +13,7 @@ import {
   Crown,
   Loader2,
   RefreshCcw,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/lib/routes";
@@ -79,6 +80,35 @@ function getSessionStatusLabel(status?: string | null) {
     default:
       return "aguardando aprovação do Pilar 2";
   }
+}
+
+function getTimelineStepState(
+  currentStatus: string | null | undefined,
+  step: "approval" | "release" | "request" | "confirmation"
+) {
+  const order = {
+    awaiting_pillar_approval: 0,
+    awaiting_release_window: 1,
+    ready_to_schedule: 2,
+    pending_confirmation: 3,
+    confirmed: 4,
+    cancelled: 2,
+    completed: 4,
+  } as const;
+
+  const stepIndex = {
+    approval: 0,
+    release: 1,
+    request: 2,
+    confirmation: 3,
+  } as const;
+
+  const current = order[(currentStatus || "awaiting_pillar_approval") as keyof typeof order] ?? 0;
+  const target = stepIndex[step];
+
+  if (current > target) return "done";
+  if (current === target) return "current";
+  return "upcoming";
 }
 
 export default function SchedulingPageClient() {
@@ -273,6 +303,28 @@ export default function SchedulingPageClient() {
   const sessionStatusLabel = getSessionStatusLabel(status?.session?.status);
   const availableSlotsCount = slots.length;
   const hasRequestedSlot = Boolean(status?.session?.requestedSlotStart);
+  const timelineSteps = [
+    {
+      id: "approval",
+      label: "Aprovação da etapa",
+      description: "A equipe valida o fechamento do Pilar 2 para abrir o fluxo ao vivo.",
+    },
+    {
+      id: "release",
+      label: "Liberação da sessão",
+      description: "A área de agendamento entra em modo prático no momento certo.",
+    },
+    {
+      id: "request",
+      label: "Escolha do horário",
+      description: "Você manda um pedido real com os horários válidos para a sua conta.",
+    },
+    {
+      id: "confirmation",
+      label: "Confirmação final",
+      description: "O tutor confirma pelo calendário e sua jornada segue aberta.",
+    },
+  ] as const;
 
   if (isLoading || loadingState) {
     return (
@@ -406,6 +458,49 @@ export default function SchedulingPageClient() {
               </div>
             </div>
 
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-cyan-200" />
+                <p className="text-[10px] uppercase tracking-[0.24em] text-white/35">
+                  Linha da etapa
+                </p>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {timelineSteps.map((step, index) => {
+                  const stepState = getTimelineStepState(status?.session?.status, step.id);
+                  const tone =
+                    stepState === "done"
+                      ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100"
+                      : stepState === "current"
+                        ? "border-cyan-400/25 bg-cyan-500/10 text-cyan-100"
+                        : "border-white/10 bg-black/20 text-white/55";
+
+                  return (
+                    <div
+                      key={step.id}
+                      className={`rounded-2xl border p-4 transition-colors ${tone}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`flex h-7 w-7 items-center justify-center rounded-full border text-[11px] font-bold ${
+                          stepState === "done"
+                            ? "border-emerald-300/30 bg-emerald-400/20 text-emerald-100"
+                            : stepState === "current"
+                              ? "border-cyan-300/30 bg-cyan-400/20 text-cyan-100"
+                              : "border-white/10 bg-white/5 text-white/45"
+                        }`}>
+                          {index + 1}
+                        </div>
+                        <p className="text-sm font-semibold">{step.label}</p>
+                      </div>
+                      <p className="mt-3 text-sm leading-relaxed opacity-80">
+                        {step.description}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             {hasRequestedSlot && (
               <div className="mt-5 rounded-2xl border border-violet-500/20 bg-violet-500/10 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -439,29 +534,42 @@ export default function SchedulingPageClient() {
             )}
 
             {status?.canManageCurrentBooking && (
-              <div className="mt-5 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={submitting}
-                  className="inline-flex items-center gap-2 rounded-xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-200 transition hover:bg-red-500/15 disabled:opacity-60"
-                >
-                  {submitting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <CalendarX2 className="w-4 h-4" />
-                  )}
-                  Cancelar / remarcar
-                </button>
+              <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">
+                      Gerenciar pedido
+                    </p>
+                    <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/65">
+                      Se precisar ajustar o horário, você pode cancelar este pedido e voltar para a seleção de slots. O painel continua mostrando tudo o que já ficou registrado.
+                    </p>
+                  </div>
 
-                <button
-                  type="button"
-                  onClick={loadStatus}
-                  className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/75 transition hover:bg-white/10"
-                >
-                  <RefreshCcw className="w-4 h-4" />
-                  Atualizar status
-                </button>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      disabled={submitting}
+                      className="inline-flex items-center gap-2 rounded-xl border border-red-400/25 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-200 transition hover:bg-red-500/15 disabled:opacity-60"
+                    >
+                      {submitting ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <CalendarX2 className="w-4 h-4" />
+                      )}
+                      Cancelar / remarcar
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={loadStatus}
+                      className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/75 transition hover:bg-white/10"
+                    >
+                      <RefreshCcw className="w-4 h-4" />
+                      Atualizar status
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </section>
@@ -598,30 +706,62 @@ export default function SchedulingPageClient() {
         )}
 
         {status?.session?.status === "confirmed" && (
-          <section className="rounded-3xl border border-emerald-400/20 bg-emerald-500/10 p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-300/30 bg-emerald-400/15 text-emerald-200">
-                <Clock3 className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.24em] text-emerald-200">
-                  Próxima fase liberada
-                </p>
-                <h2 className="mt-2 text-2xl font-bold text-white">
-                  Seu Pilar 3 pode continuar
+          <section className="relative overflow-hidden rounded-[28px] border border-emerald-400/20 bg-[linear-gradient(135deg,rgba(10,25,20,0.96),rgba(14,44,37,0.94),rgba(42,25,70,0.92))] p-6 shadow-[0_20px_80px_rgba(16,185,129,0.16)]">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_30%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.16),transparent_35%)]" />
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.26em] text-emerald-100">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Sessão confirmada
+                </div>
+                <h2 className="mt-4 text-3xl font-bold text-white">
+                  Seu Pilar 3 já está destravado
                 </h2>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">
-                  A sessão ao vivo já ficou integrada ao seu progresso. Você não
-                  precisa esperar a aula acontecer para seguir estudando.
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-emerald-50/80">
+                  A sessão ao vivo já ficou integrada ao seu progresso. Agora você tem as duas coisas ao mesmo tempo: o acompanhamento marcado e a continuação da trilha liberada.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => router.push(`${ROUTES.app.pillar}/3`)}
-                  className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-4 text-sm font-bold text-black transition hover:bg-white/90"
-                >
-                  Ir para o Pilar 3
-                  <ArrowRight className="w-5 h-5" />
-                </button>
+
+                <div className="mt-5 grid gap-3 md:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">
+                      Sessão marcada
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-white">
+                      {formatDateTime(status?.session?.requestedSlotStart)}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">
+                      Estado da jornada
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-white">
+                      Você já pode seguir estudando
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => router.push(`${ROUTES.app.pillar}/3`)}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-4 text-sm font-bold text-black transition hover:bg-white/90"
+                  >
+                    Ir para o Pilar 3
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+
+                  {status?.session?.calendarHtmlLink && (
+                    <a
+                      href={status.session.calendarHtmlLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-white transition hover:bg-white/10"
+                    >
+                      Abrir sessão no calendário
+                      <Clock3 className="w-5 h-5" />
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           </section>
