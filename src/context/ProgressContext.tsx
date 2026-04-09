@@ -66,8 +66,18 @@ interface ProgressContextType {
     completedPillarModules: string[];
     /** Marca um módulo de pilar como completado */
     markPillarModuleAsCompleted: (moduleId: string) => void;
+    /** Alterna manualmente o status de um módulo de pilar (DevTools) */
+    setPillarModuleCompletion: (moduleId: string, completed: boolean) => Promise<void>;
     /** Marca todos os módulos de todos os pilares como completos (DevTools) */
     completeAllPillarModules: () => Promise<void>;
+    /** Marca todos os módulos de um pilar como completos (DevTools) */
+    completePillarModulesForPillar: (pillarNumber: number) => Promise<void>;
+    /** Limpa todos os módulos concluídos de um pilar (DevTools) */
+    clearPillarModulesForPillar: (pillarNumber: number) => Promise<void>;
+    /** Limpa todos os módulos concluídos dos pilares (DevTools) */
+    clearAllPillarModules: () => Promise<void>;
+    /** Remove as provas da conta atual (DevTools) */
+    clearCurrentUserExams: () => Promise<void>;
     /** Verifica se um módulo de pilar está completado */
     isPillarModuleCompleted: (moduleId: string) => boolean;
 }
@@ -100,6 +110,10 @@ function getInitialStatus(): Record<string, PillarStatus> {
 
 function getAllPillarModuleIds(): string[] {
     return Object.values(PILLARS_CONTENT).flatMap((pillar) => pillar.modules?.map((module) => module.id) ?? []);
+}
+
+function getPillarModuleIds(pillarNumber: number): string[] {
+    return PILLARS_CONTENT[pillarNumber]?.modules?.map((module) => module.id) ?? [];
 }
 
 // Provider
@@ -473,16 +487,53 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const completeAllPillarModules = async () => {
-        const allModuleIds = getAllPillarModuleIds();
-        setCompletedPillarModules(allModuleIds);
-
+    const syncCompletedPillarModules = async (moduleIds: string[]) => {
         if (user?.id) {
             const { updateUserProgress } = await import("@/lib/auth/service");
             await updateUserProgress(user.id, {
-                completedPillarModules: allModuleIds,
+                completedPillarModules: moduleIds,
             });
         }
+    };
+
+    const setPillarModuleCompletion = async (moduleId: string, completed: boolean) => {
+        const next = completed
+            ? Array.from(new Set([...completedPillarModules, moduleId]))
+            : completedPillarModules.filter((id) => id !== moduleId);
+
+        setCompletedPillarModules(next);
+        await syncCompletedPillarModules(next);
+    };
+
+    const completeAllPillarModules = async () => {
+        const allModuleIds = getAllPillarModuleIds();
+        setCompletedPillarModules(allModuleIds);
+        await syncCompletedPillarModules(allModuleIds);
+    };
+
+    const completePillarModulesForPillar = async (pillarNumber: number) => {
+        const ids = getPillarModuleIds(pillarNumber);
+        const next = Array.from(new Set([...completedPillarModules, ...ids]));
+        setCompletedPillarModules(next);
+        await syncCompletedPillarModules(next);
+    };
+
+    const clearPillarModulesForPillar = async (pillarNumber: number) => {
+        const ids = getPillarModuleIds(pillarNumber);
+        const next = completedPillarModules.filter((id) => !ids.includes(id));
+        setCompletedPillarModules(next);
+        await syncCompletedPillarModules(next);
+    };
+
+    const clearAllPillarModules = async () => {
+        setCompletedPillarModules([]);
+        await syncCompletedPillarModules([]);
+    };
+
+    const clearCurrentUserExams = async () => {
+        if (!user?.id) return;
+        const { deleteUserExams } = await import("@/lib/exam/service");
+        await deleteUserExams(user.id);
     };
 
     // Verifica se módulo de pilar está completado
@@ -560,7 +611,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 getGlobalProgress,
                 completedPillarModules,
                 markPillarModuleAsCompleted,
+                setPillarModuleCompletion,
                 completeAllPillarModules,
+                completePillarModulesForPillar,
+                clearPillarModulesForPillar,
+                clearAllPillarModules,
+                clearCurrentUserExams,
                 isPillarModuleCompleted,
                 hasSeenMissionComplete,
                 markMissionCompleteSeen,

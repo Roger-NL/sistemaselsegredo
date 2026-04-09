@@ -33,6 +33,54 @@ function formatDateTime(value?: string | null) {
   });
 }
 
+function getSessionTone(status?: string | null) {
+  switch (status) {
+    case "awaiting_release_window":
+      return {
+        badge: "Aguardando janela",
+        classes:
+          "border-amber-400/25 bg-amber-500/10 text-amber-100",
+      };
+    case "ready_to_schedule":
+      return {
+        badge: "Pronta para marcar",
+        classes:
+          "border-emerald-400/25 bg-emerald-500/10 text-emerald-100",
+      };
+    case "pending_confirmation":
+      return {
+        badge: "Pedido enviado",
+        classes: "border-cyan-400/25 bg-cyan-500/10 text-cyan-100",
+      };
+    case "confirmed":
+      return {
+        badge: "Confirmada",
+        classes:
+          "border-violet-400/25 bg-violet-500/10 text-violet-100",
+      };
+    default:
+      return {
+        badge: "Aguardando etapa",
+        classes: "border-white/10 bg-white/5 text-white/80",
+      };
+  }
+}
+
+function getSessionStatusLabel(status?: string | null) {
+  switch (status) {
+    case "awaiting_release_window":
+      return "janela de agendamento aguardando abertura";
+    case "ready_to_schedule":
+      return "aguardando sua escolha de horário";
+    case "pending_confirmation":
+      return "pedido aguardando confirmação do tutor";
+    case "confirmed":
+      return "sessão confirmada no calendário";
+    default:
+      return "aguardando aprovação do Pilar 2";
+  }
+}
+
 export default function SchedulingPageClient() {
   const router = useRouter();
   const { user, subscriptionStatus, isLoading, refreshUser } = useAuth();
@@ -221,6 +269,11 @@ export default function SchedulingPageClient() {
     }
   }, [status?.session]);
 
+  const sessionTone = getSessionTone(status?.session?.status);
+  const sessionStatusLabel = getSessionStatusLabel(status?.session?.status);
+  const availableSlotsCount = slots.length;
+  const hasRequestedSlot = Boolean(status?.session?.requestedSlotStart);
+
   if (isLoading || loadingState) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white">
@@ -234,9 +287,9 @@ export default function SchedulingPageClient() {
   }
 
   return (
-    <div className="min-h-screen min-h-[100dvh] p-4 md:p-8 text-white">
+    <div className="min-h-screen min-h-[100dvh] bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.08),transparent_30%),radial-gradient(circle_at_right,rgba(34,211,238,0.08),transparent_28%),linear-gradient(180deg,rgba(4,6,12,0.98),rgba(7,10,16,1))] p-4 md:p-8 text-white">
       <div className="max-w-5xl mx-auto space-y-6 pb-24">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-emerald-200">
               <Crown className="w-3.5 h-3.5" />
@@ -254,10 +307,54 @@ export default function SchedulingPageClient() {
           <button
             type="button"
             onClick={() => router.push(ROUTES.app.dashboard)}
-            className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 transition hover:bg-white/10 hover:text-white md:self-start"
           >
             Voltar ao dashboard
           </button>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-sm">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">
+              Estado da sessão
+            </p>
+            <div className="mt-3 flex items-center gap-3">
+              <div className={`rounded-full border px-3 py-1 text-xs font-semibold ${sessionTone.classes}`}>
+                {sessionTone.badge}
+              </div>
+            </div>
+            <p className="mt-3 text-sm text-white/55">
+              {status?.session
+                ? "Seu acompanhamento ao vivo já faz parte da jornada."
+                : "A área já existe na sua conta e entra em ação no momento certo."}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-sm">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">
+              Próxima data útil
+            </p>
+            <p className="mt-3 text-lg font-semibold text-white">
+              {formatDateTime(status?.earliestScheduleAt || undefined)}
+            </p>
+            <p className="mt-2 text-sm text-white/55">
+              O sistema só mostra horários que já estão dentro da janela certa para você.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur-sm">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">
+              Horários visíveis agora
+            </p>
+            <p className="mt-3 text-lg font-semibold text-white">
+              {status?.canRequestScheduling ? availableSlotsCount : 0}
+            </p>
+            <p className="mt-2 text-sm text-white/55">
+              {status?.canRequestScheduling
+                ? "Você pode escolher um horário real e mandar para confirmação."
+                : "Assim que a etapa abrir, esta área passa a mostrar os horários disponíveis."}
+            </p>
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
@@ -273,6 +370,9 @@ export default function SchedulingPageClient() {
                 <h2 className="mt-2 text-2xl font-bold text-white">
                   {headline}
                 </h2>
+                <div className={`mt-4 inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${sessionTone.classes}`}>
+                  {sessionTone.badge}
+                </div>
                 <p className="mt-3 text-sm leading-relaxed text-white/65">
                   {status?.waitingReason ||
                     "Assim que a etapa certa for aprovada, essa área deixa de ser passiva e vira o seu painel real de acompanhamento."}
@@ -293,9 +393,7 @@ export default function SchedulingPageClient() {
                   Status atual
                 </p>
                 <p className="mt-2 text-lg font-semibold text-white">
-                  {status?.session
-                    ? status.session.status.replaceAll("_", " ")
-                    : "aguardando aprovação do Pilar 2"}
+                  {sessionStatusLabel}
                 </p>
               </div>
               <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
@@ -308,7 +406,7 @@ export default function SchedulingPageClient() {
               </div>
             </div>
 
-            {status?.session?.requestedSlotStart && (
+            {hasRequestedSlot && (
               <div className="mt-5 rounded-2xl border border-violet-500/20 bg-violet-500/10 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
@@ -316,14 +414,14 @@ export default function SchedulingPageClient() {
                       Horário atual
                     </p>
                     <p className="mt-2 text-lg font-semibold text-white">
-                      {formatDateTime(status.session.requestedSlotStart)}
+                      {formatDateTime(status?.session?.requestedSlotStart)}
                     </p>
                     <p className="mt-1 text-sm text-white/60">
-                      até {formatDateTime(status.session.requestedSlotEnd)}
+                      até {formatDateTime(status?.session?.requestedSlotEnd)}
                     </p>
                   </div>
 
-                  {status.session.calendarHtmlLink && (
+                  {status?.session?.calendarHtmlLink && (
                     <a
                       href={status.session.calendarHtmlLink}
                       target="_blank"
@@ -333,6 +431,9 @@ export default function SchedulingPageClient() {
                       Abrir no Google Calendar
                     </a>
                   )}
+                </div>
+                <div className="mt-4 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white/65">
+                  Esse horário fica salvo aqui para você acompanhar, cancelar ou remarcar dentro das regras da etapa.
                 </div>
               </div>
             )}
@@ -384,6 +485,15 @@ export default function SchedulingPageClient() {
                   <p>{item}</p>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">
+                Leitura rápida
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-white/65">
+                A sessão ao vivo não existe para te travar. Ela entra como parte do acompanhamento. Quando estiver pronta para marcar, você escolhe um horário real. Quando o tutor confirmar, sua jornada segue aberta.
+              </p>
             </div>
           </section>
         </div>
@@ -453,9 +563,7 @@ export default function SchedulingPageClient() {
 
             {!loadingSlots && slots.length === 0 && (
               <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-4 text-sm text-amber-100">
-                Ainda não encontramos horários disponíveis para esta janela. Se a
-                integração do Google Calendar ainda não estiver configurada, esse
-                bloco permanece vazio até a operação liberar a agenda real.
+                Ainda não encontramos horários livres para esta janela. Se a agenda ainda não estiver conectada, esse bloco fica vazio até a operação liberar os horários reais.
               </div>
             )}
 
@@ -483,7 +591,7 @@ export default function SchedulingPageClient() {
                 ) : (
                   <ArrowRight className="w-5 h-5" />
                 )}
-                Solicitar este horário
+                Pedir este horário
               </button>
             </div>
           </section>

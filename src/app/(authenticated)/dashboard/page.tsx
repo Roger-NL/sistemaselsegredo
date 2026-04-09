@@ -38,10 +38,12 @@ export default function Page() {
   const currentSpec = getCurrentSpecialization();
   const globalProgress = getGlobalProgress();
   const pillarOneModuleIds = PILAR_1_DATA.modules?.map((module) => module.id) ?? [];
+  const isPremiumUser = subscriptionStatus === "premium";
   const hasFinishedPillarOne =
     (user?.approvedPillar || 1) >= 2 ||
     (pillarOneModuleIds.length > 0 && pillarOneModuleIds.every((moduleId) => completedPillarModules.includes(moduleId)));
-  const shouldShowPremiumCTA = subscriptionStatus !== "premium" && hasFinishedPillarOne;
+  const shouldShowPremiumCTA = !isPremiumUser && hasFinishedPillarOne;
+  const hasTopFeatureCard = shouldShowPremiumCTA || isPremiumUser;
 
   // NÃO mostrar DecisionMatrix automaticamente
   // O usuário acessa via HUD clicando no Pilar 10 (Especialidades)
@@ -52,6 +54,7 @@ export default function Page() {
 
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [schedulingStatus, setSchedulingStatus] = useState<LiveSessionStatusPayload | null>(null);
+  const heroTopOffsetClass = hasTopFeatureCard ? "top-[8.3rem] md:top-32" : "top-24";
 
   // Carregar Leaderboard
   useEffect(() => {
@@ -182,8 +185,8 @@ export default function Page() {
         </div>
       )}
 
-      {subscriptionStatus === "premium" && (
-        <div className="absolute top-24 left-1/2 z-30 w-[min(92vw,720px)] -translate-x-1/2 pointer-events-auto px-4">
+      {isPremiumUser && (
+        <div className="absolute top-[8.3rem] left-1/2 z-30 w-[min(92vw,720px)] -translate-x-1/2 pointer-events-auto px-4 md:top-32">
           <button
             type="button"
             onClick={() => router.push(ROUTES.app.scheduling)}
@@ -200,12 +203,17 @@ export default function Page() {
                 </div>
 
                 <h2 className="text-base font-black uppercase tracking-[0.12em] text-white md:text-lg">
-                  Área de agendamentos já disponível
+                  Sua área de agendamentos já está pronta
                 </h2>
                 <p className="mt-1 max-w-[52ch] text-sm leading-relaxed text-cyan-50/78 md:text-[15px]">
                   {schedulingStatus?.waitingReason ||
                     "Seu espaço de agendamento já faz parte da conta premium. Quando a etapa certa for aprovada, ele vira sua área prática de marcação."}
                 </p>
+                <div className="mt-3 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.18em] text-cyan-100/65">
+                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Sessão ao vivo</span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Acompanhamento humano</span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Fluxo premium</span>
+                </div>
               </div>
 
               <div className="hidden shrink-0 items-center gap-2 self-center rounded-full border border-cyan-300/30 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-cyan-200 md:flex">
@@ -308,7 +316,7 @@ export default function Page() {
       {/* Center Stage (The Globe) */}
       <div className="absolute inset-0 z-10 flex items-center justify-center">
         {/* Nova versão estonteante - Hero Left (Desktop) */}
-        <div className="absolute left-8 xl:left-12 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-start z-0 select-none max-w-[600px] pointer-events-none">
+        <div className={`absolute left-8 xl:left-12 ${heroTopOffsetClass} -translate-y-1/2 hidden lg:flex flex-col items-start z-0 select-none max-w-[600px] pointer-events-none`}>
           <div className="flex items-center gap-3 mb-6 opacity-80">
             <div className="h-px w-8 bg-gradient-to-r from-transparent to-cyan-400" />
             <span className="text-cyan-400 font-mono text-[10px] tracking-[0.3em] uppercase font-bold">
