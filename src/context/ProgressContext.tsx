@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { PILLARS, PLANETS, type Pillar, type Planet, type PillarStatus } from "@/data/curriculum";
+import { PILLARS_CONTENT } from "@/data/pillars-content";
 import { secureStorage } from "@/lib/storage/secure-storage";
 import { useAuth } from "@/context/AuthContext";
 import type { User } from "@/lib/auth/service";
@@ -30,11 +31,11 @@ interface ProgressContextType {
     /** Retorna lista de planetas com status atualizado */
     getPlanetsWithStatus: () => Planet[];
     /** Reseta todo o progresso (para testes) */
-    resetProgress: () => void;
+    resetProgress: () => Promise<void>;
     /** Desbloqueia uma especialização específica (inicia estudo) */
     unlockSpecialization: (planetId: string) => void;
     /** Define o progresso até um pilar específico (Dev Mode) */
-    setPillarLevel: (level: number) => void;
+    setPillarLevel: (level: number) => Promise<void>;
     /** ID da especialização escolhida/ativa (ou null se nenhuma) */
     chosenSpecialization: string | null;
     /** Status da especialização atual: 'studying' | 'pending_approval' | 'completed' | null */
@@ -65,6 +66,8 @@ interface ProgressContextType {
     completedPillarModules: string[];
     /** Marca um módulo de pilar como completado */
     markPillarModuleAsCompleted: (moduleId: string) => void;
+    /** Marca todos os módulos de todos os pilares como completos (DevTools) */
+    completeAllPillarModules: () => Promise<void>;
     /** Verifica se um módulo de pilar está completado */
     isPillarModuleCompleted: (moduleId: string) => boolean;
 }
@@ -93,6 +96,10 @@ function getInitialStatus(): Record<string, PillarStatus> {
         status[pillar.id] = index === 0 ? "unlocked" : "locked";
     });
     return status;
+}
+
+function getAllPillarModuleIds(): string[] {
+    return Object.values(PILLARS_CONTENT).flatMap((pillar) => pillar.modules?.map((module) => module.id) ?? []);
 }
 
 // Provider
@@ -256,13 +263,44 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     };
 
     // Define nível específico (Dev Mode)
-    const setPillarLevel = (level: number) => {
+    const setPillarLevel = async (level: number) => {
+        const safeLevel = Math.min(Math.max(level, 1), 9);
+
+        if (safeLevel <= 1) {
+            const initial = getInitialStatus();
+            setPillarStatus(initial);
+            setChosenSpecialization(null);
+            setSpecializationStatus(null);
+            setCompletedSpecializations([]);
+            setCompletedModules({});
+            setCompletedPillarModules([]);
+            setHasSeenMissionComplete(false);
+
+            if (storageKey) {
+                secureStorage.setItem(storageKey, {
+                    pillarStatus: initial,
+                    chosenSpecialization: null,
+                    specializationStatus: null,
+                    completedSpecializations: [],
+                    completedModules: {},
+                    completedPillarModules: [],
+                    hasSeenMissionComplete: false
+                });
+            }
+
+            if (user?.id) {
+                const { resetUserCourseProgress } = await import("@/lib/admin/reset-user-course-progress");
+                await resetUserCourseProgress(user.id);
+            }
+            return;
+        }
+
         const newStatus: Record<string, PillarStatus> = {};
         PILLARS.forEach((pillar, index) => {
             const pillarNum = index + 1;
-            if (pillarNum < level) {
+            if (pillarNum < safeLevel) {
                 newStatus[pillar.id] = "completed";
-            } else if (pillarNum === level) {
+            } else if (pillarNum === safeLevel) {
                 newStatus[pillar.id] = "unlocked";
             } else {
                 newStatus[pillar.id] = "locked";
@@ -276,7 +314,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 updateUserProgress(user.id, {
                     localPillarStatus: newStatus,
                     completedPillarModules: [],
-                    approvedPillar: level, // Sync the "Server Authority" as well
+                    approvedPillar: safeLevel, // Sync the "Server Authority" as well
                 });
             });
         }
@@ -435,6 +473,18 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const completeAllPillarModules = async () => {
+        const allModuleIds = getAllPillarModuleIds();
+        setCompletedPillarModules(allModuleIds);
+
+        if (user?.id) {
+            const { updateUserProgress } = await import("@/lib/auth/service");
+            await updateUserProgress(user.id, {
+                completedPillarModules: allModuleIds,
+            });
+        }
+    };
+
     // Verifica se módulo de pilar está completado
     const isPillarModuleCompleted = (moduleId: string) => {
         return completedPillarModules.includes(moduleId);
@@ -475,21 +525,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 hasSeenMissionComplete: false
             });
         }
-        // Also clear Firebase progress so it doesn't re-inject old data on reload
+        // Reset only the currently logged-in account in DevTools, including exams,
+        // so old Pillar 1 submissions don't auto-open Pillar 2 again.
         if (user?.id) {
-            const { updateUserProgress } = await import("@/lib/auth/service");
-            await updateUserProgress(user.id, {
-                localPillarStatus: {},
-                completedPillarModules: [],
-                completedModules: {},
-                completedSpecializations: [],
-                chosenSpecialization: null,
-                specializationStatus: null,
-                hasSeenMissionComplete: false,
-                approvedPillar: 1, // Reset to first pillar
-            });
+            const { resetUserCourseProgress } = await import("@/lib/admin/reset-user-course-progress");
+            await resetUserCourseProgress(user.id);
         }
-        window.location.reload();
     };
 
     return (
@@ -519,6 +560,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
                 getGlobalProgress,
                 completedPillarModules,
                 markPillarModuleAsCompleted,
+                completeAllPillarModules,
                 isPillarModuleCompleted,
                 hasSeenMissionComplete,
                 markMissionCompleteSeen,
