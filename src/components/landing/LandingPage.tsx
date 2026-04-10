@@ -189,9 +189,27 @@ function LandingInner({ isDark, isAuthenticated, isLoading }: {
                         </div>
 
                         <div className={`flex items-center gap-8 text-xs font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>
-                            <a href="#" className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-gray-900"}`}>Termos</a>
-                            <a href="#" className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-gray-900"}`}>Privacidade</a>
-                            <a href="#" className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-gray-900"}`}>Suporte</a>
+                            <button
+                                type="button"
+                                onClick={() => {}}
+                                className={`bg-transparent border-0 p-0 transition-colors ${isDark ? "hover:text-white" : "hover:text-gray-900"}`}
+                            >
+                                Termos
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {}}
+                                className={`bg-transparent border-0 p-0 transition-colors ${isDark ? "hover:text-white" : "hover:text-gray-900"}`}
+                            >
+                                Privacidade
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById("faq")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                                className={`bg-transparent border-0 p-0 transition-colors ${isDark ? "hover:text-white" : "hover:text-gray-900"}`}
+                            >
+                                Suporte
+                            </button>
                         </div>
                     </div>
 
