@@ -54,8 +54,6 @@ export default function Page() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [schedulingStatus, setSchedulingStatus] = useState<LiveSessionStatusPayload | null>(null);
   const shouldShowSchedulingCard = isPremiumUser && Boolean(schedulingStatus?.session);
-  const hasTopFeatureCard = shouldShowPremiumCTA || shouldShowSchedulingCard;
-  const heroTopOffsetClass = hasTopFeatureCard ? "top-[8.3rem] md:top-32" : "top-24";
 
   // Carregar Leaderboard
   useEffect(() => {
@@ -317,7 +315,7 @@ export default function Page() {
       {/* Center Stage (The Globe) */}
       <div className="absolute inset-0 z-10 flex items-center justify-center">
         {/* Nova versão estonteante - Hero Left (Desktop) */}
-        <div className={`absolute left-8 xl:left-12 ${heroTopOffsetClass} -translate-y-1/2 hidden lg:flex flex-col items-start z-0 select-none max-w-[600px] pointer-events-none`}>
+        <div className="absolute left-8 top-1/2 hidden max-w-[600px] -translate-y-1/2 select-none pointer-events-none lg:flex xl:left-12 flex-col items-start z-0">
           <div className="flex items-center gap-3 mb-6 opacity-80">
             <div className="h-px w-8 bg-gradient-to-r from-transparent to-cyan-400" />
             <span className="text-cyan-400 font-mono text-[10px] tracking-[0.3em] uppercase font-bold">
