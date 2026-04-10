@@ -10,12 +10,13 @@ export async function POST(req: Request) {
     const { userId: requestedUserId } = body;
     const { sessionUserId, isAdmin } = await getRequestUserContext();
     const userId = requestedUserId || sessionUserId;
+    const isDevFallback = process.env.NODE_ENV !== 'production' && !sessionUserId && !!requestedUserId;
 
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId.' }, { status: 400 });
     }
 
-    if (!isAdmin && sessionUserId !== userId) {
+    if (!isAdmin && !isDevFallback && sessionUserId !== userId) {
       return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
     }
 
