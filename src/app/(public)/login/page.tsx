@@ -19,9 +19,9 @@ export default function LoginPage() {
 
 function LoginPageFallback() {
     return (
-        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#050505] p-4">
+        <div className="relative min-h-[100dvh] w-full overflow-y-auto overflow-x-hidden bg-[#050505] px-4 py-10 md:flex md:min-h-screen md:items-center md:justify-center md:overflow-hidden md:p-4">
             <AuthBackground />
-            <div className="relative z-10 w-full max-w-md bg-[#0A0A0A]/60 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
+            <div className="relative z-10 mx-auto w-full max-w-md rounded-2xl border border-white/10 bg-[#0A0A0A]/60 p-6 pb-10 shadow-2xl backdrop-blur-xl sm:p-8 sm:pb-8">
                 <div className="text-center text-slate-400 text-sm">Carregando acesso...</div>
             </div>
         </div>
@@ -41,6 +41,12 @@ function LoginPageContent() {
     const { user, login, loginWithGoogle, isAuthenticated, isLoading, resetPassword } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
+
+    const handleFieldFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+        window.setTimeout(() => {
+            event.target.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 250);
+    };
 
     const getPostLoginTarget = useCallback((email?: string) => {
         const callbackUrl = searchParams?.get("callbackUrl") || "";
@@ -96,7 +102,7 @@ function LoginPageContent() {
     };
 
     return (
-        <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#050505] p-4">
+        <div className="relative min-h-[100dvh] w-full overflow-y-auto overflow-x-hidden bg-[#050505] px-4 py-10 md:flex md:min-h-screen md:items-center md:justify-center md:overflow-hidden md:p-4">
 
             {/* Ambient Background */}
             <AuthBackground />
@@ -114,7 +120,7 @@ function LoginPageContent() {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="relative z-10 w-full max-w-md bg-[#0A0A0A]/60 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl"
+                className="relative z-10 mx-auto w-full max-w-md rounded-2xl border border-white/10 bg-[#0A0A0A]/60 p-6 pb-10 shadow-2xl backdrop-blur-xl sm:p-8 sm:pb-8"
             >
                 {/* Header */}
                 <div className="text-center mb-10">
@@ -147,6 +153,7 @@ function LoginPageContent() {
                                     required
                                     value={identifier}
                                     onChange={(e) => setIdentifier(e.target.value)}
+                                    onFocus={handleFieldFocus}
                                     className="block w-full rounded-lg bg-black/40 border border-white/10 px-4 py-3 text-white placeholder-slate-600 focus:border-white/30 focus:ring-0 transition-all outline-none sm:text-sm"
                                     placeholder="seu@email.com"
                                 />
@@ -167,6 +174,7 @@ function LoginPageContent() {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    onFocus={handleFieldFocus}
                                     className="block w-full rounded-lg bg-black/40 border border-white/10 px-4 py-3 text-white placeholder-slate-600 focus:border-white/30 focus:ring-0 transition-all outline-none sm:text-sm"
                                     placeholder="••••••••"
                                 />
