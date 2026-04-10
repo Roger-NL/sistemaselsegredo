@@ -7,8 +7,9 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { userId, slotStart, slotEnd, notes } = body;
+    const { userId: requestedUserId, slotStart, slotEnd, notes } = body;
     const { sessionUserId, isAdmin } = await getRequestUserContext();
+    const userId = requestedUserId || sessionUserId;
 
     if (!userId || !slotStart || !slotEnd) {
       return NextResponse.json({ error: 'Missing booking payload.' }, { status: 400 });

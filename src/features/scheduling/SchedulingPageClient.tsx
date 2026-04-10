@@ -131,7 +131,7 @@ export default function SchedulingPageClient() {
     setError("");
 
     try {
-      const response = await fetch(`/api/scheduling/status?userId=${user.id}`, {
+      const response = await fetch("/api/scheduling/status", {
         cache: "no-store",
       });
       const payload = await response.json();
@@ -158,10 +158,9 @@ export default function SchedulingPageClient() {
     setLoadingSlots(true);
 
     try {
-      const response = await fetch(
-        `/api/scheduling/availability?userId=${user.id}`,
-        { cache: "no-store" }
-      );
+      const response = await fetch("/api/scheduling/availability", {
+        cache: "no-store",
+      });
       const payload = await response.json();
 
       if (!response.ok) {
@@ -220,7 +219,6 @@ export default function SchedulingPageClient() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user.id,
           slotStart: selectedSlot.start,
           slotEnd: selectedSlot.end,
           notes,
@@ -262,7 +260,7 @@ export default function SchedulingPageClient() {
       const response = await fetch("/api/scheduling/cancel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
+        body: JSON.stringify({}),
       });
       const payload = await response.json();
 
