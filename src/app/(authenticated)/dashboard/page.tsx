@@ -43,7 +43,6 @@ export default function Page() {
     (user?.approvedPillar || 1) >= 2 ||
     (pillarOneModuleIds.length > 0 && pillarOneModuleIds.every((moduleId) => completedPillarModules.includes(moduleId)));
   const shouldShowPremiumCTA = !isPremiumUser && hasFinishedPillarOne;
-  const hasTopFeatureCard = shouldShowPremiumCTA || isPremiumUser;
 
   // NÃO mostrar DecisionMatrix automaticamente
   // O usuário acessa via HUD clicando no Pilar 10 (Especialidades)
@@ -54,6 +53,8 @@ export default function Page() {
 
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [schedulingStatus, setSchedulingStatus] = useState<LiveSessionStatusPayload | null>(null);
+  const shouldShowSchedulingCard = isPremiumUser && Boolean(schedulingStatus?.session);
+  const hasTopFeatureCard = shouldShowPremiumCTA || shouldShowSchedulingCard;
   const heroTopOffsetClass = hasTopFeatureCard ? "top-[8.3rem] md:top-32" : "top-24";
 
   // Carregar Leaderboard
@@ -185,7 +186,7 @@ export default function Page() {
         </div>
       )}
 
-      {isPremiumUser && (
+      {shouldShowSchedulingCard && (
         <div className="absolute top-[8.3rem] left-1/2 z-30 w-[min(92vw,720px)] -translate-x-1/2 pointer-events-auto px-4 md:top-32">
           <button
             type="button"
