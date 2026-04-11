@@ -1,5 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
-import { addDays, isAfter, parseISO, subHours } from 'date-fns';
+import { addDays, addHours, isAfter, parseISO, subHours } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { cancelCalendarEvent, createCalendarEventForBooking, getAvailableSchedulingSlots, getCalendarEventState, getSchedulingTimezone, getSchedulingTutorEmail, isGoogleCalendarConfigured, listCalendarEventsForDate, updateCalendarEventMarker } from '@/lib/scheduling/google-calendar';
 import type { AdminSchedulingSnapshot, LiveSessionAvailabilitySlot, LiveSessionBooking, LiveSessionStatusPayload, SchedulingDayOverview } from '@/lib/scheduling/types';
@@ -7,6 +7,7 @@ import type { AdminSchedulingSnapshot, LiveSessionAvailabilitySlot, LiveSessionB
 const COLLECTION = 'live_sessions';
 const PURCHASE_WINDOW_DAYS = 7;
 const RESCHEDULE_DEADLINE_HOURS = 24;
+const PENDING_CONFIRMATION_TIMEOUT_HOURS = 24;
 
 function stripUndefined<T extends object>(value: T): T {
   return Object.fromEntries(
@@ -158,6 +159,45 @@ async function syncSessionWithCalendar(session: LiveSessionBooking) {
   return session;
 }
 
+async function expirePendingSessionIfNeeded(session: LiveSessionBooking) {
+  if (session.status !== 'pending_confirmation' || !session.requestedSlotStart) {
+    return session;
+  }
+
+  const pendingSince = session.updatedAt || session.createdAt || nowIso();
+  const expiresAt = addHours(parseISO(pendingSince), PENDING_CONFIRMATION_TIMEOUT_HOURS);
+
+  if (!isAfter(new Date(), expiresAt)) {
+    return session;
+  }
+
+  if (session.calendarEventId) {
+    await cancelCalendarEvent(session.calendarEventId);
+  }
+
+  const nextStatus = getReadyStatusFromSession(session);
+  const expiredUpdate: Partial<LiveSessionBooking> = {
+    status: nextStatus,
+    requestedSlotStart: null,
+    requestedSlotEnd: null,
+    calendarEventId: null,
+    calendarHtmlLink: null,
+    confirmedAt: null,
+    adminDecisionReason: null,
+    cancelledAt: nowIso(),
+    updatedAt: nowIso(),
+    lastActionMessage: 'Seu pedido expirou automaticamente após 24 horas sem confirmação. Escolha um novo horário disponível.',
+  };
+
+  await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined(expiredUpdate), { merge: true });
+
+  return {
+    ...session,
+    ...expiredUpdate,
+    status: nextStatus,
+  } as LiveSessionBooking;
+}
+
 export async function getSchedulingStatusForUser(userId: string): Promise<LiveSessionStatusPayload> {
   const user = await getUserProfile(userId);
   const premiumStatus = user?.subscriptionStatus === 'premium';
@@ -196,6 +236,7 @@ export async function getSchedulingStatusForUser(userId: string): Promise<LiveSe
   }
 
   if (session) {
+    session = await expirePendingSessionIfNeeded(session);
     session = await syncSessionWithCalendar(session);
 
     if (
