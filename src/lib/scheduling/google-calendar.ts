@@ -1,7 +1,7 @@
 import { google } from 'googleapis';
 import { addMinutes, eachDayOfInterval, format, isAfter, isBefore, parseISO, startOfDay } from 'date-fns';
 import { fromZonedTime, toZonedTime } from 'date-fns-tz';
-import type { LiveSessionAvailabilitySlot, LiveSessionBooking } from '@/lib/scheduling/types';
+import type { LiveSessionAvailabilitySlot, LiveSessionBooking, SchedulingCalendarDayItem } from '@/lib/scheduling/types';
 
 const CALENDAR_SCOPE = ['https://www.googleapis.com/auth/calendar'];
 const DEFAULT_TIMEZONE = process.env.GOOGLE_CALENDAR_TIMEZONE || 'America/Sao_Paulo';
@@ -208,6 +208,68 @@ export async function getCalendarEventState(eventId: string) {
     console.error('[scheduling] Falha ao consultar evento no Google Calendar', error);
     return null;
   }
+}
+
+function replaceSummaryMarker(summary: string | undefined, marker: 'PENDENTE' | 'CONFIRMADO') {
+  const baseSummary = (summary || 'Sessão ao vivo')
+    .replace(/^\[(PENDENTE|CONFIRMADO|RECUSAR|CANCELAR|OK)\]\s*/i, '')
+    .trim();
+
+  return `[${marker}] ${baseSummary}`;
+}
+
+export async function updateCalendarEventMarker(eventId: string, marker: 'PENDENTE' | 'CONFIRMADO') {
+  const calendar = getCalendarClient();
+  if (!calendar) return null;
+
+  const current = await calendar.events.get({
+    calendarId: DEFAULT_CALENDAR_ID,
+    eventId,
+  });
+
+  const nextSummary = replaceSummaryMarker(current.data.summary || undefined, marker);
+  const response = await calendar.events.patch({
+    calendarId: DEFAULT_CALENDAR_ID,
+    eventId,
+    requestBody: {
+      summary: nextSummary,
+      colorId: marker === 'CONFIRMADO' ? '10' : '5',
+    },
+  });
+
+  return {
+    status: response.data.status,
+    htmlLink: response.data.htmlLink || undefined,
+    summary: response.data.summary || undefined,
+  };
+}
+
+export async function listCalendarEventsForDate(dateKey: string): Promise<SchedulingCalendarDayItem[]> {
+  const calendar = getCalendarClient();
+  if (!calendar) return [];
+
+  const timeMin = fromZonedTime(`${dateKey}T00:00:00`, DEFAULT_TIMEZONE).toISOString();
+  const timeMax = fromZonedTime(`${dateKey}T23:59:59`, DEFAULT_TIMEZONE).toISOString();
+
+  const response = await calendar.events.list({
+    calendarId: DEFAULT_CALENDAR_ID,
+    singleEvents: true,
+    orderBy: 'startTime',
+    timeMin,
+    timeMax,
+    maxResults: 250,
+  });
+
+  return (response.data.items || [])
+    .filter((item) => item.status !== 'cancelled')
+    .map((item) => ({
+      id: item.id || undefined,
+      title: item.summary || 'Evento sem título',
+      start: item.start?.dateTime || item.start?.date || null,
+      end: item.end?.dateTime || item.end?.date || null,
+      status: item.status || null,
+      htmlLink: item.htmlLink || null,
+    }));
 }
 
 export async function cancelCalendarEvent(eventId: string) {

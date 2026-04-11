@@ -1,7 +1,8 @@
 import { adminDb } from '@/lib/firebase-admin';
 import { addDays, isAfter, parseISO, subHours } from 'date-fns';
-import { cancelCalendarEvent, createCalendarEventForBooking, getAvailableSchedulingSlots, getCalendarEventState, getSchedulingTimezone, getSchedulingTutorEmail, isGoogleCalendarConfigured } from '@/lib/scheduling/google-calendar';
-import type { LiveSessionAvailabilitySlot, LiveSessionBooking, LiveSessionStatusPayload } from '@/lib/scheduling/types';
+import { formatInTimeZone } from 'date-fns-tz';
+import { cancelCalendarEvent, createCalendarEventForBooking, getAvailableSchedulingSlots, getCalendarEventState, getSchedulingTimezone, getSchedulingTutorEmail, isGoogleCalendarConfigured, listCalendarEventsForDate, updateCalendarEventMarker } from '@/lib/scheduling/google-calendar';
+import type { AdminSchedulingSnapshot, LiveSessionAvailabilitySlot, LiveSessionBooking, LiveSessionStatusPayload, SchedulingDayOverview } from '@/lib/scheduling/types';
 
 const COLLECTION = 'live_sessions';
 const PURCHASE_WINDOW_DAYS = 7;
@@ -352,5 +353,107 @@ export async function getAdminSchedulingSnapshot() {
     confirmed: sessions.filter((item) => item.status === 'confirmed').length,
     readyToSchedule: sessions.filter((item) => item.status === 'ready_to_schedule' || item.status === 'awaiting_release_window').length,
     sessions,
+  } satisfies AdminSchedulingSnapshot;
+}
+
+async function unlockPillarForConfirmedSession(session: LiveSessionBooking) {
+  if (session.sourcePillarId !== 2) return;
+
+  const userRef = adminDb.collection('users').doc(session.userId);
+  const userDoc = await userRef.get();
+  const approvedPillar = userDoc.exists ? Number(userDoc.data()?.approvedPillar || 1) : 1;
+  await userRef.set({ approvedPillar: Math.max(approvedPillar, 3), updatedAt: nowIso() }, { merge: true });
+}
+
+function getReadyStatusFromSession(session: LiveSessionBooking) {
+  return isAfter(parseISO(session.earliestScheduleAt || nowIso()), new Date())
+    ? 'awaiting_release_window'
+    : 'ready_to_schedule';
+}
+
+export async function getSchedulingDayOverview(sessionId: string): Promise<SchedulingDayOverview> {
+  const snapshot = await adminDb.collection(COLLECTION).doc(sessionId).get();
+  if (!snapshot.exists) {
+    throw new Error('SESSION_NOT_FOUND');
+  }
+
+  const session = { id: snapshot.id, ...(snapshot.data() as LiveSessionBooking) } as LiveSessionBooking;
+  if (!session.requestedSlotStart) {
+    throw new Error('SESSION_WITHOUT_SLOT');
+  }
+
+  const timezone = getSchedulingTimezone();
+  const dateKey = formatInTimeZone(session.requestedSlotStart, timezone, 'yyyy-MM-dd');
+  const events = await listCalendarEventsForDate(dateKey);
+
+  return {
+    dateKey,
+    timezone,
+    session,
+    events: events.map((event) => ({
+      ...event,
+      isCurrentRequest: Boolean(session.calendarEventId && event.id === session.calendarEventId),
+    })),
   };
+}
+
+export async function updateSchedulingStatusByAdmin(options: {
+  sessionId: string;
+  decision: 'confirm' | 'pending' | 'reject';
+}) {
+  const snapshot = await adminDb.collection(COLLECTION).doc(options.sessionId).get();
+  if (!snapshot.exists) {
+    throw new Error('SESSION_NOT_FOUND');
+  }
+
+  const session = { id: snapshot.id, ...(snapshot.data() as LiveSessionBooking) } as LiveSessionBooking;
+  if (!session.requestedSlotStart && options.decision !== 'pending') {
+    throw new Error('SESSION_WITHOUT_SLOT');
+  }
+
+  if (options.decision === 'confirm') {
+    if (session.calendarEventId) {
+      await updateCalendarEventMarker(session.calendarEventId, 'CONFIRMADO');
+    }
+
+    await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined({
+      status: 'confirmed',
+      confirmedAt: session.confirmedAt || nowIso(),
+      updatedAt: nowIso(),
+      lastActionMessage: 'Sua aula ao vivo foi confirmada. O Pilar 3 já está liberado para você continuar.',
+    }), { merge: true });
+
+    await unlockPillarForConfirmedSession(session);
+    return;
+  }
+
+  if (options.decision === 'pending') {
+    if (session.calendarEventId) {
+      await updateCalendarEventMarker(session.calendarEventId, 'PENDENTE');
+    }
+
+    await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined({
+      status: 'pending_confirmation',
+      confirmedAt: null,
+      updatedAt: nowIso(),
+      lastActionMessage: 'Seu pedido foi enviado. Agora o tutor confirma esse horário pelo calendário.',
+    }), { merge: true });
+    return;
+  }
+
+  if (session.calendarEventId) {
+    await cancelCalendarEvent(session.calendarEventId);
+  }
+
+  await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined({
+    status: getReadyStatusFromSession(session),
+    requestedSlotStart: null,
+    requestedSlotEnd: null,
+    calendarEventId: null,
+    calendarHtmlLink: null,
+    confirmedAt: null,
+    cancelledAt: nowIso(),
+    updatedAt: nowIso(),
+    lastActionMessage: 'Esse horário não foi confirmado. O aluno já pode escolher um novo horário válido.',
+  }), { merge: true });
 }

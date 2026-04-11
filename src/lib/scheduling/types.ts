@@ -51,3 +51,28 @@ export interface LiveSessionStatusPayload {
   waitingReason?: string;
   timezone: string;
 }
+
+export interface AdminSchedulingSnapshot {
+  total: number;
+  pendingConfirmation: number;
+  confirmed: number;
+  readyToSchedule: number;
+  sessions: LiveSessionBooking[];
+}
+
+export interface SchedulingCalendarDayItem {
+  id?: string;
+  title: string;
+  start: string | null;
+  end: string | null;
+  status?: string | null;
+  htmlLink?: string | null;
+  isCurrentRequest?: boolean;
+}
+
+export interface SchedulingDayOverview {
+  dateKey: string;
+  timezone: string;
+  session: LiveSessionBooking;
+  events: SchedulingCalendarDayItem[];
+}
