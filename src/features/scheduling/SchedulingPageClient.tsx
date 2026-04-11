@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
@@ -150,6 +150,7 @@ export default function SchedulingPageClient() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
+  const previousSessionStatusRef = useRef<string | null>(null);
   const isLocalDev =
     typeof window !== "undefined" &&
     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
@@ -235,11 +236,21 @@ export default function SchedulingPageClient() {
 
     const timer = window.setInterval(() => {
       loadStatus();
-      refreshUser();
     }, 15000);
 
     return () => window.clearInterval(timer);
-  }, [loadStatus, refreshUser, status?.session]);
+  }, [loadStatus, status?.session]);
+
+  useEffect(() => {
+    const nextStatus = status?.session?.status || null;
+    const previousStatus = previousSessionStatusRef.current;
+
+    if (nextStatus === "confirmed" && previousStatus !== "confirmed") {
+      refreshUser();
+    }
+
+    previousSessionStatusRef.current = nextStatus;
+  }, [refreshUser, status?.session?.status]);
 
   const handleRequest = async () => {
     if (!user?.id || !selectedSlot) return;
