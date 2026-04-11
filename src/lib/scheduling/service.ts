@@ -229,7 +229,7 @@ export async function getSchedulingStatusForUser(userId: string): Promise<LiveSe
     : session.status === 'awaiting_release_window'
       ? 'A sessão foi liberada, mas os horários só ficam visíveis a partir da janela segura da compra.'
       : session.status === 'pending_confirmation'
-        ? 'Seu pedido foi enviado. Agora o tutor confirma esse horário pelo calendário.'
+        ? 'Seu pedido foi enviado. Agora o tutor confirma esse horário no painel.'
         : session.status === 'confirmed'
           ? 'Sua sessão está confirmada e sua jornada já pode continuar normalmente.'
           : session.lastActionMessage || undefined;
@@ -259,8 +259,21 @@ export async function getSchedulingAvailability(userId: string): Promise<LiveSes
     return [];
   }
 
-  return getAvailableSchedulingSlots({
+  const slots = await getAvailableSchedulingSlots({
     earliestScheduleAt: status.earliestScheduleAt,
+  });
+
+  const reservedRanges = await getReservedSessionRanges(userId);
+
+  return slots.filter((slot) => {
+    const slotStart = parseISO(slot.start);
+    const slotEnd = parseISO(slot.end);
+
+    return !reservedRanges.some((range) => {
+      const rangeStart = parseISO(range.start);
+      const rangeEnd = parseISO(range.end);
+      return slotStart < rangeEnd && slotEnd > rangeStart;
+    });
   });
 }
 
@@ -280,6 +293,15 @@ export async function requestLiveSessionBooking(options: {
     throw new Error('SLOT_NOT_ALLOWED_YET');
   }
 
+  const availableSlots = await getSchedulingAvailability(options.userId);
+  const requestedSlotStillAvailable = availableSlots.some(
+    (slot) => slot.start === options.slotStart && slot.end === options.slotEnd
+  );
+
+  if (!requestedSlotStillAvailable) {
+    throw new Error('SLOT_NO_LONGER_AVAILABLE');
+  }
+
   const sessionId = status.session.id || getSessionId(options.userId, 2);
   const nextSession: LiveSessionBooking = {
     ...status.session,
@@ -289,23 +311,17 @@ export async function requestLiveSessionBooking(options: {
     requestedSlotEnd: options.slotEnd,
     notes: options.notes,
     updatedAt: nowIso(),
-    lastActionMessage: 'Seu pedido foi enviado. Agora o tutor confirma esse horário pelo calendário.',
+    lastActionMessage: 'Seu pedido foi enviado. Agora o tutor confirma esse horário no painel.',
     tutorEmail: status.session.tutorEmail || getSchedulingTutorEmail(),
   };
 
-  const calendarEvent = await createCalendarEventForBooking(nextSession);
-
   await adminDb.collection(COLLECTION).doc(sessionId).set(stripUndefined({
     ...nextSession,
-    calendarEventId: calendarEvent?.eventId,
-    calendarHtmlLink: calendarEvent?.htmlLink,
+    calendarEventId: null,
+    calendarHtmlLink: null,
   }), { merge: true });
 
-  return {
-    ...nextSession,
-    calendarEventId: calendarEvent?.eventId,
-    calendarHtmlLink: calendarEvent?.htmlLink,
-  };
+  return nextSession;
 }
 
 export async function cancelLiveSessionBooking(userId: string) {
@@ -371,6 +387,38 @@ function getReadyStatusFromSession(session: LiveSessionBooking) {
     : 'ready_to_schedule';
 }
 
+async function getReservedSessionRanges(excludeUserId?: string) {
+  const snapshot = await adminDb.collection(COLLECTION).get();
+
+  return snapshot.docs
+    .map((doc) => ({ id: doc.id, ...(doc.data() as LiveSessionBooking) } as LiveSessionBooking))
+    .filter((session) =>
+      Boolean(session.requestedSlotStart && session.requestedSlotEnd) &&
+      session.userId !== excludeUserId &&
+      ['pending_confirmation', 'confirmed', 'completed'].includes(session.status)
+    )
+    .map((session) => ({
+      start: session.requestedSlotStart!,
+      end: session.requestedSlotEnd!,
+      session,
+    }));
+}
+
+async function getBookedSessionsForDate(dateKey: string, excludeSessionId?: string) {
+  const snapshot = await adminDb.collection(COLLECTION).get();
+
+  return snapshot.docs
+    .map((doc) => ({ id: doc.id, ...(doc.data() as LiveSessionBooking) } as LiveSessionBooking))
+    .filter((session) => {
+      if (!session.requestedSlotStart || !session.requestedSlotEnd) return false;
+      if (excludeSessionId && session.id === excludeSessionId) return false;
+      if (!['pending_confirmation', 'confirmed', 'completed'].includes(session.status)) return false;
+
+      const sessionDateKey = formatInTimeZone(session.requestedSlotStart, getSchedulingTimezone(), 'yyyy-MM-dd');
+      return sessionDateKey === dateKey;
+    });
+}
+
 export async function getSchedulingDayOverview(sessionId: string): Promise<SchedulingDayOverview> {
   const snapshot = await adminDb.collection(COLLECTION).doc(sessionId).get();
   if (!snapshot.exists) {
@@ -384,16 +432,39 @@ export async function getSchedulingDayOverview(sessionId: string): Promise<Sched
 
   const timezone = getSchedulingTimezone();
   const dateKey = formatInTimeZone(session.requestedSlotStart, timezone, 'yyyy-MM-dd');
-  const events = await listCalendarEventsForDate(dateKey);
+  const [events, bookedSessions] = await Promise.all([
+    listCalendarEventsForDate(dateKey),
+    getBookedSessionsForDate(dateKey, session.id),
+  ]);
 
   return {
     dateKey,
     timezone,
     session,
-    events: events.map((event) => ({
-      ...event,
-      isCurrentRequest: Boolean(session.calendarEventId && event.id === session.calendarEventId),
-    })),
+    events: [
+      ...bookedSessions.map((bookedSession) => ({
+        id: bookedSession.id,
+        title: `[APP] ${bookedSession.studentName || 'Aluno'} • ${bookedSession.status === 'confirmed' ? 'confirmado' : 'pendente'}`,
+        start: bookedSession.requestedSlotStart || null,
+        end: bookedSession.requestedSlotEnd || null,
+        status: bookedSession.status,
+        htmlLink: bookedSession.calendarHtmlLink || null,
+        isCurrentRequest: false,
+      })),
+      ...events.map((event) => ({
+        ...event,
+        isCurrentRequest: Boolean(session.calendarEventId && event.id === session.calendarEventId),
+      })),
+      {
+        id: session.id,
+        title: `[PEDIDO ATUAL] ${session.studentName || 'Aluno'}`,
+        start: session.requestedSlotStart || null,
+        end: session.requestedSlotEnd || null,
+        status: session.status,
+        htmlLink: session.calendarHtmlLink || null,
+        isCurrentRequest: true,
+      },
+    ].sort((a, b) => new Date(a.start || 0).getTime() - new Date(b.start || 0).getTime()),
   };
 }
 
@@ -412,12 +483,25 @@ export async function updateSchedulingStatusByAdmin(options: {
   }
 
   if (options.decision === 'confirm') {
-    if (session.calendarEventId) {
-      await updateCalendarEventMarker(session.calendarEventId, 'CONFIRMADO');
+    let calendarEventId = session.calendarEventId || null;
+    let calendarHtmlLink = session.calendarHtmlLink || null;
+
+    if (calendarEventId) {
+      const updated = await updateCalendarEventMarker(calendarEventId, 'CONFIRMADO');
+      calendarHtmlLink = updated?.htmlLink || calendarHtmlLink;
+    } else if (session.requestedSlotStart && session.requestedSlotEnd) {
+      const created = await createCalendarEventForBooking({
+        ...session,
+        status: 'confirmed',
+      });
+      calendarEventId = created?.eventId || null;
+      calendarHtmlLink = created?.htmlLink || null;
     }
 
     await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined({
       status: 'confirmed',
+      calendarEventId,
+      calendarHtmlLink,
       confirmedAt: session.confirmedAt || nowIso(),
       updatedAt: nowIso(),
       lastActionMessage: 'Sua aula ao vivo foi confirmada. O Pilar 3 já está liberado para você continuar.',
@@ -429,14 +513,16 @@ export async function updateSchedulingStatusByAdmin(options: {
 
   if (options.decision === 'pending') {
     if (session.calendarEventId) {
-      await updateCalendarEventMarker(session.calendarEventId, 'PENDENTE');
+      await cancelCalendarEvent(session.calendarEventId);
     }
 
     await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined({
       status: 'pending_confirmation',
+      calendarEventId: null,
+      calendarHtmlLink: null,
       confirmedAt: null,
       updatedAt: nowIso(),
-      lastActionMessage: 'Seu pedido foi enviado. Agora o tutor confirma esse horário pelo calendário.',
+      lastActionMessage: 'Seu pedido segue pendente. A confirmação fica sob controle do admin no painel.',
     }), { merge: true });
     return;
   }

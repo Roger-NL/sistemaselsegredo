@@ -149,10 +149,16 @@ export async function createCalendarEventForBooking(booking: LiveSessionBooking)
     return null;
   }
 
+  const isConfirmed = booking.status === 'confirmed';
+  const summaryPrefix = isConfirmed ? '[CONFIRMADO]' : '[PENDENTE]';
+  const statusLine = isConfirmed
+    ? 'Status inicial: confirmado pelo admin no painel.'
+    : 'Status inicial: pendente de confirmação do tutor no painel.';
+
   const response = await calendar.events.insert({
     calendarId: DEFAULT_CALENDAR_ID,
     requestBody: {
-      summary: `[PENDENTE] Sessão ao vivo • ${booking.studentName || 'Aluno'} • Pilar ${booking.sourcePillarId}`,
+      summary: `${summaryPrefix} Sessão ao vivo • ${booking.studentName || 'Aluno'} • Pilar ${booking.sourcePillarId}`,
       description: [
         `Aluno: ${booking.studentName || '-'}`,
         `Email: ${booking.studentEmail || '-'}`,
@@ -161,11 +167,8 @@ export async function createCalendarEventForBooking(booking: LiveSessionBooking)
         `Booking ID: ${booking.id || '-'}`,
         `Tutor principal: ${booking.tutorEmail || DEFAULT_TUTOR_EMAIL || '-'}`,
         '',
-        'Status inicial: pendente de confirmação do tutor.',
-        '',
-        'Aprovacao pelo telemovel:',
-        '- Para confirmar: troque [PENDENTE] por [CONFIRMADO] no titulo.',
-        '- Para recusar/remarcar: troque [PENDENTE] por [RECUSAR] no titulo.',
+        statusLine,
+        'Gestão oficial pelo painel admin do BasedSpeak.',
       ].join('\n'),
       start: {
         dateTime: booking.requestedSlotStart,
@@ -175,7 +178,7 @@ export async function createCalendarEventForBooking(booking: LiveSessionBooking)
         dateTime: booking.requestedSlotEnd,
         timeZone: DEFAULT_TIMEZONE,
       },
-      colorId: '5',
+      colorId: isConfirmed ? '10' : '5',
       reminders: {
         useDefault: true,
       },

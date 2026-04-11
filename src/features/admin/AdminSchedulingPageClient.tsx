@@ -247,7 +247,7 @@ export default function AdminSchedulingPageClient({
                       <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Próximo passo</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
                         {session.status === "pending_confirmation"
-                          ? "Ver agenda do dia e decidir"
+                          ? "Ver agenda do dia e decidir no painel"
                           : session.status === "confirmed"
                             ? "Sessão já confirmada"
                             : "Acompanhar atualização"}
@@ -306,11 +306,11 @@ export default function AdminSchedulingPageClient({
                       Recusar / remarcar
                     </button>
 
-                    {session.calendarHtmlLink && (
-                      <a
-                        href={session.calendarHtmlLink}
-                        target="_blank"
-                        rel="noreferrer"
+                  {session.calendarHtmlLink && (
+                    <a
+                      href={session.calendarHtmlLink}
+                      target="_blank"
+                      rel="noreferrer"
                         className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
                       >
                         Abrir no Google Calendar
@@ -447,7 +447,7 @@ export default function AdminSchedulingPageClient({
                   até {formatDate(activeOverview.session.requestedSlotEnd)}
                 </p>
                 <p className="mt-4 text-sm leading-relaxed text-slate-600">
-                  Abaixo você vê tudo o que já existe nesse dia. Assim dá para decidir aqui dentro se confirma, devolve para pendente ou pede remarcação.
+                  Abaixo você vê tudo o que já existe nesse dia. Assim dá para decidir aqui dentro se confirma, devolve para pendente ou pede remarcação. O Google só entra depois da confirmação.
                 </p>
               </div>
 
