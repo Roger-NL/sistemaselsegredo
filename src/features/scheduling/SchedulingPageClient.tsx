@@ -34,6 +34,32 @@ function formatDateTime(value?: string | null) {
   });
 }
 
+function formatSlotDayKey(slot: LiveSessionAvailabilitySlot) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: slot.timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(slot.start));
+}
+
+function formatSlotDayLabel(slot: LiveSessionAvailabilitySlot) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: slot.timezone,
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  }).format(new Date(slot.start));
+}
+
+function formatSlotTimeLabel(slot: LiveSessionAvailabilitySlot) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: slot.timezone,
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(slot.start));
+}
+
 function getSessionTone(status?: string | null) {
   switch (status) {
     case "awaiting_release_window":
@@ -123,6 +149,7 @@ export default function SchedulingPageClient() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
 
   const loadStatus = useCallback(async () => {
     if (!user?.id) return;
@@ -303,6 +330,55 @@ export default function SchedulingPageClient() {
   const sessionStatusLabel = getSessionStatusLabel(status?.session?.status);
   const availableSlotsCount = slots.length;
   const hasRequestedSlot = Boolean(status?.session?.requestedSlotStart);
+  const slotsByDay = useMemo(() => {
+    const grouped = new Map<string, { key: string; label: string; timezone: string; slots: LiveSessionAvailabilitySlot[] }>();
+
+    for (const slot of slots) {
+      const key = formatSlotDayKey(slot);
+      const existing = grouped.get(key);
+
+      if (existing) {
+        existing.slots.push(slot);
+      } else {
+        grouped.set(key, {
+          key,
+          label: formatSlotDayLabel(slot),
+          timezone: slot.timezone,
+          slots: [slot],
+        });
+      }
+    }
+
+    return Array.from(grouped.values());
+  }, [slots]);
+
+  const selectedDay = slotsByDay.find((day) => day.key === selectedDayKey) ?? slotsByDay[0] ?? null;
+  const visibleSlots = selectedDay?.slots ?? [];
+
+  useEffect(() => {
+    if (!slotsByDay.length) {
+      setSelectedDayKey(null);
+      return;
+    }
+
+    setSelectedDayKey((current) => {
+      if (current && slotsByDay.some((day) => day.key === current)) {
+        return current;
+      }
+
+      return slotsByDay[0].key;
+    });
+  }, [slotsByDay]);
+
+  useEffect(() => {
+    if (!selectedSlot || !selectedDay) return;
+
+    const stillVisible = selectedDay.slots.some((slot) => slot.start === selectedSlot.start);
+    if (!stillVisible) {
+      setSelectedSlot(null);
+    }
+  }, [selectedDay, selectedSlot]);
+
   const timelineSteps = [
     {
       id: "approval",
@@ -634,8 +710,59 @@ export default function SchedulingPageClient() {
               </button>
             </div>
 
-            <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {slots.map((slot) => {
+            {slotsByDay.length > 0 && (
+              <div className="mt-6">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">
+                  Escolha o dia
+                </p>
+                <div className="mt-3 flex gap-3 overflow-x-auto pb-2">
+                  {slotsByDay.map((day) => {
+                    const isSelectedDay = day.key === selectedDay?.key;
+
+                    return (
+                      <button
+                        key={day.key}
+                        type="button"
+                        onClick={() => setSelectedDayKey(day.key)}
+                        className={`min-w-[160px] rounded-2xl border px-4 py-3 text-left transition ${
+                          isSelectedDay
+                            ? "border-cyan-300/45 bg-cyan-400/10 shadow-[0_0_24px_rgba(34,211,238,0.12)]"
+                            : "border-white/10 bg-white/5 hover:bg-white/10"
+                        }`}
+                      >
+                        <p className="text-sm font-semibold text-white">
+                          {day.label}
+                        </p>
+                        <p className="mt-1 text-xs text-white/45">
+                          {day.slots.length} horario{day.slots.length > 1 ? "s" : ""} disponivel
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">
+                  Horarios do dia
+                </p>
+                <p className="mt-1 text-sm text-white/60">
+                  {selectedDay
+                    ? `Selecione um horario em ${selectedDay.label}.`
+                    : "Escolha um dia para ver os horarios disponiveis."}
+                </p>
+              </div>
+              {selectedDay && (
+                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/55">
+                  {selectedDay.timezone}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {visibleSlots.map((slot) => {
                 const selected = selectedSlot?.start === slot.start;
 
                 return (
@@ -652,10 +779,10 @@ export default function SchedulingPageClient() {
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold text-white">
-                          {slot.label}
+                          {formatSlotTimeLabel(slot)}
                         </p>
                         <p className="mt-1 text-xs text-white/45">
-                          {slot.timezone}
+                          {selectedDay?.label}
                         </p>
                       </div>
                       {selected ? (
@@ -672,6 +799,12 @@ export default function SchedulingPageClient() {
             {!loadingSlots && slots.length === 0 && (
               <div className="mt-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-4 text-sm text-amber-100">
                 Ainda não encontramos horários livres para esta janela. Se a agenda ainda não estiver conectada, esse bloco fica vazio até a operação liberar os horários reais.
+              </div>
+            )}
+
+            {!loadingSlots && slots.length > 0 && visibleSlots.length === 0 && (
+              <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-white/65">
+                Esse dia nao tem horarios disponiveis no momento. Escolha outro dia acima.
               </div>
             )}
 
