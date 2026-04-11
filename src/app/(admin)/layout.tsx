@@ -12,6 +12,7 @@ import {
     BarChart3, 
     LogOut, 
     ShieldAlert,
+    CalendarClock,
     Menu,
     X
 } from "lucide-react";
@@ -80,6 +81,7 @@ function AdminLayoutInner({
     const navItems = [
         { name: "Visão Geral", href: "/admin/dashboard", icon: LayoutDashboard },
         { name: "Aprovações", href: "/admin/aprovacoes", icon: ShieldAlert },
+        { name: "Agendamentos", href: "/admin/agendamentos", icon: CalendarClock },
         { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
         { name: "Alunos", href: "/admin/usuarios", icon: Users },
         { name: "Códigos de Acesso", href: "/admin/codigos", icon: Key },

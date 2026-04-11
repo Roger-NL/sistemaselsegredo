@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Crown, Sparkles, ArrowRight, CalendarClock } from "lucide-react";
+import { Crown, Sparkles, ArrowRight, CalendarClock, CheckCircle2, Clock3 } from "lucide-react";
 import type { LiveSessionStatusPayload } from "@/lib/scheduling/types";
 import RotatingEarth from "@/components/ui/wireframe-dotted-globe";
 import { DevControls } from "@/components/core/DevControls";
@@ -53,7 +53,8 @@ export default function Page() {
 
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [schedulingStatus, setSchedulingStatus] = useState<LiveSessionStatusPayload | null>(null);
-  const shouldShowSchedulingCard = isPremiumUser && Boolean(schedulingStatus?.session);
+  const hasBookedScheduling = Boolean(schedulingStatus?.session?.requestedSlotStart);
+  const shouldShowSchedulingCard = isPremiumUser && Boolean(schedulingStatus?.session) && !hasBookedScheduling;
 
   // Carregar Leaderboard
   useEffect(() => {
@@ -72,7 +73,11 @@ export default function Page() {
       }
 
       try {
-        const response = await fetch(`/api/scheduling/status?userId=${user.id}`, {
+        const isLocalDev =
+          typeof window !== "undefined" &&
+          (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+        const query = isLocalDev ? `?userId=${user.id}` : "";
+        const response = await fetch(`/api/scheduling/status${query}`, {
           cache: "no-store",
         });
         const payload = await response.json();
@@ -217,6 +222,67 @@ export default function Page() {
 
               <div className="hidden shrink-0 items-center gap-2 self-center rounded-full border border-cyan-300/30 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-cyan-200 md:flex">
                 Abrir
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </div>
+            </div>
+          </button>
+        </div>
+      )}
+
+      {isPremiumUser && hasBookedScheduling && (
+        <div className="absolute top-[8.3rem] left-1/2 z-30 w-[min(92vw,760px)] -translate-x-1/2 pointer-events-auto px-4 md:top-32">
+          <button
+            type="button"
+            onClick={() => router.push(ROUTES.app.scheduling)}
+            className="group w-full rounded-3xl border border-violet-400/20 bg-[linear-gradient(135deg,rgba(16,11,28,0.96),rgba(18,20,42,0.94),rgba(7,32,38,0.92))] px-5 py-4 text-left shadow-[0_0_40px_rgba(139,92,246,0.10)] backdrop-blur-xl transition-all duration-300 hover:scale-[1.01] hover:border-violet-300/45 hover:shadow-[0_0_65px_rgba(139,92,246,0.16)] md:px-6 md:py-5"
+          >
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="flex items-start gap-4">
+                <div className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-violet-300/20 bg-violet-400/10 text-violet-200 shadow-[0_0_18px_rgba(139,92,246,0.18)]">
+                  {schedulingStatus?.session?.status === "confirmed" ? (
+                    <CheckCircle2 className="h-5 w-5" />
+                  ) : (
+                    <Clock3 className="h-5 w-5" />
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.28em] text-violet-200">
+                    Meu agendamento
+                  </div>
+
+                  <h2 className="text-base font-black uppercase tracking-[0.12em] text-white md:text-lg">
+                    {schedulingStatus?.session?.status === "confirmed"
+                      ? "Sua sessão já está confirmada"
+                      : "Seu pedido de horário já foi enviado"}
+                  </h2>
+                  <p className="mt-1 max-w-[58ch] text-sm leading-relaxed text-violet-50/78 md:text-[15px]">
+                    {schedulingStatus?.waitingReason ||
+                      "Agora você acompanha tudo daqui: horário pedido, confirmação e próximos passos da sua jornada."}
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.18em] text-violet-100/65">
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                      {new Date(schedulingStatus?.session?.requestedSlotStart || "").toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                      {new Date(schedulingStatus?.session?.requestedSlotStart || "").toLocaleTimeString("pt-BR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                      {schedulingStatus?.session?.status === "confirmed" ? "Confirmado" : "Aguardando tutor"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="hidden shrink-0 items-center gap-2 self-center rounded-full border border-violet-300/30 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-violet-100 md:flex">
+                Ver agendamento
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </div>
             </div>

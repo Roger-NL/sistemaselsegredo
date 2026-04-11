@@ -150,6 +150,9 @@ export default function SchedulingPageClient() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null);
+  const isLocalDev =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
 
   const loadStatus = useCallback(async () => {
     if (!user?.id) return;
@@ -158,7 +161,8 @@ export default function SchedulingPageClient() {
     setError("");
 
     try {
-      const response = await fetch(`/api/scheduling/status?userId=${user.id}`, {
+      const query = isLocalDev ? `?userId=${user.id}` : "";
+      const response = await fetch(`/api/scheduling/status${query}`, {
         cache: "no-store",
       });
       const payload = await response.json();
@@ -177,7 +181,7 @@ export default function SchedulingPageClient() {
     } finally {
       setLoadingState(false);
     }
-  }, [user?.id]);
+  }, [isLocalDev, user?.id]);
 
   const loadSlots = useCallback(async () => {
     if (!user?.id) return;
@@ -185,8 +189,9 @@ export default function SchedulingPageClient() {
     setLoadingSlots(true);
 
     try {
+      const query = isLocalDev ? `?userId=${user.id}` : "";
       const response = await fetch(
-        `/api/scheduling/availability?userId=${user.id}`,
+        `/api/scheduling/availability${query}`,
         { cache: "no-store" }
       );
       const payload = await response.json();
@@ -205,7 +210,7 @@ export default function SchedulingPageClient() {
     } finally {
       setLoadingSlots(false);
     }
-  }, [user?.id]);
+  }, [isLocalDev, user?.id]);
 
   useEffect(() => {
     loadStatus();
@@ -247,7 +252,7 @@ export default function SchedulingPageClient() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user.id,
+          ...(isLocalDev ? { userId: user.id } : {}),
           slotStart: selectedSlot.start,
           slotEnd: selectedSlot.end,
           notes,
@@ -289,7 +294,7 @@ export default function SchedulingPageClient() {
       const response = await fetch("/api/scheduling/cancel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
+        body: JSON.stringify(isLocalDev ? { userId: user.id } : {}),
       });
       const payload = await response.json();
 
