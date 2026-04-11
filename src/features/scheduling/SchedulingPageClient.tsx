@@ -520,6 +520,17 @@ export default function SchedulingPageClient() {
               </div>
             )}
 
+            {status?.session?.adminDecisionReason && !hasRequestedSlot && (
+              <div className="mt-5 rounded-2xl border border-amber-400/25 bg-amber-500/10 px-4 py-4 text-sm text-amber-100">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-amber-200/80">
+                  Retorno do agendamento
+                </p>
+                <p className="mt-2 leading-relaxed">
+                  {status.session.adminDecisionReason}
+                </p>
+              </div>
+            )}
+
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div className="rounded-2xl border border-white/8 bg-black/20 p-4">
                 <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">

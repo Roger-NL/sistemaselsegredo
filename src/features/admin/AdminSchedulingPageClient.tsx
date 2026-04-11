@@ -129,6 +129,21 @@ export default function AdminSchedulingPageClient({
   }
 
   async function handleDecision(session: LiveSessionBooking, decision: "confirm" | "pending" | "reject") {
+    let reason: string | undefined;
+
+    if (decision === "reject") {
+      const typedReason = window.prompt(
+        "Qual o motivo da recusa/remarcação?\n\nEsse texto vai aparecer para o aluno na área de agendamentos.",
+        session.adminDecisionReason || ""
+      );
+
+      if (typedReason === null) {
+        return;
+      }
+
+      reason = typedReason.trim() || "O horário escolhido não pôde ser confirmado. Escolha um novo horário disponível.";
+    }
+
     setActioningId(session.id || null);
     setError("");
 
@@ -139,6 +154,7 @@ export default function AdminSchedulingPageClient({
         body: JSON.stringify({
           sessionId: session.id,
           decision,
+          reason,
         }),
       });
       const payload = await response.json();
@@ -260,6 +276,12 @@ export default function AdminSchedulingPageClient({
                     <span>•</span>
                     <span>Atualizado em {formatDate(session.updatedAt || session.createdAt)}</span>
                   </div>
+
+                  {session.adminDecisionReason && session.status !== "confirmed" && (
+                    <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                      <span className="font-semibold">Motivo atual:</span> {session.adminDecisionReason}
+                    </div>
+                  )}
 
                   <div className="mt-5 flex flex-wrap gap-3">
                     <button
@@ -426,6 +448,14 @@ export default function AdminSchedulingPageClient({
                   className="inline-flex items-center gap-2 rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm font-medium text-cyan-700 transition hover:bg-cyan-100 disabled:opacity-60"
                 >
                   Voltar para pendente
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDecision(activeOverview.session, "reject")}
+                  disabled={actioningId === activeOverview.session.id}
+                  className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 transition hover:bg-rose-100 disabled:opacity-60"
+                >
+                  Recusar / remarcar
                 </button>
                 <button
                   type="button"

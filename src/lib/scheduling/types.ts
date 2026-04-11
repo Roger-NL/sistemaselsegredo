@@ -31,6 +31,7 @@ export interface LiveSessionBooking {
   cancelledAt?: string | null;
   completedAt?: string | null;
   lastActionMessage?: string | null;
+  adminDecisionReason?: string | null;
   notes?: string | null;
 }
 

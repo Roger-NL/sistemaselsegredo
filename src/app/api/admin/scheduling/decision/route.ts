@@ -13,16 +13,17 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { sessionId, decision } = body as {
+    const { sessionId, decision, reason } = body as {
       sessionId?: string;
       decision?: 'confirm' | 'pending' | 'reject';
+      reason?: string;
     };
 
     if (!sessionId || !decision) {
       return NextResponse.json({ error: 'Missing decision payload.' }, { status: 400 });
     }
 
-    await updateSchedulingStatusByAdmin({ sessionId, decision });
+    await updateSchedulingStatusByAdmin({ sessionId, decision, reason });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('[admin/scheduling/decision] error', error);

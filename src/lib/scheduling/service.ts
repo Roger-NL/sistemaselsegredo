@@ -471,6 +471,7 @@ export async function getSchedulingDayOverview(sessionId: string): Promise<Sched
 export async function updateSchedulingStatusByAdmin(options: {
   sessionId: string;
   decision: 'confirm' | 'pending' | 'reject';
+  reason?: string;
 }) {
   const snapshot = await adminDb.collection(COLLECTION).doc(options.sessionId).get();
   if (!snapshot.exists) {
@@ -503,6 +504,7 @@ export async function updateSchedulingStatusByAdmin(options: {
       calendarEventId,
       calendarHtmlLink,
       confirmedAt: session.confirmedAt || nowIso(),
+      adminDecisionReason: null,
       updatedAt: nowIso(),
       lastActionMessage: 'Sua aula ao vivo foi confirmada. O Pilar 3 já está liberado para você continuar.',
     }), { merge: true });
@@ -521,11 +523,14 @@ export async function updateSchedulingStatusByAdmin(options: {
       calendarEventId: null,
       calendarHtmlLink: null,
       confirmedAt: null,
+      adminDecisionReason: null,
       updatedAt: nowIso(),
       lastActionMessage: 'Seu pedido segue pendente. A confirmação fica sob controle do admin no painel.',
     }), { merge: true });
     return;
   }
+
+  const rejectionReason = options.reason?.trim() || 'O horário escolhido não pôde ser confirmado. Escolha um novo horário disponível.';
 
   if (session.calendarEventId) {
     await cancelCalendarEvent(session.calendarEventId);
@@ -538,8 +543,9 @@ export async function updateSchedulingStatusByAdmin(options: {
     calendarEventId: null,
     calendarHtmlLink: null,
     confirmedAt: null,
+    adminDecisionReason: rejectionReason,
     cancelledAt: nowIso(),
     updatedAt: nowIso(),
-    lastActionMessage: 'Esse horário não foi confirmado. O aluno já pode escolher um novo horário válido.',
+    lastActionMessage: `Esse horário não foi aprovado. Motivo: ${rejectionReason}`,
   }), { merge: true });
 }
