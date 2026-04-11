@@ -34,6 +34,31 @@ function formatDateTime(value?: string | null) {
   });
 }
 
+function formatGoogleCalendarDate(value?: string | null) {
+  if (!value) return "";
+  return new Date(value).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+}
+
+function buildStudentGoogleCalendarLink(session?: LiveSessionStatusPayload["session"]) {
+  if (!session?.requestedSlotStart || !session?.requestedSlotEnd) return null;
+
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: `BasedSpeak • Sessão ao vivo • Pilar ${session.sourcePillarId}`,
+    dates: `${formatGoogleCalendarDate(session.requestedSlotStart)}/${formatGoogleCalendarDate(session.requestedSlotEnd)}`,
+    details: [
+      "Sua sessão ao vivo do BasedSpeak foi confirmada.",
+      `Pilar de origem: ${session.sourcePillarId}`,
+      session.adminDecisionReason ? `Observação: ${session.adminDecisionReason}` : null,
+      session.notes ? `Notas do pedido: ${session.notes}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 function formatSlotDayKey(slot: LiveSessionAvailabilitySlot) {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: slot.timezone,
@@ -370,6 +395,10 @@ export default function SchedulingPageClient() {
 
   const selectedDay = slotsByDay.find((day) => day.key === selectedDayKey) ?? slotsByDay[0] ?? null;
   const visibleSlots = selectedDay?.slots ?? [];
+  const studentCalendarLink = useMemo(
+    () => buildStudentGoogleCalendarLink(status?.session),
+    [status?.session]
+  );
 
   useEffect(() => {
     if (!slotsByDay.length) {
@@ -619,14 +648,14 @@ export default function SchedulingPageClient() {
                     </p>
                   </div>
 
-                  {status?.session?.calendarHtmlLink && (
+                  {status?.session?.status === "confirmed" && studentCalendarLink && (
                     <a
-                      href={status.session.calendarHtmlLink}
+                      href={studentCalendarLink}
                       target="_blank"
                       rel="noreferrer"
                       className="rounded-xl border border-violet-300/20 bg-white/5 px-4 py-3 text-sm text-violet-100 transition hover:bg-white/10"
                     >
-                      Abrir no Google Calendar
+                      Adicionar na minha agenda
                     </a>
                   )}
                 </div>
