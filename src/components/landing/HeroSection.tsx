@@ -105,11 +105,11 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
                             <div className="pointer-events-none absolute -inset-x-3 -inset-y-3 rounded-[40px] bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.32),rgba(16,185,129,0.12),transparent_72%)] blur-xl" />
                             <GradientButton
                                 onClick={handleCta}
-                                className="group px-5"
+                                className="group overflow-hidden px-5 shadow-[0_10px_34px_rgba(124,58,237,0.35)] ring-1 ring-white/10 transition-[transform,box-shadow,filter] duration-200 ease-out before:pointer-events-none before:absolute before:inset-[4px] before:z-[2] before:rounded-[44px] before:bg-[linear-gradient(180deg,rgba(255,255,255,0.16),transparent_52%,rgba(255,255,255,0.05))] before:content-[''] before:opacity-80 before:transition-opacity before:duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_42px_rgba(124,58,237,0.55)] hover:before:opacity-100 active:translate-y-0 active:scale-[0.98]"
                                 width="100%"
                                 height="58px"
                             >
-                                <span className="relative z-10 flex w-full items-center gap-3 px-1.5 text-left">
+                                <span className="relative z-10 flex w-full items-center justify-center gap-3 px-1.5 text-center">
                                     <span className="flex items-center gap-3">
                                         <span className="rounded-full border border-violet-400/20 bg-violet-500/10 p-2">
                                             <Rocket className="h-4 w-4 rotate-45 text-violet-300 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
