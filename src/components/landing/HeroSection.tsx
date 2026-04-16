@@ -109,20 +109,20 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
                                 width="100%"
                                 height="58px"
                             >
-                                <span className="relative z-10 flex w-full items-center justify-between gap-3 px-1.5 text-left">
+                                <span className="relative z-10 flex w-full items-center gap-3 px-1.5 text-left">
                                     <span className="flex items-center gap-3">
                                         <span className="rounded-full border border-violet-400/20 bg-violet-500/10 p-2">
                                             <Rocket className="h-4 w-4 rotate-45 text-violet-300 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                                         </span>
                                         <span className="[font-family:var(--font-geist-sans)] text-sm font-semibold uppercase tracking-[0.1em] text-white">
-                                            começar agora
+                                            começar grátis
                                         </span>
-                                    </span>
-                                    <span className="[font-family:var(--font-geist-mono)] text-[11px] uppercase tracking-[0.2em] text-emerald-300/90">
-                                        grátis
                                     </span>
                                 </span>
                             </GradientButton>
+                            <p className="mt-3 text-center [font-family:var(--font-geist-sans)] text-xs font-medium text-white/55">
+                                Estude agora, pague só quando avançar.
+                            </p>
                         </div>
                     </motion.div>
                 </div>
