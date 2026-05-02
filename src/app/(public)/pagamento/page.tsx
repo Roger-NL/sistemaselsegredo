@@ -35,6 +35,7 @@ export default function PagamentoPage() {
     const [paymentId, setPaymentId] = useState<string | null>(null);
     const [pixExpiresAt, setPixExpiresAt] = useState<string | null>(null);
     const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
+    const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [recoveringPix, setRecoveringPix] = useState(false);
@@ -44,6 +45,9 @@ export default function PagamentoPage() {
         pixExpiresAt &&
         new Date(pixExpiresAt).getTime() <= Date.now()
     );
+    const adminEmails = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
+    const isAdminUser = Boolean(user?.email && adminEmails.includes(user.email));
+    const isWebhookApproved = subscriptionStatus === "premium" || paymentStatus === "RECEIVED" || paymentStatus === "CONFIRMED";
 
     // Redirect if already premium (on load or after status update)
     useEffect(() => {
@@ -82,6 +86,7 @@ export default function PagamentoPage() {
                     setActivePaymentMethod(data.paymentMethod || "PIX");
                     setPaymentId(data.paymentId);
                     setInvoiceUrl(data.invoiceUrl || null);
+                    setPaymentStatus(data.status || null);
                     setQrCodeData(
                         data.qrCode && data.qrCodePayload
                             ? { encodedImage: data.qrCode, payload: data.qrCodePayload }
@@ -121,6 +126,7 @@ export default function PagamentoPage() {
                     body: JSON.stringify({ paymentId, userId: user.id }),
                 });
                 const data = await res.json();
+                setPaymentStatus(data.status || null);
                 if (data.isPaid && !stopped) {
                     stopped = true;
                     await refreshUser();
@@ -187,7 +193,8 @@ export default function PagamentoPage() {
         }
     };
 
-    const handlePayment = async () => {
+    const createPayment = async (options?: { redirectOnCard?: boolean }) => {
+        const redirectOnCard = options?.redirectOnCard ?? true;
         setError('');
 
         if (!isAuthenticated || !user) {
@@ -232,6 +239,7 @@ export default function PagamentoPage() {
             setActivePaymentMethod(data.paymentMethod || selectedPaymentMethod);
             setPaymentId(data.paymentId);
             setInvoiceUrl(data.invoiceUrl || null);
+            setPaymentStatus(data.status || null);
             setQrCodeData(
                 data.qrCode && data.qrCodePayload
                     ? { encodedImage: data.qrCode, payload: data.qrCodePayload }
@@ -239,7 +247,7 @@ export default function PagamentoPage() {
             );
             setPixExpiresAt(data.expiresAt || null);
 
-            if ((data.paymentMethod || selectedPaymentMethod) === "CREDIT_CARD" && data.invoiceUrl) {
+            if (redirectOnCard && (data.paymentMethod || selectedPaymentMethod) === "CREDIT_CARD" && data.invoiceUrl) {
                 window.location.href = data.invoiceUrl;
             }
         } catch (err: unknown) {
@@ -247,6 +255,28 @@ export default function PagamentoPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handlePayment = async () => {
+        await createPayment({ redirectOnCard: true });
+    };
+
+    const handleLaunchOnly = async () => {
+        await createPayment({ redirectOnCard: false });
+    };
+
+    const handleOpenAsaasPage = () => {
+        if (selectedPaymentMethod === "CREDIT_CARD" && invoiceUrl) {
+            window.open(invoiceUrl, "_blank", "noopener,noreferrer");
+            return;
+        }
+
+        if (selectedPaymentMethod === "PIX" && qrCodeData) {
+            document.getElementById("pix-display-card")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+        }
+
+        setError("Primeiro lance a cobranca na Asaas para abrir a pagina de pagamento.");
     };
 
     // Success Screen
@@ -291,6 +321,49 @@ export default function PagamentoPage() {
                     Voltar
                 </button>
             </nav>
+
+            {isAdminUser && (
+                <div className="fixed right-4 top-24 z-50 w-[min(90vw,320px)] rounded-2xl border border-white/10 bg-black/75 p-4 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.35)]">
+                    <div className="mb-3 flex items-center justify-between">
+                        <div>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-white/40">Admin Payment Test</p>
+                            <p className="mt-1 text-xs text-white/70">Lancar na Asaas e acompanhar webhook.</p>
+                        </div>
+                        <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] ${
+                            isWebhookApproved
+                                ? "bg-emerald-500/15 text-emerald-300"
+                                : "bg-red-500/15 text-red-300"
+                        }`}>
+                            <span className={`h-2 w-2 rounded-full ${isWebhookApproved ? "bg-emerald-400" : "bg-red-400"}`} />
+                            {isWebhookApproved ? "Aprovado" : "Pendente"}
+                        </span>
+                    </div>
+
+                    <div className="mb-3 text-[11px] leading-relaxed text-white/55">
+                        {paymentId ? `Cobranca atual: ${paymentId}` : "Nenhuma cobranca criada ainda."}
+                        {paymentStatus ? ` Status: ${paymentStatus}.` : ""}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            type="button"
+                            onClick={handleLaunchOnly}
+                            disabled={loading || recoveringPix}
+                            className="rounded-xl border border-violet-400/30 bg-violet-500/10 px-3 py-3 text-xs font-bold uppercase tracking-[0.18em] text-violet-200 transition hover:bg-violet-500/20 disabled:opacity-50"
+                        >
+                            Lançar no Asaas
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleOpenAsaasPage}
+                            disabled={loading || recoveringPix || (!invoiceUrl && !qrCodeData)}
+                            className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-3 text-xs font-bold uppercase tracking-[0.18em] text-emerald-200 transition hover:bg-emerald-500/20 disabled:opacity-50"
+                        >
+                            Ir para pagamento
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <main className="pt-24 pb-20">
 
@@ -446,6 +519,7 @@ export default function PagamentoPage() {
 
                             {activePaymentMethod === "PIX" && qrCodeData ? (
                                 <motion.div
+                                    id="pix-display-card"
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     className="bg-white rounded-xl p-6 text-black flex flex-col items-center shadow-lg"
