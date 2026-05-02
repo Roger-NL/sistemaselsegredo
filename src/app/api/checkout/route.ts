@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { AsaasApiError } from "@/lib/asaas";
 import { createCheckout, getCheckoutState } from "@/lib/payments/service";
-import type { CheckoutRequestInput } from "@/lib/payments/types";
+import type { CheckoutPlan, CheckoutRequestInput } from "@/lib/payments/types";
 
 export const dynamic = "force-dynamic";
 
@@ -25,12 +25,13 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
+    const plan = (searchParams.get("plan") as CheckoutPlan | null) ?? "lifetime";
 
     if (!userId) {
       return NextResponse.json({ error: "Missing userId." }, { status: 400 });
     }
 
-    const checkoutState = await getCheckoutState(userId);
+    const checkoutState = await getCheckoutState(userId, plan);
     return NextResponse.json(checkoutState);
   } catch (error: unknown) {
     console.error("Checkout state error:", error);

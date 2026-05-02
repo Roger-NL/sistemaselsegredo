@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { FlightButton } from "@/components/ui/FlightCard";
@@ -23,7 +23,10 @@ import {
 
 export default function PagamentoPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { user, subscriptionStatus, activateWithInvite, isAuthenticated, isLoading, refreshUser } = useAuth();
+    const checkoutPlan = searchParams.get("plan") === "specialty" ? "specialty" : "lifetime";
+    const isSpecialtyTestMode = checkoutPlan === "specialty";
 
     // UI States
     const [showCodeInput, setShowCodeInput] = useState(false);
@@ -51,13 +54,13 @@ export default function PagamentoPage() {
 
     // Redirect if already premium (on load or after status update)
     useEffect(() => {
-        if (!isLoading && subscriptionStatus === 'premium') {
+        if (!isSpecialtyTestMode && !isLoading && subscriptionStatus === 'premium') {
             router.replace(ROUTES.app.thankYou);
         }
-    }, [router, subscriptionStatus, isLoading]);
+    }, [router, subscriptionStatus, isLoading, isSpecialtyTestMode]);
 
     useEffect(() => {
-        if (!user?.id || isLoading || paymentId || subscriptionStatus === 'premium') {
+        if (!user?.id || isLoading || paymentId || (!isSpecialtyTestMode && subscriptionStatus === 'premium')) {
             return;
         }
 
@@ -66,7 +69,7 @@ export default function PagamentoPage() {
         const recoverCheckoutState = async () => {
             setRecoveringPix(true);
             try {
-                const res = await fetch(`/api/checkout?userId=${encodeURIComponent(user.id)}`, {
+                const res = await fetch(`/api/checkout?userId=${encodeURIComponent(user.id)}&plan=${checkoutPlan}`, {
                     cache: 'no-store',
                 });
                 const data = await res.json();
@@ -77,7 +80,9 @@ export default function PagamentoPage() {
 
                 if (data.alreadyPremium) {
                     await refreshUser();
-                    router.replace(ROUTES.app.thankYou);
+                    if (!isSpecialtyTestMode) {
+                        router.replace(ROUTES.app.thankYou);
+                    }
                     return;
                 }
 
@@ -108,12 +113,12 @@ export default function PagamentoPage() {
         return () => {
             cancelled = true;
         };
-    }, [user?.id, isLoading, paymentId, subscriptionStatus, refreshUser, router]);
+    }, [user?.id, isLoading, paymentId, subscriptionStatus, refreshUser, router, checkoutPlan, isSpecialtyTestMode]);
 
     // Primary: Poll /api/verify-payment directly (does not depend on webhook)
     // Secondary: onSnapshot listens for Firestore change (works if webhook fires)
     useEffect(() => {
-        if (!paymentId || !user?.id || subscriptionStatus === 'premium') return;
+        if (!paymentId || !user?.id || (!isSpecialtyTestMode && subscriptionStatus === 'premium')) return;
 
         let stopped = false;
 
@@ -129,8 +134,10 @@ export default function PagamentoPage() {
                 setPaymentStatus(data.status || null);
                 if (data.isPaid && !stopped) {
                     stopped = true;
-                    await refreshUser();
-                    router.replace(ROUTES.app.thankYou);
+                    if (!isSpecialtyTestMode) {
+                        await refreshUser();
+                        router.replace(ROUTES.app.thankYou);
+                    }
                 }
             } catch {
                 // silent — will retry
@@ -145,6 +152,7 @@ export default function PagamentoPage() {
         const userRef = doc(db, "users", user.id);
         const unsubscribe = onSnapshot(userRef, (snapshot) => {
             if (snapshot.exists() && snapshot.data()?.subscriptionStatus === 'premium' && !stopped) {
+                if (isSpecialtyTestMode) return;
                 stopped = true;
                 clearInterval(interval);
                 router.replace(ROUTES.app.thankYou);
@@ -163,7 +171,7 @@ export default function PagamentoPage() {
             unsubscribe();
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-    }, [paymentId, user?.id, subscriptionStatus, router, refreshUser]);
+    }, [paymentId, user?.id, subscriptionStatus, router, refreshUser, isSpecialtyTestMode]);
 
     const redirectToLogin = () => {
         router.push(`${ROUTES.auth.login}?callbackUrl=${encodeURIComponent(ROUTES.public.payment)}`);
@@ -218,6 +226,7 @@ export default function PagamentoPage() {
                     email: user.email,
                     cpfCnpj: cpf.replace(/\D/g, ''),
                     userId: user.id,
+                    plan: checkoutPlan,
                     paymentMethod: selectedPaymentMethod,
                     creditCardMode: selectedPaymentMethod === "CREDIT_CARD" ? "INVOICE_URL" : undefined
                 })
@@ -227,7 +236,9 @@ export default function PagamentoPage() {
 
             if (data.alreadyPremium) {
                 await refreshUser();
-                router.replace(ROUTES.app.thankYou);
+                if (!isSpecialtyTestMode) {
+                    router.replace(ROUTES.app.thankYou);
+                }
                 return;
             }
 
@@ -298,7 +309,7 @@ export default function PagamentoPage() {
         );
     }
 
-    if (!isLoading && subscriptionStatus === 'premium') {
+    if (!isSpecialtyTestMode && !isLoading && subscriptionStatus === 'premium') {
         return (
             <div className="min-h-screen bg-[#050505] flex items-center justify-center">
                 <div className="text-center">
@@ -463,19 +474,23 @@ export default function PagamentoPage() {
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.15),transparent_70%)] pointer-events-none" />
 
                         <div className="relative z-10">
-                            <div className="inline-block px-4 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-bold uppercase tracking-widest mb-8 animate-pulse">
-                                <Zap className="w-3 h-3 inline mr-2 text-yellow-400" fill="currentColor" />
-                                Desconto por Recorde no Pilar 1
-                            </div>
+                        <div className="inline-block px-4 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-bold uppercase tracking-widest mb-8 animate-pulse">
+                            <Zap className="w-3 h-3 inline mr-2 text-yellow-400" fill="currentColor" />
+                            {isSpecialtyTestMode ? "Modo de Teste • Especialidade" : "Desconto por Recorde no Pilar 1"}
+                        </div>
 
-                            <div className="mb-8">
-                                <p className="text-slate-500 text-lg line-through mb-2">De R$ 997,00 por</p>
-                                <h2 className="text-6xl md:text-8xl font-black text-white tracking-tighter">
-                                    <span className="text-2xl align-top text-slate-400 font-bold mr-1">R$</span>
-                                    297
-                                </h2>
-                                <p className="text-slate-400 mt-4 text-sm uppercase tracking-widest">Acesso Vitalício • Pagamento Único</p>
-                            </div>
+                        <div className="mb-8">
+                            <p className="text-slate-500 text-lg line-through mb-2">
+                                {isSpecialtyTestMode ? "Valor de teste" : "De R$ 997,00 por"}
+                            </p>
+                            <h2 className="text-6xl md:text-8xl font-black text-white tracking-tighter">
+                                <span className="text-2xl align-top text-slate-400 font-bold mr-1">R$</span>
+                                {isSpecialtyTestMode ? "50" : "297"}
+                            </h2>
+                            <p className="text-slate-400 mt-4 text-sm uppercase tracking-widest">
+                                {isSpecialtyTestMode ? "Compra de Especialidade • Pagamento Único" : "Acesso Vitalício • Pagamento Único"}
+                            </p>
+                        </div>
 
                             <ul className="text-left max-w-md mx-auto space-y-4 mb-10 text-slate-300">
                                 <li className="flex items-center gap-3">
