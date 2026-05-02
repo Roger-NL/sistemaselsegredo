@@ -7,6 +7,7 @@ const labLinks = [
   { href: "/dev/modals", label: "Modais" },
   { href: "/dev/forms", label: "Forms" },
   { href: "/dev/pages", label: "Pages" },
+  { href: "/dev/payments", label: "Payments" },
 ];
 
 export default function DevLayout({

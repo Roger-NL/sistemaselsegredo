@@ -21,6 +21,11 @@ const labs = [
     title: "Page Lab",
     description: "Sandbox para telas candidatas a refatoracao antes da integracao real.",
   },
+  {
+    href: "/dev/payments",
+    title: "Payments Lab",
+    description: "Carrinho dev isolado para testar Pix, cartao e webhook da Asaas sem liberar premium.",
+  },
 ];
 
 export default function DevHomePage() {

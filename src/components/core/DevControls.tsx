@@ -2,7 +2,6 @@
 
 import { useProgress } from "@/context/ProgressContext";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Settings, ShieldAlert, CheckCheck, Eraser, FileX2, CreditCard, QrCode, ExternalLink } from "lucide-react";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
@@ -12,7 +11,6 @@ interface DevControlsProps {
 }
 
 export function DevControls({ isAdmin }: DevControlsProps) {
-    const router = useRouter();
     const { user } = useAuth();
     const {
         setPillarLevel,
@@ -223,12 +221,12 @@ export function DevControls({ isAdmin }: DevControlsProps) {
                             </div>
 
                             <button
-                                onClick={() => router.push("/dev/payments")}
+                                onClick={() => window.location.assign("/dev/payments")}
                                 disabled={isBusy}
                                 className="flex w-full items-center justify-center gap-2 rounded border border-white/15 bg-white/5 py-2 text-[10px] font-bold uppercase tracking-wider text-white/80 transition-colors hover:border-white/30 hover:bg-white/10 hover:text-white disabled:opacity-50"
                             >
                                 <ExternalLink size={11} />
-                                Ir para página de pagamento
+                                Abrir carrinho teste
                             </button>
 
                             <p className="text-[10px] leading-relaxed text-white/45">
