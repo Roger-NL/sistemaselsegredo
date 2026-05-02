@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Settings, ShieldAlert, CheckCheck, Eraser, FileX2, CreditCard, QrCode, ExternalLink } from "lucide-react";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
-import { ROUTES } from "@/lib/routes";
 
 interface DevControlsProps {
     isAdmin: boolean;
@@ -224,7 +223,7 @@ export function DevControls({ isAdmin }: DevControlsProps) {
                             </div>
 
                             <button
-                                onClick={() => router.push(`${ROUTES.public.payment}?plan=specialty&dev=1`)}
+                                onClick={() => router.push("/dev/payments")}
                                 disabled={isBusy}
                                 className="flex w-full items-center justify-center gap-2 rounded border border-white/15 bg-white/5 py-2 text-[10px] font-bold uppercase tracking-wider text-white/80 transition-colors hover:border-white/30 hover:bg-white/10 hover:text-white disabled:opacity-50"
                             >
