@@ -16,7 +16,9 @@ import {
     Play,
     Star,
     Lock,
-    Zap
+    Zap,
+    CreditCard,
+    QrCode
 } from "lucide-react";
 
 export default function PagamentoPage() {
@@ -27,14 +29,21 @@ export default function PagamentoPage() {
     const [showCodeInput, setShowCodeInput] = useState(false);
     const [inviteCode, setInviteCode] = useState('');
     const [cpf, setCpf] = useState('');
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"PIX" | "CREDIT_CARD">("PIX");
+    const [activePaymentMethod, setActivePaymentMethod] = useState<"PIX" | "CREDIT_CARD" | null>(null);
     const [qrCodeData, setQrCodeData] = useState<{ encodedImage: string, payload: string } | null>(null);
     const [paymentId, setPaymentId] = useState<string | null>(null);
     const [pixExpiresAt, setPixExpiresAt] = useState<string | null>(null);
+    const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [recoveringPix, setRecoveringPix] = useState(false);
     const [success, setSuccess] = useState(false);
-    const pixExpired = Boolean(pixExpiresAt && new Date(pixExpiresAt).getTime() <= Date.now());
+    const pixExpired = Boolean(
+        activePaymentMethod === "PIX" &&
+        pixExpiresAt &&
+        new Date(pixExpiresAt).getTime() <= Date.now()
+    );
 
     // Redirect if already premium (on load or after status update)
     useEffect(() => {
@@ -44,28 +53,7 @@ export default function PagamentoPage() {
     }, [router, subscriptionStatus, isLoading]);
 
     useEffect(() => {
-        const pendingPixPayment = user?.pendingPixPayment;
-
-        if (!pendingPixPayment) {
-            return;
-        }
-
-        const isValid = new Date(pendingPixPayment.expiresAt).getTime() > Date.now();
-
-        if (!isValid) {
-            return;
-        }
-
-        setPaymentId(pendingPixPayment.paymentId);
-        setQrCodeData({
-            encodedImage: pendingPixPayment.qrCode,
-            payload: pendingPixPayment.qrCodePayload,
-        });
-        setPixExpiresAt(pendingPixPayment.expiresAt);
-    }, [user?.pendingPixPayment]);
-
-    useEffect(() => {
-        if (!user?.id || isLoading || qrCodeData || subscriptionStatus === 'premium') {
+        if (!user?.id || isLoading || paymentId || subscriptionStatus === 'premium') {
             return;
         }
 
@@ -89,9 +77,16 @@ export default function PagamentoPage() {
                     return;
                 }
 
-                if (data.hasPendingPix) {
+                if (data.hasPendingPayment) {
+                    setSelectedPaymentMethod(data.paymentMethod || "PIX");
+                    setActivePaymentMethod(data.paymentMethod || "PIX");
                     setPaymentId(data.paymentId);
-                    setQrCodeData({ encodedImage: data.qrCode, payload: data.qrCodePayload });
+                    setInvoiceUrl(data.invoiceUrl || null);
+                    setQrCodeData(
+                        data.qrCode && data.qrCodePayload
+                            ? { encodedImage: data.qrCode, payload: data.qrCodePayload }
+                            : null
+                    );
                     setPixExpiresAt(data.expiresAt || null);
                 }
             } catch {
@@ -108,12 +103,12 @@ export default function PagamentoPage() {
         return () => {
             cancelled = true;
         };
-    }, [user?.id, isLoading, qrCodeData, subscriptionStatus, refreshUser, router]);
+    }, [user?.id, isLoading, paymentId, subscriptionStatus, refreshUser, router]);
 
     // Primary: Poll /api/verify-payment directly (does not depend on webhook)
     // Secondary: onSnapshot listens for Firestore change (works if webhook fires)
     useEffect(() => {
-        if (!qrCodeData || !paymentId || !user?.id || subscriptionStatus === 'premium') return;
+        if (!paymentId || !user?.id || subscriptionStatus === 'premium') return;
 
         let stopped = false;
 
@@ -162,7 +157,7 @@ export default function PagamentoPage() {
             unsubscribe();
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-    }, [qrCodeData, paymentId, user?.id, subscriptionStatus, router, refreshUser]);
+    }, [paymentId, user?.id, subscriptionStatus, router, refreshUser]);
 
     const redirectToLogin = () => {
         router.push(`${ROUTES.auth.login}?callbackUrl=${encodeURIComponent(ROUTES.public.payment)}`);
@@ -215,7 +210,9 @@ export default function PagamentoPage() {
                     name: user.name || "Novo Aluno",
                     email: user.email,
                     cpfCnpj: cpf.replace(/\D/g, ''),
-                    userId: user.id
+                    userId: user.id,
+                    paymentMethod: selectedPaymentMethod,
+                    creditCardMode: selectedPaymentMethod === "CREDIT_CARD" ? "INVOICE_URL" : undefined
                 })
             });
 
@@ -231,9 +228,20 @@ export default function PagamentoPage() {
                 throw new Error(data.error || 'Erro ao gerar cobrança');
             }
 
+            setSelectedPaymentMethod(data.paymentMethod || selectedPaymentMethod);
+            setActivePaymentMethod(data.paymentMethod || selectedPaymentMethod);
             setPaymentId(data.paymentId);
-            setQrCodeData({ encodedImage: data.qrCode, payload: data.qrCodePayload });
+            setInvoiceUrl(data.invoiceUrl || null);
+            setQrCodeData(
+                data.qrCode && data.qrCodePayload
+                    ? { encodedImage: data.qrCode, payload: data.qrCodePayload }
+                    : null
+            );
             setPixExpiresAt(data.expiresAt || null);
+
+            if ((data.paymentMethod || selectedPaymentMethod) === "CREDIT_CARD" && data.invoiceUrl) {
+                window.location.href = data.invoiceUrl;
+            }
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Erro de comunicação com o servidor.');
         } finally {
@@ -429,14 +437,14 @@ export default function PagamentoPage() {
                                 </div>
                             )}
 
-                            {recoveringPix && !qrCodeData && (
+                            {recoveringPix && !paymentId && (
                                 <div className="mb-6 p-3 bg-white/5 border border-white/10 rounded-lg text-slate-300 text-sm flex items-center justify-center gap-2">
                                     <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
-                                    Recuperando seu Pix atual...
+                                    Recuperando seu pagamento atual...
                                 </div>
                             )}
 
-                            {qrCodeData ? (
+                            {activePaymentMethod === "PIX" && qrCodeData ? (
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
@@ -482,8 +490,79 @@ export default function PagamentoPage() {
                                         </p>
                                     )}
                                 </motion.div>
+                            ) : activePaymentMethod === "CREDIT_CARD" && invoiceUrl ? (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="rounded-2xl border border-emerald-400/20 bg-emerald-500/5 p-6 text-center shadow-[0_0_40px_rgba(16,185,129,0.12)]"
+                                >
+                                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10">
+                                        <CreditCard className="h-6 w-6 text-emerald-300" />
+                                    </div>
+                                    <h3 className="mb-2 text-xl font-bold text-white">Pagamento por Cartão Pronto</h3>
+                                    <p className="mx-auto mb-5 max-w-md text-sm leading-relaxed text-slate-300">
+                                        Sua cobrança por cartão já foi criada. Toque abaixo para abrir a fatura segura da Asaas e finalizar o pagamento.
+                                    </p>
+                                    <FlightButton
+                                        onClick={() => window.location.href = invoiceUrl}
+                                        className="w-full py-5 text-lg font-bold"
+                                        variant="neon"
+                                    >
+                                        <span className="flex items-center justify-center gap-2">
+                                            <CreditCard className="h-5 w-5" />
+                                            PAGAR COM CARTÃO AGORA
+                                        </span>
+                                    </FlightButton>
+                                    <p className="mt-4 text-xs uppercase tracking-[0.22em] text-slate-500">
+                                        Fatura segura Asaas
+                                    </p>
+                                </motion.div>
                             ) : (
                                 <div className="space-y-4">
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedPaymentMethod("PIX");
+                                                setError("");
+                                            }}
+                                            className={`rounded-2xl border p-4 text-left transition-all ${
+                                                selectedPaymentMethod === "PIX"
+                                                    ? "border-violet-400 bg-violet-500/10 shadow-[0_0_24px_rgba(139,92,246,0.18)]"
+                                                    : "border-white/10 bg-black/30 hover:border-white/20"
+                                            }`}
+                                        >
+                                            <div className="mb-2 flex items-center gap-2">
+                                                <QrCode className="h-5 w-5 text-violet-300" />
+                                                <span className="text-sm font-bold uppercase tracking-[0.18em] text-white">Pix</span>
+                                            </div>
+                                            <p className="text-sm leading-relaxed text-slate-400">
+                                                Gera QR Code instantaneo e copia e cola para pagamento imediato.
+                                            </p>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedPaymentMethod("CREDIT_CARD");
+                                                setError("");
+                                            }}
+                                            className={`rounded-2xl border p-4 text-left transition-all ${
+                                                selectedPaymentMethod === "CREDIT_CARD"
+                                                    ? "border-emerald-400 bg-emerald-500/10 shadow-[0_0_24px_rgba(16,185,129,0.18)]"
+                                                    : "border-white/10 bg-black/30 hover:border-white/20"
+                                            }`}
+                                        >
+                                            <div className="mb-2 flex items-center gap-2">
+                                                <CreditCard className="h-5 w-5 text-emerald-300" />
+                                                <span className="text-sm font-bold uppercase tracking-[0.18em] text-white">Cartao</span>
+                                            </div>
+                                            <p className="text-sm leading-relaxed text-slate-400">
+                                                Abre a fatura segura da Asaas para voce concluir no cartao de credito.
+                                            </p>
+                                        </button>
+                                    </div>
+
                                     <div className="text-left w-full relative">
                                         <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Seu CPF (Para emissão da nota)</label>
                                         <input
@@ -506,7 +585,9 @@ export default function PagamentoPage() {
                                                 {recoveringPix ? 'RECUPERANDO PIX...' : 'GERANDO PIX...'}
                                             </span>
                                         ) : (
-                                            "GERAR PIX DE ACESSO"
+                                            selectedPaymentMethod === "PIX"
+                                                ? "GERAR PIX DE ACESSO"
+                                                : "ABRIR PAGAMENTO NO CARTAO"
                                         )}
                                     </FlightButton>
                                 </div>

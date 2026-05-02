@@ -2,7 +2,8 @@
 
 import { useProgress } from "@/context/ProgressContext";
 import { useState } from "react";
-import { Settings, ShieldAlert, CheckCheck, Eraser, FileX2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { Settings, ShieldAlert, CheckCheck, Eraser, FileX2, CreditCard, QrCode } from "lucide-react";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
 
 interface DevControlsProps {
@@ -10,6 +11,7 @@ interface DevControlsProps {
 }
 
 export function DevControls({ isAdmin }: DevControlsProps) {
+    const { user } = useAuth();
     const {
         setPillarLevel,
         resetProgress,
@@ -25,6 +27,8 @@ export function DevControls({ isAdmin }: DevControlsProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isBusy, setIsBusy] = useState(false);
     const [selectedPillar, setSelectedPillar] = useState(1);
+    const [testCpf, setTestCpf] = useState("12345678909");
+    const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
 
     if (!isAdmin) return null;
 
@@ -38,11 +42,58 @@ export function DevControls({ isAdmin }: DevControlsProps) {
     const runAction = async (action: () => Promise<void> | void) => {
         if (isBusy) return;
         setIsBusy(true);
+        setPaymentMessage(null);
         try {
             await action();
         } finally {
             setIsBusy(false);
         }
+    };
+
+    const launchSpecialtyPaymentTest = async (paymentMethod: "PIX" | "CREDIT_CARD") => {
+        if (!user) {
+            setPaymentMessage("Usuario nao autenticado para teste.");
+            return;
+        }
+
+        const cleanCpf = testCpf.replace(/\D/g, "");
+        if (cleanCpf.length < 11) {
+            setPaymentMessage("Informe um CPF de teste valido.");
+            return;
+        }
+
+        const res = await fetch("/api/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                userId: user.id,
+                localCustomerId: user.id,
+                name: user.name || "Admin Teste",
+                email: user.email,
+                cpfCnpj: cleanCpf,
+                paymentMethod,
+                creditCardMode: paymentMethod === "CREDIT_CARD" ? "INVOICE_URL" : undefined,
+                plan: "specialty",
+                value: 50,
+                description: "Teste DevTools - Compra de Especialidade"
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || "Falha ao criar pagamento de teste.");
+        }
+
+        if (data.invoiceUrl) {
+            window.open(data.invoiceUrl, "_blank", "noopener,noreferrer");
+        }
+
+        setPaymentMessage(
+            paymentMethod === "PIX"
+                ? "Teste Pix criado. A fatura da Asaas foi aberta em nova aba."
+                : "Teste Cartao criado. A invoiceUrl da Asaas foi aberta em nova aba."
+        );
     };
 
     const selectedModules = PILLARS_CONTENT[selectedPillar]?.modules ?? [];
@@ -136,6 +187,50 @@ export function DevControls({ isAdmin }: DevControlsProps) {
                     </div>
 
                     <div className="space-y-2 pt-2 border-t border-white/10">
+                        <div className="space-y-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-[10px] uppercase tracking-wider text-emerald-300">Payment Test</span>
+                                <span className="text-[10px] text-emerald-500 font-mono">R$ 50</span>
+                            </div>
+
+                            <input
+                                type="text"
+                                value={testCpf}
+                                onChange={(e) => setTestCpf(e.target.value)}
+                                placeholder="CPF teste"
+                                className="w-full rounded border border-white/10 bg-black/40 px-2 py-1.5 text-[10px] text-white outline-none focus:border-emerald-400"
+                            />
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    onClick={() => runAction(() => launchSpecialtyPaymentTest("PIX"))}
+                                    disabled={isBusy}
+                                    className="flex items-center justify-center gap-1.5 rounded border border-cyan-500/30 bg-cyan-500/10 py-2 text-[10px] font-bold uppercase tracking-wider text-cyan-300 transition-colors hover:bg-cyan-500 hover:text-white disabled:opacity-50"
+                                >
+                                    <QrCode size={11} />
+                                    Test Pix
+                                </button>
+                                <button
+                                    onClick={() => runAction(() => launchSpecialtyPaymentTest("CREDIT_CARD"))}
+                                    disabled={isBusy}
+                                    className="flex items-center justify-center gap-1.5 rounded border border-emerald-500/30 bg-emerald-500/10 py-2 text-[10px] font-bold uppercase tracking-wider text-emerald-300 transition-colors hover:bg-emerald-500 hover:text-white disabled:opacity-50"
+                                >
+                                    <CreditCard size={11} />
+                                    Test Card
+                                </button>
+                            </div>
+
+                            <p className="text-[10px] leading-relaxed text-white/45">
+                                Gera uma compra de especialidade de R$ 50 sem liberar premium vitalicio.
+                            </p>
+
+                            {paymentMessage && (
+                                <p className="text-[10px] leading-relaxed text-emerald-200">
+                                    {paymentMessage}
+                                </p>
+                            )}
+                        </div>
+
                         <button
                             onClick={handleCompleteAll}
                             className="w-full flex items-center justify-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs py-2 rounded hover:bg-emerald-500 hover:text-white transition-colors uppercase font-bold tracking-wider"

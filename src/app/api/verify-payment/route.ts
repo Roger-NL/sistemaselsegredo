@@ -1,52 +1,33 @@
 import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
-import { getPayment, isPaymentPaid } from "@/lib/asaas";
+import { AsaasApiError } from "@/lib/asaas";
+import { verifyPaymentStatus } from "@/lib/payments/service";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
-    const { paymentId, userId } = await req.json();
+    const { paymentId, userId } = (await req.json()) as { paymentId?: string; userId?: string };
 
     if (!paymentId || !userId) {
       return NextResponse.json({ error: "Missing paymentId or userId" }, { status: 400 });
     }
 
-    const payment = await getPayment(paymentId);
-    const status: string = payment.status;
-
-    console.log(`[verify-payment] paymentId=${paymentId} userId=${userId} status=${status}`);
-
-    const isPaid = isPaymentPaid(status);
-
-    if (isPaid) {
-      const userRef = adminDb.collection("users").doc(userId);
-      const userDoc = await userRef.get();
-      const currentApprovedPillar = userDoc.exists ? Number(userDoc.data()?.approvedPillar || 1) : 1;
-
-      await userRef.set({
-        subscriptionStatus: "premium",
-        purchasedPlan: "lifetime",
-        premiumActivatedAt: new Date().toISOString(),
-        paymentId,
-        pendingPixPayment: null,
-        approvedPillar: Math.max(currentApprovedPillar, 2),
-        updatedAt: new Date().toISOString(),
-      }, { merge: true });
-
-      console.log(`[verify-payment] Acesso liberado para UID: ${userId}`);
-      return NextResponse.json({ isPaid: true, status });
-    }
-
-    await adminDb.collection("users").doc(userId).set({
-      "pendingPixPayment.status": status,
-      updatedAt: new Date().toISOString(),
-    }, { merge: true });
-
-    return NextResponse.json({ isPaid: false, status });
-
+    const verification = await verifyPaymentStatus(userId, paymentId);
+    return NextResponse.json(verification);
   } catch (error: unknown) {
     console.error("[verify-payment] Error:", error);
+
+    if (error instanceof AsaasApiError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          provider: "asaas",
+          providerStatus: error.status,
+        },
+        { status: error.status >= 400 && error.status < 500 ? 400 : 502 }
+      );
+    }
+
     const message = error instanceof Error ? error.message : "Unexpected verify payment error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
