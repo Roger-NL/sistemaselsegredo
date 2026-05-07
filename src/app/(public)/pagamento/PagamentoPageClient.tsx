@@ -8,6 +8,12 @@ import { FlightButton } from "@/components/ui/FlightCard";
 import { ROUTES } from "@/lib/routes";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { DirectCardForm } from "@/components/payments/DirectCardForm";
+import {
+    buildDirectCardPayload,
+    EMPTY_DIRECT_CARD_FORM,
+    getDirectCardValidationError
+} from "@/lib/payments/direct-card";
 import {
     Check,
     AlertCircle,
@@ -31,6 +37,7 @@ function PagamentoPageContent() {
     const [showCodeInput, setShowCodeInput] = useState(false);
     const [inviteCode, setInviteCode] = useState('');
     const [cpf, setCpf] = useState('');
+    const [cardForm, setCardForm] = useState(EMPTY_DIRECT_CARD_FORM);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"PIX" | "CREDIT_CARD">("PIX");
     const [activePaymentMethod, setActivePaymentMethod] = useState<"PIX" | "CREDIT_CARD" | null>(null);
     const [qrCodeData, setQrCodeData] = useState<{ encodedImage: string, payload: string } | null>(null);
@@ -208,10 +215,20 @@ function PagamentoPageContent() {
             return;
         }
 
+        if (selectedPaymentMethod === "CREDIT_CARD") {
+            const validationError = getDirectCardValidationError(cardForm);
+            if (validationError) {
+                setError(validationError);
+                return;
+            }
+        }
+
         setLoading(true);
 
         try {
-            const res = await fetch('/api/checkout', {
+            const endpoint = selectedPaymentMethod === "CREDIT_CARD" ? '/api/checkout/card/direct' : '/api/checkout';
+            const directCardPayload = selectedPaymentMethod === "CREDIT_CARD" ? buildDirectCardPayload(cardForm) : {};
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -221,7 +238,8 @@ function PagamentoPageContent() {
                     userId: user.id,
                     plan: checkoutPlan,
                     paymentMethod: selectedPaymentMethod,
-                    creditCardMode: selectedPaymentMethod === "CREDIT_CARD" ? "INVOICE_URL" : undefined
+                    creditCardMode: selectedPaymentMethod === "CREDIT_CARD" ? "DIRECT" : undefined,
+                    ...directCardPayload
                 })
             });
 
@@ -280,7 +298,11 @@ function PagamentoPageContent() {
             return;
         }
 
-        setError("Primeiro lance a cobranca na Asaas para abrir a pagina de pagamento.");
+        setError(
+            selectedPaymentMethod === "CREDIT_CARD"
+                ? "No fluxo direto de cartao nao existe invoiceUrl. Envie os dados do cartao para testar a cobranca."
+                : "Primeiro lance a cobranca na Asaas para abrir a pagina de pagamento."
+        );
     };
 
     if (success) {
@@ -559,7 +581,7 @@ function PagamentoPageContent() {
                                         </p>
                                     )}
                                 </motion.div>
-                            ) : activePaymentMethod === "CREDIT_CARD" && invoiceUrl ? (
+                            ) : activePaymentMethod === "CREDIT_CARD" && (invoiceUrl || paymentId) ? (
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
@@ -568,22 +590,32 @@ function PagamentoPageContent() {
                                     <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-400/30 bg-emerald-400/10">
                                         <CreditCard className="h-6 w-6 text-emerald-300" />
                                     </div>
-                                    <h3 className="mb-2 text-xl font-bold text-white">Pagamento por Cartão Pronto</h3>
+                                    <h3 className="mb-2 text-xl font-bold text-white">
+                                        {invoiceUrl ? "Pagamento por Cartão Pronto" : "Cartão enviado para processamento"}
+                                    </h3>
                                     <p className="mx-auto mb-5 max-w-md text-sm leading-relaxed text-slate-300">
-                                        Sua cobrança por cartão já foi criada. Toque abaixo para abrir a fatura segura da Asaas e finalizar o pagamento.
+                                        {invoiceUrl
+                                            ? "Sua cobrança por cartão já foi criada. Toque abaixo para abrir a fatura segura da Asaas e finalizar o pagamento."
+                                            : "Os dados completos do cartão foram enviados para a Asaas. Acompanhe o status abaixo enquanto a confirmação é processada."}
                                     </p>
-                                    <FlightButton
-                                        onClick={() => window.location.href = invoiceUrl}
-                                        className="w-full py-5 text-lg font-bold"
-                                        variant="neon"
-                                    >
-                                        <span className="flex items-center justify-center gap-2">
-                                            <CreditCard className="h-5 w-5" />
-                                            PAGAR COM CARTÃO AGORA
-                                        </span>
-                                    </FlightButton>
+                                    {invoiceUrl ? (
+                                        <FlightButton
+                                            onClick={() => window.location.href = invoiceUrl}
+                                            className="w-full py-5 text-lg font-bold"
+                                            variant="neon"
+                                        >
+                                            <span className="flex items-center justify-center gap-2">
+                                                <CreditCard className="h-5 w-5" />
+                                                PAGAR COM CARTÃO AGORA
+                                            </span>
+                                        </FlightButton>
+                                    ) : (
+                                        <div className="rounded-2xl border border-emerald-400/20 bg-black/20 px-4 py-4 text-sm text-emerald-200">
+                                            Status atual: <span className="font-bold">{paymentStatus || "PROCESSANDO"}</span>
+                                        </div>
+                                    )}
                                     <p className="mt-4 text-xs uppercase tracking-[0.22em] text-slate-500">
-                                        Fatura segura Asaas
+                                        {invoiceUrl ? "Fatura segura Asaas" : "Cobranca direta Asaas"}
                                     </p>
                                 </motion.div>
                             ) : (
@@ -627,7 +659,7 @@ function PagamentoPageContent() {
                                                 <span className="text-sm font-bold uppercase tracking-[0.18em] text-white">Cartao</span>
                                             </div>
                                             <p className="text-sm leading-relaxed text-slate-400">
-                                                Abre a fatura segura da Asaas para voce concluir no cartao de credito.
+                                                Preenche os dados reais do cartao aqui e envia a cobranca direta para a Asaas.
                                             </p>
                                         </button>
                                     </div>
@@ -642,6 +674,18 @@ function PagamentoPageContent() {
                                             className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-mono"
                                         />
                                     </div>
+                                    {selectedPaymentMethod === "CREDIT_CARD" && (
+                                        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/5 p-5">
+                                            <p className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-emerald-300">
+                                                Dados do cartao para teste real
+                                            </p>
+                                            <DirectCardForm
+                                                value={cardForm}
+                                                onChange={setCardForm}
+                                                disabled={loading || recoveringPix}
+                                            />
+                                        </div>
+                                    )}
                                     <FlightButton
                                         onClick={handlePayment}
                                         disabled={loading || recoveringPix}
@@ -656,7 +700,7 @@ function PagamentoPageContent() {
                                         ) : (
                                             selectedPaymentMethod === "PIX"
                                                 ? "GERAR PIX DE ACESSO"
-                                                : "ABRIR PAGAMENTO NO CARTAO"
+                                                : "ENVIAR PAGAMENTO NO CARTAO"
                                         )}
                                     </FlightButton>
                                 </div>

@@ -5,6 +5,19 @@ import type { CheckoutPlan, CheckoutRequestInput } from "@/lib/payments/types";
 
 export const dynamic = "force-dynamic";
 
+function resolveRequestIp(req: Request) {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    const firstIp = forwardedFor.split(",")[0]?.trim();
+    if (firstIp) return firstIp;
+  }
+
+  const realIp = req.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
+
+  return "127.0.0.1";
+}
+
 function getErrorResponse(error: unknown) {
   if (error instanceof AsaasApiError) {
     return NextResponse.json(
@@ -47,7 +60,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required checkout fields." }, { status: 400 });
     }
 
-    const checkoutResponse = await createCheckout(payload);
+    const checkoutResponse = await createCheckout({
+      ...payload,
+      remoteIp: payload.remoteIp || (payload.creditCardMode === "DIRECT" ? resolveRequestIp(req) : payload.remoteIp),
+    });
     return NextResponse.json(checkoutResponse);
   } catch (error: unknown) {
     console.error("Checkout creation error:", error);

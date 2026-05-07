@@ -5,6 +5,19 @@ import type { CheckoutRequestInput } from "@/lib/payments/types";
 
 export const dynamic = "force-dynamic";
 
+function resolveRequestIp(req: Request) {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    const firstIp = forwardedFor.split(",")[0]?.trim();
+    if (firstIp) return firstIp;
+  }
+
+  const realIp = req.headers.get("x-real-ip")?.trim();
+  if (realIp) return realIp;
+
+  return "127.0.0.1";
+}
+
 export async function POST(req: Request) {
   try {
     const payload = (await req.json()) as CheckoutRequestInput;
@@ -17,6 +30,7 @@ export async function POST(req: Request) {
       ...payload,
       paymentMethod: "CREDIT_CARD",
       creditCardMode: "DIRECT",
+      remoteIp: payload.remoteIp || resolveRequestIp(req),
     });
 
     return NextResponse.json(response);

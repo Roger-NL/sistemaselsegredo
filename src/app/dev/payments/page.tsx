@@ -6,6 +6,12 @@ import { CreditCard, ExternalLink, QrCode, ShoppingCart, ShieldAlert } from "luc
 import { useAuth } from "@/context/AuthContext";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { DirectCardForm } from "@/components/payments/DirectCardForm";
+import {
+  buildDirectCardPayload,
+  EMPTY_DIRECT_CARD_FORM,
+  getDirectCardValidationError,
+} from "@/lib/payments/direct-card";
 
 const TEST_PRODUCTS = [
   { id: "spec-tech", name: "Especialidade Tech", price: 50 },
@@ -22,6 +28,7 @@ export default function DevPaymentsPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([TEST_PRODUCTS[0].id]);
   const [cpf, setCpf] = useState("12345678909");
   const [paymentMethod, setPaymentMethod] = useState<"PIX" | "CREDIT_CARD">("PIX");
+  const [cardForm, setCardForm] = useState(EMPTY_DIRECT_CARD_FORM);
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
@@ -109,10 +116,20 @@ export default function DevPaymentsPage() {
       return;
     }
 
+    if (paymentMethod === "CREDIT_CARD") {
+      const validationError = getDirectCardValidationError(cardForm);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
-      const res = await fetch("/api/checkout", {
+      const endpoint = paymentMethod === "CREDIT_CARD" ? "/api/checkout/card/direct" : "/api/checkout";
+      const directCardPayload = paymentMethod === "CREDIT_CARD" ? buildDirectCardPayload(cardForm) : {};
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -122,10 +139,11 @@ export default function DevPaymentsPage() {
           email: user.email,
           cpfCnpj: cpf.replace(/\D/g, ""),
           paymentMethod,
-          creditCardMode: paymentMethod === "CREDIT_CARD" ? "INVOICE_URL" : undefined,
+          creditCardMode: paymentMethod === "CREDIT_CARD" ? "DIRECT" : undefined,
           plan: "specialty",
           value: total,
           description,
+          ...directCardPayload,
         }),
       });
 
@@ -150,7 +168,11 @@ export default function DevPaymentsPage() {
         }
       }
 
-      setMessage("Cobranca de teste criada com sucesso.");
+      setMessage(
+        paymentMethod === "CREDIT_CARD"
+          ? "Pagamento direto de cartao enviado para a Asaas. Acompanhe o status abaixo."
+          : "Cobranca de teste criada com sucesso."
+      );
     } catch (checkoutError: unknown) {
       setError(checkoutError instanceof Error ? checkoutError.message : "Erro ao criar cobranca.");
     } finally {
@@ -291,6 +313,20 @@ export default function DevPaymentsPage() {
             />
           </label>
 
+          {paymentMethod === "CREDIT_CARD" && (
+            <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/5 p-4">
+              <p className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-emerald-300">
+                Dados reais do cartao
+              </p>
+              <DirectCardForm
+                value={cardForm}
+                onChange={setCardForm}
+                disabled={loading}
+                compact
+              />
+            </div>
+          )}
+
           <div className="grid gap-3 sm:grid-cols-2">
             <button
               type="button"
@@ -304,12 +340,12 @@ export default function DevPaymentsPage() {
             <button
               type="button"
               onClick={openPayment}
-              disabled={loading || (!invoiceUrl && !qrCodeData)}
+              disabled={loading || (paymentMethod === "CREDIT_CARD" ? !invoiceUrl : !qrCodeData)}
               className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-emerald-200 transition hover:bg-emerald-500/20 disabled:opacity-50"
             >
               <span className="inline-flex items-center justify-center gap-2">
                 <ExternalLink className="h-4 w-4" />
-                Ir para pagamento
+                {paymentMethod === "CREDIT_CARD" ? "Abrir invoiceUrl" : "Ir para pagamento"}
               </span>
             </button>
           </div>
@@ -321,6 +357,11 @@ export default function DevPaymentsPage() {
             <div className="rounded-xl border border-slate-800 bg-black/30 p-4 text-xs text-slate-400">
               <p>ID: <span className="text-slate-200">{paymentId}</span></p>
               <p className="mt-1">Status: <span className="text-slate-200">{paymentStatus || "aguardando"}</span></p>
+              {paymentMethod === "CREDIT_CARD" && !invoiceUrl && (
+                <p className="mt-2 text-emerald-300">
+                  Fluxo direto ativo: este teste envia os dados completos do cartao sem abrir invoiceUrl.
+                </p>
+              )}
             </div>
           )}
         </div>
