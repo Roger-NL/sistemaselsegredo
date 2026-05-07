@@ -61,8 +61,14 @@ function formatDateDaysFromNow(daysFromNow: number) {
   return date.toISOString().split("T")[0];
 }
 
+function stripUndefined<T extends object>(value: T): T {
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).filter(([, entryValue]) => entryValue !== undefined)
+  ) as T;
+}
+
 function buildPendingCheckoutPayment(attempt: PaymentAttemptRecord): PendingCheckoutPayment {
-  return {
+  return stripUndefined({
     paymentId: attempt.id,
     paymentMethod: attempt.paymentMethod,
     status: attempt.status,
@@ -74,7 +80,7 @@ function buildPendingCheckoutPayment(attempt: PaymentAttemptRecord): PendingChec
     expiresAt: attempt.expiresAt,
     dueDate: attempt.dueDate,
     plan: attempt.plan,
-  };
+  });
 }
 
 function getAttemptResponse(
@@ -142,7 +148,7 @@ async function getPaymentAttempt(paymentId: string) {
 }
 
 async function upsertPaymentAttempt(attempt: PaymentAttemptRecord) {
-  await adminDb.collection(PAYMENT_ATTEMPTS_COLLECTION).doc(attempt.id).set(attempt, { merge: true });
+  await adminDb.collection(PAYMENT_ATTEMPTS_COLLECTION).doc(attempt.id).set(stripUndefined(attempt), { merge: true });
 }
 
 async function syncUserPendingState(userId: string, attempt: PaymentAttemptRecord | null) {
@@ -163,14 +169,14 @@ async function syncUserPendingState(userId: string, attempt: PaymentAttemptRecor
   }
 
   await userRef.set(
-    {
+    stripUndefined({
       paymentId: attempt.id,
       paymentMethod: attempt.paymentMethod,
       paymentStatus: attempt.status,
       pendingCheckoutPayment: buildPendingCheckoutPayment(attempt),
       pendingPixPayment:
         attempt.paymentMethod === "PIX"
-          ? {
+          ? stripUndefined({
               paymentId: attempt.id,
               qrCode: attempt.qrCode,
               qrCodePayload: attempt.qrCodePayload,
@@ -178,10 +184,10 @@ async function syncUserPendingState(userId: string, attempt: PaymentAttemptRecor
               expiresAt: attempt.expiresAt,
               status: attempt.status,
               plan: attempt.plan,
-            }
+            })
           : null,
       updatedAt: nowIso(),
-    },
+    }),
     { merge: true }
   );
 }
