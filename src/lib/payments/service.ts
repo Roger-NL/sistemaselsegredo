@@ -19,6 +19,7 @@ import type {
   PaymentAttemptRecord,
   PendingCheckoutPayment,
 } from "@/lib/payments/types";
+import { calculateCheckoutInstallmentTotals, MAX_CHECKOUT_INSTALLMENTS } from "@/lib/payments/installments";
 
 const PAYMENT_VALUE = 297.0;
 const PAYMENT_DESCRIPTION = "Acesso Vitalicio - BasedSpeak PRO (9 Pilares)";
@@ -31,7 +32,6 @@ const DIRECT_CARD_ENABLED = process.env.ASAAS_ENABLE_DIRECT_CREDIT_CARD === "tru
 const USER_COLLECTION = "users";
 const PAYMENT_ATTEMPTS_COLLECTION = "payment_attempts";
 const WEBHOOK_EVENTS_COLLECTION = "asaas_webhook_events";
-const MAX_INSTALLMENTS = 21;
 
 type UserPaymentSnapshot = {
   subscriptionStatus?: string;
@@ -479,9 +479,11 @@ export async function createCheckout(input: CheckoutRequestInput): Promise<Check
     paymentMethod === "CREDIT_CARD" ? input.creditCardMode ?? "INVOICE_URL" : "INVOICE_URL";
   const installmentCount =
     paymentMethod === "CREDIT_CARD" && Number.isFinite(input.installmentCount)
-      ? Math.min(MAX_INSTALLMENTS, Math.max(1, Math.trunc(input.installmentCount as number)))
+      ? Math.min(MAX_CHECKOUT_INSTALLMENTS, Math.max(1, Math.trunc(input.installmentCount as number)))
       : 1;
-  const { value, description } = getPlanPricing(plan);
+  const { value: baseValue, description } = getPlanPricing(plan);
+  const installmentTotals = calculateCheckoutInstallmentTotals(baseValue, installmentCount);
+  const value = paymentMethod === "CREDIT_CARD" ? installmentTotals.totalAmount : baseValue;
 
   const existingState = await getCheckoutState(input.userId, plan);
   if (existingState.alreadyPremium || existingState.hasPendingPayment) {

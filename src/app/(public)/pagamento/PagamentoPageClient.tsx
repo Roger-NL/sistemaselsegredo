@@ -17,6 +17,7 @@ import {
     getDirectCardFieldErrors
 } from "@/lib/payments/direct-card";
 import type { DirectCardField, DirectCardFieldErrors } from "@/lib/payments/direct-card";
+import { calculateCheckoutInstallmentTotals, MAX_CHECKOUT_INSTALLMENTS } from "@/lib/payments/installments";
 import {
     Check,
     AlertCircle,
@@ -32,9 +33,6 @@ import {
 
 const PAYMENT_AMOUNT = 297;
 const SPECIALTY_TEST_PAYMENT_AMOUNT = 50;
-const DEFAULT_MAX_INSTALLMENTS = 12;
-const PREMIUM_MAX_INSTALLMENTS = 21;
-
 function detectCardBrand(cardNumber: string) {
     const digits = digitsOnly(cardNumber);
 
@@ -57,11 +55,6 @@ function detectCardBrand(cardNumber: string) {
     }
 
     return "unknown";
-}
-
-function getInstallmentLimit(cardNumber: string) {
-    const brand = detectCardBrand(cardNumber);
-    return brand === "visa" || brand === "mastercard" ? PREMIUM_MAX_INSTALLMENTS : DEFAULT_MAX_INSTALLMENTS;
 }
 
 function formatCurrency(value: number) {
@@ -146,9 +139,13 @@ function PagamentoPageContent() {
     );
     const checkoutAmount = isSpecialtyTestMode ? SPECIALTY_TEST_PAYMENT_AMOUNT : PAYMENT_AMOUNT;
     const detectedCardBrand = detectCardBrand(cardForm.number);
-    const maxInstallments = getInstallmentLimit(cardForm.number);
-    const normalizedInstallmentCount = Math.min(installmentCount, maxInstallments);
-    const installmentValue = checkoutAmount / normalizedInstallmentCount;
+    const maxInstallments = MAX_CHECKOUT_INSTALLMENTS;
+    const installmentTotals = calculateCheckoutInstallmentTotals(checkoutAmount, installmentCount);
+    const normalizedInstallmentCount = installmentTotals.installmentCount;
+    const installmentValue = installmentTotals.installmentAmount;
+    const installmentTotalAmount = installmentTotals.totalAmount;
+    const installmentFeeAmount = installmentTotals.feeAmount;
+    const hasInstallmentFee = installmentTotals.hasFee;
     const maskedCardNumber = cardForm.number || "0000 0000 0000 0000";
     const maskedHolderName = (cardForm.holderName || user?.name || "SEU NOME").toUpperCase();
     const maskedExpiry = `${cardForm.expiryMonth || "MM"}/${(cardForm.expiryYear || "AA").slice(-2)}`;
@@ -889,37 +886,67 @@ function PagamentoPageContent() {
                                                             disabled={loading || recoveringPix}
                                                             className="mt-2 w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
                                                         >
-                                                            {installmentOptions.map((option) => (
-                                                                <option key={option} value={option}>
-                                                                    {option}x de {formatCurrency(checkoutAmount / option)}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </label>
-                                                    <p className="mt-3 text-xs leading-relaxed text-slate-400">
-                                                        {normalizedInstallmentCount === 1
-                                                            ? "Pagamento a vista com cobranca unica no cartao."
-                                                            : `Sua fatura recebe ${normalizedInstallmentCount} parcelas de ${formatCurrency(installmentValue)}.`}
-                                                    </p>
-                                                    <p className="mt-2 text-[11px] leading-relaxed text-emerald-300/80">
-                                                        Visa e Master podem chegar a 21x na Asaas. Outras bandeiras seguem ate 12x.
-                                                    </p>
-                                                </div>
+                                                        {installmentOptions.map((option) => {
+                                                            const optionTotals = calculateCheckoutInstallmentTotals(checkoutAmount, option);
 
-                                                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                                                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Resumo</p>
-                                                    <div className="mt-3 space-y-2 text-sm text-slate-300">
+                                                            return (
+                                                                <option key={option} value={option}>
+                                                                    {option}x de {formatCurrency(optionTotals.installmentAmount)}{" "}
+                                                                    {optionTotals.hasFee ? `| total ${formatCurrency(optionTotals.totalAmount)}` : "| sem acrescimo"}
+                                                                </option>
+                                                            );
+                                                        })}
+                                                    </select>
+                                                </label>
+                                                <p className="mt-3 text-xs leading-relaxed text-slate-400">
+                                                    {normalizedInstallmentCount === 1
+                                                        ? "Pagamento a vista no cartao, sem acrescimo."
+                                                        : normalizedInstallmentCount === 2
+                                                            ? "Parcelamento em 2x sem acrescimo."
+                                                            : `Parcelamento em ${normalizedInstallmentCount}x com taxa da Asaas repassada ao comprador.`}
+                                                </p>
+                                                <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
+                                                    Escolha entre 1x e 8x. Ate 2x sem acrescimo. De 3x a 8x, a taxa do parcelamento e somada ao total da compra.
+                                                </p>
+                                                {hasInstallmentFee ? (
+                                                    <p className="mt-2 text-[11px] leading-relaxed text-emerald-300/80">
+                                                        Total no cartao: {formatCurrency(installmentTotalAmount)}. Taxa do parcelamento: {formatCurrency(installmentFeeAmount)}.
+                                                    </p>
+                                                ) : (
+                                                    <p className="mt-2 text-[11px] leading-relaxed text-emerald-300/80">
+                                                        Total no cartao: {formatCurrency(installmentTotalAmount)} sem taxa adicional.
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                                                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Resumo</p>
+                                                <div className="mt-3 space-y-2 text-sm text-slate-300">
                                                         <div className="flex items-center justify-between gap-3">
-                                                            <span>Total</span>
-                                                            <span className="font-semibold text-white">{formatCurrency(checkoutAmount)}</span>
+                                                            <span>Total no cartao</span>
+                                                            <span className="font-semibold text-white">{formatCurrency(installmentTotalAmount)}</span>
                                                         </div>
                                                         <div className="flex items-center justify-between gap-3">
                                                             <span>Forma</span>
                                                             <span className="font-semibold text-white">Cartao de credito</span>
                                                         </div>
                                                         <div className="flex items-center justify-between gap-3">
-                                                            <span>Plano</span>
+                                                            <span>Parcelas</span>
                                                             <span className="font-semibold text-white">{normalizedInstallmentCount}x</span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <span>Produto</span>
+                                                            <span className="font-semibold text-white">{formatCurrency(checkoutAmount)}</span>
+                                                        </div>
+                                                        {hasInstallmentFee && (
+                                                            <div className="flex items-center justify-between gap-3">
+                                                                <span>Taxa do parcelamento</span>
+                                                                <span className="font-semibold text-emerald-300">{formatCurrency(installmentFeeAmount)}</span>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <span>Valor por parcela</span>
+                                                            <span className="font-semibold text-white">{formatCurrency(installmentValue)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
