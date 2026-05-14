@@ -147,7 +147,7 @@ function PagamentoPageContent() {
     const installmentFeeAmount = installmentTotals.feeAmount;
     const hasInstallmentFee = installmentTotals.hasFee;
     const maskedCardNumber = cardForm.number || "0000 0000 0000 0000";
-    const maskedHolderName = (cardForm.holderName || user?.name || "SEU NOME").toUpperCase();
+    const maskedHolderName = (cardForm.holderName || "NOME DO TITULAR").toUpperCase();
     const maskedExpiry = `${cardForm.expiryMonth || "MM"}/${(cardForm.expiryYear || "AA").slice(-2)}`;
     const shouldAskPhone = digitsOnly(cardForm.phone || user?.phone || "").length < 10;
     const installmentOptions = Array.from({ length: maxInstallments }, (_, index) => index + 1);
@@ -203,7 +203,7 @@ function PagamentoPageContent() {
 
         if (selectedPaymentMethod === "CREDIT_CARD") {
             const cardErrors = getDirectCardFieldErrors(cardForm, {
-                requireHolderName: !Boolean(user?.name),
+                requireHolderName: true,
                 requirePhone: shouldAskPhone,
             });
             Object.assign(nextErrors, cardErrors);
@@ -218,20 +218,18 @@ function PagamentoPageContent() {
 
     useEffect(() => {
         setCardForm((current) => {
-            const nextHolderName = current.holderName || user?.name || "";
             const nextPhone = current.phone || user?.phone || "";
 
-            if (nextHolderName === current.holderName && nextPhone === current.phone) {
+            if (nextPhone === current.phone) {
                 return current;
             }
 
             return {
                 ...current,
-                holderName: nextHolderName,
                 phone: nextPhone,
             };
         });
-    }, [user?.name, user?.phone]);
+    }, [user?.phone]);
 
     useEffect(() => {
         if (!isSpecialtyTestMode && !isLoading && subscriptionStatus === 'premium') {
@@ -976,7 +974,6 @@ function PagamentoPageContent() {
                                                         clearFieldError("phone");
                                                     }}
                                                     disabled={loading || recoveringPix}
-                                                    hideHolderName={Boolean(user?.name)}
                                                     hidePhone={!shouldAskPhone}
                                                     errors={fieldErrors}
                                                     inputRefs={{

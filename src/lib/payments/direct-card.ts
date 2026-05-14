@@ -186,7 +186,7 @@ export function buildDirectCardPayload(
   const normalizedExpiryYear =
     expiryYearDigits.length === 2 ? `20${expiryYearDigits}` : expiryYearDigits.slice(0, 4);
   const normalizedPhone = digitsOnly(form.phone);
-  const holderName = form.holderName.trim() || customer?.name?.trim() || "";
+  const holderName = form.holderName.trim();
   const postalCode = digitsOnly(form.postalCode).slice(0, 8);
   const addressNumber = form.addressNumber.trim();
   const addressComplement = form.addressComplement.trim() || null;
