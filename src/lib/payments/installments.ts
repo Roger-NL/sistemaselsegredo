@@ -1,4 +1,4 @@
-export const MAX_CHECKOUT_INSTALLMENTS = 8;
+export const MAX_CHECKOUT_INSTALLMENTS = 6;
 export const FREE_INSTALLMENT_LIMIT = 2;
 export const CARD_FIXED_FEE = 0.49;
 

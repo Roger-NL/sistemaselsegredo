@@ -910,7 +910,7 @@ function PagamentoPageContent() {
                                                             : `Parcelamento em ${normalizedInstallmentCount}x com taxa da Asaas repassada ao comprador.`}
                                                 </p>
                                                 <p className="mt-2 text-[11px] leading-relaxed text-slate-500">
-                                                    Escolha entre 1x e 8x. Ate 2x sem acrescimo. De 3x a 8x, a taxa do parcelamento e somada ao total da compra.
+                                                    Escolha entre 1x e 6x. Ate 2x sem acrescimo. De 3x a 6x, a taxa do parcelamento e somada ao total da compra.
                                                 </p>
                                                 {hasInstallmentFee ? (
                                                     <p className="mt-2 text-[11px] leading-relaxed text-emerald-300/80">
