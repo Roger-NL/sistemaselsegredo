@@ -174,23 +174,44 @@ export function getDirectCardFieldErrors(
   return errors;
 }
 
-export function buildDirectCardPayload(form: DirectCardFormData) {
+export function buildDirectCardPayload(
+  form: DirectCardFormData,
+  customer?: {
+    name?: string | null;
+    email?: string | null;
+    cpfCnpj?: string | null;
+  }
+) {
   const expiryYearDigits = digitsOnly(form.expiryYear);
   const normalizedExpiryYear =
     expiryYearDigits.length === 2 ? `20${expiryYearDigits}` : expiryYearDigits.slice(0, 4);
   const normalizedPhone = digitsOnly(form.phone);
+  const holderName = form.holderName.trim() || customer?.name?.trim() || "";
+  const postalCode = digitsOnly(form.postalCode).slice(0, 8);
+  const addressNumber = form.addressNumber.trim();
+  const addressComplement = form.addressComplement.trim() || null;
 
   return {
     card: {
-      holderName: form.holderName.trim(),
+      holderName,
       number: digitsOnly(form.number),
       expiryMonth: digitsOnly(form.expiryMonth).slice(0, 2),
       expiryYear: normalizedExpiryYear,
       ccv: digitsOnly(form.ccv).slice(0, 4),
     },
-    postalCode: digitsOnly(form.postalCode).slice(0, 8),
-    addressNumber: form.addressNumber.trim(),
-    addressComplement: form.addressComplement.trim() || null,
+    cardHolderInfo: {
+      name: holderName,
+      email: customer?.email?.trim() || "",
+      cpfCnpj: digitsOnly(customer?.cpfCnpj || "").slice(0, 14),
+      postalCode,
+      addressNumber,
+      addressComplement,
+      phone: normalizedPhone || undefined,
+      mobilePhone: normalizedPhone || undefined,
+    },
+    postalCode,
+    addressNumber,
+    addressComplement,
     phone: normalizedPhone || undefined,
     mobilePhone: normalizedPhone || undefined,
   };

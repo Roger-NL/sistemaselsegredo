@@ -409,7 +409,13 @@ function PagamentoPageContent() {
         try {
             const headers = await createAuthenticatedHeaders();
             const endpoint = selectedPaymentMethod === "CREDIT_CARD" ? '/api/checkout/card/direct' : '/api/checkout';
-            const directCardPayload = selectedPaymentMethod === "CREDIT_CARD" ? buildDirectCardPayload(cardForm) : {};
+            const directCardPayload = selectedPaymentMethod === "CREDIT_CARD"
+                ? buildDirectCardPayload(cardForm, {
+                    name: user.name || "Novo Aluno",
+                    email: user.email,
+                    cpfCnpj: cpf.replace(/\D/g, ''),
+                })
+                : {};
             const res = await fetch(endpoint, {
                 method: 'POST',
                 headers,
