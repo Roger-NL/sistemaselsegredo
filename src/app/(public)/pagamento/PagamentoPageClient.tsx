@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
@@ -14,8 +14,9 @@ import {
     buildDirectCardPayload,
     digitsOnly,
     EMPTY_DIRECT_CARD_FORM,
-    getDirectCardValidationError
+    getDirectCardFieldErrors
 } from "@/lib/payments/direct-card";
+import type { DirectCardField, DirectCardFieldErrors } from "@/lib/payments/direct-card";
 import {
     Check,
     AlertCircle,
@@ -85,6 +86,34 @@ async function createAuthenticatedHeaders() {
     };
 }
 
+type CheckoutField =
+    | "cpf"
+    | "holderName"
+    | "number"
+    | "expiryMonth"
+    | "expiryYear"
+    | "ccv"
+    | "postalCode"
+    | "addressNumber"
+    | "addressComplement"
+    | "phone";
+
+type CheckoutFieldErrors = {
+    cpf?: string;
+} & DirectCardFieldErrors;
+
+const CHECKOUT_FIELD_ORDER: CheckoutField[] = [
+    "cpf",
+    "holderName",
+    "number",
+    "expiryMonth",
+    "expiryYear",
+    "ccv",
+    "postalCode",
+    "addressNumber",
+    "phone",
+];
+
 function PagamentoPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -105,6 +134,8 @@ function PagamentoPageContent() {
     const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
     const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
     const [error, setError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState<CheckoutFieldErrors>({});
+    const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
     const [loading, setLoading] = useState(false);
     const [recoveringPix, setRecoveringPix] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -123,6 +154,66 @@ function PagamentoPageContent() {
     const maskedExpiry = `${cardForm.expiryMonth || "MM"}/${(cardForm.expiryYear || "AA").slice(-2)}`;
     const shouldAskPhone = digitsOnly(cardForm.phone || user?.phone || "").length < 10;
     const installmentOptions = Array.from({ length: maxInstallments }, (_, index) => index + 1);
+    const cpfInputRef = useRef<HTMLInputElement | null>(null);
+    const cardSectionRef = useRef<HTMLDivElement | null>(null);
+    const fieldRefs = useRef<Partial<Record<CheckoutField, HTMLInputElement | null>>>({});
+    const activeInlineError = useMemo(
+        () => CHECKOUT_FIELD_ORDER.map((field) => fieldErrors[field]).find(Boolean) || "",
+        [fieldErrors]
+    );
+
+    const setFieldRef = (field: CheckoutField) => (element: HTMLInputElement | null) => {
+        fieldRefs.current[field] = element;
+    };
+
+    const clearFieldError = (field: CheckoutField) => {
+        setFieldErrors((current) => {
+            if (!current[field]) {
+                return current;
+            }
+
+            const next = { ...current };
+            delete next[field];
+            return next;
+        });
+    };
+
+    const scrollToField = (field: CheckoutField) => {
+        const element = field === "cpf" ? cpfInputRef.current : fieldRefs.current[field];
+        if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+            window.setTimeout(() => {
+                element.focus();
+                element.select?.();
+            }, 250);
+            return;
+        }
+
+        if (field !== "cpf" && cardSectionRef.current) {
+            cardSectionRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+    };
+
+    const validateCheckoutFields = (): CheckoutFieldErrors => {
+        const nextErrors: CheckoutFieldErrors = {};
+        const normalizedCpf = cpf.replace(/\D/g, "");
+
+        if (normalizedCpf.length < 11) {
+            nextErrors.cpf = normalizedCpf.length === 0
+                ? "Informe seu CPF para emitir a cobrança."
+                : "Seu CPF precisa ter 11 dígitos.";
+        }
+
+        if (selectedPaymentMethod === "CREDIT_CARD") {
+            const cardErrors = getDirectCardFieldErrors(cardForm, {
+                requireHolderName: !Boolean(user?.name),
+                requirePhone: shouldAskPhone,
+            });
+            Object.assign(nextErrors, cardErrors);
+        }
+
+        return nextErrors;
+    };
 
     useEffect(() => {
         setInstallmentCount((current) => Math.min(current, maxInstallments));
@@ -295,23 +386,25 @@ function PagamentoPageContent() {
     const createPayment = async (options?: { redirectOnCard?: boolean }) => {
         const redirectOnCard = options?.redirectOnCard ?? true;
         setError('');
+        setHasAttemptedSubmit(true);
 
         if (!isAuthenticated || !user) {
             redirectToLogin();
             return;
         }
 
-        if (cpf.replace(/\D/g, '').length < 11) {
-            setError('Por favor, informe um CPF válido.');
-            return;
-        }
+        const validationErrors = validateCheckoutFields();
+        setFieldErrors(validationErrors);
 
-        if (selectedPaymentMethod === "CREDIT_CARD") {
-            const validationError = getDirectCardValidationError(cardForm);
-            if (validationError) {
-                setError(validationError);
-                return;
-            }
+        const firstErrorField = CHECKOUT_FIELD_ORDER.find((field) => validationErrors[field]);
+        if (firstErrorField) {
+            setError(
+                firstErrorField === "cpf"
+                    ? "Revise os dados destacados antes de continuar."
+                    : "Existem campos do pagamento com erro. Corrija para continuar."
+            );
+            scrollToField(firstErrorField);
+            return;
         }
 
         setLoading(true);
@@ -354,6 +447,7 @@ function PagamentoPageContent() {
             setPaymentId(data.paymentId);
             setInvoiceUrl(data.invoiceUrl || null);
             setPaymentStatus(data.status || null);
+            setFieldErrors({});
             setQrCodeData(
                 data.qrCode && data.qrCodePayload
                     ? { encodedImage: data.qrCode, payload: data.qrCodePayload }
@@ -371,6 +465,9 @@ function PagamentoPageContent() {
             }
 
             setError(err instanceof Error ? err.message : 'Erro de comunicação com o servidor.');
+            if (selectedPaymentMethod === "CREDIT_CARD") {
+                cardSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
         } finally {
             setLoading(false);
         }
@@ -572,6 +669,17 @@ function PagamentoPageContent() {
                                 </div>
                             )}
 
+                            {activeInlineError && hasAttemptedSubmit && (
+                                <div className="mb-6 rounded-lg border border-amber-400/30 bg-amber-500/10 p-3 text-left text-amber-200 text-sm">
+                                    <p className="font-semibold uppercase tracking-[0.18em] text-[11px] text-amber-300">
+                                        Revise os campos marcados
+                                    </p>
+                                    <p className="mt-1 leading-relaxed">
+                                        Corrija primeiro o campo destacado. Depois disso, tente finalizar novamente.
+                                    </p>
+                                </div>
+                            )}
+
                             {recoveringPix && !paymentId && (
                                 <div className="mb-6 p-3 bg-white/5 border border-white/10 rounded-lg text-slate-300 text-sm flex items-center justify-center gap-2">
                                     <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
@@ -718,12 +826,31 @@ function PagamentoPageContent() {
                                             type="text"
                                             placeholder="Ex: 000.000.000-00"
                                             value={cpf}
-                                            onChange={(e) => setCpf(e.target.value)}
-                                            className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-mono"
+                                            onChange={(e) => {
+                                                setCpf(e.target.value);
+                                                clearFieldError("cpf");
+                                            }}
+                                            ref={cpfInputRef}
+                                            aria-invalid={Boolean(fieldErrors.cpf)}
+                                            className={`w-full bg-black/50 border rounded-xl p-4 text-white focus:outline-none focus:ring-1 transition-all font-mono ${
+                                                fieldErrors.cpf
+                                                    ? "border-rose-500 focus:border-rose-400 focus:ring-rose-400/40"
+                                                    : "border-white/10 focus:border-violet-500 focus:ring-violet-500"
+                                            }`}
                                         />
+                                        {fieldErrors.cpf ? (
+                                            <p className="mt-2 text-[11px] text-rose-300">{fieldErrors.cpf}</p>
+                                        ) : (
+                                            <p className="mt-2 text-[11px] text-slate-500">
+                                                Digite os 11 dígitos do CPF do comprador.
+                                            </p>
+                                        )}
                                     </div>
                                     {selectedPaymentMethod === "CREDIT_CARD" && (
-                                        <div className="space-y-4 rounded-2xl border border-emerald-400/20 bg-emerald-500/5 p-5">
+                                        <div
+                                            ref={cardSectionRef}
+                                            className="space-y-4 rounded-2xl border border-emerald-400/20 bg-emerald-500/5 p-5"
+                                        >
                                             <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(135deg,#0d1721_0%,#10292a_45%,#153f34_100%)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.28)]">
                                                 <div className="flex items-start justify-between">
                                                     <div>
@@ -802,13 +929,35 @@ function PagamentoPageContent() {
                                                 <p className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-emerald-300">
                                                     Dados de pagamento
                                                 </p>
-                                            <DirectCardForm
-                                                value={cardForm}
-                                                onChange={setCardForm}
-                                                disabled={loading || recoveringPix}
-                                                hideHolderName={Boolean(user?.name)}
-                                                hidePhone={!shouldAskPhone}
-                                            />
+                                                <DirectCardForm
+                                                    value={cardForm}
+                                                    onChange={(nextValue) => {
+                                                        setCardForm(nextValue);
+                                                        clearFieldError("holderName");
+                                                        clearFieldError("number");
+                                                        clearFieldError("expiryMonth");
+                                                        clearFieldError("expiryYear");
+                                                        clearFieldError("ccv");
+                                                        clearFieldError("postalCode");
+                                                        clearFieldError("addressNumber");
+                                                        clearFieldError("phone");
+                                                    }}
+                                                    disabled={loading || recoveringPix}
+                                                    hideHolderName={Boolean(user?.name)}
+                                                    hidePhone={!shouldAskPhone}
+                                                    errors={fieldErrors}
+                                                    inputRefs={{
+                                                        holderName: setFieldRef("holderName"),
+                                                        number: setFieldRef("number"),
+                                                        expiryMonth: setFieldRef("expiryMonth"),
+                                                        expiryYear: setFieldRef("expiryYear"),
+                                                        ccv: setFieldRef("ccv"),
+                                                        postalCode: setFieldRef("postalCode"),
+                                                        addressNumber: setFieldRef("addressNumber"),
+                                                        addressComplement: setFieldRef("addressComplement"),
+                                                        phone: setFieldRef("phone"),
+                                                    }}
+                                                />
                                             </div>
                                         </div>
                                     )}

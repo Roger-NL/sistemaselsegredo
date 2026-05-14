@@ -10,6 +10,19 @@ export interface DirectCardFormData {
   phone: string;
 }
 
+export type DirectCardField =
+  | "holderName"
+  | "number"
+  | "expiryMonth"
+  | "expiryYear"
+  | "ccv"
+  | "postalCode"
+  | "addressNumber"
+  | "addressComplement"
+  | "phone";
+
+export type DirectCardFieldErrors = Partial<Record<DirectCardField, string>>;
+
 export const EMPTY_DIRECT_CARD_FORM: DirectCardFormData = {
   holderName: "",
   number: "",
@@ -111,6 +124,54 @@ export function getDirectCardValidationError(form: DirectCardFormData) {
   }
 
   return null;
+}
+
+export function getDirectCardFieldErrors(
+  form: DirectCardFormData,
+  options?: { requireHolderName?: boolean; requirePhone?: boolean }
+): DirectCardFieldErrors {
+  const errors: DirectCardFieldErrors = {};
+  const requireHolderName = options?.requireHolderName ?? true;
+  const requirePhone = options?.requirePhone ?? true;
+
+  if (requireHolderName && form.holderName.trim().length < 3) {
+    errors.holderName = "Informe o nome impresso no cartao.";
+  }
+
+  if (digitsOnly(form.number).length < 13) {
+    errors.number = "Informe um numero de cartao valido.";
+  }
+
+  if (digitsOnly(form.expiryMonth).length !== 2) {
+    errors.expiryMonth = "Informe o mes com 2 digitos.";
+  } else {
+    const month = Number(digitsOnly(form.expiryMonth));
+    if (!Number.isFinite(month) || month < 1 || month > 12) {
+      errors.expiryMonth = "Mes de validade invalido.";
+    }
+  }
+
+  if (digitsOnly(form.expiryYear).length < 2) {
+    errors.expiryYear = "Informe o ano de validade.";
+  }
+
+  if (digitsOnly(form.ccv).length < 3) {
+    errors.ccv = "Informe o CVV do cartao.";
+  }
+
+  if (digitsOnly(form.postalCode).length !== 8) {
+    errors.postalCode = "Informe um CEP valido.";
+  }
+
+  if (!form.addressNumber.trim()) {
+    errors.addressNumber = "Informe o numero do endereco.";
+  }
+
+  if (requirePhone && digitsOnly(form.phone).length < 10) {
+    errors.phone = "Informe um telefone com DDD.";
+  }
+
+  return errors;
 }
 
 export function buildDirectCardPayload(form: DirectCardFormData) {
