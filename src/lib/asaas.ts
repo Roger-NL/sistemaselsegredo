@@ -24,6 +24,10 @@ export const ASAAS_API_URL =
   process.env.NEXT_PUBLIC_ASAAS_API_URL ||
   DEFAULT_ASAAS_BASE_URL;
 
+export function isAsaasSandboxEnvironment() {
+  return /sandbox\.asaas\.com|api-sandbox\.asaas\.com/i.test(ASAAS_API_URL);
+}
+
 function getAsaasApiKey() {
   const key = process.env.ASAAS_API_KEY;
 

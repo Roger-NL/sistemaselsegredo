@@ -5,6 +5,7 @@ import {
   createPixPayment,
   getPayment,
   getPixQrCode,
+  isAsaasSandboxEnvironment,
   isPaymentPaid,
   tokenizeCreditCard,
   type AsaasPayment,
@@ -27,7 +28,13 @@ const SPECIALTY_TEST_PAYMENT_VALUE = 50.0;
 const SPECIALTY_TEST_PAYMENT_DESCRIPTION = "Teste DevTools - Compra de Especialidade";
 const PIX_VALIDITY_MS = 5 * 60 * 1000;
 const CARD_DUE_DAYS = 5;
-const DIRECT_CARD_ENABLED = process.env.ASAAS_ENABLE_DIRECT_CREDIT_CARD === "true";
+function isDirectCardEnabled() {
+  if (isAsaasSandboxEnvironment()) {
+    return true;
+  }
+
+  return process.env.ASAAS_ENABLE_DIRECT_CREDIT_CARD === "true";
+}
 
 const USER_COLLECTION = "users";
 const PAYMENT_ATTEMPTS_COLLECTION = "payment_attempts";
@@ -336,7 +343,7 @@ function buildPaymentAttemptFromAsaas(params: {
 }
 
 function ensureDirectCardFields(input: CheckoutRequestInput) {
-  if (!DIRECT_CARD_ENABLED) {
+  if (!isDirectCardEnabled()) {
     throw new Error("Pagamento direto com cartao nao esta habilitado neste ambiente.");
   }
 
