@@ -113,9 +113,6 @@ function PagamentoPageContent() {
         pixExpiresAt &&
         new Date(pixExpiresAt).getTime() <= Date.now()
     );
-    const adminEmails = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
-    const isAdminUser = Boolean(user?.email && adminEmails.includes(user.email));
-    const isWebhookApproved = subscriptionStatus === "premium" || paymentStatus === "RECEIVED" || paymentStatus === "CONFIRMED";
     const checkoutAmount = isSpecialtyTestMode ? SPECIALTY_TEST_PAYMENT_AMOUNT : PAYMENT_AMOUNT;
     const detectedCardBrand = detectCardBrand(cardForm.number);
     const maxInstallments = getInstallmentLimit(cardForm.number);
@@ -383,28 +380,6 @@ function PagamentoPageContent() {
         await createPayment({ redirectOnCard: true });
     };
 
-    const handleLaunchOnly = async () => {
-        await createPayment({ redirectOnCard: false });
-    };
-
-    const handleOpenAsaasPage = () => {
-        if (selectedPaymentMethod === "CREDIT_CARD" && invoiceUrl) {
-            window.open(invoiceUrl, "_blank", "noopener,noreferrer");
-            return;
-        }
-
-        if (selectedPaymentMethod === "PIX" && qrCodeData) {
-            document.getElementById("pix-display-card")?.scrollIntoView({ behavior: "smooth", block: "center" });
-            return;
-        }
-
-        setError(
-            selectedPaymentMethod === "CREDIT_CARD"
-                ? "No checkout direto do cartao a cobranca acontece aqui mesmo. Basta preencher os dados e finalizar."
-                : "Gere o Pix primeiro para abrir o QR Code e o copia e cola."
-        );
-    };
-
     if (success) {
         return (
             <div className="min-h-screen bg-[#050505] flex items-center justify-center">
@@ -457,49 +432,6 @@ function PagamentoPageContent() {
                     </button>
                 </div>
             </nav>
-
-            {isAdminUser && (
-                <div className="fixed right-4 top-24 z-50 w-[min(90vw,320px)] rounded-2xl border border-white/10 bg-black/75 p-4 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.35)]">
-                    <div className="mb-3 flex items-center justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-white/40">Admin Payment Monitor</p>
-                            <p className="mt-1 text-xs text-white/70">Operacao manual e leitura de webhook.</p>
-                        </div>
-                        <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] ${
-                            isWebhookApproved
-                                ? "bg-emerald-500/15 text-emerald-300"
-                                : "bg-red-500/15 text-red-300"
-                        }`}>
-                            <span className={`h-2 w-2 rounded-full ${isWebhookApproved ? "bg-emerald-400" : "bg-red-400"}`} />
-                            {isWebhookApproved ? "Aprovado" : "Pendente"}
-                        </span>
-                    </div>
-
-                    <div className="mb-3 text-[11px] leading-relaxed text-white/55">
-                        {paymentId ? `Cobranca atual: ${paymentId}` : "Nenhuma cobranca ativa agora."}
-                        {paymentStatus ? ` Status: ${paymentStatus}.` : ""}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                        <button
-                            type="button"
-                            onClick={handleLaunchOnly}
-                            disabled={loading || recoveringPix}
-                            className="rounded-xl border border-violet-400/30 bg-violet-500/10 px-3 py-3 text-xs font-bold uppercase tracking-[0.18em] text-violet-200 transition hover:bg-violet-500/20 disabled:opacity-50"
-                        >
-                            Criar cobranca
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleOpenAsaasPage}
-                            disabled={loading || recoveringPix || (!invoiceUrl && !qrCodeData)}
-                            className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-3 text-xs font-bold uppercase tracking-[0.18em] text-emerald-200 transition hover:bg-emerald-500/20 disabled:opacity-50"
-                        >
-                            Ir para pagamento
-                        </button>
-                    </div>
-                </div>
-            )}
 
             <main className="pt-24 pb-20">
                 <div className="relative max-w-4xl mx-auto px-4 text-center mb-16">
