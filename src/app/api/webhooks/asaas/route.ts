@@ -7,7 +7,7 @@ function isWebhookAuthorized(req: Request) {
   const expectedToken = process.env.ASAAS_WEBHOOK_TOKEN;
 
   if (!expectedToken) {
-    return true;
+    return process.env.NODE_ENV !== "production";
   }
 
   const url = new URL(req.url);

@@ -6,7 +6,7 @@ import { PILLARS } from "@/data/curriculum";
 import { useAuth } from "@/context/AuthContext";
 import { PremiumWall } from "@/features/subscription/PremiumWall";
 import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
-import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, CheckCircle2, Lock, X, ShieldCheck, MessageSquare } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, CheckCircle2, Crown, Lock, X, ShieldCheck, MessageSquare } from "lucide-react";
 import { StudyViewer } from "@/features/study/StudyViewer";
 import { PillarOperationalView } from "@/features/study/PillarOperationalView";
 import { getUserExamStatus, PillarExam } from "@/lib/exam/service";
@@ -175,16 +175,65 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     if (!isUnlocked) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center p-4">
-                    <FlightCard variant="default" className="p-8 text-center max-w-md">
-                        <Lock className="w-16 h-16 text-white/30 mx-auto mb-4" />
-                    <h1 className="text-2xl font-bold text-[#EEF4D4] mb-2">{pillar.title}</h1>
-                    <p className="text-white/50 mb-6">
-                        Complete o Pilar {pillarId - 1} primeiro para desbloquear este conteúdo.
-                    </p>
-                    <FlightButton variant="neon" onClick={() => router.push(`${ROUTES.app.pillar}/${currentPillarNumber}`)}>
-                        Ir para Pilar {currentPillarNumber}
-                        <ArrowRight className="w-4 h-4 ml-2 inline" />
-                    </FlightButton>
+                    <FlightCard variant="default" className="max-w-lg p-0 overflow-hidden text-center">
+                        <div className="relative px-8 pb-8 pt-7">
+                            <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.16),transparent_48%),radial-gradient(circle_at_top_right,rgba(168,85,247,0.22),transparent_36%),radial-gradient(circle_at_center,rgba(236,72,153,0.14),transparent_52%)]" />
+
+                            <div className="relative">
+                                <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 py-1 text-[10px] uppercase tracking-[0.28em] text-fuchsia-200">
+                                    <Lock className="h-3.5 w-3.5" />
+                                    Conteúdo bloqueado
+                                </div>
+
+                                <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[1.75rem] border border-fuchsia-400/20 bg-[linear-gradient(180deg,rgba(168,85,247,0.18),rgba(236,72,153,0.08))] shadow-[0_0_40px_rgba(168,85,247,0.18)]">
+                                    <Lock className="h-10 w-10 text-white/70" />
+                                </div>
+
+                                <h1 className="text-3xl font-bold tracking-tight text-[#EEF4D4]">
+                                    {pillar.title}
+                                </h1>
+                                <p className="mx-auto mt-3 max-w-sm text-base leading-relaxed text-white/60">
+                                    Este próximo nível já pode ser seu agora.
+                                </p>
+
+                                <div className="mt-6 rounded-2xl border border-fuchsia-400/20 bg-[linear-gradient(135deg,rgba(91,33,182,0.18),rgba(232,121,249,0.12),rgba(34,211,238,0.12))] p-4 text-left shadow-[0_0_35px_rgba(217,70,239,0.12)]">
+                                    <div className="mb-2 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-fuchsia-200">
+                                        <Crown className="h-3.5 w-3.5" />
+                                        Acesso premium
+                                    </div>
+                                    <p className="text-lg font-semibold text-white">Desbloqueie este pilar e continue sem espera.</p>
+                                    <p className="mt-1 text-sm leading-relaxed text-white/65">
+                                        Jornada completa, acesso liberado e continuidade imediata.
+                                    </p>
+                                </div>
+
+                                <div className="mt-6 space-y-3">
+                                    <FlightButton variant="neon" onClick={() => router.push(ROUTES.public.payment)} className="w-full !rounded-xl !border-fuchsia-400/35 bg-[linear-gradient(135deg,rgba(91,33,182,0.42),rgba(217,70,239,0.22),rgba(34,211,238,0.18))] px-5 py-4 shadow-[0_0_35px_rgba(217,70,239,0.22)]">
+                                        <span className="flex items-center justify-between gap-3">
+                                            <span className="flex items-center gap-3">
+                                                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-300/25 bg-fuchsia-400/15 text-fuchsia-200">
+                                                    <Crown className="h-4 w-4" />
+                                                </span>
+                                                <span className="text-left">
+                                                    <span className="block text-[10px] uppercase tracking-[0.22em] text-fuchsia-200/85">Liberar agora</span>
+                                                    <span className="block text-base text-white">Adquirir o premium</span>
+                                                </span>
+                                            </span>
+                                            <ArrowRight className="h-5 w-5 text-fuchsia-200" />
+                                        </span>
+                                    </FlightButton>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => router.push(`${ROUTES.app.pillar}/${currentPillarNumber}`)}
+                                        className="inline-flex items-center justify-center gap-2 text-sm text-white/42 transition hover:text-white/72"
+                                    >
+                                        <BookOpen className="h-4 w-4" />
+                                        Voltar ao Pilar {currentPillarNumber}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                 </FlightCard>
             </div>
         );

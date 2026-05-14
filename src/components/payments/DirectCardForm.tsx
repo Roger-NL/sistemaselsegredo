@@ -15,9 +15,18 @@ interface DirectCardFormProps {
   onChange: (value: DirectCardFormData) => void;
   disabled?: boolean;
   compact?: boolean;
+  hideHolderName?: boolean;
+  hidePhone?: boolean;
 }
 
-export function DirectCardForm({ value, onChange, disabled = false, compact = false }: DirectCardFormProps) {
+export function DirectCardForm({
+  value,
+  onChange,
+  disabled = false,
+  compact = false,
+  hideHolderName = false,
+  hidePhone = false,
+}: DirectCardFormProps) {
   const inputClassName = compact
     ? "mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400"
     : "w-full rounded-xl border border-white/10 bg-black/40 p-4 text-white outline-none transition-all focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400";
@@ -31,16 +40,19 @@ export function DirectCardForm({ value, onChange, disabled = false, compact = fa
 
   return (
     <div className="space-y-4">
-      <label className={labelClassName}>
-        Nome no cartao
-        <input
-          value={value.holderName}
-          onChange={(event) => updateField("holderName", event.target.value)}
-          className={inputClassName}
-          placeholder="Nome como aparece no cartao"
-          disabled={disabled}
-        />
-      </label>
+      {!hideHolderName && (
+        <label className={labelClassName}>
+          Nome no cartao
+          <input
+            value={value.holderName}
+            onChange={(event) => updateField("holderName", event.target.value)}
+            className={inputClassName}
+            placeholder="Nome como aparece no cartao"
+            autoComplete="cc-name"
+            disabled={disabled}
+          />
+        </label>
+      )}
 
       <label className={labelClassName}>
         Numero do cartao
@@ -123,7 +135,7 @@ export function DirectCardForm({ value, onChange, disabled = false, compact = fa
         </label>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className={`grid gap-4 ${hidePhone ? "" : "sm:grid-cols-2"}`}>
         <label className={labelClassName}>
           Complemento
           <input
@@ -136,18 +148,20 @@ export function DirectCardForm({ value, onChange, disabled = false, compact = fa
           />
         </label>
 
-        <label className={labelClassName}>
-          Telefone
-          <input
-            value={value.phone}
-            onChange={(event) => updateField("phone", formatPhone(event.target.value))}
-            className={inputClassName}
-            placeholder="(11) 99999-9999"
-            inputMode="tel"
-            autoComplete="tel"
-            disabled={disabled}
-          />
-        </label>
+        {!hidePhone && (
+          <label className={labelClassName}>
+            Telefone
+            <input
+              value={value.phone}
+              onChange={(event) => updateField("phone", formatPhone(event.target.value))}
+              className={inputClassName}
+              placeholder="(11) 99999-9999"
+              inputMode="tel"
+              autoComplete="tel"
+              disabled={disabled}
+            />
+          </label>
+        )}
       </div>
     </div>
   );

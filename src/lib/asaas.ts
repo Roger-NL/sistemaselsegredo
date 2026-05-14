@@ -138,7 +138,9 @@ export interface AsaasPayment {
 interface AsaasCreatePaymentRequest {
   customer: string;
   billingType: "PIX" | "CREDIT_CARD";
-  value: number;
+  value?: number;
+  installmentCount?: number;
+  totalValue?: number;
   dueDate: string;
   description: string;
   externalReference: string;
@@ -178,6 +180,7 @@ export async function createCreditCardPayment(input: {
   dueDate: string;
   externalReference: string;
   creditCardMode: CreditCardCheckoutMode;
+  installmentCount?: number;
   creditCard?: CheckoutCardInput;
   creditCardToken?: string;
   creditCardHolderInfo?: CheckoutCardHolderInfoInput;
@@ -186,11 +189,17 @@ export async function createCreditCardPayment(input: {
   const payload: AsaasCreatePaymentRequest = {
     customer: input.customer,
     billingType: "CREDIT_CARD",
-    value: input.value,
     dueDate: input.dueDate,
     description: input.description,
     externalReference: input.externalReference,
   };
+
+  if (input.installmentCount && input.installmentCount > 1) {
+    payload.installmentCount = input.installmentCount;
+    payload.totalValue = input.value;
+  } else {
+    payload.value = input.value;
+  }
 
   if (input.creditCardMode === "DIRECT") {
     if (input.creditCardToken) {

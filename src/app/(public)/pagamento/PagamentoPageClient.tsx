@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -7,10 +8,11 @@ import { motion } from "framer-motion";
 import { FlightButton } from "@/components/ui/FlightCard";
 import { ROUTES } from "@/lib/routes";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { DirectCardForm } from "@/components/payments/DirectCardForm";
 import {
     buildDirectCardPayload,
+    digitsOnly,
     EMPTY_DIRECT_CARD_FORM,
     getDirectCardValidationError
 } from "@/lib/payments/direct-card";
@@ -27,6 +29,62 @@ import {
     QrCode
 } from "lucide-react";
 
+const PAYMENT_AMOUNT = 297;
+const SPECIALTY_TEST_PAYMENT_AMOUNT = 50;
+const DEFAULT_MAX_INSTALLMENTS = 12;
+const PREMIUM_MAX_INSTALLMENTS = 21;
+
+function detectCardBrand(cardNumber: string) {
+    const digits = digitsOnly(cardNumber);
+
+    if (digits.startsWith("4")) {
+        return "visa";
+    }
+
+    const firstTwo = Number(digits.slice(0, 2));
+    const firstFour = Number(digits.slice(0, 4));
+    if ((firstTwo >= 51 && firstTwo <= 55) || (firstFour >= 2221 && firstFour <= 2720)) {
+        return "mastercard";
+    }
+
+    if (/^3[47]/.test(digits)) {
+        return "amex";
+    }
+
+    if (/^(4011|4312|4389|4514|4576|5041|5066|5067|509|627780|636297|636368)/.test(digits)) {
+        return "elo";
+    }
+
+    return "unknown";
+}
+
+function getInstallmentLimit(cardNumber: string) {
+    const brand = detectCardBrand(cardNumber);
+    return brand === "visa" || brand === "mastercard" ? PREMIUM_MAX_INSTALLMENTS : DEFAULT_MAX_INSTALLMENTS;
+}
+
+function formatCurrency(value: number) {
+    return value.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+    });
+}
+
+async function createAuthenticatedHeaders() {
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+        throw new Error("AUTH_REQUIRED");
+    }
+
+    const token = await currentUser.getIdToken();
+
+    return {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${token}`,
+    };
+}
+
 function PagamentoPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -38,6 +96,7 @@ function PagamentoPageContent() {
     const [inviteCode, setInviteCode] = useState('');
     const [cpf, setCpf] = useState('');
     const [cardForm, setCardForm] = useState(EMPTY_DIRECT_CARD_FORM);
+    const [installmentCount, setInstallmentCount] = useState(1);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"PIX" | "CREDIT_CARD">("PIX");
     const [activePaymentMethod, setActivePaymentMethod] = useState<"PIX" | "CREDIT_CARD" | null>(null);
     const [qrCodeData, setQrCodeData] = useState<{ encodedImage: string, payload: string } | null>(null);
@@ -57,6 +116,37 @@ function PagamentoPageContent() {
     const adminEmails = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
     const isAdminUser = Boolean(user?.email && adminEmails.includes(user.email));
     const isWebhookApproved = subscriptionStatus === "premium" || paymentStatus === "RECEIVED" || paymentStatus === "CONFIRMED";
+    const checkoutAmount = isSpecialtyTestMode ? SPECIALTY_TEST_PAYMENT_AMOUNT : PAYMENT_AMOUNT;
+    const detectedCardBrand = detectCardBrand(cardForm.number);
+    const maxInstallments = getInstallmentLimit(cardForm.number);
+    const normalizedInstallmentCount = Math.min(installmentCount, maxInstallments);
+    const installmentValue = checkoutAmount / normalizedInstallmentCount;
+    const maskedCardNumber = cardForm.number || "0000 0000 0000 0000";
+    const maskedHolderName = (cardForm.holderName || user?.name || "SEU NOME").toUpperCase();
+    const maskedExpiry = `${cardForm.expiryMonth || "MM"}/${(cardForm.expiryYear || "AA").slice(-2)}`;
+    const shouldAskPhone = digitsOnly(cardForm.phone || user?.phone || "").length < 10;
+    const installmentOptions = Array.from({ length: maxInstallments }, (_, index) => index + 1);
+
+    useEffect(() => {
+        setInstallmentCount((current) => Math.min(current, maxInstallments));
+    }, [maxInstallments]);
+
+    useEffect(() => {
+        setCardForm((current) => {
+            const nextHolderName = current.holderName || user?.name || "";
+            const nextPhone = current.phone || user?.phone || "";
+
+            if (nextHolderName === current.holderName && nextPhone === current.phone) {
+                return current;
+            }
+
+            return {
+                ...current,
+                holderName: nextHolderName,
+                phone: nextPhone,
+            };
+        });
+    }, [user?.name, user?.phone]);
 
     useEffect(() => {
         if (!isSpecialtyTestMode && !isLoading && subscriptionStatus === 'premium') {
@@ -74,8 +164,10 @@ function PagamentoPageContent() {
         const recoverCheckoutState = async () => {
             setRecoveringPix(true);
             try {
-                const res = await fetch(`/api/checkout?userId=${encodeURIComponent(user.id)}&plan=${checkoutPlan}`, {
+                const headers = await createAuthenticatedHeaders();
+                const res = await fetch(`/api/checkout?plan=${checkoutPlan}`, {
                     cache: 'no-store',
+                    headers,
                 });
                 const data = await res.json();
 
@@ -94,6 +186,7 @@ function PagamentoPageContent() {
                 if (data.hasPendingPayment) {
                     setSelectedPaymentMethod(data.paymentMethod || "PIX");
                     setActivePaymentMethod(data.paymentMethod || "PIX");
+                    setInstallmentCount(data.installmentCount || 1);
                     setPaymentId(data.paymentId);
                     setInvoiceUrl(data.invoiceUrl || null);
                     setPaymentStatus(data.status || null);
@@ -128,10 +221,11 @@ function PagamentoPageContent() {
         const checkPayment = async () => {
             if (stopped) return;
             try {
+                const headers = await createAuthenticatedHeaders();
                 const res = await fetch('/api/verify-payment', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paymentId, userId: user.id }),
+                    headers,
+                    body: JSON.stringify({ paymentId }),
                 });
                 const data = await res.json();
                 setPaymentStatus(data.status || null);
@@ -226,19 +320,20 @@ function PagamentoPageContent() {
         setLoading(true);
 
         try {
+            const headers = await createAuthenticatedHeaders();
             const endpoint = selectedPaymentMethod === "CREDIT_CARD" ? '/api/checkout/card/direct' : '/api/checkout';
             const directCardPayload = selectedPaymentMethod === "CREDIT_CARD" ? buildDirectCardPayload(cardForm) : {};
             const res = await fetch(endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     name: user.name || "Novo Aluno",
                     email: user.email,
                     cpfCnpj: cpf.replace(/\D/g, ''),
-                    userId: user.id,
                     plan: checkoutPlan,
                     paymentMethod: selectedPaymentMethod,
                     creditCardMode: selectedPaymentMethod === "CREDIT_CARD" ? "DIRECT" : undefined,
+                    installmentCount: selectedPaymentMethod === "CREDIT_CARD" ? normalizedInstallmentCount : 1,
                     ...directCardPayload
                 })
             });
@@ -273,6 +368,11 @@ function PagamentoPageContent() {
                 window.location.href = data.invoiceUrl;
             }
         } catch (err: unknown) {
+            if (err instanceof Error && err.message === "AUTH_REQUIRED") {
+                redirectToLogin();
+                return;
+            }
+
             setError(err instanceof Error ? err.message : 'Erro de comunicação com o servidor.');
         } finally {
             setLoading(false);
@@ -300,8 +400,8 @@ function PagamentoPageContent() {
 
         setError(
             selectedPaymentMethod === "CREDIT_CARD"
-                ? "No fluxo direto de cartao nao existe invoiceUrl. Envie os dados do cartao para testar a cobranca."
-                : "Primeiro lance a cobranca na Asaas para abrir a pagina de pagamento."
+                ? "No checkout direto do cartao a cobranca acontece aqui mesmo. Basta preencher os dados e finalizar."
+                : "Gere o Pix primeiro para abrir o QR Code e o copia e cola."
         );
     };
 
@@ -340,17 +440,30 @@ function PagamentoPageContent() {
                 <div className="font-bold tracking-tighter text-xl">
                     BASEDSPEAK <span className="text-violet-500">PRO</span>
                 </div>
-                <button onClick={() => router.push(ROUTES.home)} className="text-xs text-white/50 hover:text-white transition-colors uppercase tracking-widest">
-                    Voltar
-                </button>
+                <div className="flex items-center gap-2">
+                    {isAuthenticated && (
+                        <button
+                            onClick={() => router.push(ROUTES.app.dashboard)}
+                            className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-semibold text-white/75 transition hover:border-white/20 hover:bg-white/10 hover:text-white uppercase tracking-[0.2em]"
+                        >
+                            Dashboard
+                        </button>
+                    )}
+                    <button
+                        onClick={() => router.push(isAuthenticated ? ROUTES.app.dashboard : ROUTES.home)}
+                        className="text-xs text-white/50 hover:text-white transition-colors uppercase tracking-widest"
+                    >
+                        Voltar
+                    </button>
+                </div>
             </nav>
 
             {isAdminUser && (
                 <div className="fixed right-4 top-24 z-50 w-[min(90vw,320px)] rounded-2xl border border-white/10 bg-black/75 p-4 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.35)]">
                     <div className="mb-3 flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-white/40">Admin Payment Test</p>
-                            <p className="mt-1 text-xs text-white/70">Lancar na Asaas e acompanhar webhook.</p>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-white/40">Admin Payment Monitor</p>
+                            <p className="mt-1 text-xs text-white/70">Operacao manual e leitura de webhook.</p>
                         </div>
                         <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] ${
                             isWebhookApproved
@@ -363,7 +476,7 @@ function PagamentoPageContent() {
                     </div>
 
                     <div className="mb-3 text-[11px] leading-relaxed text-white/55">
-                        {paymentId ? `Cobranca atual: ${paymentId}` : "Nenhuma cobranca criada ainda."}
+                        {paymentId ? `Cobranca atual: ${paymentId}` : "Nenhuma cobranca ativa agora."}
                         {paymentStatus ? ` Status: ${paymentStatus}.` : ""}
                     </div>
 
@@ -374,7 +487,7 @@ function PagamentoPageContent() {
                             disabled={loading || recoveringPix}
                             className="rounded-xl border border-violet-400/30 bg-violet-500/10 px-3 py-3 text-xs font-bold uppercase tracking-[0.18em] text-violet-200 transition hover:bg-violet-500/20 disabled:opacity-50"
                         >
-                            Lançar no Asaas
+                            Criar cobranca
                         </button>
                         <button
                             type="button"
@@ -476,7 +589,7 @@ function PagamentoPageContent() {
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.15),transparent_70%)] pointer-events-none" />
 
                         <div className="relative z-10">
-                            <div className="inline-block px-4 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-xs font-bold uppercase tracking-widest mb-8 animate-pulse">
+                            <div className="inline-block rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-2 text-xs font-bold uppercase tracking-widest text-yellow-400 mb-8 animate-pulse">
                                 <Zap className="w-3 h-3 inline mr-2 text-yellow-400" fill="currentColor" />
                                 {isSpecialtyTestMode ? "Modo de Teste • Especialidade" : "Desconto por Recorde no Pilar 1"}
                             </div>
@@ -545,10 +658,13 @@ function PagamentoPageContent() {
                                     <p className="text-sm text-slate-500 mb-4 text-center">Abra o app do seu banco e escaneie o QR Code abaixo via PIX.</p>
 
                                     <div className="bg-slate-100 p-2 rounded-lg mb-4">
-                                        <img
+                                        <Image
                                             src={`data:image/png;base64,${qrCodeData.encodedImage}`}
                                             alt="PIX QR Code"
-                                            className="w-48 h-48 mix-blend-multiply"
+                                            width={192}
+                                            height={192}
+                                            className="h-48 w-48 mix-blend-multiply"
+                                            unoptimized
                                         />
                                     </div>
 
@@ -638,7 +754,7 @@ function PagamentoPageContent() {
                                                 <span className="text-sm font-bold uppercase tracking-[0.18em] text-white">Pix</span>
                                             </div>
                                             <p className="text-sm leading-relaxed text-slate-400">
-                                                Gera QR Code instantaneo e copia e cola para pagamento imediato.
+                                                Pagamento instantaneo com QR Code e copia e cola prontos para finalizar.
                                             </p>
                                         </button>
 
@@ -659,7 +775,7 @@ function PagamentoPageContent() {
                                                 <span className="text-sm font-bold uppercase tracking-[0.18em] text-white">Cartao</span>
                                             </div>
                                             <p className="text-sm leading-relaxed text-slate-400">
-                                                Preenche os dados reais do cartao aqui e envia a cobranca direta para a Asaas.
+                                                Checkout direto com parcelamento na fatura e confirmacao imediata quando aprovado.
                                             </p>
                                         </button>
                                     </div>
@@ -675,15 +791,93 @@ function PagamentoPageContent() {
                                         />
                                     </div>
                                     {selectedPaymentMethod === "CREDIT_CARD" && (
-                                        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/5 p-5">
-                                            <p className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-emerald-300">
-                                                Dados do cartao para teste real
-                                            </p>
+                                        <div className="space-y-4 rounded-2xl border border-emerald-400/20 bg-emerald-500/5 p-5">
+                                            <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(135deg,#0d1721_0%,#10292a_45%,#153f34_100%)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.28)]">
+                                                <div className="flex items-start justify-between">
+                                                    <div>
+                                                        <p className="text-[10px] uppercase tracking-[0.34em] text-emerald-100/55">Cartao</p>
+                                                        <p className="mt-3 text-lg font-semibold tracking-[0.32em] text-white/95">
+                                                            {maskedCardNumber}
+                                                        </p>
+                                                    </div>
+                                                    <div className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/75">
+                                                        {detectedCardBrand === "unknown" ? "credito" : detectedCardBrand}
+                                                    </div>
+                                                </div>
+                                                <div className="mt-8 flex items-end justify-between gap-4">
+                                                    <div>
+                                                        <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Titular</p>
+                                                        <p className="mt-1 text-sm font-medium tracking-[0.18em] text-white/90">
+                                                            {maskedHolderName}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Validade</p>
+                                                        <p className="mt-1 text-sm font-medium tracking-[0.18em] text-white/90">
+                                                            {maskedExpiry}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid gap-4 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+                                                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                                                    <label className="block text-xs font-bold uppercase tracking-[0.22em] text-slate-400">
+                                                        Parcelamento
+                                                        <select
+                                                            value={normalizedInstallmentCount}
+                                                            onChange={(event) => setInstallmentCount(Number(event.target.value))}
+                                                            disabled={loading || recoveringPix}
+                                                            className="mt-2 w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
+                                                        >
+                                                            {installmentOptions.map((option) => (
+                                                                <option key={option} value={option}>
+                                                                    {option}x de {formatCurrency(checkoutAmount / option)}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </label>
+                                                    <p className="mt-3 text-xs leading-relaxed text-slate-400">
+                                                        {normalizedInstallmentCount === 1
+                                                            ? "Pagamento a vista com cobranca unica no cartao."
+                                                            : `Sua fatura recebe ${normalizedInstallmentCount} parcelas de ${formatCurrency(installmentValue)}.`}
+                                                    </p>
+                                                    <p className="mt-2 text-[11px] leading-relaxed text-emerald-300/80">
+                                                        Visa e Master podem chegar a 21x na Asaas. Outras bandeiras seguem ate 12x.
+                                                    </p>
+                                                </div>
+
+                                                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                                                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Resumo</p>
+                                                    <div className="mt-3 space-y-2 text-sm text-slate-300">
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <span>Total</span>
+                                                            <span className="font-semibold text-white">{formatCurrency(checkoutAmount)}</span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <span>Forma</span>
+                                                            <span className="font-semibold text-white">Cartao de credito</span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <span>Plano</span>
+                                                            <span className="font-semibold text-white">{normalizedInstallmentCount}x</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="rounded-2xl border border-emerald-400/20 bg-black/20 p-5">
+                                                <p className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-emerald-300">
+                                                    Dados de pagamento
+                                                </p>
                                             <DirectCardForm
                                                 value={cardForm}
                                                 onChange={setCardForm}
                                                 disabled={loading || recoveringPix}
+                                                hideHolderName={Boolean(user?.name)}
+                                                hidePhone={!shouldAskPhone}
                                             />
+                                            </div>
                                         </div>
                                     )}
                                     <FlightButton
@@ -695,12 +889,14 @@ function PagamentoPageContent() {
                                         {loading || recoveringPix ? (
                                             <span className="flex items-center gap-2">
                                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                                {recoveringPix ? 'RECUPERANDO PIX...' : 'GERANDO PIX...'}
+                                                {recoveringPix ? 'RECUPERANDO CHECKOUT...' : 'PROCESSANDO PAGAMENTO...'}
                                             </span>
                                         ) : (
                                             selectedPaymentMethod === "PIX"
-                                                ? "GERAR PIX DE ACESSO"
-                                                : "ENVIAR PAGAMENTO NO CARTAO"
+                                                ? "PAGAR COM PIX"
+                                                : normalizedInstallmentCount > 1
+                                                    ? `PAGAR EM ${normalizedInstallmentCount}X`
+                                                    : "FINALIZAR NO CARTAO"
                                         )}
                                     </FlightButton>
                                 </div>

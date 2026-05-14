@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
 import { AsaasApiError } from "@/lib/asaas";
 import { createCheckout } from "@/lib/payments/service";
 import type { CheckoutRequestInput } from "@/lib/payments/types";
@@ -20,14 +21,17 @@ function resolveRequestIp(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const authUser = await requireAuthenticatedUser(req);
     const payload = (await req.json()) as CheckoutRequestInput;
 
-    if (!payload.name || !payload.email || !payload.cpfCnpj || !payload.userId) {
+    if (!payload.name || !payload.email || !payload.cpfCnpj) {
       return NextResponse.json({ error: "Missing required checkout fields." }, { status: 400 });
     }
 
     const response = await createCheckout({
       ...payload,
+      userId: authUser.uid,
+      localCustomerId: authUser.uid,
       paymentMethod: "CREDIT_CARD",
       creditCardMode: "DIRECT",
       remoteIp: payload.remoteIp || resolveRequestIp(req),
@@ -48,7 +52,12 @@ export async function POST(req: Request) {
       );
     }
 
+    if (error instanceof RequestAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+
     const message = error instanceof Error ? error.message : "Unexpected direct credit card checkout error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const status = message === "FORBIDDEN_PAYMENT_ACCESS" ? 403 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

@@ -31,6 +31,7 @@ const DIRECT_CARD_ENABLED = process.env.ASAAS_ENABLE_DIRECT_CREDIT_CARD === "tru
 const USER_COLLECTION = "users";
 const PAYMENT_ATTEMPTS_COLLECTION = "payment_attempts";
 const WEBHOOK_EVENTS_COLLECTION = "asaas_webhook_events";
+const MAX_INSTALLMENTS = 21;
 
 type UserPaymentSnapshot = {
   subscriptionStatus?: string;
@@ -61,6 +62,20 @@ function formatDateDaysFromNow(daysFromNow: number) {
   return date.toISOString().split("T")[0];
 }
 
+function getPlanPricing(plan: CheckoutPlan) {
+  if (plan === "specialty") {
+    return {
+      value: SPECIALTY_TEST_PAYMENT_VALUE,
+      description: SPECIALTY_TEST_PAYMENT_DESCRIPTION,
+    };
+  }
+
+  return {
+    value: PAYMENT_VALUE,
+    description: PAYMENT_DESCRIPTION,
+  };
+}
+
 function stripUndefined<T extends object>(value: T): T {
   return Object.fromEntries(
     Object.entries(value as Record<string, unknown>).filter(([, entryValue]) => entryValue !== undefined)
@@ -73,6 +88,7 @@ function buildPendingCheckoutPayment(attempt: PaymentAttemptRecord): PendingChec
     paymentMethod: attempt.paymentMethod,
     status: attempt.status,
     creditCardMode: attempt.creditCardMode,
+    installmentCount: attempt.installmentCount,
     invoiceUrl: attempt.invoiceUrl,
     qrCode: attempt.qrCode,
     qrCodePayload: attempt.qrCodePayload,
@@ -95,6 +111,7 @@ function getAttemptResponse(
     paymentId: attempt.id,
     paymentMethod: attempt.paymentMethod,
     creditCardMode: attempt.creditCardMode,
+    installmentCount: attempt.installmentCount,
     status: attempt.status,
     invoiceUrl: attempt.invoiceUrl,
     requiresRedirect: attempt.paymentMethod === "CREDIT_CARD" && Boolean(attempt.invoiceUrl),
@@ -145,6 +162,24 @@ async function getUserDoc(userId: string) {
 
 async function getPaymentAttempt(paymentId: string) {
   return adminDb.collection(PAYMENT_ATTEMPTS_COLLECTION).doc(paymentId).get();
+}
+
+async function assertPaymentBelongsToUser(paymentId: string, userId: string) {
+  const attemptDoc = await getPaymentAttempt(paymentId);
+  if (attemptDoc.exists) {
+    const attempt = attemptDoc.data() as PaymentAttemptRecord;
+    if (attempt.userId !== userId) {
+      throw new Error("FORBIDDEN_PAYMENT_ACCESS");
+    }
+    return attempt;
+  }
+
+  const payment = await getPayment(paymentId);
+  if ((payment.externalReference || "") !== userId) {
+    throw new Error("FORBIDDEN_PAYMENT_ACCESS");
+  }
+
+  return null;
 }
 
 async function upsertPaymentAttempt(attempt: PaymentAttemptRecord) {
@@ -270,6 +305,7 @@ function buildPaymentAttemptFromAsaas(params: {
   value: number;
   description: string;
   plan: CheckoutPlan;
+  installmentCount?: number;
   localCustomerId?: string;
   lastWebhookEvent?: string;
 }): PaymentAttemptRecord {
@@ -280,6 +316,7 @@ function buildPaymentAttemptFromAsaas(params: {
     asaasCustomerId: params.asaasCustomerId,
     paymentMethod: params.paymentMethod,
     creditCardMode: params.creditCardMode,
+    installmentCount: params.installmentCount,
     plan: params.plan,
     value: params.value,
     description: params.description,
@@ -440,10 +477,11 @@ export async function createCheckout(input: CheckoutRequestInput): Promise<Check
   const paymentMethod = input.paymentMethod ?? "PIX";
   const creditCardMode: CreditCardCheckoutMode =
     paymentMethod === "CREDIT_CARD" ? input.creditCardMode ?? "INVOICE_URL" : "INVOICE_URL";
-  const value = input.value ?? (plan === "specialty" ? SPECIALTY_TEST_PAYMENT_VALUE : PAYMENT_VALUE);
-  const description = input.description ?? (
-    plan === "specialty" ? SPECIALTY_TEST_PAYMENT_DESCRIPTION : PAYMENT_DESCRIPTION
-  );
+  const installmentCount =
+    paymentMethod === "CREDIT_CARD" && Number.isFinite(input.installmentCount)
+      ? Math.min(MAX_INSTALLMENTS, Math.max(1, Math.trunc(input.installmentCount as number)))
+      : 1;
+  const { value, description } = getPlanPricing(plan);
 
   const existingState = await getCheckoutState(input.userId, plan);
   if (existingState.alreadyPremium || existingState.hasPendingPayment) {
@@ -467,6 +505,7 @@ export async function createCheckout(input: CheckoutRequestInput): Promise<Check
       value,
       description,
       plan,
+      installmentCount: 1,
       localCustomerId: input.localCustomerId,
     });
 
@@ -488,6 +527,7 @@ export async function createCheckout(input: CheckoutRequestInput): Promise<Check
       dueDate,
       externalReference: input.userId,
       creditCardMode,
+      installmentCount,
       creditCard: input.card?.token ? undefined : input.card!,
       creditCardToken: input.card?.token,
       creditCardHolderInfo: cardHolderInfo,
@@ -503,6 +543,7 @@ export async function createCheckout(input: CheckoutRequestInput): Promise<Check
       value,
       description,
       plan,
+      installmentCount,
       localCustomerId: input.localCustomerId,
     });
 
@@ -529,6 +570,7 @@ export async function createCheckout(input: CheckoutRequestInput): Promise<Check
     dueDate,
     externalReference: input.userId,
     creditCardMode,
+    installmentCount,
   });
 
   const attempt = buildPaymentAttemptFromAsaas({
@@ -550,10 +592,10 @@ export async function createCheckout(input: CheckoutRequestInput): Promise<Check
 }
 
 export async function verifyPaymentStatus(userId: string, paymentId: string): Promise<{ isPaid: boolean; status: string }> {
+  const existingAttempt = await assertPaymentBelongsToUser(paymentId, userId);
   const payment = await getPayment(paymentId);
-  const attemptDoc = await getPaymentAttempt(paymentId);
-  const existingAttempt = attemptDoc.exists
-    ? (attemptDoc.data() as PaymentAttemptRecord)
+  const attempt = existingAttempt
+    ? existingAttempt
     : buildPaymentAttemptFromAsaas({
         payment,
         userId,
@@ -562,9 +604,10 @@ export async function verifyPaymentStatus(userId: string, paymentId: string): Pr
         value: payment.value,
         description: PAYMENT_DESCRIPTION,
         plan: "lifetime",
+        installmentCount: 1,
       });
 
-  const syncedAttempt = await syncAttemptFromAsaas(existingAttempt, payment);
+  const syncedAttempt = await syncAttemptFromAsaas(attempt, payment);
 
   if (isPaymentPaid(payment.status)) {
     if (syncedAttempt.plan === "lifetime") {
@@ -630,6 +673,7 @@ export async function handleAsaasWebhook(payload: {
       value: payment.value,
       description: PAYMENT_DESCRIPTION,
       plan: "lifetime",
+      installmentCount: 1,
       lastWebhookEvent: event,
     });
   } else {

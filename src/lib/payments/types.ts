@@ -59,6 +59,7 @@ export interface CheckoutRequestInput extends CheckoutCustomerInput {
   plan?: CheckoutPlan;
   paymentMethod?: CheckoutPaymentMethod;
   creditCardMode?: CreditCardCheckoutMode;
+  installmentCount?: number;
   card?: CheckoutCardInput;
   cardHolderInfo?: CheckoutCardHolderInfoInput;
 }
@@ -68,6 +69,7 @@ export interface PendingCheckoutPayment {
   paymentMethod: CheckoutPaymentMethod;
   status: string;
   creditCardMode?: CreditCardCheckoutMode;
+  installmentCount?: number;
   invoiceUrl?: string;
   qrCode?: string;
   qrCodePayload?: string;
@@ -84,6 +86,7 @@ export interface PaymentAttemptRecord {
   asaasCustomerId: string;
   paymentMethod: CheckoutPaymentMethod;
   creditCardMode?: CreditCardCheckoutMode;
+  installmentCount?: number;
   plan: CheckoutPlan;
   value: number;
   description: string;
@@ -111,6 +114,7 @@ export interface CheckoutStateResponse {
   paymentId?: string;
   paymentMethod?: CheckoutPaymentMethod;
   creditCardMode?: CreditCardCheckoutMode;
+  installmentCount?: number;
   status?: string;
   invoiceUrl?: string;
   requiresRedirect?: boolean;

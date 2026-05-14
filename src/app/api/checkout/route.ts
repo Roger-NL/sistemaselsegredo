@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
 import { AsaasApiError } from "@/lib/asaas";
 import { createCheckout, getCheckoutState } from "@/lib/payments/service";
 import type { CheckoutPlan, CheckoutRequestInput } from "@/lib/payments/types";
@@ -30,21 +31,21 @@ function getErrorResponse(error: unknown) {
     );
   }
 
+  if (error instanceof RequestAuthError) {
+    return NextResponse.json({ error: error.message }, { status: error.status });
+  }
+
   const message = error instanceof Error ? error.message : "Unexpected checkout error";
-  return NextResponse.json({ error: message }, { status: 500 });
+  const status = message === "FORBIDDEN_PAYMENT_ACCESS" ? 403 : 500;
+  return NextResponse.json({ error: message }, { status });
 }
 
 export async function GET(req: Request) {
   try {
+    const authUser = await requireAuthenticatedUser(req);
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
     const plan = (searchParams.get("plan") as CheckoutPlan | null) ?? "lifetime";
-
-    if (!userId) {
-      return NextResponse.json({ error: "Missing userId." }, { status: 400 });
-    }
-
-    const checkoutState = await getCheckoutState(userId, plan);
+    const checkoutState = await getCheckoutState(authUser.uid, plan);
     return NextResponse.json(checkoutState);
   } catch (error: unknown) {
     console.error("Checkout state error:", error);
@@ -54,14 +55,17 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const authUser = await requireAuthenticatedUser(req);
     const payload = (await req.json()) as CheckoutRequestInput;
 
-    if (!payload.name || !payload.email || !payload.cpfCnpj || !payload.userId) {
+    if (!payload.name || !payload.email || !payload.cpfCnpj) {
       return NextResponse.json({ error: "Missing required checkout fields." }, { status: 400 });
     }
 
     const checkoutResponse = await createCheckout({
       ...payload,
+      userId: authUser.uid,
+      localCustomerId: authUser.uid,
       remoteIp: payload.remoteIp || (payload.creditCardMode === "DIRECT" ? resolveRequestIp(req) : payload.remoteIp),
     });
     return NextResponse.json(checkoutResponse);
