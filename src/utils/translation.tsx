@@ -73,7 +73,7 @@ export const parseTextWithTranslations = (text: string): React.ReactNode => {
             // Bold text - also parse for translations inside
             const innerText = part.slice(2, -2);
             return (
-                <strong key={i} className="text-slate-200 font-bold">
+                <strong key={i} className="font-bold text-inherit">
                     {parseTranslatable(innerText)}
                 </strong>
             );

@@ -672,8 +672,8 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                     onClick={() => move("back")}
                     disabled={position === 0}
                     className={cn(
-                        "px-3 py-2.5 md:px-4 md:py-3 rounded-lg border text-slate-200 text-lg active:scale-95 min-w-[64px] md:min-w-[72px]",
-                        position === 0 ? "border-slate-700 text-slate-500" : "border-slate-600 hover:border-teal-400/85"
+                        "px-3 py-2.5 md:px-4 md:py-3 rounded-lg border text-black text-lg active:scale-95 min-w-[64px] md:min-w-[72px]",
+                        position === 0 ? "border-slate-300 text-slate-400" : "border-slate-300 hover:border-teal-300"
                     )}
                 >
                     ←
@@ -682,8 +682,8 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                     onClick={() => move("forward")}
                     disabled={isFinished}
                     className={cn(
-                        "px-3 py-2.5 md:px-4 md:py-3 rounded-lg border text-slate-200 text-lg active:scale-95 min-w-[64px] md:min-w-[72px]",
-                        isFinished ? "border-slate-700 text-slate-500" : "border-slate-600 hover:border-teal-400/85"
+                        "px-3 py-2.5 md:px-4 md:py-3 rounded-lg border text-black text-lg active:scale-95 min-w-[64px] md:min-w-[72px]",
+                        isFinished ? "border-slate-300 text-slate-400" : "border-slate-300 hover:border-teal-300"
                     )}
                 >
                     →
@@ -694,7 +694,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
             <div className="mt-2 text-[11px] md:text-xs text-slate-700 font-mono">
                 Checkpoints concluídos: {completedStages.length}/{stages.length} · Tentativas: {attempts}
             </div>
-            <div className="mt-1 text-[11px] md:text-xs text-teal-200">{parseTextWithTranslations(statusText)}</div>
+            <div className="mt-1 text-[11px] md:text-xs font-mono text-black">{parseTextWithTranslations(statusText)}</div>
 
             {currentStage && (
                 <div className="mt-3 p-3 md:p-4 rounded-lg border border-teal-300/85 bg-teal-50/80">
@@ -715,13 +715,13 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                         ? "bg-teal-100/90 border-teal-400/85 text-teal-900"
                                         : selectedOption !== null && isSelected && !isCorrect
                                             ? "bg-slate-100 border-slate-400/85 text-slate-800"
-                                            : "border-slate-600 bg-slate-900/50 text-slate-950"
+                                            : "border-slate-300 bg-white text-black hover:border-teal-300"
                                 )}
                             >
                                 <div className="space-y-2">
                                     <p>{getOptionTranslation(opt).english}</p>
                                     {getOptionTranslation(opt).portuguese && openTranslations[`${currentStage.id || activeStage}-${idx}`] && (
-                                        <p className="text-xs text-teal-200/90 border-t border-teal-200/80 pt-2">
+                                        <p className="border-t border-slate-200 pt-2 text-xs text-black">
                                             {getOptionTranslation(opt).portuguese}
                                         </p>
                                     )}
@@ -744,7 +744,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                                         setOpenTranslations((prev) => ({ ...prev, [key]: !prev[key] }));
                                                     }
                                                 }}
-                                                className="text-[11px] uppercase tracking-wider font-mono text-teal-700 hover:text-teal-200"
+                                                className="text-[11px] uppercase tracking-wider font-mono text-blue-700 hover:text-blue-800"
                                             >
                                                 {openTranslations[`${currentStage.id || activeStage}-${idx}`] ? "Ocultar traducao" : "Ver traducao"}
                                             </span>
@@ -755,15 +755,15 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                             );
                         })}
                     </div>
-                    {stageFeedback && <p className="text-xs text-teal-100 mt-3 leading-relaxed">{parseTextWithTranslations(stageFeedback)}</p>}
+                    {stageFeedback && <p className="mt-3 text-xs leading-relaxed text-black">{parseTextWithTranslations(stageFeedback)}</p>}
                     {selectedOption !== null && (
                         <div className="mt-3 space-y-2">
                             <div className="flex justify-end">
-                                <div className="max-w-[88%] rounded-2xl rounded-br-md bg-teal-600/10 border border-teal-200/85 px-3 py-2 text-sm text-teal-50">
+                                <div className="max-w-[88%] rounded-2xl rounded-br-md border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-black">
                                     <p className="text-[11px] uppercase tracking-wider font-mono text-teal-700 mb-1">{currentStage.userLabel || "Voce"}</p>
                                     <p>{getOptionTranslation(currentStage.options[selectedOption]).english}</p>
                                     {getOptionTranslation(currentStage.options[selectedOption]).portuguese && (
-                                        <p className="text-xs text-teal-200/80 mt-1">{getOptionTranslation(currentStage.options[selectedOption]).portuguese}</p>
+                                        <p className="mt-1 text-xs text-black">{getOptionTranslation(currentStage.options[selectedOption]).portuguese}</p>
                                     )}
                                 </div>
                             </div>
@@ -791,7 +791,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                     setStatusText("Você pode tentar este checkpoint novamente.");
                                     playUiSfx("click");
                                 }}
-                                className="px-3 py-2 rounded-md border border-teal-300/85 text-teal-100 hover:bg-teal-500/10 text-sm"
+                                className="px-3 py-2 rounded-md border border-teal-300 bg-teal-50 text-blue-700 hover:bg-teal-100 text-sm"
                             >
                                 Tentar novamente
                             </button>
@@ -2921,7 +2921,7 @@ const FinalNote = ({ content }: { content: string }) => (
             {content.split('\n\n').map((para, idx) => (
                 <p key={idx} className={cn(
                     "font-light leading-loose",
-                    idx === 0 ? "text-xl md:text-2xl text-slate-200 mb-5" :
+                    idx === 0 ? "text-xl md:text-2xl text-black mb-5" :
                         idx === 1 ? "text-lg md:text-xl text-slate-800 mb-4" :
                             "text-base md:text-lg text-teal-800 font-semibold"
                 )}>
@@ -3454,7 +3454,7 @@ const IntonationTrace = ({ data }: { data: { title: string; instruction: string;
                                         className="overflow-hidden"
                                     >
                                         <div className="px-4 pb-4 space-y-2 border-t border-teal-200/80 pt-3">
-                                            <p className="text-sm text-teal-200">{parseTextWithTranslations(item.intent)}</p>
+                                            <p className="text-sm text-black">{parseTextWithTranslations(item.intent)}</p>
                                             <p className="text-xs text-slate-700/80 italic">⚠️ {parseTextWithTranslations(item.danger)}</p>
                                         </div>
                                     </motion.div>
@@ -4420,9 +4420,9 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
     // If no modules, fallback (or handle legacy blocks) - ideally we migrate all
     if (!data.modules) {
         return (
-            <div className="text-center p-10 text-white">
+            <div className="p-10 text-center text-black">
                 <h2 className="text-xl text-slate-700">Conteúdo antigo detectado</h2>
-                <p className="text-white/60">Migre este pilar para o novo formato de módulos.</p>
+                <p className="text-slate-700">Migre este pilar para o novo formato de módulos.</p>
             </div>
         );
     }
