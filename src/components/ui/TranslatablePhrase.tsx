@@ -36,7 +36,13 @@ export const TranslatablePhrase: React.FC<TranslatablePhraseProps> = ({
                             toggleOpen(event);
                         }
                     }}
-                    className="translatable-text bg-transparent border-0 p-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/60 rounded-sm"
+                    className="translatable-text rounded-sm border-0 bg-transparent p-0 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                    style={{
+                        color: "#1d4ed8",
+                        fontWeight: 700,
+                        textShadow: "none",
+                        backgroundImage: "linear-gradient(90deg, #2563eb, #2563eb)",
+                    }}
                 >
                     {english}
                 </span>

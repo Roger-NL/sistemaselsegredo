@@ -11,7 +11,7 @@ import { ContentBlock, PillarData } from "@/types/study";
 import { cn } from "@/lib/ui/cn";
 import { useProgress } from "@/context/ProgressContext";
 import { AudioButton } from "@/components/ui/AudioButton";
-import { parseTranslatable, extractTranslatableText, parseTextWithTranslations } from "@/utils/translation";
+import { extractTranslatableText, parseTextWithTranslations } from "@/utils/translation";
 import { parseQuizContent, splitOutsideTranslatable } from "@/utils/content-parsers";
 import { playUiSfx } from "@/utils/ui-sfx";
 import { secureStorage } from "@/lib/storage/secure-storage";
@@ -27,24 +27,32 @@ interface PillarOperationalViewProps {
 
 const BoxIcon = ({ type }: { type: string }) => {
     switch (type) {
-        case "box-goal": return <Target className="w-5 h-5 text-emerald-400" />;
-        case "box-insight": return <Lightbulb className="w-5 h-5 text-cyan-400" />;
-        case "box-warning": return <AlertCircle className="w-5 h-5 text-amber-400" />;
-        case "box-action": return <Zap className="w-5 h-5 text-violet-400" />;
-        case "micro-win": return <CheckCircle2 className="w-5 h-5 text-emerald-400" />;
-        case "pillar-end": return <CheckCircle2 className="w-8 h-8 text-emerald-400" />;
+        case "box-goal": return <Target className="w-5 h-5 text-teal-800" />;
+        case "box-insight": return <Lightbulb className="w-5 h-5 text-teal-700" />;
+        case "box-warning": return <AlertCircle className="w-5 h-5 text-teal-800" />;
+        case "box-action": return <Zap className="w-5 h-5 text-teal-800" />;
+        case "micro-win": return <CheckCircle2 className="w-5 h-5 text-teal-800" />;
+        case "pillar-end": return <CheckCircle2 className="w-8 h-8 text-teal-800" />;
         default: return null;
     }
 };
 
 const BoxStyles = {
-    "box-goal": "bg-emerald-950/30 border-emerald-500/30 text-emerald-100",
-    "box-insight": "bg-cyan-950/30 border-cyan-500/30 text-cyan-100",
-    "box-warning": "bg-amber-950/30 border-amber-500/30 text-amber-100",
-    "box-action": "bg-violet-950/30 border-violet-500/30 text-violet-100",
-    "micro-win": "bg-emerald-950/40 border-emerald-400/50 text-emerald-100 shadow-[0_0_15px_rgba(16,185,129,0.2)]",
-    "pillar-end": "bg-emerald-950/20 border-emerald-500/50 text-emerald-50 text-center py-6 md:py-10",
+    "box-goal": "bg-teal-50/78 border-slate-300/80 text-slate-900",
+    "box-insight": "bg-teal-50/78 border-slate-300/80 text-slate-900",
+    "box-warning": "bg-teal-50/78 border-slate-300/80 text-slate-900",
+    "box-action": "bg-teal-50/78 border-slate-300/80 text-slate-900",
+    "micro-win": "bg-teal-50/82 border-slate-300/90 text-slate-900 shadow-[0_18px_48px_rgba(16,185,129,0.10)]",
+    "pillar-end": "bg-teal-50/72 border-slate-300/90 text-slate-900 text-center py-6 md:py-10",
 };
+
+const STUDY_CARD = "my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md overflow-hidden";
+const STUDY_CARD_HEADER = "bg-slate-50 px-4 py-3 md:px-6 md:py-4 border-b border-slate-200 flex items-center gap-3";
+const STUDY_PANEL = "rounded-lg border border-slate-200 bg-slate-50";
+const STUDY_PANEL_STRONG = "rounded-lg border border-teal-200 bg-teal-50";
+const STUDY_INPUT = "w-full rounded border border-slate-300 bg-white p-3 text-sm text-black outline-none transition-all placeholder:text-slate-500 focus:border-teal-400 focus:ring-1 focus:ring-teal-100";
+const STUDY_INFO_BAR = "my-6 overflow-hidden rounded-xl border border-slate-200 bg-white/70 shadow-[0_16px_40px_rgba(15,23,42,0.07)] backdrop-blur-md";
+const STUDY_INFO_BAR_HEADER = "flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2";
 
 const InteractiveQuiz = ({ question, options, answer }: { question: string, options: string[], answer: number }) => {
     const [selected, setSelected] = useState<number | null>(null);
@@ -57,12 +65,12 @@ const InteractiveQuiz = ({ question, options, answer }: { question: string, opti
     };
 
     return (
-        <div className="my-6 bg-slate-900/50 border border-slate-700/50 rounded-lg p-4 md:p-6 backdrop-blur-sm">
+        <div className="my-6 rounded-xl border border-slate-200/80 bg-white/58 p-4 md:p-6 shadow-[0_18px_48px_rgba(15,23,42,0.08)] backdrop-blur-md">
             <div className="flex items-center gap-3 mb-4">
-                <HelpCircle className="w-5 h-5 text-cyan-400" />
-                <h4 className="font-bold text-slate-200 font-mono text-xs md:text-sm tracking-wider">QUIZ RÁPIDO</h4>
+                <HelpCircle className="w-5 h-5 text-teal-700" />
+                <h4 className="font-bold text-slate-700 font-mono text-xs md:text-sm tracking-wider">QUIZ RÁPIDO</h4>
             </div>
-            <p className="text-base md:text-lg text-slate-300 mb-6 leading-relaxed">{parseTextWithTranslations(question)}</p>
+            <p className="text-base md:text-lg text-slate-800 mb-6 leading-relaxed">{parseTextWithTranslations(question)}</p>
             <div className="grid gap-3">
                 {options.map((opt, idx) => (
                     <button
@@ -72,15 +80,15 @@ const InteractiveQuiz = ({ question, options, answer }: { question: string, opti
                         className={cn(
                             "w-full text-left px-4 py-3 md:py-4 rounded border transition-all duration-200 flex justify-between items-center text-sm md:text-base",
                             showResult && idx === answer
-                                ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
+                                ? "bg-teal-100 border-teal-500 text-slate-900"
                                 : showResult && idx === selected && idx !== answer
-                                    ? "bg-red-900/40 border-red-500/50 text-red-100"
-                                    : "bg-slate-800/50 border-slate-700 hover:border-cyan-500/50 hover:bg-slate-800 text-slate-400"
+                                    ? "bg-slate-100 border-teal-500 text-slate-900"
+                                    : "bg-white/80 border-slate-200 hover:border-teal-400/85 hover:bg-teal-50/70 text-slate-700"
                         )}
                     >
                         <span className="flex-1 mr-2">{parseTextWithTranslations(opt)}</span>
-                        {showResult && idx === answer && <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />}
-                        {showResult && idx === selected && idx !== answer && <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />}
+                        {showResult && idx === answer && <CheckCircle2 className="w-5 h-5 text-teal-700 flex-shrink-0" />}
+                        {showResult && idx === selected && idx !== answer && <AlertCircle className="w-5 h-5 text-slate-700 flex-shrink-0" />}
                     </button>
                 ))}
             </div>
@@ -580,40 +588,40 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
     }, [move]);
 
     return (
-        <div className="my-8 rounded-xl border border-cyan-700/40 bg-slate-900/40 p-3 md:p-5">
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/62 p-3 md:p-5 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
             <div className="flex items-start justify-between gap-3 mb-4">
                 <div>
-                    <h4 className="font-mono text-cyan-300 text-sm md:text-base font-bold uppercase tracking-wider">
+                    <h4 className="font-mono text-teal-700 text-sm md:text-base font-bold uppercase tracking-wider">
                         {parseTextWithTranslations(cfg.title)}
                     </h4>
-                    <p className="text-slate-400 text-sm mt-1">{parseTextWithTranslations(cfg.subtitle)}</p>
+                    <p className="text-slate-700 text-sm mt-1">{parseTextWithTranslations(cfg.subtitle)}</p>
                 </div>
                 <button
                     onClick={() => reset()}
-                    className="px-3 py-2 rounded-md border border-slate-600 text-slate-300 hover:border-cyan-500/60 text-xs font-mono shrink-0"
+                    className="px-3 py-2 rounded-md border border-slate-600 text-slate-800 hover:border-teal-400/85 text-xs font-mono shrink-0"
                 >
                     Reiniciar
                 </button>
             </div>
 
-            <p className="text-slate-300 text-xs md:text-sm mb-2">{parseTextWithTranslations(cfg.goal)}</p>
+            <p className="text-slate-700 text-xs md:text-sm mb-2">{parseTextWithTranslations(cfg.goal)}</p>
             <div className="rounded-lg border border-slate-700/70 bg-slate-950/40 p-3 mb-3">
-                <p className="text-[11px] uppercase tracking-wider font-mono text-cyan-300 mb-1">Cenário</p>
-                <p className="text-xs md:text-sm text-slate-100 leading-relaxed">{parseTextWithTranslations(cfg.context)}</p>
+                <p className="text-[11px] uppercase tracking-wider font-mono text-teal-700 mb-1">Cenário</p>
+                <p className="text-xs md:text-sm text-slate-950 leading-relaxed">{parseTextWithTranslations(cfg.context)}</p>
             </div>
 
             <div className="rounded-xl border border-slate-700/70 bg-gradient-to-br from-slate-950/80 to-slate-900/60 p-3 md:p-4 mb-3 overflow-hidden">
                 <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
                     <div className={cn(
                         "snap-start shrink-0 rounded-xl border p-3 md:p-4 w-[200px] md:w-[220px] min-h-[140px] md:min-h-[152px] flex flex-col justify-between",
-                        position === 0 ? "border-cyan-500/60 bg-cyan-950/20 shadow-[0_0_24px_rgba(6,182,212,0.12)]" : "border-slate-700 bg-slate-900/60"
+                        position === 0 ? "border-teal-300 bg-teal-50 shadow-[0_12px_28px_rgba(15,23,42,0.06)]" : "border-slate-300 bg-white"
                     )}>
                         <div>
-                            <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-slate-400">Início</p>
+                            <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-slate-700">Início</p>
                             <p className="text-xl mt-2">🙂</p>
-                            <p className="text-base md:text-lg text-slate-100 mt-2 leading-snug">Você entra na conversa.</p>
+                            <p className="text-base md:text-lg text-slate-950 mt-2 leading-snug">Você entra na conversa.</p>
                         </div>
-                        <p className="text-xs text-slate-400">Primeiro passo: abrir contato sem pressão.</p>
+                        <p className="text-xs text-slate-700">Primeiro passo: abrir contato sem pressão.</p>
                     </div>
 
                     {stages.map((stage, index) => {
@@ -626,30 +634,30 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                 <div className="hidden md:flex shrink-0 items-center justify-center w-12">
                                     <div className={cn(
                                         "h-px w-full",
-                                        isCompleted ? "bg-emerald-500/60" : isActive || isHere ? "bg-cyan-500/60" : "bg-slate-700"
+                                        isCompleted ? "bg-teal-500/60" : isActive || isHere ? "bg-teal-500/60" : "bg-slate-700"
                                     )} />
                                 </div>
                                 <div className={cn(
                                     "snap-start shrink-0 rounded-xl border p-3 md:p-4 w-[200px] md:w-[230px] min-h-[140px] md:min-h-[152px] flex flex-col justify-between transition-all",
                                     isCompleted
-                                        ? "border-emerald-500/50 bg-emerald-950/20 shadow-[0_0_20px_rgba(16,185,129,0.12)]"
+                                        ? "border-teal-300 bg-teal-50 shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
                                         : isActive
-                                            ? "border-cyan-500/60 bg-cyan-950/20 shadow-[0_0_24px_rgba(6,182,212,0.12)]"
+                                            ? "border-teal-300 bg-teal-50 shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
                                             : isHere
-                                                ? "border-amber-500/60 bg-amber-950/20"
+                                                ? "border-teal-500/60 bg-teal-50/80"
                                                 : wasVisited
-                                                    ? "border-rose-500/40 bg-rose-950/10"
+                                                    ? "border-teal-500/40 bg-teal-950/10"
                                                     : "border-slate-700 bg-slate-900/60"
                                 )}>
                                     <div>
                                         <div className="flex items-center justify-between gap-3">
-                                            <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-slate-400">Checkpoint {index + 1}</p>
+                                            <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-slate-700">Checkpoint {index + 1}</p>
                                             <span className="text-base">{isCompleted ? "✓" : isActive ? "●" : isHere ? "🙂" : "○"}</span>
                                         </div>
-                                        <p className="text-base md:text-lg text-slate-100 mt-2 leading-tight">{parseTextWithTranslations(stage.title)}</p>
-                                        <p className="text-xs md:text-sm text-slate-400 mt-2 leading-relaxed line-clamp-4">{parseTextWithTranslations(stage.situation)}</p>
+                                        <p className="text-base md:text-lg text-slate-950 mt-2 leading-tight">{parseTextWithTranslations(stage.title)}</p>
+                                        <p className="text-xs md:text-sm text-slate-700 mt-2 leading-relaxed line-clamp-4">{parseTextWithTranslations(stage.situation)}</p>
                                     </div>
-                                    <p className="text-xs text-slate-500">
+                                    <p className="text-xs text-black">
                                         {isCompleted ? "Etapa concluída." : isActive ? "Você está decidindo agora." : "Avance para destravar esta etapa."}
                                     </p>
                                 </div>
@@ -665,7 +673,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                     disabled={position === 0}
                     className={cn(
                         "px-3 py-2.5 md:px-4 md:py-3 rounded-lg border text-slate-200 text-lg active:scale-95 min-w-[64px] md:min-w-[72px]",
-                        position === 0 ? "border-slate-700 text-slate-500" : "border-slate-600 hover:border-cyan-500/60"
+                        position === 0 ? "border-slate-700 text-slate-500" : "border-slate-600 hover:border-teal-400/85"
                     )}
                 >
                     ←
@@ -675,23 +683,23 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                     disabled={isFinished}
                     className={cn(
                         "px-3 py-2.5 md:px-4 md:py-3 rounded-lg border text-slate-200 text-lg active:scale-95 min-w-[64px] md:min-w-[72px]",
-                        isFinished ? "border-slate-700 text-slate-500" : "border-slate-600 hover:border-cyan-500/60"
+                        isFinished ? "border-slate-700 text-slate-500" : "border-slate-600 hover:border-teal-400/85"
                     )}
                 >
                     →
                 </button>
-                <p className="text-[11px] md:text-xs text-slate-500 font-mono ml-1">Use esquerda/direita para navegar.</p>
+                <p className="text-[11px] md:text-xs text-black font-mono ml-1">Use esquerda/direita para navegar.</p>
             </div>
 
-            <div className="mt-2 text-[11px] md:text-xs text-slate-400 font-mono">
+            <div className="mt-2 text-[11px] md:text-xs text-slate-700 font-mono">
                 Checkpoints concluídos: {completedStages.length}/{stages.length} · Tentativas: {attempts}
             </div>
-            <div className="mt-1 text-[11px] md:text-xs text-cyan-200">{parseTextWithTranslations(statusText)}</div>
+            <div className="mt-1 text-[11px] md:text-xs text-teal-200">{parseTextWithTranslations(statusText)}</div>
 
             {currentStage && (
-                <div className="mt-3 p-3 md:p-4 rounded-lg border border-cyan-500/40 bg-cyan-950/15">
-                    <div className="text-xs font-mono uppercase tracking-wider text-cyan-300 mb-2">{parseTextWithTranslations(currentStage.title)}</div>
-                    <p className="text-slate-100 text-sm mb-3 leading-relaxed">{parseTextWithTranslations(currentStage.prompt)}</p>
+                <div className="mt-3 p-3 md:p-4 rounded-lg border border-teal-300/85 bg-teal-50/80">
+                    <div className="text-xs font-mono uppercase tracking-wider text-teal-700 mb-2">{parseTextWithTranslations(currentStage.title)}</div>
+                    <p className="text-slate-950 text-sm mb-3 leading-relaxed">{parseTextWithTranslations(currentStage.prompt)}</p>
                     <div className="grid gap-2">
                         {currentStage.options.map((opt, idx) => {
                             const isCorrect = idx === currentStage.answer;
@@ -704,16 +712,16 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                 className={cn(
                                     "w-full text-left px-3 py-2.5 md:py-3 rounded-md border text-sm active:scale-[0.99]",
                                     selectedOption !== null && isCorrect
-                                        ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
+                                        ? "bg-teal-100/90 border-teal-400/85 text-teal-900"
                                         : selectedOption !== null && isSelected && !isCorrect
-                                            ? "bg-red-900/40 border-red-500/50 text-red-100"
-                                            : "border-slate-600 bg-slate-900/50 text-slate-100"
+                                            ? "bg-slate-100 border-slate-400/85 text-slate-800"
+                                            : "border-slate-600 bg-slate-900/50 text-slate-950"
                                 )}
                             >
                                 <div className="space-y-2">
                                     <p>{getOptionTranslation(opt).english}</p>
                                     {getOptionTranslation(opt).portuguese && openTranslations[`${currentStage.id || activeStage}-${idx}`] && (
-                                        <p className="text-xs text-cyan-200/90 border-t border-cyan-500/20 pt-2">
+                                        <p className="text-xs text-teal-200/90 border-t border-teal-200/80 pt-2">
                                             {getOptionTranslation(opt).portuguese}
                                         </p>
                                     )}
@@ -736,7 +744,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                                         setOpenTranslations((prev) => ({ ...prev, [key]: !prev[key] }));
                                                     }
                                                 }}
-                                                className="text-[11px] uppercase tracking-wider font-mono text-cyan-300 hover:text-cyan-200"
+                                                className="text-[11px] uppercase tracking-wider font-mono text-teal-700 hover:text-teal-200"
                                             >
                                                 {openTranslations[`${currentStage.id || activeStage}-${idx}`] ? "Ocultar traducao" : "Ver traducao"}
                                             </span>
@@ -747,21 +755,21 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                             );
                         })}
                     </div>
-                    {stageFeedback && <p className="text-xs text-cyan-100 mt-3 leading-relaxed">{parseTextWithTranslations(stageFeedback)}</p>}
+                    {stageFeedback && <p className="text-xs text-teal-100 mt-3 leading-relaxed">{parseTextWithTranslations(stageFeedback)}</p>}
                     {selectedOption !== null && (
                         <div className="mt-3 space-y-2">
                             <div className="flex justify-end">
-                                <div className="max-w-[88%] rounded-2xl rounded-br-md bg-cyan-600/20 border border-cyan-500/30 px-3 py-2 text-sm text-cyan-50">
-                                    <p className="text-[11px] uppercase tracking-wider font-mono text-cyan-300 mb-1">{currentStage.userLabel || "Voce"}</p>
+                                <div className="max-w-[88%] rounded-2xl rounded-br-md bg-teal-600/10 border border-teal-200/85 px-3 py-2 text-sm text-teal-50">
+                                    <p className="text-[11px] uppercase tracking-wider font-mono text-teal-700 mb-1">{currentStage.userLabel || "Voce"}</p>
                                     <p>{getOptionTranslation(currentStage.options[selectedOption]).english}</p>
                                     {getOptionTranslation(currentStage.options[selectedOption]).portuguese && (
-                                        <p className="text-xs text-cyan-200/80 mt-1">{getOptionTranslation(currentStage.options[selectedOption]).portuguese}</p>
+                                        <p className="text-xs text-teal-200/80 mt-1">{getOptionTranslation(currentStage.options[selectedOption]).portuguese}</p>
                                     )}
                                 </div>
                             </div>
                             <div className="flex justify-start">
-                                <div className="max-w-[88%] rounded-2xl rounded-bl-md bg-slate-800/90 border border-slate-600 px-3 py-2 text-sm text-slate-100">
-                                    <p className="text-[11px] uppercase tracking-wider font-mono text-slate-400 mb-1">{currentStage.partnerLabel || "Pessoa"}</p>
+                                <div className="max-w-[88%] rounded-2xl rounded-bl-md bg-white/90 border border-slate-300 px-3 py-2 text-sm text-slate-800">
+                                    <p className="text-[11px] uppercase tracking-wider font-mono text-slate-700 mb-1">{currentStage.partnerLabel || "Pessoa"}</p>
                                     <p>
                                         {parseTextWithTranslations(
                                             selectedOption === currentStage.answer
@@ -783,7 +791,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                     setStatusText("Você pode tentar este checkpoint novamente.");
                                     playUiSfx("click");
                                 }}
-                                className="px-3 py-2 rounded-md border border-cyan-500/40 text-cyan-100 hover:bg-cyan-500/10 text-sm"
+                                className="px-3 py-2 rounded-md border border-teal-300/85 text-teal-100 hover:bg-teal-500/10 text-sm"
                             >
                                 Tentar novamente
                             </button>
@@ -791,7 +799,7 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                         <button
                             type="button"
                             onClick={() => reset()}
-                            className="px-3 py-2 rounded-md border border-slate-600 text-slate-300 hover:border-cyan-500/40 text-sm"
+                            className="px-3 py-2 rounded-md border border-slate-600 text-slate-800 hover:border-teal-300/85 text-sm"
                         >
                             Reiniciar rota
                         </button>
@@ -800,18 +808,18 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
             )}
 
             {isFinished && (
-                <div className="mt-4 p-3 rounded border border-emerald-500/40 bg-emerald-900/20 text-emerald-200 text-sm">
+                <div className="mt-4 p-3 rounded border border-teal-300/85 bg-teal-50/85 text-teal-900 text-sm">
                     {parseTextWithTranslations(cfg.winMessage)}
                 </div>
             )}
 
             <motion.div
                 layout
-                className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-950/10 p-3 md:p-4"
+                className="mt-4 rounded-xl border border-teal-200/80 bg-teal-50/70 p-3 md:p-4"
             >
                 <div className="flex items-center justify-between gap-3 mb-3">
-                    <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-emerald-300">Conversa Em Construção</p>
-                    <span className="text-xs text-emerald-200/70">{Object.keys(builtConversation).length}/{stages.length} partes</span>
+                    <p className="text-[11px] uppercase tracking-[0.24em] font-mono text-teal-800">Conversa Em Construção</p>
+                    <span className="text-xs text-teal-900/70">{Object.keys(builtConversation).length}/{stages.length} partes</span>
                 </div>
                 <div className="space-y-2">
                     {stages.map((stage, index) => {
@@ -823,11 +831,11 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                 className={cn(
                                     "rounded-lg border px-3 py-2 text-sm transition-colors leading-relaxed",
                                     builtLine
-                                        ? "border-emerald-500/35 bg-emerald-950/20 text-emerald-100"
-                                        : "border-slate-700 bg-slate-950/30 text-slate-500"
+                                        ? "border-teal-300/85 bg-teal-50/80 text-teal-900"
+                                        : "border-slate-300 bg-white text-black"
                                 )}
                             >
-                                <span className="text-[11px] uppercase tracking-wider font-mono mr-2 opacity-70">{stage.title}:</span>
+                                <span className="text-[11px] uppercase tracking-wider font-mono mr-2 text-black">{stage.title}:</span>
                                 {builtLine ? parseTextWithTranslations(builtLine) : "Ainda não resolvido"}
                             </motion.div>
                         );
@@ -844,19 +852,19 @@ const RevealBox = ({ title, children }: { title: string, children: React.ReactNo
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className="my-6 border border-dashed border-slate-700 rounded-lg overflow-hidden">
+        <div className="my-6 rounded-xl border border-dashed border-slate-300 overflow-hidden bg-white/44 shadow-[0_12px_34px_rgba(15,23,42,0.06)] backdrop-blur-md">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between px-4 py-3 md:px-6 md:py-4 bg-slate-900/50 hover:bg-slate-800/50 transition-colors text-left"
+                className="w-full flex items-center justify-between px-4 py-3 md:px-6 md:py-4 bg-white/46 hover:bg-white/62 transition-colors text-left"
             >
-                <span className="font-semibold text-slate-300 flex items-center gap-2 font-mono text-xs md:text-sm">
-                    <Eye className="w-4 h-4 text-cyan-500" />
+                <span className="font-semibold text-slate-700 flex items-center gap-2 font-mono text-xs md:text-sm">
+                    <Eye className="w-4 h-4 text-teal-700" />
                     {parseTextWithTranslations(title)}
                 </span>
                 <ChevronDown className={cn("w-5 h-5 text-slate-500 transition-transform", isOpen && "rotate-180")} />
             </button>
             {isOpen && (
-                <div className="p-4 md:p-6 bg-slate-950/50 border-t border-slate-800 animate-in fade-in slide-in-from-top-2 text-slate-300 text-sm md:text-base">
+                <div className="animate-in fade-in slide-in-from-top-2 border-t border-slate-200/80 bg-white/72 p-4 text-sm text-slate-800 md:p-6 md:text-base">
                     {children}
                 </div>
             )}
@@ -898,15 +906,15 @@ const ScrambleExercise = ({
     const isSuccess = currentSentence === targetSentence;
 
     return (
-        <div className="my-8 rounded-xl border border-violet-500/30 overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950 shadow-xl">
-            <div className="bg-gradient-to-r from-violet-900/40 to-slate-900/40 px-4 py-3 md:px-6 md:py-4 border-b border-violet-500/30 flex items-center gap-3">
-                <Gamepad2 className="w-5 h-5 text-violet-400" />
-                <span className="font-bold text-violet-400 font-mono text-xs md:text-sm tracking-wider">CÓDIGO EMBARALHADO</span>
-                {isSuccess && <CheckCircle2 className="w-5 h-5 ml-auto text-emerald-400 animate-in zoom-in duration-300" />}
+        <div className="my-8 rounded-xl border border-slate-200 overflow-hidden bg-white shadow-[0_18px_44px_rgba(15,23,42,0.10)]">
+            <div className="bg-slate-50 px-4 py-3 md:px-6 md:py-4 border-b border-slate-200 flex items-center gap-3">
+                <Gamepad2 className="w-5 h-5 text-teal-700" />
+                <span className="font-bold text-teal-700 font-mono text-xs md:text-sm tracking-wider">CÓDIGO EMBARALHADO</span>
+                {isSuccess && <CheckCircle2 className="w-5 h-5 ml-auto text-teal-700 animate-in zoom-in duration-300" />}
             </div>
 
             <div className="p-4 md:p-6 flex flex-col items-center">
-                <p className="text-sm md:text-base text-slate-300 mb-6 text-center">
+                <p className="text-sm md:text-base text-slate-800 mb-6 text-center">
                     {isMobile ? "Arraste as palavras para cima ou para baixo." : "Arraste as palavras para o lado."}
                 </p>
 
@@ -930,8 +938,8 @@ const ScrambleExercise = ({
                                 className={cn(
                                     "px-4 py-2 md:px-5 md:py-3 rounded-md font-mono text-sm md:text-base shadow-md cursor-grab active:cursor-grabbing border select-none transition-colors text-center",
                                     isSuccess
-                                        ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-                                        : "bg-slate-800 border-slate-600 text-slate-200 hover:border-violet-400"
+                                        ? "bg-teal-50 border-teal-300 text-black shadow-[0_0_15px_rgba(16,185,129,0.10)]"
+                                        : "bg-white border-slate-300 text-black hover:border-teal-400"
                                 )}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
@@ -946,26 +954,26 @@ const ScrambleExercise = ({
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-emerald-950/40 text-emerald-200 px-6 py-3 rounded-lg border border-emerald-500/30 text-center text-sm md:text-base w-full"
+                        className="bg-teal-100/85 text-teal-900 px-6 py-3 rounded-lg border border-teal-200/85 text-center text-sm md:text-base w-full"
                     >
                         <strong>Sucesso!</strong> A estrutura está perfeita.
                     </motion.div>
                 )}
 
-                <div className="w-full mt-5 border-t border-violet-500/20 pt-4">
+                <div className="w-full mt-5 border-t border-teal-200/80 pt-4">
                     <button
                         type="button"
                         onClick={() => setShowAnswer((prev) => !prev)}
-                        className="px-4 py-2 rounded-md text-sm font-medium bg-violet-500/15 text-violet-200 border border-violet-400/30 hover:bg-violet-500/25 transition"
+                        className="px-4 py-2 rounded-md text-sm font-medium bg-teal-50 text-black border border-teal-300 hover:bg-teal-100 transition"
                     >
                         {showAnswer ? "Ocultar resposta" : "Ver resposta"}
                     </button>
 
                     {showAnswer && (
-                        <div className="mt-3 p-3 rounded-lg border border-violet-400/30 bg-violet-950/20 text-sm">
-                            <p className="text-violet-100 font-medium">{targetSentence}</p>
+                        <div className="mt-3 p-3 rounded-lg border border-teal-300 bg-teal-50 text-sm">
+                            <p className="text-black font-medium">{targetSentence}</p>
                             {translation && (
-                                <p className="text-violet-200/80 mt-1">Tradução: {translation}</p>
+                                <p className="text-black mt-1">Tradução: {translation}</p>
                             )}
                         </div>
                     )}
@@ -1198,17 +1206,17 @@ const CombatSortGame = ({
     if (!rounds.length) return null;
 
     return (
-        <div className="my-8 rounded-2xl border border-amber-500/25 overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 shadow-2xl">
-            <div className="border-b border-amber-500/20 bg-gradient-to-r from-amber-950/40 to-slate-900/40 px-4 py-3 md:px-5 md:py-4 flex items-center justify-between gap-3">
+        <div className="my-8 rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-[0_20px_48px_rgba(15,23,42,0.10)]">
+            <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 md:px-5 md:py-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                    <Crosshair className="w-5 h-5 text-amber-300" />
+                    <Crosshair className="w-5 h-5 text-teal-700" />
                     <div>
-                        <p className="font-bold text-amber-300 text-xs md:text-sm tracking-wider uppercase">Upgrade de fala</p>
-                        <p className="text-slate-400 text-[11px] md:text-xs">Troque frase dura por inglês que anda sozinho.</p>
+                        <p className="font-bold text-teal-700 text-xs md:text-sm tracking-wider uppercase">Upgrade de fala</p>
+                        <p className="text-black text-[11px] md:text-xs">Troque frase dura por inglês que anda sozinho.</p>
                     </div>
                 </div>
                 {!finished && (
-                    <span className="rounded-full bg-amber-950/60 px-2.5 py-1 text-[11px] md:text-xs font-mono text-amber-300">
+                    <span className="rounded-full bg-teal-50 border border-teal-200 px-2.5 py-1 text-[11px] md:text-xs font-mono text-teal-800">
                         Rodada {currentRound + 1}/{rounds.length}
                     </span>
                 )}
@@ -1216,28 +1224,28 @@ const CombatSortGame = ({
 
             <div className="p-4 md:p-6">
                 {finished ? (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-emerald-500/20 bg-emerald-950/20 p-5 md:p-6 text-center">
-                        <CheckCircle2 className="w-14 h-14 text-emerald-400 mx-auto mb-3" />
-                        <h4 className="text-lg md:text-xl font-bold text-slate-100 mb-2">Desafio concluído</h4>
-                        <p className="text-slate-300 text-sm md:text-base">
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-teal-200/75 bg-teal-50/80 p-5 md:p-6 text-center">
+                        <CheckCircle2 className="w-14 h-14 text-teal-700 mx-auto mb-3" />
+                        <h4 className="text-lg md:text-xl font-bold text-slate-950 mb-2">Desafio concluído</h4>
+                        <p className="text-slate-800 text-sm md:text-base">
                             Você percebeu melhor o que deixa uma frase mais solta e mais falada.
                         </p>
-                        <p className="text-slate-400 text-sm mt-2 mb-5">
+                        <p className="text-slate-700 text-sm mt-2 mb-5">
                             Acertos de primeira etapa: {score}/{rounds.length}
                         </p>
                         {history.length > 0 && (
-                            <div className="mb-5 rounded-xl border border-slate-700 bg-slate-900/60 p-4 text-left">
-                                <p className="mb-3 text-xs uppercase tracking-[0.22em] text-slate-400">Seu histórico</p>
+                            <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-left">
+                                <p className="mb-3 text-xs uppercase tracking-[0.22em] text-black">Seu histórico</p>
                                 <div className="space-y-3">
                                     {history.map((entry) => {
                                         if (!entry) return null;
                                         const before = getOptionTranslation(entry.stiff);
                                         const after = getOptionTranslation(entry.natural);
                                         return (
-                                            <div key={`combat-history-${entry.roundIndex}`} className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                                                <p className="text-xs text-slate-500">Rodada {entry.roundIndex + 1}</p>
-                                                <p className="mt-1 text-sm text-slate-300">Antes: {before.english}</p>
-                                                <p className="text-sm text-emerald-200">Natural: {after.english}</p>
+                                            <div key={`combat-history-${entry.roundIndex}`} className="rounded-lg border border-slate-200 bg-white p-3">
+                                                <p className="text-xs text-black">Rodada {entry.roundIndex + 1}</p>
+                                                <p className="mt-1 text-sm text-black">Antes: {before.english}</p>
+                                                <p className="text-sm text-black">Natural: {after.english}</p>
                                             </div>
                                         );
                                     })}
@@ -1246,7 +1254,7 @@ const CombatSortGame = ({
                         )}
                         <button
                             onClick={restart}
-                            className="inline-flex items-center justify-center rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-700"
+                            className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-black transition hover:bg-slate-100"
                         >
                             Jogar de novo
                         </button>
@@ -1254,28 +1262,28 @@ const CombatSortGame = ({
                 ) : (
                     <div className="space-y-4">
                         <div className="grid gap-3 md:grid-cols-[1.05fr_1.2fr]">
-                            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-                                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 mb-2">Frase base</p>
-                                <p className="text-base md:text-lg font-medium text-slate-100 leading-relaxed">
+                            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                                <p className="text-[11px] uppercase tracking-[0.24em] text-black mb-2">Frase base</p>
+                                <p className="text-base md:text-lg font-medium text-black leading-relaxed">
                                     “{stiffDisplay.english}”
                                 </p>
                                 {stiffDisplay.portuguese && (
-                                    <p className="mt-2 text-sm text-slate-400">
+                                    <p className="mt-2 text-sm text-black">
                                         {stiffDisplay.portuguese}
                                     </p>
                                 )}
-                                <p className="mt-3 text-sm text-slate-400">
+                                <p className="mt-3 text-sm text-black">
                                     A ideia é a mesma. O jogo aqui é achar a versão que soaria mais viva numa conversa real.
                                 </p>
                             </div>
 
-                            <div className="rounded-2xl border border-amber-500/20 bg-amber-950/10 p-4">
+                            <div className="rounded-2xl border border-slate-200 bg-white p-4">
                                 <div className="flex items-center justify-between gap-3">
                                     <div>
-                                        <p className="text-[11px] uppercase tracking-[0.24em] text-amber-300/80">
+                                        <p className="text-[11px] uppercase tracking-[0.24em] text-teal-700/80">
                                             {phase === "choose" ? "Etapa 1" : phase === "reason" ? "Etapa 2" : "Fechamento"}
                                         </p>
-                                        <h4 className="mt-1 text-base md:text-lg font-semibold text-slate-100">
+                                        <h4 className="mt-1 text-base md:text-lg font-semibold text-slate-950">
                                             {phase === "choose" && "Qual versão soa mais natural?"}
                                             {phase === "reason" && "Agora perceba o porquê"}
                                             {phase === "result" && "Upgrade concluído"}
@@ -1288,7 +1296,7 @@ const CombatSortGame = ({
                                                 className={cn(
                                                     "h-2.5 w-8 rounded-full",
                                                     (phase === "reason" && step === 0) || (phase === "result" && step <= 1) || (phase === "choose" && step === 0)
-                                                        ? "bg-amber-400"
+                                                        ? "bg-teal-400"
                                                         : "bg-slate-700"
                                                 )}
                                             />
@@ -1298,7 +1306,7 @@ const CombatSortGame = ({
 
                                 {phase === "choose" && (
                                     <>
-                                        <p className="mt-3 text-sm text-slate-300">
+                                        <p className="mt-3 text-sm text-slate-800">
                                             Escolha a frase que você usaria na rua, não a que parece saída de exercício.
                                         </p>
                                         <div className="mt-4 grid gap-3">
@@ -1311,15 +1319,15 @@ const CombatSortGame = ({
                                                     className={cn(
                                                         "rounded-xl border px-4 py-3 text-left text-sm md:text-base transition",
                                                         selectedChoice === idx && idx === round.choiceAnswer
-                                                            ? "border-emerald-500/50 bg-emerald-950/30 text-emerald-100"
+                                                            ? "border-teal-400/85 bg-teal-50/85 text-teal-900"
                                                             : selectedChoice === idx
-                                                                ? "border-red-500/50 bg-red-950/30 text-red-100"
-                                                                : "border-slate-700 bg-slate-900/70 text-slate-200 hover:border-amber-400/50"
+                                                                ? "border-slate-400/85 bg-teal-950/30 text-slate-800"
+                                                                    : "border-slate-300 bg-white text-black hover:border-teal-400/50"
                                                     )}
                                                 >
                                                     <span className="block">{display.english}</span>
                                                     {display.portuguese && (
-                                                        <span className="mt-1 block text-xs text-slate-400">
+                                                        <span className="mt-1 block text-xs text-black">
                                                             {display.portuguese}
                                                         </span>
                                                     )}
@@ -1328,11 +1336,11 @@ const CombatSortGame = ({
                                             })}
                                         </div>
                                         {choiceError && (
-                                            <div className="mt-3 rounded-xl border border-red-500/20 bg-red-950/20 p-3 text-sm text-red-100">
+                                            <div className="mt-3 rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm text-black">
                                                 <p>{choiceError}</p>
                                                 <button
                                                     onClick={() => { setSelectedChoice(null); setChoiceError(null); }}
-                                                    className="mt-2 text-red-200 underline underline-offset-4"
+                                                    className="mt-2 text-slate-700 underline underline-offset-4"
                                                 >
                                                     Tentar novamente
                                                 </button>
@@ -1343,14 +1351,14 @@ const CombatSortGame = ({
 
                                 {phase === "reason" && (
                                     <>
-                                        <div className="mt-3 rounded-xl border border-emerald-500/20 bg-emerald-950/15 p-3">
-                                            <p className="text-[11px] uppercase tracking-[0.22em] text-emerald-300/80 mb-1">Versão escolhida</p>
-                                            <p className="text-sm md:text-base text-emerald-100 font-medium">“{naturalDisplay.english}”</p>
+                                        <div className="mt-3 rounded-xl border border-teal-200/75 bg-teal-50/75 p-3">
+                                            <p className="text-[11px] uppercase tracking-[0.22em] text-teal-800/80 mb-1">Versão escolhida</p>
+                                            <p className="text-sm md:text-base text-teal-900 font-medium">“{naturalDisplay.english}”</p>
                                             {naturalDisplay.portuguese && (
-                                                <p className="mt-1 text-xs text-emerald-200/80">{naturalDisplay.portuguese}</p>
+                                                <p className="mt-1 text-xs text-teal-900/80">{naturalDisplay.portuguese}</p>
                                             )}
                                         </div>
-                                        <p className="mt-3 text-sm text-slate-300">
+                                        <p className="mt-3 text-sm text-slate-800">
                                             Beleza. Agora marca a razão principal que faz essa frase soar melhor.
                                         </p>
                                         <div className="mt-4 grid gap-3">
@@ -1361,10 +1369,10 @@ const CombatSortGame = ({
                                                     className={cn(
                                                         "rounded-xl border px-4 py-3 text-left text-sm transition",
                                                         selectedReason === idx && idx === round.reasonAnswer
-                                                            ? "border-emerald-500/50 bg-emerald-950/30 text-emerald-100"
+                                                            ? "border-teal-400/85 bg-teal-50/85 text-teal-900"
                                                             : selectedReason === idx
-                                                                ? "border-red-500/50 bg-red-950/30 text-red-100"
-                                                                : "border-slate-700 bg-slate-900/70 text-slate-200 hover:border-amber-400/50"
+                                                                ? "border-slate-400/85 bg-teal-950/30 text-slate-800"
+                                                                : "border-slate-300 bg-white text-black hover:border-teal-400/50"
                                                     )}
                                                 >
                                                     {reason}
@@ -1372,11 +1380,11 @@ const CombatSortGame = ({
                                             ))}
                                         </div>
                                         {reasonError && (
-                                            <div className="mt-3 rounded-xl border border-red-500/20 bg-red-950/20 p-3 text-sm text-red-100">
+                                            <div className="mt-3 rounded-xl border border-teal-500/20 bg-slate-100/90 p-3 text-sm text-slate-800">
                                                 <p>{reasonError}</p>
                                                 <button
                                                     onClick={() => { setSelectedReason(null); setReasonError(null); }}
-                                                    className="mt-2 text-red-200 underline underline-offset-4"
+                                                    className="mt-2 text-slate-700 underline underline-offset-4"
                                                 >
                                                     Tentar novamente
                                                 </button>
@@ -1388,21 +1396,21 @@ const CombatSortGame = ({
                                 {phase === "result" && (
                                     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-3 space-y-3">
                                         <div className="grid gap-2">
-                                            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-3">
-                                                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 mb-1">Antes</p>
-                                                <p className="text-sm md:text-base text-slate-300">“{stiffDisplay.english}”</p>
+                                            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                                <p className="text-[11px] uppercase tracking-[0.22em] text-black mb-1">Antes</p>
+                                                <p className="text-sm md:text-base text-black">“{stiffDisplay.english}”</p>
                                                 {stiffDisplay.portuguese && (
-                                                    <p className="mt-1 text-xs text-slate-400">{stiffDisplay.portuguese}</p>
+                                                    <p className="mt-1 text-xs text-black">{stiffDisplay.portuguese}</p>
                                                 )}
                                             </div>
                                             <div className="flex justify-center">
-                                                <ArrowRight className="w-4 h-4 text-amber-300" />
+                                                <ArrowRight className="w-4 h-4 text-teal-700" />
                                             </div>
-                                            <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/20 p-3">
-                                                <p className="text-[11px] uppercase tracking-[0.22em] text-emerald-300/80 mb-1">Depois</p>
-                                                <p className="text-sm md:text-base text-emerald-100">“{naturalDisplay.english}”</p>
+                                            <div className="rounded-xl border border-teal-200/75 bg-teal-50/80 p-3">
+                                                <p className="text-[11px] uppercase tracking-[0.22em] text-teal-800/80 mb-1">Depois</p>
+                                                <p className="text-sm md:text-base text-black">“{naturalDisplay.english}”</p>
                                                 {naturalDisplay.portuguese && (
-                                                    <p className="mt-1 text-xs text-emerald-200/80">{naturalDisplay.portuguese}</p>
+                                                    <p className="mt-1 text-xs text-black">{naturalDisplay.portuguese}</p>
                                                 )}
                                             </div>
                                         </div>
@@ -1410,16 +1418,16 @@ const CombatSortGame = ({
                                             {round.tags.map((tag) => (
                                                 <span
                                                     key={tag}
-                                                    className="rounded-full border border-amber-500/20 bg-amber-950/20 px-3 py-1 text-[11px] uppercase tracking-wide text-amber-200"
+                                                    className="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-[11px] uppercase tracking-wide text-black"
                                                 >
                                                     {tag}
                                                 </span>
                                             ))}
                                         </div>
-                                        <p className="text-sm text-slate-300">{round.reasonText}</p>
+                                        <p className="text-sm text-black">{round.reasonText}</p>
                                         <button
                                             onClick={goNext}
-                                            className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-400"
+                                            className="inline-flex items-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-teal-400"
                                         >
                                             {currentRound + 1 < rounds.length ? "Próxima rodada" : "Fechar desafio"}
                                         </button>
@@ -1603,19 +1611,19 @@ const AudioDecodeGame = ({
     };
 
     return (
-        <div className="my-8 rounded-xl border border-cyan-500/30 overflow-hidden bg-slate-900 shadow-xl">
-            <div className="bg-gradient-to-r from-cyan-900/40 to-blue-900/40 px-4 py-3 md:px-6 md:py-4 border-b border-cyan-500/30 flex items-center justify-between">
+        <div className="my-8 rounded-xl border border-slate-200 overflow-hidden bg-white shadow-[0_20px_48px_rgba(15,23,42,0.10)]">
+            <div className="bg-slate-50 px-4 py-3 md:px-6 md:py-4 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <Terminal className="w-5 h-5 text-cyan-400" />
+                    <Terminal className="w-5 h-5 text-teal-700" />
                     <div>
-                        <span className="font-bold text-cyan-400 font-mono text-xs md:text-sm tracking-wider">{gameConfig.title}</span>
+                        <span className="font-bold text-teal-700 font-mono text-xs md:text-sm tracking-wider">{gameConfig.title}</span>
                         {gameConfig.subtitle && (
-                            <p className="mt-1 text-[11px] text-slate-400">{gameConfig.subtitle}</p>
+                            <p className="mt-1 text-[11px] text-slate-700">{gameConfig.subtitle}</p>
                         )}
                     </div>
                 </div>
                 {!isFinished && (
-                    <span className="font-mono text-xs text-cyan-500 bg-cyan-950/50 px-2 py-1 rounded">
+                    <span className="font-mono text-xs text-teal-800 bg-teal-50 border border-teal-200 px-2 py-1 rounded">
                         {gameConfig.stepLabel} {currentStep + 1}/{items.length}
                     </span>
                 )}
@@ -1624,35 +1632,35 @@ const AudioDecodeGame = ({
             <div className="p-6 md:p-8">
                 {isFinished ? (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-6">
-                        <Unlock className={cn("w-16 h-16 mx-auto mb-4", didPass ? "text-cyan-400" : "text-amber-400")} />
-                        <h4 className="text-xl md:text-2xl font-bold text-slate-100 mb-2">
+                        <Unlock className={cn("w-16 h-16 mx-auto mb-4", didPass ? "text-teal-700" : "text-teal-700")} />
+                        <h4 className="text-xl md:text-2xl font-bold text-slate-950 mb-2">
                             {didPass ? gameConfig.successTitle : gameConfig.failTitle}
                         </h4>
-                        <p className="text-slate-400 mb-2">Taxa de sucesso: {Math.round((score / items.length) * 100)}% ({score}/{items.length})</p>
-                        <p className={cn("text-sm mb-6", didPass ? "text-emerald-300" : "text-amber-300")}>
+                        <p className="text-slate-700 mb-2">Taxa de sucesso: {Math.round((score / items.length) * 100)}% ({score}/{items.length})</p>
+                        <p className={cn("text-sm mb-6", didPass ? "text-teal-800" : "text-teal-700")}>
                             {didPass
                                 ? `Meta batida. Você acertou o mínimo de ${passingScore}/${items.length} e já pode avançar.`
                                 : `Para liberar o módulo, precisa acertar pelo menos ${passingScore}/${items.length}. O desafio vai reiniciar automaticamente.`}
                         </p>
-                        <button onClick={resetGame} className="px-6 py-2 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition font-mono uppercase text-xs">{gameConfig.restartLabel}</button>
+                        <button onClick={resetGame} className="px-6 py-2 bg-white text-black rounded border border-slate-300 hover:bg-slate-100 transition font-mono uppercase text-xs">{gameConfig.restartLabel}</button>
                     </motion.div>
                 ) : (
                     <div className="max-w-xl mx-auto">
-                        <p className="text-cyan-300 text-xs text-center mb-3 uppercase tracking-[0.18em] font-bold">
+                        <p className="text-teal-700 text-xs text-center mb-3 uppercase tracking-[0.18em] font-bold">
                             {gameConfig.passLabel.replace("{passing}", String(passingScore)).replace("{total}", String(items.length))}
                         </p>
-                        <p className="text-slate-400 text-sm text-center mb-2 uppercase tracking-wide font-bold">{gameConfig.promptLabel}</p>
-                        <div className="bg-black/50 border border-slate-700 rounded-lg p-6 mb-8 text-center backdrop-blur shadow-inner">
-                            <span className="font-mono text-2xl md:text-3xl font-bold text-cyan-300 animate-pulse">
+                        <p className="text-slate-700 text-sm text-center mb-2 uppercase tracking-wide font-bold">{gameConfig.promptLabel}</p>
+                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 mb-8 text-center shadow-inner">
+                            <span className="font-mono text-2xl md:text-3xl font-bold text-black animate-pulse">
                                 &ldquo;{phoneticDisplay.english}&rdquo;
                             </span>
                             {showHints && decodedDisplay && (
-                                <p className="mt-4 text-sm md:text-base text-slate-200">
-                                    Forma completa: <span className="font-mono text-cyan-200">{decodedDisplay.english}</span>
+                                <p className="mt-4 text-sm md:text-base text-black">
+                                    Forma completa: <span className="font-mono text-black">{decodedDisplay.english}</span>
                                 </p>
                             )}
                             {showHints && topTranslation && (
-                                <p className="mt-2 text-sm text-slate-400">
+                                <p className="mt-2 text-sm text-black">
                                     Tradução: {topTranslation}
                                 </p>
                             )}
@@ -1670,42 +1678,42 @@ const AudioDecodeGame = ({
                                         disabled={showResult}
                                         className={cn(
                                             "w-full text-left px-5 py-3 md:py-4 rounded border font-mono text-sm md:text-base transition-all flex items-center justify-between",
-                                            showResult && isCorrect ? "bg-emerald-950/60 border-emerald-500/50 text-emerald-200" :
-                                                showResult && isSelected && !isCorrect ? "bg-red-950/60 border-red-500/50 text-red-200" :
-                                                    "bg-slate-800 border-slate-700 text-slate-300 hover:border-cyan-500/50"
+                                            showResult && isCorrect ? "bg-teal-950/60 border-teal-400/85 text-teal-900" :
+                                                showResult && isSelected && !isCorrect ? "bg-teal-950/60 border-slate-400/85 text-slate-700" :
+                                                    "bg-white border-slate-300 text-black hover:border-teal-400/85"
                                         )}
                                     >
                                         <span className="block">
-                                            <span className="block">{display.english}</span>
+                                            <span className="block text-black">{display.english}</span>
                                             {showHints && display.portuguese && (
-                                                <span className="mt-1 block text-xs text-slate-400">
+                                                <span className="mt-1 block text-xs text-black">
                                                     {display.portuguese}
                                                 </span>
                                             )}
                                         </span>
-                                        {showResult && isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
+                                        {showResult && isCorrect && <CheckCircle2 className="w-5 h-5 text-teal-700" />}
                                     </button>
                                 );
                             })}
                         </div>
                         {history.length > 0 && (
-                            <div className="mt-5 rounded-xl border border-slate-700 bg-slate-900/60 p-4">
-                                <p className="mb-3 text-xs text-slate-400 uppercase tracking-[0.22em]">Perguntas respondidas</p>
+                            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                <p className="mb-3 text-xs text-black uppercase tracking-[0.22em]">Perguntas respondidas</p>
                                 <div className="space-y-3">
                                     {history.map((entry) => {
                                         if (!entry) return null;
                                         const chosen = getOptionTranslation(items[entry.step]?.options?.[entry.selectedOption] || "");
                                         const decoded = entry.decoded ? getOptionTranslation(entry.decoded) : null;
                                         return (
-                                            <div key={`audio-history-${entry.step}`} className="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
-                                                <p className="text-xs text-slate-500">{gameConfig.stepLabel} {entry.step + 1}</p>
-                                                <p className="mt-1 font-mono text-cyan-200">{entry.phonetic}</p>
-                                                <p className="mt-2 text-sm text-slate-300">Sua resposta: {chosen.english}</p>
-                                                {chosen.portuguese && <p className="text-xs text-slate-400">{chosen.portuguese}</p>}
+                                            <div key={`audio-history-${entry.step}`} className="rounded-lg border border-slate-200 bg-white p-3">
+                                                <p className="text-xs text-black">{gameConfig.stepLabel} {entry.step + 1}</p>
+                                                <p className="mt-1 font-mono text-black">{entry.phonetic}</p>
+                                                <p className="mt-2 text-sm text-black">Sua resposta: {chosen.english}</p>
+                                                {chosen.portuguese && <p className="text-xs text-black">{chosen.portuguese}</p>}
                                                 {decoded && (
                                                     <>
-                                                        <p className="mt-2 text-sm text-emerald-200">Leitura correta: {decoded.english}</p>
-                                                        {decoded.portuguese && <p className="text-xs text-emerald-300/80">{decoded.portuguese}</p>}
+                                                        <p className="mt-2 text-sm text-black">Leitura correta: {decoded.english}</p>
+                                                        {decoded.portuguese && <p className="text-xs text-black">{decoded.portuguese}</p>}
                                                     </>
                                                 )}
                                             </div>
@@ -1719,7 +1727,7 @@ const AudioDecodeGame = ({
                                 <button
                                     type="button"
                                     onClick={handleRevealHints}
-                                    className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/30 bg-cyan-950/20 px-4 py-2 text-xs md:text-sm text-cyan-200 transition hover:bg-cyan-950/35"
+                                    className="inline-flex items-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-4 py-2 text-xs md:text-sm text-black transition hover:bg-teal-100"
                                 >
                                     <Eye className="w-4 h-4" />
                                     {gameConfig.helpButtonLabel}
@@ -1897,31 +1905,31 @@ const ConsolidationGame = ({
     };
 
     return (
-        <div className="my-8 rounded-xl border border-emerald-500/30 overflow-hidden bg-slate-900 shadow-xl">
-            <div className="bg-gradient-to-r from-emerald-900/40 to-cyan-900/30 px-4 py-3 md:px-6 md:py-4 border-b border-emerald-500/30 flex items-center justify-between">
+        <div className={STUDY_CARD}>
+            <div className={cn(STUDY_CARD_HEADER, "justify-between")}>
                 <div className="flex items-center gap-3">
-                    <Target className="w-5 h-5 text-emerald-400" />
-                    <span className="font-bold text-emerald-300 font-mono text-xs md:text-sm tracking-wider">
+                    <Target className="w-5 h-5 text-teal-700" />
+                    <span className="font-bold text-teal-700 font-mono text-xs md:text-sm tracking-wider">
                         {parseTextWithTranslations(data.title || "TREINO DE CONSOLIDAÇÃO")}
                     </span>
                 </div>
-                <span className="font-mono text-xs text-emerald-300/90 bg-emerald-950/40 px-2 py-1 rounded">
+                <span className="font-mono text-xs text-teal-800 bg-teal-100 px-2 py-1 rounded">
                     Etapa {finished ? totalTasks : currentTaskNumber}/{totalTasks}
                 </span>
             </div>
 
             <div className="p-4 md:p-6">
                 {data.subtitle && (
-                    <p className="text-slate-300 text-sm md:text-base mb-3">{parseTextWithTranslations(data.subtitle)}</p>
+                    <p className="text-slate-800 text-sm md:text-base mb-3">{parseTextWithTranslations(data.subtitle)}</p>
                 )}
                 {!finished && (
                     <>
-                        <div className="mb-3 rounded-md border border-slate-700 bg-slate-950/40 p-3">
-                            <p className="text-[11px] uppercase tracking-wider font-mono text-cyan-300 mb-1">{parseTextWithTranslations(currentRound.label)}</p>
+                        <div className="mb-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+                            <p className="text-[11px] uppercase tracking-wider font-mono text-teal-700 mb-1">{parseTextWithTranslations(currentRound.label)}</p>
                             {currentRound.objective && (
-                                <p className="text-xs text-slate-400 mb-1">{parseTextWithTranslations(currentRound.objective)}</p>
+                                <p className="text-xs text-black mb-1">{parseTextWithTranslations(currentRound.objective)}</p>
                             )}
-                            <p className="text-sm text-slate-100">{parseTextWithTranslations(currentTask.prompt)}</p>
+                            <p className="text-sm text-black">{parseTextWithTranslations(currentTask.prompt)}</p>
                         </div>
 
                         {currentTask.type === "select" ? (
@@ -1938,10 +1946,10 @@ const ConsolidationGame = ({
                                             className={cn(
                                                 "text-left px-3 py-3 rounded border text-sm transition",
                                                 taskValidated && isCorrect
-                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
+                                                    ? "bg-teal-100/90 border-teal-400/85 text-teal-900"
                                                     : taskValidated && isSelected && !isCorrect
-                                                        ? "bg-red-900/40 border-red-500/50 text-red-100"
-                                                        : "border-slate-600 bg-slate-900/60 text-slate-100 hover:border-cyan-500/50"
+                                                        ? "bg-slate-100 border-slate-300 text-black"
+                                                        : "border-slate-300 bg-white text-black hover:border-teal-400"
                                             )}
                                         >
                                             {parseTextWithTranslations(opt)}
@@ -1951,7 +1959,7 @@ const ConsolidationGame = ({
                             </div>
                         ) : (
                             <div className="space-y-3">
-                                <div className="rounded-md border border-emerald-700/40 bg-emerald-950/20 p-2 min-h-[46px]">
+                                <div className="rounded-md border border-teal-200 bg-teal-50 p-2 min-h-[46px]">
                                     {orderSelected.length ? (
                                         <div className="flex flex-wrap gap-2">
                                             {orderSelected.map((piece, idx) => (
@@ -1960,14 +1968,14 @@ const ConsolidationGame = ({
                                                     type="button"
                                                     onClick={() => removeOrderPiece(piece, idx)}
                                                     disabled={taskValidated}
-                                                    className="px-2.5 py-1.5 rounded bg-emerald-800/50 text-emerald-100 text-xs border border-emerald-500/40"
+                                                    className="px-2.5 py-1.5 rounded bg-white text-black text-xs border border-teal-300"
                                                 >
                                                     {piece}
                                                 </button>
                                             ))}
                                         </div>
                                     ) : (
-                                        <p className="text-xs text-emerald-200/80">Toque nas palavras para montar a frase.</p>
+                                        <p className="text-xs text-teal-900">Toque nas palavras para montar a frase.</p>
                                     )}
                                 </div>
 
@@ -1978,7 +1986,7 @@ const ConsolidationGame = ({
                                             type="button"
                                             onClick={() => pickOrderPiece(piece, idx)}
                                             disabled={taskValidated}
-                                            className="px-2.5 py-1.5 rounded bg-slate-800 text-slate-100 text-xs border border-slate-600 hover:border-cyan-500/50"
+                                            className="px-2.5 py-1.5 rounded bg-white text-black text-xs border border-slate-300 hover:border-teal-400"
                                         >
                                             {piece}
                                         </button>
@@ -1992,8 +2000,8 @@ const ConsolidationGame = ({
                                     className={cn(
                                         "px-3 py-2 rounded text-sm font-medium",
                                         taskValidated || orderSelected.length !== currentTask.pieces.length
-                                            ? "bg-slate-700 text-slate-400"
-                                            : "bg-cyan-600 text-white hover:bg-cyan-500"
+                                            ? "bg-slate-200 text-slate-500"
+                                            : "bg-teal-600 text-white hover:bg-teal-500"
                                     )}
                                 >
                                     Validar frase
@@ -2002,20 +2010,20 @@ const ConsolidationGame = ({
                         )}
 
                         {feedback && (
-                            <div className="mt-3 rounded-md border border-cyan-500/40 bg-cyan-950/20 p-3 text-sm text-cyan-100">
+                            <div className="mt-3 rounded-md border border-teal-200 bg-teal-50 p-3 text-sm text-black">
                                 {parseTextWithTranslations(feedback)}
                             </div>
                         )}
 
                         <div className="mt-4 flex items-center justify-between gap-3">
-                            <div className="text-xs font-mono text-slate-400">Pontos: {score}/{totalTasks}</div>
+                            <div className="text-xs font-mono text-black">Pontos: {score}/{totalTasks}</div>
                             <button
                                 type="button"
                                 onClick={moveNext}
                                 disabled={!taskValidated}
                                 className={cn(
                                     "px-4 py-2 rounded-md text-sm font-medium",
-                                    taskValidated ? "bg-emerald-600 hover:bg-emerald-500 text-white" : "bg-slate-700 text-slate-400"
+                                    taskValidated ? "bg-teal-600 hover:bg-teal-500 text-white" : "bg-slate-200 text-slate-500"
                                 )}
                             >
                                 {currentTaskNumber >= totalTasks ? "Finalizar desafio" : "Próxima tarefa"}
@@ -2025,13 +2033,13 @@ const ConsolidationGame = ({
                 )}
 
                 {finished && (
-                    <div className="mt-2 rounded border border-emerald-500/40 bg-emerald-900/20 text-emerald-200 p-4 text-sm">
+                    <div className="mt-2 rounded border border-teal-200 bg-teal-50 text-black p-4 text-sm">
                         <p className="font-semibold mb-1">Desafio concluído</p>
                         <p>Você terminou o treino com {score}/{totalTasks} acertos. Refaça para fixar ainda mais.</p>
                         <button
                             type="button"
                             onClick={restart}
-                            className="mt-3 px-3 py-2 rounded border border-emerald-400/50 hover:bg-emerald-500/15"
+                            className="mt-3 px-3 py-2 rounded border border-teal-400/80 hover:bg-teal-500/15"
                         >
                             Jogar novamente
                         </button>
@@ -2050,11 +2058,11 @@ const BrainDiagram = ({ data }: { data: { title: string; steps: string[] } }) =>
     const [activeStep, setActiveStep] = useState(0);
 
     return (
-        <div className="my-8 bg-gradient-to-br from-slate-900 via-slate-950 to-black rounded-xl border border-cyan-500/20 overflow-hidden shadow-2xl">
+        <div className="my-8 rounded-xl border border-slate-200 overflow-hidden bg-white shadow-[0_20px_48px_rgba(15,23,42,0.10)]">
             {/* Header */}
-            <div className="bg-slate-900/80 px-4 py-3 md:px-6 md:py-4 border-b border-cyan-500/20 flex items-center gap-3">
-                <Brain className="w-5 h-5 md:w-6 md:h-6 text-cyan-400 animate-pulse" />
-                <h3 className="font-bold text-cyan-400 font-mono text-sm md:text-base tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            <div className="bg-slate-50 px-4 py-3 md:px-6 md:py-4 border-b border-slate-200 flex items-center gap-3">
+                <Brain className="w-5 h-5 md:w-6 md:h-6 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-sm md:text-base tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
 
             {/* Diagram Area */}
@@ -2062,24 +2070,24 @@ const BrainDiagram = ({ data }: { data: { title: string; steps: string[] } }) =>
                 {/* Animated Brain Visual - Kept Identical */}
                 <div className="flex flex-col md:flex-row items-center justify-center mb-8 gap-6 md:gap-0">
                     <div className="relative">
-                        <div className="w-24 h-24 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center border-2 border-cyan-500/30 shadow-[0_0_40px_rgba(6,182,212,0.3)] animate-pulse">
-                            <Brain className="w-12 h-12 md:w-20 md:h-20 text-cyan-400" />
+                        <div className="w-24 h-24 md:w-40 md:h-40 rounded-full bg-teal-50 flex items-center justify-center border-2 border-teal-300 shadow-[0_0_24px_rgba(15,23,42,0.08)]">
+                            <Brain className="w-12 h-12 md:w-20 md:h-20 text-teal-700" />
                         </div>
-                        <div className="absolute -top-2 -right-2 w-6 h-6 md:w-8 md:h-8 bg-red-500/50 rounded-full animate-ping" />
-                        <div className="absolute -top-2 -right-2 w-6 h-6 md:w-8 md:h-8 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white">
+                        <div className="absolute -top-2 -right-2 w-6 h-6 md:w-8 md:h-8 bg-teal-100 rounded-full" />
+                        <div className="absolute -top-2 -right-2 w-6 h-6 md:w-8 md:h-8 bg-teal-600 rounded-full flex items-center justify-center text-[10px] font-bold text-white">
                             ⚡
                         </div>
                     </div>
                     <div className="hidden md:flex items-center mx-6">
-                        <div className="w-16 h-0.5 bg-gradient-to-r from-red-500 to-yellow-500 animate-pulse" />
-                        <div className="w-3 h-3 rounded-full bg-yellow-500 animate-ping" />
-                        <div className="w-16 h-0.5 bg-gradient-to-r from-yellow-500 to-emerald-500" />
+                        <div className="w-16 h-0.5 bg-teal-300" />
+                        <div className="w-3 h-3 rounded-full bg-teal-500" />
+                        <div className="w-16 h-0.5 bg-teal-300" />
                     </div>
                     <div className="relative mt-4 md:mt-0">
-                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-slate-800/50 border border-slate-700 flex items-center justify-center">
+                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center">
                             <span className="text-2xl md:text-3xl">🔒</span>
                         </div>
-                        <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] md:text-xs text-slate-500 font-mono whitespace-nowrap">CÓRTEX BLOQUEADO</span>
+                        <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] md:text-xs text-black font-mono whitespace-nowrap">CÓRTEX BLOQUEADO</span>
                     </div>
                 </div>
 
@@ -2092,19 +2100,19 @@ const BrainDiagram = ({ data }: { data: { title: string; steps: string[] } }) =>
                             className={cn(
                                 "w-full text-left p-3 md:p-4 rounded-lg border transition-all duration-300 flex gap-3 md:gap-4 items-start",
                                 activeStep === idx
-                                    ? "bg-cyan-950/40 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.2)]"
-                                    : "bg-slate-900/50 border-slate-700 hover:border-slate-500"
+                                    ? "bg-teal-50 border-teal-300 shadow-[0_0_20px_rgba(15,23,42,0.05)]"
+                                    : "bg-white border-slate-200 hover:border-teal-300"
                             )}
                         >
                             <div className={cn(
                                 "w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center font-mono text-xs md:text-sm font-bold flex-shrink-0 mt-0.5",
-                                activeStep === idx ? "bg-cyan-500 text-slate-900" : "bg-slate-700 text-slate-400"
+                                activeStep === idx ? "bg-teal-600 text-white" : "bg-slate-200 text-black"
                             )}>
                                 {idx + 1}
                             </div>
                             <p className={cn(
                                 "text-sm leading-relaxed",
-                                activeStep === idx ? "text-slate-200" : "text-slate-500"
+                                activeStep === idx ? "text-black" : "text-black"
                             )}>
                                 {parseTextWithTranslations(step)}
                             </p>
@@ -2118,29 +2126,29 @@ const BrainDiagram = ({ data }: { data: { title: string; steps: string[] } }) =>
 
 const ComparisonTable = ({ data }: { data: { headers: string[]; rows: string[][] } }) => {
     return (
-        <div className="my-8 rounded-xl border border-slate-700/50 overflow-hidden bg-slate-900/30 backdrop-blur">
-            <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-4 py-3 md:px-6 md:py-4 border-b border-slate-700/50 flex items-center gap-3">
-                <TableIcon className="w-5 h-5 text-cyan-400" />
-                <span className="font-bold text-slate-200 font-mono text-xs md:text-sm tracking-wider">ANÁLISE COMPARATIVA</span>
+        <div className="my-8 rounded-xl border border-slate-200 overflow-hidden bg-white shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+            <div className="bg-slate-50 px-4 py-3 md:px-6 md:py-4 border-b border-slate-200 flex items-center gap-3">
+                <TableIcon className="w-5 h-5 text-teal-700" />
+                <span className="font-bold text-black font-mono text-xs md:text-sm tracking-wider">ANÁLISE COMPARATIVA</span>
             </div>
             <div className="overflow-x-auto pb-2">
                 <table className="w-full min-w-[600px]">
                     <thead>
-                        <tr className="bg-slate-800/50">
+                        <tr className="bg-slate-50">
                             {data.headers.map((header, i) => (
-                                <th key={i} className="px-4 py-3 md:px-6 md:py-4 text-left text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider border-b border-slate-700 whitespace-nowrap">
+                                <th key={i} className="px-4 py-3 md:px-6 md:py-4 text-left text-[10px] md:text-xs font-bold text-teal-700 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">
                                     {parseTextWithTranslations(header)}
                                 </th>
                             ))}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800">
+                    <tbody className="divide-y divide-slate-200">
                         {data.rows.map((row, i) => (
-                            <tr key={i} className="hover:bg-slate-800/30 transition-colors group">
+                            <tr key={i} className="hover:bg-slate-50 transition-colors group">
                                 {row.map((cell, j) => (
                                     <td key={j} className={cn(
                                         "px-4 py-3 md:px-6 md:py-4 text-xs md:text-sm",
-                                        j === 0 ? "font-semibold text-slate-200 whitespace-nowrap" : "text-slate-400 group-hover:text-slate-300 min-w-[150px]"
+                                        j === 0 ? "font-semibold text-black whitespace-nowrap" : "text-black group-hover:text-black min-w-[150px]"
                                     )}>
                                         {parseTextWithTranslations(cell)}
                                     </td>
@@ -2158,24 +2166,24 @@ const ScenarioCard = ({ data }: { data: { context: string; situation: string; wr
     const [showSolution, setShowSolution] = useState(false);
 
     return (
-        <div className="my-8 rounded-xl border border-amber-500/30 bg-gradient-to-br from-slate-900 via-slate-950 to-black shadow-2xl">
+        <div className="my-8 rounded-xl border border-slate-200 bg-white shadow-[0_20px_48px_rgba(15,23,42,0.10)]">
             {/* Header */}
-            <div className="rounded-t-xl bg-gradient-to-r from-amber-900/40 to-orange-900/30 px-4 py-3 md:px-6 md:py-4 border-b border-amber-500/30 flex items-center gap-3">
-                <Crosshair className="w-5 h-5 text-amber-400" />
-                <span className="font-bold text-amber-400 font-mono text-xs md:text-sm tracking-wider">SITUAÇÃO REAL</span>
-                <span className="ml-auto text-[10px] md:text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 md:px-3 md:py-1 rounded-full font-mono">RITMO ALTO</span>
+            <div className="rounded-t-xl bg-slate-50 px-4 py-3 md:px-6 md:py-4 border-b border-slate-200 flex items-center gap-3">
+                <Crosshair className="w-5 h-5 text-teal-700" />
+                <span className="font-bold text-teal-700 font-mono text-xs md:text-sm tracking-wider">SITUAÇÃO REAL</span>
+                <span className="ml-auto text-[10px] md:text-xs bg-teal-500/20 text-teal-700 px-2 py-0.5 md:px-3 md:py-1 rounded-full font-mono">RITMO ALTO</span>
             </div>
 
             {/* Context */}
-            <div className="p-4 md:p-6 border-b border-slate-800">
-                <h4 className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">📍 CONTEXTO</h4>
-                <p className="text-sm md:text-base text-slate-300 leading-relaxed">{parseTextWithTranslations(data.context)}</p>
+            <div className="p-4 md:p-6 border-b border-slate-200">
+                <h4 className="text-[10px] md:text-xs font-bold text-black uppercase tracking-wider mb-2">📍 CONTEXTO</h4>
+                <p className="text-sm md:text-base text-black leading-relaxed">{parseTextWithTranslations(data.context)}</p>
             </div>
 
             {/* Situation */}
-            <div className="p-4 md:p-6 bg-slate-900/50 border-b border-slate-800">
-                <h4 className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">🎯 SITUAÇÃO</h4>
-                <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700 font-mono text-cyan-300 text-sm md:text-base">
+            <div className="p-4 md:p-6 bg-slate-50 border-b border-slate-200">
+                <h4 className="text-[10px] md:text-xs font-bold text-black uppercase tracking-wider mb-3">🎯 SITUAÇÃO</h4>
+                <div className="bg-white p-4 rounded-lg border border-slate-200 font-mono text-black text-sm md:text-base">
                     &ldquo;{parseTextWithTranslations(data.situation)}&rdquo;
                 </div>
             </div>
@@ -2187,8 +2195,8 @@ const ScenarioCard = ({ data }: { data: { context: string; situation: string; wr
                     className={cn(
                         "w-full py-3 md:py-4 rounded-lg font-bold transition-all duration-300 flex items-center justify-center gap-2 text-sm md:text-base",
                         showSolution
-                            ? "bg-slate-800 text-slate-400 border border-slate-700"
-                            : "bg-gradient-to-r from-cyan-600 to-cyan-500 text-white shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:shadow-[0_0_40px_rgba(6,182,212,0.6)]"
+                            ? "bg-white text-black border border-slate-300"
+                            : "bg-teal-600 text-white shadow-[0_0_18px_rgba(15,23,42,0.08)] hover:bg-teal-500"
                     )}
                 >
                     {showSolution ? "OCULTAR ANÁLISE" : "VER ANÁLISE"}
@@ -2206,25 +2214,25 @@ const ScenarioCard = ({ data }: { data: { context: string; situation: string; wr
                         >
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                                 {/* Wrong Approach */}
-                                <div className="bg-red-950/20 border border-red-500/30 rounded-lg p-4 md:p-5">
-                                    <h5 className="font-bold text-red-400 text-xs md:text-sm mb-3 flex items-center gap-2">
+                                <div className="bg-slate-100/90 border border-slate-300/85 rounded-lg p-4 md:p-5">
+                                    <h5 className="font-bold text-slate-700 text-xs md:text-sm mb-3 flex items-center gap-2">
                                         <AlertCircle className="w-4 h-4" />
                                         ❌ RESPOSTA QUE ATRAPALHA
                                     </h5>
-                                    <p className="text-slate-400 text-sm mb-3 leading-relaxed">{parseTextWithTranslations(data.wrong.action)}</p>
-                                    <div className="bg-red-900/20 p-3 rounded text-red-300 text-xs md:text-sm font-mono leading-relaxed">
+                                    <p className="text-slate-700 text-sm mb-3 leading-relaxed">{parseTextWithTranslations(data.wrong.action)}</p>
+                                    <div className="bg-slate-100 p-3 rounded text-slate-700 text-xs md:text-sm font-mono leading-relaxed">
                                         → {parseTextWithTranslations(data.wrong.result)}
                                     </div>
                                 </div>
 
                                 {/* Right Approach */}
-                                <div className="bg-emerald-950/20 border border-emerald-500/30 rounded-lg p-4 md:p-5">
-                                    <h5 className="font-bold text-emerald-400 text-xs md:text-sm mb-3 flex items-center gap-2">
+                                <div className="bg-teal-50/80 border border-teal-200/85 rounded-lg p-4 md:p-5">
+                                    <h5 className="font-bold text-teal-700 text-xs md:text-sm mb-3 flex items-center gap-2">
                                         <CheckCircle2 className="w-4 h-4" />
                                         ✅ RESPOSTA QUE FUNCIONA
                                     </h5>
-                                    <p className="text-slate-400 text-sm mb-3 leading-relaxed">{parseTextWithTranslations(data.right.action)}</p>
-                                    <div className="bg-emerald-900/20 p-3 rounded text-emerald-300 text-xs md:text-sm font-mono leading-relaxed">
+                                    <p className="text-slate-700 text-sm mb-3 leading-relaxed">{parseTextWithTranslations(data.right.action)}</p>
+                                    <div className="bg-teal-50/85 p-3 rounded text-teal-800 text-xs md:text-sm font-mono leading-relaxed">
                                         → {parseTextWithTranslations(data.right.result)}
                                     </div>
                                 </div>
@@ -2239,35 +2247,35 @@ const ScenarioCard = ({ data }: { data: { context: string; situation: string; wr
 
 const PhoneticBreakdown = ({ data }: { data: { formal: { text: string; analysis: string }; combat: { text: string; analysis: string }; explanation: string } }) => {
     return (
-        <div className="my-8 rounded-xl border border-violet-500/30 overflow-hidden bg-gradient-to-br from-slate-900 to-violet-950/20">
-            <div className="bg-gradient-to-r from-violet-900/40 to-purple-900/30 px-4 py-3 md:px-6 md:py-4 border-b border-violet-500/30 flex items-center gap-3">
-                <Volume2 className="w-5 h-5 text-violet-400" />
-                <span className="font-bold text-violet-400 font-mono text-xs md:text-sm tracking-wider">🛠️ ENGENHARIA REVERSA</span>
+        <div className={STUDY_CARD}>
+            <div className={STUDY_CARD_HEADER}>
+                <Volume2 className="w-5 h-5 text-teal-700" />
+                <span className="font-bold text-teal-700 font-mono text-xs md:text-sm tracking-wider">🛠️ ENGENHARIA REVERSA</span>
             </div>
 
             <div className="p-4 md:p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                     {/* Formal */}
-                    <div className="bg-slate-800/30 rounded-lg p-4 md:p-5 border border-slate-700">
-                        <h4 className="text-[10px] md:text-xs font-bold text-red-400 uppercase tracking-wider mb-3">📚 FORMA DE LIVRO</h4>
-                        <div className="bg-slate-900/50 p-3 md:p-4 rounded font-mono text-xl md:text-2xl text-slate-300 text-center mb-3">
+                    <div className={cn(STUDY_PANEL, "p-4 md:p-5")}>
+                        <h4 className="text-[10px] md:text-xs font-bold text-black uppercase tracking-wider mb-3">📚 FORMA DE LIVRO</h4>
+                        <div className="rounded border border-slate-200 bg-white p-3 md:p-4 font-mono text-xl md:text-2xl text-black text-center mb-3">
                             {parseTextWithTranslations(data.formal.text)}
                         </div>
-                        <p className="text-[10px] md:text-xs text-slate-500 text-center">{parseTextWithTranslations(data.formal.analysis)}</p>
+                        <p className="text-[10px] md:text-xs text-black text-center">{parseTextWithTranslations(data.formal.analysis)}</p>
                     </div>
 
                     {/* Combat */}
-                    <div className="bg-cyan-950/20 rounded-lg p-4 md:p-5 border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.1)]">
-                        <h4 className="text-[10px] md:text-xs font-bold text-cyan-400 uppercase tracking-wider mb-3">FORMA NATURAL</h4>
-                        <div className="bg-slate-900/50 p-3 md:p-4 rounded font-mono text-xl md:text-2xl text-cyan-300 text-center mb-3">
+                    <div className={cn(STUDY_PANEL_STRONG, "p-4 md:p-5")}>
+                        <h4 className="text-[10px] md:text-xs font-bold text-teal-800 uppercase tracking-wider mb-3">FORMA NATURAL</h4>
+                        <div className="rounded border border-teal-200 bg-white p-3 md:p-4 font-mono text-xl md:text-2xl text-black text-center mb-3">
                             {parseTextWithTranslations(data.combat.text)}
                         </div>
-                        <p className="text-[10px] md:text-xs text-cyan-500 text-center">{parseTextWithTranslations(data.combat.analysis)}</p>
+                        <p className="text-[10px] md:text-xs text-black text-center">{parseTextWithTranslations(data.combat.analysis)}</p>
                     </div>
                 </div>
 
-                <div className="bg-slate-800/30 p-4 rounded-lg border border-slate-700">
-                    <p className="text-sm text-slate-400 leading-relaxed">{parseTextWithTranslations(data.explanation)}</p>
+                <div className={cn(STUDY_PANEL, "p-4")}>
+                    <p className="text-sm text-black leading-relaxed">{parseTextWithTranslations(data.explanation)}</p>
                 </div>
             </div>
         </div>
@@ -2278,16 +2286,16 @@ const EliteInsight = ({ title, content }: { title: string; content: string }) =>
     return (
         <div className="my-8 relative overflow-hidden rounded-xl">
             {/* Gradient Background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/10 via-purple-600/10 to-cyan-600/10 animate-gradient-x" />
+            <div className="absolute inset-0 bg-gradient-to-r from-teal-500/6 via-slate-300/14 to-teal-500/6 animate-gradient-x" />
 
-            <div className="relative bg-slate-900/80 backdrop-blur border border-cyan-500/30 rounded-xl p-4 md:p-6 shadow-[0_0_40px_rgba(6,182,212,0.15)]">
+            <div className="relative bg-white/78 backdrop-blur-xl border border-slate-200 rounded-xl p-4 md:p-6 shadow-[0_18px_44px_rgba(15,23,42,0.10)]">
                 <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(6,182,212,0.5)]">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-teal-500 to-teal-500 flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(6,182,212,0.5)]">
                         <Brain className="w-5 h-5 md:w-6 md:h-6 text-white" />
                     </div>
                     <div>
-                        <h4 className="font-bold text-cyan-400 font-mono text-xs md:text-sm tracking-wider mb-2">{parseTextWithTranslations(title)}</h4>
-                        <p className="text-sm md:text-base text-slate-300 leading-relaxed">{parseTextWithTranslations(content)}</p>
+                        <h4 className="font-bold text-teal-700 font-mono text-xs md:text-sm tracking-wider mb-2">{parseTextWithTranslations(title)}</h4>
+                        <p className="text-sm md:text-base text-slate-800 leading-relaxed">{parseTextWithTranslations(content)}</p>
                     </div>
                 </div>
             </div>
@@ -2304,9 +2312,9 @@ const MemoryDiagram = ({ data }: { data: { title: string; declarative: { title: 
     const [activePanel, setActivePanel] = useState<'declarative' | 'procedural' | null>(null);
 
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-cyan-500/30 overflow-hidden">
-            <div className="bg-gradient-to-r from-cyan-900/50 to-purple-900/50 p-4 border-b border-cyan-500/20">
-                <h3 className="text-base md:text-lg font-bold text-cyan-400 font-mono flex items-center gap-2">
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-100/95 to-slate-50/90 p-4 border-b border-teal-200/80">
+                <h3 className="text-base md:text-lg font-bold text-teal-700 font-mono flex items-center gap-2">
                     <Brain className="w-4 h-4 md:w-5 md:h-5" />
                     {parseTextWithTranslations(data.title)}
                 </h3>
@@ -2319,14 +2327,14 @@ const MemoryDiagram = ({ data }: { data: { title: string; declarative: { title: 
                     className={cn(
                         "text-left p-4 md:p-5 rounded-lg border transition-all duration-300",
                         activePanel === 'declarative'
-                            ? "bg-red-500/20 border-red-500/50"
-                            : "bg-slate-800/50 border-slate-700 hover:border-red-500/30"
+                            ? "bg-slate-100 border-slate-400/85"
+                            : "bg-white/85 border-slate-300 hover:border-slate-300/50"
                     )}
                 >
                     <div className="flex items-center gap-3 mb-3">
                         <span className="text-xl md:text-2xl">{data.declarative.icon}</span>
-                        <span className="font-bold text-red-400 text-sm md:text-base">{parseTextWithTranslations(data.declarative.title)}</span>
-                        <span className="ml-auto text-[10px] md:text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">O ERRO</span>
+                        <span className="font-bold text-slate-700 text-sm md:text-base">{parseTextWithTranslations(data.declarative.title)}</span>
+                        <span className="ml-auto text-[10px] md:text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded">O ERRO</span>
                     </div>
                     <AnimatePresence>
                         {activePanel === 'declarative' && (
@@ -2334,7 +2342,7 @@ const MemoryDiagram = ({ data }: { data: { title: string; declarative: { title: 
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="text-slate-400 text-sm leading-relaxed"
+                                className="text-slate-700 text-sm leading-relaxed"
                             >
                                 {parseTextWithTranslations(data.declarative.description)}
                             </motion.div>
@@ -2351,14 +2359,14 @@ const MemoryDiagram = ({ data }: { data: { title: string; declarative: { title: 
                     className={cn(
                         "text-left p-4 md:p-5 rounded-lg border transition-all duration-300",
                         activePanel === 'procedural'
-                            ? "bg-emerald-500/20 border-emerald-500/50"
-                            : "bg-slate-800/50 border-slate-700 hover:border-emerald-500/30"
+                            ? "bg-teal-500/10 border-teal-400/85"
+                            : "bg-white/85 border-slate-300 hover:border-teal-400/80"
                     )}
                 >
                     <div className="flex items-center gap-3 mb-3">
                         <span className="text-xl md:text-2xl">{data.procedural.icon}</span>
-                        <span className="font-bold text-emerald-400 text-sm md:text-base">{parseTextWithTranslations(data.procedural.title)}</span>
-                        <span className="ml-auto text-[10px] md:text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">A SOLUÇÃO</span>
+                        <span className="font-bold text-teal-700 text-sm md:text-base">{parseTextWithTranslations(data.procedural.title)}</span>
+                        <span className="ml-auto text-[10px] md:text-xs bg-teal-500/10 text-teal-700 px-2 py-1 rounded">A SOLUÇÃO</span>
                     </div>
                     <AnimatePresence>
                         {activePanel === 'procedural' && (
@@ -2366,7 +2374,7 @@ const MemoryDiagram = ({ data }: { data: { title: string; declarative: { title: 
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="text-slate-400 text-sm leading-relaxed"
+                                className="text-slate-700 text-sm leading-relaxed"
                             >
                                 {parseTextWithTranslations(data.procedural.description)}
                             </motion.div>
@@ -2379,12 +2387,12 @@ const MemoryDiagram = ({ data }: { data: { title: string; declarative: { title: 
             </div>
 
             {/* Diagnosis */}
-            <div className="mx-4 md:mx-6 mb-6 p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-lg">
-                <div className="flex items-center gap-2 text-amber-400 font-mono text-xs md:text-sm font-bold mb-2">
+            <div className="mx-4 md:mx-6 mb-6 p-4 bg-gradient-to-r from-teal-500/10 to-teal-500/10 border border-teal-500/30 rounded-lg">
+                <div className="flex items-center gap-2 text-teal-700 font-mono text-xs md:text-sm font-bold mb-2">
                     <Crosshair className="w-4 h-4" />
                     DIAGNÓSTICO DE ELITE
                 </div>
-                <p className="text-slate-300 text-sm leading-relaxed">{parseTextWithTranslations(data.diagnosis)}</p>
+                <p className="text-slate-800 text-sm leading-relaxed">{parseTextWithTranslations(data.diagnosis)}</p>
             </div>
         </div>
     );
@@ -2395,9 +2403,9 @@ const BabyLearning = ({ data }: { data: { title: string; phases: { name: string;
     const [activePhase, setActivePhase] = useState(0);
 
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-violet-500/30 overflow-hidden">
-            <div className="bg-gradient-to-r from-violet-900/50 to-pink-900/50 p-4 border-b border-violet-500/20">
-                <h3 className="text-base md:text-lg font-bold text-violet-400 font-mono flex items-center gap-2">
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-100/95 to-slate-50/90 p-4 border-b border-teal-200/80">
+                <h3 className="text-base md:text-lg font-bold text-teal-700 font-mono flex items-center gap-2">
                     🛠️ {parseTextWithTranslations(data.title)}
                 </h3>
             </div>
@@ -2411,8 +2419,8 @@ const BabyLearning = ({ data }: { data: { title: string; phases: { name: string;
                         className={cn(
                             "flex-1 min-w-[100px] md:min-w-[120px] px-2 md:px-4 py-3 text-center text-xs md:text-sm font-medium transition-all relative whitespace-nowrap",
                             activePhase === idx
-                                ? "text-violet-300 bg-violet-500/10"
-                                : "text-slate-500 hover:text-slate-300 hover:bg-slate-800/50"
+                                ? "text-teal-800 bg-teal-500/8"
+                                : "text-slate-500 hover:text-slate-800 hover:bg-slate-800/50"
                         )}
                     >
                         <span className="mr-1 md:mr-2">{phase.icon}</span>
@@ -2421,7 +2429,7 @@ const BabyLearning = ({ data }: { data: { title: string; phases: { name: string;
                         {activePhase === idx && (
                             <motion.div
                                 layoutId="activePhaseIndicator"
-                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-violet-500 to-pink-500"
+                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-600 to-slate-500"
                             />
                         )}
                     </button>
@@ -2438,14 +2446,14 @@ const BabyLearning = ({ data }: { data: { title: string; phases: { name: string;
                     className="p-4 md:p-6"
                 >
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
-                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 border border-violet-500/30 flex items-center justify-center text-3xl flex-shrink-0 mb-2 md:mb-0">
+                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-teal-500/20 to-teal-500/20 border border-teal-200/85 flex items-center justify-center text-3xl flex-shrink-0 mb-2 md:mb-0">
                             {data.phases[activePhase].icon}
                         </div>
                         <div>
-                            <h4 className="font-bold text-violet-300 text-base md:text-lg mb-2">
+                            <h4 className="font-bold text-teal-800 text-base md:text-lg mb-2">
                                 Fase {activePhase + 1}: {parseTextWithTranslations(data.phases[activePhase].name)}
                             </h4>
-                            <p className="text-slate-400 text-sm leading-relaxed">
+                            <p className="text-slate-700 text-sm leading-relaxed">
                                 {parseTextWithTranslations(data.phases[activePhase].description)}
                             </p>
                         </div>
@@ -2462,7 +2470,7 @@ const BabyLearning = ({ data }: { data: { title: string; phases: { name: string;
                         className={cn(
                             "w-2 h-2 md:w-3 md:h-3 rounded-full transition-all",
                             activePhase === idx
-                                ? "bg-violet-500 scale-125 shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+                                ? "bg-teal-500 scale-125 shadow-[0_0_10px_rgba(139,92,246,0.5)]"
                                 : "bg-slate-600 hover:bg-slate-500"
                         )}
                     />
@@ -2477,20 +2485,20 @@ const PhraseAnalysis = ({ data }: { data: { phrase: string; phonetic: string; gr
     const [showDetails, setShowDetails] = useState(false);
 
     return (
-        <div className="my-6 bg-slate-900/50 rounded-xl border border-cyan-500/30 overflow-hidden">
+        <div className="my-6 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md overflow-hidden">
             <div className="p-4 md:p-5">
                 <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] md:text-xs font-bold text-cyan-400 font-mono tracking-wider">ANÁLISE DE FRASE TÁTICA</span>
+                    <span className="text-[10px] md:text-xs font-bold text-teal-700 font-mono tracking-wider">ANÁLISE DE FRASE TÁTICA</span>
                     <AudioButton text={data.phrase} size="sm" />
                 </div>
 
-                <p className="text-xl md:text-2xl font-bold text-white mb-3 font-serif">
+                <p className="text-xl md:text-2xl font-bold text-slate-950 mb-3 font-serif">
                     &ldquo;{parseTextWithTranslations(data.phrase)}&rdquo;
                 </p>
 
                 <button
                     onClick={() => setShowDetails(!showDetails)}
-                    className="text-xs md:text-sm text-cyan-400 hover:text-cyan-300 flex items-center gap-2"
+                    className="text-xs md:text-sm text-teal-700 hover:text-teal-700 flex items-center gap-2"
                 >
                     {showDetails ? "Esconder análise" : "Ver análise completa"}
                     <ChevronDown className={cn("w-4 h-4 transition-transform", showDetails && "rotate-180")} />
@@ -2505,12 +2513,12 @@ const PhraseAnalysis = ({ data }: { data: { phrase: string; phonetic: string; gr
                             className="mt-4 space-y-3 border-t border-slate-700/50 pt-4"
                         >
                             <div className="flex flex-col md:flex-row md:items-start gap-1 md:gap-3">
-                                <span className="text-[10px] md:text-xs font-bold text-emerald-400 font-mono w-24 flex-shrink-0">FONÉTICA:</span>
-                                <span className="text-slate-400 text-sm font-mono">{parseTextWithTranslations(data.phonetic)}</span>
+                                <span className="text-[10px] md:text-xs font-bold text-teal-700 font-mono w-24 flex-shrink-0">FONÉTICA:</span>
+                                <span className="text-slate-700 text-sm font-mono">{parseTextWithTranslations(data.phonetic)}</span>
                             </div>
                             <div className="flex flex-col md:flex-row md:items-start gap-1 md:gap-3">
-                                <span className="text-[10px] md:text-xs font-bold text-amber-400 font-mono w-24 flex-shrink-0">GRAMÁTICA:</span>
-                                <span className="text-slate-400 text-sm">{parseTextWithTranslations(data.grammarNote)}</span>
+                                <span className="text-[10px] md:text-xs font-bold text-teal-700 font-mono w-24 flex-shrink-0">GRAMÁTICA:</span>
+                                <span className="text-slate-700 text-sm">{parseTextWithTranslations(data.grammarNote)}</span>
                             </div>
                         </motion.div>
                     )}
@@ -2525,18 +2533,17 @@ const PhraseAnalysis = ({ data }: { data: { phrase: string; phonetic: string; gr
 // ================================================================
 
 const TowerLog = ({ content }: { content: string }) => (
-    <div className="my-8 rounded-lg overflow-hidden border border-cyan-500/30 bg-[#050505] shadow-[0_0_25px_rgba(6,182,212,0.1)]">
-        <div className="bg-cyan-900/20 px-4 py-2 border-b border-cyan-500/20 flex items-center gap-2">
-            <Terminal className="w-4 h-4 text-cyan-400" />
-            <span className="text-[10px] font-mono font-bold text-cyan-400 tracking-widest uppercase">TOWER_OPERATIONAL_LOG</span>
+    <div className={STUDY_INFO_BAR}>
+        <div className={STUDY_INFO_BAR_HEADER}>
+            <Terminal className="w-4 h-4 text-slate-700" />
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-700">Resumo Operacional</span>
         </div>
-        <div className="p-4 md:p-6 font-mono text-sm md:text-base text-cyan-500/90 whitespace-pre-wrap leading-relaxed">
-            {parseTextWithTranslations(content)}
-            <motion.span
-                animate={{ opacity: [1, 0] }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-                className="inline-block w-2 h-4 bg-cyan-500 ml-1 translate-y-0.5"
-            />
+        <div className="p-4 md:p-6">
+            <pre className="whitespace-pre-wrap font-sans text-sm md:text-base leading-relaxed text-black">
+                {content.split('\n').map((line, i) => (
+                    <span key={i} className="block">{extractTranslatableText(line)}</span>
+                ))}
+            </pre>
         </div>
     </div>
 );
@@ -2553,13 +2560,13 @@ const SonicScan = ({ data }: { data: { title: string; instructions: string; item
     const checkedCount = checkedItems.filter(Boolean).length;
 
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-blue-500/30 backdrop-blur-sm">
-            <div className="bg-blue-500/10 p-4 border-b border-blue-500/20 flex items-center gap-3">
-                <Volume2 className="w-5 h-5 text-blue-400" />
-                <h3 className="font-bold text-blue-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className={STUDY_CARD}>
+            <div className={STUDY_CARD_HEADER}>
+                <Volume2 className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-6">{data.instructions}</p>
+                <p className="text-black text-sm mb-6">{data.instructions}</p>
                 <div className="space-y-3">
                     {data.items.map((item, idx) => (
                         <button
@@ -2568,15 +2575,15 @@ const SonicScan = ({ data }: { data: { title: string; instructions: string; item
                             className={cn(
                                 "w-full text-left p-4 rounded-lg border transition-all flex items-start gap-4",
                                 checkedItems[idx]
-                                    ? "bg-blue-900/30 border-blue-500/50 text-blue-100"
-                                    : "bg-slate-800/40 border-slate-700 text-slate-400 hover:border-slate-600"
+                                    ? "bg-teal-50 border-teal-300 text-black"
+                                    : "bg-white border-slate-200 text-black hover:border-teal-300"
                             )}
                         >
                             <div className={cn(
                                 "w-5 h-5 rounded border mt-0.5 flex items-center justify-center flex-shrink-0 transition-colors",
-                                checkedItems[idx] ? "bg-blue-500 border-blue-500" : "border-slate-600"
+                                checkedItems[idx] ? "bg-teal-600 border-teal-600" : "border-slate-300"
                             )}>
-                                {checkedItems[idx] && <CheckCircle2 className="w-4 h-4 text-slate-900" />}
+                                {checkedItems[idx] && <CheckCircle2 className="w-4 h-4 text-white" />}
                             </div>
                             <span className="text-sm md:text-base">{parseTextWithTranslations(item)}</span>
                         </button>
@@ -2588,7 +2595,7 @@ const SonicScan = ({ data }: { data: { title: string; instructions: string; item
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="mt-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-300 text-center font-bold text-xs md:text-sm font-mono"
+                            className="mt-6 rounded-lg border border-teal-200 bg-teal-50 p-4 text-center font-bold text-xs md:text-sm font-mono text-black"
                         >
                             ⚠️ {parseTextWithTranslations(data.output)}
                         </motion.div>
@@ -2603,13 +2610,13 @@ const ABSnapTest = ({ data }: { data: { title: string; rule: string; items: { id
     const [answers, setAnswers] = useState<Record<string, 'a' | 'b'>>({});
 
     return (
-        <div className="my-8 bg-slate-900/60 rounded-xl border border-purple-500/30">
-            <div className="bg-purple-500/10 p-4 border-b border-purple-500/20 flex items-center gap-3">
-                <Crosshair className="w-5 h-5 text-purple-400" />
-                <h3 className="font-bold text-purple-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/8 p-4 border-b border-teal-200/80 flex items-center gap-3">
+                <Crosshair className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6 text-center">
-                <p className="text-slate-400 text-sm mb-8">{data.rule}</p>
+                <p className="text-slate-700 text-sm mb-8">{data.rule}</p>
 
                 <div className="space-y-6 max-w-lg mx-auto">
                     {data.items.map((item) => (
@@ -2621,8 +2628,8 @@ const ABSnapTest = ({ data }: { data: { title: string; rule: string; items: { id
                                     className={cn(
                                         "flex-1 py-4 px-2 rounded-lg border font-mono font-bold transition-all",
                                         answers[item.id] === 'a'
-                                            ? "bg-cyan-500 border-cyan-400 text-slate-900 scale-[1.02]"
-                                            : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500"
+                                            ? "bg-teal-500 border-teal-400 text-slate-900 scale-[1.02]"
+                                            : "bg-white/85 border-slate-300 text-slate-700 hover:border-slate-500"
                                     )}
                                 >
                                     {parseTextWithTranslations(item.a)}
@@ -2633,8 +2640,8 @@ const ABSnapTest = ({ data }: { data: { title: string; rule: string; items: { id
                                     className={cn(
                                         "flex-1 py-4 px-2 rounded-lg border font-mono font-bold transition-all",
                                         answers[item.id] === 'b'
-                                            ? "bg-cyan-500 border-cyan-400 text-slate-900 scale-[1.02]"
-                                            : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500"
+                                            ? "bg-teal-500 border-teal-400 text-slate-900 scale-[1.02]"
+                                            : "bg-white/85 border-slate-300 text-slate-700 hover:border-slate-500"
                                     )}
                                 >
                                     {parseTextWithTranslations(item.b)}
@@ -2656,13 +2663,13 @@ const LatencyMeter = ({ data }: { data: { title: string; description: string; op
     const [selected, setSelected] = useState<number | null>(null);
 
     return (
-        <div className="my-8 bg-slate-900/40 rounded-xl border border-amber-500/20">
-            <div className="bg-amber-500/10 p-4 border-b border-amber-500/20 flex items-center gap-3">
-                <Cpu className="w-5 h-5 text-amber-400" />
-                <h3 className="font-bold text-amber-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className={STUDY_CARD}>
+            <div className={STUDY_CARD_HEADER}>
+                <Cpu className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-300 text-sm md:text-base mb-6">{data.description}</p>
+                <p className="text-black text-sm md:text-base mb-6">{data.description}</p>
                 <div className="grid gap-3">
                     {data.options.map((opt, idx) => (
                         <button
@@ -2671,8 +2678,8 @@ const LatencyMeter = ({ data }: { data: { title: string; description: string; op
                             className={cn(
                                 "text-left p-4 rounded-lg border transition-all text-sm md:text-base",
                                 selected === idx
-                                    ? "bg-amber-900/30 border-amber-500/50 text-amber-200"
-                                    : "bg-slate-800/40 border-slate-700 text-slate-400 hover:border-slate-600"
+                                    ? "bg-teal-50 border-teal-300 text-black"
+                                    : "bg-white border-slate-200 text-black hover:border-teal-300"
                             )}
                         >
                             {parseTextWithTranslations(opt)}
@@ -2685,7 +2692,7 @@ const LatencyMeter = ({ data }: { data: { title: string; description: string; op
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="mt-6 p-4 bg-slate-800/80 rounded-lg border-l-4 border-amber-500 text-slate-300 text-xs md:text-sm"
+                            className="mt-6 rounded-lg border border-teal-200 bg-teal-50 p-4 text-xs md:text-sm text-black"
                         >
                             <strong>LATENCY VERDICT:</strong> {parseTextWithTranslations(data.verdicts[selected])}
                         </motion.div>
@@ -2697,58 +2704,58 @@ const LatencyMeter = ({ data }: { data: { title: string; description: string; op
 };
 
 const CutoffDrill = ({ data }: { data: { title: string; instruction: string; items: { word: string; cutoff: string }[]; warning: string } }) => (
-    <div className="my-8 bg-black/40 rounded-xl border border-red-500/20">
-        <div className="bg-red-950/20 p-4 border-b border-red-500/20 flex items-center gap-3">
-            <Zap className="w-5 h-5 text-red-500" />
-            <h3 className="font-bold text-red-500 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+    <div className={STUDY_CARD}>
+        <div className={STUDY_CARD_HEADER}>
+            <Zap className="w-5 h-5 text-slate-700" />
+            <h3 className="font-bold text-slate-800 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
         </div>
         <div className="p-4 md:p-8 text-center">
-            <p className="text-slate-400 text-sm mb-8 leading-relaxed">{data.instruction}</p>
+            <p className="text-black text-sm mb-8 leading-relaxed">{data.instruction}</p>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {data.items.map((item, idx) => (
-                    <div key={idx} className="bg-slate-900/80 border border-slate-800 p-4 rounded-lg group hover:border-red-500/50 transition-all">
-                        <div className="text-xs font-mono text-slate-500 mb-2 uppercase tracking-tighter">Trava: {item.cutoff}</div>
-                        <div className="text-xl md:text-2xl font-bold text-white font-mono group-hover:text-red-400 transition-colors">
+                    <div key={idx} className="rounded-lg border border-slate-200 bg-white p-4 transition-all hover:border-teal-300">
+                        <div className="text-xs font-mono text-slate-600 mb-2 uppercase tracking-tighter">Trava: {item.cutoff}</div>
+                        <div className="text-xl md:text-2xl font-bold text-black font-mono">
                             {extractTranslatableText(item.word).split('').map((char, i, arr) => (
-                                <span key={i} className={i === arr.length - 1 ? "text-red-500" : ""}>{char}</span>
+                                <span key={i} className={i === arr.length - 1 ? "text-teal-700" : ""}>{char}</span>
                             ))}
                         </div>
                     </div>
                 ))}
             </div>
-            <p className="mt-8 text-xs text-red-400/80 font-mono italic">{parseTextWithTranslations(data.warning)}</p>
+            <p className="mt-8 text-xs text-black font-mono italic">{parseTextWithTranslations(data.warning)}</p>
         </div>
     </div>
 );
 
 const MisfireCases = ({ data }: { data: { title: string; cases: { whatYouSay: string; whatTheyHear: string; whyItHurts: string }[]; note: string } }) => (
-    <div className="my-8 rounded-xl border border-slate-700/50 bg-slate-900/30 backdrop-blur">
-        <div className="bg-red-900/10 px-4 py-3 border-b border-red-500/20 flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500" />
-            <span className="font-bold text-slate-200 font-mono text-xs md:text-sm tracking-wider uppercase">{parseTextWithTranslations(data.title)}</span>
+    <div className={STUDY_CARD}>
+        <div className={STUDY_CARD_HEADER}>
+            <AlertCircle className="w-5 h-5 text-slate-700" />
+            <span className="font-bold text-slate-800 font-mono text-xs md:text-sm tracking-wider uppercase">{parseTextWithTranslations(data.title)}</span>
         </div>
         <div className="overflow-x-auto">
             <table className="w-full text-left min-w-[500px]">
                 <thead>
-                    <tr className="bg-slate-800/50 text-[10px] uppercase font-mono text-slate-500 tracking-widest">
+                    <tr className="bg-slate-50 text-[10px] uppercase font-mono text-slate-700 tracking-widest">
                         <th className="px-6 py-4">Sinal Emitido (Erro)</th>
                         <th className="px-6 py-4">Sinal Recebido (Nativo)</th>
                         <th className="px-6 py-4">Dano Operacional</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800">
+                <tbody className="divide-y divide-slate-200">
                     {data.cases.map((c, i) => (
-                        <tr key={i} className="hover:bg-slate-800/30 transition-colors">
-                            <td className="px-6 py-4 font-mono text-red-400">{parseTextWithTranslations(c.whatYouSay)}</td>
-                            <td className="px-6 py-4 font-mono text-cyan-400 font-bold">{parseTextWithTranslations(c.whatTheyHear)}</td>
-                            <td className="px-6 py-4 text-xs md:text-sm text-slate-400 leading-relaxed">{parseTextWithTranslations(c.whyItHurts)}</td>
+                        <tr key={i} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-6 py-4 font-mono text-black">{parseTextWithTranslations(c.whatYouSay)}</td>
+                            <td className="px-6 py-4 font-mono text-teal-700 font-bold">{parseTextWithTranslations(c.whatTheyHear)}</td>
+                            <td className="px-6 py-4 text-xs md:text-sm text-black leading-relaxed">{parseTextWithTranslations(c.whyItHurts)}</td>
                         </tr>
                     ))}
                 </tbody>
             </table>
         </div>
-        <div className="p-4 bg-slate-900/50 border-t border-slate-800">
-            <p className="text-[10px] md:text-xs text-slate-500 font-mono italic">⚠️ {data.note}</p>
+        <div className="border-t border-slate-200 bg-slate-50 p-4">
+            <p className="text-[10px] md:text-xs text-black font-mono italic">⚠️ {data.note}</p>
         </div>
     </div>
 );
@@ -2757,28 +2764,28 @@ const AnchorBuilder = ({ data }: { data: { title: string; instruction: string; e
     const [values, setValues] = useState<Record<string, string>>({});
 
     return (
-        <div className="my-8 bg-gradient-to-br from-slate-900/80 to-blue-900/20 rounded-xl border border-blue-500/30 shadow-xl">
-            <div className="bg-blue-900/40 p-4 border-b border-blue-500/30 flex items-center gap-3">
-                <Target className="w-5 h-5 text-blue-400" />
-                <h3 className="font-bold text-blue-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className={STUDY_CARD}>
+            <div className={STUDY_CARD_HEADER}>
+                <Target className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-300 text-sm md:text-base mb-2">{data.instruction}</p>
-                <div className="bg-black/40 p-3 rounded border border-slate-800 mb-8 mt-2">
-                    <p className="text-[11px] font-mono text-slate-500 uppercase mb-1">Padrão Tático de Exemplo:</p>
-                    <p className="text-xs md:text-sm text-blue-300 italic">&ldquo;{parseTextWithTranslations(data.example)}&rdquo;</p>
+                <p className="text-black text-sm md:text-base mb-2">{data.instruction}</p>
+                <div className={cn(STUDY_PANEL_STRONG, "mb-8 mt-2 p-3")}>
+                    <p className="text-[11px] font-mono text-slate-700 uppercase mb-1">Padrão Tático de Exemplo:</p>
+                    <p className="text-xs md:text-sm text-black italic">&ldquo;{parseTextWithTranslations(data.example)}&rdquo;</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {data.fields.map((field) => (
                         <div key={field.id} className="space-y-2">
-                            <label className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest block">{field.label}</label>
+                            <label className="text-[10px] font-mono font-bold text-slate-700 uppercase tracking-widest block">{field.label}</label>
                             <input
                                 type="text"
                                 placeholder={extractTranslatableText(field.placeholder)}
                                 value={values[field.id] || ''}
                                 onChange={(e) => setValues(prev => ({ ...prev, [field.id]: e.target.value }))}
-                                className="w-full bg-slate-950/80 border border-slate-700 rounded p-3 text-sm text-slate-200 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all outline-none"
+                                className={STUDY_INPUT}
                             />
                         </div>
                     ))}
@@ -2806,26 +2813,26 @@ const Checksum = ({ data }: { data: { title: string; rule: string; questions: { 
     };
 
     return (
-        <div className="my-8 bg-slate-900 rounded-xl border border-emerald-500/30 shadow-2xl">
-            <div className="bg-emerald-500/10 p-4 border-b border-emerald-500/20 flex items-center justify-between">
+        <div className={STUDY_CARD}>
+            <div className={cn(STUDY_CARD_HEADER, "justify-between")}>
                 <div className="flex items-center gap-3">
-                    <Target className="w-5 h-5 text-emerald-400" />
-                    <h3 className="font-bold text-emerald-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+                    <Target className="w-5 h-5 text-teal-700" />
+                    <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
                 </div>
-                {!finished && <span className="font-mono text-xs text-emerald-500 bg-emerald-950/50 px-2 py-1 rounded">Check {current + 1}/{data.questions.length}</span>}
+                {!finished && <span className="font-mono text-xs text-teal-700 bg-teal-100 px-2 py-1 rounded">Check {current + 1}/{data.questions.length}</span>}
             </div>
             <div className="p-6 md:p-8">
                 {finished ? (
                     <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center py-4">
-                        <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-                        <h4 className="text-xl md:text-2xl font-bold text-white mb-2">Checksum Validado</h4>
-                        <p className="text-slate-400 text-sm mb-6 max-w-sm mx-auto">Sua antena auditiva está calibrada para o sinal limpo. Prepare-se para o próximo nível.</p>
-                        <button onClick={() => { setCurrent(0); setSelected(new Array(data.questions.length).fill(-1)); setFinished(false); }} className="px-6 py-2 bg-slate-800 text-slate-300 rounded text-xs font-mono uppercase tracking-widest hover:bg-slate-700 transition">Reiniciar Scan</button>
+                        <CheckCircle2 className="w-16 h-16 text-teal-700 mx-auto mb-4" />
+                        <h4 className="text-xl md:text-2xl font-bold text-black mb-2">Checksum Validado</h4>
+                        <p className="text-black text-sm mb-6 max-w-sm mx-auto">Sua antena auditiva está calibrada para o sinal limpo. Prepare-se para o próximo nível.</p>
+                        <button onClick={() => { setCurrent(0); setSelected(new Array(data.questions.length).fill(-1)); setFinished(false); }} className="rounded bg-teal-600 px-6 py-2 text-xs font-mono uppercase tracking-widest text-white transition hover:bg-teal-500">Reiniciar Scan</button>
                     </motion.div>
                 ) : (
                     <div>
-                        <p className="text-slate-400 text-sm mb-6 italic text-center">{data.rule}</p>
-                        <h4 className="text-lg md:text-xl font-bold text-slate-100 mb-8 text-center">{parseTextWithTranslations(data.questions[current].q)}</h4>
+                        <p className="text-black text-sm mb-6 italic text-center">{data.rule}</p>
+                        <h4 className="text-lg md:text-xl font-bold text-black mb-8 text-center">{parseTextWithTranslations(data.questions[current].q)}</h4>
                         <div className="grid gap-3 max-w-md mx-auto">
                             {data.questions[current].options.map((opt, idx) => (
                                 <button
@@ -2834,8 +2841,8 @@ const Checksum = ({ data }: { data: { title: string; rule: string; questions: { 
                                     className={cn(
                                         "w-full text-left p-4 rounded-lg border font-mono text-sm transition-all",
                                         selected[current] === idx
-                                            ? idx === data.questions[current].answer ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100" : "bg-red-900/40 border-red-500/50 text-red-100"
-                                            : "bg-slate-800 border-slate-700 text-slate-400 hover:border-emerald-500/30"
+                                            ? idx === data.questions[current].answer ? "bg-teal-50 border-teal-300 text-black" : "bg-slate-100 border-slate-300 text-black"
+                                            : "bg-white border-slate-200 text-black hover:border-teal-300"
                                     )}
                                 >
                                     {parseTextWithTranslations(opt)}
@@ -2854,17 +2861,17 @@ const Checksum = ({ data }: { data: { title: string; rule: string; questions: { 
 // ============================================================================
 
 const SoftStatus = ({ content }: { content: string }) => (
-    <div className="my-6 bg-emerald-950/30 border border-emerald-500/20 rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between bg-emerald-500/8 px-4 py-2 border-b border-emerald-500/15">
+    <div className={STUDY_INFO_BAR}>
+        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
             <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span className="text-emerald-400 font-mono text-xs uppercase tracking-widest">System Status</span>
+                <CheckCircle2 className="w-4 h-4 text-slate-700" />
+                <span className="font-mono text-xs uppercase tracking-widest text-slate-700">Status da aula</span>
             </div>
-            <span className="text-[10px] font-mono text-emerald-500/50 uppercase tracking-widest">● STABLE</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Estável</span>
         </div>
-        <pre className="text-emerald-300/70 font-mono text-xs md:text-sm p-4 md:p-6 whitespace-pre-wrap leading-relaxed">
+        <pre className="whitespace-pre-wrap p-4 md:p-6 font-sans text-xs md:text-sm leading-relaxed text-black">
             {content.split('\n').map((line, i) => (
-                <span key={i} className={cn("block", line.startsWith('•') ? "text-emerald-200/80 pl-2" : "")}>{parseTextWithTranslations(line)}</span>
+                <span key={i} className={cn("block", line.startsWith('•') ? "pl-2 font-medium text-black" : "text-black")}>{extractTranslatableText(line)}</span>
             ))}
         </pre>
     </div>
@@ -2878,25 +2885,25 @@ const SimpleList = ({ items }: { items: string[] }) => (
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.08 }}
-                className="flex items-start gap-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/60 hover:border-emerald-500/20 transition-colors"
+                className="flex items-start gap-4 p-4 rounded-xl bg-slate-800/30 border border-slate-700/60 hover:border-teal-200/75 transition-colors"
             >
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mt-0.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-500/15 border border-teal-200/85 flex items-center justify-center mt-0.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-teal-700" />
                 </div>
-                <p className="text-slate-300 text-sm leading-relaxed">{parseTextWithTranslations(item)}</p>
+                <p className="text-slate-800 text-sm leading-relaxed">{parseTextWithTranslations(item)}</p>
             </motion.div>
         ))}
     </div>
 );
 
 const SoftWarning = ({ title, content }: { title: string; content: string }) => (
-    <div className="my-8 bg-amber-950/20 border border-amber-500/25 rounded-xl overflow-hidden">
-        <div className="flex items-center gap-3 bg-amber-500/8 px-5 py-3 border-b border-amber-500/15">
-            <Lightbulb className="w-4 h-4 text-amber-400" />
-            <span className="text-amber-300 font-semibold text-sm">{title}</span>
+    <div className="my-8 bg-teal-50/80 border border-teal-500/25 rounded-xl overflow-hidden">
+        <div className="flex items-center gap-3 bg-teal-500/8 px-5 py-3 border-b border-teal-500/15">
+            <Lightbulb className="w-4 h-4 text-teal-700" />
+            <span className="text-teal-700 font-semibold text-sm">{title}</span>
         </div>
         <div className="p-5 md:p-6">
-            <pre className="text-amber-200/70 text-sm leading-relaxed whitespace-pre-wrap font-sans">
+            <pre className="text-slate-800/70 text-sm leading-relaxed whitespace-pre-wrap font-sans">
                 {content.split('\n').map((line, i) => (
                     <span key={i} className="block">{parseTextWithTranslations(line)}</span>
                 ))}
@@ -2915,8 +2922,8 @@ const FinalNote = ({ content }: { content: string }) => (
                 <p key={idx} className={cn(
                     "font-light leading-loose",
                     idx === 0 ? "text-xl md:text-2xl text-slate-200 mb-5" :
-                        idx === 1 ? "text-lg md:text-xl text-slate-300 mb-4" :
-                            "text-base md:text-lg text-emerald-300 font-semibold"
+                        idx === 1 ? "text-lg md:text-xl text-slate-800 mb-4" :
+                            "text-base md:text-lg text-teal-800 font-semibold"
                 )}>
                     {parseTextWithTranslations(para)}
                 </p>
@@ -2928,11 +2935,11 @@ const FinalNote = ({ content }: { content: string }) => (
 const PillarEnd = ({ title, content }: { title: string; content: string }) => (
     <div className="my-12 relative overflow-hidden rounded-2xl">
         {/* Background glow layers */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-emerald-950/30 to-slate-900" />
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-teal-950/30 to-slate-900" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.08)_0%,transparent_70%)]" />
         {/* Decorative top line */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-teal-500/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-teal-500/30 to-transparent" />
 
         <div className="relative z-10 px-6 md:px-12 py-12 md:py-16 text-center">
             {/* Icon */}
@@ -2942,8 +2949,8 @@ const PillarEnd = ({ title, content }: { title: string; content: string }) => (
                 transition={{ type: "spring", stiffness: 200, damping: 20 }}
                 className="w-24 h-24 mx-auto mb-8 relative"
             >
-                <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
-                <div className="relative w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center shadow-[0_0_60px_rgba(16,185,129,0.4)]">
+                <div className="absolute inset-0 bg-teal-500/10 rounded-full animate-ping" />
+                <div className="relative w-24 h-24 bg-teal-500 rounded-full flex items-center justify-center shadow-[0_0_60px_rgba(16,185,129,0.4)]">
                     <CheckCircle2 className="w-12 h-12 text-slate-900" />
                 </div>
             </motion.div>
@@ -2952,18 +2959,18 @@ const PillarEnd = ({ title, content }: { title: string; content: string }) => (
             <motion.h2
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-2xl md:text-3xl font-bold font-mono text-emerald-300 tracking-widest uppercase mb-8"
+                className="text-2xl md:text-3xl font-bold font-mono text-teal-800 tracking-widest uppercase mb-8"
             >
                 {parseTextWithTranslations(title)}
             </motion.h2>
 
             {/* Content */}
-            <pre className="text-slate-300 font-light text-base md:text-lg whitespace-pre-wrap leading-loose max-w-md mx-auto">
+            <pre className="text-slate-800 font-light text-base md:text-lg whitespace-pre-wrap leading-loose max-w-md mx-auto">
                 {content.split('\n').map((line, i) => (
                     <span key={i} className={cn(
                         "block",
-                        line.includes("humano") ? "text-white font-medium" : "",
-                        line.includes("aguarda") ? "text-emerald-400 font-mono text-sm mt-4 uppercase tracking-widest" : ""
+                        line.includes("humano") ? "text-slate-900 font-medium" : "",
+                        line.includes("aguarda") ? "text-teal-700 font-mono text-sm mt-4 uppercase tracking-widest" : ""
                     )}>{parseTextWithTranslations(line)}</span>
                 ))}
             </pre>
@@ -2976,54 +2983,54 @@ const PillarEnd = ({ title, content }: { title: string; content: string }) => (
 // ============================================================================
 
 const SpectrumInit = ({ content }: { content: string }) => (
-    <div className="my-6 bg-slate-950 border border-orange-500/40 rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between bg-orange-500/10 px-4 py-2 border-b border-orange-500/20">
+    <div className={STUDY_INFO_BAR}>
+        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
             <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-orange-400 animate-pulse" />
-                <span className="text-orange-400 font-mono text-xs uppercase tracking-widest">Full Spectrum Mode</span>
+                <Zap className="w-4 h-4 text-slate-700" />
+                <span className="font-mono text-xs uppercase tracking-widest text-slate-700">Leitura de sinal</span>
             </div>
-            <span className="text-[10px] font-mono text-orange-500/60 uppercase tracking-widest">SIGNAL: UNSTABLE</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Atenção</span>
         </div>
-        <pre className="text-orange-300/80 font-mono text-xs md:text-sm p-4 md:p-6 whitespace-pre-wrap leading-relaxed">
+        <pre className="whitespace-pre-wrap p-4 md:p-6 font-sans text-xs md:text-sm leading-relaxed text-black">
             {content.split('\n').map((line, i) => (
-                <span key={i} className={cn("block", line.startsWith('•') ? "text-orange-200 pl-2" : "")}>{parseTextWithTranslations(line)}</span>
+                <span key={i} className={cn("block", line.startsWith('•') ? "pl-2 font-medium text-black" : "text-black")}>{extractTranslatableText(line)}</span>
             ))}
         </pre>
     </div>
 );
 
 const AccentDriftMap = ({ data }: { data: { title: string; instruction: string; accents: { profile: string; characteristics: string[]; risk: string }[]; rule: string } }) => (
-    <div className="my-8 bg-slate-900/50 rounded-xl border border-orange-500/30">
-        <div className="bg-orange-500/10 p-4 border-b border-orange-500/20 flex items-center gap-3">
-            <Volume2 className="w-5 h-5 text-orange-400" />
-            <h3 className="font-bold text-orange-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+    <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+        <div className="bg-teal-500/8 p-4 border-b border-teal-200/80 flex items-center gap-3">
+            <Volume2 className="w-5 h-5 text-teal-700" />
+            <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
         </div>
         <div className="p-4 md:p-6">
-            <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+            <p className="text-slate-700 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {data.accents.map((accent, idx) => (
-                    <div key={idx} className="bg-slate-800/60 rounded-lg border border-slate-700 hover:border-orange-500/30 transition-colors overflow-hidden">
-                        <div className="bg-orange-500/10 px-4 py-2 border-b border-orange-500/10">
-                            <span className="text-xs font-mono font-bold text-orange-300 uppercase tracking-wider">{parseTextWithTranslations(accent.profile)}</span>
+                    <div key={idx} className="overflow-hidden rounded-lg border border-slate-200 bg-white transition-colors hover:border-teal-300">
+                        <div className="border-b border-slate-200 bg-slate-50 px-4 py-2">
+                            <span className="text-xs font-mono font-bold uppercase tracking-wider text-blue-700">{parseTextWithTranslations(accent.profile)}</span>
                         </div>
                         <div className="p-4">
                             <ul className="space-y-1 mb-3">
                                 {accent.characteristics.map((c, cIdx) => (
-                                    <li key={cIdx} className="text-xs text-slate-400 flex items-start gap-2">
-                                        <span className="text-orange-500 mt-0.5">→</span>
+                                    <li key={cIdx} className="text-xs text-slate-700 flex items-start gap-2">
+                                        <span className="text-teal-500 mt-0.5">→</span>
                                         <span>{parseTextWithTranslations(c)}</span>
                                     </li>
                                 ))}
                             </ul>
-                            <div className="border-t border-slate-700 pt-3">
-                                <span className="text-[10px] font-mono text-red-400/80 uppercase tracking-widest block mb-1">⚠ Risk</span>
-                                <p className="text-xs text-slate-400 italic">{parseTextWithTranslations(accent.risk)}</p>
+                            <div className="border-t border-slate-200 pt-3">
+                                <span className="text-[10px] font-mono text-slate-700/80 uppercase tracking-widest block mb-1">⚠ Risk</span>
+                                <p className="text-xs text-slate-700 italic">{parseTextWithTranslations(accent.risk)}</p>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
-            <p className="mt-5 text-xs text-orange-400/80 font-mono italic text-center border-t border-orange-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
+            <p className="mt-5 border-t border-slate-200 pt-4 text-center text-xs font-mono italic text-blue-700">{parseTextWithTranslations(data.rule)}</p>
         </div>
     </div>
 );
@@ -3031,19 +3038,19 @@ const AccentDriftMap = ({ data }: { data: { title: string; instruction: string; 
 const ImperfectInput = ({ data }: { data: { title: string; instruction: string; samples: { input: string; question: string; options: string[]; answer: number; insight: string }[]; rule: string } }) => {
     const [answers, setAnswers] = useState<Record<number, number>>({});
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-yellow-500/30">
-            <div className="bg-yellow-500/10 p-4 border-b border-yellow-500/20 flex items-center gap-3">
-                <Brain className="w-5 h-5 text-yellow-400" />
-                <h3 className="font-bold text-yellow-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/10 p-4 border-b border-teal-200/80 flex items-center gap-3">
+                <Brain className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <p className="text-slate-700 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
                 <div className="space-y-6">
                     {data.samples.map((sample, sIdx) => (
-                        <div key={sIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                        <div key={sIdx} className="bg-slate-50/90 rounded-lg p-4 border border-slate-200">
                             <div className="flex items-center gap-3 mb-3">
                                 <AudioButton text={sample.input} size="sm" />
-                                <span className="text-sm md:text-base font-mono text-yellow-200 font-bold italic">&ldquo;{sample.input}&rdquo;</span>
+                                <span className="text-sm md:text-base font-mono text-black font-bold italic">&ldquo;{sample.input}&rdquo;</span>
                             </div>
                             <p className="text-xs text-slate-500 mb-3 font-mono">{parseTextWithTranslations(sample.question)}</p>
                             <div className="grid grid-cols-1 gap-2">
@@ -3052,12 +3059,12 @@ const ImperfectInput = ({ data }: { data: { title: string; instruction: string; 
                                         key={oIdx}
                                         onClick={() => setAnswers(prev => ({ ...prev, [sIdx]: oIdx }))}
                                         className={cn(
-                                            "w-full text-left p-3 rounded border text-sm transition-all",
-                                            answers[sIdx] === oIdx
-                                                ? oIdx === sample.answer
-                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
-                                                    : "bg-red-900/40 border-red-500/50 text-red-100"
-                                                : "bg-slate-900/50 border-slate-700 text-slate-400 hover:border-yellow-500/30"
+                                        "w-full text-left rounded border p-3 text-sm transition-all",
+                                        answers[sIdx] === oIdx
+                                            ? oIdx === sample.answer
+                                                    ? "bg-teal-100 border-teal-300 text-black"
+                                                    : "bg-slate-100 border-slate-300 text-black"
+                                                : "bg-white border-slate-300 text-black hover:border-teal-300"
                                         )}
                                     >
                                         {opt}
@@ -3065,14 +3072,14 @@ const ImperfectInput = ({ data }: { data: { title: string; instruction: string; 
                                 ))}
                             </div>
                             {answers[sIdx] !== undefined && (
-                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-yellow-300/80 italic font-mono">
+                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-slate-700 italic font-mono">
                                     💡 {parseTextWithTranslations(sample.insight)}
                                 </motion.p>
                             )}
                         </div>
                     ))}
                 </div>
-                <p className="mt-4 text-xs text-yellow-400/80 font-mono italic text-center border-t border-yellow-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
+                <p className="mt-4 text-xs text-teal-700/80 font-mono italic text-center border-t border-teal-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
             </div>
         </div>
     );
@@ -3081,23 +3088,23 @@ const ImperfectInput = ({ data }: { data: { title: string; instruction: string; 
 const EmotionalOverlay = ({ data }: { data: { title: string; instruction: string; scenarios: { audio: string; emotion: string; missionOptions: string[]; answer: number; note: string }[]; rule: string } }) => {
     const [answers, setAnswers] = useState<Record<number, number>>({});
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-pink-500/30">
-            <div className="bg-pink-500/10 p-4 border-b border-pink-500/20 flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-pink-400" />
-                <h3 className="font-bold text-pink-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/8 p-4 border-b border-teal-500/20 flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <p className="text-slate-700 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
                 <div className="space-y-6">
                     {data.scenarios.map((sc, sIdx) => (
-                        <div key={sIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                        <div key={sIdx} className="bg-slate-50/90 rounded-lg p-4 border border-slate-200">
                             <div className="flex items-center gap-3 mb-2">
                                 <AudioButton text={sc.audio} size="sm" />
-                                <span className="text-sm md:text-base font-mono text-white font-bold">&ldquo;{sc.audio}&rdquo;</span>
+                                <span className="text-sm md:text-base font-mono text-slate-950 font-bold">&ldquo;{sc.audio}&rdquo;</span>
                             </div>
                             <div className="flex items-center gap-2 mb-4">
                                 <span className="text-[10px] uppercase font-mono text-slate-500 tracking-wider">Emoção detectada:</span>
-                                <span className="text-xs font-mono text-pink-300 bg-pink-500/10 border border-pink-500/20 px-2 py-0.5 rounded">{parseTextWithTranslations(sc.emotion)}</span>
+                                <span className="rounded border border-teal-200 bg-teal-50 px-2 py-0.5 text-xs font-mono text-teal-800">{parseTextWithTranslations(sc.emotion)}</span>
                             </div>
                             <p className="text-[10px] font-mono uppercase text-slate-500 tracking-wider mb-2">Qual é a missão?</p>
                             <div className="grid grid-cols-1 gap-2">
@@ -3109,9 +3116,9 @@ const EmotionalOverlay = ({ data }: { data: { title: string; instruction: string
                                             "w-full text-left p-3 rounded border text-sm transition-all",
                                             answers[sIdx] === oIdx
                                                 ? oIdx === sc.answer
-                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
-                                                    : "bg-red-900/40 border-red-500/50 text-red-100"
-                                                : "bg-slate-900/50 border-slate-700 text-slate-400 hover:border-pink-500/30"
+                                                    ? "bg-teal-100/90 border-teal-400/85 text-teal-900"
+                                                    : "bg-slate-100 border-slate-400/85 text-slate-800"
+                                                : "bg-white/85 border-slate-300 text-slate-700 hover:border-teal-500/50"
                                         )}
                                     >
                                         {opt}
@@ -3119,14 +3126,14 @@ const EmotionalOverlay = ({ data }: { data: { title: string; instruction: string
                                 ))}
                             </div>
                             {answers[sIdx] !== undefined && (
-                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-pink-300/80 italic">
+                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-slate-700 italic">
                                     ✓ {parseTextWithTranslations(sc.note)}
                                 </motion.p>
                             )}
                         </div>
                     ))}
                 </div>
-                <p className="mt-4 text-xs text-pink-400/80 font-mono italic text-center border-t border-pink-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
+                <p className="mt-4 text-xs text-teal-700/80 font-mono italic text-center border-t border-teal-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
             </div>
         </div>
     );
@@ -3137,18 +3144,18 @@ const PartialLossDrill = ({ data }: { data: { title: string; instruction: string
     return (
         <div className="my-8 bg-slate-900/50 rounded-xl border border-slate-500/40">
             <div className="bg-slate-700/30 p-4 border-b border-slate-600/30 flex items-center gap-3">
-                <Terminal className="w-5 h-5 text-slate-400" />
-                <h3 className="font-bold text-slate-300 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+                <Terminal className="w-5 h-5 text-slate-700" />
+                <h3 className="font-bold text-slate-800 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <p className="text-slate-700 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
                 <div className="space-y-6">
                     {data.cases.map((c, cIdx) => (
-                        <div key={cIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
-                            <div className="text-base md:text-lg font-mono font-bold text-white mb-1">
+                        <div key={cIdx} className="bg-slate-50/90 rounded-lg p-4 border border-slate-200">
+                            <div className="mb-1 text-base md:text-lg font-mono font-bold text-black">
                                 {c.heard.split('…').map((part, i) => (
                                     <span key={i}>
-                                        {i > 0 && <span className="text-slate-600 mx-1">…</span>}
+                                        {i > 0 && <span className="mx-1 text-slate-500">…</span>}
                                         {parseTextWithTranslations(part)}
                                     </span>
                                 ))}
@@ -3163,9 +3170,9 @@ const PartialLossDrill = ({ data }: { data: { title: string; instruction: string
                                             "w-full text-left p-3 rounded border text-sm transition-all",
                                             answers[cIdx] === oIdx
                                                 ? oIdx === c.answer
-                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
-                                                    : "bg-red-900/40 border-red-500/50 text-red-100"
-                                                : "bg-slate-900/50 border-slate-700 text-slate-400 hover:border-slate-500"
+                                                    ? "bg-teal-100/90 border-teal-400/85 text-teal-900"
+                                                    : "bg-slate-100 border-slate-400/85 text-slate-800"
+                                                : "bg-white/85 border-slate-300 text-slate-700 hover:border-slate-500"
                                         )}
                                     >
                                         {parseTextWithTranslations(opt)}
@@ -3173,14 +3180,14 @@ const PartialLossDrill = ({ data }: { data: { title: string; instruction: string
                                 ))}
                             </div>
                             {answers[cIdx] !== undefined && (
-                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-slate-400 italic">
+                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-slate-700 italic">
                                     💡 {parseTextWithTranslations(c.insight)}
                                 </motion.p>
                             )}
                         </div>
                     ))}
                 </div>
-                <p className="mt-4 text-xs text-slate-400/80 font-mono italic text-center border-t border-slate-700 pt-4">{parseTextWithTranslations(data.rule)}</p>
+                <p className="mt-4 text-xs text-slate-700/80 font-mono italic text-center border-t border-slate-700 pt-4">{parseTextWithTranslations(data.rule)}</p>
             </div>
         </div>
     );
@@ -3189,15 +3196,15 @@ const PartialLossDrill = ({ data }: { data: { title: string; instruction: string
 const SelfRegulationProtocol = ({ data }: { data: { title: string; steps: { number: number; action: string; why: string }[]; warning: string } }) => {
     const [activeStep, setActiveStep] = useState<number | null>(null);
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-cyan-500/30">
-            <div className="bg-cyan-500/10 p-4 border-b border-cyan-500/20 flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-cyan-400" />
-                <h3 className="font-bold text-cyan-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/10 p-4 border-b border-teal-200/80 flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
                 <div className="relative">
                     {/* Vertical connector line */}
-                    <div className="absolute left-5 top-5 bottom-5 w-px bg-cyan-500/20 hidden md:block" />
+                    <div className="absolute left-5 top-5 bottom-5 w-px bg-teal-500/20 hidden md:block" />
                     <div className="space-y-4">
                         {data.steps.map((step, idx) => (
                             <div
@@ -3205,24 +3212,24 @@ const SelfRegulationProtocol = ({ data }: { data: { title: string; steps: { numb
                                 onClick={() => setActiveStep(activeStep === idx ? null : idx)}
                                 className={cn(
                                     "relative flex gap-4 p-4 rounded-lg border cursor-pointer transition-all",
-                                    activeStep === idx ? "bg-cyan-500/15 border-cyan-500/40" : "bg-slate-800/50 border-slate-700 hover:border-cyan-500/30"
+                                    activeStep === idx ? "bg-teal-500/15 border-teal-300/85" : "bg-white/85 border-slate-300 hover:border-teal-400/85"
                                 )}
                             >
                                 <div className={cn(
                                     "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-mono font-bold text-sm border-2 transition-colors z-10",
-                                    activeStep === idx ? "bg-cyan-500 border-cyan-400 text-slate-900" : "bg-slate-800 border-slate-600 text-cyan-400"
+                                    activeStep === idx ? "bg-teal-500 border-teal-400 text-slate-900" : "bg-slate-800 border-slate-600 text-teal-700"
                                 )}>
                                     {step.number}
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-sm text-white font-medium leading-snug">{parseTextWithTranslations(step.action)}</p>
+                                    <p className="text-sm text-slate-900 font-medium leading-snug">{parseTextWithTranslations(step.action)}</p>
                                     <AnimatePresence>
                                         {activeStep === idx && (
                                             <motion.p
                                                 initial={{ opacity: 0, height: 0 }}
                                                 animate={{ opacity: 1, height: 'auto' }}
                                                 exit={{ opacity: 0, height: 0 }}
-                                                className="text-xs text-cyan-300/80 italic mt-2"
+                                                className="text-xs text-teal-700/80 italic mt-2"
                                             >
                                                 {parseTextWithTranslations(step.why)}
                                             </motion.p>
@@ -3233,8 +3240,8 @@ const SelfRegulationProtocol = ({ data }: { data: { title: string; steps: { numb
                         ))}
                     </div>
                 </div>
-                <div className="mt-5 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    <pre className="text-xs text-red-300/80 font-mono whitespace-pre-wrap leading-relaxed">
+                <div className="mt-5 p-4 bg-slate-100 border border-teal-500/20 rounded-lg">
+                    <pre className="text-xs text-slate-700/80 font-mono whitespace-pre-wrap leading-relaxed">
                         {data.warning.split('\n').map((line, i) => (
                             <span key={i} className="block">{parseTextWithTranslations(line)}</span>
                         ))}
@@ -3251,23 +3258,23 @@ const ReadinessCheck = ({ data }: { data: { title: string; description: string; 
     const score = checked.filter(Boolean).length;
 
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-emerald-500/30">
-            <div className="bg-emerald-500/10 p-4 border-b border-emerald-500/20 flex items-center justify-between">
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/8 p-4 border-b border-teal-200/75 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <Target className="w-5 h-5 text-emerald-400" />
-                    <h3 className="font-bold text-emerald-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+                    <Target className="w-5 h-5 text-teal-700" />
+                    <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className={cn(
                         "text-2xl font-bold font-mono transition-colors",
-                        score === data.questions.length ? "text-emerald-400" : score >= 3 ? "text-yellow-400" : "text-slate-500"
+                        score === data.questions.length ? "text-teal-700" : score >= 3 ? "text-teal-700" : "text-slate-500"
                     )}>
                         {score}/{data.questions.length}
                     </div>
                 </div>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.description)}</p>
+                <p className="text-slate-700 text-sm mb-5">{parseTextWithTranslations(data.description)}</p>
                 <div className="space-y-3">
                     {data.questions.map((q, idx) => (
                         <button
@@ -3276,20 +3283,20 @@ const ReadinessCheck = ({ data }: { data: { title: string; description: string; 
                             className={cn(
                                 "w-full flex items-center gap-3 p-4 rounded-lg border text-left transition-all",
                                 checked[idx]
-                                    ? "bg-emerald-900/30 border-emerald-500/40"
-                                    : "bg-slate-800/50 border-slate-700 hover:border-emerald-500/20"
+                                    ? "bg-teal-50 border-teal-300"
+                                    : "bg-white border-slate-300 hover:border-teal-300"
                             )}
                         >
                             <div className={cn(
                                 "w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all",
-                                checked[idx] ? "bg-emerald-500 border-emerald-400" : "border-slate-600"
+                                checked[idx] ? "bg-teal-600 border-teal-600" : "border-slate-400"
                             )}>
-                                {checked[idx] && <CheckCircle2 className="w-3 h-3 text-slate-900" />}
+                                {checked[idx] && <CheckCircle2 className="w-3 h-3 text-white" />}
                             </div>
                             <div className="flex-1">
-                                <p className={cn("text-sm transition-colors", checked[idx] ? "text-emerald-200" : "text-slate-400")}>{parseTextWithTranslations(q.text)}</p>
+                                <p className={cn("text-sm transition-colors", checked[idx] ? "text-black" : "text-black")}>{parseTextWithTranslations(q.text)}</p>
                                 {checked[idx] && (
-                                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] font-mono text-emerald-500 uppercase tracking-widest mt-1">
+                                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-1 text-[10px] font-mono uppercase tracking-widest text-blue-700">
                                         ✓ {parseTextWithTranslations(q.signal)}
                                     </motion.p>
                                 )}
@@ -3302,9 +3309,9 @@ const ReadinessCheck = ({ data }: { data: { title: string; description: string; 
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="mt-5 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg"
+                            className="mt-5 p-4 bg-teal-500/8 border border-teal-200/75 rounded-lg"
                         >
-                            <pre className="text-xs md:text-sm text-emerald-300 font-mono whitespace-pre-wrap leading-relaxed">
+                            <pre className="text-xs md:text-sm text-teal-800 font-mono whitespace-pre-wrap leading-relaxed">
                                 {data.interpretation.split('\n').map((line, i) => (
                                     <span key={i} className="block">{parseTextWithTranslations(line)}</span>
                                 ))}
@@ -3318,17 +3325,17 @@ const ReadinessCheck = ({ data }: { data: { title: string; description: string; 
 };
 
 const TransitionBrief = ({ content }: { content: string }) => (
-    <div className="my-8 bg-slate-950 border border-cyan-500/20 rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between bg-cyan-500/10 px-4 py-2 border-b border-cyan-500/20">
+    <div className={STUDY_INFO_BAR}>
+        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2">
             <div className="flex items-center gap-2">
-                <ArrowRight className="w-4 h-4 text-cyan-400" />
-                <span className="text-cyan-400 font-mono text-xs uppercase tracking-widest">Transition Brief</span>
+                <ArrowRight className="w-4 h-4 text-slate-700" />
+                <span className="font-mono text-xs uppercase tracking-widest text-slate-700">Resumo de transição</span>
             </div>
-            <span className="text-[10px] font-mono text-cyan-500/60 uppercase tracking-widest">PRÓXIMO: CHECK-RIDE</span>
+            <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Próximo módulo</span>
         </div>
-        <pre className="text-cyan-300/80 font-mono text-xs md:text-sm p-4 md:p-6 whitespace-pre-wrap leading-relaxed">
+        <pre className="whitespace-pre-wrap p-4 md:p-6 font-sans text-xs md:text-sm leading-relaxed text-black">
             {content.split('\n').map((line, i) => (
-                <span key={i} className={cn("block", line.startsWith('•') ? "text-cyan-200 pl-2" : "")}>{parseTextWithTranslations(line)}</span>
+                <span key={i} className={cn("block", line.startsWith('•') ? "pl-2 font-medium text-black" : "text-black")}>{extractTranslatableText(line)}</span>
             ))}
         </pre>
     </div>
@@ -3339,14 +3346,14 @@ const TransitionBrief = ({ content }: { content: string }) => (
 // ============================================================================
 
 const RadarConsole = ({ content }: { content: string }) => (
-    <div className="my-6 bg-slate-950 border border-red-500/30 rounded-xl overflow-hidden">
-        <div className="flex items-center gap-2 bg-red-500/10 px-4 py-2 border-b border-red-500/20">
-            <Crosshair className="w-4 h-4 text-red-400 animate-pulse" />
-            <span className="text-red-400 font-mono text-xs uppercase tracking-widest">Painel de foco</span>
+    <div className={STUDY_INFO_BAR}>
+        <div className={STUDY_INFO_BAR_HEADER}>
+            <Crosshair className="w-4 h-4 text-slate-700" />
+            <span className="font-mono text-xs uppercase tracking-widest text-slate-700">Painel de foco</span>
         </div>
-        <pre className="text-red-300/80 font-mono text-xs md:text-sm p-4 md:p-6 whitespace-pre-wrap leading-relaxed">
+        <pre className="whitespace-pre-wrap p-4 md:p-6 font-sans text-xs md:text-sm leading-relaxed text-black">
             {content.split('\n').map((line, i) => (
-                <span key={i} className="block">{parseTextWithTranslations(line)}</span>
+                <span key={i} className="block">{extractTranslatableText(line)}</span>
             ))}
         </pre>
     </div>
@@ -3364,7 +3371,7 @@ const StressHeatmap = ({ data }: { data: { title: string; instruction: string; l
                     const clean = word.replace(/[.,!?]/g, '');
                     const isPeak = peaks.includes(clean);
                     return (
-                        <span key={i} className={cn("mr-2", isPeak ? "text-red-300 bg-red-500/20 px-1 rounded" : "text-slate-400")}>
+                        <span key={i} className={cn("mr-2", isPeak ? "text-slate-700 bg-slate-100 px-1 rounded" : "text-slate-700")}>
                             {word}
                         </span>
                     );
@@ -3374,20 +3381,20 @@ const StressHeatmap = ({ data }: { data: { title: string; instruction: string; l
     };
 
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-red-500/30">
-            <div className="bg-red-500/10 p-4 border-b border-red-500/20 flex items-center gap-3">
-                <Crosshair className="w-5 h-5 text-red-400" />
-                <h3 className="font-bold text-red-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-slate-300/85">
+            <div className="bg-slate-100 p-4 border-b border-teal-500/20 flex items-center gap-3">
+                <Crosshair className="w-5 h-5 text-slate-700" />
+                <h3 className="font-bold text-slate-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-6">{parseTextWithTranslations(data.instruction)}</p>
+                <p className="text-slate-700 text-sm mb-6">{parseTextWithTranslations(data.instruction)}</p>
                 <div className="space-y-4">
                     {data.lines.map((line, idx) => (
-                        <div key={idx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                        <div key={idx} className="bg-slate-50/90 rounded-lg p-4 border border-slate-200">
                             <div className="mb-3">{renderWithPeaks(line.text, line.peaks)}</div>
                             <button
                                 onClick={() => toggle(idx)}
-                                className="text-xs text-red-400/70 hover:text-red-300 font-mono transition-colors"
+                                className="text-xs text-slate-700/70 hover:text-slate-700 font-mono transition-colors"
                             >
                                 {revealed[idx] ? "▲ ocultar análise" : "▼ ver análise"}
                             </button>
@@ -3396,7 +3403,7 @@ const StressHeatmap = ({ data }: { data: { title: string; instruction: string; l
                                     <motion.p
                                         initial={{ opacity: 0, height: 0 }}
                                         animate={{ opacity: 1, height: 'auto' }}
-                                        className="mt-2 text-xs text-red-300/80 italic"
+                                        className="mt-2 text-xs text-slate-700/80 italic"
                                     >
                                         {parseTextWithTranslations(line.why)}
                                     </motion.p>
@@ -3405,7 +3412,7 @@ const StressHeatmap = ({ data }: { data: { title: string; instruction: string; l
                         </div>
                     ))}
                 </div>
-                <p className="mt-4 text-xs text-red-400/80 font-mono italic text-center border-t border-red-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
+                <p className="mt-4 text-xs text-slate-700/80 font-mono italic text-center border-t border-teal-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
             </div>
         </div>
     );
@@ -3414,29 +3421,29 @@ const StressHeatmap = ({ data }: { data: { title: string; instruction: string; l
 const IntonationTrace = ({ data }: { data: { title: string; instruction: string; items: { line: string; contour: string; intent: string; danger: string }[]; rule: string } }) => {
     const [expanded, setExpanded] = useState<number | null>(null);
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-violet-500/30">
-            <div className="bg-violet-500/10 p-4 border-b border-violet-500/20 flex items-center gap-3">
-                <Zap className="w-5 h-5 text-violet-400" />
-                <h3 className="font-bold text-violet-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/8 p-4 border-b border-teal-200/80 flex items-center gap-3">
+                <Zap className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <p className="text-slate-700 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
                 <div className="space-y-3">
                     {data.items.map((item, idx) => (
                         <div
                             key={idx}
                             className={cn(
                                 "rounded-lg border cursor-pointer transition-all",
-                                expanded === idx ? "bg-violet-500/15 border-violet-500/40" : "bg-slate-800/50 border-slate-700 hover:border-violet-500/30"
+                                expanded === idx ? "bg-teal-500/10 border-teal-300/85" : "bg-white/85 border-slate-300 hover:border-teal-400/50"
                             )}
                             onClick={() => setExpanded(expanded === idx ? null : idx)}
                         >
                             <div className="flex items-center gap-4 p-4">
-                                <span className="text-2xl font-bold text-violet-300 w-12 text-center flex-shrink-0">{item.contour}</span>
+                                <span className="text-2xl font-bold text-teal-800 w-12 text-center flex-shrink-0">{item.contour}</span>
                                 <div className="flex-1">
-                                    <div className="font-mono text-base md:text-lg text-white font-bold">{item.line}</div>
+                                    <div className="font-mono text-base md:text-lg text-slate-950 font-bold">{item.line}</div>
                                 </div>
-                                <ChevronDown className={cn("w-4 h-4 text-violet-400 transition-transform", expanded === idx ? "rotate-180" : "")} />
+                                <ChevronDown className={cn("w-4 h-4 text-teal-700 transition-transform", expanded === idx ? "rotate-180" : "")} />
                             </div>
                             <AnimatePresence>
                                 {expanded === idx && (
@@ -3446,9 +3453,9 @@ const IntonationTrace = ({ data }: { data: { title: string; instruction: string;
                                         exit={{ height: 0 }}
                                         className="overflow-hidden"
                                     >
-                                        <div className="px-4 pb-4 space-y-2 border-t border-violet-500/20 pt-3">
-                                            <p className="text-sm text-violet-200">{parseTextWithTranslations(item.intent)}</p>
-                                            <p className="text-xs text-red-400/80 italic">⚠️ {parseTextWithTranslations(item.danger)}</p>
+                                        <div className="px-4 pb-4 space-y-2 border-t border-teal-200/80 pt-3">
+                                            <p className="text-sm text-teal-200">{parseTextWithTranslations(item.intent)}</p>
+                                            <p className="text-xs text-slate-700/80 italic">⚠️ {parseTextWithTranslations(item.danger)}</p>
                                         </div>
                                     </motion.div>
                                 )}
@@ -3456,7 +3463,7 @@ const IntonationTrace = ({ data }: { data: { title: string; instruction: string;
                         </div>
                     ))}
                 </div>
-                <p className="mt-4 text-xs text-violet-400/80 font-mono italic text-center">{parseTextWithTranslations(data.rule)}</p>
+                <p className="mt-4 text-xs text-teal-700/80 font-mono italic text-center">{parseTextWithTranslations(data.rule)}</p>
             </div>
         </div>
     );
@@ -3465,23 +3472,23 @@ const IntonationTrace = ({ data }: { data: { title: string; instruction: string;
 const EmphasisShift = ({ data }: { data: { title: string; instruction: string; base: string; variants: { stressed: string; options: string[]; answer: number; note: string }[]; rule: string } }) => {
     const [answers, setAnswers] = useState<Record<number, number>>({});
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-amber-500/30">
-            <div className="bg-amber-500/10 p-4 border-b border-amber-500/20 flex items-center gap-3">
-                <Target className="w-5 h-5 text-amber-400" />
-                <h3 className="font-bold text-amber-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 bg-slate-900/50 rounded-xl border border-teal-500/30">
+            <div className="bg-teal-500/8 p-4 border-b border-teal-500/20 flex items-center gap-3">
+                <Target className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <div className="bg-slate-800/80 rounded-lg p-3 border border-amber-500/20 mb-5 text-center">
+                <div className="bg-teal-50/90 rounded-lg p-3 border border-slate-200 mb-5 text-center">
                     <span className="text-[10px] uppercase font-mono text-slate-500 tracking-widest">Base phrase</span>
-                    <p className="text-base font-mono text-slate-300 italic mt-1">&ldquo;{data.base}&rdquo;</p>
+                    <p className="text-base font-mono text-slate-800 italic mt-1">&ldquo;{data.base}&rdquo;</p>
                 </div>
-                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <p className="text-slate-700 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
                 <div className="space-y-6">
                     {data.variants.map((v, vIdx) => (
-                        <div key={vIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                        <div key={vIdx} className="bg-slate-50/90 rounded-lg p-4 border border-slate-200">
                             <div className="flex items-center gap-3 mb-3">
                                 <AudioButton text={v.stressed} size="sm" />
-                                <span className="text-sm md:text-base font-mono text-amber-200 font-bold italic">&ldquo;{v.stressed}&rdquo;</span>
+                                <span className="text-sm md:text-base font-mono text-slate-800 font-bold italic">&ldquo;{v.stressed}&rdquo;</span>
                             </div>
                             <div className="grid grid-cols-1 gap-2">
                                 {v.options.map((opt, oIdx) => (
@@ -3492,9 +3499,9 @@ const EmphasisShift = ({ data }: { data: { title: string; instruction: string; b
                                             "w-full text-left p-3 rounded border text-sm transition-all",
                                             answers[vIdx] === oIdx
                                                 ? oIdx === v.answer
-                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
-                                                    : "bg-red-900/40 border-red-500/50 text-red-100"
-                                                : "bg-slate-900/50 border-slate-700 text-slate-400 hover:border-amber-500/30"
+                                                    ? "bg-teal-100/90 border-teal-400/85 text-teal-900"
+                                                    : "bg-slate-100 border-slate-400/85 text-slate-800"
+                                                : "bg-white/85 border-slate-300 text-slate-700 hover:border-teal-500/50"
                                         )}
                                     >
                                         {opt}
@@ -3502,14 +3509,14 @@ const EmphasisShift = ({ data }: { data: { title: string; instruction: string; b
                                 ))}
                             </div>
                             {answers[vIdx] !== undefined && (
-                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-amber-300/80 italic">
+                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-teal-700/80 italic">
                                     {parseTextWithTranslations(v.note)}
                                 </motion.p>
                             )}
                         </div>
                     ))}
                 </div>
-                <p className="mt-4 text-xs text-amber-400/80 font-mono italic text-center border-t border-amber-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
+                <p className="mt-4 text-xs text-teal-700/80 font-mono italic text-center border-t border-teal-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
             </div>
         </div>
     );
@@ -3519,23 +3526,23 @@ const TriageDrill = ({ data }: { data: { title: string; instruction: string; ent
     const [revealed, setRevealed] = useState<boolean[]>(new Array(data.entries.length).fill(false));
     const toggle = (idx: number) => setRevealed(prev => { const next = [...prev]; next[idx] = !next[idx]; return next; });
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-cyan-500/30">
-            <div className="bg-cyan-500/10 p-4 border-b border-cyan-500/20 flex items-center gap-3">
-                <Terminal className="w-5 h-5 text-cyan-400" />
-                <h3 className="font-bold text-cyan-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/10 p-4 border-b border-teal-200/80 flex items-center gap-3">
+                <Terminal className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <p className="text-slate-700 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
                 <div className="space-y-4">
                     {data.entries.map((entry, idx) => (
-                        <div key={idx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                        <div key={idx} className="bg-slate-50/90 rounded-lg p-4 border border-slate-200">
                             <div className="flex items-center gap-3 mb-3">
                                 <AudioButton text={entry.input} size="sm" />
                                 <span className="text-sm font-mono text-white italic">&ldquo;{entry.input}&rdquo;</span>
                             </div>
                             <button
                                 onClick={() => toggle(idx)}
-                                className="w-full py-2 rounded bg-cyan-500/15 border border-cyan-500/20 text-cyan-300 font-mono text-xs hover:bg-cyan-500/25 transition-colors"
+                                className="w-full rounded border border-slate-300 bg-white py-2 font-mono text-xs text-blue-700 transition-colors hover:border-teal-300 hover:bg-teal-50"
                             >
                                 {revealed[idx] ? "▲ ocultar tags" : "▼ revelar tags esperadas"}
                             </button>
@@ -3546,22 +3553,22 @@ const TriageDrill = ({ data }: { data: { title: string; instruction: string; ent
                                             {entry.expectedTags.map((tag, tIdx) => (
                                                 <span key={tIdx} className={cn(
                                                     "text-xs font-mono px-3 py-1 rounded-full border",
-                                                    tIdx === 0 ? "bg-red-500/15 border-red-500/30 text-red-300" :
-                                                        tIdx === 1 ? "bg-yellow-500/15 border-yellow-500/30 text-yellow-300" :
-                                                            "bg-violet-500/15 border-violet-500/30 text-violet-300"
+                                                    tIdx === 0 ? "bg-slate-50 border-slate-300 text-black" :
+                                                        tIdx === 1 ? "bg-teal-50 border-teal-300 text-blue-700" :
+                                                            "bg-teal-50 border-teal-300 text-black"
                                                 )}>
                                                     {tIdx === 0 ? "AÇÃO: " : tIdx === 1 ? "TEMPO: " : "TOM: "}{tag}
                                                 </span>
                                             ))}
                                         </div>
-                                        <p className="text-xs text-slate-400 italic">{parseTextWithTranslations(entry.note)}</p>
+                                        <p className="text-xs text-slate-700 italic">{parseTextWithTranslations(entry.note)}</p>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>
                     ))}
                 </div>
-                <p className="mt-4 text-xs text-cyan-400/80 font-mono italic text-center">{parseTextWithTranslations(data.rule)}</p>
+                <p className="mt-4 text-xs text-teal-700/80 font-mono italic text-center">{parseTextWithTranslations(data.rule)}</p>
             </div>
         </div>
     );
@@ -3572,15 +3579,15 @@ const SelectiveJamming = ({ data }: { data: { title: string; instruction: string
     return (
         <div className="my-8 bg-slate-900/50 rounded-xl border border-slate-500/40">
             <div className="bg-slate-700/30 p-4 border-b border-slate-600/30 flex items-center gap-3">
-                <Cpu className="w-5 h-5 text-slate-400" />
-                <h3 className="font-bold text-slate-300 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+                <Cpu className="w-5 h-5 text-slate-700" />
+                <h3 className="font-bold text-slate-800 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <p className="text-slate-700 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
                 <div className="space-y-6">
                     {data.samples.map((sample, sIdx) => (
-                        <div key={sIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
-                            <div className="font-mono text-lg md:text-xl text-white font-bold mb-1 tracking-wide">
+                        <div key={sIdx} className="bg-slate-50/90 rounded-lg p-4 border border-slate-200">
+                            <div className="font-mono text-lg md:text-xl text-slate-950 font-bold mb-1 tracking-wide">
                                 {sample.masked.split('___').map((part, i, arr) => (
                                     <span key={i}>
                                         {part}
@@ -3598,9 +3605,9 @@ const SelectiveJamming = ({ data }: { data: { title: string; instruction: string
                                             "w-full text-left p-3 rounded border text-sm transition-all",
                                             answers[sIdx] === oIdx
                                                 ? oIdx === sample.answer
-                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
-                                                    : "bg-red-900/40 border-red-500/50 text-red-100"
-                                                : "bg-slate-900/50 border-slate-700 text-slate-400 hover:border-slate-500"
+                                                    ? "bg-teal-100/90 border-teal-400/85 text-teal-900"
+                                                    : "bg-slate-100 border-slate-400/85 text-slate-800"
+                                                : "bg-white/85 border-slate-300 text-slate-700 hover:border-slate-500"
                                         )}
                                     >
                                         {opt}
@@ -3608,14 +3615,14 @@ const SelectiveJamming = ({ data }: { data: { title: string; instruction: string
                                 ))}
                             </div>
                             {answers[sIdx] !== undefined && (
-                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-slate-400 italic">
+                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-slate-700 italic">
                                     💡 {parseTextWithTranslations(sample.hint)}
                                 </motion.p>
                             )}
                         </div>
                     ))}
                 </div>
-                <p className="mt-4 text-xs text-slate-400/80 font-mono italic text-center border-t border-slate-700 pt-4">{parseTextWithTranslations(data.rule)}</p>
+                <p className="mt-4 text-xs text-slate-700/80 font-mono italic text-center border-t border-slate-700 pt-4">{parseTextWithTranslations(data.rule)}</p>
             </div>
         </div>
     );
@@ -3624,24 +3631,24 @@ const SelectiveJamming = ({ data }: { data: { title: string; instruction: string
 const ControlResponses = ({ data }: { data: { title: string; instruction: string; situations: { heard: string; youKnow: string; options: string[]; answer: number; note: string }[]; rule: string } }) => {
     const [answers, setAnswers] = useState<Record<number, number>>({});
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-emerald-500/30">
-            <div className="bg-emerald-500/10 p-4 border-b border-emerald-500/20 flex items-center gap-3">
-                <MessageSquare className="w-5 h-5 text-emerald-400" />
-                <h3 className="font-bold text-emerald-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/8 p-4 border-b border-teal-200/75 flex items-center gap-3">
+                <MessageSquare className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
+                <p className="text-slate-700 text-sm mb-5">{parseTextWithTranslations(data.instruction)}</p>
                 <div className="space-y-6">
                     {data.situations.map((sit, sIdx) => (
-                        <div key={sIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                        <div key={sIdx} className="bg-slate-50/90 rounded-lg p-4 border border-slate-200">
                             <div className="flex items-start gap-3 mb-3">
                                 <div className="flex-none">
                                     <div className="text-[10px] font-mono text-slate-500 uppercase mb-1">Você ouviu</div>
-                                    <div className="text-base font-mono text-white font-bold italic">&ldquo;{sit.heard}&rdquo;</div>
+                                    <div className="text-base font-mono text-slate-950 font-bold italic">&ldquo;{sit.heard}&rdquo;</div>
                                 </div>
                                 <div className="flex-none ml-4">
                                     <div className="text-[10px] font-mono text-slate-500 uppercase mb-1">Você sabe</div>
-                                    <span className="text-xs bg-cyan-500/15 border border-cyan-500/20 text-cyan-300 px-2 py-1 rounded font-mono">{sit.youKnow}</span>
+                                    <span className="text-xs bg-teal-500/15 border border-teal-200/80 text-teal-700 px-2 py-1 rounded font-mono">{sit.youKnow}</span>
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 gap-2">
@@ -3653,9 +3660,9 @@ const ControlResponses = ({ data }: { data: { title: string; instruction: string
                                             "w-full text-left p-3 rounded border text-sm transition-all font-mono",
                                             answers[sIdx] === oIdx
                                                 ? oIdx === sit.answer
-                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
-                                                    : "bg-red-900/40 border-red-500/50 text-red-100"
-                                                : "bg-slate-900/50 border-slate-700 text-slate-300 hover:border-emerald-500/30"
+                                                    ? "bg-teal-100/90 border-teal-400/85 text-teal-900"
+                                                    : "bg-slate-100 border-slate-400/85 text-slate-800"
+                                                : "bg-white/85 border-slate-300 text-slate-700 hover:border-teal-400/85"
                                         )}
                                     >
                                         &ldquo;{opt}&rdquo;
@@ -3663,28 +3670,28 @@ const ControlResponses = ({ data }: { data: { title: string; instruction: string
                                 ))}
                             </div>
                             {answers[sIdx] !== undefined && (
-                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-emerald-300/80 italic">
+                                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-xs text-teal-800/80 italic">
                                     ✓ {parseTextWithTranslations(sit.note)}
                                 </motion.p>
                             )}
                         </div>
                     ))}
                 </div>
-                <p className="mt-4 text-xs text-emerald-400/80 font-mono italic text-center border-t border-emerald-500/10 pt-4">{parseTextWithTranslations(data.rule)}</p>
+                <p className="mt-4 text-xs text-teal-700/80 font-mono italic text-center border-t border-teal-200/70 pt-4">{parseTextWithTranslations(data.rule)}</p>
             </div>
         </div>
     );
 };
 
 const OperatorNotes = ({ content }: { content: string }) => (
-    <div className="my-6 bg-slate-950 border border-slate-600/30 rounded-xl overflow-hidden">
-        <div className="flex items-center gap-2 bg-slate-800/50 px-4 py-2 border-b border-slate-700/50">
-            <Eye className="w-4 h-4 text-slate-400" />
-            <span className="text-slate-400 font-mono text-xs uppercase tracking-widest">Operator Notes</span>
+    <div className={STUDY_INFO_BAR}>
+        <div className={STUDY_INFO_BAR_HEADER}>
+            <Eye className="w-4 h-4 text-slate-700" />
+            <span className="font-mono text-xs uppercase tracking-widest text-slate-700">Notas do módulo</span>
         </div>
-        <pre className="text-slate-400/80 font-mono text-xs md:text-sm p-4 md:p-6 whitespace-pre-wrap leading-relaxed">
+        <pre className="whitespace-pre-wrap p-4 md:p-6 font-sans text-xs md:text-sm leading-relaxed text-black">
             {content.split('\n').map((line, i) => (
-                <span key={i} className={cn("block", line.startsWith('•') ? "text-slate-300 pl-2" : "")}>{parseTextWithTranslations(line)}</span>
+                <span key={i} className={cn("block", line.startsWith('•') ? "pl-2 font-medium text-black" : "text-black")}>{extractTranslatableText(line)}</span>
             ))}
         </pre>
     </div>
@@ -3692,16 +3699,16 @@ const OperatorNotes = ({ content }: { content: string }) => (
 
 const CompletionSeal = ({ content }: { content: string }) => (
     <div className="my-12 relative">
-        <div className="absolute inset-0 bg-red-500/5 blur-3xl rounded-full" />
-        <div className="relative bg-red-950/20 border border-red-500/40 p-8 md:p-12 rounded-xl text-center overflow-hidden">
+        <div className="absolute inset-0 bg-teal-500/5 blur-3xl rounded-full" />
+        <div className="relative bg-slate-100/90 border border-slate-300/85 p-8 md:p-12 rounded-xl text-center overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10">
-                <Crosshair className="w-32 h-32 text-red-500" />
+                <Crosshair className="w-32 h-32 text-slate-700" />
             </div>
             <div className="relative z-10">
-                <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(239,68,68,0.4)]">
+                <div className="w-20 h-20 bg-teal-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(239,68,68,0.4)]">
                     <Crosshair className="w-10 h-10 text-slate-900" />
                 </div>
-                <pre className="text-red-200 font-mono text-xs md:text-sm whitespace-pre-wrap leading-relaxed max-w-lg mx-auto">
+                <pre className="text-slate-700 font-mono text-xs md:text-sm whitespace-pre-wrap leading-relaxed max-w-lg mx-auto">
                     {content.split('\n').map((line, i) => (
                         <span key={i} className="block">{parseTextWithTranslations(line)}</span>
                     ))}
@@ -3718,17 +3725,17 @@ const CompletionSeal = ({ content }: { content: string }) => (
 const BoundaryIllusion = ({ data }: { data: { title: string; instruction: string; example: string; insight: string } }) => {
     const [revealed, setRevealed] = useState(false);
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-indigo-500/30">
-            <div className="bg-indigo-500/10 p-4 border-b border-indigo-500/20 flex items-center gap-3">
-                <Brain className="w-5 h-5 text-indigo-400" />
-                <h3 className="font-bold text-indigo-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/8 p-4 border-b border-teal-200/80 flex items-center gap-3">
+                <Brain className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-6">{parseTextWithTranslations(data.instruction)}</p>
+                <p className="text-slate-700 text-sm mb-6">{parseTextWithTranslations(data.instruction)}</p>
 
-                <div className="bg-slate-800/80 rounded-lg p-6 border border-slate-700 mb-6">
+                <div className="bg-slate-50/90 rounded-lg p-6 border border-slate-200 mb-6">
                     <div className="text-center">
-                        <div className="text-lg md:text-xl font-mono text-white font-bold mb-4 tracking-wide">
+                        <div className="text-lg md:text-xl font-mono text-slate-950 font-bold mb-4 tracking-wide">
                             {parseTextWithTranslations(data.example.split('\n')[0])}
                         </div>
 
@@ -3739,7 +3746,7 @@ const BoundaryIllusion = ({ data }: { data: { title: string; instruction: string
                                     animate={{ opacity: 1, height: 'auto' }}
                                     className="mt-4"
                                 >
-                                    <div className="text-sm text-indigo-300/80 whitespace-pre-line leading-relaxed">
+                                    <div className="text-sm text-teal-800/80 whitespace-pre-line leading-relaxed">
                                         {data.example.split('\n').slice(1).map((line, i) => (
                                             <p key={i} className="mb-1">{parseTextWithTranslations(line)}</p>
                                         ))}
@@ -3752,7 +3759,7 @@ const BoundaryIllusion = ({ data }: { data: { title: string; instruction: string
 
                 <button
                     onClick={() => setRevealed(!revealed)}
-                    className="w-full py-3 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-mono text-sm hover:bg-indigo-500/30 transition-colors"
+                    className="w-full py-3 rounded-lg bg-teal-500/10 border border-teal-200/85 text-teal-800 font-mono text-sm hover:bg-teal-500/30 transition-colors"
                 >
                     {revealed ? "OCULTAR SEGMENTAÇÃO" : "REVELAR SEGMENTAÇÃO REAL"}
                 </button>
@@ -3761,7 +3768,7 @@ const BoundaryIllusion = ({ data }: { data: { title: string; instruction: string
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="mt-4 text-xs text-indigo-400/80 italic text-center font-mono"
+                        className="mt-4 text-xs text-teal-700/80 italic text-center font-mono"
                     >
                         💡 {parseTextWithTranslations(data.insight)}
                     </motion.p>
@@ -3772,27 +3779,27 @@ const BoundaryIllusion = ({ data }: { data: { title: string; instruction: string
 };
 
 const LinkingMap = ({ data }: { data: { title: string; patterns: { pattern: string; example: string; note: string }[]; rule: string } }) => (
-    <div className="my-8 bg-slate-900/50 rounded-xl border border-teal-500/30">
+    <div className="my-8 rounded-xl border border-teal-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
         <div className="bg-teal-500/10 p-4 border-b border-teal-500/20 flex items-center gap-3">
-            <Zap className="w-5 h-5 text-teal-400" />
-            <h3 className="font-bold text-teal-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+            <Zap className="w-5 h-5 text-teal-700" />
+            <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
         </div>
         <div className="p-4 md:p-6 space-y-4">
             {data.patterns.map((p, idx) => (
-                <div key={idx} className="bg-slate-800/60 rounded-lg p-4 border border-teal-500/10 hover:border-teal-500/30 transition-colors">
+                <div key={idx} className="rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:border-teal-300">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-teal-500 bg-teal-500/10 px-2 py-1 rounded">
+                        <span className="rounded bg-slate-50 px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-blue-700 border border-slate-200">
                             {parseTextWithTranslations(p.pattern)}
                         </span>
                     </div>
-                    <div className="text-base md:text-lg font-mono font-bold text-white mb-2">
+                    <div className="text-base md:text-lg font-mono font-bold text-slate-950 mb-2">
                         {parseTextWithTranslations(p.example)}
                     </div>
-                    <p className="text-xs text-slate-400 italic">{parseTextWithTranslations(p.note)}</p>
+                    <p className="text-xs text-slate-700 italic">{parseTextWithTranslations(p.note)}</p>
                 </div>
             ))}
-            <div className="mt-4 p-3 bg-teal-500/10 border border-teal-500/20 rounded-lg text-center">
-                <p className="text-xs md:text-sm text-teal-300 font-mono">{parseTextWithTranslations(data.rule)}</p>
+            <div className="mt-4 rounded-lg border border-teal-200 bg-teal-50 p-3 text-center">
+                <p className="text-xs md:text-sm font-mono text-blue-700">{parseTextWithTranslations(data.rule)}</p>
             </div>
         </div>
     </div>
@@ -3803,10 +3810,10 @@ const CompressionDeck = ({ data }: { data: { title: string; items: { written: st
     const toggle = (idx: number) => setFlipped(prev => { const next = [...prev]; next[idx] = !next[idx]; return next; });
 
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-orange-500/30">
-            <div className="bg-orange-500/10 p-4 border-b border-orange-500/20 flex items-center gap-3">
-                <Cpu className="w-5 h-5 text-orange-400" />
-                <h3 className="font-bold text-orange-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/8 p-4 border-b border-teal-200/80 flex items-center gap-3">
+                <Cpu className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
                 {data.items.map((item, idx) => (
@@ -3816,21 +3823,21 @@ const CompressionDeck = ({ data }: { data: { title: string; items: { written: st
                         className={cn(
                             "p-4 rounded-lg border text-center transition-all duration-300 cursor-pointer group",
                             flipped[idx]
-                                ? "bg-orange-500/20 border-orange-500/40"
-                                : "bg-slate-800/80 border-slate-700 hover:border-orange-500/30"
+                                ? "bg-teal-50 border-teal-300"
+                                : "bg-white border-slate-200 hover:border-teal-300"
                         )}
                     >
                         <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-2">
                             {flipped[idx] ? "Compressed" : "Written"}
                         </div>
-                        <div className="text-lg md:text-xl font-bold font-mono text-white mb-2">
+                        <div className="text-lg md:text-xl font-bold font-mono text-slate-950 mb-2">
                             {flipped[idx] ? item.compressed : parseTextWithTranslations(item.written)}
                         </div>
                         {flipped[idx] && (
                             <motion.p
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="text-[10px] text-orange-300/80 italic"
+                                className="text-[10px] italic text-slate-700"
                             >
                                 {parseTextWithTranslations(item.why)}
                             </motion.p>
@@ -3841,7 +3848,7 @@ const CompressionDeck = ({ data }: { data: { title: string; items: { written: st
                     </button>
                 ))}
             </div>
-            <p className="px-6 pb-4 text-xs text-orange-400/80 font-mono italic">{parseTextWithTranslations(data.warning)}</p>
+            <p className="px-6 pb-4 text-xs font-mono italic text-blue-700">{parseTextWithTranslations(data.warning)}</p>
         </div>
     );
 };
@@ -3849,20 +3856,20 @@ const CompressionDeck = ({ data }: { data: { title: string; items: { written: st
 const BlockDecode = ({ data }: { data: { title: string; instruction: string; samples: { audio: string; options: string[]; answer: number }[]; goal: string } }) => {
     const [answers, setAnswers] = useState<Record<number, number>>({});
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-cyan-500/30">
-            <div className="bg-cyan-500/10 p-4 border-b border-cyan-500/20 flex items-center gap-3">
-                <Play className="w-5 h-5 text-cyan-400" />
-                <h3 className="font-bold text-cyan-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/10 p-4 border-b border-teal-200/80 flex items-center gap-3">
+                <Play className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-6">{parseTextWithTranslations(data.instruction)}</p>
+                <p className="text-slate-700 text-sm mb-6">{parseTextWithTranslations(data.instruction)}</p>
 
                 <div className="space-y-6">
                     {data.samples.map((sample, sIdx) => (
-                        <div key={sIdx} className="bg-slate-800/60 rounded-lg p-4 border border-slate-700">
+                        <div key={sIdx} className="bg-slate-50/90 rounded-lg p-4 border border-slate-200">
                             <div className="flex items-center gap-3 mb-4">
                                 <AudioButton text={sample.audio} size="sm" />
-                                <span className="text-sm md:text-base font-mono text-white font-bold italic">&ldquo;{sample.audio}&rdquo;</span>
+                                <span className="text-sm md:text-base font-mono text-slate-950 font-bold italic">&ldquo;{sample.audio}&rdquo;</span>
                             </div>
                             <div className="grid grid-cols-1 gap-2">
                                 {sample.options.map((opt, oIdx) => (
@@ -3873,9 +3880,9 @@ const BlockDecode = ({ data }: { data: { title: string; instruction: string; sam
                                             "w-full text-left p-3 rounded border text-sm transition-all",
                                             answers[sIdx] === oIdx
                                                 ? oIdx === sample.answer
-                                                    ? "bg-emerald-900/40 border-emerald-500/50 text-emerald-100"
-                                                    : "bg-red-900/40 border-red-500/50 text-red-100"
-                                                : "bg-slate-900/50 border-slate-700 text-slate-400 hover:border-cyan-500/30"
+                                                    ? "bg-teal-100/90 border-teal-400/85 text-teal-900"
+                                                    : "bg-slate-100 border-slate-400/85 text-slate-800"
+                                                : "bg-white/85 border-slate-300 text-slate-700 hover:border-teal-400/85"
                                         )}
                                     >
                                         {parseTextWithTranslations(opt)}
@@ -3891,9 +3898,9 @@ const BlockDecode = ({ data }: { data: { title: string; instruction: string; sam
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="mt-6 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-lg text-center"
+                            className="mt-6 p-4 bg-teal-500/10 border border-teal-200/85 rounded-lg text-center"
                         >
-                            <p className="text-sm text-cyan-300 font-mono font-bold">{parseTextWithTranslations(data.goal)}</p>
+                            <p className="text-sm text-teal-700 font-mono font-bold">{parseTextWithTranslations(data.goal)}</p>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -3907,30 +3914,30 @@ const LatencyCheck = ({ data }: { data: { title: string; description: string; it
     const toggle = (idx: number) => setChecked(prev => { const next = [...prev]; next[idx] = !next[idx]; return next; });
 
     return (
-        <div className="my-8 bg-slate-900/50 rounded-xl border border-yellow-500/30">
-            <div className="bg-yellow-500/10 p-4 border-b border-yellow-500/20 flex items-center gap-3">
-                <Cpu className="w-5 h-5 text-yellow-400" />
-                <h3 className="font-bold text-yellow-400 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
+        <div className="my-8 rounded-xl border border-slate-200 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+            <div className="bg-teal-500/10 p-4 border-b border-teal-200/80 flex items-center gap-3">
+                <Cpu className="w-5 h-5 text-teal-700" />
+                <h3 className="font-bold text-teal-700 font-mono text-xs md:text-sm uppercase tracking-wider">{parseTextWithTranslations(data.title)}</h3>
             </div>
             <div className="p-4 md:p-6">
-                <p className="text-slate-400 text-sm mb-4">{parseTextWithTranslations(data.description)}</p>
+                <p className="text-slate-700 text-sm mb-4">{parseTextWithTranslations(data.description)}</p>
                 <div className="space-y-3">
                     {data.items.map((item, idx) => (
                         <button
                             key={idx}
                             onClick={() => toggle(idx)}
                             className={cn(
-                                "w-full flex items-center gap-3 p-4 rounded-lg border text-left text-sm transition-all",
+                                "w-full flex items-center gap-3 rounded-lg border p-4 text-left text-sm transition-all",
                                 checked[idx]
-                                    ? "bg-yellow-500/15 border-yellow-500/40 text-yellow-200"
-                                    : "bg-slate-800/50 border-slate-700 text-slate-400 hover:border-yellow-500/20"
+                                    ? "bg-teal-50 border-teal-300 text-black"
+                                    : "bg-white border-slate-300 text-black hover:border-teal-300"
                             )}
                         >
                             <div className={cn(
                                 "w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors",
-                                checked[idx] ? "bg-yellow-500 border-yellow-400" : "border-slate-600"
+                                checked[idx] ? "bg-teal-600 border-teal-600" : "border-slate-400"
                             )}>
-                                {checked[idx] && <CheckCircle2 className="w-3 h-3 text-slate-900" />}
+                                {checked[idx] && <CheckCircle2 className="w-3 h-3 text-white" />}
                             </div>
                             <span>{parseTextWithTranslations(item)}</span>
                         </button>
@@ -3942,9 +3949,9 @@ const LatencyCheck = ({ data }: { data: { title: string; description: string; it
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
-                            className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-center"
+                            className="mt-6 p-4 bg-teal-500/10 border border-teal-200/80 rounded-lg text-center"
                         >
-                            <p className="text-xs md:text-sm text-yellow-300 font-mono italic">{parseTextWithTranslations(data.interpretation)}</p>
+                            <p className="text-xs md:text-sm font-mono italic text-blue-700">{parseTextWithTranslations(data.interpretation)}</p>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -3955,17 +3962,17 @@ const LatencyCheck = ({ data }: { data: { title: string; description: string; it
 
 const TowerStamp = ({ content }: { content: string }) => (
     <div className="my-12 relative">
-        <div className="absolute inset-0 bg-emerald-500/5 blur-3xl rounded-full" />
-        <div className="relative bg-emerald-950/20 border border-emerald-500/40 p-8 md:p-12 rounded-xl text-center overflow-hidden">
+        <div className="absolute inset-0 bg-teal-500/5 blur-3xl rounded-full" />
+        <div className="relative bg-teal-50/80 border border-teal-300/85 p-8 md:p-12 rounded-xl text-center overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10">
-                <CheckCircle2 className="w-32 h-32 text-emerald-500" />
+                <CheckCircle2 className="w-32 h-32 text-teal-700" />
             </div>
             <div className="relative z-10">
-                <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
+                <div className="w-20 h-20 bg-teal-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
                     <CheckCircle2 className="w-10 h-10 text-slate-900" />
                 </div>
-                <h3 className="text-2xl md:text-3xl font-black text-emerald-400 font-mono tracking-tighter mb-4 uppercase">SINAL VALIDADO</h3>
-                <div className="text-slate-300 text-base md:text-lg max-w-lg mx-auto whitespace-pre-wrap leading-relaxed">
+                <h3 className="text-2xl md:text-3xl font-black text-teal-700 font-mono tracking-tighter mb-4 uppercase">SINAL VALIDADO</h3>
+                <div className="text-slate-800 text-base md:text-lg max-w-lg mx-auto whitespace-pre-wrap leading-relaxed">
                     {parseTextWithTranslations(content)}
                 </div>
             </div>
@@ -3992,11 +3999,11 @@ const RenderBlock = ({
                     <div className={cn("flex-1", block.type === "pillar-end" && "flex flex-col items-center")}>
                         {block.type === "pillar-end" && <div className="mb-4"><BoxIcon type={block.type} /></div>}
                         {block.title && (
-                            <h4 className={cn("font-bold text-sm font-mono tracking-wider mb-2 opacity-90", block.type === "pillar-end" && "text-xl")}>
+                            <h4 className={cn("font-bold text-sm font-mono tracking-wider mb-2 text-black", block.type === "pillar-end" && "text-xl")}>
                                 {block.title.toUpperCase()}
                             </h4>
                         )}
-                        <div className="text-base leading-relaxed opacity-90">
+                        <div className="text-base leading-relaxed text-black">
                             {Array.isArray(block.content) ? (
                                 block.content.map((line, i) => <p key={i} className="mb-2 last:mb-0">{parseTextWithTranslations(line)}</p>)
                             ) : (
@@ -4012,16 +4019,17 @@ const RenderBlock = ({
     switch (block.type) {
         case "h2":
             return (
-                <h2 className="text-2xl md:text-3xl font-bold text-white mt-12 mb-6 flex items-center gap-3">
-                    <span className="w-1 h-8 bg-cyan-500 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)]"></span>
-                    {parseTranslatable(block.content as string)}
-                </h2>
+                <div className="mt-12 mb-6 border-l-4 border-teal-600 pl-6">
+                    <h2 className="max-w-5xl text-3xl md:text-5xl font-bold leading-[1.08] tracking-tight text-slate-950">
+                        {extractTranslatableText(block.content as string)}
+                    </h2>
+                </div>
             );
         case "h3":
-            return <h3 className="text-xl font-bold text-slate-200 mt-8 mb-4">{parseTextWithTranslations(block.content as string)}</h3>;
+            return <h3 className="text-xl font-bold text-slate-900 mt-8 mb-4">{parseTextWithTranslations(block.content as string)}</h3>;
         case "paragraph":
             return (
-                <p className="text-lg text-slate-400 leading-relaxed mb-6 font-sans">
+                <p className="text-lg text-slate-800 leading-relaxed mb-6 font-sans">
                     {parseTextWithTranslations(block.content as string)}
                 </p>
             );
@@ -4033,10 +4041,10 @@ const RenderBlock = ({
                         const title = parts.length > 1 ? parts[0] : null;
                         const desc = parts.length > 1 ? parts.slice(1).join(':') : item;
                         return (
-                            <li key={i} className="flex items-start gap-3 text-slate-400">
-                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 mt-2.5 flex-shrink-0 shadow-[0_0_5px_rgba(6,182,212,0.8)]" />
+                            <li key={i} className="flex items-start gap-3 text-slate-800">
+                                <span className="w-1.5 h-1.5 rounded-full bg-teal-600 mt-2.5 flex-shrink-0 shadow-[0_0_5px_rgba(6,182,212,0.25)]" />
                                 <span className="text-lg">
-                                    {title ? <><strong className="text-slate-200">{parseTextWithTranslations(title)}:</strong>{parseTextWithTranslations(desc)}</> : <>{parseTextWithTranslations(desc)}</>}
+                                    {title ? <><strong className="text-slate-950">{parseTextWithTranslations(title)}:</strong>{parseTextWithTranslations(desc)}</> : <>{parseTextWithTranslations(desc)}</>}
                                 </span>
                             </li>
                         )
@@ -4045,31 +4053,26 @@ const RenderBlock = ({
             );
         case "system-status":
             return (
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3 bg-[#111313] text-emerald-200 p-4 rounded-xl border border-emerald-700/35 my-6 text-sm shadow-[0_8px_24px_rgba(0,0,0,0.22)]">
+                <div className="my-6 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white/70 p-4 text-sm shadow-[0_12px_34px_rgba(15,23,42,0.06)] backdrop-blur-md md:flex-row md:items-center md:gap-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-emerald-300 rounded-full animate-pulse shadow-[0_0_10px_rgba(110,231,183,0.65)]" />
-                        <span className="uppercase tracking-wider font-semibold text-emerald-100/90">Status da aula</span>
+                        <div className="h-2 w-2 rounded-full bg-teal-600" />
+                        <span className="font-semibold uppercase tracking-wider text-slate-700">Status da aula</span>
                     </div>
-                    <span className="text-emerald-50/85">{parseTextWithTranslations(block.content as string)}</span>
+                    <span className="text-black">{extractTranslatableText(block.content as string)}</span>
                 </div>
             );
         case "terminal-view":
             return (
-                <div className="my-8 rounded overflow-hidden bg-[#050505] border border-white/10 shadow-2xl font-mono text-sm group hover:border-cyan-500/30 transition-colors">
-                    <div className="bg-white/5 px-4 py-2 flex items-center gap-2 border-b border-white/5">
-                        <div className="flex gap-1.5">
-                            <div className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
-                            <div className="w-2.5 h-2.5 rounded-full bg-amber-500/50" />
-                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/50" />
-                        </div>
-                        <span className="text-white/20 text-xs ml-2">painel-aula</span>
+                <div className="my-8 overflow-hidden rounded-xl border border-slate-200 bg-white/70 shadow-[0_16px_40px_rgba(15,23,42,0.07)] backdrop-blur-md">
+                    <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2">
+                        <Terminal className="h-4 w-4 text-slate-700" />
+                        <span className="ml-1 text-xs font-mono uppercase tracking-widest text-slate-700">Painel do módulo</span>
                     </div>
-                    <div className="p-4 text-emerald-400/90 leading-relaxed font-mono overflow-x-auto">
+                    <div className="overflow-x-auto p-4">
                         <div className="min-w-[300px]">
                             {Array.isArray(block.content) ? block.content.map((line, i) => (
-                                <div key={i} className="mb-1"><span className="text-white/30 mr-2">$</span>{line}</div>
-                            )) : <div>{block.content}</div>}
-                            <div className="animate-pulse text-cyan-500 mt-2">_</div>
+                                <div key={i} className="mb-1 font-sans leading-relaxed text-black">{extractTranslatableText(line)}</div>
+                            )) : <div className="font-sans leading-relaxed text-black">{extractTranslatableText(block.content as string)}</div>}
                         </div>
                     </div>
                 </div>
@@ -4114,11 +4117,11 @@ const RenderBlock = ({
             return <RevealBox title={parseTextWithTranslations(block.title || "Detalhes") as string}>{parseTextWithTranslations(block.content as string)}</RevealBox>;
         case "audio-player":
             return (
-                <div className="my-6 p-4 bg-slate-900/50 border border-slate-700 rounded-lg flex items-center gap-4 hover:border-cyan-500/50 transition-colors group">
+                <div className="my-6 flex items-center gap-4 rounded-xl border border-slate-200/80 bg-white/60 p-4 shadow-[0_12px_32px_rgba(15,23,42,0.07)] transition-colors group hover:border-teal-400/85 backdrop-blur-md">
                     <AudioButton text={block.content as string} size="lg" />
                     <div className="flex-1">
                         <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Áudio de apoio</div>
-                        <div className="text-slate-300 font-medium text-sm md:text-base">{block.content}</div>
+                        <div className="text-slate-800 font-medium text-sm md:text-base">{block.content}</div>
                     </div>
                 </div>
             );
@@ -4129,12 +4132,12 @@ const RenderBlock = ({
                         const [title, ...descParts] = splitOutsideTranslatable(card, '|');
                         const desc = descParts.join('|');
                         return (
-                            <div key={i} className="bg-slate-900/40 p-4 md:p-6 rounded-lg border border-slate-700 hover:border-cyan-500/50 transition-all group backdrop-blur-sm">
-                                <h4 className="font-bold text-slate-200 mb-2 group-hover:text-cyan-400 transition-colors flex items-center gap-2 font-mono text-sm md:text-base">
+                            <div key={i} className="rounded-xl border border-slate-200/80 bg-white/56 p-4 md:p-6 shadow-[0_12px_32px_rgba(15,23,42,0.06)] transition-all group backdrop-blur-md hover:border-teal-400/85">
+                                <h4 className="font-bold text-slate-900 mb-2 group-hover:text-teal-700 transition-colors flex items-center gap-2 font-mono text-sm md:text-base">
                                     <Cpu className="w-4 h-4 text-slate-500" />
                                     {parseTextWithTranslations(title)}
                                 </h4>
-                                <p className="text-xs md:text-sm text-slate-400">{parseTextWithTranslations(desc)}</p>
+                                <p className="text-xs md:text-sm text-slate-700">{parseTextWithTranslations(desc)}</p>
                             </div>
                         )
                     })}
@@ -4144,7 +4147,7 @@ const RenderBlock = ({
             return (
                 <div className="my-8 md:my-10 rounded overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] border border-white/10 bg-black">
                     <div className="bg-slate-900/80 backdrop-blur px-4 py-3 flex items-center justify-between border-b border-white/10">
-                        <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs uppercase tracking-widest">
+                        <div className="flex items-center gap-2 text-teal-700 font-mono text-xs uppercase tracking-widest">
                             <Play className="w-4 h-4 fill-current" />
                             <span>Vídeo de apoio</span>
                         </div>
@@ -4157,20 +4160,20 @@ const RenderBlock = ({
             );
         case "table":
             return (
-                <div className="my-8 md:my-10 rounded border border-slate-700/50 overflow-hidden bg-slate-900/20 backdrop-blur">
-                    <div className="bg-slate-900/50 px-4 py-3 border-b border-slate-700/50 flex items-center gap-2">
+                <div className="my-8 md:my-10 overflow-hidden rounded-xl border border-slate-200/80 bg-white/58 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+                    <div className="bg-slate-50/90 px-4 py-3 border-b border-slate-200/80 flex items-center gap-2">
                         <TableIcon className="w-4 h-4 text-slate-500" />
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{block.title || "Tabela de apoio"}</span>
+                        <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">{block.title || "Tabela de apoio"}</span>
                     </div>
                     <div className="overflow-x-auto pb-2">
                         <table className="w-full text-sm text-left min-w-[500px]">
-                            <tbody className="divide-y divide-slate-800">
+                            <tbody className="divide-y divide-slate-200">
                                 {(block.content as string[]).map((row, i) => {
                                     const cols = splitOutsideTranslatable(row, '|');
                                     return (
-                                        <tr key={i} className={i === 0 ? "bg-slate-900/80 font-bold text-cyan-400 font-mono text-xs uppercase" : "hover:bg-white/5 transition-colors"}>
+                                        <tr key={i} className={i === 0 ? "bg-slate-100/90 font-bold text-teal-700 font-mono text-xs uppercase" : "hover:bg-slate-50/90 transition-colors"}>
                                             {cols.map((col, j) => (
-                                                <td key={j} className="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-slate-400 first:text-slate-200 text-xs md:text-sm">
+                                                <td key={j} className="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-slate-700 first:text-slate-950 text-xs md:text-sm">
                                                     {parseTextWithTranslations(col)}
                                                 </td>
                                             ))}
@@ -4184,10 +4187,10 @@ const RenderBlock = ({
             );
         case "dialogue":
             return (
-                <div className="my-10 bg-slate-900/30 rounded border border-slate-700 overflow-hidden">
-                    <div className="bg-slate-900/80 px-4 py-3 border-b border-slate-700 flex items-center gap-2">
-                        <MessageSquare className="w-4 h-4 text-cyan-500" />
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Diálogo guiado: {parseTextWithTranslations(block.title || "")}</span>
+                <div className="my-10 overflow-hidden rounded-xl border border-slate-200/80 bg-white/56 shadow-[0_16px_42px_rgba(15,23,42,0.07)] backdrop-blur-md">
+                    <div className="bg-slate-50/90 px-4 py-3 border-b border-slate-200/80 flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-teal-700" />
+                        <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">Diálogo guiado: {parseTextWithTranslations(block.title || "")}</span>
                     </div>
                     <div className="p-6 space-y-4">
                         {(block.content as string[]).map((line, i) => {
@@ -4198,7 +4201,7 @@ const RenderBlock = ({
                                     <span className="text-[10px] uppercase font-bold text-slate-500 mb-1 px-1 font-mono">{parseTextWithTranslations(speaker)}</span>
                                     <div className={cn(
                                         "px-4 py-3 rounded text-sm leading-relaxed shadow-lg border relative",
-                                        isMe ? "bg-cyan-900/20 border-cyan-500/30 text-cyan-100" : "bg-slate-800/40 border-slate-700 text-slate-300"
+                                        isMe ? "bg-teal-50 border-slate-200 text-slate-900" : "bg-white/86 border-slate-200 text-slate-800"
                                     )}>
                                         {parseTextWithTranslations(text)}
                                     </div>
@@ -4418,7 +4421,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
     if (!data.modules) {
         return (
             <div className="text-center p-10 text-white">
-                <h2 className="text-xl text-red-400">Conteúdo antigo detectado</h2>
+                <h2 className="text-xl text-slate-700">Conteúdo antigo detectado</h2>
                 <p className="text-white/60">Migre este pilar para o novo formato de módulos.</p>
             </div>
         );
@@ -4720,11 +4723,11 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         <div ref={viewRootRef} className="w-full max-w-5xl mx-auto pb-32">
             {/* HEADER */}
             <div className="mb-12 relative">
-                <div className="absolute top-0 left-0 w-20 h-1 bg-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.8)]" />
+                <div className="absolute top-0 left-0 w-20 h-1 bg-teal-500 shadow-[0_0_20px_rgba(6,182,212,0.8)]" />
                 <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tighter pt-8">
                     {parseTextWithTranslations(data.title)}
                 </h1>
-                <p className="text-xl text-slate-400 max-w-2xl font-light leading-relaxed">
+                <p className="text-xl text-white max-w-2xl font-light leading-relaxed">
                     {parseTextWithTranslations(data.subtitle)}
                 </p>
             </div>
@@ -4759,16 +4762,16 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.1 }}
                                 className={cn(
-                                    "relative rounded-lg border transition-all duration-300",
+                                    "relative rounded-xl border transition-all duration-300 shadow-[0_16px_44px_rgba(2,6,23,0.10)] backdrop-blur-md",
                                     isActive
-                                        ? "bg-slate-900/80 border-cyan-500/50 shadow-[0_0_30px_rgba(8,145,178,0.1)]"
+                                        ? "bg-white/20 border-slate-300/80 shadow-[0_0_30px_rgba(8,145,178,0.10)]"
                                         : isHighlighted
-                                            ? "bg-cyan-950/40 border-cyan-400 shadow-[0_0_40px_rgba(6,182,212,0.6)] animate-pulse"
+                                            ? "bg-teal-100/80 border-teal-400 shadow-[0_0_40px_rgba(6,182,212,0.6)] animate-pulse"
                                             : isCompleted
-                                                ? "bg-emerald-950/20 border-emerald-500/30 hover:border-emerald-500/50"
-                                                : isLocked
-                                                    ? "bg-slate-950/30 border-slate-800 opacity-60"
-                                                    : "bg-slate-900/40 border-slate-700 hover:border-slate-500"
+                                                ? "bg-white/10 border-teal-200/75 hover:border-teal-300/80"
+                                            : isLocked
+                                                    ? "bg-slate-900/20 border-slate-700/50 opacity-60"
+                                                    : "bg-white/10 border-white/12 hover:border-white/22"
                                 )}
                             >
                                 {/* Module Header / Trigger */}
@@ -4790,22 +4793,22 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                     }}
                                     className={cn(
                                         "w-full flex items-center justify-between p-6 text-left relative z-10 outline-none",
-                                        !isLocked && "cursor-pointer focus-visible:ring-2 focus-visible:ring-cyan-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                                        !isLocked && "cursor-pointer focus-visible:ring-2 focus-visible:ring-teal-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
                                     )}
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className={cn(
                                             "w-12 h-12 rounded flex items-center justify-center border font-mono text-lg font-bold transition-colors",
                                             isCompleted
-                                                ? "bg-emerald-950 text-emerald-400 border-emerald-500/50"
+                                                ? "bg-teal-900 text-white border-teal-300"
                                                 : isActive
-                                                    ? "bg-cyan-950 text-cyan-400 border-cyan-500/50"
+                                                    ? "bg-teal-900 text-white border-teal-300"
                                                     : isLocked
                                                         ? "bg-slate-900 text-slate-600 border-slate-800"
-                                                        : "bg-slate-800 text-slate-300 border-slate-600 group-hover:bg-slate-700"
+                                                        : "bg-white/12 text-white border-white/20 group-hover:bg-white/18"
                                         )}>
                                             {isCompleted ? (
-                                                <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                                                <CheckCircle2 className="w-6 h-6 text-teal-700" />
                                             ) : (
                                                 index + 1
                                             )}
@@ -4813,15 +4816,15 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                         <div>
                                             <h3 className={cn(
                                                 "font-bold text-base md:text-lg transition-colors flex items-center gap-2",
-                                                isCompleted ? "text-emerald-300" : isActive ? "text-white" : isLocked ? "text-slate-600" : "text-slate-300"
+                                                isCompleted ? "text-white" : isActive ? "text-white" : isLocked ? "text-slate-600" : "text-white"
                                             )}>
                                                 {parseTextWithTranslations(module.title)}
                                                 {isCompleted && (
-                                                    <span className="text-[10px] md:text-xs bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 md:px-2 md:py-0.5 rounded font-mono">COMPLETO</span>
+                                                    <span className="text-[10px] md:text-xs bg-teal-400/20 text-white px-1.5 py-0.5 md:px-2 md:py-0.5 rounded font-mono">COMPLETO</span>
                                                 )}
                                             </h3>
                                             {module.subtitle && (
-                                                <p className="text-sm text-slate-500 hidden md:block">
+                                                <p className="text-sm text-white/80 hidden md:block">
                                                     {parseTextWithTranslations(module.subtitle)}
                                                 </p>
                                             )}
@@ -4832,20 +4835,20 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                         {isLocked ? (
                                             <Lock className="w-5 h-5 text-slate-600" />
                                         ) : isCompleted && !isActive ? (
-                                            <span className="text-xs text-emerald-400/60 font-mono hidden md:block">Clique para rever</span>
+                                            <span className="text-xs text-white/80 font-mono hidden md:block">Clique para rever</span>
                                         ) : (
                                             <div className={cn(
                                                 "flex items-center gap-2 text-xs md:text-sm font-mono tracking-widest transition-opacity",
-                                                isActive ? "opacity-100 text-cyan-400" : "opacity-0"
+                                                isActive ? "opacity-100 text-white" : "opacity-0"
                                             )}>
                                                 <span className="hidden md:inline">ABRINDO</span>
                                                 <span className="md:hidden">ABRIR</span>
-                                                <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-cyan-400 rounded-full animate-pulse" />
+                                                <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-teal-400 rounded-full animate-pulse" />
                                             </div>
                                         )}
                                         <ChevronDown className={cn(
                                             "w-5 h-5 transition-transform duration-300",
-                                            isActive ? "rotate-180 text-cyan-500" : isCompleted ? "text-emerald-500" : "text-slate-500"
+                                            isActive ? "rotate-180 text-teal-700" : isCompleted ? "text-teal-700" : "text-slate-500"
                                         )} />
                                     </div>
                                 </div>
@@ -4859,156 +4862,158 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                             exit={{ height: 0, opacity: 0 }}
                                             transition={{ duration: 0.3, ease: "easeInOut" }}
                                         >
-                                            <div className="px-4 pb-8 md:px-20 md:pb-12 border-t border-white/5 relative">
+                                            <div className="px-4 pb-8 md:px-20 md:pb-12 border-t border-white/10 relative">
                                                 {/* Decorative Sidebar Line */}
                                                 <div className={cn(
                                                     "absolute left-12 top-0 bottom-0 w-px bg-gradient-to-b hidden md:block",
-                                                    isCompleted ? "from-emerald-500/20 to-transparent" : "from-cyan-500/20 to-transparent"
+                                                    isCompleted ? "from-teal-500/20 to-transparent" : "from-teal-500/20 to-transparent"
                                                 )} />
 
-                                                <div className="pt-8 space-y-2">
-                                                    {module.blocks.map((block, idx) => (
-                                                        <RenderBlock key={idx} block={block} moduleId={module.id} onGameComplete={handleGameComplete} />
-                                                    ))}
-                                                </div>
+                                                <div className="mt-6 rounded-[28px] border border-white/45 bg-[linear-gradient(180deg,rgba(255,255,255,0.70),rgba(248,250,252,0.58))] p-6 pt-8 shadow-[0_30px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl md:p-10">
+                                                    <div className="space-y-2">
+                                                        {module.blocks.map((block, idx) => (
+                                                            <RenderBlock key={idx} block={block} moduleId={module.id} onGameComplete={handleGameComplete} />
+                                                        ))}
+                                                    </div>
 
-                                                {/* Module Completion Action */}
-                                                <div className="mt-12 flex justify-between items-center">
-                                                    {isCompleted ? (
-                                                        <span className="text-emerald-400 font-mono text-sm flex items-center gap-2">
-                                                            <CheckCircle2 className="w-5 h-5" />
-                                                            Módulo concluído
-                                                        </span>
-                                                    ) : (
-                                                        <span />
-                                                    )}
-
-                                                    {!isCompleted ? (
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                e.currentTarget.blur();
-                                                                handleStartCompletionFlow(module.id, module.title, index);
-                                                            }}
-                                                            className={cn(
-                                                                "flex items-center gap-2 px-6 py-3 rounded font-bold transition-all group",
-                                                                blockedByMaze
-                                                                    ? "bg-amber-700/80 hover:bg-amber-600 text-white"
-                                                                    : "bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white shadow-[0_0_20px_rgba(8,145,178,0.4)] hover:shadow-[0_0_30px_rgba(8,145,178,0.6)]"
-                                                            )}
-                                                        >
-                                                            <span>{blockedByMaze ? "Concluir (faça o desafio)" : "Concluir e avançar"}</span>
-                                                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                                        </button>
-                                                    ) : index < data.modules!.length - 1 ? (
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                e.currentTarget.blur();
-                                                                handleModuleClick(
-                                                                    data.modules![index + 1].id,
-                                                                    data.modules![index + 1].status,
-                                                                    index + 1
-                                                                );
-                                                            }}
-                                                            className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded font-bold transition-all"
-                                                        >
-                                                            <span>Ir para próxima parte</span>
-                                                            <ArrowRight className="w-5 h-5" />
-                                                        </button>
-                                                    ) : null}
-                                                </div>
-
-                                                {mazeHintByModule[module.id] && !isCompleted && (
-                                                    <p className="mt-4 text-cyan-300 text-sm">
-                                                        {mazeHintByModule[module.id]}
-                                                    </p>
-                                                )}
-
-                                                {challengeTarget?.moduleId === module.id && !isCompleted && (
-                                                    <div className="mt-6 rounded-xl border border-cyan-500/30 bg-slate-900/60 p-4 md:p-6">
-                                                        <div className="flex items-center justify-between gap-4 mb-4">
-                                                            <h4 className="text-cyan-300 font-semibold text-sm md:text-base">
-                                                                Desafio rápido (2 perguntas Sim/Não)
-                                                            </h4>
-                                                            {(() => {
-                                                                const leftMs = (challengeLockUntil[module.id] ?? 0) - clockNow;
-                                                                if (leftMs <= 0) return null;
-                                                                return (
-                                                                    <span className="text-amber-300 text-xs md:text-sm">
-                                                                        Nova tentativa em {Math.ceil(leftMs / 1000)}s
-                                                                    </span>
-                                                                );
-                                                            })()}
-                                                        </div>
-
-                                                        <div className="space-y-4">
-                                                            {(challengeQuestions[module.id] ?? []).map((q, qIndex) => {
-                                                                const answerValue = challengeAnswers[module.id]?.[qIndex] ?? null;
-                                                                return (
-                                                                    <div key={`${module.id}-q-${qIndex}`} className="rounded-lg border border-slate-700/70 bg-slate-950/50 p-3">
-                                                                        <p className="text-slate-200 text-sm mb-3">{q.question}</p>
-                                                                        <div className="flex gap-2">
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => handleChallengeAnswer(module.id, qIndex, true)}
-                                                                                className={cn(
-                                                                                    "px-4 py-2 rounded text-sm border transition",
-                                                                                    answerValue === true
-                                                                                        ? "bg-emerald-600/30 border-emerald-400/50 text-emerald-200"
-                                                                                        : "bg-slate-800 border-slate-600 text-slate-300 hover:border-emerald-400/40"
-                                                                                )}
-                                                                            >
-                                                                                Sim
-                                                                            </button>
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => handleChallengeAnswer(module.id, qIndex, false)}
-                                                                                className={cn(
-                                                                                    "px-4 py-2 rounded text-sm border transition",
-                                                                                    answerValue === false
-                                                                                        ? "bg-red-600/25 border-red-400/50 text-red-200"
-                                                                                        : "bg-slate-800 border-slate-600 text-slate-300 hover:border-red-400/40"
-                                                                                )}
-                                                                            >
-                                                                                Não
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-
-                                                        {challengeFeedback[module.id] === "error" && (
-                                                            <p className="mt-4 text-red-300 text-sm">
-                                                                Respostas incorretas. Revise o módulo e tente novamente após 30 segundos.
-                                                            </p>
+                                                    {/* Module Completion Action */}
+                                                    <div className="mt-12 flex justify-between items-center">
+                                                        {isCompleted ? (
+                                                            <span className="text-teal-800 font-mono text-sm flex items-center gap-2">
+                                                                <CheckCircle2 className="w-5 h-5" />
+                                                                Módulo concluído
+                                                            </span>
+                                                        ) : (
+                                                            <span />
                                                         )}
 
-                                                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                                                        {!isCompleted ? (
                                                             <button
                                                                 type="button"
-                                                                onClick={() => handleChallengeSubmit(module.id, module.title, index)}
-                                                                disabled={
-                                                                    (challengeLockUntil[module.id] ?? 0) > clockNow ||
-                                                                    (challengeAnswers[module.id] ?? [null, null]).some((v) => v === null)
-                                                                }
-                                                                className="px-4 py-2 rounded bg-cyan-600 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cyan-500 transition"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.currentTarget.blur();
+                                                                    handleStartCompletionFlow(module.id, module.title, index);
+                                                                }}
+                                                                className={cn(
+                                                                    "flex items-center gap-2 px-6 py-3 rounded font-bold transition-all group",
+                                                                    blockedByMaze
+                                                                        ? "bg-teal-700/80 hover:bg-teal-600 text-white"
+                                                                        : "bg-gradient-to-r from-teal-600 to-teal-600 hover:from-teal-500 hover:to-teal-500 text-white shadow-[0_0_20px_rgba(8,145,178,0.4)] hover:shadow-[0_0_30px_rgba(8,145,178,0.6)]"
+                                                                )}
                                                             >
-                                                                Enviar respostas
+                                                                <span>{blockedByMaze ? "Concluir (faça o desafio)" : "Concluir e avançar"}</span>
+                                                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                                             </button>
+                                                        ) : index < data.modules!.length - 1 ? (
                                                             <button
                                                                 type="button"
-                                                                onClick={() => setChallengeTarget(null)}
-                                                                className="px-4 py-2 rounded border border-slate-600 text-slate-300 text-sm hover:bg-slate-800 transition"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.currentTarget.blur();
+                                                                    handleModuleClick(
+                                                                        data.modules![index + 1].id,
+                                                                        data.modules![index + 1].status,
+                                                                        index + 1
+                                                                    );
+                                                                }}
+                                                                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded font-bold transition-all"
                                                             >
-                                                                Fechar
+                                                                <span>Ir para próxima parte</span>
+                                                                <ArrowRight className="w-5 h-5" />
                                                             </button>
-                                                        </div>
+                                                        ) : null}
                                                     </div>
-                                                )}
+
+                                                    {mazeHintByModule[module.id] && !isCompleted && (
+                                                        <p className="mt-4 text-teal-800 text-sm">
+                                                            {mazeHintByModule[module.id]}
+                                                        </p>
+                                                    )}
+
+                                                    {challengeTarget?.moduleId === module.id && !isCompleted && (
+                                                        <div className="mt-6 rounded-xl border border-slate-200 bg-white/76 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.08)] md:p-6">
+                                                            <div className="flex items-center justify-between gap-4 mb-4">
+                                                                <h4 className="text-teal-800 font-semibold text-sm md:text-base">
+                                                                    Desafio rápido (2 perguntas Sim/Não)
+                                                                </h4>
+                                                                {(() => {
+                                                                    const leftMs = (challengeLockUntil[module.id] ?? 0) - clockNow;
+                                                                    if (leftMs <= 0) return null;
+                                                                    return (
+                                                                        <span className="text-teal-800 text-xs md:text-sm">
+                                                                            Nova tentativa em {Math.ceil(leftMs / 1000)}s
+                                                                        </span>
+                                                                    );
+                                                                })()}
+                                                            </div>
+
+                                                            <div className="space-y-4">
+                                                                {(challengeQuestions[module.id] ?? []).map((q, qIndex) => {
+                                                                    const answerValue = challengeAnswers[module.id]?.[qIndex] ?? null;
+                                                                    return (
+                                                                        <div key={`${module.id}-q-${qIndex}`} className="rounded-lg border border-slate-200 bg-slate-50/90 p-3">
+                                                                            <p className="text-slate-800 text-sm mb-3">{q.question}</p>
+                                                                            <div className="flex gap-2">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => handleChallengeAnswer(module.id, qIndex, true)}
+                                                                                    className={cn(
+                                                                                        "px-4 py-2 rounded text-sm border transition",
+                                                                                        answerValue === true
+                                                                                            ? "bg-teal-100 border-teal-400 text-teal-900"
+                                                                                            : "bg-white border-slate-300 text-slate-700 hover:border-teal-300/85"
+                                                                                    )}
+                                                                                >
+                                                                                    Sim
+                                                                                </button>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => handleChallengeAnswer(module.id, qIndex, false)}
+                                                                                    className={cn(
+                                                                                        "px-4 py-2 rounded text-sm border transition",
+                                                                                        answerValue === false
+                                                                                            ? "bg-slate-100 border-slate-300 text-slate-900"
+                                                                                            : "bg-white border-slate-300 text-slate-700 hover:border-slate-300/70"
+                                                                                    )}
+                                                                                >
+                                                                                    Não
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+
+                                                            {challengeFeedback[module.id] === "error" && (
+                                                                <p className="mt-4 text-slate-800 text-sm">
+                                                                    Respostas incorretas. Revise o módulo e tente novamente após 30 segundos.
+                                                                </p>
+                                                            )}
+
+                                                            <div className="mt-4 flex flex-wrap items-center gap-3">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleChallengeSubmit(module.id, module.title, index)}
+                                                                    disabled={
+                                                                        (challengeLockUntil[module.id] ?? 0) > clockNow ||
+                                                                        (challengeAnswers[module.id] ?? [null, null]).some((v) => v === null)
+                                                                    }
+                                                                    className="px-4 py-2 rounded bg-teal-600 text-white text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-teal-500 transition"
+                                                                >
+                                                                    Enviar respostas
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setChallengeTarget(null)}
+                                                                    className="px-4 py-2 rounded border border-slate-300 text-slate-700 text-sm hover:bg-slate-100 transition"
+                                                                >
+                                                                    Fechar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </motion.div>
                                     )}
