@@ -848,6 +848,45 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
 
 type ModuleChallengeQuestion = { question: string; answer: boolean };
 
+const BUILT_IN_ASSESSMENT_BLOCKS = new Set([
+    "interactive-quiz",
+    "maze-game",
+    "consolidation-game",
+    "combat-sort-game",
+    "audio-decode-game",
+    "checksum",
+    "quick-check",
+    "a-b-snaptest",
+    "scramble-exercise",
+    "latency-check",
+    "readiness-check",
+    "control-responses",
+]);
+
+const MODULE_SPECIFIC_CHALLENGES: Record<string, ModuleChallengeQuestion[]> = {
+    "p1-m2": [
+        { question: "Necessidade real costuma acelerar mais o ingles do que estudo preso so em regra?", answer: true },
+        { question: "Saber explicar gramatica ja garante conversa natural sob pressao?", answer: false },
+        { question: "Errar, ajustar e repetir faz parte da aquisicao real do idioma?", answer: true },
+        { question: "Comecar a conversa se diminuindo fortalece sua presenca?", answer: false },
+    ],
+    "p1-m4": [
+        { question: "Fluencia depende de saber todas as palavras do idioma?", answer: false },
+        { question: "Focar em vocabulario de alta frequencia traz mais retorno no comeco?", answer: true },
+        { question: "Palavras uteis e repetiveis valem mais do que vocabulario bonito e raro?", answer: true },
+        { question: "Quanto mais palavra dificil, melhor a comunicacao no dia a dia?", answer: false },
+    ],
+    "p2-intro": [
+        { question: "No Pilar 2, o foco principal passa a ser ouvir melhor o ingles real?", answer: true },
+        { question: "Se tudo parecer embolado no comeco, isso ja prova que voce nao leva jeito?", answer: false },
+        { question: "Ouvir ingles bem depende so de decorar mais vocabulario?", answer: false },
+        { question: "Treinar escuta real inclui perceber som, bloco e intencao?", answer: true },
+    ],
+};
+
+const moduleHasBuiltInAssessment = (module: NonNullable<PillarData["modules"]>[number]) =>
+    module.blocks.some((block) => BUILT_IN_ASSESSMENT_BLOCKS.has(block.type));
+
 const RevealBox = ({ title, children }: { title: string, children: React.ReactNode }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -4058,7 +4097,7 @@ const RenderBlock = ({
                         <div className="h-2 w-2 rounded-full bg-teal-600" />
                         <span className="font-semibold uppercase tracking-wider text-slate-700">Status da aula</span>
                     </div>
-                    <span className="text-black">{extractTranslatableText(block.content as string)}</span>
+                    <span className="text-black">{parseTextWithTranslations(block.content as string)}</span>
                 </div>
             );
         case "terminal-view":
@@ -4071,8 +4110,8 @@ const RenderBlock = ({
                     <div className="overflow-x-auto p-4">
                         <div className="min-w-[300px]">
                             {Array.isArray(block.content) ? block.content.map((line, i) => (
-                                <div key={i} className="mb-1 font-sans leading-relaxed text-black">{extractTranslatableText(line)}</div>
-                            )) : <div className="font-sans leading-relaxed text-black">{extractTranslatableText(block.content as string)}</div>}
+                                <div key={i} className="mb-1 font-sans leading-relaxed text-black">{parseTextWithTranslations(line)}</div>
+                            )) : <div className="font-sans leading-relaxed text-black">{parseTextWithTranslations(block.content as string)}</div>}
                         </div>
                     </div>
                 </div>
@@ -4504,110 +4543,13 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         }
     };
 
-    const getChallengePool = (moduleId: string, moduleTitle: string): ModuleChallengeQuestion[] => {
-        const title = moduleTitle.toLowerCase();
-
-        if (moduleId.startsWith("p3-")) {
-            if (title.includes("base social")) {
-                return [
-                    { question: "Falar com gentileza melhora a resposta do outro lado?", answer: true },
-                    { question: "Ser extremamente direto sempre soa natural em inglês?", answer: false },
-                    { question: "Pedir repetição com educação ajuda a manter a conversa?", answer: true },
-                    { question: "Fingir que entendeu evita problema no longo prazo?", answer: false },
-                    { question: "Frases curtas e claras podem ser mais eficazes que frases longas?", answer: true },
-                    { question: "Usar 'please' e 'thank you' é opcional em todo contexto formal?", answer: false },
-                ];
-            }
-            if (title.includes("restaurante") || title.includes("café")) {
-                return [
-                    { question: "No restaurante, 'I'd like...' costuma soar mais natural que 'I want...'? ", answer: true },
-                    { question: "Se o pedido vier errado, a melhor abordagem é atacar o atendente?", answer: false },
-                    { question: "Confirmar conta e itens antes de pagar evita confusão?", answer: true },
-                    { question: "Em pedidos com alergia, ser vago é suficiente?", answer: false },
-                    { question: "Pedir para dividir a conta é uma situação comum e válida?", answer: true },
-                    { question: "Evitar qualquer pergunta sobre o menu ajuda na clareza?", answer: false },
-                ];
-            }
-            if (title.includes("hotel")) {
-                return [
-                    { question: "No hotel, explicar problema + pedido de solução é uma boa estrutura?", answer: true },
-                    { question: "Reclamar sem contexto costuma resolver mais rápido?", answer: false },
-                    { question: "Pedir troca de quarto com educação aumenta chance de ajuda?", answer: true },
-                    { question: "Para check-in/check-out, não precisa confirmar horário?", answer: false },
-                    { question: "Pedir ajuda para bagagem/itens perdidos é apropriado?", answer: true },
-                    { question: "Silêncio total quando há problema no quarto é a melhor estratégia?", answer: false },
-                ];
-            }
-            if (title.includes("transporte") || title.includes("aeroporto")) {
-                return [
-                    { question: "Confirmar destino no app antes de sair reduz erro de rota?", answer: true },
-                    { question: "Em caso de voo atrasado, ficar sem perguntar opções ajuda?", answer: false },
-                    { question: "Perguntar portão e horário de embarque é essencial?", answer: true },
-                    { question: "Se perdeu conexão, é melhor não avisar ninguém?", answer: false },
-                    { question: "Em transporte, pedido claro e curto facilita entendimento?", answer: true },
-                    { question: "No aeroporto, adivinhar informações é melhor que confirmar?", answer: false },
-                ];
-            }
-            if (title.includes("saúde") || title.includes("farmácia")) {
-                return [
-                    { question: "Em saúde, descrever sintoma e intensidade ajuda atendimento?", answer: true },
-                    { question: "Falar de alergia não é importante em consulta?", answer: false },
-                    { question: "Em emergência, frases curtas e diretas são recomendadas?", answer: true },
-                    { question: "Evitar pedir esclarecimento sobre dose de remédio é seguro?", answer: false },
-                    { question: "Pedir recibo/relatório pode ser necessário para seguro?", answer: true },
-                    { question: "Esperar piorar sem comunicar sintomas graves é boa prática?", answer: false },
-                ];
-            }
-        }
-
-        if (moduleId === "p1-m1") {
-            return [
-                { question: "Quando der branco, pedir desculpa pelo inglês é a melhor saída?", answer: false },
-                { question: "Usar frases curtas (como pedir repetição) ajuda a manter controle da conversa?", answer: true },
-                { question: "Respirar e ganhar 1 segundo pode evitar o travamento?", answer: true },
-                { question: "Fingir entendimento total sempre te protege da confusão?", answer: false },
-            ];
-        }
-
-        if (moduleId === "p1-m2") {
-            return [
-                { question: "Necessidade real de conexão costuma acelerar o inglês mais do que estudo só na teoria?", answer: true },
-                { question: "Saber muita regra já garante conversa natural sob pressão?", answer: false },
-                { question: "Errar, ajustar e repetir faz parte do caminho para falar melhor?", answer: true },
-                { question: "Para soar natural, o melhor é sempre usar a frase mais formal e mais longa possível?", answer: false },
-                { question: "Quando a frase vira reflexo, o cérebro para de depender tanto de tradução?", answer: true },
-                { question: "Esperar perfeição antes de falar é a forma mais rápida de evoluir?", answer: false },
-            ];
-        }
-
-        if (title.includes("pareto")) {
-            return [
-                { question: "Você precisa saber todas as palavras para se comunicar bem?", answer: false },
-                { question: "Focar no vocabulário de maior uso acelera o resultado?", answer: true },
-                { question: "Praticar os blocos mais frequentes costuma trazer retorno rápido?", answer: true },
-                { question: "Distribuir esforço igual em tudo é sempre o mais eficiente?", answer: false },
-            ];
-        }
-
-        if (title.includes("som")) {
-            return [
-                { question: "Fala conectada pode parecer mais rápida, mas é sobre ligação de sons?", answer: true },
-                { question: "Adicionar vogal no fim de toda palavra em inglês melhora sua clareza?", answer: false },
-                { question: "Perceber cortes e conexões de som ajuda no listening?", answer: true },
-                { question: "Ignorar ritmo e entonação não impacta compreensão?", answer: false },
-            ];
-        }
-
-        return [
-            { question: "Neste módulo, a prática real vale mais do que perfeição travada?", answer: true },
-            { question: "Fingir entendimento quando você não entendeu é uma boa estratégia?", answer: false },
-            { question: "Pedir confirmação pode evitar erros em cadeia?", answer: true },
-            { question: "Evitar tentar por medo de errar é o melhor caminho?", answer: false },
-        ];
+    const getChallengePool = (moduleId: string): ModuleChallengeQuestion[] => {
+        return MODULE_SPECIFIC_CHALLENGES[moduleId] ?? [];
     };
 
-    const pickModuleChallenge = (moduleId: string, moduleTitle: string): ModuleChallengeQuestion[] => {
-        const pool = getChallengePool(moduleId, moduleTitle);
+    const pickModuleChallenge = (moduleId: string): ModuleChallengeQuestion[] => {
+        const pool = getChallengePool(moduleId);
+        if (!pool.length) return [];
         const used = challengeUsedQuestionIdsRef.current[moduleId] ?? new Set<number>();
         const available = pool.map((_, idx) => idx).filter((idx) => !used.has(idx));
 
@@ -4632,17 +4574,31 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         return pickedIdx.map((idx) => pool[idx]);
     };
 
-    const handleStartCompletionFlow = (moduleId: string, moduleTitle: string, index: number) => {
+    const handleStartCompletionFlow = (moduleId: string, index: number) => {
         const moduleRef = data.modules?.find((m) => m.id === moduleId);
-        const skipsCompletionChallenge = !!moduleRef?.blocks?.some((b) => b.type === "pillar-end");
+        const skipsCompletionChallenge = !!moduleRef?.blocks?.some((b) =>
+            b.type === "pillar-end" || b.type === "pilar2-end"
+        );
         const hasInlineGameGate = !!moduleRef?.blocks?.some((b) =>
             b.type === "maze-game" ||
             b.type === "consolidation-game" ||
             b.type === "combat-sort-game" ||
             b.type === "audio-decode-game"
         );
+        const hasBuiltInAssessment = !!moduleRef && moduleHasBuiltInAssessment(moduleRef);
 
         if (skipsCompletionChallenge) {
+            handleCompleteModule(moduleId, index);
+            return;
+        }
+
+        if (hasBuiltInAssessment && !hasInlineGameGate) {
+            handleCompleteModule(moduleId, index);
+            return;
+        }
+
+        const challengePool = getChallengePool(moduleId);
+        if (!challengePool.length) {
             handleCompleteModule(moduleId, index);
             return;
         }
@@ -4665,7 +4621,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         }
 
         setMazeHintByModule((prev) => ({ ...prev, [moduleId]: null }));
-        const moduleQuestions = pickModuleChallenge(moduleId, moduleTitle);
+        const moduleQuestions = pickModuleChallenge(moduleId);
         setChallengeQuestions((prev) => ({ ...prev, [moduleId]: moduleQuestions }));
         setChallengeFeedback((prev) => ({ ...prev, [moduleId]: null }));
         setChallengeTarget({ moduleId, index });
@@ -4686,11 +4642,11 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
         });
     };
 
-    const handleChallengeSubmit = (moduleId: string, moduleTitle: string, index: number) => {
+    const handleChallengeSubmit = (moduleId: string, index: number) => {
         const lockUntil = challengeLockUntil[moduleId] ?? 0;
         if (lockUntil > clockNow) return;
 
-        const questions = challengeQuestions[moduleId] ?? pickModuleChallenge(moduleId, moduleTitle);
+        const questions = challengeQuestions[moduleId] ?? pickModuleChallenge(moduleId);
         if (!challengeQuestions[moduleId]) {
             setChallengeQuestions((prev) => ({ ...prev, [moduleId]: questions }));
         }
@@ -4893,7 +4849,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                                                 onClick={(e) => {
                                                                     e.preventDefault();
                                                                     e.currentTarget.blur();
-                                                                    handleStartCompletionFlow(module.id, module.title, index);
+                                                                    handleStartCompletionFlow(module.id, index);
                                                                 }}
                                                                 className={cn(
                                                                     "flex items-center gap-2 px-6 py-3 rounded font-bold transition-all group",
@@ -4994,7 +4950,7 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
                                                             <div className="mt-4 flex flex-wrap items-center gap-3">
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => handleChallengeSubmit(module.id, module.title, index)}
+                                                                    onClick={() => handleChallengeSubmit(module.id, index)}
                                                                     disabled={
                                                                         (challengeLockUntil[module.id] ?? 0) > clockNow ||
                                                                         (challengeAnswers[module.id] ?? [null, null]).some((v) => v === null)

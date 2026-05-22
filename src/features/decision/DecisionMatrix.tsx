@@ -11,6 +11,42 @@ import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { cn } from "@/lib/ui/cn";
 import { ROUTES } from "@/lib/routes";
 
+const SPECIALIZATION_PREVIEW: Record<
+  string,
+  { label: string; hook: string; outcomes: [string, string] }
+> = {
+  "spec-popculture": {
+    label: "Filmes, séries e internet",
+    hook: "Entenda o inglês que aparece em trailers, entrevistas e cultura digital sem ficar perdido no ritmo.",
+    outcomes: ["gírias reais", "referências culturais"],
+  },
+  "spec-health": {
+    label: "Consultas, exames e urgências",
+    hook: "Ganhe vocabulário e segurança para interagir em contextos de saúde com clareza e calma.",
+    outcomes: ["consultas médicas", "situações urgentes"],
+  },
+  "spec-shopping": {
+    label: "Lojas, pedidos e atendimento",
+    hook: "Fale com naturalidade em compras presenciais e online, entendendo ofertas, trocas e pedidos.",
+    outcomes: ["atendimento rápido", "compras sem travar"],
+  },
+  "spec-interview": {
+    label: "Entrevistas e processos seletivos",
+    hook: "Aprenda a responder com firmeza, soar profissional e manter presença nas perguntas decisivas.",
+    outcomes: ["respostas fortes", "confiança profissional"],
+  },
+  "spec-travel": {
+    label: "Aeroporto, hotel e deslocamento",
+    hook: "Viaje com independência, entendendo orientações, imprevistos e interações comuns no exterior.",
+    outcomes: ["aeroporto e imigração", "pedidos de ajuda"],
+  },
+  "spec-business": {
+    label: "Reuniões, calls e apresentações",
+    hook: "Participe de conversas profissionais com mais controle, clareza e fluidez em ambiente de trabalho.",
+    outcomes: ["calls e reuniões", "apresentações seguras"],
+  },
+};
+
 export const DecisionMatrix = () => {
   const router = useRouter();
   const {
@@ -28,6 +64,7 @@ export const DecisionMatrix = () => {
   const canSelect = canChooseSpecialization();
   const completedCount = getCompletedCount();
   const currentSpec = getCurrentSpecialization();
+  const remainingPillars = Math.max(0, 9 - completedCount);
 
   // Determine initial step:
   // - If user already has a specialization: show "current" view
@@ -298,15 +335,89 @@ export const DecisionMatrix = () => {
               animate={{ opacity: 1, y: 0 }}
               className="max-w-5xl w-full"
             >
-              <div className="text-center mb-12">
-                <h2 className="text-[#EEF4D4] font-mono text-xs tracking-[0.5em] mb-2 uppercase">Selection Panel</h2>
-                <h3 className="text-3xl text-white font-serif tracking-widest">
-                  {canSelect ? "ESCOLHA SUA PRÓXIMA MISSÃO" : "ESPECIALIDADES DISPONÍVEIS"}
-                </h3>
+              <div className="mb-10 overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(88,28,135,0.35),transparent_40%),linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))] p-6 md:p-8 shadow-[0_30px_120px_rgba(0,0,0,0.45)]">
+                <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+                  <div>
+                    <h2 className="text-[#EEF4D4] font-mono text-xs tracking-[0.5em] mb-3 uppercase">Selection Panel</h2>
+                    <h3 className="max-w-3xl text-3xl md:text-5xl text-white font-serif tracking-[0.08em] leading-[1.05]">
+                      {canSelect ? "Agora você escolhe a trilha que vai mudar o seu inglês no mundo real." : "Essas são as especialidades que esperam por você quando os 9 pilares estiverem completos."}
+                    </h3>
+                    <p className="mt-4 max-w-2xl text-white/70 text-sm md:text-base leading-relaxed">
+                      {canSelect
+                        ? "Cada especialidade pega a base que você construiu e transforma isso em situações desejadas de verdade: trabalho, viagens, saúde, cultura pop e conversas que antes travavam."
+                        : "A base está construindo acesso. Quando você concluir os pilares, essas trilhas deixam de ser vitrine e viram o próximo nível do curso, com treino aplicado para contextos que as pessoas realmente querem dominar."}
+                    </p>
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      {[
+                        "situações reais",
+                        "vocabulário aplicado",
+                        "fluidez prática",
+                        "segurança social e profissional",
+                      ].map((item) => (
+                        <span
+                          key={item}
+                          className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.18em] text-white/75"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                    <div className="rounded-2xl border border-violet-400/20 bg-violet-500/10 p-4">
+                      <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-violet-200/80">
+                        Desbloqueio
+                      </div>
+                      <div className="mt-2 text-3xl font-bold text-white">{completedCount}/9</div>
+                      <p className="mt-2 text-sm text-white/60">
+                        pilares concluídos até aqui
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                      <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-white/55">
+                        Falta
+                      </div>
+                      <div className="mt-2 text-3xl font-bold text-white">{remainingPillars}</div>
+                      <p className="mt-2 text-sm text-white/60">
+                        {remainingPillars === 1 ? "pilar para liberar tudo" : "pilares para liberar tudo"}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-4">
+                      <div className="text-[10px] font-mono uppercase tracking-[0.24em] text-emerald-200/80">
+                        Recompensa
+                      </div>
+                      <div className="mt-2 text-lg font-semibold text-white">
+                        6 especialidades
+                      </div>
+                      <p className="mt-2 text-sm text-white/60">
+                        prontas para levar sua base a uso real
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {!canSelect && (
-                  <p className="text-violet-400/80 font-mono text-sm mt-4">
-                    Complete os 9 pilares para desbloquear a seleção
-                  </p>
+                  <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-violet-300/80">
+                          Acesso travado por progresso
+                        </p>
+                        <p className="mt-2 text-white/70 text-sm">
+                          Você já consegue ver o prêmio final. Agora falta fechar a base para transformar essas trilhas em acesso real.
+                        </p>
+                      </div>
+                      <div className="hidden sm:block min-w-[180px]">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all duration-500"
+                            style={{ width: `${(completedCount / 9) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
 
@@ -314,9 +425,16 @@ export const DecisionMatrix = () => {
                 {PLANETS.map((planet) => {
                   const isCompleted = isSpecializationComplete(planet.id);
                   const isCurrentSpec = chosenSpecialization === planet.id;
+                  const preview = SPECIALIZATION_PREVIEW[planet.id];
                   return (
-                    <div key={planet.id} className={`group relative h-full rounded-xl p-1 transition-all duration-300 ${!canSelect ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
-                      onClick={() => handleManualChoice(planet.id)}
+                    <div
+                      key={planet.id}
+                      aria-disabled={!canSelect}
+                      className={cn(
+                        "group relative h-full rounded-xl p-1 transition-all duration-300",
+                        canSelect ? "cursor-pointer hover:-translate-y-1" : "cursor-default"
+                      )}
+                      onClick={canSelect ? () => handleManualChoice(planet.id) : undefined}
                     >
                       <GlowingEffect
                         spread={40}
@@ -335,12 +453,21 @@ export const DecisionMatrix = () => {
                       />
 
                       <div className={cn(
-                        "relative flex h-full flex-col justify-between overflow-hidden rounded-lg border-[0.75px] bg-[#050505] p-3 sm:p-5 shadow-sm transition-all",
+                        "relative flex h-full flex-col justify-between overflow-hidden rounded-[20px] border-[0.75px] p-3 sm:p-5 shadow-sm transition-all",
                         isCompleted ? "border-emerald-500/30 bg-emerald-950/10" :
                           isCurrentSpec ? "border-violet-500/50 bg-violet-950/20" :
                             canSelect ? "border-white/10 group-hover:border-violet-500/30 bg-black" :
-                              "border-white/5 bg-black"
-                      )}>
+                              "border-white/10 bg-[#070709]"
+                      )}
+                      style={{
+                        backgroundImage: isCompleted
+                          ? undefined
+                          : `radial-gradient(circle at top right, ${planet.color}22, transparent 38%), linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))`,
+                      }}>
+                        <div
+                          className="absolute inset-x-0 top-0 h-px opacity-80"
+                          style={{ background: `linear-gradient(90deg, transparent, ${planet.color}, transparent)` }}
+                        />
                         {/* Current spec indicator */}
                         {isCurrentSpec && (
                           <div className="absolute top-2 right-2">
@@ -359,18 +486,21 @@ export const DecisionMatrix = () => {
                             "font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full border",
                             isCompleted ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/10" :
                               canSelect ? "border-white/10 text-white/50 bg-white/5" :
-                                "border-white/5 text-white/20 bg-white/5"
+                                "border-white/10 text-white/55 bg-white/[0.04]"
                           )}>
                             {isCompleted ? "COMPLETED" : (canSelect ? "CLASSIFIED" : "ENCRYPTED")}
                           </span>
                         </div>
 
                         <div className="space-y-3">
+                          <div className="inline-flex rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[9px] font-mono uppercase tracking-[0.24em] text-white/55">
+                            {preview?.label ?? "especialidade avançada"}
+                          </div>
                           <div className={cn(
-                            "w-10 h-10 rounded flex items-center justify-center border transition-colors",
+                            "w-12 h-12 rounded-xl flex items-center justify-center border transition-colors",
                             isCompleted ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" :
                               canSelect ? "bg-white/5 border-white/10 text-[#EEF4D4] group-hover:border-violet-500/50 group-hover:text-violet-300 group-hover:bg-violet-500/10" :
-                                "bg-violet-500/5 border-violet-500/20 text-violet-400/50"
+                                "bg-violet-500/10 border-violet-500/30 text-violet-200"
                           )}>
                             {!canSelect ? (
                               <Lock className="w-4 h-4" />
@@ -384,16 +514,39 @@ export const DecisionMatrix = () => {
                             "text-sm md:text-lg font-bold tracking-tight uppercase transition-colors leading-tight",
                             isCompleted ? "text-emerald-400" :
                               canSelect ? "text-[#EEF4D4] group-hover:text-violet-200" :
-                                "text-[#EEF4D4]/50"
+                                "text-[#EEF4D4]/90"
                           )}>
                             {planet.title}
                           </h4>
-                          <p className="text-[10px] md:text-xs text-gray-500 font-mono leading-relaxed hidden sm:block">
-                            Desbloqueia protocolos de comunicação avançados para {planet.title.toLowerCase()}.
+                          <p
+                            className={cn(
+                              "text-[10px] md:text-xs font-mono leading-relaxed",
+                              canSelect ? "text-gray-500" : "text-white/55"
+                            )}
+                          >
+                            {preview?.hook ?? `Desbloqueia protocolos de comunicação avançados para ${planet.title.toLowerCase()}.`}
                           </p>
+                          <div className="flex flex-wrap gap-2 pt-1">
+                            {(preview?.outcomes ?? []).map((item) => (
+                              <span
+                                key={item}
+                                className={cn(
+                                  "rounded-full px-2.5 py-1 text-[9px] font-mono uppercase tracking-[0.18em]",
+                                  canSelect ? "bg-white/5 text-white/60 border border-white/10" : "bg-white/[0.04] text-white/55 border border-white/10"
+                                )}
+                              >
+                                {item}
+                              </span>
+                            ))}
+                          </div>
                         </div>
 
-                        <div className="pt-2 md:pt-4 flex justify-between items-center text-[8px] sm:text-[10px] font-mono text-gray-600 border-t border-white/5 mt-2 md:mt-3">
+                        <div
+                          className={cn(
+                            "pt-2 md:pt-4 flex justify-between items-center text-[8px] sm:text-[10px] font-mono border-t border-white/5 mt-2 md:mt-3",
+                            canSelect ? "text-gray-600" : "text-white/45"
+                          )}
+                        >
                           <span>STATUS: {isCompleted ? "MISSION ACCOMPLISHED" : (canSelect ? "READY" : "LOCKED")}</span>
                           {isCompleted && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
                         </div>
@@ -404,16 +557,27 @@ export const DecisionMatrix = () => {
               </div>
 
               {canSelect && (
-                <div className="mt-12 text-center flex justify-center">
-                  <button
-                    onClick={startDiagnostic}
-                    className="group relative px-10 py-4 overflow-hidden rounded bg-purple-500/5 hover:bg-purple-500/10 transition-all border border-purple-500/20 hover:border-purple-500/50"
-                  >
-                    <span className="relative z-10 text-purple-400 font-mono text-xs tracking-widest flex items-center gap-3">
-                      <Cpu className="w-4 h-4 animate-pulse" />
-                      ANALISAR PERFIL (RECOMENDAÇÃO TÁTICA)
-                    </span>
-                  </button>
+                <div className="mt-12 overflow-hidden rounded-[24px] border border-purple-500/20 bg-[linear-gradient(135deg,rgba(88,28,135,0.18),rgba(17,24,39,0.55))] p-6 text-center">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-purple-200/75">
+                    Não sabe por onde começar?
+                  </p>
+                  <h4 className="mt-3 text-2xl font-serif tracking-[0.08em] text-white">
+                    Deixe o sistema recomendar sua melhor entrada.
+                  </h4>
+                  <p className="mx-auto mt-3 max-w-2xl text-sm text-white/65">
+                    Se você quiser acelerar a decisão, a análise tática escolhe a especialidade mais alinhada com seu perfil e seu momento.
+                  </p>
+                  <div className="mt-6 flex justify-center">
+                    <button
+                      onClick={startDiagnostic}
+                      className="group relative px-10 py-4 overflow-hidden rounded bg-purple-500/10 hover:bg-purple-500/15 transition-all border border-purple-500/30 hover:border-purple-500/50"
+                    >
+                      <span className="relative z-10 text-purple-200 font-mono text-xs tracking-widest flex items-center gap-3">
+                        <Cpu className="w-4 h-4 animate-pulse" />
+                        ANALISAR PERFIL (RECOMENDAÇÃO TÁTICA)
+                      </span>
+                    </button>
+                  </div>
                 </div>
               )}
             </motion.div>

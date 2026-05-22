@@ -242,7 +242,7 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
         <div className="flex items-center gap-3 bg-slate-900 text-emerald-400 p-4 rounded-lg font-mono text-sm border border-emerald-500/30 my-6 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
           <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
           <span className="uppercase tracking-widest font-bold">SYSTEM STATUS:</span>
-          <span className="text-white/80">{block.content}</span>
+          <span className="text-white/80">{parseTextWithTranslations(block.content as string)}</span>
         </div>
       );
     case "terminal-view":
@@ -261,11 +261,11 @@ const RenderBlock = ({ block }: { block: ContentBlock }) => {
               block.content.map((line, i) => (
                 <div key={i} className="mb-1">
                   <span className="text-white/30 mr-2">$</span>
-                  {line}
+                  {parseTextWithTranslations(line)}
                 </div>
               ))
             ) : (
-              <div>{block.content}</div>
+              <div>{parseTextWithTranslations(block.content as string)}</div>
             )}
             <div className="animate-pulse text-emerald-500 mt-2">_</div>
           </div>

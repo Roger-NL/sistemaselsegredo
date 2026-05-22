@@ -53,9 +53,9 @@ export const PILLARS: Pillar[] = [
     },
     {
         id: "pilar-4",
-        title: "04. Vocabulário Estratégico",
+        title: "04. Engenharia da Frase",
         status: "locked",
-        description: "As palavras que realmente importam no dia a dia.",
+        description: "A ordem e a estrutura que sustentam o ingles com clareza.",
         routerPath: "/pilar/4",
     },
     {
