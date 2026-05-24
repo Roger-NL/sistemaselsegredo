@@ -3,64 +3,16 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Shield, Lock, Unlock, Zap, Ear, Mic, Brain, Globe, Briefcase, Plane, ShoppingBag, Heart, Clapperboard, BarChart3, Target, ArrowRight } from "lucide-react";
+import { PILLARS } from "@/data/curriculum";
 
 export function FeaturesSection({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
-    const pillars = [
-        {
-            title: "Pilar 1: Base & Inteligência",
-            icon: Brain,
-            desc: "Desprogramação. Destrua o método escolar e aprenda a técnica real.",
-            status: "unlocked"
-        },
-        {
-            title: "Pilar 2: Imersão Nativa",
-            icon: Ear,
-            desc: "Decodifique a fala rápida nativa.",
-            status: "locked"
-        },
-        {
-            title: "Pilar 3: Sobrevivência",
-            icon: Globe,
-            desc: "Inglês de rua. Vocabulário crítico para o mundo real.",
-            status: "locked"
-        },
-        {
-            title: "Pilar 4: Fundamentos",
-            icon: Shield,
-            desc: "Gramática tática. Só a lógica que importa.",
-            status: "locked"
-        },
-        {
-            title: "Pilar 5: Números & Acordos",
-            icon: BarChart3,
-            desc: "Dinheiro e negociação. O inglês que paga as contas.",
-            status: "locked"
-        },
-        {
-            title: "Pilar 6: Ataque Oral",
-            icon: Mic,
-            desc: "Shadowing ativo para destravar a fala bloqueada.",
-            status: "locked"
-        },
-        {
-            title: "Pilar 7: Autonomia",
-            icon: Zap,
-            desc: "Independência total. Aprenda a fluir sozinho.",
-            status: "locked"
-        },
-        {
-            title: "Pilar 8: Especializações",
-            icon: Target,
-            desc: "Posicionamento para sua carreira.",
-            status: "locked"
-        },
-        {
-            title: "Pilar 9: Escalada",
-            icon: Plane,
-            desc: "Simulação final e prova de fogo com nativos.",
-            status: "locked"
-        },
-    ];
+    const pillarIcons = [Brain, Ear, Globe, Shield, BarChart3, Mic, Zap, Target, Plane];
+    const pillars = PILLARS.map((pillar, index) => ({
+        title: pillar.title,
+        icon: pillarIcons[index] ?? Shield,
+        desc: pillar.description,
+        status: pillar.status,
+    }));
 
     const specs = [
         { title: "Cultura Pop", icon: Clapperboard },
@@ -104,7 +56,7 @@ export function FeaturesSection({ isAuthenticated = false }: { isAuthenticated?:
                         transition={{ delay: 0.2 }}
                         className="text-white/70 font-mono font-bold text-base max-w-2xl mx-auto leading-relaxed"
                     >
-                        Treinamento em blocos blindados. O próximo pilar só abre com aprovação (Clearance) na etapa anterior.
+                        Treinamento em blocos blindados. O próximo pilar só abre quando o anterior foi realmente concluído.
                     </motion.p>
                 </div>
 

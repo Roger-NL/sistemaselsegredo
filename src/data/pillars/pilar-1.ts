@@ -17,7 +17,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Você está começando a primeira parte do curso. E já vale deixar uma coisa clara: aqui a gente não vai te empurrar aquele inglês duro de escola.\n\nA ideia é outra. Você vai entender por que trava, como sair desse travamento e o que falar quando a mente der branco. Tudo com foco em conversa real, não em frase bonita de prova.\n\nSe você já estudou, tentou e mesmo assim sentiu que na hora de responder o inglês simplesmente evaporava, este módulo foi feito exatamente para esse ponto."
+                    content: "Você está começando a primeira parte do curso. E já vale deixar uma coisa clara: aqui a gente não vai te empurrar aquele inglês duro de escola.\n\nA ideia é outra. Você vai entender por que trava, como sair desse travamento e o que falar quando a mente der branco. Tudo com foco em conversa real, não em frase bonita de prova.\n\nSe você já estudou, tentou e mesmo assim sentiu que, na hora de responder, o inglês simplesmente evaporava, este módulo foi feito exatamente para esse ponto."
                 },
                 {
                     type: "h3",
@@ -63,12 +63,12 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Você já esteve numa reunião, numa viagem ou numa conversa simples, alguém te fez uma pergunta e o branco veio na hora. O coração acelerou, a mão suou e a palavra sumiu.\n\nSe isso já aconteceu com você, presta atenção: **isso não é falta de inteligência.** É biologia. Seu cérebro entrou em {{Panic Mode|Modo de Pânico}} e reduziu sua capacidade de pensar em inglês para tentar te proteger do julgamento alheio."
+                    content: "Você já esteve numa reunião, numa viagem ou numa conversa simples, alguém te fez uma pergunta e o branco veio na hora. O coração acelerou, a mão suou e a palavra sumiu.\n\nSe isso já aconteceu com você, presta atenção: **isso não é falta de inteligência.** É biologia. Seu cérebro entrou em {{Panic Mode|Modo de Pânico}} e reduziu sua capacidade de pensar em inglês para tentar te proteger do julgamento, da exposição e do erro."
                 },
                 {
                     type: "elite-insight",
                     title: "💡 POR QUE ISSO IMPORTA?",
-                    content: "Enquanto você estiver no \"modo pânico\", seu cérebro bloqueia a parte que sabe gramática. Se você não souber desativar esse \"interruptor\", pode estudar por muito tempo e continuar travando na {{Real Life|Vida Real}}."
+                    content: "Enquanto você estiver no \"modo pânico\", seu cérebro bloqueia acesso rápido ao que já sabe. Se você não souber desativar esse \"interruptor\", pode estudar por muito tempo e continuar travando na {{Real Life|Vida Real}}."
                 },
                 {
                     type: "h2",
@@ -114,11 +114,11 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "No Brasil, eu fui o \"estudante modelo\". Segui o script das grandes franquias por quatro anos. Frequentei aulas duas vezes por semana, fiz todos os {{homeworks|tarefas de casa}} e tirei notas máximas nas provas de gramática. No papel, eu era um \"sucesso\". Na vida real, ao desembarcar na Europa, eu descobri que era um **analfabeto funcional**."
+                    content: "No Brasil, eu fui o \"estudante modelo\". Segui o script das grandes franquias por quatro anos. Frequentei aulas duas vezes por semana, fiz todos os {{homeworks|tarefas de casa}} e tirei notas máximas nas provas de gramática. No papel, eu era um \"sucesso\". Na vida real, ao desembarcar na Europa, descobri uma verdade mais dura: eu funcionava muito abaixo do que o boletim prometia."
                 },
                 {
                     type: "paragraph",
-                    content: "O sistema tradicional é desenhado para criar gente que sabe explicar inglês, não usar inglês sob pressão. Eles te ensinam a teoria, mas quase nunca te colocam para reagir de verdade."
+                    content: "O sistema tradicional costuma formar gente que sabe explicar inglês, mas não necessariamente usar inglês sob pressão. Ele te ensina a teoria, mas quase nunca te força a reagir de verdade."
                 },
                 {
                     type: "memory-diagram",
@@ -236,7 +236,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "**Pare de se desculpar o tempo todo.** O vício brasileiro de dizer \"{{Sorry for my bad English|Desculpe pelo meu inglês ruim}}\" enfraquece sua presença antes mesmo da conversa andar. Na \"Ponte Húngara\", eu entendi uma coisa simples: se eu começasse me diminuindo, eu perdia a conversa antes de ela começar. O inglês é o meio, não o palco. Se o sinal vier com ruído, você ajusta e continua."
+                    content: "**Pare de se desculpar o tempo todo.** O vício brasileiro de dizer \"{{Sorry for my bad English|Desculpe pelo meu inglês ruim}}\" enfraquece sua presença antes mesmo da conversa andar. Na \"Ponte Húngara\", eu entendi uma coisa simples: se eu começasse me diminuindo, eu entregava minha presença antes de entregar minha ideia. O inglês é o meio, não o palco. Se o sinal vier com ruído, você ajusta e continua."
                 },
                 {
                     type: "elite-insight",
@@ -262,8 +262,8 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "box-warning",
-                    title: "🚨 A VERDADE BRUTAL",
-                    content: "O modelo de negócio das grandes escolas depende do seu fracasso. Se você aprende em 6 meses, eles perdem 4 anos de mensalidade. Você não é um aluno para eles; você é uma anuidade paga."
+                    title: "🚨 A VERDADE QUE POUCA GENTE TE FALA",
+                    content: "Grande parte do ensino tradicional te mantém ocupado, mas não necessariamente te deixa operacional. Você estuda, repete, faz exercício, tira nota e até sente que está avançando. O problema é que isso nem sempre te prepara para reagir quando o inglês aparece com pressão, velocidade e ruído real."
                 },
                 {
                     type: "h2",
@@ -271,26 +271,26 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Você passou anos preenchendo lacunas em livros coloridos. Aprendeu a cor das frutas e os animais da fazenda. Mas, no primeiro soco da vida real (um nativo falando rápido), você desmaiou. \n\nO inglês de livro é um cadáver: não tem sotaque, não tem gíria e não tem pressa. O mundo real é um 'zoológico'."
+                    content: "Muita gente passou anos treinando um inglês que funciona no exercício, mas enfraquece na conversa real. Aprendeu lista, completou lacuna, reconheceu estrutura e respondeu prova. Só que, quando o idioma veio com sotaque, pressa, redução e contexto vivo, a base começou a falhar.\n\nO problema não é estudar. O problema é estudar um inglês limpo demais e depois esperar que ele aguente o mundo real sem treino de realidade."
                 },
                 {
                     type: "brain-diagram",
                     content: JSON.stringify({
-                        "title": "🧠 POR QUE VOCÊ ESQUECE TUDO?",
+                        "title": "🧠 POR QUE TANTA COISA SOME NA HORA?",
                         "steps": [
-                            "Input Passivo: Ler regras e ouvir áudios lentos gera sinapses fracas. Seu cérebro deleta isso em 24h porque não vê risco nem recompensa.",
-                            "A Mordaça Gramatical: Ao tentar 'calcular' a regra antes de falar, você gera um delay de processamento. A conversa avança e você fica para trás.",
-                            "Recuperação Ativa (BasedSpeak): Nós não ensinamos a regra. Nós te jogamos no fogo. O cérebro só grava o que é necessário para surpreender."
+                            "Input Passivo: ler regra e ouvir áudio controlado gera reconhecimento, mas nem sempre gera reflexo. Seu cérebro entende, mas não necessariamente reage.",
+                            "Travamento de Processamento: quando você tenta calcular a regra antes de falar, cria atraso. A conversa continua, e você fica tentando alcançar.",
+                            "Recuperação Ativa: quando o treino aproxima mais a vida real, o cérebro começa a registrar o que realmente precisa para agir, não só para explicar."
                         ]
                     })
                 },
                 {
                     type: "h2",
-                    content: "3.2 O Crime do \"{{I am going to|Eu vou}}\""
+                    content: "3.2 O problema do \"{{I am going to|Eu vou}}\" perfeitinho demais"
                 },
                 {
                     type: "paragraph",
-                    content: "Eles te ensinaram a falar frases inteiras, sílaba por sílaba. Mas humanos não falam assim. Veja a diferença entre o que você aprendeu e o que você realmente precisa ouvir."
+                    content: "A escola costuma te ensinar a frase inteira, palavra por palavra, como se o idioma sempre viesse bem recortado. Mas gente real não fala assim. O som vem comprimido, ligado e cheio de economia. Se o seu ouvido espera o formato escolar, ele se atrasa."
                 },
                 {
                     type: "phonetic-breakdown",
@@ -309,7 +309,7 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "comparison-table",
                     content: JSON.stringify({
-                        "headers": ["Elemento", "Escola Comum (Necrotério)", "Método Elite (Operacional)"],
+                        "headers": ["Elemento", "Escola Comum", "Uso Operacional"],
                         "rows": [
                             ["Velocidade", "Lenta e Robótica", "{{Connected Speech|Fala Conectada}} Real"],
                             ["Erro", "Punido com nota (Gera Medo)", "Dados de Calibragem (Gera Audácia)"],
@@ -321,7 +321,7 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "reveal-box",
                     title: "📝 Nota do Instrutor (Clique para expandir)",
-                    content: "Aprender inglês com livro de franquia é como tentar aprender a lutar MMA jogando 'Street Fighter' no videogame. Você conhece os golpes, mas a primeira vez que levar um soco (ouvir um nativo rápido), você vai desmaiar."
+                    content: "Aprender inglês só em material muito controlado é como treinar direção apenas em simulador. Você entende a lógica, reconhece o painel e até sabe o que deveria fazer. Mas a rua pede outra prontidão: pressão, improviso e leitura rápida do que está acontecendo."
                 },
                 {
                     type: "h2",
@@ -330,27 +330,27 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "scenario-card",
                     content: JSON.stringify({
-                        "context": "Reunião de emergência via Zoom. Seu chefe americano solta uma metralhadora de palavras.",
+                        "context": "Reunião de emergência via Zoom. Seu chefe americano entra rápido no ponto e a frase vem mais comprimida do que o seu ouvido queria.",
                         "situation": "\"{{Guys, we gotta pivot the strategy 'cause the numbers ain't lookin' good. Whad'ya reckon?|Pessoal, temos que mudar a estratégia porque os números não estão bons. O que acham?}}\"",
                         "wrong": {
-                            "action": "Tentar processar o 'ain't' e o 'reckon' (que não estavam no seu livro). Entrar em pânico.",
-                            "result": "Silêncio constrangedor. Você parece incompetente, mas é apenas o seu método que é lento."
+                            "action": "Tentar decodificar cada palavra isolada, travar no {{ain't|ain't}} e no {{reckon|reckon}} e perder a ideia central.",
+                            "result": "Silêncio ou resposta atrasada. Você não parece sem inteligência; parece sem ferramenta para aquele tipo de escuta."
                         },
                         "right": {
-                            "action": "Filtro de Ruído. Capturar apenas as palavras de poder: {{PIVOT|MUDAR}}, {{STRATEGY|ESTRATÉGIA}}, {{NUMBERS|NÚMEROS}}, {{NOT GOOD|NADA BOM}}.",
-                            "result": "\"{{I'm with you. Let's change the plan. I have an idea.|Tô contigo. Vamos mudar o plano. Tenho uma ideia.}}\" (Líder. Operacional. Elite.)"
+                            "action": "Filtro de Ruído. Capturar as palavras de poder: {{PIVOT|MUDAR}}, {{STRATEGY|ESTRATÉGIA}}, {{NUMBERS|NÚMEROS}}, {{NOT GOOD|NADA BOM}}.",
+                            "result": "\"{{I'm with you. Let's change the plan. I have an idea.|Tô contigo. Vamos mudar o plano. Tenho uma ideia.}}\" Você não traduziu tudo. Você entendeu o suficiente para entrar no jogo."
                         }
                     })
                 },
                 {
                     type: "elite-insight",
-                    title: "💡 DESPERTE SUA RAIVA",
-                    content: "Sinta raiva do tempo perdido preenchendo lacunas. Essa raiva é o que vai te impulsionar a não aceitar mais o método medíocre. O brasileiro médio tem 'trauma' de inglês porque foi tratado como uma criança incapaz."
+                    title: "💡 TRANSFORME FRUSTRAÇÃO EM CRITÉRIO",
+                    content: "Não precisa romantizar o tempo perdido. Mas vale usar essa frustração como critério. Se um método te faz sentir que sabe e depois te abandona na conversa real, o problema não é falta de esforço da sua parte. O problema é o tipo de treino que você recebeu."
                 },
                 {
                     type: "box-action",
-                    title: "🔓 O FIM DA DITADURA DO DICIONÁRIO",
-                    content: "Saber inglês não é saber TODAS as palavras. É saber as palavras certas. No próximo módulo, vou te mostrar como 20% do vocabulário resolve 80% da sua vida. Vamos cortar a gordura e focar no músculo. O Princípio de Pareto vai explodir sua mente."
+                    title: "🔓 O FIM DO EXCESSO DE DICIONÁRIO",
+                    content: "Saber inglês não é saber todas as palavras. É saber as palavras certas com mais velocidade de uso. No próximo módulo, você vai ver como 20% do vocabulário resolve uma fatia enorme da vida real. A ideia é simples: parar de carregar peso morto e começar a operar com o que mais retorna."
                 },
                 {
                     type: "combat-sort-game",
@@ -378,7 +378,7 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "box-goal",
                     title: "Objetivo Tático",
-                    content: "Parar de carregar peso morto. Vamos identificar as armas de alto calibre (vocabulário de alta frequência) que permitem que você opere no mundo real com o mínimo de esforço. Fluência não é sobre saber MUITO, é sobre saber o que IMPORTA."
+                    content: "Parar de carregar peso morto. Vamos identificar o vocabulário de alta frequência que permite que você opere no mundo real com o mínimo de esforço desperdiçado. Fluência não é sobre saber muito. É sobre saber o que mais retorna."
                 },
                 {
                     type: "h2",
@@ -386,23 +386,23 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "O maior erro do recruta é acreditar que saber inglês é saber TODAS as palavras. Um nativo conhece 20.000 palavras, mas usa apenas 3.000 no dia a dia.\n\nSe você focar nas palavras certas (o seu {{Return on Investment|Retorno sobre Investimento}}), você consegue negociar, viajar e liderar reuniões com apenas 800 a 1.200 palavras bem aplicadas. Você está estudando para ser um dicionário ambulante ou um Operador de Elite?"
+                    content: "O maior erro de quem começa a levar inglês a sério é acreditar que saber inglês é saber todas as palavras. Um nativo conhece muito, mas usa uma fatia bem menor disso no dia a dia.\n\nSe você focar nas palavras certas, no seu {{Return on Investment|Retorno sobre Investimento}}, consegue negociar, viajar e sustentar conversa com muito menos vocabulário do que imagina. A pergunta não é se você sabe muito. A pergunta é se você sabe o que mais move a vida real."
                 },
                 {
                     type: "brain-diagram",
                     content: JSON.stringify({
                         "title": "🧠 O FILTRO DE SOBREVIVÊNCIA (SAR)",
                         "steps": [
-                            "Sobrecarga Cognitiva: Tentar aprender palavras 'bonitas' mas inúteis (como {{nevertheless|no entanto}}) trava o seu Córtex. Seu cérebro gasta energia escolhendo a palavra e esquece de falar.",
-                            "O Princípio de Pareto: 20% do vocabulário é responsável por 80% da comunicação real. Ao focar nesse núcleo, você cria 'Super-Rodovias Neurais' para respostas automáticas.",
-                            "Poda Sináptica: O cérebro de elite descarta o que não usa. Se uma palavra não te ajuda a resolver um problema em 15 segundos, ela é lixo tecnológico."
+                            "Sobrecarga Cognitiva: tentar aprender palavra bonita demais e útil de menos trava seu processamento. O cérebro gasta energia escolhendo a palavra e perde velocidade de resposta.",
+                            "Princípio de Pareto: uma parte pequena do vocabulário sustenta uma parte enorme da comunicação real. Quando você foca nesse núcleo, o reflexo cresce mais rápido.",
+                            "Poda Inteligente: o cérebro guarda melhor o que usa com frequência. Se uma palavra quase nunca resolve nada na sua rotina, ela tende a pesar mais do que ajudar."
                         ]
                     })
                 },
                 {
                     type: "elite-insight",
                     title: "💡 INSIGHT DE COMANDO",
-                    content: "A fluência operacional não é o tamanho do seu arsenal, mas a sua habilidade em derrubar o alvo com uma única pistola. Carregar um canhão que você não consegue levantar só vai te fazer ser morto em campo."
+                    content: "A fluência operacional não é o tamanho do seu arsenal. É a sua capacidade de resolver com rapidez o que mais aparece. Carregar vocabulário demais, sem uso, cria ilusão de avanço e pouca resposta na prática."
                 },
                 {
                     type: "comparison-table",
@@ -422,7 +422,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Se o inglês fosse uma máquina, o verbo **GET** seria o óleo que faz as engrenagens girarem. Ele substitui mais de 50 outros verbos. Se você domina o {{Get|Conseguir}}, sua autonomia sobre 40% instantaneamente."
+                    content: "Se o inglês fosse uma máquina, o verbo **GET** seria o óleo que faz as engrenagens girarem. Ele substitui uma quantidade enorme de verbos e intenções. Quando você domina {{Get|Get}}, sua autonomia sobe porque o idioma começa a responder com menos esforço."
                 },
                 {
                     type: "phrase-analysis",
@@ -439,27 +439,27 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "scenario-card",
                     content: JSON.stringify({
-                        "context": "Cliente internacional furioso. O relatório está atrasado. Sua Amígdala quer que você se esconda.",
+                        "context": "Cliente internacional irritado. O relatório está atrasado. A pressão bate e a vontade é sumir.",
                         "situation": "\"{{Where is the report? We were expecting it yesterday!|Onde está o relatório? Estávamos esperando ontem!}}\"",
                         "wrong": {
-                            "action": "O Recruta tenta ser 'educado demais' com palavras complexas e gagueja.",
-                            "result": "\"{{I apologize for the inconveniences. We are having difficulties...|Peço desculpas pelas inconveniências. Estamos tendo dificuldades...}}\" (Você soa distante e inseguro.)"
+                            "action": "A pessoa tenta ser sofisticada demais, caça palavra complexa e perde firmeza.",
+                            "result": "\"{{I apologize for the inconveniences. We are having difficulties...|Peço desculpas pelas inconveniências. Estamos tendo dificuldades...}}\" (Soa distante, lento e pouco confiável.)"
                         },
                         "right": {
-                            "action": "O Operador usa Pareto. Direto ao ponto. Foco no resultado.",
-                            "result": "\"{{Sorry about that. We're running a bit late, but I'll get it done today. Is that okay?|Desculpe por isso. Estamos um pouco atrasados, mas vou resolver hoje. Tudo bem?}}\" (Você assume o comando da conversa)"
+                            "action": "A mentalidade certa usa Pareto: vai direto ao ponto e protege o resultado.",
+                            "result": "\"{{Sorry about that. We're running a bit late, but I'll get it done today. Is that okay?|Desculpe por isso. Estamos um pouco atrasados, mas vou resolver hoje. Tudo bem?}}\" (Você recupera controle sem se esconder atrás de frase difícil.)"
                         }
                     })
                 },
                 {
                     type: "box-warning",
                     title: "⚠️ O LIMITE DO TUTORIAL",
-                    content: "O que você viu até aqui é o mapa da mina. Mas saber que o 80/20 existe não é o mesmo que possuir as listas de alta frequência e os treinamentos de mielinização pesada. \n\nExiste um protocolo silencioso que separa quem 'sabe como funciona' de quem 'opera no automático'. Para cruzar essa linha, você precisará de mais do que apenas teoria."
+                    content: "O que você viu até aqui é o mapa da mina. Mas saber que o 80/20 existe não é a mesma coisa que ter critério para cortar excesso, reconhecer padrão útil e automatizar vocabulário que realmente aparece.\n\nExiste uma diferença grande entre entender a lógica e operar com ela. Para cruzar essa linha, você precisa de mais do que teoria."
                 },
                 {
                     type: "elite-insight",
                     title: "🔓 OPEN LOOP: O VÍRUS DO SOTAQUE",
-                    content: "Você aprendeu a economizar palavras. Mas de que adianta usar as palavras certas se o seu sotaque brasileiro adiciona uma \"{{Vogal Fantasma|Epêntese}}\" que faz os gringos acharem que você é um amador? No próximo módulo, vou te mostrar o som invisível que destrói sua autoridade. Prepare seus ouvidos."
+                    content: "Você aprendeu a economizar palavras. Agora entra outro ponto decisivo: o som que você adiciona sem perceber. No próximo módulo, você vai ver como a {{Vogal Fantasma|epêntese}} bagunça sua escuta, sua produção e a imagem de clareza que você passa."
                 }
             ]
         },
@@ -476,7 +476,7 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "box-goal",
                     title: "Objetivo Tático",
-                    content: "Seu ouvido não é ruim; ele foi mal treinado. Vamos entender por que os nativos parecem falar 'rápido demais' e como desativar a 'Vogal Fantasma' (o vício nº 1 dos brasileiros) que destrói sua inteligência percebida em campo."
+                    content: "Seu ouvido não é ruim; ele foi mal treinado. Vamos entender por que os nativos parecem falar rápido demais e como desativar a {{Vogal Fantasma|vogal fantasma}}, um dos vícios mais comuns do brasileiro quando ouve e produz inglês."
                 },
                 {
                     type: "h2",
@@ -484,16 +484,16 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "A maior reclamação dos operadores novatos é: 'Eu entendo o professor, mas não entendo o nativo na rua'. O segredo: eles não falam rápido, eles falam **conectado**.\n\nO português é uma língua 'Sílaba por Sílaba' (tá-tá-tá-tá). O inglês é uma língua de 'Ritmo e Pancada' (Stress-timed). Nós atropelamos as palavras fracas para chegar logo nas fortes."
+                    content: "Uma das reclamações mais comuns é: 'Eu entendo o professor, mas não entendo o nativo na rua'. O segredo é que eles não falam necessariamente mais rápido. Eles falam **conectado**.\n\nO português tende a vir mais recortado sílaba por sílaba. O inglês distribui energia de outro jeito: reduz palavras fracas e concentra força nas partes mais importantes."
                 },
                 {
                     type: "brain-diagram",
                     content: JSON.stringify({
                         "title": "🧠 O FILTRO FONÉTICO BRASILEIRO",
                         "steps": [
-                            "Percepção Categórica: Seu cérebro foi treinado para ignorar sons que não existem no português. Quando um nativo usa um 'Schwa' ou um 'Short I', seu cérebro tenta encaixar na gaveta mais próxima (geralmente o som de 'i' ou 'é').",
-                            "O Delay de Processamento: Você ouve '{{Bit|Pouco}}' e seu cérebro processa como '{{Beat|Bater}}'. Essa confusão gera um atraso. Enquanto você decodifica a primeira palavra, o nativo já terminou a frase.",
-                            "Remapeamento Neural: Para entender o inglês real, precisamos instalar um novo driver de áudio no seu córtex auditivo."
+                            "Percepção Categórica: seu cérebro foi treinado para ignorar sons que não existem no português. Quando o nativo usa um {{schwa|schwa}} ou um som curto, seu ouvido tenta encaixar na gaveta mais próxima.",
+                            "Delay de Processamento: você ouve '{{Bit|Pouco}}' e o cérebro puxa '{{Beat|Bater}}'. Essa troca gera atraso, e a frase anda antes de você terminar de decodificar.",
+                            "Remapeamento: para entender o inglês real, o ouvido precisa aprender novos contrastes em vez de insistir no filtro do português."
                         ]
                     })
                 },
@@ -503,7 +503,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "O maior inimigo da sua autoridade é o som que você **adiciona** onde ele não existe. No Brasil, consoante muda é proibida; toda consoante quer uma vogal de mãos dadas. No inglês, consoantes podem (e devem) morrer secas."
+                    content: "Um dos vícios que mais bagunçam a clareza é o som que você **adiciona** onde ele não existe. No português, consoantes finais costumam pedir apoio. No inglês, muitas delas morrem secas. Quando você coloca uma vogal extra, o som muda, o ritmo muda e a compreensão pode sair do trilho."
                 },
                 {
                     type: "comparison-table",
@@ -520,7 +520,7 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "box-action",
                     title: "🎯 AÇÃO CORRETIVA: O PENHASCO",
-                    content: "Imagine que o final da palavra é um penhasco. Você deve parar exatamente na consoante final. Não deixe sua língua 'escorregar' para um som de 'i'. Treine travar a garganta no final de \"{{Big|Grande}}\" e \"{{Hot|Quente}}\"."
+                    content: "Imagine que o final da palavra é um penhasco. Você deve parar exatamente na consoante final. Não deixe sua língua escorregar para um som de 'i'. Treine encerrar seco em \"{{Big|Grande}}\" e \"{{Hot|Quente}}\"."
                 },
                 {
                     type: "h2",
@@ -550,7 +550,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "No Brasil, falamos com a boca muito aberta e articulada. O inglês é falado no fundo da garganta, com a mandíbula relaxada, quase sem abrir a boca."
+                    content: "O português costuma vir mais aberto e articulado. O inglês, em muitos contextos, trabalha com mais relaxamento de mandíbula, mais redução e menos esforço em cada sílaba fraca."
                 },
                 {
                     type: "comparison-table",
@@ -566,7 +566,7 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "reveal-box",
                     title: "📝 NOTA TÁTICA (Clique para expandir)",
-                    content: "O nativo não fala 'errado', ele fala de forma econômica. Tentar falar o inglês de livro em um bar ou em uma reunião informal é como ir de terno e gravata para a praia: você é o único que não está confortável e todos percebem."
+                    content: "O nativo não fala 'errado'; ele fala de forma econômica. Tentar reproduzir o inglês de livro em todo contexto informal cria um descompasso. Você até pode ser entendido, mas fica menos natural e gasta mais energia do que precisa."
                 },
                 {
                     type: "h2",
@@ -578,11 +578,11 @@ export const PILAR_1_DATA: PillarData = {
                         "context": "Starbucks em NY. Fila enorme atrás de você. O atendente, estressado, dispara:",
                         "situation": "\"{{Whaddya-havin? Need-any-thin-else?|O que vai querer? Precisa de mais algo?}}\"",
                         "wrong": {
-                            "action": "O Aluno Tradicional tenta separar as palavras: 'What... do... you... having?'. Ele trava na gramática do 'having'.",
-                            "result": "O atendente perde a paciência. 'Next!'. Você sai sem o café e com a autoestima no chão."
+                            "action": "A cabeça treinada por escola tenta separar todas as palavras e trava na forma.",
+                            "result": "Você se atrasa, perde o fio e sente que o problema é incapacidade, quando na verdade o problema é o tipo de escuta que foi treinado."
                         },
                         "right": {
-                            "action": "O Operador Elite reconhece o som /whaddya/ como um bloco único. Foca na entonação de pergunta.",
+                            "action": "Você reconhece /whaddya/ como bloco de pergunta e foca no que importa.",
                             "result": "\"{{Black coffee. That's it.|Café preto. Só isso.}}\" (Curto, claro e funcional.)"
                         }
                     })
@@ -593,12 +593,12 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "O brasileiro tem pavor do silêncio. Quando esquecemos uma palavra, preenchemos com \"éééé...\" ou \"humm...\". Isso é mortal.\n\n**Técnica de Elite:** Se esquecer a palavra, faça uma pausa silenciosa. Olhe nos olhos. O silêncio demonstra pensamento e controle. O \"éééé\" demonstra insegurança e ativa o sotaque brasileiro."
+                    content: "Muita gente tem pavor do silêncio. Quando esquece uma palavra, preenche com \"éééé...\" ou \"humm...\".\n\n**Técnica de Elite:** se esquecer a palavra, faça uma pausa silenciosa. O silêncio transmite processamento e controle. O preenchimento excessivo transmite pressa, insegurança e ruído."
                 },
                 {
                     type: "elite-insight",
                     title: "💡 INSIGHT DE ELITE",
-                    content: "O seu ouvido é um músculo. Se você só treina ouvindo áudio lento de livro didático, você está treinando para perder. A partir de agora, você vai consumir o som real, com todas as suas 'sujeiras', reduções e velocidade. Bem-vindo ao mundo real."
+                    content: "O seu ouvido é um músculo. Se você só treina com áudio lento e limpo demais, está treinando uma versão protegida do idioma. A partir daqui, a ideia é encostar no som real, com redução, velocidade e imperfeição suficiente para gerar adaptação de verdade."
                 },
                 {
                     type: "audio-decode-game",
@@ -676,7 +676,7 @@ export const PILAR_1_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Daqui para frente, o curso entra numa camada mais acompanhada: mais aplicação, mais direção e mais correção humana. Não é sobre jogar mais conteúdo em cima de você. É sobre pegar o que já começou a nascer e transformar isso em uso real, com segurança."
+                    content: "Daqui para frente, o curso entra numa camada mais acompanhada: mais aplicação, mais direção e mais correção humana. Não é sobre jogar mais conteúdo em cima de você. É sobre pegar o que já começou a nascer e transformar isso em uso real com mais segurança."
                 },
                 {
                     type: "brain-diagram",
@@ -726,7 +726,7 @@ export const PILAR_1_DATA: PillarData = {
                 {
                     type: "box-action",
                     title: "📋 O que você vai encontrar agora",
-                    content: "Ao tocar em iniciar avaliação, você verá:\n\n• uma parte curta de perguntas objetivas\n• uma resposta escrita simples\n• a opção de deixar seu WhatsApp para receber retorno mais rápido\n\nTudo foi pensado para ser direto, leve e útil."
+                    content: "Ao tocar em iniciar avaliação, você verá:\n\n• uma parte curta de perguntas objetivas\n• uma resposta escrita simples\n• a etapa de contato para facilitar o retorno da equipe\n\nTudo foi pensado para ser direto, leve e útil."
                 },
                 {
                     type: "pillar-end",

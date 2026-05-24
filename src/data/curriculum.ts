@@ -60,9 +60,9 @@ export const PILLARS: Pillar[] = [
     },
     {
         id: "pilar-5",
-        title: "05. Pronúncia & Fluência",
+        title: "05. Números, Dinheiro e Decisões",
         status: "locked",
-        description: "Técnicas para soar natural e confiante.",
+        description: "Precos, datas, horarios, pagamento e salario com ingles claro e util.",
         routerPath: "/pilar/5",
     },
     {
