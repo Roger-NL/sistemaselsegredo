@@ -133,9 +133,9 @@ export function FeaturesSection({ isAuthenticated = false }: { isAuthenticated?:
                     <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
                     <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
                         <div className="text-left max-w-md">
-                            <h3 className="text-2xl font-serif text-white mb-4">Especializações (Pós-Graduação)</h3>
+                            <h3 className="text-2xl font-serif text-white mb-4">Especializações (Etapa Final)</h3>
                             <p className="text-white/50 text-sm font-mono mb-8">
-                                Apenas para alunos que concluem os 9 pilares. Treinamento focado em objetivos específicos.
+                                Trilhas avançadas planejadas para a etapa final da jornada, liberadas conforme o progresso do aluno e a evolução da plataforma.
                             </p>
                             <ul className="grid grid-cols-2 gap-4">
                                 {specs.map((spec, i) => (

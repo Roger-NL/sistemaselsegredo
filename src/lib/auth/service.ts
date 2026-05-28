@@ -1,6 +1,6 @@
 /**
  * Authentication Service (FIREBASE EDITION)
- * Replaces local-db with Firebase Auth + Firestore
+ * Firebase Auth + Firestore authentication service
  */
 
 import {
@@ -536,26 +536,6 @@ export function initAuthFull(): void {
  * Activate with Invite Code
  */
 export async function activateWithInvite(userId: string, code: string): Promise<AuthResult> {
-    // 1. Backdoor para Testes (Modo Deus)
-    if (code === "ADMIN-TEST-KEY") {
-        const expiresAt = new Date();
-        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-        try {
-            const userRef = doc(db, "users", userId);
-            await updateDoc(userRef, {
-                subscriptionStatus: 'premium',
-                subscriptionExpiresAt: expiresAt.toISOString(),
-                premiumActivatedAt: new Date().toISOString(),
-                inviteCodeUsed: 'ADMIN-TEST-KEY'
-            });
-            const user = await mapFirebaseUser(auth.currentUser!);
-            return { success: true, user: user! };
-        } catch {
-            return { success: false, error: 'Erro ao ativar conta de teste.' };
-        }
-    }
-
-    // 2. Validação Real no Firestore
     try {
         const codesRef = collection(db, "invite_codes");
         const q = query(codesRef, where("code", "==", code), where("status", "==", "unused"));
@@ -568,6 +548,11 @@ export async function activateWithInvite(userId: string, code: string): Promise<
         const codeDoc = querySnapshot.docs[0];
         const codeRef = doc(db, "invite_codes", codeDoc.id);
         const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+        const currentApprovedPillar =
+            userSnap.exists() && typeof userSnap.data()?.approvedPillar === "number"
+                ? userSnap.data()!.approvedPillar
+                : 1;
 
         const expiresAt = new Date();
         expiresAt.setFullYear(expiresAt.getFullYear() + 1);
@@ -585,7 +570,8 @@ export async function activateWithInvite(userId: string, code: string): Promise<
             subscriptionStatus: 'premium',
             subscriptionExpiresAt: expiresAt.toISOString(),
             premiumActivatedAt: new Date().toISOString(),
-            inviteCodeUsed: code
+            inviteCodeUsed: code,
+            approvedPillar: Math.max(currentApprovedPillar, 2)
         });
 
         await batch.commit();

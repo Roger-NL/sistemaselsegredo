@@ -205,7 +205,7 @@ export function SpecialtiesSection() {
                             <Rocket className="w-3.5 h-3.5 text-violet-500" />
                         </motion.div>
                         <span className={`font-mono text-[10px] tracking-widest uppercase ${isDark ? "text-violet-400" : "text-violet-600"}`}>
-                            Depois dos 9 Pilares
+                            Etapa final da jornada
                         </span>
                     </div>
                     <h2 className={`text-3xl md:text-5xl font-bold font-serif mb-3 ${isDark ? "text-white" : "text-gray-900"}`}>

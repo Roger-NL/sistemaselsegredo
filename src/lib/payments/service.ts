@@ -23,7 +23,7 @@ import type {
 import { calculateCheckoutInstallmentTotals, MAX_CHECKOUT_INSTALLMENTS } from "@/lib/payments/installments";
 
 const PAYMENT_VALUE = 297.0;
-const PAYMENT_DESCRIPTION = "Acesso Vitalicio - BasedSpeak PRO (9 Pilares)";
+const PAYMENT_DESCRIPTION = "BasedSpeak PRO - Acesso Premium";
 const SPECIALTY_TEST_PAYMENT_VALUE = 50.0;
 const SPECIALTY_TEST_PAYMENT_DESCRIPTION = "Teste DevTools - Compra de Especialidade";
 const PIX_VALIDITY_MS = 5 * 60 * 1000;
@@ -428,7 +428,7 @@ export async function getCheckoutState(userId: string, plan: CheckoutPlan = "lif
     return {
       success: true,
       alreadyPremium: true,
-      message: "Este usuario ja possui acesso vitalicio.",
+      message: "Este usuario ja possui acesso premium.",
     };
   }
 

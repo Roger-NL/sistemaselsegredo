@@ -63,7 +63,7 @@ export default function ObrigadoPage() {
                     </h1>
 
                     <p className="mx-auto mb-8 max-w-lg text-base leading-relaxed text-slate-400 sm:mb-10 md:text-lg">
-                        Seu pagamento foi confirmado com sucesso. Você agora faz parte da <span className="text-white font-medium">elite operacional</span> e tem acesso vitalício à ferramenta.
+                        Seu pagamento foi confirmado com sucesso. Você agora faz parte da <span className="text-white font-medium">jornada premium</span> e seu acesso foi liberado na plataforma.
                     </p>
 
                     {/* Premium Unlocked Features Grid */}
@@ -76,29 +76,29 @@ export default function ObrigadoPage() {
                         <div className="flex min-h-[104px] items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:min-h-[132px]">
                             <Fingerprint className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400/80" strokeWidth={1.5} />
                             <div className="min-w-0">
-                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Manejo dos Pilares</p>
-                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Acesso profundo aos 9 fundamentos</p>
+                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Jornada Premium</p>
+                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Acesso liberado conforme sua progressão</p>
                             </div>
                         </div>
                         <div className="flex min-h-[104px] items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:min-h-[132px]">
                             <BookOpen className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400/80" strokeWidth={1.5} />
                             <div className="min-w-0">
-                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Especializações</p>
-                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Módulos avançados liberados</p>
+                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Etapas Avançadas</p>
+                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Liberação gradual conforme o avanço da jornada</p>
                             </div>
                         </div>
                         <div className="flex min-h-[104px] items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:min-h-[132px]">
                             <Award className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400/80" strokeWidth={1.5} />
                             <div className="min-w-0">
-                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Certificações</p>
-                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Suporte a testes OPIc e internacionais</p>
+                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Acompanhamento</p>
+                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Fluxo premium com acompanhamento e evolução controlada</p>
                             </div>
                         </div>
                         <div className="flex min-h-[104px] items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:min-h-[132px]">
                             <Users className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400/80" strokeWidth={1.5} />
                             <div className="min-w-0">
-                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Squads e Lobbies</p>
-                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Acesso direto à nossa comunidade</p>
+                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Próximas Etapas</p>
+                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">O restante da jornada continua a abrir no momento certo</p>
                             </div>
                         </div>
                     </motion.div>

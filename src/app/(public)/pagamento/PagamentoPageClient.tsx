@@ -16,7 +16,7 @@ import {
     EMPTY_DIRECT_CARD_FORM,
     getDirectCardFieldErrors
 } from "@/lib/payments/direct-card";
-import type { DirectCardField, DirectCardFieldErrors } from "@/lib/payments/direct-card";
+import type { DirectCardFieldErrors } from "@/lib/payments/direct-card";
 import { calculateCheckoutInstallmentTotals, MAX_CHECKOUT_INSTALLMENTS } from "@/lib/payments/installments";
 import {
     Check,
@@ -114,7 +114,8 @@ function PagamentoPageContent() {
     const checkoutPlan = searchParams.get("plan") === "specialty" ? "specialty" : "lifetime";
     const isSpecialtyTestMode = checkoutPlan === "specialty";
 
-    const [showCodeInput, setShowCodeInput] = useState(false);
+    const forceShowInvite = searchParams.get("invite") === "1" || searchParams.get("beta") === "1";
+    const [showCodeInput, setShowCodeInput] = useState(forceShowInvite);
     const [inviteCode, setInviteCode] = useState('');
     const [cpf, setCpf] = useState('');
     const [cardForm, setCardForm] = useState(EMPTY_DIRECT_CARD_FORM);
@@ -633,26 +634,26 @@ function PagamentoPageContent() {
                                     {isSpecialtyTestMode ? "50" : "297"}
                                 </h2>
                                 <p className="text-slate-400 mt-4 text-sm uppercase tracking-widest">
-                                    {isSpecialtyTestMode ? "Compra de Especialidade • Pagamento Único" : "Acesso Vitalício • Pagamento Único"}
+                                    {isSpecialtyTestMode ? "Compra de Especialidade • Pagamento Único" : "Acesso Premium • Pagamento Único"}
                                 </p>
                             </div>
 
                             <ul className="text-left max-w-md mx-auto space-y-4 mb-10 text-slate-300">
                                 <li className="flex items-center gap-3">
                                     <Check className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                                    <span>Sistema completo de 9 Pilares</span>
+                                    <span>Jornada premium liberada conforme sua progressão</span>
                                 </li>
                                 <li className="flex items-center gap-3">
                                     <Check className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                                    <span>Certificações Internacionais</span>
+                                    <span>Conteúdo principal já utilizável nesta fase</span>
                                 </li>
                                 <li className="flex items-center gap-3">
                                     <Check className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                                    <span>Acesso à Comunidade Elite</span>
+                                    <span>Novas etapas adicionadas com a evolução da plataforma</span>
                                 </li>
                                 <li className="flex items-center gap-3">
                                     <Check className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                                    <span>Garantia de 7 dias blindada</span>
+                                    <span>Liberação controlada e acompanhamento do seu avanço</span>
                                 </li>
                             </ul>
 
@@ -1020,21 +1021,44 @@ function PagamentoPageContent() {
                         </div>
                     </div>
 
-                    <div className="mt-12">
+                    <div className="mt-12 max-w-xl mx-auto">
                         {!showCodeInput ? (
-                            <button
-                                onClick={() => setShowCodeInput(true)}
-                                className="text-xs text-slate-600 hover:text-slate-400 transition-colors underline decoration-slate-700 underline-offset-4"
-                            >
-                                Tenho um código de convite de parceiro
-                            </button>
+                            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.05] px-5 py-5 text-left">
+                                <div className="flex items-start gap-3">
+                                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">
+                                        <Shield className="h-4 w-4" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300">
+                                            Acesso beta por convite
+                                        </p>
+                                        <p className="mt-2 text-sm leading-relaxed text-white/72">
+                                            Recebeu um codigo de tester? Voce nao precisa pagar agora. Ative seu acesso direto por aqui.
+                                        </p>
+                                        <button
+                                            onClick={() => setShowCodeInput(true)}
+                                            className="mt-4 inline-flex items-center rounded-full border border-emerald-400/25 bg-emerald-400/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100 transition hover:border-emerald-300/40 hover:bg-emerald-400/15"
+                                        >
+                                            Tenho codigo de acesso
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         ) : (
                             <motion.form
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
-                                className="max-w-xs mx-auto"
+                                className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.05] px-5 py-5"
                                 onSubmit={handleInviteSubmit}
                             >
+                                <div className="mb-4 text-left">
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-300">
+                                        Ativar acesso beta
+                                    </p>
+                                    <p className="mt-2 text-sm leading-relaxed text-white/72">
+                                        Digite abaixo o codigo que voce recebeu. Se ele estiver valido, seu acesso premium sera liberado sem pagamento.
+                                    </p>
+                                </div>
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
@@ -1051,6 +1075,13 @@ function PagamentoPageContent() {
                                         OK
                                     </button>
                                 </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCodeInput(false)}
+                                    className="mt-3 text-xs text-white/45 transition hover:text-white/70"
+                                >
+                                    Voltar para o pagamento
+                                </button>
                             </motion.form>
                         )}
                     </div>

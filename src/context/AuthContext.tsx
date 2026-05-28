@@ -24,7 +24,6 @@ import {
     isFirestorePermissionError,
     updateUserProgress,
 } from "@/lib/auth/service";
-import { getUserExamStatus } from "@/lib/exam/service";
 
 import type { User as FirebaseUser } from "firebase/auth";
 
@@ -219,10 +218,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if ((user.approvedPillar || 1) >= 2) return;
 
             try {
-                const pillarOneExam = await getUserExamStatus(user.id, 1);
-
-                if (!pillarOneExam) return;
-
                 await updateUserProgress(user.id, {
                     approvedPillar: 2,
                 });
@@ -319,7 +314,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 console.error("Error refreshing user profile:", error);
             }
         }
-    }, [auth.currentUser]);
+    }, []);
 
     const logout = async () => {
         await authLogout();

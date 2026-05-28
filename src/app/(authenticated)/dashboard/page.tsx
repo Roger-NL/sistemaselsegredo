@@ -203,11 +203,11 @@ export default function Page() {
                 </div>
 
                 <p className="text-sm leading-relaxed text-white/72">
-                  Você concluiu o Pilar 1. Seu acesso ao premium vitalício já pode ser ativado quando quiser.
+                  Você concluiu o Pilar 1. Seu acesso premium já pode ser ativado quando quiser.
                 </p>
 
                 <div className="mt-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-emerald-100/55">
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Vitalício</span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Premium</span>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Pagamento único</span>
                 </div>
 
