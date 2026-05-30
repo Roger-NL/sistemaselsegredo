@@ -9,8 +9,9 @@ export type UserRole = "admin" | "student" | undefined;
 
 export interface AuthGuardInput {
   pathname: string;
-  token?: string;
-  role?: string;
+  pathnameWithSearch?: string;
+  hasVerifiedSession?: boolean;
+  hasLegacySessionHint?: boolean;
 }
 
 export interface AuthGuardDecision {
@@ -31,27 +32,22 @@ function matchesPath(pathname: string, prefixes: string[]): boolean {
 
 export function evaluateAuthGuard({
   pathname,
-  token,
-  role,
+  pathnameWithSearch,
+  hasVerifiedSession,
+  hasLegacySessionHint,
 }: AuthGuardInput): AuthGuardDecision {
+  const callbackTarget = pathnameWithSearch || pathname;
   const isProtectedPath = matchesPath(pathname, PROTECTED_ROUTE_PREFIXES);
   const isAdminPath = matchesPath(pathname, ADMIN_ROUTE_PREFIXES);
   const isAuthPath = matchesPath(pathname, AUTH_ENTRY_ROUTE_PREFIXES);
+  const hasAuthenticatedBoundary = Boolean(hasVerifiedSession || hasLegacySessionHint);
 
   if (isAdminPath) {
-    if (!token) {
+    if (!hasAuthenticatedBoundary) {
       return {
         allow: false,
-        redirectTo: ROUTES.auth.login,
+        redirectTo: `${ROUTES.auth.login}?callbackUrl=${encodeURIComponent(callbackTarget)}`,
         reason: "admin_requires_login",
-      };
-    }
-
-    if (role !== "admin") {
-      return {
-        allow: false,
-        redirectTo: ROUTES.app.dashboard,
-        reason: "admin_requires_role",
       };
     }
 
@@ -59,10 +55,10 @@ export function evaluateAuthGuard({
   }
 
   if (isProtectedPath) {
-    if (!token) {
+    if (!hasAuthenticatedBoundary) {
       return {
         allow: false,
-        redirectTo: `${ROUTES.auth.login}?callbackUrl=${encodeURIComponent(pathname)}`,
+        redirectTo: `${ROUTES.auth.login}?callbackUrl=${encodeURIComponent(callbackTarget)}`,
         reason: "protected_requires_login",
       };
     }
@@ -70,15 +66,7 @@ export function evaluateAuthGuard({
     return { allow: true, reason: "allow" };
   }
 
-  if (isAuthPath && token) {
-    if (role === "admin") {
-      return {
-        allow: false,
-        redirectTo: ROUTES.admin.dashboard,
-        reason: "auth_already_logged_admin",
-      };
-    }
-
+  if (isAuthPath && hasAuthenticatedBoundary) {
     return {
       allow: false,
       redirectTo: ROUTES.app.dashboard,

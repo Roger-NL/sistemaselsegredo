@@ -1,14 +1,20 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { evaluateAuthGuard } from "@/lib/auth/route-guards";
+import { AUTH_SESSION_COOKIE_NAME } from "@/lib/auth/session";
 
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
+  const pathnameWithSearch = `${pathname}${search}`;
 
-  // Read auth cookies used by guard rules
-  const token = request.cookies.get('es_session_token')?.value;
-  const role = request.cookies.get('es_user_role')?.value;
-  const decision = evaluateAuthGuard({ pathname, token, role });
+  const verifiedSessionCookie = request.cookies.get(AUTH_SESSION_COOKIE_NAME)?.value;
+  const legacySessionHint = request.cookies.get('es_session_token')?.value;
+  const decision = evaluateAuthGuard({
+    pathname,
+    pathnameWithSearch,
+    hasVerifiedSession: Boolean(verifiedSessionCookie),
+    hasLegacySessionHint: Boolean(legacySessionHint),
+  });
 
   if (!decision.allow && decision.redirectTo) {
     return NextResponse.redirect(new URL(decision.redirectTo, request.url));

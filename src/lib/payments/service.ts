@@ -18,9 +18,18 @@ import type {
   CheckoutStateResponse,
   CreditCardCheckoutMode,
   PaymentAttemptRecord,
+  PaymentReconciliationReason,
+  PaymentReconciliationStatus,
+  PaymentVerificationResponse,
   PendingCheckoutPayment,
 } from "@/lib/payments/types";
 import { calculateCheckoutInstallmentTotals, MAX_CHECKOUT_INSTALLMENTS } from "@/lib/payments/installments";
+import {
+  buildStoredProgressSnapshot,
+  deriveLegacyApprovedPillar,
+  type WriterExamStatus,
+  type WriterLiveSessionStatus,
+} from "@/lib/auth/premium-access";
 
 const PAYMENT_VALUE = 297.0;
 const PAYMENT_DESCRIPTION = "BasedSpeak PRO - Acesso Premium";
@@ -58,6 +67,20 @@ type UserPaymentSnapshot = {
   pendingCheckoutPayment?: PendingCheckoutPayment | null;
   approvedPillar?: number;
 };
+
+type TrackedPaymentResolution =
+  | {
+      kind: "tracked";
+      attempt: PaymentAttemptRecord;
+      reason: Extract<PaymentReconciliationReason, "tracked_attempt" | "tracked_pending_snapshot">;
+    }
+  | {
+      kind: "unresolved";
+      reason: Extract<
+        PaymentReconciliationReason,
+        "provider_reference_match_without_plan" | "missing_attempt" | "missing_plan" | "user_mismatch"
+      >;
+    };
 
 function nowIso() {
   return new Date().toISOString();
@@ -127,6 +150,8 @@ function getAttemptResponse(
     expiresAt: attempt.expiresAt,
     dueDate: attempt.dueDate,
     plan: attempt.plan,
+    reconciliationStatus: options?.expired ? "expired" : "pending",
+    reconciliationReason: options?.expired ? "expired" : "tracked_attempt",
   };
 }
 
@@ -163,8 +188,95 @@ function sanitizeWebhookEventId(payload: { id?: string; event?: string; payment?
   ].join(":");
 }
 
+function buildUnresolvedVerificationResponse(params: {
+  paymentId: string;
+  status: string;
+  reason: Extract<
+    PaymentReconciliationReason,
+    "provider_reference_match_without_plan" | "missing_attempt" | "missing_plan" | "user_mismatch"
+  >;
+}): PaymentVerificationResponse {
+  return {
+    isPaid: false,
+    status: params.status,
+    paymentId: params.paymentId,
+    reconciliationStatus: "unresolved",
+    reconciliationReason: params.reason,
+    needsManualReconciliation: true,
+  };
+}
+
 async function getUserDoc(userId: string) {
   return adminDb.collection(USER_COLLECTION).doc(userId).get();
+}
+
+async function getLatestExamStatus(userId: string, pillarId: number): Promise<WriterExamStatus> {
+  const snapshot = await adminDb.collection("pillar_exams")
+    .where("userId", "==", userId)
+    .where("pillarId", "==", pillarId)
+    .get();
+
+  if (snapshot.empty) {
+    return "not_started";
+  }
+
+  const exams = snapshot.docs
+    .map((item) => item.data() as { status?: WriterExamStatus; createdAt?: { toMillis?: () => number } | null })
+    .sort((left, right) => {
+      const leftTime = left.createdAt?.toMillis?.() ?? 0;
+      const rightTime = right.createdAt?.toMillis?.() ?? 0;
+      return rightTime - leftTime;
+    });
+
+  return exams[0]?.status ?? "not_started";
+}
+
+async function recomputeStoredProgressSnapshot(
+  userId: string,
+  options?: {
+    subscriptionStatusOverride?: string;
+    currentApprovedPillarOverride?: number;
+    completedPillarModulesOverride?: string[];
+  }
+) {
+  const userSnapshot = await getUserDoc(userId);
+  if (!userSnapshot.exists) {
+    return;
+  }
+
+  const userData = userSnapshot.data() as UserPaymentSnapshot & {
+    completedPillarModules?: string[];
+  };
+
+  const [pillar1ExamStatus, pillar2ExamStatus, liveSessionSnapshot] = await Promise.all([
+    getLatestExamStatus(userId, 1),
+    getLatestExamStatus(userId, 2),
+    adminDb.collection("live_sessions").doc(`${userId}_p2`).get(),
+  ]);
+
+  const snapshot = buildStoredProgressSnapshot({
+    subscriptionStatus: options?.subscriptionStatusOverride ?? userData.subscriptionStatus,
+    completedPillarModules: options?.completedPillarModulesOverride ?? userData.completedPillarModules,
+    pillar1ExamStatus,
+    pillar2ExamStatus,
+    pillar2LiveSessionStatus: (
+      liveSessionSnapshot.exists
+        ? (liveSessionSnapshot.data()?.status as WriterLiveSessionStatus | undefined)
+        : "not_created"
+    ),
+    currentApprovedPillar:
+      options?.currentApprovedPillarOverride ??
+      (typeof userData.approvedPillar === "number" ? userData.approvedPillar : 1),
+  });
+
+  await adminDb.collection(USER_COLLECTION).doc(userId).set(
+    {
+      progressSnapshot: snapshot,
+      approvedPillar: deriveLegacyApprovedPillar(snapshot),
+      updatedAt: nowIso(),
+    },
+    { merge: true }
+  );
 }
 
 async function getPaymentAttempt(paymentId: string) {
@@ -238,22 +350,28 @@ async function grantLifetimeAccess(userId: string, payment: AsaasPayment) {
   const userRef = adminDb.collection(USER_COLLECTION).doc(userId);
   const userDoc = await userRef.get();
   const currentApprovedPillar = userDoc.exists ? Number(userDoc.data()?.approvedPillar || 1) : 1;
+  const activatedAt = nowIso();
 
   await userRef.set(
     {
       subscriptionStatus: "premium",
       purchasedPlan: "lifetime",
-      premiumActivatedAt: nowIso(),
+      premiumActivatedAt: activatedAt,
       paymentId: payment.id,
       paymentMethod: payment.billingType as CheckoutPaymentMethod,
       paymentStatus: payment.status,
       pendingCheckoutPayment: null,
       pendingPixPayment: null,
       approvedPillar: Math.max(currentApprovedPillar, 2),
-      updatedAt: nowIso(),
+      updatedAt: activatedAt,
     },
     { merge: true }
   );
+
+  await recomputeStoredProgressSnapshot(userId, {
+    subscriptionStatusOverride: "premium",
+    currentApprovedPillarOverride: Math.max(currentApprovedPillar, 2),
+  });
 }
 
 async function registerSpecialtyPurchase(userId: string, payment: AsaasPayment) {
@@ -276,7 +394,7 @@ async function registerSpecialtyPurchase(userId: string, payment: AsaasPayment) 
 
 function normalizeAttemptFromLegacyUser(userId: string, userData: UserPaymentSnapshot): PaymentAttemptRecord | null {
   const legacyPix = userData.pendingPixPayment;
-  if (!legacyPix?.paymentId) {
+  if (!legacyPix?.paymentId || !legacyPix.plan) {
     return null;
   }
 
@@ -285,7 +403,7 @@ function normalizeAttemptFromLegacyUser(userId: string, userData: UserPaymentSna
     userId,
     asaasCustomerId: "",
     paymentMethod: "PIX",
-    plan: "lifetime",
+    plan: legacyPix.plan,
     value: PAYMENT_VALUE,
     description: PAYMENT_DESCRIPTION,
     status: legacyPix.status || "PENDING",
@@ -298,6 +416,63 @@ function normalizeAttemptFromLegacyUser(userId: string, userData: UserPaymentSna
     createdAt: legacyPix.createdAt || nowIso(),
     updatedAt: nowIso(),
   };
+}
+
+function buildAttemptFromTrackedPendingSnapshot(
+  userId: string,
+  payment: AsaasPayment,
+  userData: UserPaymentSnapshot
+): PaymentAttemptRecord | null {
+  const pending = userData.pendingCheckoutPayment;
+  if (pending?.paymentId === payment.id && pending.plan) {
+    return stripUndefined({
+      id: payment.id,
+      userId,
+      asaasCustomerId: payment.customer,
+      paymentMethod: pending.paymentMethod,
+      creditCardMode: pending.creditCardMode,
+      installmentCount: pending.installmentCount,
+      plan: pending.plan,
+      value: payment.value,
+      description: getPlanPricing(pending.plan).description,
+      status: payment.status,
+      dueDate: payment.dueDate,
+      invoiceUrl: payment.invoiceUrl,
+      qrCode: pending.qrCode,
+      qrCodePayload: pending.qrCodePayload,
+      expiresAt: pending.expiresAt,
+      externalReference: payment.externalReference || userId,
+      billingType: pending.paymentMethod,
+      createdAt: pending.createdAt,
+      updatedAt: nowIso(),
+      paidAt: isPaymentPaid(payment.status) ? nowIso() : undefined,
+    });
+  }
+
+  const legacyPix = userData.pendingPixPayment;
+  if (legacyPix?.paymentId === payment.id && legacyPix.plan) {
+    return stripUndefined({
+      id: payment.id,
+      userId,
+      asaasCustomerId: payment.customer,
+      paymentMethod: "PIX" as const,
+      plan: legacyPix.plan,
+      value: payment.value,
+      description: getPlanPricing(legacyPix.plan).description,
+      status: payment.status,
+      dueDate: payment.dueDate,
+      qrCode: legacyPix.qrCode,
+      qrCodePayload: legacyPix.qrCodePayload,
+      expiresAt: legacyPix.expiresAt,
+      externalReference: payment.externalReference || userId,
+      billingType: "PIX" as const,
+      createdAt: legacyPix.createdAt || nowIso(),
+      updatedAt: nowIso(),
+      paidAt: isPaymentPaid(payment.status) ? nowIso() : undefined,
+    });
+  }
+
+  return null;
 }
 
 function buildPaymentAttemptFromAsaas(params: {
@@ -395,6 +570,65 @@ async function syncAttemptFromAsaas(attempt: PaymentAttemptRecord, payment: Asaa
   return updatedAttempt;
 }
 
+async function resolveTrackedPaymentAttempt(
+  userId: string,
+  payment: AsaasPayment,
+  options?: { existingAttempt?: PaymentAttemptRecord | null; userData?: UserPaymentSnapshot }
+): Promise<TrackedPaymentResolution> {
+  const existingAttempt = options?.existingAttempt;
+  if (existingAttempt) {
+    if (existingAttempt.userId !== userId) {
+      return { kind: "unresolved", reason: "user_mismatch" };
+    }
+
+    return {
+      kind: "tracked",
+      attempt: existingAttempt,
+      reason: "tracked_attempt",
+    };
+  }
+
+  const userDoc = options?.userData ? null : await getUserDoc(userId);
+  const userData = options?.userData ?? ((userDoc?.data() as UserPaymentSnapshot | undefined) ?? undefined);
+  if (userData) {
+    const attemptFromPending = buildAttemptFromTrackedPendingSnapshot(userId, payment, userData);
+    if (attemptFromPending) {
+      return {
+        kind: "tracked",
+        attempt: attemptFromPending,
+        reason: "tracked_pending_snapshot",
+      };
+    }
+  }
+
+  if ((payment.externalReference || "") === userId) {
+    return { kind: "unresolved", reason: "provider_reference_match_without_plan" };
+  }
+
+  return { kind: "unresolved", reason: "missing_attempt" };
+}
+
+async function applyPaidAttempt(userId: string, attempt: PaymentAttemptRecord, payment: AsaasPayment) {
+  if (!isPaymentPaid(payment.status)) {
+    throw new Error("INVALID_PAYMENT_RECONCILIATION_STATUS");
+  }
+
+  if (attempt.userId !== userId) {
+    throw new Error("FORBIDDEN_PAYMENT_ACCESS");
+  }
+
+  if (!attempt.plan) {
+    throw new Error("MISSING_PAYMENT_PLAN");
+  }
+
+  if (attempt.plan === "lifetime") {
+    await grantLifetimeAccess(userId, payment);
+  } else {
+    await registerSpecialtyPurchase(userId, payment);
+  }
+  await syncUserPendingState(userId, null);
+}
+
 async function resolveActiveAttempt(userId: string): Promise<PaymentAttemptRecord | null> {
   const userDoc = await getUserDoc(userId);
   const userData = userDoc.data() as UserPaymentSnapshot | undefined;
@@ -429,6 +663,8 @@ export async function getCheckoutState(userId: string, plan: CheckoutPlan = "lif
       success: true,
       alreadyPremium: true,
       message: "Este usuario ja possui acesso premium.",
+      reconciliationStatus: "already_premium",
+      reconciliationReason: "already_premium",
     };
   }
 
@@ -444,12 +680,7 @@ export async function getCheckoutState(userId: string, plan: CheckoutPlan = "lif
   const syncedAttempt = await syncAttemptFromAsaas(activeAttempt, payment);
 
   if (isPaymentPaid(payment.status)) {
-    if (syncedAttempt.plan === "lifetime") {
-      await grantLifetimeAccess(userId, payment);
-    } else {
-      await registerSpecialtyPurchase(userId, payment);
-    }
-    await syncUserPendingState(userId, null);
+    await applyPaidAttempt(userId, syncedAttempt, payment);
 
     return {
       success: true,
@@ -459,6 +690,8 @@ export async function getCheckoutState(userId: string, plan: CheckoutPlan = "lif
       plan: syncedAttempt.plan,
       status: payment.status,
       message: "Pagamento ja confirmado para este usuario.",
+      reconciliationStatus: "paid",
+      reconciliationReason: "tracked_attempt",
     };
   }
 
@@ -600,41 +833,54 @@ export async function createCheckout(input: CheckoutRequestInput): Promise<Check
   return getAttemptResponse(attempt);
 }
 
-export async function verifyPaymentStatus(userId: string, paymentId: string): Promise<{ isPaid: boolean; status: string }> {
+export async function verifyPaymentStatus(userId: string, paymentId: string): Promise<PaymentVerificationResponse> {
   const existingAttempt = await assertPaymentBelongsToUser(paymentId, userId);
   const payment = await getPayment(paymentId);
-  const attempt = existingAttempt
-    ? existingAttempt
-    : buildPaymentAttemptFromAsaas({
-        payment,
-        userId,
-        asaasCustomerId: payment.customer,
-        paymentMethod: payment.billingType as CheckoutPaymentMethod,
-        value: payment.value,
-        description: PAYMENT_DESCRIPTION,
-        plan: "lifetime",
-        installmentCount: 1,
-      });
+  const resolution = await resolveTrackedPaymentAttempt(userId, payment, { existingAttempt });
 
-  const syncedAttempt = await syncAttemptFromAsaas(attempt, payment);
+  if (resolution.kind === "unresolved") {
+    return buildUnresolvedVerificationResponse({
+      paymentId: payment.id,
+      status: payment.status,
+      reason: resolution.reason,
+    });
+  }
+
+  const syncedAttempt = await syncAttemptFromAsaas(resolution.attempt, payment);
 
   if (isPaymentPaid(payment.status)) {
-    if (syncedAttempt.plan === "lifetime") {
-      await grantLifetimeAccess(userId, payment);
-    } else {
-      await registerSpecialtyPurchase(userId, payment);
-    }
-    await syncUserPendingState(userId, null);
-    return { isPaid: true, status: payment.status };
+    await applyPaidAttempt(userId, syncedAttempt, payment);
+    return {
+      isPaid: true,
+      status: payment.status,
+      paymentId: payment.id,
+      plan: syncedAttempt.plan,
+      reconciliationStatus: "paid",
+      reconciliationReason: resolution.reason,
+    };
   }
 
   if (shouldClearPendingPayment(payment.status)) {
     await syncUserPendingState(userId, null);
+    return {
+      isPaid: false,
+      status: payment.status,
+      paymentId: payment.id,
+      plan: syncedAttempt.plan,
+      reconciliationStatus: "cleared",
+      reconciliationReason: "cleared",
+    };
   } else {
     await syncUserPendingState(userId, syncedAttempt);
+    return {
+      isPaid: false,
+      status: payment.status,
+      paymentId: payment.id,
+      plan: syncedAttempt.plan,
+      reconciliationStatus: "pending",
+      reconciliationReason: "pending",
+    };
   }
-
-  return { isPaid: false, status: payment.status };
 }
 
 export async function handleAsaasWebhook(payload: {
@@ -673,18 +919,42 @@ export async function handleAsaasWebhook(payload: {
     throw new Error("Nao foi possivel determinar o usuario local para o pagamento recebido.");
   }
 
-  if (!attempt) {
-    attempt = buildPaymentAttemptFromAsaas({
-      payment,
-      userId,
-      asaasCustomerId: payment.customer,
-      paymentMethod: payment.billingType as CheckoutPaymentMethod,
-      value: payment.value,
-      description: PAYMENT_DESCRIPTION,
-      plan: "lifetime",
-      installmentCount: 1,
+  const userDoc = await getUserDoc(userId);
+  const userData = userDoc.data() as UserPaymentSnapshot | undefined;
+  const resolution = await resolveTrackedPaymentAttempt(userId, payment, {
+    existingAttempt: attempt,
+    userData,
+  });
+
+  if (resolution.kind === "unresolved") {
+    await webhookRef.set(
+      {
+        reconciliationStatus: "unresolved",
+        reconciliationReason: resolution.reason,
+        userId,
+        needsManualReconciliation: true,
+        updatedAt: nowIso(),
+      },
+      { merge: true }
+    );
+
+    return {
+      success: true,
+      paymentId: payment.id,
+      ignoredEvent: event,
+      reconciliationStatus: "unresolved" as PaymentReconciliationStatus,
+      reconciliationReason: resolution.reason,
+      needsManualReconciliation: true,
+    };
+  }
+
+  attempt = resolution.attempt;
+
+  if (!attemptDoc.exists) {
+    attempt = {
+      ...attempt,
       lastWebhookEvent: event,
-    });
+    };
   } else {
     attempt = {
       ...attempt,
@@ -700,22 +970,59 @@ export async function handleAsaasWebhook(payload: {
   await upsertPaymentAttempt(attempt);
 
   if (isPaymentPaid(payment.status)) {
-    if (attempt.plan === "lifetime") {
-      await grantLifetimeAccess(userId, payment);
-    } else {
-      await registerSpecialtyPurchase(userId, payment);
-    }
-    await syncUserPendingState(userId, null);
-    return { success: true, grantedAccess: true, paymentId: payment.id };
+    await applyPaidAttempt(userId, attempt, payment);
+    await webhookRef.set(
+      {
+        reconciliationStatus: "paid",
+        reconciliationReason: resolution.reason,
+        userId,
+        needsManualReconciliation: false,
+        updatedAt: nowIso(),
+      },
+      { merge: true }
+    );
+    return {
+      success: true,
+      grantedAccess: true,
+      paymentId: payment.id,
+      reconciliationStatus: "paid" as PaymentReconciliationStatus,
+      reconciliationReason: resolution.reason,
+    };
   }
 
   if (shouldClearPendingPayment(payment.status)) {
     await syncUserPendingState(userId, null);
+    await webhookRef.set(
+      {
+        reconciliationStatus: "cleared",
+        reconciliationReason: "cleared",
+        userId,
+        needsManualReconciliation: false,
+        updatedAt: nowIso(),
+      },
+      { merge: true }
+    );
   } else {
     await syncUserPendingState(userId, attempt);
+    await webhookRef.set(
+      {
+        reconciliationStatus: "pending",
+        reconciliationReason: "pending",
+        userId,
+        needsManualReconciliation: false,
+        updatedAt: nowIso(),
+      },
+      { merge: true }
+    );
   }
 
-  return { success: true, ignoredEvent: event, paymentId: payment.id };
+  return {
+    success: true,
+    ignoredEvent: event,
+    paymentId: payment.id,
+    reconciliationStatus: shouldClearPendingPayment(payment.status) ? ("cleared" as PaymentReconciliationStatus) : ("pending" as PaymentReconciliationStatus),
+    reconciliationReason: shouldClearPendingPayment(payment.status) ? ("cleared" as PaymentReconciliationReason) : ("pending" as PaymentReconciliationReason),
+  };
 }
 
 export async function createCreditCardToken(input: CheckoutRequestInput) {

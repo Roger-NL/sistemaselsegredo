@@ -6,6 +6,7 @@ import { MessageSquare, ArrowRight } from "lucide-react";
 import { FlightButton } from "@/components/ui/FlightCard";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useProgress } from "@/context/ProgressContext";
 import { type PillarExam } from "@/lib/exam/service";
 import { ROUTES } from "@/lib/routes";
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -14,6 +15,7 @@ import { isFirestorePermissionError } from "@/lib/auth/service";
 
 export function ExamFeedbackPopup() {
     const { user } = useAuth();
+    const { progressSnapshot } = useProgress();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [examData, setExamData] = useState<PillarExam | null>(null);
@@ -66,17 +68,27 @@ export function ExamFeedbackPopup() {
 
         if (examData.pillarId === 1) {
             handleClose();
-            router.push(ROUTES.public.payment);
+            if (progressSnapshot?.nextAction === "continue_pillar_2" || (progressSnapshot?.highestUnlockedPillar ?? 1) >= 2) {
+                router.push(`${ROUTES.app.pillar}/2`);
+            } else if (progressSnapshot?.nextAction === "upgrade_required") {
+                router.push(ROUTES.public.payment);
+            } else {
+                setIsViewModalOpen(true);
+            }
         } else if (examData.pillarId === 2 && examData.status === "approved") {
             handleClose();
-            router.push(ROUTES.app.scheduling);
+            if (
+                progressSnapshot?.nextAction === "schedule_pillar_2_live_session" ||
+                progressSnapshot?.nextAction === "wait_pillar_2_live_session_confirmation"
+            ) {
+                router.push(ROUTES.app.scheduling);
+            } else if (progressSnapshot?.nextAction === "continue_pillar_3" || (progressSnapshot?.highestUnlockedPillar ?? 1) >= 3) {
+                router.push(`${ROUTES.app.pillar}/3`);
+            } else {
+                setIsViewModalOpen(true);
+            }
         } else {
-            // Stay on dashboard, open view modal
-            // Do NOT close the main popup yet? Or close it and open the other one?
-            // Better to close the notification and open the detail.
             handleClose();
-            // We need to persist the examData for the view modal, so we can't just rely on 'examData' if 'isOpen' controls nullability or similar.
-            // But handleClose sets isOpen false. examData stays in state? Yes.
             setIsViewModalOpen(true);
         }
     };
@@ -116,7 +128,19 @@ export function ExamFeedbackPopup() {
                             </p>
 
                             <FlightButton variant="neon" className="w-full" onClick={handleAction}>
-                                {examData.pillarId === 1 ? "Ver Próxima Etapa" : "Ver Veredito do Comando"}
+                                {examData.pillarId === 1
+                                    ? progressSnapshot?.nextAction === "continue_pillar_2"
+                                        ? "Abrir Pilar 2"
+                                        : progressSnapshot?.nextAction === "upgrade_required"
+                                            ? "Ver Próxima Etapa"
+                                            : "Ver Veredito do Comando"
+                                    : examData.pillarId === 2 && progressSnapshot?.nextAction === "continue_pillar_3"
+                                        ? "Abrir Pilar 3"
+                                        : examData.pillarId === 2 &&
+                                            (progressSnapshot?.nextAction === "schedule_pillar_2_live_session" ||
+                                                progressSnapshot?.nextAction === "wait_pillar_2_live_session_confirmation")
+                                            ? "Ir para Agendamentos"
+                                            : "Ver Veredito do Comando"}
                                 <ArrowRight className="ml-2 w-5 h-5" />
                             </FlightButton>
 

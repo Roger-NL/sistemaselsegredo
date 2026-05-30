@@ -1,11 +1,10 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, onIdTokenChanged } from "firebase/auth";
 import { doc, getDoc, updateDoc, getDocFromServer, onSnapshot } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
-import Cookies from 'js-cookie';
 
 import {
     login as authLogin,
@@ -22,7 +21,8 @@ import {
     AuthResult,
     SubscriptionStatus,
     isFirestorePermissionError,
-    updateUserProgress,
+    setLegacySessionHintCookies,
+    clearLegacySessionHintCookies,
 } from "@/lib/auth/service";
 
 import type { User as FirebaseUser } from "firebase/auth";
@@ -45,6 +45,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+const AUTH_SESSION_ENDPOINT = "/api/auth/session";
 
 function buildFallbackUser(firebaseUser: FirebaseUser): User {
     return {
@@ -62,25 +63,83 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
+    const lastSyncedTokenRef = useRef<string | null>(null);
+    const warnedSessionEndpointRef = useRef(false);
+    const sessionEndpointUnavailableRef = useRef(false);
 
-    useEffect(() => {
-        if (!user) {
-            Cookies.remove('es_session_token', { path: '/' });
-            Cookies.remove('es_user_role', { path: '/' });
-            Cookies.remove('es_user_status', { path: '/' });
+    const syncServerSession = useCallback(async (firebaseUser: FirebaseUser | null, forceRefresh = false) => {
+        if (sessionEndpointUnavailableRef.current) {
             return;
         }
 
-        const role = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"].includes(user.email)
-            ? 'admin'
-            : 'student';
+        if (!firebaseUser) {
+            lastSyncedTokenRef.current = null;
 
-        Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
-        Cookies.set('es_user_role', role, { expires: 7, path: '/' });
-        Cookies.set('es_user_status', user.subscriptionStatus, { expires: 7, path: '/' });
+            try {
+                await fetch(AUTH_SESSION_ENDPOINT, {
+                    method: "DELETE",
+                    credentials: "include",
+                });
+            } catch (error) {
+                console.error("Error clearing server session:", error);
+            }
+
+            return;
+        }
+
+        try {
+            const idToken = await firebaseUser.getIdToken(forceRefresh);
+
+            if (!forceRefresh && lastSyncedTokenRef.current === idToken) {
+                return;
+            }
+
+            const response = await fetch(AUTH_SESSION_ENDPOINT, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ idToken }),
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    sessionEndpointUnavailableRef.current = true;
+                    if (!warnedSessionEndpointRef.current) {
+                        console.warn("Server auth session endpoint not available yet. Continuing with transitional client auth sync.");
+                        warnedSessionEndpointRef.current = true;
+                    }
+                    return;
+                }
+
+                throw new Error(`Failed to sync server session (${response.status})`);
+            }
+
+            lastSyncedTokenRef.current = idToken;
+        } catch (error) {
+            console.error("Error syncing server session:", error);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!user) {
+            clearLegacySessionHintCookies();
+            return;
+        }
+
+        setLegacySessionHintCookies(user);
     }, [user]);
 
     // FIREBASE REAL-TIME LISTENER
+    useEffect(() => {
+        const unsubscribeToken = onIdTokenChanged(auth, async (firebaseUser) => {
+            await syncServerSession(firebaseUser);
+        });
+
+        return () => unsubscribeToken();
+    }, [syncServerSession]);
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
@@ -209,37 +268,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return () => unsubscribe();
     }, [user?.id]);
 
-    useEffect(() => {
-        const syncPremiumPillarOneUnlock = async () => {
-            if (!user?.id) return;
-
-            const isPremiumUser = checkSubscriptionStatus(user) === "premium";
-            if (!isPremiumUser) return;
-            if ((user.approvedPillar || 1) >= 2) return;
-
-            try {
-                await updateUserProgress(user.id, {
-                    approvedPillar: 2,
-                });
-
-                setUser((prev) => prev ? { ...prev, approvedPillar: Math.max(prev.approvedPillar || 1, 2) } : prev);
-            } catch (error) {
-                console.error("Error syncing premium Pillar 1 unlock:", error);
-            }
-        };
-
-        syncPremiumPillarOneUnlock();
-    }, [user]);
-
     const login = async (identifier: string, password: string): Promise<AuthResult> => {
         const result = await authLogin(identifier, password);
-        // State update happens automatically via onAuthStateChanged
+        if (result.success && auth.currentUser) {
+            await syncServerSession(auth.currentUser, true);
+        }
         return result;
     };
 
     const loginWithGoogle = async (): Promise<AuthResult> => {
         const result = await authLoginWithGoogle();
-        // State update happens automatically via onAuthStateChanged
+        if (result.success && auth.currentUser) {
+            await syncServerSession(auth.currentUser, true);
+        }
         return result;
     };
 
@@ -250,7 +291,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         confirmPassword: string
     ): Promise<AuthResult> => {
         const result = await authRegister(name, email, password, confirmPassword);
-        // State update happens automatically via onAuthStateChanged
+        if (result.success && auth.currentUser) {
+            await syncServerSession(auth.currentUser, true);
+        }
         return result;
     };
 
@@ -296,14 +339,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const refreshUser = useCallback(async () => {
         if (!auth.currentUser) return;
         try {
+            await syncServerSession(auth.currentUser, true);
+
             const userDocRef = doc(db, "users", auth.currentUser.uid);
             // IMPORTANTE: Forçar leitura direto do servidor para evitar ler cache antigo (caso o webhook tenha atualizado)
             const userDoc = await getDocFromServer(userDocRef);
             if (userDoc.exists()) {
                 const userData = userDoc.data() as User;
                 setUser({ ...userData, id: auth.currentUser.uid });
-                // Atualizar cookie também para o SSR (Layouts) saber
-                Cookies.set('es_user_status', userData.subscriptionStatus || 'free', { expires: 30, path: '/' });
             } else {
                 setUser(buildFallbackUser(auth.currentUser));
             }
@@ -314,9 +357,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 console.error("Error refreshing user profile:", error);
             }
         }
-    }, []);
+    }, [syncServerSession]);
 
     const logout = async () => {
+        await syncServerSession(null);
         await authLogout();
         // State update happens automatically via onAuthStateChanged
         router.push("/");

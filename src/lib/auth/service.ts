@@ -16,20 +16,27 @@ import {
     User as FirebaseUser
 } from "firebase/auth";
 import {
+    collection,
     doc,
     setDoc,
     getDoc,
-    updateDoc,
-    deleteField,
-    collection,
-    query,
-    where,
     getDocs,
-    writeBatch
+    query,
+    updateDoc,
+    where,
+    deleteField,
 } from "firebase/firestore";
 import type { FirebaseError } from "firebase/app";
 import { auth, db } from "@/lib/firebase";
 import Cookies from 'js-cookie';
+import {
+    buildPremiumAccessUpdate,
+    buildStoredProgressSnapshot,
+    deriveLegacyApprovedPillar,
+    normalizeInviteCode,
+    type WriterExamStatus,
+    type WriterLiveSessionStatus,
+} from "@/lib/auth/premium-access";
 
 // ADMIN LIST (Hardcoded for MVP Phase)
 const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
@@ -137,6 +144,89 @@ function getFirebaseErrorCode(error: unknown): string | null {
 
 function normalizeSubscriptionStatus(status: User["subscriptionStatus"] | "active" | undefined): SubscriptionStatus {
     return status === "active" ? "free" : (status ?? "free");
+}
+
+async function getLatestExamStatusForUser(userId: string, pillarId: number): Promise<WriterExamStatus> {
+    const snapshot = await getDocs(
+        query(
+            collection(db, "pillar_exams"),
+            where("userId", "==", userId),
+            where("pillarId", "==", pillarId)
+        )
+    );
+
+    if (snapshot.empty) {
+        return "not_started";
+    }
+
+    const exams = snapshot.docs
+        .map((item) => item.data() as { status?: WriterExamStatus; createdAt?: { toMillis?: () => number } | null })
+        .sort((left, right) => {
+            const leftTime = left.createdAt?.toMillis?.() ?? 0;
+            const rightTime = right.createdAt?.toMillis?.() ?? 0;
+            return rightTime - leftTime;
+        });
+
+    return exams[0]?.status ?? "not_started";
+}
+
+async function recomputeClientProgressSnapshot(userId: string) {
+    const userRef = doc(db, "users", userId);
+    const userSnapshot = await getDoc(userRef);
+    if (!userSnapshot.exists()) {
+        return;
+    }
+
+    const userData = userSnapshot.data() as {
+        subscriptionStatus?: string;
+        completedPillarModules?: string[];
+        approvedPillar?: number;
+    };
+
+    const [pillar1ExamStatus, pillar2ExamStatus, liveSessionSnapshot] = await Promise.all([
+        getLatestExamStatusForUser(userId, 1),
+        getLatestExamStatusForUser(userId, 2),
+        getDoc(doc(db, "live_sessions", `${userId}_p2`)),
+    ]);
+
+    const snapshot = buildStoredProgressSnapshot({
+        subscriptionStatus: userData.subscriptionStatus,
+        completedPillarModules: userData.completedPillarModules,
+        pillar1ExamStatus,
+        pillar2ExamStatus,
+        pillar2LiveSessionStatus: (
+            liveSessionSnapshot.exists()
+                ? (liveSessionSnapshot.data()?.status as WriterLiveSessionStatus | undefined)
+                : "not_created"
+        ),
+        currentApprovedPillar: typeof userData.approvedPillar === "number" ? userData.approvedPillar : 1,
+    });
+
+    await updateDoc(userRef, {
+        progressSnapshot: snapshot,
+        approvedPillar: deriveLegacyApprovedPillar(snapshot),
+    });
+}
+
+function getLegacyRoleHint(email: string): "admin" | "student" {
+    return ADMIN_EMAILS.includes(email) ? "admin" : "student";
+}
+
+/**
+ * Transitional client-side hints used by legacy SSR/route guards.
+ * These cookies are not an authorization source and should disappear once
+ * the server-side session rollout is complete.
+ */
+export function setLegacySessionHintCookies(user: Pick<User, "id" | "email" | "subscriptionStatus">): void {
+    Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
+    Cookies.set('es_user_role', getLegacyRoleHint(user.email), { expires: 7, path: '/' });
+    Cookies.set('es_user_status', user.subscriptionStatus, { expires: 7, path: '/' });
+}
+
+export function clearLegacySessionHintCookies(): void {
+    Cookies.remove('es_session_token', { path: '/' });
+    Cookies.remove('es_user_role', { path: '/' });
+    Cookies.remove('es_user_status', { path: '/' });
 }
 
 export function isFirestorePermissionError(error: unknown): boolean {
@@ -253,11 +343,7 @@ export async function loginWithGoogle(): Promise<AuthResult> {
             console.warn("Google login succeeded, but Firestore profile access was denied. Using auth fallback user.", firestoreError);
         }
 
-        // Cookies
-        Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
-        const role = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'student';
-        Cookies.set('es_user_role', role, { expires: 7, path: '/' });
-        Cookies.set('es_user_status', user.subscriptionStatus, { expires: 7, path: '/' });
+        setLegacySessionHintCookies(user);
 
         return { success: true, user };
 
@@ -323,13 +409,7 @@ export async function login(identifier: string, password: string): Promise<AuthR
             console.warn("Email login succeeded, but Firestore profile access was denied. Using auth fallback user.", firestoreError);
         }
 
-        // Set Middleware Cookie
-        Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
-
-        // Set Role Cookie
-        const role = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'student';
-        Cookies.set('es_user_role', role, { expires: 7, path: '/' });
-        Cookies.set('es_user_status', user.subscriptionStatus, { expires: 7, path: '/' });
+        setLegacySessionHintCookies(user);
 
         return { success: true, user };
 
@@ -389,11 +469,7 @@ export async function register(
             console.warn("Registration succeeded, but Firestore profile creation was denied. Using auth fallback user.", firestoreError);
         }
 
-        // Set Middleware Cookie
-        Cookies.set('es_session_token', newUser.id, { expires: 7, path: '/' });
-        const role = ADMIN_EMAILS.includes(email) ? 'admin' : 'student';
-        Cookies.set('es_user_role', role, { expires: 7, path: '/' });
-        Cookies.set('es_user_status', newUser.subscriptionStatus, { expires: 7, path: '/' });
+        setLegacySessionHintCookies(newUser);
 
         return { success: true, user: newUser };
 
@@ -508,8 +584,7 @@ export async function resetPassword(email: string): Promise<AuthResult> {
  */
 export async function logout(): Promise<void> {
     await signOut(auth);
-    Cookies.remove('es_session_token', { path: '/' });
-    Cookies.remove('es_user_role', { path: '/' });
+    clearLegacySessionHintCookies();
 }
 
 /**
@@ -522,6 +597,48 @@ export function getCurrentUser(): User | null {
     // This helper is kept for compatibility but returns null
     // The AuthContext will handle the real user loading.
     return null;
+}
+
+type AuthJsonResponse<T> =
+    | { ok: true; data: T }
+    | { ok: false; error: string };
+
+async function postAuthenticatedAuthJson<T>(
+    path: string,
+    payload: Record<string, unknown>
+): Promise<AuthJsonResponse<T>> {
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+        return { ok: false, error: "Usuario nao autenticado." };
+    }
+
+    try {
+        const idToken = await currentUser.getIdToken();
+        const response = await fetch(path, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${idToken}`,
+            },
+            credentials: "include",
+            body: JSON.stringify(payload),
+        });
+
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+
+        if (!response.ok) {
+            return {
+                ok: false,
+                error: typeof data?.error === "string" ? data.error : "Erro ao processar solicitacao.",
+            };
+        }
+
+        return { ok: true, data: (data ?? {}) as T };
+    } catch (error) {
+        console.error(`Error calling ${path}:`, error);
+        return { ok: false, error: "Erro de comunicacao com o servidor." };
+    }
 }
 
 // ============================================================================
@@ -537,51 +654,39 @@ export function initAuthFull(): void {
  */
 export async function activateWithInvite(userId: string, code: string): Promise<AuthResult> {
     try {
-        const codesRef = collection(db, "invite_codes");
-        const q = query(codesRef, where("code", "==", code), where("status", "==", "unused"));
-        const querySnapshot = await getDocs(q);
-
-        if (querySnapshot.empty) {
-            return { success: false, error: 'Código inválido ou já utilizado.' };
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+            return { success: false, error: "Usuario nao autenticado." };
         }
 
-        const codeDoc = querySnapshot.docs[0];
-        const codeRef = doc(db, "invite_codes", codeDoc.id);
-        const userRef = doc(db, "users", userId);
-        const userSnap = await getDoc(userRef);
-        const currentApprovedPillar =
-            userSnap.exists() && typeof userSnap.data()?.approvedPillar === "number"
-                ? userSnap.data()!.approvedPillar
-                : 1;
+        if (userId && currentUser.uid !== userId) {
+            return { success: false, error: "Sessao divergente. Entre novamente antes de ativar o convite." };
+        }
 
-        const expiresAt = new Date();
-        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+        const normalizedCode = normalizeInviteCode(code);
+        if (!normalizedCode) {
+            return { success: false, error: "Codigo de convite obrigatorio." };
+        }
 
-        // Batch Write (Atomicidade: ou faz tudo ou nada)
-        const batch = writeBatch(db);
+        const activationResult = await postAuthenticatedAuthJson<{ success: boolean; inviteCode: string }>(
+            "/api/auth/invite",
+            { code: normalizedCode }
+        );
 
-        batch.update(codeRef, {
-            status: 'used',
-            usedBy: userId,
-            usedAt: new Date().toISOString()
-        });
+        if (!activationResult.ok) {
+            return { success: false, error: activationResult.error };
+        }
 
-        batch.update(userRef, {
-            subscriptionStatus: 'premium',
-            subscriptionExpiresAt: expiresAt.toISOString(),
-            premiumActivatedAt: new Date().toISOString(),
-            inviteCodeUsed: code,
-            approvedPillar: Math.max(currentApprovedPillar, 2)
-        });
+        const user = await mapFirebaseUser(currentUser);
+        if (!user) {
+            return { success: false, error: "Nao foi possivel atualizar o perfil apos a ativacao." };
+        }
 
-        await batch.commit();
-
-        const user = await mapFirebaseUser(auth.currentUser!);
-        return { success: true, user: user! };
+        return { success: true, user };
 
     } catch (error: unknown) {
         console.error("Invite Error:", error);
-        return { success: false, error: 'Erro ao processar código.' };
+        return { success: false, error: 'Erro ao processar codigo.' };
     }
 }
 
@@ -589,17 +694,23 @@ export async function activateWithInvite(userId: string, code: string): Promise<
  * Activate with Payment
  */
 export async function activateWithPayment(userId: string, paymentId: string): Promise<AuthResult> {
-    const expiresAt = new Date();
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-
     try {
         const userRef = doc(db, "users", userId);
-        await updateDoc(userRef, {
-            subscriptionStatus: 'premium',
-            subscriptionExpiresAt: expiresAt.toISOString(),
-            premiumActivatedAt: new Date().toISOString(),
-            paymentId
-        });
+        const userSnap = await getDoc(userRef);
+        const currentApprovedPillar =
+            userSnap.exists() && typeof userSnap.data()?.approvedPillar === "number"
+                ? userSnap.data()!.approvedPillar
+                : 1;
+
+        // Transitional legacy path:
+        // checkout + verification already converge on the server-side billing flow.
+        // We keep this helper compatible for older callers, but it still writes directly
+        // until the billing migration is moved to the same protected server pattern.
+        await updateDoc(userRef, buildPremiumAccessUpdate({
+            currentApprovedPillar,
+            paymentId,
+        }));
+        await recomputeClientProgressSnapshot(userId);
 
         const user = await mapFirebaseUser(auth.currentUser!);
         return { success: true, user: user! };

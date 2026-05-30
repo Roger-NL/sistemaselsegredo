@@ -27,6 +27,7 @@ export default function Page() {
   const {
     getCompletedCount,
     getCurrentPillarNumber,
+    progressSnapshot,
     specializationStatus,
     getCurrentSpecialization,
     getGlobalProgress,
@@ -41,7 +42,9 @@ export default function Page() {
   const pillarOneModuleIds = PILAR_1_DATA.modules?.map((module) => module.id) ?? [];
   const isPremiumUser = subscriptionStatus === "premium";
   const hasFinishedPillarOne =
-    (user?.approvedPillar || 1) >= 2 ||
+    progressSnapshot?.nextAction === "upgrade_required" ||
+    progressSnapshot?.completedPillars.includes(1) ||
+    (progressSnapshot?.highestUnlockedPillar ?? 1) >= 2 ||
     (pillarOneModuleIds.length > 0 && pillarOneModuleIds.every((moduleId) => completedPillarModules.includes(moduleId)));
   const shouldShowPremiumCTA = !isPremiumUser && hasFinishedPillarOne;
   const [isPremiumCTAOpen, setIsPremiumCTAOpen] = useState(() => {
@@ -59,7 +62,12 @@ export default function Page() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [schedulingStatus, setSchedulingStatus] = useState<LiveSessionStatusPayload | null>(null);
   const hasBookedScheduling = Boolean(schedulingStatus?.session?.requestedSlotStart);
-  const shouldShowSchedulingCard = isPremiumUser && Boolean(schedulingStatus?.session) && !hasBookedScheduling;
+  const isSchedulingJourneyActive =
+    progressSnapshot?.nextAction === "schedule_pillar_2_live_session" ||
+    progressSnapshot?.nextAction === "wait_pillar_2_live_session_confirmation" ||
+    progressSnapshot?.nextAction === "continue_pillar_3";
+  const shouldShowSchedulingCard =
+    isPremiumUser && ((Boolean(schedulingStatus?.session) && !hasBookedScheduling) || isSchedulingJourneyActive);
 
   // Carregar Leaderboard
   useEffect(() => {
@@ -203,7 +211,9 @@ export default function Page() {
                 </div>
 
                 <p className="text-sm leading-relaxed text-white/72">
-                  Você concluiu o Pilar 1. Seu acesso premium já pode ser ativado quando quiser.
+                  {progressSnapshot?.nextAction === "upgrade_required"
+                    ? "Seu snapshot oficial já marcou o próximo passo: ativar o premium para abrir o Pilar 2."
+                    : "Você concluiu o Pilar 1. Seu acesso premium já pode ser ativado quando quiser."}
                 </p>
 
                 <div className="mt-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-emerald-100/55">

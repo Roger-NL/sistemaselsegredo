@@ -1,11 +1,18 @@
-import { cookies } from 'next/headers';
+import { getRequestPrincipal } from "@/lib/auth/principal";
 
-export async function getRequestUserContext() {
-  const cookieStore = await cookies();
-  const sessionUserId = cookieStore.get('es_session_token')?.value;
-  const role = cookieStore.get('es_user_role')?.value || 'student';
+export async function getRequestUserContext(req?: Request) {
+  const principal = await getRequestPrincipal(req, {
+    allowBearer: true,
+    allowSessionCookie: true,
+    allowLegacyCookie: true,
+  });
+
   return {
-    sessionUserId,
-    isAdmin: role === 'admin',
+    sessionUserId: principal?.uid ?? null,
+    isAdmin: principal?.role === "admin",
+    role: principal?.role ?? "student",
+    subscriptionStatus: principal?.subscriptionStatus ?? "free",
+    source: principal?.source ?? null,
+    principal,
   };
 }

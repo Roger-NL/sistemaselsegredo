@@ -2,9 +2,14 @@ import { redirect } from "next/navigation";
 import { PLANETS } from "@/data/curriculum";
 import { SPECIALIZATIONS_CONTENT } from "@/data/specializations-content";
 import { SpecializationStudyPage } from "@/features/decision/SpecializationStudyPage";
-import { getRequestUserContext } from "@/lib/auth/request-user";
+import { getRequestPrincipal } from "@/lib/auth/principal";
 import { adminDb } from "@/lib/firebase-admin";
 import { ROUTES } from "@/lib/routes";
+
+type StoredProgressSnapshot = {
+  eligibleForSpecialization?: boolean;
+  completedPillars?: number[];
+};
 
 function hasCompletedAllPillars(localPillarStatus: Record<string, unknown> | undefined) {
   if (!localPillarStatus) {
@@ -16,15 +21,31 @@ function hasCompletedAllPillars(localPillarStatus: Record<string, unknown> | und
   );
 }
 
+function canAccessSpecialization(progressSnapshot: StoredProgressSnapshot | undefined, localPillarStatus: Record<string, unknown> | undefined) {
+  if (progressSnapshot?.eligibleForSpecialization === true) {
+    return true;
+  }
+
+  if (Array.isArray(progressSnapshot?.completedPillars) && progressSnapshot.completedPillars.length >= 9) {
+    return true;
+  }
+
+  return hasCompletedAllPillars(localPillarStatus);
+}
+
 interface EspecialidadePageProps {
   params: Promise<{ id: string }>;
 }
 
 export default async function EspecialidadePage({ params }: EspecialidadePageProps) {
   const { id: specId } = await params;
-  const { sessionUserId } = await getRequestUserContext();
+  const principal = await getRequestPrincipal(undefined, {
+    allowBearer: false,
+    allowSessionCookie: true,
+    allowLegacyCookie: true,
+  });
 
-  if (!sessionUserId) {
+  if (!principal) {
     redirect(ROUTES.app.specialties);
   }
 
@@ -34,10 +55,13 @@ export default async function EspecialidadePage({ params }: EspecialidadePagePro
     redirect(ROUTES.app.specialties);
   }
 
-  const userSnapshot = await adminDb.collection("users").doc(sessionUserId).get();
-  const userData = userSnapshot.data() as { localPillarStatus?: Record<string, unknown> } | undefined;
+  const userSnapshot = await adminDb.collection("users").doc(principal.uid).get();
+  const userData = userSnapshot.data() as {
+    localPillarStatus?: Record<string, unknown>;
+    progressSnapshot?: StoredProgressSnapshot;
+  } | undefined;
 
-  if (!hasCompletedAllPillars(userData?.localPillarStatus)) {
+  if (!canAccessSpecialization(userData?.progressSnapshot, userData?.localPillarStatus)) {
     redirect(ROUTES.app.specialties);
   }
 

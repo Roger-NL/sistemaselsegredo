@@ -6,6 +6,7 @@ import { PILLARS_CONTENT } from "@/data/pillars-content";
 import { secureStorage } from "@/lib/storage/secure-storage";
 import { useAuth } from "@/context/AuthContext";
 import type { User } from "@/lib/auth/service";
+import type { ProgressSnapshotSeed } from "@/lib/progress/contract";
 
 // ============================================================================
 // PROGRESS CONTEXT
@@ -14,6 +15,7 @@ import type { User } from "@/lib/auth/service";
 // ============================================================================
 
 interface ProgressContextType {
+    progressSnapshot: AppProgressSnapshot | null;
     /** Status de cada pilar (por ID) */
     pillarStatus: Record<string, PillarStatus>;
     /** Marca um pilar como completado e desbloqueia o próximo */
@@ -99,6 +101,14 @@ type ProgressSnapshot = Pick<
     pillarStatus: Record<string, PillarStatus>;
 };
 
+type AppProgressSnapshot = ProgressSnapshotSeed & {
+    legacyAccessOverride?: boolean;
+};
+
+type UserWithProgressSnapshot = User & {
+    progressSnapshot?: AppProgressSnapshot | null;
+};
+
 // Estado inicial: apenas pilar 1 desbloqueado
 function getInitialStatus(): Record<string, PillarStatus> {
     const status: Record<string, PillarStatus> = {};
@@ -116,10 +126,63 @@ function getPillarModuleIds(pillarNumber: number): string[] {
     return PILLARS_CONTENT[pillarNumber]?.modules?.map((module) => module.id) ?? [];
 }
 
+function isNumberArray(value: unknown): value is number[] {
+    return Array.isArray(value) && value.every((item) => typeof item === "number");
+}
+
+function extractProgressSnapshot(user: User | null): AppProgressSnapshot | null {
+    const snapshot = (user as UserWithProgressSnapshot | null)?.progressSnapshot;
+    if (!snapshot || typeof snapshot !== "object") {
+        return null;
+    }
+
+    const candidate = snapshot as Partial<AppProgressSnapshot>;
+    if (
+        typeof candidate.currentPillar !== "number" ||
+        typeof candidate.highestUnlockedPillar !== "number" ||
+        !isNumberArray(candidate.completedPillars) ||
+        typeof candidate.nextAction !== "string" ||
+        typeof candidate.gateState !== "string" ||
+        typeof candidate.eligibleForSpecialization !== "boolean"
+    ) {
+        return null;
+    }
+
+    return {
+        currentPillar: candidate.currentPillar,
+        highestUnlockedPillar: candidate.highestUnlockedPillar,
+        completedPillars: candidate.completedPillars,
+        blockedReason: candidate.blockedReason ?? null,
+        nextAction: candidate.nextAction,
+        gateState: candidate.gateState,
+        eligibleForSpecialization: candidate.eligibleForSpecialization,
+        legacyAccessOverride: candidate.legacyAccessOverride,
+    };
+}
+
+function buildPillarStatusFromSnapshot(snapshot: AppProgressSnapshot): Record<string, PillarStatus> {
+    const completedPillars = new Set(snapshot.completedPillars);
+
+    return PILLARS.reduce<Record<string, PillarStatus>>((acc, pillar, index) => {
+        const pillarNumber = index + 1;
+
+        if (completedPillars.has(pillarNumber)) {
+            acc[pillar.id] = "completed";
+        } else if (pillarNumber <= snapshot.highestUnlockedPillar) {
+            acc[pillar.id] = "unlocked";
+        } else {
+            acc[pillar.id] = "locked";
+        }
+
+        return acc;
+    }, {});
+}
+
 // Provider
 export function ProgressProvider({ children }: { children: ReactNode }) {
     const { user, subscriptionStatus } = useAuth(); // NOW using user
     const isAdminUser = !!user?.email && ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"].includes(user.email);
+    const progressSnapshot = extractProgressSnapshot(user);
     const [pillarStatus, setPillarStatus] = useState<Record<string, PillarStatus>>(getInitialStatus);
     const [chosenSpecialization, setChosenSpecialization] = useState<string | null>(null);
     const [specializationStatus, setSpecializationStatus] = useState<'studying' | 'pending_approval' | 'completed' | null>(null);
@@ -164,10 +227,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             setHasSeenMissionComplete(stored.hasSeenMissionComplete || false);
         }
 
-        // SYNC WITH FIREBASE (approvedPillar & Specialty Progress)
+        // SYNC WITH FIREBASE (progress snapshot preferred, legacy approvedPillar as fallback)
         if (user) {
-            // 1. Pillar Logic (Server Authority for Level)
-            if (user.approvedPillar) {
+            if (progressSnapshot) {
+                initialStatus = buildPillarStatusFromSnapshot(progressSnapshot);
+            } else if (user.approvedPillar) {
+                // Legacy fallback while progressSnapshot is still rolling out.
                 const approvedLevel = user.approvedPillar;
                 const hasRemoteLocalPillarStatus = user.localPillarStatus !== undefined;
                 const newStatus: Record<string, PillarStatus> = {};
@@ -211,7 +276,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setPillarStatus(initialStatus);
 
         setIsHydrated(true);
-    }, [storageKey, user]); // Re-run when user changes
+    }, [progressSnapshot, storageKey, user]); // Re-run when user changes
 
     // Salva progresso no localStorage sempre que mudar
     // Salva progresso no localStorage E FIREBASE sempre que mudar
@@ -232,14 +297,16 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
             // 2. Remote Persistence (Firebase)
             if (user?.id) {
-                // Import dynamically to avoid circular dependencies if any, 
-                // or assume we have the function available.
-                // We'll import `updateUserProgress` at the top or use a dynamic import.
-                // Since this is inside useEffect, we can use the imported function.
+                // Remote sync keeps learner activity fields in sync, but no longer
+                // persists client-computed gating authority.
                 import("@/lib/auth/service").then(({ updateUserProgress }) => {
                     updateUserProgress(user.id, {
-                        ...progressData,
-                        localPillarStatus: pillarStatus
+                        chosenSpecialization,
+                        specializationStatus,
+                        completedSpecializations,
+                        completedModules,
+                        completedPillarModules,
+                        hasSeenMissionComplete,
                     });
                 });
             }
@@ -322,11 +389,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         });
         setPillarStatus(newStatus);
         setCompletedPillarModules([]);
-        // Sync to Firebase so reload doesn't override
+        // Dev override keeps the legacy pillar pointer in sync during transition,
+        // but no longer persists localPillarStatus as remote gating authority.
         if (user?.id) {
             import("@/lib/auth/service").then(({ updateUserProgress }) => {
                 updateUserProgress(user.id, {
-                    localPillarStatus: newStatus,
                     completedPillarModules: [],
                     approvedPillar: safeLevel, // Sync the "Server Authority" as well
                 });
@@ -336,6 +403,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // Retorna número do pilar atual
     const getCurrentPillarNumber = (): number => {
+        if (progressSnapshot?.currentPillar) {
+            return progressSnapshot.currentPillar;
+        }
+
         if (!isAdminUser && subscriptionStatus !== "premium") {
             return 1;
         }
@@ -354,6 +425,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // Conta pilares completados
     const getCompletedCount = (): number => {
+        if (progressSnapshot) {
+            return progressSnapshot.completedPillars.length;
+        }
+
         return Object.values(pillarStatus).filter((s) => s === "completed").length;
     };
 
@@ -366,6 +441,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const isPillarUnlocked = (pillarNumber: number): boolean => {
         // Regra de Ouro: Pilar 1 é sempre livre (Freemium)
         if (pillarNumber === 1) return true;
+
+        if (progressSnapshot) {
+            return pillarNumber <= progressSnapshot.highestUnlockedPillar;
+        }
 
         // Pilar 2+ exige premium sem excecao.
         if (!isAdminUser && subscriptionStatus !== 'premium') return false;
@@ -383,6 +462,17 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // Retorna pilares com status atualizado
     const getPillarsWithStatus = (): Pillar[] => {
+        if (progressSnapshot) {
+            const snapshotStatus = buildPillarStatusFromSnapshot(progressSnapshot);
+
+            return PILLARS.map((pillar, index) => ({
+                ...pillar,
+                status: index === 0 && !isAdminUser && subscriptionStatus !== "premium"
+                    ? (snapshotStatus[pillar.id] || "unlocked")
+                    : (snapshotStatus[pillar.id] || "locked"),
+            }));
+        }
+
         if (!isAdminUser && subscriptionStatus !== "premium") {
             return PILLARS.map((pillar, index) => ({
                 ...pillar,
@@ -410,8 +500,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // Verifica se pode escolher nova especialização
     const canChooseSpecialization = (): boolean => {
-        const allPillarsComplete = areAllPillarsComplete();
-        return allPillarsComplete;
+        return progressSnapshot?.eligibleForSpecialization ?? areAllPillarsComplete();
     };
 
     // Marca módulo como completo
@@ -548,7 +637,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // Retorna planetas com status atualizado
     const getPlanetsWithStatus = (): Planet[] => {
-        const allComplete = areAllPillarsComplete();
+        const allComplete = progressSnapshot?.eligibleForSpecialization ?? areAllPillarsComplete();
         return PLANETS.map((planet) => ({
             ...planet,
             status: allComplete ? "unlocked" : "locked",
@@ -587,6 +676,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     return (
         <ProgressContext.Provider
             value={{
+                progressSnapshot,
                 pillarStatus,
                 completePillar,
                 setPillarLevel,

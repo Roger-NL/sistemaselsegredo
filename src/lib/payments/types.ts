@@ -123,4 +123,39 @@ export interface CheckoutStateResponse {
   expiresAt?: string;
   dueDate?: string;
   plan?: CheckoutPlan;
+  reconciliationStatus?: PaymentReconciliationStatus;
+  needsManualReconciliation?: boolean;
+  reconciliationReason?: PaymentReconciliationReason;
+}
+
+export type PaymentReconciliationStatus =
+  | "pending"
+  | "paid"
+  | "expired"
+  | "cleared"
+  | "already_premium"
+  | "unresolved";
+
+export type PaymentReconciliationReason =
+  | "tracked_attempt"
+  | "tracked_pending_snapshot"
+  | "provider_reference_match_without_plan"
+  | "missing_attempt"
+  | "missing_plan"
+  | "user_mismatch"
+  | "provider_reference_mismatch"
+  | "invalid_paid_status"
+  | "pending"
+  | "cleared"
+  | "expired"
+  | "already_premium";
+
+export interface PaymentVerificationResponse {
+  isPaid: boolean;
+  status: string;
+  paymentId: string;
+  plan?: CheckoutPlan;
+  reconciliationStatus: PaymentReconciliationStatus;
+  reconciliationReason: PaymentReconciliationReason;
+  needsManualReconciliation?: boolean;
 }

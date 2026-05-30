@@ -15,6 +15,12 @@ import {
     runTransaction,
     type DocumentData
 } from "firebase/firestore";
+import {
+    buildStoredProgressSnapshot,
+    deriveLegacyApprovedPillar,
+    type WriterExamStatus,
+    type WriterLiveSessionStatus,
+} from "@/lib/auth/premium-access";
 
 export type ExamStatus = 'pending' | 'approved' | 'rejected';
 
@@ -35,6 +41,50 @@ export interface PillarExam {
 }
 
 const COLLECTION = "pillar_exams";
+
+async function recomputeUserProgressSnapshot(
+    userId: string,
+    overrides?: {
+        pillar1ExamStatus?: WriterExamStatus;
+        pillar2ExamStatus?: WriterExamStatus;
+    }
+) {
+    const userRef = doc(db, "users", userId);
+    const userSnapshot = await getDoc(userRef);
+    if (!userSnapshot.exists()) {
+        return;
+    }
+
+    const userData = userSnapshot.data() as {
+        subscriptionStatus?: string;
+        completedPillarModules?: string[];
+        approvedPillar?: number;
+    };
+
+    const [pillar1Exam, pillar2Exam, liveSessionSnapshot] = await Promise.all([
+        getUserExamStatus(userId, 1),
+        getUserExamStatus(userId, 2),
+        getDoc(doc(db, "live_sessions", `${userId}_p2`)),
+    ]);
+
+    const snapshot = buildStoredProgressSnapshot({
+        subscriptionStatus: userData.subscriptionStatus,
+        completedPillarModules: userData.completedPillarModules,
+        pillar1ExamStatus: overrides?.pillar1ExamStatus ?? ((pillar1Exam?.status ?? "not_started") as WriterExamStatus),
+        pillar2ExamStatus: overrides?.pillar2ExamStatus ?? ((pillar2Exam?.status ?? "not_started") as WriterExamStatus),
+        pillar2LiveSessionStatus: (
+            liveSessionSnapshot.exists()
+                ? (liveSessionSnapshot.data()?.status as WriterLiveSessionStatus | undefined)
+                : "not_created"
+        ),
+        currentApprovedPillar: typeof userData.approvedPillar === "number" ? userData.approvedPillar : 1,
+    });
+
+    await updateDoc(userRef, {
+        progressSnapshot: snapshot,
+        approvedPillar: deriveLegacyApprovedPillar(snapshot),
+    });
+}
 
 /**
  * Enviar uma nova prova
@@ -62,6 +112,14 @@ export async function submitExam(examData: Omit<PillarExam, 'status' | 'createdA
             status: 'pending',
             createdAt: serverTimestamp()
         });
+        await recomputeUserProgressSnapshot(
+            examData.userId,
+            examData.pillarId === 1
+                ? { pillar1ExamStatus: "pending" }
+                : examData.pillarId === 2
+                    ? { pillar2ExamStatus: "pending" }
+                    : undefined
+        );
         return { success: true };
     } catch (error) {
         console.error("Erro ao enviar prova:", error);
@@ -105,6 +163,9 @@ export async function getUserExamStatus(userId: string, pillarId: number): Promi
  */
 export async function gradeExam(examId: string, status: 'approved' | 'rejected', feedback?: string) {
     try {
+        let affectedUserId: string | null = null;
+        let affectedPillarId: number | null = null;
+
         await runTransaction(db, async (transaction) => {
             const examRef = doc(db, COLLECTION, examId);
             const examSnapshot = await transaction.get(examRef);
@@ -117,16 +178,8 @@ export async function gradeExam(examId: string, status: 'approved' | 'rejected',
                 id: examSnapshot.id,
                 ...examSnapshot.data(),
             } as PillarExam;
-
-            // REGRAS DO FIRESTORE: Todas as "leituras" PRECISAM vir antes das "escritas"
-            let userRef = null;
-            let currentApprovedPillar = 1;
-
-            if (status === "approved") {
-                userRef = doc(db, "users", exam.userId);
-                const userSnapshot = await transaction.get(userRef);
-                currentApprovedPillar = Number(userSnapshot.data()?.approvedPillar || 1);
-            }
+            affectedUserId = exam.userId;
+            affectedPillarId = exam.pillarId;
 
             // Agora sim, as "escritas" (updates/sets)
             transaction.update(examRef, {
@@ -134,16 +187,18 @@ export async function gradeExam(examId: string, status: 'approved' | 'rejected',
                 adminFeedback: feedback || "",
                 gradedAt: serverTimestamp()
             });
-
-            if (status === "approved" && userRef) {
-                const nextApprovedPillar = exam.pillarId === 2
-                    ? Math.max(currentApprovedPillar, 2)
-                    : Math.max(currentApprovedPillar, exam.pillarId + 1);
-                transaction.update(userRef, {
-                    approvedPillar: nextApprovedPillar,
-                });
-            }
         });
+
+        if (affectedUserId) {
+            await recomputeUserProgressSnapshot(
+                affectedUserId,
+                affectedPillarId === 1
+                    ? { pillar1ExamStatus: status }
+                    : affectedPillarId === 2
+                        ? { pillar2ExamStatus: status }
+                        : undefined
+            );
+        }
 
         return { success: true };
     } catch (error) {
@@ -197,6 +252,7 @@ export async function deleteUserExams(userId: string) {
 
         const snapshot = await getDocs(examsQuery);
         await Promise.all(snapshot.docs.map((examDoc) => deleteDoc(examDoc.ref)));
+        await recomputeUserProgressSnapshot(userId);
         return { success: true, deletedExams: snapshot.docs.length };
     } catch (error) {
         console.error("Erro ao apagar provas do usuário:", error);

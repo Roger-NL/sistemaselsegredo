@@ -148,16 +148,8 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
         });
 
         if (result.success) {
-            if (isPremiumPillarOne) {
-                try {
-                    const { updateUserProgress } = await import("@/lib/auth/service");
-                    await updateUserProgress(user!.id, {
-                        approvedPillar: Math.max(user?.approvedPillar || 1, 2),
-                    });
-                    await refreshUser();
-                } catch (unlockError) {
-                    console.error("Failed to unlock Pillar 2 after premium Pillar 1 submission:", unlockError);
-                }
+            if (subscriptionStatus === "premium") {
+                await refreshUser();
             }
             setStep('success');
             // Check if Pillar 1, aim for immediate upsell logic

@@ -1,14 +1,22 @@
 import { NextResponse } from 'next/server';
-import { getRequestUserContext } from '@/lib/auth/request-user';
+import { getRequestPrincipal } from '@/lib/auth/principal';
 import { getSchedulingDayOverview } from '@/lib/scheduling/service';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   try {
-    const { isAdmin } = await getRequestUserContext();
+    const principal = await getRequestPrincipal(req, {
+      allowBearer: true,
+      allowSessionCookie: true,
+      allowLegacyCookie: true,
+    });
 
-    if (!isAdmin) {
+    if (!principal) {
+      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+    }
+
+    if (principal.role !== 'admin') {
       return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
     }
 

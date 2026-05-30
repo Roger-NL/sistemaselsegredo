@@ -30,7 +30,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
     // Note: pillarId is passed as prop, no need to read params
 
-    const { isPillarUnlocked, getCurrentPillarNumber, isPillarModuleCompleted } = useProgress();
+    const { isPillarUnlocked, getCurrentPillarNumber, isPillarModuleCompleted, progressSnapshot } = useProgress();
     const { user, subscriptionStatus, isLoading: authLoading } = useAuth(); // Auth Check
     const isAdminUser = !!user?.email && ADMIN_EMAILS.includes(user.email);
     const isPremiumLike = subscriptionStatus === "premium" || isAdminUser;
@@ -38,6 +38,19 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     const pillar = PILLARS[pillarId - 1];
     const isUnlocked = isPillarUnlocked(pillarId);
     const currentPillarNumber = getCurrentPillarNumber();
+    const snapshotHighestUnlockedPillar = progressSnapshot?.highestUnlockedPillar ?? user?.approvedPillar ?? 1;
+    const snapshotNextAction = progressSnapshot?.nextAction ?? null;
+    const isNextPillarUnlockedBySnapshot = snapshotHighestUnlockedPillar >= pillarId + 1;
+    const shouldOpenPremiumPaymentFromSnapshot =
+        pillarId === 1 && !isPremiumLike && snapshotNextAction === "upgrade_required";
+    const shouldAdvanceToPillarTwoFromSnapshot =
+        pillarId === 1 && isPremiumLike && snapshotNextAction === "continue_pillar_2";
+    const shouldGoToSchedulingFromSnapshot =
+        pillarId === 2 &&
+        (snapshotNextAction === "schedule_pillar_2_live_session" ||
+            snapshotNextAction === "wait_pillar_2_live_session_confirmation");
+    const shouldAdvanceToPillarThreeFromSnapshot =
+        pillarId === 2 && snapshotNextAction === "continue_pillar_3";
 
     // Access Control & Exam State
     const [exam, setExam] = useState<PillarExam | null>(null);
@@ -101,17 +114,44 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
     // Helper functions
     const handleAction = async () => {
-        // Intercept Pillar 1 (Premium Logic) - FLOW
+        if (shouldOpenPremiumPaymentFromSnapshot) {
+            router.push(ROUTES.public.payment);
+            return;
+        }
+
+        if (shouldAdvanceToPillarTwoFromSnapshot) {
+            router.push(`${ROUTES.app.pillar}/2`);
+            return;
+        }
+
+        if (shouldGoToSchedulingFromSnapshot) {
+            router.push(ROUTES.app.scheduling);
+            return;
+        }
+
+        if (shouldAdvanceToPillarThreeFromSnapshot) {
+            router.push(`${ROUTES.app.pillar}/3`);
+            return;
+        }
+
+        // Intercept Pillar 1 (legacy fallback during transition)
         if (pillarId === 1 && !isPremiumLike) {
-            // Se já fez a prova (está aguardando correção ou já foi aprovado), joga pro pagamento (Upsell)
             if ((user?.approvedPillar || 1) >= 2 || exam?.status === 'pending') {
                 router.push(ROUTES.public.payment);
                 return;
             }
-            // Se ainda não fez a prova, continua o fluxo normal e abre o modal da prova
         }
 
         const nextPillar = pillarId + 1;
+
+        if (isNextPillarUnlockedBySnapshot) {
+            if (pillarId < 9) {
+                router.push(`${ROUTES.app.pillar}/${nextPillar}`);
+            } else {
+                router.push(ROUTES.app.dashboard);
+            }
+            return;
+        }
 
         if (pillarId === 1 && isPremiumLike && exam?.status === "pending") {
             router.push(`${ROUTES.app.pillar}/2`);
@@ -251,6 +291,11 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     const canContinueToPaymentWhilePending = pillarId === 1 && !isPremiumLike;
     const isActionBlockedByPendingReview =
         isPendingReview && !canAdvanceWithPendingReview && !canContinueToPaymentWhilePending;
+    const shouldShowPaymentCTA = shouldOpenPremiumPaymentFromSnapshot || (pillarId === 1 && !isPremiumLike && exam?.status === "pending");
+    const shouldShowSchedulingCTA =
+        shouldGoToSchedulingFromSnapshot ||
+        (exam?.status === "approved" && pillarId === 2 && (user?.approvedPillar || 1) < 3);
+    const shouldShowPillarThreeReadyBox = shouldAdvanceToPillarThreeFromSnapshot;
 
     return (
         <div className="min-h-screen min-h-[100dvh] w-full overflow-y-auto pointer-events-auto">
@@ -334,9 +379,9 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                                 <Lock className="w-6 h-6" />
                                                 Complete todos os módulos para avançar
                                             </>
-                                        ) : (user?.approvedPillar || 1) >= pillarId + 1 ? (
+                                        ) : isNextPillarUnlockedBySnapshot || (user?.approvedPillar || 1) >= pillarId + 1 ? (
                                             // === CASO: APROVADO ===
-                                            pillarId === 1 && !isPremiumLike ? (
+                                            shouldShowPaymentCTA ? (
                                                 <div className="flex flex-col items-center gap-1">
                                                     <span className="text-xs font-normal text-emerald-300 normal-case tracking-normal">
                                                         Missão Cumprida!
@@ -353,9 +398,15 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                                     <ArrowRight className="w-5 h-5" />
                                                 </>
                                             )
+                                        ) : shouldShowSchedulingCTA ? (
+                                            <>
+                                                <CalendarDays className="w-6 h-6" />
+                                                Ir para meus agendamentos
+                                                <ArrowRight className="w-5 h-5" />
+                                            </>
                                         ) : exam?.status === 'pending' ? (
                                             // === CASO: PENDENTE ===
-                                            pillarId === 1 && !isPremiumLike ? (
+                                            shouldShowPaymentCTA ? (
                                                 <div className="flex flex-col items-center gap-1">
                                                     <span className="text-[10px] font-medium text-white/70 uppercase tracking-widest">
                                                         Avaliação em Andamento
@@ -365,7 +416,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                                         <ArrowRight className="w-5 h-5" />
                                                     </div>
                                                 </div>
-                                            ) : pillarId === 1 && isPremiumLike ? (
+                                            ) : shouldAdvanceToPillarTwoFromSnapshot || (pillarId === 1 && isPremiumLike) ? (
                                                 <div className="flex flex-col items-center gap-1">
                                                     <span className="text-[10px] font-medium text-emerald-300 uppercase tracking-widest">
                                                         Pilar 2 liberado
@@ -381,12 +432,6 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                                     Avaliação em breve
                                                 </>
                                             )
-                                        ) : exam?.status === 'approved' && pillarId === 2 && (user?.approvedPillar || 1) < 3 ? (
-                                            <>
-                                                <CalendarDays className="w-6 h-6" />
-                                                Ir para meus agendamentos
-                                                <ArrowRight className="w-5 h-5" />
-                                            </>
                                         ) : exam?.status === 'rejected' ? (
                                             // === CASO: REPROVADO ===
                                             <>
@@ -428,13 +473,24 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                 </div>
                             )}
 
-                            {areAllModulesCompleted && pillarId === 2 && exam?.status === "approved" && (user?.approvedPillar || 1) < 3 && (
+                            {areAllModulesCompleted && pillarId === 2 && shouldShowSchedulingCTA && !shouldShowPillarThreeReadyBox && (
                                 <div className="mx-auto mb-16 mt-4 max-w-2xl rounded-2xl border border-cyan-500/20 bg-cyan-500/5 px-5 py-4 text-center">
                                     <p className="text-sm font-medium text-cyan-200">
                                         Sua prova foi aprovada. Agora a primeira aula ao vivo foi liberada para marcação.
                                     </p>
                                     <p className="mt-2 text-sm leading-relaxed text-white/65">
                                         Assim que o tutor confirmar esse horário pelo calendário, o Pilar 3 abre automaticamente para você.
+                                    </p>
+                                </div>
+                            )}
+
+                            {areAllModulesCompleted && pillarId === 2 && shouldShowPillarThreeReadyBox && (
+                                <div className="mx-auto mb-16 mt-4 max-w-2xl rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-5 py-4 text-center">
+                                    <p className="text-sm font-medium text-emerald-200">
+                                        Sua etapa ao vivo foi confirmada. O Pilar 3 já está liberado para você continuar.
+                                    </p>
+                                    <p className="mt-2 text-sm leading-relaxed text-white/65">
+                                        O desbloqueio agora segue o snapshot oficial da jornada, sem depender mais de heurística espalhada no client.
                                     </p>
                                 </div>
                             )}

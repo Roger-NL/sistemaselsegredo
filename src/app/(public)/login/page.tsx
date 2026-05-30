@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import AuthBackground from "@/components/auth/AuthBackground";
 import ConciergeModal from "@/components/core/ConciergeModal";
-import { ROUTES, isSafeInternalCallbackPath } from "@/lib/routes";
+import { ROUTES } from "@/lib/routes";
+import { buildAuthEntryHref, resolvePostAuthTarget } from "@/lib/auth/post-auth";
 
 export default function LoginPage() {
     return (
@@ -48,15 +49,15 @@ function LoginPageContent() {
         }, 250);
     };
 
-    const getPostLoginTarget = useCallback((email?: string) => {
-        const callbackUrl = searchParams?.get("callbackUrl") || "";
-        if (isSafeInternalCallbackPath(callbackUrl)) {
-            return callbackUrl;
-        }
+    const callbackUrl = searchParams?.get("callbackUrl");
 
-        const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
-        return email && ADMIN_EMAILS.includes(email) ? ROUTES.admin.dashboard : ROUTES.app.dashboard;
-    }, [searchParams]);
+    const getPostLoginTarget = useCallback((email?: string | null) => {
+        return resolvePostAuthTarget({
+            mode: "login",
+            callbackUrl,
+            email,
+        });
+    }, [callbackUrl]);
 
     // Auto-redirect if already logged in
     useEffect(() => {
@@ -273,7 +274,10 @@ function LoginPageContent() {
 
                     <div className="text-center text-xs text-slate-500 mt-6">
                         NÃO TEM UMA CONTA?{" "}
-                        <Link href={ROUTES.auth.signup} className="text-slate-300 hover:text-white font-medium transition-colors">
+                        <Link
+                            href={buildAuthEntryHref(ROUTES.auth.signup, callbackUrl)}
+                            className="text-slate-300 hover:text-white font-medium transition-colors"
+                        >
                             CADASTRE-SE
                         </Link>
                     </div>

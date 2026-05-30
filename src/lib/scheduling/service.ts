@@ -3,6 +3,12 @@ import { addDays, addHours, isAfter, parseISO, subHours } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { cancelCalendarEvent, createCalendarEventForBooking, getAvailableSchedulingSlots, getCalendarEventState, getSchedulingTimezone, getSchedulingTutorEmail, isGoogleCalendarConfigured, listCalendarEventsForDate, updateCalendarEventMarker } from '@/lib/scheduling/google-calendar';
 import type { AdminSchedulingSnapshot, LiveSessionAvailabilitySlot, LiveSessionBooking, LiveSessionStatusPayload, SchedulingDayOverview } from '@/lib/scheduling/types';
+import {
+  buildStoredProgressSnapshot,
+  deriveLegacyApprovedPillar,
+  type WriterExamStatus,
+  type WriterLiveSessionStatus,
+} from '@/lib/auth/premium-access';
 
 const COLLECTION = 'live_sessions';
 const PURCHASE_WINDOW_DAYS = 7;
@@ -32,6 +38,63 @@ async function getUserProfile(userId: string) {
   const snapshot = await adminDb.collection('users').doc(userId).get();
   if (!snapshot.exists) return null;
   return snapshot.data() as Record<string, unknown>;
+}
+
+async function getLatestExamStatus(userId: string, pillarId: number): Promise<WriterExamStatus> {
+  const snapshot = await adminDb.collection('pillar_exams')
+    .where('userId', '==', userId)
+    .where('pillarId', '==', pillarId)
+    .get();
+
+  if (snapshot.empty) {
+    return 'not_started';
+  }
+
+  const exams = snapshot.docs
+    .map((item) => item.data() as { status?: WriterExamStatus; createdAt?: { toMillis?: () => number } | null })
+    .sort((left, right) => {
+      const leftTime = left.createdAt?.toMillis?.() ?? 0;
+      const rightTime = right.createdAt?.toMillis?.() ?? 0;
+      return rightTime - leftTime;
+    });
+
+  return exams[0]?.status ?? 'not_started';
+}
+
+async function recomputeStoredProgressSnapshot(userId: string, liveSessionStatusOverride?: WriterLiveSessionStatus) {
+  const userSnapshot = await adminDb.collection('users').doc(userId).get();
+  if (!userSnapshot.exists) {
+    return;
+  }
+
+  const userData = userSnapshot.data() as {
+    subscriptionStatus?: string;
+    completedPillarModules?: string[];
+    approvedPillar?: number;
+  };
+
+  const [pillar1ExamStatus, pillar2ExamStatus, liveSessionSnapshot] = await Promise.all([
+    getLatestExamStatus(userId, 1),
+    getLatestExamStatus(userId, 2),
+    liveSessionStatusOverride === undefined
+      ? getLiveSessionByUserAndPillar(userId, 2)
+      : Promise.resolve(null),
+  ]);
+
+  const snapshot = buildStoredProgressSnapshot({
+    subscriptionStatus: userData.subscriptionStatus,
+    completedPillarModules: userData.completedPillarModules,
+    pillar1ExamStatus,
+    pillar2ExamStatus,
+    pillar2LiveSessionStatus: liveSessionStatusOverride ?? ((liveSessionSnapshot?.status as WriterLiveSessionStatus | undefined) ?? 'not_created'),
+    currentApprovedPillar: typeof userData.approvedPillar === 'number' ? userData.approvedPillar : 1,
+  });
+
+  await adminDb.collection('users').doc(userId).set({
+    progressSnapshot: snapshot,
+    approvedPillar: deriveLegacyApprovedPillar(snapshot),
+    updatedAt: nowIso(),
+  }, { merge: true });
 }
 
 export async function getLiveSessionByUserAndPillar(userId: string, sourcePillarId: number) {
@@ -95,6 +158,7 @@ export async function releaseLiveSessionAfterApproval(options: {
   };
 
   await adminDb.collection(COLLECTION).doc(sessionId).set(stripUndefined(session), { merge: true });
+  await recomputeStoredProgressSnapshot(options.userId, session.status);
   return session;
 }
 
@@ -106,7 +170,6 @@ async function syncSessionWithCalendar(session: LiveSessionBooking) {
 
   let nextStatus = session.status;
   let nextMessage = session.lastActionMessage;
-  let shouldUnlockPillarThree = false;
   const normalizedSummary = calendarState.summary?.toUpperCase() || '';
   const confirmedByMarker = normalizedSummary.includes('[CONFIRMADO]') || normalizedSummary.includes('[OK]');
   const rejectedByMarker = normalizedSummary.includes('[RECUSAR]') || normalizedSummary.includes('[CANCELAR]');
@@ -117,7 +180,6 @@ async function syncSessionWithCalendar(session: LiveSessionBooking) {
   } else if (confirmedByMarker) {
     nextStatus = 'confirmed';
     nextMessage = 'Sua aula ao vivo foi confirmada. O Pilar 3 já está liberado para você continuar.';
-    shouldUnlockPillarThree = session.sourcePillarId === 2;
   }
 
   if (nextStatus !== session.status || calendarState.htmlLink !== session.calendarHtmlLink) {
@@ -138,12 +200,7 @@ async function syncSessionWithCalendar(session: LiveSessionBooking) {
 
     await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined(updatedSession), { merge: true });
 
-    if (shouldUnlockPillarThree) {
-      const userRef = adminDb.collection('users').doc(session.userId);
-      const userDoc = await userRef.get();
-      const approvedPillar = userDoc.exists ? Number(userDoc.data()?.approvedPillar || 1) : 1;
-      await userRef.set({ approvedPillar: Math.max(approvedPillar, 3), updatedAt: nowIso() }, { merge: true });
-    }
+    await recomputeStoredProgressSnapshot(session.userId, nextStatus);
 
     return {
       ...session,
@@ -190,6 +247,7 @@ async function expirePendingSessionIfNeeded(session: LiveSessionBooking) {
   };
 
   await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined(expiredUpdate), { merge: true });
+  await recomputeStoredProgressSnapshot(session.userId, nextStatus);
 
   return {
     ...session,
@@ -251,6 +309,7 @@ export async function getSchedulingStatusForUser(userId: string): Promise<LiveSe
       };
 
       await adminDb.collection(COLLECTION).doc(session.id!).set(promoted, { merge: true });
+      await recomputeStoredProgressSnapshot(userId, promoted.status);
       session = {
         ...session,
         ...promoted,
@@ -361,6 +420,7 @@ export async function requestLiveSessionBooking(options: {
     calendarEventId: null,
     calendarHtmlLink: null,
   }), { merge: true });
+  await recomputeStoredProgressSnapshot(options.userId, nextSession.status);
 
   return nextSession;
 }
@@ -398,6 +458,7 @@ export async function cancelLiveSessionBooking(userId: string) {
     updatedAt: nowIso(),
     lastActionMessage: 'Seu pedido foi cancelado. Quando quiser, escolha um novo horário válido.',
   }), { merge: true });
+  await recomputeStoredProgressSnapshot(userId, nextStatus);
 }
 
 export async function getAdminSchedulingSnapshot() {
@@ -415,11 +476,7 @@ export async function getAdminSchedulingSnapshot() {
 
 async function unlockPillarForConfirmedSession(session: LiveSessionBooking) {
   if (session.sourcePillarId !== 2) return;
-
-  const userRef = adminDb.collection('users').doc(session.userId);
-  const userDoc = await userRef.get();
-  const approvedPillar = userDoc.exists ? Number(userDoc.data()?.approvedPillar || 1) : 1;
-  await userRef.set({ approvedPillar: Math.max(approvedPillar, 3), updatedAt: nowIso() }, { merge: true });
+  await recomputeStoredProgressSnapshot(session.userId, 'confirmed');
 }
 
 function getReadyStatusFromSession(session: LiveSessionBooking) {
@@ -568,6 +625,7 @@ export async function updateSchedulingStatusByAdmin(options: {
       updatedAt: nowIso(),
       lastActionMessage: 'Seu pedido segue pendente. A confirmação fica sob controle do admin no painel.',
     }), { merge: true });
+    await recomputeStoredProgressSnapshot(session.userId, 'pending_confirmation');
     return;
   }
 
@@ -589,4 +647,5 @@ export async function updateSchedulingStatusByAdmin(options: {
     updatedAt: nowIso(),
     lastActionMessage: `Esse horário não foi aprovado. Motivo: ${rejectionReason}`,
   }), { merge: true });
+  await recomputeStoredProgressSnapshot(session.userId, getReadyStatusFromSession(session));
 }

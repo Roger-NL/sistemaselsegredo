@@ -10,35 +10,18 @@ import { CtaSection } from "./CtaSection";
 import { RanksSection } from "./RanksSection";
 import { useRouter } from "next/navigation";
 import { LandingThemeProvider } from "@/context/LandingThemeContext";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FaqSection } from "./FaqSection";
 import { ROUTES } from "@/lib/routes";
-
-function hasSessionCookie() {
-    if (typeof document === "undefined") return false;
-    return document.cookie.split("; ").some((cookie) => cookie.startsWith("es_session_token="));
-}
+import { useAuth } from "@/context/AuthContext";
 
 function useLandingSessionState() {
-    const [state, setState] = useState({
-        isAuthenticated: false,
-        isLoading: true,
-    });
+    const { isAuthenticated, isLoading } = useAuth();
 
-    useEffect(() => {
-        const frameId = window.requestAnimationFrame(() => {
-            setState({
-                isAuthenticated: hasSessionCookie(),
-                isLoading: false,
-            });
-        });
-
-        return () => {
-            window.cancelAnimationFrame(frameId);
-        };
-    }, []);
-
-    return state;
+    return {
+        isAuthenticated,
+        isLoading,
+    };
 }
 
 // Inner Content with Theme Access - NOW ENFORCED DARK

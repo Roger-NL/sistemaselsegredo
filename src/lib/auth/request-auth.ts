@@ -1,4 +1,8 @@
-import { adminAuth } from "@/lib/firebase-admin";
+import {
+  getRequestPrincipal,
+  type RequestPrincipal,
+  type RequestPrincipalOptions,
+} from "@/lib/auth/principal";
 
 export class RequestAuthError extends Error {
   status: number;
@@ -10,34 +14,41 @@ export class RequestAuthError extends Error {
   }
 }
 
-function extractBearerToken(req: Request) {
-  const authorization = req.headers.get("authorization");
-  if (!authorization) {
-    return null;
+function getAuthErrorMessage(options: RequestPrincipalOptions) {
+  if (options.allowBearer === false && options.allowSessionCookie !== false) {
+    return "Valid server session required.";
   }
 
-  const [scheme, token] = authorization.split(" ");
-  if (scheme?.toLowerCase() !== "bearer" || !token) {
-    return null;
+  return "Authentication required.";
+}
+
+export async function requireRequestPrincipal(
+  req?: Request,
+  options: RequestPrincipalOptions = {}
+): Promise<RequestPrincipal> {
+  const principal = await getRequestPrincipal(req, options);
+
+  if (!principal) {
+    throw new RequestAuthError(getAuthErrorMessage(options));
   }
 
-  return token.trim();
+  return principal;
 }
 
 export async function requireAuthenticatedUser(req: Request) {
-  const token = extractBearerToken(req);
+  const principal = await requireRequestPrincipal(req, {
+    allowBearer: true,
+    allowSessionCookie: true,
+    allowLegacyCookie: false,
+  });
 
-  if (!token) {
-    throw new RequestAuthError("Authentication required.");
-  }
-
-  try {
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    return {
-      uid: decodedToken.uid,
-      email: decodedToken.email || null,
-    };
-  } catch {
-    throw new RequestAuthError("Invalid authentication token.");
-  }
+  return {
+    uid: principal.uid,
+    email: principal.email,
+    role: principal.role,
+    subscriptionStatus: principal.subscriptionStatus,
+    source: principal.source,
+  };
 }
+
+export type { RequestPrincipal, RequestPrincipalOptions } from "@/lib/auth/principal";

@@ -1,14 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import AuthBackground from "@/components/auth/AuthBackground";
 import { ROUTES } from "@/lib/routes";
+import { buildAuthEntryHref, resolvePostAuthTarget } from "@/lib/auth/post-auth";
 
 export default function CadastroPage() {
+    return (
+        <Suspense fallback={<CadastroPageFallback />}>
+            <CadastroPageContent />
+        </Suspense>
+    );
+}
+
+function CadastroPageFallback() {
+    return (
+        <div className="relative min-h-[100dvh] w-full overflow-y-auto overflow-x-hidden bg-[#050505] px-4 py-10 md:flex md:min-h-screen md:items-center md:justify-center md:overflow-hidden md:p-4">
+            <AuthBackground />
+            <div className="relative z-10 mx-auto w-full max-w-md rounded-2xl border border-white/10 bg-[#0A0A0A]/60 p-6 pb-10 shadow-2xl backdrop-blur-xl sm:p-8 sm:pb-8">
+                <div className="text-center text-slate-400 text-sm">Carregando cadastro...</div>
+            </div>
+        </div>
+    );
+}
+
+function CadastroPageContent() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -17,6 +37,8 @@ export default function CadastroPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { register, loginWithGoogle, isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams?.get("callbackUrl");
 
     const handleFieldFocus = (event: React.FocusEvent<HTMLInputElement>) => {
         window.setTimeout(() => {
@@ -24,12 +46,20 @@ export default function CadastroPage() {
         }, 250);
     };
 
+    const getPostSignupTarget = useCallback((userEmail?: string | null) => {
+        return resolvePostAuthTarget({
+            mode: "signup",
+            callbackUrl,
+            email: userEmail,
+        });
+    }, [callbackUrl]);
+
     // Auto-redirect if already logged in
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
-            router.push(ROUTES.app.dashboard);
+            router.push(getPostSignupTarget());
         }
-    }, [isAuthenticated, isLoading, router]);
+    }, [getPostSignupTarget, isAuthenticated, isLoading, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -46,7 +76,7 @@ export default function CadastroPage() {
 
         if (result.success) {
             setTimeout(() => {
-                router.push(ROUTES.app.profile);
+                router.push(getPostSignupTarget(result.user?.email ?? email));
             }, 500);
         } else {
             setError(result.error || "Erro ao criar conta");
@@ -185,12 +215,7 @@ export default function CadastroPage() {
                                 setIsSubmitting(true);
                                 const result = await loginWithGoogle();
                                 if (result.success) {
-                                    // Redirect appropriately
-                                    const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
-                                    const target = result.user && ADMIN_EMAILS.includes(result.user.email)
-                                        ? ROUTES.admin.dashboard
-                                        : ROUTES.app.profile;
-                                    router.push(target);
+                                    router.push(getPostSignupTarget(result.user?.email));
                                 } else {
                                     setError(result.error || "Erro ao cadastrar com Google");
                                     setIsSubmitting(false);
@@ -249,7 +274,10 @@ export default function CadastroPage() {
 
                     <div className="text-center text-xs text-slate-500 mt-6">
                         JÁ TEM UMA CONTA?{" "}
-                        <Link href={ROUTES.auth.login} className="text-slate-300 hover:text-white font-medium transition-colors">
+                        <Link
+                            href={buildAuthEntryHref(ROUTES.auth.login, callbackUrl)}
+                            className="text-slate-300 hover:text-white font-medium transition-colors"
+                        >
                             FAZER LOGIN
                         </Link>
                     </div>

@@ -126,3 +126,95 @@
 - [ ] Construir `Conteúdo Real: Pilar 8`.
 - [ ] Construir `Conteúdo Real: Pilar 9`.
 - [ ] Fazer revisão visual em browser dos pilares já refeitos para validar ritmo, espaçamento, travas e UX final.
+
+---
+
+## 🔄 ATUALIZAÇÃO CONSOLIDADA (28/05/2026 - PACOTE A / PROGRESS CONTRACT SEED)
+
+### ✅ CONCLUÍDO NESTE CICLO
+- [x] Criada a base técnica inicial de progressão em `src/lib/progress/contract.ts`.
+- [x] Congelada a matriz de decisão para transição `Pilar 1 -> Pilar 2`.
+- [x] Congelada a matriz de decisão para transição `Pilar 2 -> Pilar 3`.
+- [x] Formalizados os campos iniciais de contrato: `blockedReason`, `nextAction`, `ProgressDecisionSeed` e `ProgressSnapshotSeed`.
+- [x] Formalizada a regra de fase atual: `Pilar 2` só abre com `premium/admin` + `Pilar 1` academicamente fechado (`módulos completos + prova enviada/aprovada`).
+- [x] Formalizada a regra de fase atual: `Pilar 3` só abre com `premium/admin` + `Pilar 2` com módulos completos + prova aprovada + aula ao vivo confirmada/concluída.
+- [x] Registrado `legacyAccessOverride` como escape temporário de migração para evitar corte abrupto de acesso já concedido por regra antiga.
+
+### ⏳ FALTA FAZER NESTA FRENTE
+- [ ] Plugar o contrato novo em um serviço server-side de derivação de `progressSnapshot`.
+- [ ] Parar de usar `approvedPillar` como mistura de progressão acadêmica e desbloqueio comercial.
+- [ ] Parar de persistir `localPillarStatus` como fonte remota de gating.
+- [ ] Migrar leitores do app (`dashboard`, `PillarPageClient`, `ExamFeedbackPopup`, SSR e `ProgressContext`) para o snapshot novo sem regressão.
+
+### 🚫 AINDA NAO DEVE ACONTECER NESTA RODADA
+- [x] Nao foi alterado o gating global do app nesta rodada.
+- [x] Nao foi reescrito o `ProgressContext` em profundidade nesta rodada.
+- [x] Nao foi trocado ainda o comportamento legada de `approvedPillar`; apenas foi congelado o contrato tecnico que vai substituir essa ambiguidade.
+
+---
+
+## 🔄 ATUALIZAÇÃO CONSOLIDADA (28/05/2026 - PACOTE C / CAMADA PUBLICA DE RECONCILIACAO)
+
+### ✅ CONCLUÍDO NESTE CICLO
+- [x] `/api/verify-payment` passou a normalizar a resposta publica de verificacao em um contrato explicito com `success`, `isPaid`, `status`, `reconciliationState`, `message` e `shouldStopPolling`.
+- [x] A camada publica ficou preparada para estados controlados de reconciliacao como `manual-reconciliation` e `unresolved`, mesmo sem quebrar o fluxo feliz atual de PIX/cartao.
+- [x] `PagamentoPageClient` deixou de tratar falha de reconciliacao como silencio total e agora mostra mensagens seguras quando a cobranca precisa de conferencia manual ou cai em estado nao confiavel.
+- [x] O polling da pagina passou a poder pausar com seguranca quando a API sinaliza reconciliacao manual/controlada, mantendo o redirecionamento feliz quando o premium entra de fato.
+
+### ⏳ FALTA FAZER NESTA FRENTE
+- [ ] Endurecer `payments/service.ts` para devolver estados autoritativos de reconciliacao manual/orfa, sem fallback automatico para `lifetime`.
+- [ ] Unificar o contrato de concessao premium entre pagamento e convite em uma rotina server-side unica.
+- [ ] Reduzir o fallback legado de sessao/cookies na camada publica assim que o restante do Pacote C e o Pacote D estiverem integrados.
+
+### 🚫 NAO FOI ALTERADO NESTA RODADA
+- [x] Nao foi mexido em `payments/service.ts`.
+- [x] Nao foi mexido em `auth/service.ts`, `AuthContext.tsx` ou `api/auth/*`.
+- [x] Nao foi alterado o fluxo feliz de redirecionamento para `thank-you` quando o pagamento entra como confirmado.
+
+---
+
+## 🔄 ATUALIZAÇÃO CONSOLIDADA (28/05/2026 - PACOTE D / LEITORES DO APP E LIMPEZA CLIENT-SIDE)
+
+### ✅ CONCLUÍDO NESTE CICLO
+- [x] `ProgressContext` passou a preferir `progressSnapshot` quando ele existir para `currentPillar`, `highestUnlockedPillar`, `completedPillars` e `eligibleForSpecialization`.
+- [x] `ProgressContext` parou de persistir `localPillarStatus` no sync remoto padrão, removendo o client como autoridade remota de gating no fluxo normal.
+- [x] O auto-unlock premium client-side foi removido de `AuthContext`.
+- [x] O unlock no submit premium do `PillarExamModal` foi removido; o modal agora apenas refresca o perfil quando necessário.
+- [x] `dashboard`, `PillarPageClient` e `ExamFeedbackPopup` passaram a preferir `progressSnapshot.nextAction` e `highestUnlockedPillar` antes da lógica legada espalhada.
+- [x] O SSR de especialidade passou a preferir `progressSnapshot.eligibleForSpecialization`, mantendo fallback para `localPillarStatus` apenas como compatibilidade transitória.
+
+### ⏳ FALTA FAZER NESTA FRENTE
+- [ ] Migrar o backend escritor para gravar `progressSnapshot` de forma consistente em todos os caminhos de progressão.
+- [ ] Reduzir o fallback legado baseado em `approvedPillar` assim que o snapshot estiver presente para todos os usuários relevantes.
+- [ ] Remover o fallback de `localPillarStatus` do SSR de especialidades depois do backfill do snapshot.
+- [ ] Revisar `setPillarLevel` e demais ferramentas de dev/admin para alinhar overrides explícitos ao modelo novo sem depender de `approvedPillar`.
+
+### 🚫 NAO FOI ALTERADO NESTA RODADA
+- [x] Nao foi mexido em `src/lib/progress/*`.
+- [x] Nao foi mexido em `exam/service.ts`, `scheduling/service.ts`, `payments/service.ts` ou `auth/premium-access.ts`.
+- [x] Nao foi eliminado totalmente o fallback legado de `approvedPillar`; ele segue ativo apenas para transicao segura enquanto o snapshot ainda nao cobre todos os casos.
+
+---
+
+## 🔄 ATUALIZAÇÃO CONSOLIDADA (30/05/2026 - PACOTE D FECHADO / PACOTE E ENDURECIMENTO DE REGRAS)
+
+### ✅ CONCLUÍDO NESTE CICLO
+- [x] O backend escritor passou a gravar `progressSnapshot` nos caminhos principais de progressão: convite, pagamento, prova e scheduling.
+- [x] `auth/premium-access.ts` foi transformado em adaptador do contrato novo, removendo a derivação paralela de snapshot que competia com `src/lib/progress/service.ts`.
+- [x] A ativação por convite em `api/auth/invite` passou a recomputar `progressSnapshot` e a espelhar `approvedPillar` só como compatibilidade transitória.
+- [x] O `Pacote D` foi validado com `tsc`, `eslint` focado e `build` de produção.
+- [x] O fallback global de `firestore.rules` foi removido.
+- [x] `firestore.rules` agora restringe `users`, `pillar_exams`, `live_sessions`, `access_requests`, `invite_codes`, `payment_attempts` e `webhook_events` explicitamente, em vez de confiar em `allow read, write` amplo para autenticados.
+- [x] Escritas sensíveis de conta (`subscriptionStatus`, `paymentId`, `progressSnapshot`, `inviteCodeUsed`, entre outras) deixaram de ser permitidas para o próprio aluno via regra genérica de `users`.
+- [x] O `leaderboard` deixou de depender de leitura aberta da coleção `users` e passou a usar a rota protegida `api/leaderboard`.
+- [x] `access_requests` ganhou validação mínima de payload nas regras, reduzindo margem para escrita frouxa por cliente autenticado.
+
+### ⏳ FALTA FAZER NESTA FRENTE
+- [ ] Reduzir o fallback legado baseado em `approvedPillar` assim que o snapshot estiver presente para todos os usuários relevantes.
+- [ ] Remover o fallback de `localPillarStatus` do SSR de especialidades depois do backfill do snapshot.
+- [ ] Revisar `setPillarLevel` e demais ferramentas de dev/admin para alinhar overrides explícitos ao modelo novo sem depender de `approvedPillar`.
+- [ ] Fazer uma passada de QA dirigida nas superfícies admin que ainda usam Firestore client-side sob as regras novas.
+
+### 🚫 NAO PRECISA MAIS
+- [x] Nao existe mais `fallback` global de leitura/escrita para qualquer autenticado em `firestore.rules`.
+- [x] Nao existe mais derivação duplicada de snapshot competindo entre `auth/premium-access` e `progress/service`.
