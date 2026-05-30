@@ -18,6 +18,7 @@ import { secureStorage } from "@/lib/storage/secure-storage";
 
 interface PillarOperationalViewProps {
     data: PillarData;
+    onActiveModuleChange?: (moduleId: string | null) => void;
 }
 
 // Utility functions removed, now using centralized ones from @/utils/translation
@@ -4382,7 +4383,7 @@ const RenderBlock = ({
 // MAIN COMPONENT: CASCADING DRAWER (ACCORDION)
 // ============================================================================
 
-export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
+export const PillarOperationalView = ({ data, onActiveModuleChange }: PillarOperationalViewProps) => {
     const [activeModuleId, setActiveModuleId] = useState<string | null>(
         data.modules?.[0]?.id || null
     );
@@ -4439,6 +4440,10 @@ export const PillarOperationalView = ({ data }: PillarOperationalViewProps) => {
             }
         };
     }, []);
+
+    useEffect(() => {
+        onActiveModuleChange?.(activeModuleId);
+    }, [activeModuleId, onActiveModuleChange]);
 
     const scrollToModuleAnchor = (
         moduleId: string,

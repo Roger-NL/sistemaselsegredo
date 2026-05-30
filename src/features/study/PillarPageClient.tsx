@@ -15,6 +15,7 @@ import { PillarExamViewModal } from "@/features/study/exam/PillarExamViewModal";
 import { useState, useEffect, useCallback } from "react";
 import { PillarData } from "@/types/study";
 import { ROUTES } from "@/lib/routes";
+import { useStudyActivityTracker } from "@/lib/study/use-study-activity-tracker";
 
 interface PillarPageClientProps {
     pillarId: number;
@@ -57,6 +58,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     const [isExamModalOpen, setIsExamModalOpen] = useState(false);
     const [isViewExamModalOpen, setIsViewExamModalOpen] = useState(false);
     const [isCheckingExam, setIsCheckingExam] = useState(true);
+    const [trackedModuleId, setTrackedModuleId] = useState<string | null>(null);
 
     const refreshExamStatus = useCallback(async () => {
         if (user) {
@@ -182,8 +184,19 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     };
 
     const handleGoToMenu = () => {
-        router.push(ROUTES.home);
+        router.push(ROUTES.app.dashboard);
     };
+
+    // Selecionar conteúdo baseado no ID do Map (Passed from Server now)
+    const activeContent = initialContent;
+
+    const activeStudyModuleId = trackedModuleId ?? activeContent?.modules?.[0]?.id ?? null;
+
+    useStudyActivityTracker({
+        pillarId,
+        moduleId: activeStudyModuleId,
+        enabled: Boolean(user && activeContent && isUnlocked),
+    });
 
     // 1. Loading State
     if (authLoading) {
@@ -200,9 +213,9 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     if (!pillar) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center p-4">
-                <FlightCard variant="danger" className="p-8 text-center max-w-md">
-                    <h1 className="text-2xl font-bold text-[#EEF4D4] mb-4">Pilar não encontrado</h1>
-                    <FlightButton onClick={() => router.push(ROUTES.home)}>
+                    <FlightCard variant="danger" className="p-8 text-center max-w-md">
+                        <h1 className="text-2xl font-bold text-[#EEF4D4] mb-4">Pilar não encontrado</h1>
+                    <FlightButton onClick={() => router.push(ROUTES.app.dashboard)}>
                         <ArrowLeft className="w-4 h-4 mr-2 inline" />
                         Voltar ao Dashboard
                     </FlightButton>
@@ -278,9 +291,6 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
             </div>
         );
     }
-
-    // Selecionar conteúdo baseado no ID do Map (Passed from Server now)
-    const activeContent = initialContent;
 
     // Verificar se todos os módulos (se houver) foram completados
     const areAllModulesCompleted = activeContent?.modules
@@ -360,7 +370,10 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                     {activeContent ? (
                         <div className="animate-in fade-in duration-700 slide-in-from-bottom-4">
                             {activeContent.modules ? (
-                                <PillarOperationalView data={activeContent} />
+                                <PillarOperationalView
+                                    data={activeContent}
+                                    onActiveModuleChange={setTrackedModuleId}
+                                />
                             ) : (
                                 <StudyViewer data={activeContent} />
                             )}

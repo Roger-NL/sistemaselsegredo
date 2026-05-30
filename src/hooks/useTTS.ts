@@ -2,6 +2,80 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 
+type VoiceStrategy = "native-first" | "cloud-first";
+
+function getVoiceStrategy(): VoiceStrategy {
+    if (typeof navigator === "undefined") {
+        return "native-first";
+    }
+
+    const ua = navigator.userAgent.toLowerCase();
+    const vendor = navigator.vendor.toLowerCase();
+    const isOpera = ua.includes("opr/") || ua.includes("opera");
+    const isFirefox = ua.includes("firefox");
+    const isSafari = vendor.includes("apple") && !ua.includes("crios") && !ua.includes("fxios") && !ua.includes("edgios") && !ua.includes("opr/");
+
+    if (isSafari || isOpera || isFirefox) {
+        return "cloud-first";
+    }
+
+    return "native-first";
+}
+
+function isRoboticVoiceName(name: string) {
+    const normalized = name.toLowerCase();
+    return [
+        "david",
+        "zira",
+        "mark",
+        "desktop",
+        "hazel",
+        "fred",
+        "lekha",
+        "rina",
+        "tessa",
+        "veena",
+        "karen",
+        "moira",
+    ].some((item) => normalized.includes(item));
+}
+
+function pickPreferredNativeVoice(voices: SpeechSynthesisVoice[]) {
+    const priorityList = [
+        "Google US English",
+        "Google UK English Female",
+        "Google UK English Male",
+        "Microsoft Aria Online (Natural)",
+        "Microsoft Guy Online (Natural)",
+        "Microsoft Jenny Online (Natural)",
+        "Samantha",
+        "Daniel",
+        "Karen",
+        "Moira",
+        "Siri",
+        "Natural",
+        "Neural",
+        "Online",
+    ];
+
+    for (const preferredName of priorityList) {
+        const match = voices.find((voice) => {
+            const isEnglish = voice.lang === "en-US" || voice.lang.startsWith("en-");
+            return isEnglish && voice.name.includes(preferredName) && !isRoboticVoiceName(voice.name);
+        });
+
+        if (match) {
+            return match;
+        }
+    }
+
+    return (
+        voices.find((voice) => voice.lang === "en-US" && !isRoboticVoiceName(voice.name)) ||
+        voices.find((voice) => voice.lang.startsWith("en") && !isRoboticVoiceName(voice.name)) ||
+        null
+    );
+}
+
 export function useTTS() {
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -24,41 +98,44 @@ export function useTTS() {
         }
     }, []);
 
-    const playPremiumCloudTTS = useCallback((text: string, currentSpeed: number) => {
-        // 1º Tentar usar o Youdao (Tem um motor Neural muito mais humano e natural que o Google gratuito)
-        // type=2 é Inglês Americano (US), type=1 é Britânico (UK)
-        const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
-        const audio = new Audio(youdaoUrl);
+    const playPremiumCloudTTS = useCallback((text: string, currentSpeed: number, onFailure?: () => void) => {
+        const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en-US&client=tw-ob`;
+        const googleAudio = new Audio(googleUrl);
 
         if (currentSpeed !== 1.0) {
-            audio.playbackRate = currentSpeed;
+            googleAudio.playbackRate = currentSpeed;
         }
 
-        audio.onended = () => {
+        googleAudio.onended = () => {
             setIsPlaying(false);
         };
 
-        audio.onerror = () => {
-            // 2º Se falhar (ex: CORS ou limite), faz fallback automático para o Google com cliente 'tw-ob' (melhor que gtx)
-            console.log("[TTS] Youdao Neural engine failed. Falling back to Google HQ...");
-            const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en-US&client=tw-ob`;
-            const fallbackAudio = new Audio(googleUrl);
+        googleAudio.onerror = () => {
+            console.log("[TTS] Google cloud voice failed. Trying secondary fallback...");
+            const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=2`;
+            const fallbackAudio = new Audio(youdaoUrl);
 
-            if (currentSpeed !== 1.0) fallbackAudio.playbackRate = currentSpeed;
+            if (currentSpeed !== 1.0) {
+                fallbackAudio.playbackRate = currentSpeed;
+            }
 
             fallbackAudio.onended = () => setIsPlaying(false);
             fallbackAudio.onerror = () => {
                 setIsPlaying(false);
-                console.log("[TTS] All cloud fallbacks failed.");
+                onFailure?.();
             };
 
             audioRef.current = fallbackAudio;
-            fallbackAudio.play().catch(() => setIsPlaying(false));
+            fallbackAudio.play().catch(() => {
+                setIsPlaying(false);
+                onFailure?.();
+            });
         };
 
-        audioRef.current = audio;
-        audio.play().catch(() => {
+        audioRef.current = googleAudio;
+        googleAudio.play().catch(() => {
             setIsPlaying(false);
+            onFailure?.();
         });
     }, []);
 
@@ -82,73 +159,42 @@ export function useTTS() {
         setIsPlaying(true);
 
         const currentSpeed = forceSpeed || speed;
+        const voiceStrategy = getVoiceStrategy();
 
         // Small delay to let the browser engine 'breathe' after a cancel()
         setTimeout(() => {
-            // Try Web Speech API first
-            if ("speechSynthesis" in window) {
+            const speakWithNativeVoice = () => {
+                if (!("speechSynthesis" in window)) {
+                    playPremiumCloudTTS(text, currentSpeed);
+                    return;
+                }
+
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = "en-US";
                 utterance.rate = currentSpeed;
 
                 const voices = window.speechSynthesis.getVoices();
-
-                // VETO LIST: The most notoriously robotic voices that ruin the experience
-                const isRobotic = (name: string) => {
-                    const n = name.toLowerCase();
-                    return n.includes("david") || n.includes("zira") || n.includes("mark") ||
-                        n.includes("desktop") || n.includes("hazel");
-                };
-
-                // Premium human-like voices priority
-                const priorityList = [
-                    "Microsoft Aria Online (Natural)", // Edge top tier
-                    "Microsoft Guy Online (Natural)",
-                    "Microsoft Jenny Online (Natural)",
-                    "Google US English", // Chrome high quality
-                    "Google UK English Female",
-                    "Samantha", // macOS
-                    "Daniel", // macOS premium
-                    "Siri", // iOS/macOS
-                    "Natural",
-                    "Neural",
-                    "Online"
-                ];
-
-                let preferredVoice = null;
-                for (const name of priorityList) {
-                    preferredVoice = voices.find(v => v.name.includes(name) && v.lang.startsWith("en") && !isRobotic(v.name));
-                    if (preferredVoice) break;
-                }
-
-                // Se não achou nenhuma Premium, e todas as outras vozes nativas são muito robóticas (ex: MS David),
-                // é preferível ABORTAR a voz nativa e usar a nuvem (Youdao/Google) que é muito mais humana!
-                if (!preferredVoice) {
-                    const fallbackNative = voices.find(v => v.lang === "en-US" && !isRobotic(v.name)) ||
-                        voices.find(v => v.lang.startsWith("en") && !isRobotic(v.name));
-
-                    if (fallbackNative) {
-                        preferredVoice = fallbackNative;
-                    }
-                }
+                const preferredVoice = pickPreferredNativeVoice(voices);
 
                 if (preferredVoice) {
                     utterance.voice = preferredVoice;
                     utterance.onend = () => setIsPlaying(false);
                     utterance.onerror = () => {
-                        console.log("[TTS] Native failed or interrupted, switching to Premium Cloud.");
+                        console.log("[TTS] Native voice failed, switching to cloud voice.");
                         playPremiumCloudTTS(text, currentSpeed);
                     };
                     window.speechSynthesis.speak(utterance);
                 } else {
-                    // Sem vozes humanas nativas instaladas. Bloqueou o MS David. Usar Nuvem!
-                    console.log("[TTS] Only robotic native voices found. Forcing Premium Cloud TTS.");
                     playPremiumCloudTTS(text, currentSpeed);
                 }
-            } else {
-                // Browser doesn't support Web Speech API
-                playPremiumCloudTTS(text, currentSpeed);
+            };
+
+            if (voiceStrategy === "cloud-first") {
+                playPremiumCloudTTS(text, currentSpeed, speakWithNativeVoice);
+                return;
             }
+
+            speakWithNativeVoice();
         }, 50);
     }, [speed, stop, playPremiumCloudTTS]);
 

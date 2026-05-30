@@ -11,7 +11,6 @@ type ResolvePostAuthTargetParams = {
 };
 
 export function resolvePostAuthTarget({
-    mode,
     callbackUrl,
     email,
 }: ResolvePostAuthTargetParams): string {
@@ -23,7 +22,7 @@ export function resolvePostAuthTarget({
         return ROUTES.admin.dashboard;
     }
 
-    return mode === "signup" ? ROUTES.app.profile : ROUTES.app.dashboard;
+    return ROUTES.app.dashboard;
 }
 
 export function buildAuthEntryHref(basePath: string, callbackUrl?: string | null): string {

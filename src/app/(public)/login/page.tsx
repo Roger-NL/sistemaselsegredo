@@ -62,7 +62,7 @@ function LoginPageContent() {
     // Auto-redirect if already logged in
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
-            router.push(getPostLoginTarget(user?.email));
+            router.replace(getPostLoginTarget(user?.email));
         }
     }, [getPostLoginTarget, isAuthenticated, isLoading, router, user]);
 
@@ -80,7 +80,7 @@ function LoginPageContent() {
         const result = await login(identifier, password);
 
         if (result.success) {
-            router.push(getPostLoginTarget(result.user?.email));
+            router.replace(getPostLoginTarget(result.user?.email));
         } else {
             setError(result.error || "Erro ao fazer login");
             setIsSubmitting(false);
@@ -191,7 +191,7 @@ function LoginPageContent() {
                                 setIsSubmitting(true);
                                 const result = await loginWithGoogle();
                                 if (result.success) {
-                                    router.push(getPostLoginTarget(result.user?.email));
+                                    router.replace(getPostLoginTarget(result.user?.email));
                                 } else {
                                     setError(result.error || "Erro ao entrar com Google");
                                     setIsSubmitting(false);

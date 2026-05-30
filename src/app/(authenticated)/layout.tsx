@@ -43,6 +43,7 @@ function AuthenticatedLayoutInner({
                     pathname.startsWith(ROUTES.app.dashboard) ||
                     pathname.startsWith('/pilar') ||
                     pathname.startsWith(ROUTES.app.thankYou) ||
+                    pathname.startsWith(ROUTES.app.specialties) ||
                     pathname.startsWith(ROUTES.app.profile) ||
                     pathname.startsWith(ROUTES.app.settings);
 
@@ -73,6 +74,7 @@ function AuthenticatedLayoutInner({
             pathname.startsWith(ROUTES.app.dashboard) ||
             pathname.startsWith('/pilar') ||
             pathname.startsWith(ROUTES.app.thankYou) ||
+            pathname.startsWith(ROUTES.app.specialties) ||
             pathname.startsWith(ROUTES.app.profile) ||
             pathname.startsWith(ROUTES.app.settings);
 
@@ -81,11 +83,23 @@ function AuthenticatedLayoutInner({
         }
     }
 
+    const shouldUseAnimatedBackground =
+        pathname.startsWith(ROUTES.app.dashboard) ||
+        pathname.startsWith(ROUTES.app.thankYou);
+
+    const content = shouldUseAnimatedBackground ? (
+        <TubesBackground className="min-h-screen min-h-[100dvh]">
+            {children}
+        </TubesBackground>
+    ) : (
+        <div className="min-h-screen min-h-[100dvh] bg-black">
+            {children}
+        </div>
+    );
+
     return (
         <ProgressProvider>
-            <TubesBackground className="min-h-screen min-h-[100dvh]">
-                {children}
-            </TubesBackground>
+            {content}
         </ProgressProvider>
     );
 }

@@ -299,6 +299,14 @@ function PagamentoPageContent() {
                     return;
                 }
 
+                if (data.isPaid) {
+                    await refreshUser();
+                    if (!isSpecialtyTestMode) {
+                        router.replace(ROUTES.app.thankYou);
+                    }
+                    return;
+                }
+
                 if (data.hasPendingPayment) {
                     setSelectedPaymentMethod(data.paymentMethod || "PIX");
                     setActivePaymentMethod(data.paymentMethod || "PIX");
@@ -371,7 +379,7 @@ function PagamentoPageContent() {
         };
 
         void checkPayment();
-        const interval = setInterval(checkPayment, 5000);
+        const interval = setInterval(checkPayment, 1500);
 
         const userRef = doc(db, "users", user.id);
         const unsubscribe = onSnapshot(userRef, (snapshot) => {
@@ -481,6 +489,14 @@ function PagamentoPageContent() {
             const data = await res.json();
 
             if (data.alreadyPremium) {
+                await refreshUser();
+                if (!isSpecialtyTestMode) {
+                    router.replace(ROUTES.app.thankYou);
+                }
+                return;
+            }
+
+            if (data.isPaid) {
                 await refreshUser();
                 if (!isSpecialtyTestMode) {
                     router.replace(ROUTES.app.thankYou);

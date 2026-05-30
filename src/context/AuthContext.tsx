@@ -151,8 +151,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                     // Retry logic for new registrations (race condition fix)
                     if (!userDoc.exists()) {
-                        for (let i = 0; i < 3; i++) {
-                            await new Promise(resolve => setTimeout(resolve, 1000));
+                        for (let i = 0; i < 2; i++) {
+                            await new Promise(resolve => setTimeout(resolve, 250));
                             userDoc = await getDoc(userDocRef);
                             if (userDoc.exists()) break;
                         }
@@ -252,7 +252,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     prev.phone === nextUser.phone &&
                     prev.currentStreak === nextUser.currentStreak &&
                     prev.name === nextUser.name &&
-                    prev.email === nextUser.email
+                    prev.email === nextUser.email &&
+                    prev.studyStats?.totalActiveSeconds === nextUser.studyStats?.totalActiveSeconds &&
+                    prev.studyStats?.lastStudiedAt === nextUser.studyStats?.lastStudiedAt
                 ) {
                     return prev;
                 }
@@ -271,7 +273,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const login = async (identifier: string, password: string): Promise<AuthResult> => {
         const result = await authLogin(identifier, password);
         if (result.success && auth.currentUser) {
-            await syncServerSession(auth.currentUser, true);
+            if (result.user) {
+                setUser(result.user);
+            }
+            setIsLoading(false);
+            void syncServerSession(auth.currentUser, true);
         }
         return result;
     };
@@ -279,7 +285,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const loginWithGoogle = async (): Promise<AuthResult> => {
         const result = await authLoginWithGoogle();
         if (result.success && auth.currentUser) {
-            await syncServerSession(auth.currentUser, true);
+            if (result.user) {
+                setUser(result.user);
+            }
+            setIsLoading(false);
+            void syncServerSession(auth.currentUser, true);
         }
         return result;
     };
@@ -292,7 +302,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ): Promise<AuthResult> => {
         const result = await authRegister(name, email, password, confirmPassword);
         if (result.success && auth.currentUser) {
-            await syncServerSession(auth.currentUser, true);
+            if (result.user) {
+                setUser(result.user);
+            }
+            setIsLoading(false);
+            void syncServerSession(auth.currentUser, true);
         }
         return result;
     };
@@ -314,6 +328,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const result = await authActivateWithInvite(user.id, code);
         if (result.success && result.user) {
             setUser(result.user);
+            setIsLoading(false);
+            if (auth.currentUser) {
+                void syncServerSession(auth.currentUser, true);
+            }
         }
         return result;
     };
@@ -323,6 +341,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const result = await authActivateWithPayment(user.id, paymentId);
         if (result.success && result.user) {
             setUser(result.user);
+            setIsLoading(false);
+            if (auth.currentUser) {
+                void syncServerSession(auth.currentUser, true);
+            }
         }
         return result;
     };

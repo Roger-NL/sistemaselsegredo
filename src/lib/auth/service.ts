@@ -37,6 +37,7 @@ import {
     type WriterExamStatus,
     type WriterLiveSessionStatus,
 } from "@/lib/auth/premium-access";
+import { normalizeStudyStats, type StudyStats } from "@/lib/study/stats";
 
 // ADMIN LIST (Hardcoded for MVP Phase)
 const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
@@ -78,6 +79,7 @@ export interface User {
     completedPillarModules?: string[]; // IDs of unique modules like 'p1-m1', 'p2-m1'
     hasSeenMissionComplete?: boolean;
     localPillarStatus?: Record<string, string>; // Optional: Sync the full pillar status map if desired
+    studyStats?: StudyStats;
 }
 
 export interface AuthResult {
@@ -298,6 +300,7 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
                         Object.entries(data.localPillarStatus).filter(([, value]) => typeof value === "string")
                     )
                     : undefined,
+            studyStats: normalizeStudyStats((data as { studyStats?: unknown }).studyStats),
         };
     }
     return null;

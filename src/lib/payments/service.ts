@@ -133,8 +133,11 @@ function getAttemptResponse(
   attempt: PaymentAttemptRecord,
   options?: { reusedExisting?: boolean; expired?: boolean }
 ): CheckoutStateResponse {
+  const paid = isPaymentPaid(attempt.status);
   return {
     success: true,
+    isPaid: paid,
+    alreadyPremium: paid && attempt.plan === "lifetime",
     hasPendingPayment: !(options?.expired),
     reusedExisting: options?.reusedExisting,
     expired: options?.expired,
@@ -150,7 +153,7 @@ function getAttemptResponse(
     expiresAt: attempt.expiresAt,
     dueDate: attempt.dueDate,
     plan: attempt.plan,
-    reconciliationStatus: options?.expired ? "expired" : "pending",
+    reconciliationStatus: options?.expired ? "expired" : paid ? "paid" : "pending",
     reconciliationReason: options?.expired ? "expired" : "tracked_attempt",
   };
 }

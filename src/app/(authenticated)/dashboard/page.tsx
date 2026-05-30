@@ -14,7 +14,7 @@ import { TheHUD } from "@/components/core/TheHUD";
 import { GlobalStatusPanel } from "@/features/dashboard/GlobalStatusPanel";
 import { Typewriter } from "@/components/ui/typewriter";
 import { DashboardNav } from "@/components/core/DashboardNav";
-import ConciergeModal from "@/components/core/ConciergeModal";
+import ConciergeModal, { useConciergeModal } from "@/components/core/ConciergeModal";
 import { ExamFeedbackPopup } from "@/features/dashboard/ExamFeedbackPopup";
 
 import { useAuth } from "@/context/AuthContext";
@@ -57,7 +57,8 @@ export default function Page() {
   // Isso resolve o problema do botão "Voltar" não funcionar
 
   const [isHUDOpen, setIsHUDOpen] = useState(false);
-  const [showCommsModal, setShowCommsModal] = useState(false);
+  const conciergeModal = useConciergeModal("login");
+  const [shouldReduceDashboardMotion, setShouldReduceDashboardMotion] = useState(false);
 
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [schedulingStatus, setSchedulingStatus] = useState<LiveSessionStatusPayload | null>(null);
@@ -104,24 +105,26 @@ export default function Page() {
     loadSchedulingStatus();
   }, [subscriptionStatus, user?.id]);
 
-  // Trigger: Verifica conexão WhatsApp ao entrar (delay 3s)
   useEffect(() => {
-    if (!user) return;
+    if (typeof window === "undefined") return;
 
-    // Se já tem telefone válido no sistema, não mostra o modal
-    if (user.phone && user.phone.length > 8) return;
+    const mediaQueries = [
+      window.matchMedia("(pointer: coarse)"),
+      window.matchMedia("(prefers-reduced-motion: reduce)"),
+      window.matchMedia("(max-width: 768px)"),
+    ];
 
-    // Verifica se já conectou (fallback local)
-    const alreadyConnected = localStorage.getItem('es-secure-comms-v2');
+    const syncMotionPreference = () => {
+      setShouldReduceDashboardMotion(mediaQueries.some((query) => query.matches));
+    };
 
-    if (!alreadyConnected) {
-      // Se NÃO conectou, espera 3 segundos e bloqueia a tela com o modal
-      const timer = setTimeout(() => {
-        setShowCommsModal(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [user]);
+    syncMotionPreference();
+    mediaQueries.forEach((query) => query.addEventListener("change", syncMotionPreference));
+
+    return () => {
+      mediaQueries.forEach((query) => query.removeEventListener("change", syncMotionPreference));
+    };
+  }, []);
 
   const handleGlobeClick = () => {
     console.log("Opening HUD");
@@ -173,7 +176,7 @@ export default function Page() {
       />
 
       {shouldShowPremiumCTA && (
-        <div className="fixed right-4 top-24 z-40 w-[min(calc(100vw-1.5rem),24rem)] pointer-events-auto sm:right-5 md:right-6 md:top-28">
+        <div className="fixed right-4 top-24 z-[60] w-[min(calc(100vw-1.5rem),24rem)] pointer-events-auto sm:right-5 md:right-6 md:top-28">
           <AnimatePresence mode="wait" initial={false}>
             {isPremiumCTAOpen ? (
               <motion.div
@@ -569,6 +572,7 @@ export default function Page() {
                   width={500}
                   height={500}
                   className="size-full transition-transform duration-700 ease-out"
+                  reducedMotion={shouldReduceDashboardMotion}
                 />
               </button>
 
@@ -705,15 +709,18 @@ export default function Page() {
       {/* WhatsApp Capture Modal — Trigger: Login (Mandatório) */}
       <ConciergeModal
         trigger="login"
-        isOpen={showCommsModal}
-        onClose={() => {
-          setShowCommsModal(false);
-        }}
-        onConnect={(phone) => {
+        isOpen={Boolean(user && conciergeModal.isOpen && !(user.phone && user.phone.length > 8))}
+        onClose={conciergeModal.close}
+        onConnect={async (phone) => {
           if (user) {
-            updateProfile(user.name, user.email, phone);
+            const result = await updateProfile(user.name, user.email, phone);
+            if (result.success) {
+              conciergeModal.connect(phone);
+              return;
+            }
           }
-          setShowCommsModal(false);
+
+          conciergeModal.close();
         }}
       />
 

@@ -3,11 +3,11 @@
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Lock, ChevronRight, Check, Star, BookOpen } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type Pillar, PLANETS } from "@/data/curriculum";
 import { getRank } from "@/utils/ranks";
 import { useProgress } from "@/context/ProgressContext";
+import { ROUTES } from "@/lib/routes";
 
 interface TheHUDProps {
     isOpen: boolean;
@@ -22,6 +22,13 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
     const { areAllPillarsComplete, chosenSpecialization } = useProgress();
 
     const allComplete = areAllPillarsComplete();
+
+    const navigateFromHud = (href: string) => {
+        onClose();
+        window.requestAnimationFrame(() => {
+            router.push(href);
+        });
+    };
 
     if (typeof document === "undefined") return null;
 
@@ -72,8 +79,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => {
-                                            onClose();
-                                            window.location.href = "/";
+                                            navigateFromHud(ROUTES.app.dashboard);
                                         }}
                                         className="text-[#EEF4D4]/40 hover:text-[#EEF4D4]/80 transition-colors text-[10px] font-mono uppercase tracking-widest"
                                     >
@@ -107,8 +113,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                     </div>
                                     <div
                                         onClick={() => {
-                                            onClose();
-                                            router.push(`/especialidades/${chosenSpecialization}`);
+                                            navigateFromHud(`${ROUTES.app.specialties}/${chosenSpecialization}`);
                                         }}
                                         className="group relative p-6 border transition-all duration-300 flex items-center justify-between overflow-hidden bg-gradient-to-r from-violet-500/30 to-purple-500/30 border-violet-500/60 hover:border-violet-400 cursor-pointer"
                                     >
@@ -176,11 +181,11 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                     }
 
                                     return (
-                                        <Link
+                                        <button
                                             key={pillar.id}
-                                            href={`/pilar/${index + 1}`}
-                                            onClick={onClose}
-                                            className="group relative block overflow-hidden"
+                                            type="button"
+                                            onClick={() => navigateFromHud(`${ROUTES.app.pillar}/${index + 1}`)}
+                                            className="group relative block w-full overflow-hidden text-left"
                                         >
                                             <div className={`
                                                 relative p-6 border transition-all duration-300 flex items-center justify-between
@@ -242,15 +247,14 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                                     <div className="absolute inset-0 bg-[#EEF4D4] blur-[2px] opacity-20 pointer-events-none" />
                                                 )}
                                             </div>
-                                        </Link>
+                                        </button>
                                     );
                                 })}
 
                                 {/* Pilar 10 - Especialidades (Sempre desbloqueado, seleção interna é que é controlada) */}
                                 <div
                                     onClick={() => {
-                                        onClose();
-                                        router.push("/especialidades");
+                                        navigateFromHud(ROUTES.app.specialties);
                                     }}
                                     className="group relative p-6 border transition-all duration-300 flex items-center justify-between overflow-hidden bg-gradient-to-r from-violet-500/20 to-purple-500/20 border-violet-500/50 hover:border-violet-400 hover:from-violet-500/30 hover:to-purple-500/30 cursor-pointer"
                                 >

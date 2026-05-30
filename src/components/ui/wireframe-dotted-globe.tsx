@@ -9,6 +9,7 @@ interface RotatingEarthProps {
     height?: number
     className?: string
     onClick?: () => void
+    reducedMotion?: boolean
 }
 
 type LandFeature = Feature<Polygon | MultiPolygon, GeoJsonProperties>
@@ -185,7 +186,8 @@ function RotatingEarthComponent({
     width = 500,
     height = 500,
     className = "",
-    onClick
+    onClick,
+    reducedMotion = false,
 }: RotatingEarthProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -362,6 +364,10 @@ function RotatingEarthComponent({
             }
 
             setIsLoading(false)
+            if (reducedMotion) {
+                render()
+                return
+            }
             startAnimation()
         }
 
@@ -373,7 +379,7 @@ function RotatingEarthComponent({
             document.removeEventListener("visibilitychange", handleVisibilityChange)
             stopAnimation()
         }
-    }, [height, size, width])
+    }, [height, reducedMotion, size, width])
 
     return (
         <div ref={containerRef} className={`relative cursor-pointer ${className}`} onClick={onClick}>

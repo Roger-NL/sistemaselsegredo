@@ -57,7 +57,7 @@ function CadastroPageContent() {
     // Auto-redirect if already logged in
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
-            router.push(getPostSignupTarget());
+            router.replace(getPostSignupTarget());
         }
     }, [getPostSignupTarget, isAuthenticated, isLoading, router]);
 
@@ -75,9 +75,7 @@ function CadastroPageContent() {
         const result = await register(name, email, password, confirmPassword);
 
         if (result.success) {
-            setTimeout(() => {
-                router.push(getPostSignupTarget(result.user?.email ?? email));
-            }, 500);
+            router.replace(getPostSignupTarget(result.user?.email ?? email));
         } else {
             setError(result.error || "Erro ao criar conta");
             setIsSubmitting(false);
@@ -215,7 +213,7 @@ function CadastroPageContent() {
                                 setIsSubmitting(true);
                                 const result = await loginWithGoogle();
                                 if (result.success) {
-                                    router.push(getPostSignupTarget(result.user?.email));
+                                    router.replace(getPostSignupTarget(result.user?.email));
                                 } else {
                                     setError(result.error || "Erro ao cadastrar com Google");
                                     setIsSubmitting(false);

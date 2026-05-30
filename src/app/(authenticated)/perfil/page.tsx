@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { getRank } from "@/utils/ranks";
 import { ROUTES } from "@/lib/routes";
 import { DashboardNav } from "@/components/core/DashboardNav";
+import { formatStudyDuration } from "@/lib/study/stats";
+import type { User } from "@/lib/auth/service";
 
 type ProfileActionResult = {
     success: boolean;
@@ -131,8 +133,18 @@ export default function PerfilPage() {
     // Default or loading state
     if (authLoading) return <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">Carregando...</div>;
 
-    const baseUser = user || { name: "Usuário", email: "...", createdAt: new Date().toISOString(), currentStreak: 0, phone: "" };
+    const baseUser: User = user || {
+        id: "guest",
+        name: "Usuário",
+        email: "...",
+        createdAt: new Date().toISOString(),
+        currentStreak: 0,
+        subscriptionStatus: "free",
+        approvedPillar: 1,
+        phone: "",
+    };
     const displayUser = { ...baseUser, phone: baseUser.phone || localPhone || "" };
+    const formattedStudyDuration = formatStudyDuration(displayUser.studyStats?.totalActiveSeconds);
 
     const startEditing = () => {
         setEditName(displayUser.name);
@@ -320,7 +332,7 @@ export default function PerfilPage() {
                         <div className="text-sm text-gray-500 mt-1">Progresso Total</div>
                     </div>
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 text-center">
-                        <div className="text-3xl font-bold text-gray-900">12h 30min</div>
+                        <div className="text-3xl font-bold text-gray-900">{formattedStudyDuration}</div>
                         <div className="text-sm text-gray-500 mt-1">Tempo de Estudo</div>
                     </div>
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 text-center">

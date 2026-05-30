@@ -106,6 +106,7 @@ export interface PaymentAttemptRecord {
 
 export interface CheckoutStateResponse {
   success: boolean;
+  isPaid?: boolean;
   alreadyPremium?: boolean;
   hasPendingPayment?: boolean;
   reusedExisting?: boolean;
