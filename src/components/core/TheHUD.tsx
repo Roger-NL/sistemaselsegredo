@@ -1,6 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
+import { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Lock, ChevronRight, Check, Star, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -20,12 +21,35 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
     const currentRank = getRank(completedCount);
     const router = useRouter();
     const { areAllPillarsComplete, chosenSpecialization } = useProgress();
+    const navigationLockRef = useRef(false);
 
     const allComplete = areAllPillarsComplete();
 
     const navigateFromHud = (href: string) => {
+        if (navigationLockRef.current) return;
+        navigationLockRef.current = true;
+
         router.push(href);
-        onClose();
+
+        if (typeof window === "undefined") {
+            navigationLockRef.current = false;
+            onClose();
+            return;
+        }
+
+        window.setTimeout(() => {
+            const target = new URL(href, window.location.origin);
+            const targetPath = `${target.pathname}${target.search}${target.hash}`;
+            const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+            if (currentPath !== targetPath) {
+                window.location.assign(href);
+                return;
+            }
+
+            navigationLockRef.current = false;
+            onClose();
+        }, 180);
     };
 
     if (typeof document === "undefined") return null;
@@ -76,16 +100,18 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                             <div className="flex flex-col items-end gap-2 md:gap-4">
                                 <div className="flex items-center gap-2">
                                     <button
+                                        type="button"
                                         onClick={() => {
                                             navigateFromHud(ROUTES.app.dashboard);
                                         }}
-                                        className="text-[#EEF4D4]/40 hover:text-[#EEF4D4]/80 transition-colors text-[10px] font-mono uppercase tracking-widest"
+                                        className="touch-manipulation text-[#EEF4D4]/40 hover:text-[#EEF4D4]/80 transition-colors text-[10px] font-mono uppercase tracking-widest"
                                     >
                                         Menu Principal
                                     </button>
                                     <button
+                                        type="button"
                                         onClick={onClose}
-                                        className="group flex items-center gap-1 text-[#EEF4D4]/60 hover:text-[#EEF4D4] transition-colors"
+                                        className="group flex touch-manipulation items-center gap-1 text-[#EEF4D4]/60 hover:text-[#EEF4D4] transition-colors"
                                     >
                                         <span className="text-[10px] font-mono uppercase tracking-widest hidden md:inline">Fechar</span>
                                         <X className="w-5 h-5" />
@@ -109,11 +135,12 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                         <Star className="w-4 h-4 text-violet-400" />
                                         <span className="text-[10px] font-mono tracking-[0.3em] text-violet-400/80 uppercase">Minha Especialização</span>
                                     </div>
-                                    <div
+                                    <button
+                                        type="button"
                                         onClick={() => {
                                             navigateFromHud(`${ROUTES.app.specialties}/${chosenSpecialization}`);
                                         }}
-                                        className="group relative p-6 border transition-all duration-300 flex items-center justify-between overflow-hidden bg-gradient-to-r from-violet-500/30 to-purple-500/30 border-violet-500/60 hover:border-violet-400 cursor-pointer"
+                                        className="group relative flex w-full touch-manipulation items-center justify-between overflow-hidden border bg-gradient-to-r from-violet-500/30 to-purple-500/30 p-6 text-left transition-all duration-300 border-violet-500/60 hover:border-violet-400"
                                     >
                                         <div className="flex items-center gap-6 z-10">
                                             <span className="text-2xl font-mono font-bold tracking-tighter text-violet-300">
@@ -130,7 +157,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                         </div>
                                         <ChevronRight className="w-5 h-5 text-violet-300 group-hover:translate-x-1 transition-transform" />
                                         <div className="absolute inset-0 bg-violet-500 blur-[2px] opacity-20 pointer-events-none group-hover:opacity-30 transition-opacity" />
-                                    </div>
+                                    </button>
                                 </div>
                             )}
 
@@ -183,7 +210,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                             key={pillar.id}
                                             type="button"
                                             onClick={() => navigateFromHud(`${ROUTES.app.pillar}/${index + 1}`)}
-                                            className="group relative block w-full overflow-hidden text-left"
+                                            className="group relative block w-full touch-manipulation overflow-hidden text-left"
                                         >
                                             <div className={`
                                                 relative p-6 border transition-all duration-300 flex items-center justify-between
@@ -250,11 +277,12 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                 })}
 
                                 {/* Pilar 10 - Especialidades (Sempre desbloqueado, seleção interna é que é controlada) */}
-                                <div
+                                <button
+                                    type="button"
                                     onClick={() => {
                                         navigateFromHud(ROUTES.app.specialties);
                                     }}
-                                    className="group relative p-6 border transition-all duration-300 flex items-center justify-between overflow-hidden bg-gradient-to-r from-violet-500/20 to-purple-500/20 border-violet-500/50 hover:border-violet-400 hover:from-violet-500/30 hover:to-purple-500/30 cursor-pointer"
+                                    className="group relative flex w-full touch-manipulation items-center justify-between overflow-hidden border bg-gradient-to-r from-violet-500/20 to-purple-500/20 p-6 text-left transition-all duration-300 border-violet-500/50 hover:border-violet-400 hover:from-violet-500/30 hover:to-purple-500/30"
                                 >
                                     <div className="flex items-center gap-6 z-10">
                                         <span className="text-2xl font-mono font-bold tracking-tighter text-violet-400">
@@ -277,7 +305,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
 
                                     {/* Efeito Glow */}
                                     <div className="absolute inset-0 bg-violet-500 blur-[2px] opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity" />
-                                </div>
+                                </button>
                             </div>
                         </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Crown, Sparkles, ArrowRight, CalendarClock, CheckCircle2, Clock3, X } from "lucide-react";
 import type { LiveSessionStatusPayload } from "@/lib/scheduling/types";
@@ -131,6 +131,25 @@ export default function Page() {
     setIsHUDOpen(true);
   };
 
+  const navigateSafely = useCallback(
+    (href: string) => {
+      router.push(href);
+
+      if (typeof window === "undefined") return;
+
+      window.setTimeout(() => {
+        const target = new URL(href, window.location.origin);
+        const targetPath = `${target.pathname}${target.search}${target.hash}`;
+        const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+        if (currentPath !== targetPath) {
+          window.location.assign(href);
+        }
+      }, 180);
+    },
+    [router]
+  );
+
   const openPremiumCTA = () => {
     setIsPremiumCTAOpen(true);
     if (typeof window !== "undefined") {
@@ -227,8 +246,8 @@ export default function Page() {
                 <div className="mt-4 flex gap-2">
                   <button
                     type="button"
-                    onClick={() => router.push(ROUTES.public.payment)}
-                    className="group inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-400/12 px-4 py-3 text-xs font-bold uppercase tracking-[0.22em] text-emerald-100 transition hover:border-emerald-200/50 hover:bg-emerald-400/18"
+                    onClick={() => navigateSafely(ROUTES.public.payment)}
+                    className="group inline-flex flex-1 touch-manipulation items-center justify-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-400/12 px-4 py-3 text-xs font-bold uppercase tracking-[0.22em] text-emerald-100 transition hover:border-emerald-200/50 hover:bg-emerald-400/18"
                   >
                     Adquirir premium
                     <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -364,7 +383,7 @@ export default function Page() {
 
       {/* Global Status Panel (Lateral) - Absolute para não afetar centralização */}
       <div className="absolute inset-0 pointer-events-none z-30">
-        <div className="pointer-events-auto">
+        <div>
           <GlobalStatusPanel />
         </div>
       </div>
@@ -627,14 +646,15 @@ export default function Page() {
             </div>
 
             <div className="absolute left-1/2 top-full z-20 mt-5 -translate-x-1/2 pointer-events-auto flex flex-col items-center">
-              <div
+              <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (currentSpec) router.push(`${ROUTES.app.specialties}/${currentSpec.id}`);
-                  else if (completedCount < 9) router.push(`${ROUTES.app.pillar}/${currentPillarNumber}`);
-                  else router.push(ROUTES.app.specialties);
+                  if (currentSpec) navigateSafely(`${ROUTES.app.specialties}/${currentSpec.id}`);
+                  else if (completedCount < 9) navigateSafely(`${ROUTES.app.pillar}/${currentPillarNumber}`);
+                  else navigateSafely(ROUTES.app.specialties);
                 }}
-                className="cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95"
+                className="cursor-pointer touch-manipulation transition-all duration-300 hover:scale-110 active:scale-95 border-0 bg-transparent p-0"
               >
                 <span
                   className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm ${currentSpec
@@ -661,7 +681,7 @@ export default function Page() {
                     }
                   </span>
                 </span>
-              </div>
+              </button>
 
               <div className="mt-4 text-center">
                 {currentSpec ? (
