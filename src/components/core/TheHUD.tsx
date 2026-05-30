@@ -24,10 +24,8 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
     const allComplete = areAllPillarsComplete();
 
     const navigateFromHud = (href: string) => {
+        router.push(href);
         onClose();
-        window.requestAnimationFrame(() => {
-            router.push(href);
-        });
     };
 
     if (typeof document === "undefined") return null;

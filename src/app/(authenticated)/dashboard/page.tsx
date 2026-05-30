@@ -155,7 +155,7 @@ export default function Page() {
   const isAdmin = user && ADMIN_EMAILS.includes(user.email);
 
   return (
-    <main className="relative min-h-screen min-h-[100dvh] w-full overflow-hidden text-white selection:bg-[#EEF4D4] selection:text-black flex items-center justify-center pointer-events-none">
+    <main className="relative min-h-screen min-h-[100dvh] w-full overflow-hidden text-white selection:bg-[#EEF4D4] selection:text-black flex items-center justify-center">
 
       {/* Admin Portal Button - Fixed Bottom Right */}
       {isAdmin && (
