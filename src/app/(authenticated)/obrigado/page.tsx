@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import { ROUTES } from "@/lib/routes";
 import { Check, ArrowRight, BookOpen, Fingerprint, Award, Users } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,12 +9,31 @@ import { motion } from "framer-motion";
 export default function ObrigadoPage() {
     const router = useRouter();
 
+    const navigateSafely = useCallback(
+        (href: string) => {
+            router.push(href);
+
+            if (typeof window === "undefined") return;
+
+            window.setTimeout(() => {
+                const target = new URL(href, window.location.origin);
+                const targetPath = `${target.pathname}${target.search}${target.hash}`;
+                const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+                if (currentPath !== targetPath) {
+                    window.location.assign(href);
+                }
+            }, 180);
+        },
+        [router]
+    );
+
     const handleDashboard = () => {
-        router.push(ROUTES.app.dashboard);
+        navigateSafely(ROUTES.app.dashboard);
     };
 
     const handlePillar2 = () => {
-        router.push(`${ROUTES.app.pillar}/2`);
+        navigateSafely(`${ROUTES.app.pillar}/2`);
     };
 
     return (
@@ -110,8 +130,9 @@ export default function ObrigadoPage() {
                         className="flex w-full flex-col items-center gap-3 sm:flex-row"
                     >
                         <button
+                            type="button"
                             onClick={handlePillar2}
-                            className="group relative w-full overflow-hidden rounded-xl bg-white py-4 text-sm font-semibold text-black transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            className="group relative w-full touch-manipulation overflow-hidden rounded-xl bg-white py-4 text-sm font-semibold text-black transition-all hover:scale-[1.02] active:scale-[0.98]"
                         >
                             <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-black/10 to-transparent skew-x-12" />
                             <span className="flex items-center justify-center gap-2">
@@ -121,8 +142,9 @@ export default function ObrigadoPage() {
                         </button>
                         
                         <button
+                            type="button"
                             onClick={handleDashboard}
-                            className="w-full rounded-xl border border-white/20 bg-transparent py-4 text-sm font-semibold text-white transition-all hover:bg-white/5 active:scale-[0.98]"
+                            className="w-full touch-manipulation rounded-xl border border-white/20 bg-transparent py-4 text-sm font-semibold text-white transition-all hover:bg-white/5 active:scale-[0.98]"
                         >
                             MENU PRINCIPAL
                         </button>

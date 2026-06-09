@@ -330,7 +330,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(result.user);
             setIsLoading(false);
             if (auth.currentUser) {
-                void syncServerSession(auth.currentUser, true);
+                await syncServerSession(auth.currentUser, true);
             }
         }
         return result;
@@ -343,7 +343,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(result.user);
             setIsLoading(false);
             if (auth.currentUser) {
-                void syncServerSession(auth.currentUser, true);
+                await syncServerSession(auth.currentUser, true);
             }
         }
         return result;

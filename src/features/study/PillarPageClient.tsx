@@ -16,6 +16,7 @@ import { useState, useEffect, useCallback } from "react";
 import { PillarData } from "@/types/study";
 import { ROUTES } from "@/lib/routes";
 import { useStudyActivityTracker } from "@/lib/study/use-study-activity-tracker";
+import { navigateWithMobileFallback } from "@/lib/navigation/safe-client-navigation";
 
 interface PillarPageClientProps {
     pillarId: number;
@@ -59,6 +60,11 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     const [isViewExamModalOpen, setIsViewExamModalOpen] = useState(false);
     const [isCheckingExam, setIsCheckingExam] = useState(true);
     const [trackedModuleId, setTrackedModuleId] = useState<string | null>(null);
+
+    const navigateSafely = useCallback(
+        (href: string) => navigateWithMobileFallback(router, href),
+        [router]
+    );
 
     const refreshExamStatus = useCallback(async () => {
         if (user) {
@@ -117,29 +123,29 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     // Helper functions
     const handleAction = async () => {
         if (shouldOpenPremiumPaymentFromSnapshot) {
-            router.push(ROUTES.public.payment);
+            navigateSafely(ROUTES.public.payment);
             return;
         }
 
         if (shouldAdvanceToPillarTwoFromSnapshot) {
-            router.push(`${ROUTES.app.pillar}/2`);
+            navigateSafely(`${ROUTES.app.pillar}/2`);
             return;
         }
 
         if (shouldGoToSchedulingFromSnapshot) {
-            router.push(ROUTES.app.scheduling);
+            navigateSafely(ROUTES.app.scheduling);
             return;
         }
 
         if (shouldAdvanceToPillarThreeFromSnapshot) {
-            router.push(`${ROUTES.app.pillar}/3`);
+            navigateSafely(`${ROUTES.app.pillar}/3`);
             return;
         }
 
         // Intercept Pillar 1 (legacy fallback during transition)
         if (pillarId === 1 && !isPremiumLike) {
             if ((user?.approvedPillar || 1) >= 2 || exam?.status === 'pending') {
-                router.push(ROUTES.public.payment);
+                navigateSafely(ROUTES.public.payment);
                 return;
             }
         }
@@ -148,29 +154,29 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
         if (isNextPillarUnlockedBySnapshot) {
             if (pillarId < 9) {
-                router.push(`${ROUTES.app.pillar}/${nextPillar}`);
+                navigateSafely(`${ROUTES.app.pillar}/${nextPillar}`);
             } else {
-                router.push(ROUTES.app.dashboard);
+                navigateSafely(ROUTES.app.dashboard);
             }
             return;
         }
 
         if (pillarId === 1 && isPremiumLike && exam?.status === "pending") {
-            router.push(`${ROUTES.app.pillar}/2`);
+            navigateSafely(`${ROUTES.app.pillar}/2`);
             return;
         }
 
         if (pillarId === 2 && exam?.status === "approved" && (user?.approvedPillar || 1) < 3) {
-            router.push(ROUTES.app.scheduling);
+            navigateSafely(ROUTES.app.scheduling);
             return;
         }
 
         // Caso 1: Já está aprovado pelo Comando (Server Authority) -> Apenas avança
         if ((user?.approvedPillar || 1) >= nextPillar) {
             if (pillarId < 9) {
-                router.push(`${ROUTES.app.pillar}/${nextPillar}`);
+                navigateSafely(`${ROUTES.app.pillar}/${nextPillar}`);
             } else {
-                router.push(ROUTES.app.dashboard);
+                navigateSafely(ROUTES.app.dashboard);
             }
             return;
         }
@@ -184,7 +190,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     };
 
     const handleGoToMenu = () => {
-        router.push(ROUTES.app.dashboard);
+        navigateSafely(ROUTES.app.dashboard);
     };
 
     // Selecionar conteúdo baseado no ID do Map (Passed from Server now)
@@ -200,7 +206,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
     // 1. Loading State
     if (authLoading) {
-        return <div className="min-h-screen bg-black flex items-center justify-center text-white">Carregando...</div>;
+        return <div className="min-h-screen min-h-[100dvh] bg-black flex items-center justify-center text-white">Carregando...</div>;
     }
 
     // 2. Premium Lock (Pillar > 1 requires Premium)
@@ -212,10 +218,10 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     // 3. Invalid Pillar
     if (!pillar) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center p-4">
+            <div className="min-h-screen min-h-[100dvh] bg-black flex items-center justify-center p-4">
                     <FlightCard variant="danger" className="p-8 text-center max-w-md">
                         <h1 className="text-2xl font-bold text-[#EEF4D4] mb-4">Pilar não encontrado</h1>
-                    <FlightButton onClick={() => router.push(ROUTES.app.dashboard)}>
+                    <FlightButton onClick={() => navigateSafely(ROUTES.app.dashboard)}>
                         <ArrowLeft className="w-4 h-4 mr-2 inline" />
                         Voltar ao Dashboard
                     </FlightButton>
@@ -227,7 +233,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
     // 4. Sequential Lock (Must complete previous pillars)
     if (!isUnlocked) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center p-4">
+            <div className="min-h-screen min-h-[100dvh] bg-black flex items-center justify-center p-4">
                     <FlightCard variant="default" className="max-w-lg p-0 overflow-hidden text-center">
                         <div className="relative px-8 pb-8 pt-7">
                             <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.16),transparent_48%),radial-gradient(circle_at_top_right,rgba(168,85,247,0.22),transparent_36%),radial-gradient(circle_at_center,rgba(236,72,153,0.14),transparent_52%)]" />
@@ -261,7 +267,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                 </div>
 
                                 <div className="mt-6 space-y-3">
-                                    <FlightButton variant="neon" onClick={() => router.push(ROUTES.public.payment)} className="w-full !rounded-xl !border-fuchsia-400/35 bg-[linear-gradient(135deg,rgba(91,33,182,0.42),rgba(217,70,239,0.22),rgba(34,211,238,0.18))] px-5 py-4 shadow-[0_0_35px_rgba(217,70,239,0.22)]">
+                                    <FlightButton variant="neon" onClick={() => navigateSafely(ROUTES.public.payment)} className="w-full !rounded-xl !border-fuchsia-400/35 bg-[linear-gradient(135deg,rgba(91,33,182,0.42),rgba(217,70,239,0.22),rgba(34,211,238,0.18))] px-5 py-4 shadow-[0_0_35px_rgba(217,70,239,0.22)]">
                                         <span className="flex items-center justify-between gap-3">
                                             <span className="flex items-center gap-3">
                                                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-fuchsia-300/25 bg-fuchsia-400/15 text-fuchsia-200">
@@ -278,7 +284,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
                                     <button
                                         type="button"
-                                        onClick={() => router.push(`${ROUTES.app.pillar}/${currentPillarNumber}`)}
+                                        onClick={() => navigateSafely(`${ROUTES.app.pillar}/${currentPillarNumber}`)}
                                         className="inline-flex items-center justify-center gap-2 text-sm text-white/42 transition hover:text-white/72"
                                     >
                                         <BookOpen className="h-4 w-4" />
@@ -309,7 +315,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
     return (
         <div className="min-h-screen min-h-[100dvh] w-full overflow-y-auto pointer-events-auto">
-            <main className="w-full p-4 md:p-8 pb-24 md:pb-8">
+            <main className="w-full px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(6rem,calc(4rem+env(safe-area-inset-bottom)))] md:p-8">
                 <div className="max-w-4xl mx-auto">
 
                     {/* Header Navigation */}
@@ -318,7 +324,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                             <button
                                 type="button"
                                 onClick={handleBack}
-                                className="flex items-center gap-2 text-white/50 hover:text-white transition-colors py-2 px-3 rounded-md hover:bg-white/5 border border-white/10 hover:border-white/30"
+                                className="flex touch-manipulation items-center gap-2 text-white/50 hover:text-white transition-colors py-3 px-4 rounded-xl hover:bg-white/5 border border-white/10 hover:border-white/30"
                             >
                                 <ArrowLeft className="w-4 h-4" />
                                 <span className="hidden md:inline">Voltar</span>
@@ -326,7 +332,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                             <button
                                 type="button"
                                 onClick={handleGoToMenu}
-                                className="flex items-center gap-2 text-white/30 hover:text-white/60 transition-colors text-xs"
+                                className="flex touch-manipulation items-center gap-2 rounded-xl px-3 py-3 text-xs text-white/40 transition-colors hover:bg-white/5 hover:text-white/70"
                             >
                                 Menu Principal
                             </button>

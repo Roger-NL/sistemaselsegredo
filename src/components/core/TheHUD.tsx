@@ -1,7 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Lock, ChevronRight, Check, Star, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ import { type Pillar, PLANETS } from "@/data/curriculum";
 import { getRank } from "@/utils/ranks";
 import { useProgress } from "@/context/ProgressContext";
 import { ROUTES } from "@/lib/routes";
+import { navigateWithMobileFallback } from "@/lib/navigation/safe-client-navigation";
 
 interface TheHUDProps {
     isOpen: boolean;
@@ -25,31 +26,30 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
 
     const allComplete = areAllPillarsComplete();
 
+    useEffect(() => {
+        if (isOpen) {
+            navigationLockRef.current = false;
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        const unlockOnPageRestore = () => {
+            navigationLockRef.current = false;
+        };
+
+        window.addEventListener("pageshow", unlockOnPageRestore);
+        return () => window.removeEventListener("pageshow", unlockOnPageRestore);
+    }, []);
+
     const navigateFromHud = (href: string) => {
         if (navigationLockRef.current) return;
         navigationLockRef.current = true;
 
-        router.push(href);
-
-        if (typeof window === "undefined") {
-            navigationLockRef.current = false;
-            onClose();
-            return;
-        }
-
+        navigateWithMobileFallback(router, href);
         window.setTimeout(() => {
-            const target = new URL(href, window.location.origin);
-            const targetPath = `${target.pathname}${target.search}${target.hash}`;
-            const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-
-            if (currentPath !== targetPath) {
-                window.location.assign(href);
-                return;
-            }
-
             navigationLockRef.current = false;
             onClose();
-        }, 180);
+        }, 240);
     };
 
     if (typeof document === "undefined") return null;
@@ -57,7 +57,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 md:p-8">
+                <div className="fixed inset-0 z-[99999] flex min-h-[100dvh] items-center justify-center p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] md:p-8">
                     {/* Backdrop Técnico */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -76,7 +76,7 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
                         transition={{ type: "spring", damping: 30, stiffness: 400 }}
-                        className="relative z-10 w-full max-w-4xl bg-black border border-[#EEF4D4]/30 shadow-[0_0_50px_rgba(238,244,212,0.1)] flex flex-col max-h-[90vh] overflow-hidden"
+                        className="relative z-10 flex max-h-[calc(100dvh-2rem)] w-full max-w-4xl flex-col overflow-hidden border border-[#EEF4D4]/30 bg-black shadow-[0_0_50px_rgba(238,244,212,0.1)] md:max-h-[90dvh]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Decorative Corners */}

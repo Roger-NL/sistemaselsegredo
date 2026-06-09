@@ -535,7 +535,7 @@ export default function Page() {
         </div>
 
         {/* Nova versão estonteante - Mobile */}
-        <div className="absolute top-[11%] left-0 right-0 flex lg:hidden flex-col items-center z-30 pointer-events-none select-none px-4 text-center">
+        <div className="absolute top-[max(3.5rem,calc(env(safe-area-inset-top)+2.5rem))] left-0 right-0 flex lg:hidden flex-col items-center z-30 pointer-events-none select-none px-4 text-center">
           <div className="flex items-center gap-2 mb-0 opacity-80 z-40">
             <span className="text-cyan-400 font-mono text-[9px] tracking-[0.4em] uppercase font-bold">
               Mission Directive
@@ -546,22 +546,9 @@ export default function Page() {
           <div className="min-h-[40px] flex items-center justify-center relative w-full z-40">
             <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-full h-16 bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-emerald-500/10 blur-[20px] -z-10 rounded-full mix-blend-screen" />
 
-            <Typewriter
-              text={[
-                "UNLOCK FLUENCY",
-                "MASTER ENGLISH",
-                "NO BARRIERS",
-                "ACCESS WORLD",
-                "BECOME A LEGEND",
-                "CHANGE YOUR LIFE"
-              ]}
-              speed={60}
-              className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#EEF4D4] via-emerald-300 to-cyan-400 tracking-tighter leading-none uppercase drop-shadow-sm"
-              waitTime={2500}
-              deleteSpeed={30}
-              cursorChar={"_"}
-              cursorClassName="text-cyan-400 animate-pulse text-2xl sm:text-3xl font-black drop-shadow-[0_0_10px_rgba(34,211,238,0.6)] inline-block -translate-y-[0.1em] -ml-1"
-            />
+            <span className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#EEF4D4] via-emerald-300 to-cyan-400 tracking-tighter leading-none uppercase drop-shadow-sm">
+              UNLOCK FLUENCY
+            </span>
           </div>
         </div>
 

@@ -33,13 +33,13 @@ export function DirectCardForm({
 }: DirectCardFormProps) {
   const baseInputClassName = compact
     ? "mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400"
-    : "w-full rounded-xl border border-white/10 bg-black/40 p-4 text-white outline-none transition-all focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400";
+    : "w-full rounded-xl border border-zinc-200 bg-white p-4 text-base text-zinc-950 outline-none transition-all placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-4 focus:ring-zinc-950/10 disabled:bg-zinc-100 disabled:text-zinc-500";
   const labelClassName = compact
     ? "block text-xs uppercase tracking-[0.22em] text-slate-400"
-    : "block text-xs font-bold uppercase tracking-widest text-slate-400";
+    : "block text-xs font-bold uppercase tracking-[0.14em] text-zinc-600";
 
   const getInputClassName = (field: DirectCardField) =>
-    `${baseInputClassName} ${errors[field] ? "border-rose-500 focus:border-rose-400 focus:ring-rose-400/40" : ""}`;
+    `${baseInputClassName} ${errors[field] ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500/15" : ""}`;
 
   const updateField = <K extends keyof DirectCardFormData>(field: K, nextValue: DirectCardFormData[K]) => {
     onChange({ ...value, [field]: nextValue });
@@ -59,7 +59,7 @@ export function DirectCardForm({
             disabled={disabled}
             ref={inputRefs?.holderName}
           />
-          {errors.holderName && <p className="mt-2 text-[11px] text-rose-300">{errors.holderName}</p>}
+          {errors.holderName && <p className="mt-2 text-[11px] text-rose-600">{errors.holderName}</p>}
         </label>
       )}
 
@@ -75,7 +75,7 @@ export function DirectCardForm({
           disabled={disabled}
           ref={inputRefs?.number}
         />
-        {errors.number && <p className="mt-2 text-[11px] text-rose-300">{errors.number}</p>}
+        {errors.number && <p className="mt-2 text-[11px] text-rose-600">{errors.number}</p>}
       </label>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -91,7 +91,7 @@ export function DirectCardForm({
             disabled={disabled}
             ref={inputRefs?.expiryMonth}
           />
-          {errors.expiryMonth && <p className="mt-2 text-[11px] text-rose-300">{errors.expiryMonth}</p>}
+          {errors.expiryMonth && <p className="mt-2 text-[11px] text-rose-600">{errors.expiryMonth}</p>}
         </label>
 
         <label className={labelClassName}>
@@ -106,7 +106,7 @@ export function DirectCardForm({
             disabled={disabled}
             ref={inputRefs?.expiryYear}
           />
-          {errors.expiryYear && <p className="mt-2 text-[11px] text-rose-300">{errors.expiryYear}</p>}
+          {errors.expiryYear && <p className="mt-2 text-[11px] text-rose-600">{errors.expiryYear}</p>}
         </label>
 
         <label className={labelClassName}>
@@ -121,7 +121,7 @@ export function DirectCardForm({
             disabled={disabled}
             ref={inputRefs?.ccv}
           />
-          {errors.ccv && <p className="mt-2 text-[11px] text-rose-300">{errors.ccv}</p>}
+          {errors.ccv && <p className="mt-2 text-[11px] text-rose-600">{errors.ccv}</p>}
         </label>
       </div>
 
@@ -138,7 +138,7 @@ export function DirectCardForm({
             disabled={disabled}
             ref={inputRefs?.postalCode}
           />
-          {errors.postalCode && <p className="mt-2 text-[11px] text-rose-300">{errors.postalCode}</p>}
+          {errors.postalCode && <p className="mt-2 text-[11px] text-rose-600">{errors.postalCode}</p>}
         </label>
 
         <label className={labelClassName}>
@@ -152,7 +152,7 @@ export function DirectCardForm({
             disabled={disabled}
             ref={inputRefs?.addressNumber}
           />
-          {errors.addressNumber && <p className="mt-2 text-[11px] text-rose-300">{errors.addressNumber}</p>}
+          {errors.addressNumber && <p className="mt-2 text-[11px] text-rose-600">{errors.addressNumber}</p>}
         </label>
       </div>
 
@@ -168,7 +168,7 @@ export function DirectCardForm({
             disabled={disabled}
             ref={inputRefs?.addressComplement}
           />
-          {errors.addressComplement && <p className="mt-2 text-[11px] text-rose-300">{errors.addressComplement}</p>}
+          {errors.addressComplement && <p className="mt-2 text-[11px] text-rose-600">{errors.addressComplement}</p>}
         </label>
 
         {!hidePhone && (
@@ -184,7 +184,7 @@ export function DirectCardForm({
               disabled={disabled}
               ref={inputRefs?.phone}
             />
-            {errors.phone && <p className="mt-2 text-[11px] text-rose-300">{errors.phone}</p>}
+            {errors.phone && <p className="mt-2 text-[11px] text-rose-600">{errors.phone}</p>}
           </label>
         )}
       </div>
