@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, onIdTokenChanged } from "firebase/auth";
-import { doc, getDoc, updateDoc, getDocFromServer, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, updateDoc, getDocFromServer } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 import {
@@ -234,42 +234,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return () => unsubscribe();
     }, []);
 
-    useEffect(() => {
-        if (!auth.currentUser) return;
-
-        const userDocRef = doc(db, "users", auth.currentUser.uid);
-        const unsubscribe = onSnapshot(userDocRef, (snapshot) => {
-            if (!snapshot.exists()) return;
-
-            const liveUser = snapshot.data() as User;
-            setUser((prev) => {
-                const nextUser = { ...liveUser, id: auth.currentUser!.uid };
-
-                if (
-                    prev &&
-                    prev.subscriptionStatus === nextUser.subscriptionStatus &&
-                    prev.approvedPillar === nextUser.approvedPillar &&
-                    prev.phone === nextUser.phone &&
-                    prev.currentStreak === nextUser.currentStreak &&
-                    prev.name === nextUser.name &&
-                    prev.email === nextUser.email &&
-                    prev.studyStats?.totalActiveSeconds === nextUser.studyStats?.totalActiveSeconds &&
-                    prev.studyStats?.lastStudiedAt === nextUser.studyStats?.lastStudiedAt
-                ) {
-                    return prev;
-                }
-
-                return nextUser;
-            });
-        }, (error) => {
-            if (!isFirestorePermissionError(error)) {
-                console.error("Error subscribing to live user profile:", error);
-            }
-        });
-
-        return () => unsubscribe();
-    }, [user?.id]);
-
     const login = async (identifier: string, password: string): Promise<AuthResult> => {
         const result = await authLogin(identifier, password);
         if (result.success && auth.currentUser) {
@@ -380,6 +344,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
         }
     }, [syncServerSession]);
+
+    useEffect(() => {
+        if (!user?.id) return;
+
+        const refreshWhenVisible = () => {
+            if (document.visibilityState === "visible") {
+                void refreshUser();
+            }
+        };
+
+        document.addEventListener("visibilitychange", refreshWhenVisible);
+        window.addEventListener("focus", refreshWhenVisible);
+
+        return () => {
+            document.removeEventListener("visibilitychange", refreshWhenVisible);
+            window.removeEventListener("focus", refreshWhenVisible);
+        };
+    }, [refreshUser, user?.id]);
 
     const logout = async () => {
         await syncServerSession(null);

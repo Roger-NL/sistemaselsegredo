@@ -59,7 +59,8 @@
   }
 
   html {
-    height: 100%;
+    min-height: 100%;
+    overflow-y: auto;
     overflow-x: hidden;
     background-color: var(--background);
     color: var(--foreground);
@@ -71,9 +72,10 @@
   body {
     min-height: 100%;
     min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
     background-color: var(--background);
     color: var(--foreground);
-    overscroll-behavior-y: none;
   }
 
   /* Safe image/media defaults - prevent overflow */
@@ -302,8 +304,10 @@
 
 .translatable-phrase {
   position: relative;
-  display: inline;
+  display: inline-block;
   cursor: help;
+  vertical-align: baseline;
+  isolation: isolate;
 }
 
 .translatable-text {
@@ -369,7 +373,8 @@
   width: max-content;
   max-width: 250px;
   text-align: center;
-  z-index: 1000;
+  z-index: 99999;
+  pointer-events: none;
   animation: tooltipFadeIn 0.2s ease-out;
   box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.5),
@@ -395,6 +400,21 @@
   transform: translateX(-50%);
   border: 5px solid transparent;
   border-top-color: #1e293b;
+}
+
+.translatable-tooltip-fixed {
+  position: fixed;
+  bottom: auto;
+  transform: translate(-50%, calc(-100% - 8px));
+  z-index: 2147483647;
+}
+
+.translatable-tooltip-fixed::before {
+  top: 100%;
+}
+
+.translatable-tooltip-fixed::after {
+  top: calc(100% - 1px);
 }
 
 @keyframes tooltipFadeIn {
@@ -441,20 +461,15 @@
 /* Mobile touch support */
 @media (max-width: 768px) {
   .translatable-tooltip {
-    position: fixed;
-    bottom: auto;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 90vw;
+    max-width: min(82vw, 260px);
     white-space: normal;
     text-align: center;
-    padding: 16px 20px;
+    padding: 10px 12px;
   }
 
   .translatable-tooltip::before,
   .translatable-tooltip::after {
-    display: none;
+    display: block;
   }
 }
 

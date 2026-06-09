@@ -489,12 +489,15 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
     const [attempts, setAttempts] = useState(0);
     const [builtConversation, setBuiltConversation] = useState<Record<number, string>>({});
     const [openTranslations, setOpenTranslations] = useState<Record<string, boolean>>({});
+    const translationTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
     const completionNotifiedRef = useRef(false);
     const currentStage = activeStage !== null ? stages[activeStage] : null;
     const isFinished = completedStages.length === stages.length;
     const canRetryCurrentStage = selectedOption !== null && activeStage !== null && selectedOption !== currentStage?.answer;
 
     const reset = useCallback((withSound = true) => {
+        Object.values(translationTimersRef.current).forEach(clearTimeout);
+        translationTimersRef.current = {};
         setPosition(0);
         setVisitedStage(null);
         setCompletedStages([]);
@@ -508,6 +511,25 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
         completionNotifiedRef.current = false;
         if (withSound) playUiSfx("click");
     }, []);
+
+    useEffect(() => {
+        return () => {
+            Object.values(translationTimersRef.current).forEach(clearTimeout);
+            translationTimersRef.current = {};
+        };
+    }, []);
+
+    const openTranslationFor = (key: string) => {
+        if (translationTimersRef.current[key]) {
+            clearTimeout(translationTimersRef.current[key]);
+        }
+
+        setOpenTranslations((prev) => ({ ...prev, [key]: true }));
+        translationTimersRef.current[key] = setTimeout(() => {
+            setOpenTranslations((prev) => ({ ...prev, [key]: false }));
+            delete translationTimersRef.current[key];
+        }, 3500);
+    };
 
     const move = useCallback((dir: "back" | "forward") => {
         if (isFinished) return;
@@ -735,14 +757,14 @@ const MazeGame = ({ data, onComplete }: { data: MazeConfig; onComplete?: () => v
                                                     e.preventDefault();
                                                     e.stopPropagation();
                                                     const key = `${currentStage.id || activeStage}-${idx}`;
-                                                    setOpenTranslations((prev) => ({ ...prev, [key]: !prev[key] }));
+                                                    openTranslationFor(key);
                                                 }}
                                                 onKeyDown={(e) => {
                                                     if (e.key === "Enter" || e.key === " ") {
                                                         e.preventDefault();
                                                         e.stopPropagation();
                                                         const key = `${currentStage.id || activeStage}-${idx}`;
-                                                        setOpenTranslations((prev) => ({ ...prev, [key]: !prev[key] }));
+                                                        openTranslationFor(key);
                                                     }
                                                 }}
                                                 className="text-[11px] uppercase tracking-wider font-mono text-blue-700 hover:text-blue-800"

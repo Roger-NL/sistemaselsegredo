@@ -21,6 +21,15 @@ import { useAuth } from "@/context/AuthContext";
 import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard/service";
 import { ROUTES } from "@/lib/routes";
 
+const MOBILE_MISSION_DIRECTIVES = [
+  "UNLOCK FLUENCY",
+  "MASTER THE CODE",
+  "SPEAK BOLDLY",
+  "BREAK BARRIERS",
+  "THINK IN ENGLISH",
+  "ACCESS THE WORLD",
+];
+
 export default function Page() {
   const router = useRouter();
   const { user, updateProfile, subscriptionStatus } = useAuth();
@@ -59,6 +68,7 @@ export default function Page() {
   const [isHUDOpen, setIsHUDOpen] = useState(false);
   const conciergeModal = useConciergeModal("login");
   const [shouldReduceDashboardMotion, setShouldReduceDashboardMotion] = useState(false);
+  const [mobileDirectiveIndex, setMobileDirectiveIndex] = useState(0);
 
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [schedulingStatus, setSchedulingStatus] = useState<LiveSessionStatusPayload | null>(null);
@@ -108,23 +118,29 @@ export default function Page() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const mediaQueries = [
-      window.matchMedia("(pointer: coarse)"),
-      window.matchMedia("(prefers-reduced-motion: reduce)"),
-      window.matchMedia("(max-width: 768px)"),
-    ];
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const syncMotionPreference = () => {
-      setShouldReduceDashboardMotion(mediaQueries.some((query) => query.matches));
+      setShouldReduceDashboardMotion(reducedMotionQuery.matches);
     };
 
     syncMotionPreference();
-    mediaQueries.forEach((query) => query.addEventListener("change", syncMotionPreference));
+    reducedMotionQuery.addEventListener("change", syncMotionPreference);
 
     return () => {
-      mediaQueries.forEach((query) => query.removeEventListener("change", syncMotionPreference));
+      reducedMotionQuery.removeEventListener("change", syncMotionPreference);
     };
   }, []);
+
+  useEffect(() => {
+    if (shouldReduceDashboardMotion) return;
+
+    const intervalId = window.setInterval(() => {
+      setMobileDirectiveIndex((currentIndex) => (currentIndex + 1) % MOBILE_MISSION_DIRECTIVES.length);
+    }, 4200);
+
+    return () => window.clearInterval(intervalId);
+  }, [shouldReduceDashboardMotion]);
 
   const handleGlobeClick = () => {
     console.log("Opening HUD");
@@ -195,7 +211,7 @@ export default function Page() {
       />
 
       {shouldShowPremiumCTA && (
-        <div className="fixed right-4 top-24 z-[60] w-[min(calc(100vw-1.5rem),24rem)] pointer-events-auto sm:right-5 md:right-6 md:top-28">
+        <div className="fixed right-4 top-24 z-[60] hidden w-[min(calc(100vw-1.5rem),24rem)] pointer-events-auto sm:right-5 md:right-6 md:top-28 md:block">
           <AnimatePresence mode="wait" initial={false}>
             {isPremiumCTAOpen ? (
               <motion.div
@@ -546,9 +562,18 @@ export default function Page() {
           <div className="min-h-[40px] flex items-center justify-center relative w-full z-40">
             <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-full h-16 bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-emerald-500/10 blur-[20px] -z-10 rounded-full mix-blend-screen" />
 
-            <span className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#EEF4D4] via-emerald-300 to-cyan-400 tracking-tighter leading-none uppercase drop-shadow-sm">
-              UNLOCK FLUENCY
-            </span>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={MOBILE_MISSION_DIRECTIVES[mobileDirectiveIndex]}
+                initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: -8, filter: "blur(6px)" }}
+                transition={{ duration: shouldReduceDashboardMotion ? 0 : 0.34, ease: [0.22, 1, 0.36, 1] }}
+                className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#EEF4D4] via-emerald-300 to-cyan-400 tracking-tighter leading-none uppercase drop-shadow-sm"
+              >
+                {MOBILE_MISSION_DIRECTIVES[mobileDirectiveIndex]}
+              </motion.span>
+            </AnimatePresence>
           </div>
         </div>
 
@@ -637,6 +662,10 @@ export default function Page() {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (shouldShowPremiumCTA) {
+                    navigateSafely(ROUTES.public.payment);
+                    return;
+                  }
                   if (currentSpec) navigateSafely(`${ROUTES.app.specialties}/${currentSpec.id}`);
                   else if (completedCount < 9) navigateSafely(`${ROUTES.app.pillar}/${currentPillarNumber}`);
                   else navigateSafely(ROUTES.app.specialties);
@@ -644,19 +673,29 @@ export default function Page() {
                 className="cursor-pointer touch-manipulation transition-all duration-300 hover:scale-110 active:scale-95 border-0 bg-transparent p-0"
               >
                 <span
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm ${currentSpec
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-sm ${shouldShowPremiumCTA
+                    ? "border-emerald-300/45 bg-emerald-300/12 hover:bg-emerald-300/18"
+                    : currentSpec
                     ? "border-violet-500/40 bg-violet-500/10 hover:bg-violet-500/20"
                     : "border-[#EEF4D4]/40 bg-[#EEF4D4]/10 hover:bg-[#EEF4D4]/20"
                     }`}
                   style={{
-                    boxShadow: currentSpec
+                    boxShadow: shouldShowPremiumCTA
+                      ? '0 0 24px rgba(16, 185, 129, 0.22)'
+                      : currentSpec
                       ? '0 0 20px rgba(139, 92, 246, 0.3)'
                       : '0 0 20px rgba(238, 244, 212, 0.2)'
                   }}
                 >
-                  <span className={`w-2 h-2 rounded-full animate-pulse ${currentSpec ? "bg-violet-400" : "bg-[#EEF4D4]"}`} />
-                  <span className={`text-xs md:text-sm font-medium uppercase tracking-wider ${currentSpec ? "text-violet-300" : "text-[#EEF4D4]"}`}>
-                    {currentSpec
+                  {shouldShowPremiumCTA ? (
+                    <Crown className="h-4 w-4 text-emerald-200" />
+                  ) : (
+                    <span className={`w-2 h-2 rounded-full animate-pulse ${currentSpec ? "bg-violet-400" : "bg-[#EEF4D4]"}`} />
+                  )}
+                  <span className={`text-xs md:text-sm font-medium uppercase tracking-wider ${shouldShowPremiumCTA ? "text-emerald-100" : currentSpec ? "text-violet-300" : "text-[#EEF4D4]"}`}>
+                    {shouldShowPremiumCTA
+                      ? "Liberar Premium"
+                      : currentSpec
                       ? "Continuar Estudo"
                       : specializationStatus === "completed"
                         ? "Especialização Concluída"

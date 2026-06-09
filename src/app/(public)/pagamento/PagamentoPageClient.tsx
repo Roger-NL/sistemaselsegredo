@@ -7,8 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { FlightButton } from "@/components/ui/FlightCard";
 import { ROUTES } from "@/lib/routes";
-import { doc, onSnapshot } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 import {
     buildPaymentReturnTo,
     getReconciliationMessage,
@@ -381,16 +380,6 @@ function PagamentoPageContent() {
         void checkPayment();
         const interval = setInterval(checkPayment, 1500);
 
-        const userRef = doc(db, "users", user.id);
-        const unsubscribe = onSnapshot(userRef, (snapshot) => {
-            if (snapshot.exists() && snapshot.data()?.subscriptionStatus === 'premium' && !navigationCompleted) {
-                if (isSpecialtyTestMode) return;
-                navigationCompleted = true;
-                clearInterval(interval);
-                router.replace(ROUTES.app.thankYou);
-            }
-        });
-
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') void checkPayment();
         };
@@ -400,7 +389,6 @@ function PagamentoPageContent() {
             navigationCompleted = true;
             pollingPaused = true;
             clearInterval(interval);
-            unsubscribe();
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, [paymentId, user?.id, isAlreadyPremium, router, refreshUser, isSpecialtyTestMode]);

@@ -236,6 +236,11 @@ export function isFirestorePermissionError(error: unknown): boolean {
     return errorCode === "permission-denied" || errorCode === "firestore/permission-denied";
 }
 
+function isFirestoreQuotaError(error: unknown): boolean {
+    const errorCode = getFirebaseErrorCode(error);
+    return errorCode === "resource-exhausted" || errorCode === "firestore/resource-exhausted";
+}
+
 /**
  * Initialize auth service (No-op for Firebase usually)
  */
@@ -762,7 +767,7 @@ export async function updateUserProgress(userId: string, progressData: Partial<U
             await updateDoc(userRef, safeUpdate);
         }
     } catch (error) {
-        if (!isFirestorePermissionError(error)) {
+        if (!isFirestorePermissionError(error) && !isFirestoreQuotaError(error)) {
             console.error("Error syncing progress to Firebase:", error);
         }
         // Silently fail or retry - we don't want to block the UI for this background sync

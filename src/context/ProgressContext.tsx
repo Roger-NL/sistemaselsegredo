@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { PILLARS, PLANETS, type Pillar, type Planet, type PillarStatus } from "@/data/curriculum";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
 import { secureStorage } from "@/lib/storage/secure-storage";
@@ -178,6 +178,25 @@ function buildPillarStatusFromSnapshot(snapshot: AppProgressSnapshot): Record<st
     }, {});
 }
 
+function serializeRemoteProgress(data: Pick<
+    ProgressSnapshot,
+    | "chosenSpecialization"
+    | "specializationStatus"
+    | "completedSpecializations"
+    | "completedModules"
+    | "completedPillarModules"
+    | "hasSeenMissionComplete"
+>) {
+    return JSON.stringify({
+        chosenSpecialization: data.chosenSpecialization ?? null,
+        specializationStatus: data.specializationStatus ?? null,
+        completedSpecializations: data.completedSpecializations ?? [],
+        completedModules: data.completedModules ?? {},
+        completedPillarModules: data.completedPillarModules ?? [],
+        hasSeenMissionComplete: data.hasSeenMissionComplete ?? false,
+    });
+}
+
 // Provider
 export function ProgressProvider({ children }: { children: ReactNode }) {
     const { user, subscriptionStatus } = useAuth(); // NOW using user
@@ -191,6 +210,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const [completedPillarModules, setCompletedPillarModules] = useState<string[]>([]);
     const [hasSeenMissionComplete, setHasSeenMissionComplete] = useState(false);
     const [isHydrated, setIsHydrated] = useState(false);
+    const lastRemoteProgressSyncRef = useRef<string | null>(null);
 
     // Dynamic key based on user ID to prevent shared progress
     const storageKey = user?.id ? `${STORAGE_KEY}-${user.id}` : null;
@@ -295,21 +315,42 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             // 1. Local Persistence (Fast, Offline)
             secureStorage.setItem(storageKey, progressData);
 
-            // 2. Remote Persistence (Firebase)
-            if (user?.id) {
-                // Remote sync keeps learner activity fields in sync, but no longer
-                // persists client-computed gating authority.
-                import("@/lib/auth/service").then(({ updateUserProgress }) => {
-                    updateUserProgress(user.id, {
-                        chosenSpecialization,
-                        specializationStatus,
-                        completedSpecializations,
-                        completedModules,
-                        completedPillarModules,
-                        hasSeenMissionComplete,
-                    });
-                });
+            if (!user?.id) return;
+
+            const nextRemoteProgress = {
+                chosenSpecialization,
+                specializationStatus,
+                completedSpecializations,
+                completedModules,
+                completedPillarModules,
+                hasSeenMissionComplete,
+            };
+            const nextRemoteProgressJson = serializeRemoteProgress(nextRemoteProgress);
+            const currentRemoteProgressJson = serializeRemoteProgress({
+                chosenSpecialization: user.chosenSpecialization,
+                specializationStatus: user.specializationStatus,
+                completedSpecializations: user.completedSpecializations,
+                completedModules: user.completedModules,
+                completedPillarModules: user.completedPillarModules,
+                hasSeenMissionComplete: user.hasSeenMissionComplete,
+            });
+
+            if (
+                nextRemoteProgressJson === currentRemoteProgressJson ||
+                nextRemoteProgressJson === lastRemoteProgressSyncRef.current
+            ) {
+                lastRemoteProgressSyncRef.current = nextRemoteProgressJson;
+                return;
             }
+
+            const timeout = window.setTimeout(() => {
+                lastRemoteProgressSyncRef.current = nextRemoteProgressJson;
+                import("@/lib/auth/service").then(({ updateUserProgress }) => {
+                    updateUserProgress(user.id, nextRemoteProgress);
+                });
+            }, 900);
+
+            return () => window.clearTimeout(timeout);
         }
     }, [
         pillarStatus,
@@ -320,7 +361,13 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         completedPillarModules,
         hasSeenMissionComplete,
         storageKey,
-        user,
+        user?.id,
+        user?.chosenSpecialization,
+        user?.specializationStatus,
+        user?.completedSpecializations,
+        user?.completedModules,
+        user?.completedPillarModules,
+        user?.hasSeenMissionComplete,
         isHydrated
     ]);
 
