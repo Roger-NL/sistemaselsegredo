@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Crown, Sparkles, ArrowRight, CalendarClock, CheckCircle2, Clock3, X } from "lucide-react";
+import { Crown, ArrowRight, CalendarClock, CheckCircle2, Clock3 } from "lucide-react";
 import type { LiveSessionStatusPayload } from "@/lib/scheduling/types";
 import RotatingEarth from "@/components/ui/wireframe-dotted-globe";
 import { DevControls } from "@/components/core/DevControls";
@@ -19,6 +19,7 @@ import { ExamFeedbackPopup } from "@/features/dashboard/ExamFeedbackPopup";
 
 import { useAuth } from "@/context/AuthContext";
 import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard/service";
+import { prefetchClientRoutesDuringIdle } from "@/lib/navigation/safe-client-navigation";
 import { ROUTES } from "@/lib/routes";
 
 const MOBILE_MISSION_DIRECTIVES = [
@@ -56,10 +57,6 @@ export default function Page() {
     (progressSnapshot?.highestUnlockedPillar ?? 1) >= 2 ||
     (pillarOneModuleIds.length > 0 && pillarOneModuleIds.every((moduleId) => completedPillarModules.includes(moduleId)));
   const shouldShowPremiumCTA = !isPremiumUser && hasFinishedPillarOne;
-  const [isPremiumCTAOpen, setIsPremiumCTAOpen] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return window.localStorage.getItem("es-premium-cta-open") !== "false";
-  });
 
   // NÃO mostrar DecisionMatrix automaticamente
   // O usuário acessa via HUD clicando no Pilar 10 (Especialidades)
@@ -137,10 +134,25 @@ export default function Page() {
 
     const intervalId = window.setInterval(() => {
       setMobileDirectiveIndex((currentIndex) => (currentIndex + 1) % MOBILE_MISSION_DIRECTIVES.length);
-    }, 4200);
+    }, 2400);
 
     return () => window.clearInterval(intervalId);
   }, [shouldReduceDashboardMotion]);
+
+  useEffect(() => {
+    const nextRoutes: string[] = [
+      ROUTES.app.dashboard,
+      `${ROUTES.app.pillar}/${currentPillarNumber}`,
+      currentPillarNumber < 9 ? `${ROUTES.app.pillar}/${currentPillarNumber + 1}` : ROUTES.app.specialties,
+      ROUTES.app.specialties,
+    ];
+
+    if (shouldShowPremiumCTA) {
+      nextRoutes.push(ROUTES.public.payment);
+    }
+
+    return prefetchClientRoutesDuringIdle(router, nextRoutes);
+  }, [currentPillarNumber, router, shouldShowPremiumCTA]);
 
   const handleGlobeClick = () => {
     console.log("Opening HUD");
@@ -166,19 +178,6 @@ export default function Page() {
     [router]
   );
 
-  const openPremiumCTA = () => {
-    setIsPremiumCTAOpen(true);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("es-premium-cta-open", "true");
-    }
-  };
-
-  const closePremiumCTA = () => {
-    setIsPremiumCTAOpen(false);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("es-premium-cta-open", "false");
-    }
-  };
   // Controle manual removido - valores fixados em 36px/20px no desktop
 
 
@@ -209,92 +208,6 @@ export default function Page() {
         studentName={user?.name || "Rogério Augusto"}
         studentStreak={user?.currentStreak || 0}
       />
-
-      {shouldShowPremiumCTA && (
-        <div className="fixed right-4 top-24 z-[60] hidden w-[min(calc(100vw-1.5rem),24rem)] pointer-events-auto sm:right-5 md:right-6 md:top-28 md:block">
-          <AnimatePresence mode="wait" initial={false}>
-            {isPremiumCTAOpen ? (
-              <motion.div
-                key="premium-cta-expanded"
-                initial={{ opacity: 0, scale: 0.6, x: 48, y: -32, rotate: 6, filter: "blur(8px)" }}
-                animate={{ opacity: 1, scale: 1, x: 0, y: 0, rotate: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, scale: 0.28, x: 124, y: -62, rotate: 10, filter: "blur(10px)" }}
-                transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-                className="origin-top-right rounded-[1.75rem] border border-emerald-300/25 bg-[linear-gradient(145deg,rgba(3,10,8,0.94),rgba(6,24,20,0.96),rgba(8,39,32,0.92))] p-4 shadow-[0_18px_60px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
-              >
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-emerald-300/25 bg-emerald-400/10 text-emerald-200 shadow-[0_0_22px_rgba(16,185,129,0.18)]">
-                      <Crown className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.28em] text-emerald-300">
-                        <Sparkles className="h-3 w-3" />
-                        Premium liberado
-                      </div>
-                      <p className="mt-2 text-sm font-semibold uppercase tracking-[0.18em] text-white/92">
-                        Upgrade disponível
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={closePremiumCTA}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
-                    aria-label="Fechar aviso premium"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-
-                <p className="text-sm leading-relaxed text-white/72">
-                  {progressSnapshot?.nextAction === "upgrade_required"
-                    ? "Seu snapshot oficial já marcou o próximo passo: ativar o premium para abrir o Pilar 2."
-                    : "Você concluiu o Pilar 1. Seu acesso premium já pode ser ativado quando quiser."}
-                </p>
-
-                <div className="mt-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-emerald-100/55">
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Premium</span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Pagamento único</span>
-                </div>
-
-                <div className="mt-4 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => navigateSafely(ROUTES.public.payment)}
-                    className="group inline-flex flex-1 touch-manipulation items-center justify-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-400/12 px-4 py-3 text-xs font-bold uppercase tracking-[0.22em] text-emerald-100 transition hover:border-emerald-200/50 hover:bg-emerald-400/18"
-                  >
-                    Adquirir premium
-                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={closePremiumCTA}
-                    className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60 transition hover:border-white/20 hover:text-white"
-                  >
-                    Fechar
-                  </button>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.button
-                key="premium-cta-collapsed"
-                type="button"
-                onClick={openPremiumCTA}
-                initial={{ opacity: 0, scale: 0.7, x: 72, y: -24, filter: "blur(8px)" }}
-                animate={{ opacity: 1, scale: 1, x: 0, y: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, scale: 0.85, x: 18, y: -10 }}
-                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                className="ml-auto inline-flex origin-top-right items-center gap-2 rounded-full border border-emerald-300/25 bg-[rgba(6,23,18,0.92)] px-4 py-3 text-xs font-bold uppercase tracking-[0.22em] text-emerald-100 shadow-[0_14px_40px_rgba(0,0,0,0.34)] backdrop-blur-xl transition hover:border-emerald-200/45 hover:bg-[rgba(8,32,25,0.96)]"
-              >
-                <Crown className="h-4 w-4" />
-                Adquirir premium
-              </motion.button>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
 
       {shouldShowSchedulingCard && (
         <div className="absolute top-[8.3rem] left-1/2 z-30 w-[min(92vw,720px)] -translate-x-1/2 pointer-events-auto px-4 md:top-32">
@@ -540,10 +453,10 @@ export default function Page() {
                 "UNLEASH\nPOWER",
                 "DOMINATE\nTHE GAME"
               ]}
-              speed={75}
+              speed={42}
               className="text-5xl xl:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#EEF4D4] via-emerald-300 to-cyan-500 tracking-tighter leading-[0.85] uppercase whitespace-pre-line drop-shadow-sm"
-              waitTime={4500}
-              deleteSpeed={35}
+              waitTime={1600}
+              deleteSpeed={22}
               cursorChar={"_"}
               cursorClassName="text-cyan-400 animate-pulse text-5xl xl:text-7xl font-black drop-shadow-[0_0_15px_rgba(34,211,238,0.6)] inline-block -translate-y-[0.1em] -ml-2"
             />

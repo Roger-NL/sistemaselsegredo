@@ -9,7 +9,11 @@ import { type Pillar, PLANETS } from "@/data/curriculum";
 import { getRank } from "@/utils/ranks";
 import { useProgress } from "@/context/ProgressContext";
 import { ROUTES } from "@/lib/routes";
-import { navigateWithMobileFallback } from "@/lib/navigation/safe-client-navigation";
+import {
+    navigateWithMobileFallback,
+    prefetchClientRoute,
+    prefetchClientRoutesDuringIdle,
+} from "@/lib/navigation/safe-client-navigation";
 
 interface TheHUDProps {
     isOpen: boolean;
@@ -31,6 +35,20 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
             navigationLockRef.current = false;
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const unlockedPillarRoutes = pillars
+            .map((pillar, index) => (pillar.status === "locked" ? null : `${ROUTES.app.pillar}/${index + 1}`))
+            .filter((route): route is string => Boolean(route));
+
+        return prefetchClientRoutesDuringIdle(router, [
+            ROUTES.app.dashboard,
+            ROUTES.app.specialties,
+            ...unlockedPillarRoutes,
+        ]);
+    }, [isOpen, pillars, router]);
 
     useEffect(() => {
         const unlockOnPageRestore = () => {
@@ -104,6 +122,8 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                         onClick={() => {
                                             navigateFromHud(ROUTES.app.dashboard);
                                         }}
+                                        onPointerEnter={() => prefetchClientRoute(router, ROUTES.app.dashboard)}
+                                        onTouchStart={() => prefetchClientRoute(router, ROUTES.app.dashboard)}
                                         className="touch-manipulation text-[#EEF4D4]/40 hover:text-[#EEF4D4]/80 transition-colors text-[10px] font-mono uppercase tracking-widest"
                                     >
                                         Menu Principal
@@ -209,6 +229,8 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                         <button
                                             key={pillar.id}
                                             type="button"
+                                            onPointerEnter={() => prefetchClientRoute(router, `${ROUTES.app.pillar}/${index + 1}`)}
+                                            onTouchStart={() => prefetchClientRoute(router, `${ROUTES.app.pillar}/${index + 1}`)}
                                             onClick={() => navigateFromHud(`${ROUTES.app.pillar}/${index + 1}`)}
                                             className="group relative block w-full touch-manipulation overflow-hidden text-left"
                                         >
@@ -279,6 +301,8 @@ export function TheHUD({ isOpen, onClose, pillars, completedCount }: TheHUDProps
                                 {/* Pilar 10 - Especialidades (Sempre desbloqueado, seleção interna é que é controlada) */}
                                 <button
                                     type="button"
+                                    onPointerEnter={() => prefetchClientRoute(router, ROUTES.app.specialties)}
+                                    onTouchStart={() => prefetchClientRoute(router, ROUTES.app.specialties)}
                                     onClick={() => {
                                         navigateFromHud(ROUTES.app.specialties);
                                     }}

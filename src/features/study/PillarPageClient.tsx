@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useProgress } from "@/context/ProgressContext";
 import { PILLARS } from "@/data/curriculum";
@@ -7,16 +8,16 @@ import { useAuth } from "@/context/AuthContext";
 import { PremiumWall } from "@/features/subscription/PremiumWall";
 import { FlightCard, FlightButton } from "@/components/ui/FlightCard";
 import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, CheckCircle2, Crown, Lock, X, ShieldCheck, MessageSquare } from "lucide-react";
-import { StudyViewer } from "@/features/study/StudyViewer";
-import { PillarOperationalView } from "@/features/study/PillarOperationalView";
 import { getUserExamStatus, PillarExam } from "@/lib/exam/service";
-import { PillarExamModal } from "@/features/study/exam/PillarExamModal";
-import { PillarExamViewModal } from "@/features/study/exam/PillarExamViewModal";
 import { useState, useEffect, useCallback } from "react";
 import { PillarData } from "@/types/study";
 import { ROUTES } from "@/lib/routes";
 import { useStudyActivityTracker } from "@/lib/study/use-study-activity-tracker";
-import { navigateWithMobileFallback } from "@/lib/navigation/safe-client-navigation";
+import {
+    navigateWithMobileFallback,
+    prefetchClientRoute,
+    prefetchClientRoutesDuringIdle,
+} from "@/lib/navigation/safe-client-navigation";
 
 interface PillarPageClientProps {
     pillarId: number;
@@ -24,6 +25,72 @@ interface PillarPageClientProps {
 }
 
 const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
+const EXAM_STATUS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+const StudyEngineLoading = () => (
+    <div className="my-10 rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center text-sm uppercase tracking-[0.24em] text-white/45">
+        Preparando módulo...
+    </div>
+);
+
+const StudyViewer = dynamic(
+    () => import("@/features/study/StudyViewer").then((module) => module.StudyViewer),
+    { ssr: false, loading: StudyEngineLoading }
+);
+
+const PillarOperationalView = dynamic(
+    () => import("@/features/study/PillarOperationalView").then((module) => module.PillarOperationalView),
+    { ssr: false, loading: StudyEngineLoading }
+);
+
+const PillarExamModal = dynamic(
+    () => import("@/features/study/exam/PillarExamModal").then((module) => module.PillarExamModal),
+    { ssr: false }
+);
+
+const PillarExamViewModal = dynamic(
+    () => import("@/features/study/exam/PillarExamViewModal").then((module) => module.PillarExamViewModal),
+    { ssr: false }
+);
+
+type CachedExamStatus = {
+    savedAt: number;
+    exam: PillarExam | null;
+};
+
+function getExamStatusCacheKey(userId: string, pillarId: number) {
+    return `exam-status-cache:${userId}:p${pillarId}`;
+}
+
+function readCachedExamStatus(userId: string, pillarId: number): PillarExam | null | undefined {
+    if (typeof window === "undefined") return undefined;
+
+    try {
+        const raw = window.sessionStorage.getItem(getExamStatusCacheKey(userId, pillarId));
+        if (!raw) return undefined;
+
+        const cached = JSON.parse(raw) as Partial<CachedExamStatus>;
+        if (typeof cached.savedAt !== "number") return undefined;
+        if (Date.now() - cached.savedAt > EXAM_STATUS_CACHE_TTL_MS) return undefined;
+
+        return (cached.exam ?? null) as PillarExam | null;
+    } catch {
+        return undefined;
+    }
+}
+
+function writeCachedExamStatus(userId: string, pillarId: number, exam: PillarExam | null) {
+    if (typeof window === "undefined") return;
+
+    try {
+        window.sessionStorage.setItem(
+            getExamStatusCacheKey(userId, pillarId),
+            JSON.stringify({ savedAt: Date.now(), exam } satisfies CachedExamStatus)
+        );
+    } catch {
+        // Cache is a performance hint only.
+    }
+}
 
 export default function PillarPageClient({ pillarId, initialContent }: PillarPageClientProps) {
     const router = useRouter();
@@ -70,6 +137,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
         if (user) {
             const currentExam = await getUserExamStatus(user.id, pillarId);
             setExam(currentExam);
+            writeCachedExamStatus(user.id, pillarId, currentExam);
         }
         setIsCheckingExam(false);
     }, [pillarId, user]);
@@ -102,6 +170,14 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
         let isMounted = true;
 
         const loadExamStatus = async () => {
+            if (user?.id) {
+                const cachedExam = readCachedExamStatus(user.id, pillarId);
+                if (cachedExam !== undefined && isMounted) {
+                    setExam(cachedExam);
+                    setIsCheckingExam(false);
+                }
+            }
+
             await refreshExamStatus();
             if (!isMounted) return;
         };
@@ -111,7 +187,29 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
         return () => {
             isMounted = false;
         };
-    }, [refreshExamStatus]);
+    }, [pillarId, refreshExamStatus, user?.id]);
+
+    useEffect(() => {
+        const routesToWarm: string[] = [
+            ROUTES.app.dashboard,
+            ROUTES.app.specialties,
+            ROUTES.public.payment,
+        ];
+
+        if (pillarId > 1) {
+            routesToWarm.push(`${ROUTES.app.pillar}/${pillarId - 1}`);
+        }
+
+        if (pillarId < 9) {
+            routesToWarm.push(`${ROUTES.app.pillar}/${pillarId + 1}`);
+        }
+
+        if (currentPillarNumber >= 1 && currentPillarNumber <= 9) {
+            routesToWarm.push(`${ROUTES.app.pillar}/${currentPillarNumber}`);
+        }
+
+        return prefetchClientRoutesDuringIdle(router, routesToWarm);
+    }, [currentPillarNumber, pillarId, router]);
 
     useEffect(() => {
         if (hasFeedbackQuery) {
@@ -332,6 +430,8 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                             <button
                                 type="button"
                                 onClick={handleGoToMenu}
+                                onPointerEnter={() => prefetchClientRoute(router, ROUTES.app.dashboard)}
+                                onTouchStart={() => prefetchClientRoute(router, ROUTES.app.dashboard)}
                                 className="flex touch-manipulation items-center gap-2 rounded-xl px-3 py-3 text-xs text-white/40 transition-colors hover:bg-white/5 hover:text-white/70"
                             >
                                 Menu Principal
@@ -578,7 +678,9 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                     <div className="fixed bottom-0 left-0 right-0 p-3 bg-black/90 backdrop-blur-md border-t border-white/10 z-40 md:relative md:bg-transparent md:border-0 md:p-0 md:mt-12 flex justify-between items-center">
                         {pillarId > 1 ? (
                             <button
-                                onClick={() => router.push(`${ROUTES.app.pillar}/${pillarId - 1}`)}
+                                onPointerEnter={() => prefetchClientRoute(router, `${ROUTES.app.pillar}/${pillarId - 1}`)}
+                                onTouchStart={() => prefetchClientRoute(router, `${ROUTES.app.pillar}/${pillarId - 1}`)}
+                                onClick={() => navigateSafely(`${ROUTES.app.pillar}/${pillarId - 1}`)}
                                 className="text-white/40 hover:text-white/70 transition-colors text-sm flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/5"
                             >
                                 <ArrowLeft className="w-4 h-4" />
@@ -588,7 +690,9 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
                         {pillarId < 9 && isPillarUnlocked(pillarId + 1) && (
                             <button
-                                onClick={() => router.push(`${ROUTES.app.pillar}/${pillarId + 1}`)}
+                                onPointerEnter={() => prefetchClientRoute(router, `${ROUTES.app.pillar}/${pillarId + 1}`)}
+                                onTouchStart={() => prefetchClientRoute(router, `${ROUTES.app.pillar}/${pillarId + 1}`)}
+                                onClick={() => navigateSafely(`${ROUTES.app.pillar}/${pillarId + 1}`)}
                                 className="text-white/40 hover:text-white/70 transition-colors text-sm flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white/5"
                             >
                                 Próximo

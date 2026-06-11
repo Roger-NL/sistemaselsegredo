@@ -16,14 +16,16 @@ type LandFeature = Feature<Polygon | MultiPolygon, GeoJsonProperties>
 type LandData = FeatureCollection<Polygon | MultiPolygon, GeoJsonProperties>
 type GlobeDot = { lng: number; lat: number }
 type GlobeCache = { landData: LandData; dots: GlobeDot[] }
+type GlobePerformanceProfile = { maxDpr: number; targetFps: number; dotStep: number; rotationSpeed: number }
 type PerformanceNavigator = Navigator & { deviceMemory?: number }
 
 const FULL_ROTATION_SPEED = 12
 const TWO_PI = Math.PI * 2
+const GLOBE_CACHE_PREFIX = "globe-cache-v2"
 
 // Cache em memória
-let memoryCache: GlobeCache | null = null
-let memoryCachePromise: Promise<GlobeCache | null> | null = null
+const memoryCache = new Map<string, GlobeCache>()
+const memoryCachePromise = new Map<string, Promise<GlobeCache | null>>()
 
 function isLandData(value: unknown): value is LandData {
     if (!value || typeof value !== "object") return false
@@ -40,10 +42,14 @@ function isGlobeCache(value: unknown): value is GlobeCache {
 }
 
 // Tenta carregar do localStorage
-function loadFromStorage(): typeof memoryCache {
+function getGlobeCacheKey(dotStep: number) {
+    return `${GLOBE_CACHE_PREFIX}:${dotStep}`
+}
+
+function loadFromStorage(cacheKey: string): GlobeCache | null {
     if (typeof window === 'undefined') return null
     try {
-        const stored = localStorage.getItem('globe-cache')
+        const stored = localStorage.getItem(cacheKey)
         if (stored) {
             const parsed: unknown = JSON.parse(stored)
             return isGlobeCache(parsed) ? parsed : null
@@ -55,43 +61,54 @@ function loadFromStorage(): typeof memoryCache {
 }
 
 // Salva no localStorage
-function saveToStorage(data: typeof memoryCache) {
+function saveToStorage(cacheKey: string, data: GlobeCache | null) {
     if (typeof window === 'undefined' || !data) return
     try {
-        localStorage.setItem('globe-cache', JSON.stringify(data))
+        localStorage.setItem(cacheKey, JSON.stringify(data))
     } catch {
         // Ignora erros de storage
     }
 }
 
-function getGlobePerformanceProfile() {
+function getGlobePerformanceProfile(): GlobePerformanceProfile {
     if (typeof navigator === "undefined") {
-        return { maxDpr: 2, targetFps: 45, dotStep: 1.5 }
+        return { maxDpr: 2, targetFps: 60, dotStep: 1.2, rotationSpeed: FULL_ROTATION_SPEED }
     }
 
     const navigatorProfile = navigator as PerformanceNavigator
     const deviceMemory = typeof navigatorProfile.deviceMemory === "number" ? navigatorProfile.deviceMemory : 8
     const hardwareConcurrency = navigatorProfile.hardwareConcurrency ?? 8
-    const isLowPowerDevice = hardwareConcurrency <= 4 || deviceMemory <= 4
+    const isMobileLike =
+        typeof window !== "undefined" &&
+        (window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(max-width: 768px)").matches)
+
+    if (!isMobileLike) {
+        return { maxDpr: 2, targetFps: 60, dotStep: 1.2, rotationSpeed: FULL_ROTATION_SPEED }
+    }
+
+    const isLowPowerMobile = hardwareConcurrency <= 4 || deviceMemory <= 4
 
     return {
-        maxDpr: isLowPowerDevice ? 1 : 2,
-        targetFps: isLowPowerDevice ? 18 : 45,
-        dotStep: isLowPowerDevice ? 2.5 : 1.5,
+        maxDpr: isLowPowerMobile ? 1 : 1.5,
+        targetFps: isLowPowerMobile ? 18 : 30,
+        dotStep: isLowPowerMobile ? 2.5 : 1.7,
+        rotationSpeed: isLowPowerMobile ? 9 : 11,
     }
 }
 
-async function loadGlobeCache(): Promise<GlobeCache | null> {
-    if (memoryCache) return memoryCache
+async function loadGlobeCache(dotStep: number): Promise<GlobeCache | null> {
+    const cacheKey = getGlobeCacheKey(dotStep)
+    const cached = memoryCache.get(cacheKey)
+    if (cached) return cached
 
-    const storedCache = loadFromStorage()
+    const storedCache = loadFromStorage(cacheKey)
     if (storedCache) {
-        memoryCache = storedCache
+        memoryCache.set(cacheKey, storedCache)
         return storedCache
     }
 
-    if (!memoryCachePromise) {
-        memoryCachePromise = (async () => {
+    if (!memoryCachePromise.has(cacheKey)) {
+        const cachePromise = (async () => {
             try {
                 const response = await fetch(
                     "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/master/110m/physical/ne_110m_land.json"
@@ -103,22 +120,22 @@ async function loadGlobeCache(): Promise<GlobeCache | null> {
                     throw new Error("Invalid globe data format")
                 }
 
-                const { dotStep } = getGlobePerformanceProfile()
                 const dots = generateDots(data, dotStep)
                 const cache = { landData: data, dots }
-                saveToStorage(cache)
-                memoryCache = cache
+                saveToStorage(cacheKey, cache)
+                memoryCache.set(cacheKey, cache)
                 return cache
             } catch (error) {
                 console.error("Failed to load globe data:", error)
                 return null
             } finally {
-                memoryCachePromise = null
+                memoryCachePromise.delete(cacheKey)
             }
         })()
+        memoryCachePromise.set(cacheKey, cachePromise)
     }
 
-    return memoryCachePromise
+    return memoryCachePromise.get(cacheKey) ?? null
 }
 
 function pointInPolygon(point: [number, number], polygon: Position[]): boolean {
@@ -235,7 +252,7 @@ function RotatingEarthComponent({
         const containerWidth = size
         const containerHeight = size
         const radius = size / 2.5
-        const { maxDpr, targetFps } = getGlobePerformanceProfile()
+        const { maxDpr, targetFps, dotStep, rotationSpeed } = getGlobePerformanceProfile()
         const frameInterval = 1000 / targetFps
 
         const dpr = Math.min(window.devicePixelRatio || 1, maxDpr)
@@ -333,7 +350,7 @@ function RotatingEarthComponent({
 
             const elapsed = lastFrameTime === 0 ? frameInterval : now - lastFrameTime
             lastFrameTime = now
-            rotation[0] = (rotation[0] + (FULL_ROTATION_SPEED * elapsed) / 1000) % 360
+            rotation[0] = (rotation[0] + (rotationSpeed * elapsed) / 1000) % 360
             projection.rotate(rotation)
             render()
             animationId = requestAnimationFrame(animate)
@@ -355,7 +372,7 @@ function RotatingEarthComponent({
         }
 
         const init = async () => {
-            const cache = await loadGlobeCache()
+            const cache = await loadGlobeCache(dotStep)
             if (isDisposed) return
 
             if (cache) {
