@@ -201,6 +201,7 @@ function serializeRemoteProgress(data: Pick<
 export function ProgressProvider({ children }: { children: ReactNode }) {
     const { user, subscriptionStatus } = useAuth(); // NOW using user
     const isAdminUser = !!user?.email && ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"].includes(user.email);
+    const canAccessPaidPillars = isAdminUser || subscriptionStatus === "premium";
     const progressSnapshot = extractProgressSnapshot(user);
     const [pillarStatus, setPillarStatus] = useState<Record<string, PillarStatus>>(getInitialStatus);
     const [chosenSpecialization, setChosenSpecialization] = useState<string | null>(null);
@@ -249,7 +250,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
         // SYNC WITH FIREBASE (progress snapshot preferred, legacy approvedPillar as fallback)
         if (user) {
-            if (progressSnapshot) {
+            if (!canAccessPaidPillars) {
+                initialStatus = getInitialStatus();
+            } else if (progressSnapshot) {
                 initialStatus = buildPillarStatusFromSnapshot(progressSnapshot);
             } else if (user.approvedPillar) {
                 // Legacy fallback while progressSnapshot is still rolling out.
@@ -296,7 +299,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setPillarStatus(initialStatus);
 
         setIsHydrated(true);
-    }, [progressSnapshot, storageKey, user]); // Re-run when user changes
+    }, [canAccessPaidPillars, progressSnapshot, storageKey, user]); // Re-run when user changes
 
     // Salva progresso no localStorage sempre que mudar
     // Salva progresso no localStorage E FIREBASE sempre que mudar
@@ -450,12 +453,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // Retorna número do pilar atual
     const getCurrentPillarNumber = (): number => {
-        if (progressSnapshot?.currentPillar) {
-            return progressSnapshot.currentPillar;
+        if (!canAccessPaidPillars) {
+            return 1;
         }
 
-        if (!isAdminUser && subscriptionStatus !== "premium") {
-            return 1;
+        if (progressSnapshot?.currentPillar) {
+            return progressSnapshot.currentPillar;
         }
 
         // First trust the user object if available
@@ -489,12 +492,13 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         // Regra de Ouro: Pilar 1 é sempre livre (Freemium)
         if (pillarNumber === 1) return true;
 
+        // Premium nao e progresso permanente: free nunca acessa Pilar 2+,
+        // mesmo que snapshots/cache/localStorage digam que ja abriu antes.
+        if (!canAccessPaidPillars) return false;
+
         if (progressSnapshot) {
             return pillarNumber <= progressSnapshot.highestUnlockedPillar;
         }
-
-        // Pilar 2+ exige premium sem excecao.
-        if (!isAdminUser && subscriptionStatus !== 'premium') return false;
 
         // Regra de Admin/Progresso:
         // Se user.approvedPillar for definido, ele tem prioridade absoluta.
@@ -509,21 +513,19 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // Retorna pilares com status atualizado
     const getPillarsWithStatus = (): Pillar[] => {
-        if (progressSnapshot) {
-            const snapshotStatus = buildPillarStatusFromSnapshot(progressSnapshot);
-
-            return PILLARS.map((pillar, index) => ({
-                ...pillar,
-                status: index === 0 && !isAdminUser && subscriptionStatus !== "premium"
-                    ? (snapshotStatus[pillar.id] || "unlocked")
-                    : (snapshotStatus[pillar.id] || "locked"),
-            }));
-        }
-
-        if (!isAdminUser && subscriptionStatus !== "premium") {
+        if (!canAccessPaidPillars) {
             return PILLARS.map((pillar, index) => ({
                 ...pillar,
                 status: index === 0 ? (pillarStatus[pillar.id] || "unlocked") : "locked",
+            }));
+        }
+
+        if (progressSnapshot) {
+            const snapshotStatus = buildPillarStatusFromSnapshot(progressSnapshot);
+
+            return PILLARS.map((pillar) => ({
+                ...pillar,
+                status: snapshotStatus[pillar.id] || "locked",
             }));
         }
 

@@ -3,6 +3,9 @@ import { PILLARS_CONTENT } from "@/data/pillars-content";
 import PillarPageClient from "@/features/study/PillarPageClient";
 import { getRequestPrincipal } from "@/lib/auth/principal";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function PillarPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const pillarId = Number(id) || 1;

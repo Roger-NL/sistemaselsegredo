@@ -143,16 +143,21 @@ export default function Page() {
     const nextRoutes: string[] = [
       ROUTES.app.dashboard,
       `${ROUTES.app.pillar}/${currentPillarNumber}`,
-      currentPillarNumber < 9 ? `${ROUTES.app.pillar}/${currentPillarNumber + 1}` : ROUTES.app.specialties,
-      ROUTES.app.specialties,
     ];
+
+    if (isPremiumUser) {
+      nextRoutes.push(
+        currentPillarNumber < 9 ? `${ROUTES.app.pillar}/${currentPillarNumber + 1}` : ROUTES.app.specialties,
+        ROUTES.app.specialties
+      );
+    }
 
     if (shouldShowPremiumCTA) {
       nextRoutes.push(ROUTES.public.payment);
     }
 
     return prefetchClientRoutesDuringIdle(router, nextRoutes);
-  }, [currentPillarNumber, router, shouldShowPremiumCTA]);
+  }, [currentPillarNumber, isPremiumUser, router, shouldShowPremiumCTA]);
 
   const handleGlobeClick = () => {
     console.log("Opening HUD");
