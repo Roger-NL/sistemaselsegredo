@@ -5,7 +5,7 @@ import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
     AlertCircle, CheckCircle2, Lightbulb, Target, Zap, Play,
     Table as TableIcon, MessageSquare, Terminal, Cpu, HelpCircle,
-    Eye, ChevronDown, Lock, Unlock, ArrowRight, Brain, Crosshair, Volume2, Gamepad2
+    Eye, ChevronDown, Lock, Unlock, ArrowRight, Brain, Crosshair, Volume2, Gamepad2, Clock3
 } from "lucide-react";
 import { ContentBlock, PillarData } from "@/types/study";
 import { cn } from "@/lib/ui/cn";
@@ -54,6 +54,100 @@ const STUDY_PANEL_STRONG = "rounded-lg border border-teal-200 bg-teal-50";
 const STUDY_INPUT = "w-full rounded border border-slate-300 bg-white p-3 text-sm text-black outline-none transition-all placeholder:text-slate-500 focus:border-teal-400 focus:ring-1 focus:ring-teal-100";
 const STUDY_INFO_BAR = "my-6 overflow-hidden rounded-xl border border-slate-200 bg-white/70 shadow-[0_16px_40px_rgba(15,23,42,0.07)] backdrop-blur-md";
 const STUDY_INFO_BAR_HEADER = "flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2";
+
+const stripTranslationSyntax = (value: string) =>
+    value.replace(/\{\{([^|{}]+)\|([^{}]+)\}\}/g, "$1").replace(/\s+/g, " ").trim();
+
+const getBlockTextForEstimate = (block: ContentBlock): string => {
+    const raw = Array.isArray(block.content) ? block.content.join(" ") : block.content;
+
+    if (typeof raw !== "string") return "";
+
+    const trimmed = raw.trim();
+    if ((trimmed.startsWith("{") && trimmed.endsWith("}")) || (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+        try {
+            return JSON.stringify(JSON.parse(trimmed));
+        } catch {
+            return raw;
+        }
+    }
+
+    return raw;
+};
+
+const estimateModuleMinutes = (blocks: ContentBlock[]) => {
+    const words = blocks
+        .map(getBlockTextForEstimate)
+        .join(" ")
+        .replace(/\{\{([^|{}]+)\|([^{}]+)\}\}/g, "$1 $2")
+        .split(/\s+/)
+        .filter(Boolean).length;
+
+    const readingMinutes = Math.ceil(words / 190);
+    const interactionMinutes = blocks.filter((block) =>
+        block.type === "interactive-quiz" ||
+        block.type === "scramble-exercise" ||
+        block.type === "combat-sort-game" ||
+        block.type === "audio-decode-game" ||
+        block.type === "consolidation-game" ||
+        block.type === "maze-game"
+    ).length;
+
+    return Math.max(1, readingMinutes + interactionMinutes);
+};
+
+const getBlockStepLabel = (block: ContentBlock, fallbackIndex: number) => {
+    if (block.title) return stripTranslationSyntax(block.title);
+    if (block.type === "h2" || block.type === "h3") return stripTranslationSyntax(String(block.content));
+    if (block.type === "interactive-quiz") return "Checkpoint rápido";
+    if (block.type === "scramble-exercise") return "Montar frase";
+    if (block.type === "combat-sort-game") return "Jogo de decisão";
+    if (block.type === "audio-decode-game") return "Decodificar som real";
+    if (block.type === "micro-win") return "Vitória registrada";
+    if (block.type === "system-status") return "Status da missão";
+    return `Etapa ${fallbackIndex + 1}`;
+};
+
+const getModuleMissionMeta = (moduleId?: string) => {
+    const meta: Record<string, { mission: string; phrase: string; victory: string }> = {
+        "p1-m1": {
+            mission: "Recuperar controle quando der branco",
+            phrase: "Say that again.",
+            victory: "Você sai com frases de sobrevivência.",
+        },
+        "p1-m2": {
+            mission: "Reconhecer inglês dentro da história",
+            phrase: "bridge / English",
+            victory: "Você prova que reconhecimento já é começo.",
+        },
+        "p1-m3": {
+            mission: "Escolher reação sob pressão",
+            phrase: "Wait, I'm lost.",
+            victory: "Você reage sem se diminuir.",
+        },
+        "p1-m4": {
+            mission: "Organizar palavras que resolvem",
+            phrase: "I need help.",
+            victory: "Você transforma palavras soltas em situação.",
+        },
+        "p1-m5": {
+            mission: "Decodificar o som real",
+            phrase: "Whaddya want?",
+            victory: "Você percebe que escuta é treinável.",
+        },
+        "p1-m6": {
+            mission: "Criar o mapa de partida",
+            phrase: "Meu próximo passo é escuta",
+            victory: "Você fecha a iniciação com direção.",
+        },
+    };
+
+    return meta[moduleId ?? ""] ?? {
+        mission: "Concluir a etapa atual",
+        phrase: "Continue",
+        victory: "Você avança com direção.",
+    };
+};
 
 const InteractiveQuiz = ({ question, options, answer }: { question: string, options: string[], answer: number }) => {
     const [selected, setSelected] = useState<number | null>(null);
@@ -4409,6 +4503,8 @@ export const PillarOperationalView = ({ data, onActiveModuleChange }: PillarOper
     const [activeModuleId, setActiveModuleId] = useState<string | null>(
         data.modules?.[0]?.id || null
     );
+    const [moduleScrollProgress, setModuleScrollProgress] = useState(0);
+    const [activeStepIndex, setActiveStepIndex] = useState(0);
     const [highlightedModuleId, setHighlightedModuleId] = useState<string | null>(null);
     const [challengeTarget, setChallengeTarget] = useState<{ moduleId: string; index: number } | null>(null);
     const [challengeAnswers, setChallengeAnswers] = useState<Record<string, Array<boolean | null>>>({});
@@ -4467,6 +4563,58 @@ export const PillarOperationalView = ({ data, onActiveModuleChange }: PillarOper
         onActiveModuleChange?.(activeModuleId);
     }, [activeModuleId, onActiveModuleChange]);
 
+    useEffect(() => {
+        if (!activeModuleId) return;
+
+        let frame = 0;
+
+        const updateMissionProgress = () => {
+            frame = 0;
+
+            const container = document.getElementById(`module-content-${activeModuleId}`);
+            if (!container) return;
+
+            const rect = container.getBoundingClientRect();
+            const viewportHeight = window.innerHeight || 1;
+            const moduleTop = window.scrollY + rect.top;
+            const readableHeight = Math.max(1, rect.height - viewportHeight * 0.55);
+            const rawProgress = (window.scrollY + viewportHeight * 0.28 - moduleTop) / readableHeight;
+            const nextProgress = Math.min(1, Math.max(0, rawProgress));
+
+            setModuleScrollProgress((previous) =>
+                Math.abs(previous - nextProgress) > 0.01 ? nextProgress : previous
+            );
+
+            const steps = Array.from(container.querySelectorAll<HTMLElement>("[data-module-step]"));
+            if (!steps.length) return;
+
+            const anchorY = viewportHeight * 0.36;
+            let nextStep = 0;
+            steps.forEach((step, index) => {
+                if (step.getBoundingClientRect().top <= anchorY) {
+                    nextStep = index;
+                }
+            });
+
+            setActiveStepIndex((previous) => previous === nextStep ? previous : nextStep);
+        };
+
+        const requestUpdate = () => {
+            if (frame) return;
+            frame = window.requestAnimationFrame(updateMissionProgress);
+        };
+
+        requestUpdate();
+        window.addEventListener("scroll", requestUpdate, { passive: true });
+        window.addEventListener("resize", requestUpdate);
+
+        return () => {
+            if (frame) window.cancelAnimationFrame(frame);
+            window.removeEventListener("scroll", requestUpdate);
+            window.removeEventListener("resize", requestUpdate);
+        };
+    }, [activeModuleId]);
+
     const scrollToModuleAnchor = (
         moduleId: string,
         options?: { delay?: number; behavior?: ScrollBehavior }
@@ -4505,6 +4653,8 @@ export const PillarOperationalView = ({ data, onActiveModuleChange }: PillarOper
         }
 
         const openNow = () => {
+            setModuleScrollProgress(0);
+            setActiveStepIndex(0);
             setActiveModuleId(moduleId);
             scrollToModuleAnchor(moduleId, { delay: 120, behavior });
         };
@@ -4539,6 +4689,8 @@ export const PillarOperationalView = ({ data, onActiveModuleChange }: PillarOper
                 window.clearTimeout(accordionTimerRef.current);
                 accordionTimerRef.current = null;
             }
+            setModuleScrollProgress(0);
+            setActiveStepIndex(0);
             setActiveModuleId(null);
             return;
         }
@@ -4702,6 +4854,18 @@ export const PillarOperationalView = ({ data, onActiveModuleChange }: PillarOper
         setMazeHintByModule((prev) => ({ ...prev, [moduleId]: "Desafio concluído. Você já pode avançar para o próximo módulo." }));
     };
 
+    const activeModuleIndex = data.modules.findIndex((module) => module.id === activeModuleId);
+    const activeModule = activeModuleIndex >= 0 ? data.modules[activeModuleIndex] : data.modules[0];
+    const activeModuleEstimateMinutes = activeModule ? estimateModuleMinutes(activeModule.blocks) : 0;
+    const remainingMinutes = activeModule
+        ? Math.max(1, Math.ceil(activeModuleEstimateMinutes * (1 - moduleScrollProgress)))
+        : 0;
+    const activeStepLabel = activeModule?.blocks[activeStepIndex]
+        ? getBlockStepLabel(activeModule.blocks[activeStepIndex], activeStepIndex)
+        : "Etapa atual";
+    const missionMeta = getModuleMissionMeta(activeModule?.id);
+    const nextModule = activeModuleIndex >= 0 ? data.modules[activeModuleIndex + 1] : undefined;
+
     return (
         <div ref={viewRootRef} className="w-full max-w-5xl mx-auto pb-32">
             {/* HEADER */}
@@ -4852,10 +5016,15 @@ export const PillarOperationalView = ({ data, onActiveModuleChange }: PillarOper
                                                     isCompleted ? "from-teal-500/20 to-transparent" : "from-teal-500/20 to-transparent"
                                                 )} />
 
-                                                <div className="mt-6 rounded-[28px] border border-white/45 bg-[linear-gradient(180deg,rgba(255,255,255,0.70),rgba(248,250,252,0.58))] p-6 pt-8 shadow-[0_30px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl md:p-10">
+                                                <div
+                                                    id={`module-content-${module.id}`}
+                                                    className="mt-6 rounded-[28px] border border-white/45 bg-[linear-gradient(180deg,rgba(255,255,255,0.70),rgba(248,250,252,0.58))] p-6 pt-8 shadow-[0_30px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl md:p-10"
+                                                >
                                                     <div className="space-y-2">
                                                         {module.blocks.map((block, idx) => (
-                                                            <RenderBlock key={idx} block={block} moduleId={module.id} onGameComplete={handleGameComplete} />
+                                                            <div key={idx} data-module-step={idx}>
+                                                                <RenderBlock block={block} moduleId={module.id} onGameComplete={handleGameComplete} />
+                                                            </div>
                                                         ))}
                                                     </div>
 
@@ -5005,6 +5174,69 @@ export const PillarOperationalView = ({ data, onActiveModuleChange }: PillarOper
                         </div>
                     );
                 })}
+            </div>
+
+            <div className="pointer-events-none hidden min-[1440px]:block">
+                <div
+                    className="fixed top-[30vh] w-48 rounded-2xl border border-white/15 bg-white/[0.08] p-3 shadow-[0_20px_60px_rgba(2,6,23,0.22)] backdrop-blur-xl"
+                    style={{ left: "max(16px, calc((100vw - 1024px) / 2 - 204px))" }}
+                >
+                    <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-teal-200">Módulo</div>
+                    <p className="mt-1 text-sm font-semibold leading-snug text-white">
+                        {activeModule ? parseTextWithTranslations(activeModule.title) : "Selecione um módulo"}
+                    </p>
+                    <div className="mt-3 text-[10px] font-mono uppercase tracking-widest text-white/45">Etapa atual</div>
+                    <p className="mt-1 text-sm text-white/85">{activeStepLabel}</p>
+                </div>
+
+                <div
+                    className="fixed top-[34vh] w-48 rounded-2xl border border-white/15 bg-white/[0.08] p-3 shadow-[0_20px_60px_rgba(2,6,23,0.22)] backdrop-blur-xl"
+                    style={{ right: "max(16px, calc((100vw - 1024px) / 2 - 204px))" }}
+                >
+                    <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-teal-200">Missão atual</div>
+                    <p className="mt-1 text-sm text-white">{missionMeta.mission}</p>
+                    <div className="mt-3 text-[10px] font-mono uppercase tracking-widest text-white/45">Frase-chave</div>
+                    <p className="mt-1 rounded-lg border border-teal-300/20 bg-teal-300/10 px-2 py-1.5 font-mono text-sm text-teal-100">
+                        {missionMeta.phrase}
+                    </p>
+                </div>
+
+                <div
+                    className="fixed bottom-8 w-48 rounded-2xl border border-white/15 bg-white/[0.08] p-3 shadow-[0_20px_60px_rgba(2,6,23,0.22)] backdrop-blur-xl"
+                    style={{ left: "max(16px, calc((100vw - 1024px) / 2 - 204px))" }}
+                >
+                    <div className="mb-2 flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-white/45">
+                        <span>Rolagem</span>
+                        <span>{Math.round(moduleScrollProgress * 100)}%</span>
+                    </div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-white/12">
+                        <div
+                            className="h-full rounded-full bg-teal-300 transition-[width] duration-150"
+                            style={{ width: `${Math.round(moduleScrollProgress * 100)}%` }}
+                        />
+                    </div>
+                    <div className="mt-3 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-white/45">
+                        <Clock3 className="h-3.5 w-3.5" />
+                        Tempo restante
+                    </div>
+                    <p className="mt-1 text-sm font-semibold text-white">
+                        {remainingMinutes <= 1 ? "menos de 1 min" : `${remainingMinutes} min`}
+                    </p>
+                </div>
+
+                <div
+                    className="fixed bottom-10 w-48 rounded-2xl border border-white/15 bg-white/[0.08] p-3 shadow-[0_20px_60px_rgba(2,6,23,0.22)] backdrop-blur-xl"
+                    style={{ right: "max(16px, calc((100vw - 1024px) / 2 - 204px))" }}
+                >
+                    <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-teal-200">Vitória</div>
+                    <p className="mt-1 text-sm text-white/85">{missionMeta.victory}</p>
+                    {nextModule && (
+                        <>
+                            <div className="mt-3 text-[10px] font-mono uppercase tracking-widest text-white/45">Próximo</div>
+                            <p className="mt-1 text-xs leading-snug text-white/80">{parseTextWithTranslations(nextModule.title)}</p>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CheckCircle2, ArrowRight, Loader2, ClipboardCheck, MessageSquare, AlertCircle, ShieldCheck, Phone } from "lucide-react";
-import { FlightButton } from "@/components/ui/FlightCard";
 import { getQuizByPillarNumber } from "@/data/quizzes";
 import { submitExam } from "@/lib/exam/service";
 import { useAuth } from "@/context/AuthContext";
@@ -167,129 +166,135 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+                className="absolute inset-0 bg-white/80 backdrop-blur-sm"
                 onClick={onClose}
             />
 
             <motion.div
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                className="relative w-full max-w-xl overflow-y-auto rounded-2xl border border-white/10 bg-[#0A0A0A] shadow-2xl max-h-[90vh]"
+                className="relative w-full max-w-xl overflow-y-auto rounded-[28px] border border-zinc-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)] max-h-[90vh] lg:max-w-5xl"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-white/5 bg-white/[0.02] px-5 py-4">
+                <div className="flex items-center justify-between border-b border-zinc-200 bg-white px-5 py-4">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-violet-400/20 bg-violet-500/10">
-                            <ShieldCheck className="h-5 w-5 text-violet-400" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50">
+                            <ShieldCheck className="h-5 w-5 text-zinc-950" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-white">Missão Final: Pilar {pillarId}</h2>
-                            <p className="font-mono text-[10px] uppercase tracking-widest text-white/40">Validação de competência</p>
+                            <h2 className="text-lg font-bold text-zinc-950">Missão Final: Pilar {pillarId}</h2>
+                            <p className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Validação de competência</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="text-white/20 hover:text-white transition-colors">
+                    <button onClick={onClose} className="text-zinc-400 hover:text-zinc-950 transition-colors">
                         <X size={20} />
                     </button>
                 </div>
 
-                <div className="p-5 md:p-6">
+                <div className="p-5 md:p-6 lg:p-8">
                     <AnimatePresence mode="wait">
                         {/* INTRO */}
                         {step === 'intro' && (
-                            <motion.div key="intro" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: -20 }} className="space-y-6">
-                                <div className="rounded-2xl border border-violet-500/20 bg-[linear-gradient(145deg,rgba(76,29,149,0.16),rgba(10,10,16,0.96),rgba(7,12,24,0.98))] p-5 md:p-6">
-                                    <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/20 bg-violet-500/10 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-violet-200">
+                            <motion.div key="intro" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: -20 }} className="space-y-5 lg:space-y-6">
+                                <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
+                                <div className="rounded-[24px] border border-zinc-200 bg-zinc-50 p-5 md:p-6 lg:p-8">
+                                    <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-zinc-700 shadow-sm">
                                         {isPillarOne ? "Fim da etapa gratuita" : "Validação da etapa"}
                                     </div>
-                                    <h3 className="mt-4 text-2xl font-bold tracking-tight text-white md:text-[2rem]">
+                                    <h3 className="mt-4 text-2xl font-black tracking-tight text-zinc-950 md:text-[2rem] lg:text-5xl lg:leading-tight">
                                         {isPillarOne ? "Você chegou até aqui com base real." : "Fechamento do pilar."}
                                     </h3>
-                                    <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70 md:text-[15px]">
+                                    <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-600 md:text-[15px] lg:text-base">
                                         {isPillarOne
-                                            ? "Agora é só uma checagem curta para registrar seu nível e liberar o próximo passo com mais contexto."
+                                            ? "Uma checagem curta para registrar seu ponto atual e seguir com direção."
                                             : "Agora entra uma checagem curta para confirmar o que ficou sólido antes da próxima etapa."}
                                     </p>
                                     <div className="mt-5 grid gap-2 sm:grid-cols-3">
-                                        <div className="rounded-xl border border-white/8 bg-black/20 px-4 py-3">
-                                            <p className="text-[10px] uppercase tracking-[0.24em] text-white/38">Formato</p>
-                                            <p className="mt-2 text-sm font-semibold text-white">2 etapas</p>
+                                        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3">
+                                            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Formato</p>
+                                            <p className="mt-2 text-sm font-semibold text-zinc-950">2 etapas</p>
                                         </div>
-                                        <div className="rounded-xl border border-white/8 bg-black/20 px-4 py-3">
-                                            <p className="text-[10px] uppercase tracking-[0.24em] text-white/38">Objetivo</p>
-                                            <p className="mt-2 text-sm font-semibold text-white">Validar progresso</p>
+                                        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3">
+                                            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Objetivo</p>
+                                            <p className="mt-2 text-sm font-semibold text-zinc-950">Validar progresso</p>
                                         </div>
-                                        <div className="rounded-xl border border-white/8 bg-black/20 px-4 py-3">
-                                            <p className="text-[10px] uppercase tracking-[0.24em] text-white/38">Estilo</p>
-                                            <p className="mt-2 text-sm font-semibold text-white">Resposta real</p>
+                                        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3">
+                                            <p className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Estilo</p>
+                                            <p className="mt-2 text-sm font-semibold text-zinc-950">Resposta real</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="grid gap-3 md:grid-cols-2">
-                                    <div className="rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.06] p-4">
+                                <div className="grid gap-3 lg:grid-rows-[1fr_1fr]">
+                                    <div className="rounded-[24px] border border-zinc-200 bg-white p-4 shadow-sm lg:p-5">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-500/10">
-                                                <ClipboardCheck className="h-5 w-5 text-emerald-300" />
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-950">
+                                                <ClipboardCheck className="h-5 w-5 text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-semibold text-white">Parte 1</p>
-                                                <p className="text-[10px] uppercase tracking-[0.18em] text-white/35">Perguntas rápidas</p>
+                                                <p className="text-sm font-semibold text-zinc-950">Parte 1</p>
+                                                <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Perguntas rápidas</p>
                                             </div>
                                         </div>
-                                        <p className="mt-3 text-sm leading-relaxed text-white/60">
-                                            Respostas objetivas para confirmar os pontos centrais deste pilar.
+                                        <p className="mt-3 text-sm leading-relaxed text-zinc-600 lg:max-w-sm">
+                                            Confirma os pontos centrais do pilar.
                                         </p>
                                     </div>
 
-                                    <div className="rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.06] p-4">
+                                    <div className="rounded-[24px] border border-zinc-200 bg-white p-4 shadow-sm lg:p-5">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-500/10">
-                                                <MessageSquare className="h-5 w-5 text-cyan-300" />
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-950">
+                                                <MessageSquare className="h-5 w-5 text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-semibold text-white">Parte 2</p>
-                                                <p className="text-[10px] uppercase tracking-[0.18em] text-white/35">Resposta escrita</p>
+                                                <p className="text-sm font-semibold text-zinc-950">Parte 2</p>
+                                                <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500">Resposta escrita</p>
                                             </div>
                                         </div>
-                                        <p className="mt-3 text-sm leading-relaxed text-white/60">
-                                            Um resumo com suas palavras e exemplos do mundo real.
+                                        <p className="mt-3 text-sm leading-relaxed text-zinc-600 lg:max-w-sm">
+                                            Mostra seu raciocínio com exemplos reais.
                                         </p>
                                     </div>
                                 </div>
+                                </div>
 
-                                <div className={`grid gap-3 ${isPillarOne ? "md:grid-cols-[1.1fr_0.9fr]" : ""}`}>
-                                    <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-4">
-                                        <h4 className="mb-3 text-sm font-semibold text-white">Para ir bem</h4>
-                                        <div className="grid gap-2">
-                                            <div className="flex gap-3 text-sm text-white/65">
-                                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-                                                <span>Use suas próprias palavras.</span>
+                                <div className={`grid gap-3 ${isPillarOne ? "lg:grid-cols-[1fr_1fr]" : ""}`}>
+                                    <div className="rounded-[24px] border border-zinc-200 bg-white p-4 shadow-sm">
+                                        <h4 className="mb-3 text-sm font-semibold text-zinc-950">Para ir bem</h4>
+                                        <div className="grid gap-2 lg:grid-cols-3">
+                                            <div className="flex gap-3 text-sm text-zinc-600">
+                                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-zinc-950" />
+                                                <span>Suas palavras.</span>
                                             </div>
-                                            <div className="flex gap-3 text-sm text-white/65">
-                                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-                                                <span>Inglês simples vale mais do que floreio.</span>
+                                            <div className="flex gap-3 text-sm text-zinc-600">
+                                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-zinc-950" />
+                                                <span>Inglês simples.</span>
                                             </div>
-                                            <div className="flex gap-3 text-sm text-white/65">
-                                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-                                                <span>Mostre seu nível real, sem copiar.</span>
+                                            <div className="flex gap-3 text-sm text-zinc-600">
+                                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-zinc-950" />
+                                                <span>Nível real.</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {isPillarOne && (
-                                        <div className="rounded-2xl border border-amber-500/15 bg-amber-500/[0.06] p-4">
-                                            <h4 className="mb-2 text-sm font-semibold text-amber-200">Depois daqui</h4>
-                                            <p className="text-sm leading-relaxed text-white/65">
-                                                A próxima fase entra com sequência completa, leitura humana e acompanhamento mais próximo.
+                                        <div className="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
+                                            <h4 className="mb-2 text-sm font-semibold text-zinc-950">Depois daqui</h4>
+                                            <p className="text-sm leading-relaxed text-zinc-600">
+                                                Seu mapa indica o próximo treino: escuta guiada no Pilar 2.
                                             </p>
                                         </div>
                                     )}
                                 </div>
 
-                                <FlightButton variant="neon" className="w-full py-4 text-base md:text-lg" onClick={handleNextStep}>
+                                <button
+                                    type="button"
+                                    onClick={handleNextStep}
+                                    className="flex w-full items-center justify-center gap-3 rounded-2xl bg-zinc-950 px-6 py-4 text-base font-black uppercase tracking-[0.18em] text-white shadow-[0_18px_44px_rgba(0,0,0,0.18)] transition hover:bg-zinc-800 md:text-lg lg:py-5"
+                                >
                                     {isPillarOne ? "Começar avaliação" : "Iniciar avaliação"}
-                                    <ArrowRight className="ml-2 w-5 h-5" />
-                                </FlightButton>
+                                    <ArrowRight className="w-5 h-5" />
+                                </button>
                             </motion.div>
                         )}
 
@@ -297,13 +302,13 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                         {step === 'quiz' && questions.length > 0 && (
                             <motion.div key="quiz" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
                                 <div className="flex justify-between items-end">
-                                    <span className="text-[10px] font-mono text-violet-400 uppercase tracking-widest">Questão {quizIndex + 1} de {questions.length}</span>
-                                    <div className="h-1 bg-white/5 w-32 rounded-full overflow-hidden">
-                                        <div className="h-full bg-violet-500 transition-all duration-500" style={{ width: `${((quizIndex + 1) / questions.length) * 100}%` }} />
+                                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Questão {quizIndex + 1} de {questions.length}</span>
+                                    <div className="h-1 bg-zinc-100 w-32 rounded-full overflow-hidden">
+                                        <div className="h-full bg-zinc-950 transition-all duration-500" style={{ width: `${((quizIndex + 1) / questions.length) * 100}%` }} />
                                     </div>
                                 </div>
 
-                                <h3 className="text-xl font-serif text-white leading-snug">
+                                <h3 className="text-2xl font-bold text-zinc-950 leading-snug">
                                     {questions[quizIndex].question}
                                 </h3>
 
@@ -312,10 +317,10 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                         <button
                                             key={idx}
                                             onClick={() => handleAnswer(idx)}
-                                            className="w-full p-4 text-left bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 hover:border-violet-500/50 transition-all text-sm group"
+                                            className="w-full p-4 text-left bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 hover:border-zinc-950 transition-all text-sm group"
                                         >
-                                            <span className="inline-block w-6 h-6 rounded-full bg-white/5 border border-white/10 text-center leading-6 text-[10px] mr-3 group-hover:bg-violet-500 group-hover:text-white transition-colors">{idx + 1}</span>
-                                            <span className="text-white/80 group-hover:text-white">{opt}</span>
+                                            <span className="inline-block w-6 h-6 rounded-full bg-zinc-50 border border-zinc-200 text-center leading-6 text-[10px] mr-3 text-zinc-500 group-hover:bg-zinc-950 group-hover:text-white transition-colors">{idx + 1}</span>
+                                            <span className="text-zinc-700 group-hover:text-zinc-950">{opt}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -326,46 +331,46 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                         {step === 'written' && (
                             <motion.div key="written" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                                 <div>
-                                    <h3 className="text-lg font-medium text-white mb-2">Sua resposta final</h3>
-                                    <p className="text-sm text-white/50 mb-4">
+                                    <h3 className="text-xl font-bold text-zinc-950 mb-2">Sua resposta final</h3>
+                                    <p className="text-sm text-zinc-600 mb-4">
                                         Conte o que mais mexeu com você neste pilar e traga **3 exemplos reais** de como isso pode aparecer na sua rotina. Não precisa soar bonito. Precisa soar seu.
                                     </p>
                                     <textarea
                                         value={writtenText}
                                         onChange={(e) => setWrittenAnswer(e.target.value)}
                                         placeholder="O que mais me marcou foi... Na prática, eu usaria isso quando..."
-                                        className="w-full h-48 bg-black border border-white/10 rounded-xl p-4 text-white placeholder:text-white/20 focus:outline-none focus:border-violet-500/50 transition-colors resize-none"
+                                        className="w-full h-48 bg-white border border-zinc-200 rounded-xl p-4 text-zinc-950 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-950 transition-colors resize-none"
                                     />
                                     <div className="flex justify-between mt-2">
-                                        <span className={`text-[10px] font-mono ${writtenText.length < 50 ? 'text-red-400' : 'text-emerald-400'}`}>
+                                        <span className={`text-[10px] font-mono ${writtenText.length < 50 ? 'text-red-600' : 'text-emerald-700'}`}>
                                             Caracteres: {writtenText.length} (mín. 50)
                                         </span>
                                     </div>
                                 </div>
 
                                 {error && (
-                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3 text-red-400 text-xs">
+                                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700 text-xs">
                                         <AlertCircle size={14} />
                                         {error}
                                     </div>
                                 )}
 
-                                <FlightButton variant="neon" className="w-full py-4" onClick={handleNextStep}>
+                                <button type="button" className="flex w-full items-center justify-center gap-3 rounded-2xl bg-zinc-950 px-6 py-4 text-base font-black uppercase tracking-[0.18em] text-white transition hover:bg-zinc-800" onClick={handleNextStep}>
                                     Continuar
-                                    <ArrowRight className="ml-2 w-5 h-5" />
-                                </FlightButton>
+                                    <ArrowRight className="w-5 h-5" />
+                                </button>
                             </motion.div>
                         )}
 
                         {/* WHATSAPP INPUT (NEW STEP) */}
                         {step === 'whatsapp' && (
                             <motion.div key="whatsapp" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                                <div className="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-center">
-                                    <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <Phone className="w-8 h-8 text-emerald-400" />
+                                <div className="p-6 bg-zinc-50 border border-zinc-200 rounded-xl text-center">
+                                    <div className="w-16 h-16 bg-zinc-950 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Phone className="w-8 h-8 text-white" />
                                     </div>
-                                    <h3 className="text-lg font-medium text-white mb-2">Se quiser, deixe seu WhatsApp</h3>
-                                    <p className="text-white/60 text-sm mb-6 max-w-sm mx-auto">
+                                    <h3 className="text-lg font-bold text-zinc-950 mb-2">Se quiser, deixe seu WhatsApp</h3>
+                                    <p className="text-zinc-600 text-sm mb-6 max-w-sm mx-auto">
                                         Assim o retorno da sua avaliação pode chegar mais rápido. Se preferir não colocar, tudo bem: você ainda consegue acompanhar a resposta por aqui.
                                     </p>
 
@@ -375,26 +380,26 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                             value={whatsapp}
                                             onChange={(e) => setWhatsapp(e.target.value)}
                                             placeholder="(XX) 9XXXX-XXXX"
-                                            className="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-white placeholder:text-white/20 focus:outline-none focus:border-emerald-500/50 transition-colors mb-2"
+                                            className="w-full bg-white border border-zinc-200 rounded-lg p-3 text-center text-zinc-950 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-950 transition-colors mb-2"
                                         />
-                                        <p className="text-[10px] text-white/30 uppercase tracking-widest">
+                                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest">
                                             {whatsapp ? "Número registrado" : "Opcional (Resposta ficará no site)"}
                                         </p>
                                     </div>
                                 </div>
 
                                 {error && (
-                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3 text-red-400 text-xs">
+                                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700 text-xs">
                                         <AlertCircle size={14} />
                                         {error}
                                     </div>
                                 )}
 
                                 <div className="space-y-3">
-                                    <FlightButton variant="neon" className="w-full py-4 text-lg" onClick={() => handleSubmit()}>
+                                    <button type="button" className="flex w-full items-center justify-center gap-3 rounded-2xl bg-zinc-950 px-6 py-4 text-base font-black uppercase tracking-[0.18em] text-white transition hover:bg-zinc-800" onClick={() => handleSubmit()}>
                                         Enviar Missão Final
-                                        <ArrowRight className="ml-2 w-5 h-5" />
-                                    </FlightButton>
+                                        <ArrowRight className="w-5 h-5" />
+                                    </button>
                                 </div>
                             </motion.div>
                         )}
@@ -402,8 +407,8 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                         {/* SENDING */}
                         {step === 'sending' && (
                             <div className="py-20 flex flex-col items-center justify-center space-y-4">
-                                <Loader2 className="w-12 h-12 text-violet-500 animate-spin" />
-                                <p className="text-white/60 font-mono text-sm animate-pulse">Sincronizando dados com o Quartel General...</p>
+                                <Loader2 className="w-12 h-12 text-zinc-950 animate-spin" />
+                                <p className="text-zinc-600 font-mono text-sm animate-pulse">Sincronizando dados com o Quartel General...</p>
                             </div>
                         )}
 
