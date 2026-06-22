@@ -37,6 +37,7 @@ import {
     type WriterExamStatus,
     type WriterLiveSessionStatus,
 } from "@/lib/auth/premium-access";
+import { readStoredProgressSnapshot, type ProgressSnapshot } from "@/lib/progress";
 import { normalizeStudyStats, type StudyStats } from "@/lib/study/stats";
 
 // ADMIN LIST (Hardcoded for MVP Phase)
@@ -79,6 +80,7 @@ export interface User {
     completedPillarModules?: string[]; // IDs of unique modules like 'p1-m1', 'p2-m1'
     hasSeenMissionComplete?: boolean;
     localPillarStatus?: Record<string, string>; // Optional: Sync the full pillar status map if desired
+    progressSnapshot?: ProgressSnapshot;
     studyStats?: StudyStats;
 }
 
@@ -305,6 +307,7 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
                         Object.entries(data.localPillarStatus).filter(([, value]) => typeof value === "string")
                     )
                     : undefined,
+            progressSnapshot: readStoredProgressSnapshot((data as { progressSnapshot?: unknown }).progressSnapshot) ?? undefined,
             studyStats: normalizeStudyStats((data as { studyStats?: unknown }).studyStats),
         };
     }
@@ -765,6 +768,17 @@ export async function updateUserProgress(userId: string, progressData: Partial<U
 
         if (Object.keys(safeUpdate).length > 0) {
             await updateDoc(userRef, safeUpdate);
+        }
+
+        const shouldRefreshProgressSnapshot =
+            progressData.completedPillarModules !== undefined ||
+            progressData.localPillarStatus !== undefined ||
+            progressData.approvedPillar !== undefined ||
+            progressData.chosenSpecialization !== undefined ||
+            progressData.completedSpecializations !== undefined;
+
+        if (shouldRefreshProgressSnapshot) {
+            await recomputeClientProgressSnapshot(userId);
         }
     } catch (error) {
         if (!isFirestorePermissionError(error) && !isFirestoreQuotaError(error)) {

@@ -178,6 +178,28 @@ function buildPillarStatusFromSnapshot(snapshot: AppProgressSnapshot): Record<st
     }, {});
 }
 
+function buildDevProgressSnapshotForLevel(level: number): AppProgressSnapshot {
+    const safeLevel = Math.min(Math.max(level, 1), 9);
+    const completedPillars = Array.from({ length: Math.max(0, safeLevel - 1) }, (_, index) => index + 1);
+
+    return {
+        currentPillar: safeLevel,
+        highestUnlockedPillar: safeLevel,
+        completedPillars,
+        blockedReason: null,
+        nextAction: safeLevel <= 1
+            ? "continue_pillar_1"
+            : safeLevel === 2
+                ? "continue_pillar_2"
+                : safeLevel >= 9
+                    ? "choose_specialization"
+                    : "continue_pillar_3",
+        gateState: "open",
+        eligibleForSpecialization: safeLevel >= 9,
+        legacyAccessOverride: true,
+    };
+}
+
 function serializeRemoteProgress(data: Pick<
     ProgressSnapshot,
     | "chosenSpecialization"
@@ -202,7 +224,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     const { user, subscriptionStatus } = useAuth(); // NOW using user
     const isAdminUser = !!user?.email && ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"].includes(user.email);
     const canAccessPaidPillars = isAdminUser || subscriptionStatus === "premium";
-    const progressSnapshot = extractProgressSnapshot(user);
+    const remoteProgressSnapshot = extractProgressSnapshot(user);
+    const [localProgressSnapshotOverride, setLocalProgressSnapshotOverride] = useState<AppProgressSnapshot | null>(null);
+    const progressSnapshot = localProgressSnapshotOverride ?? remoteProgressSnapshot;
     const [pillarStatus, setPillarStatus] = useState<Record<string, PillarStatus>>(getInitialStatus);
     const [chosenSpecialization, setChosenSpecialization] = useState<string | null>(null);
     const [specializationStatus, setSpecializationStatus] = useState<'studying' | 'pending_approval' | 'completed' | null>(null);
@@ -215,6 +239,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
     // Dynamic key based on user ID to prevent shared progress
     const storageKey = user?.id ? `${STORAGE_KEY}-${user.id}` : null;
+
+    useEffect(() => {
+        setLocalProgressSnapshotOverride(null);
+    }, [user?.id]);
 
     // Carrega progresso do localStorage na montagem ou quando user muda
     useEffect(() => {
@@ -406,6 +434,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             setCompletedModules({});
             setCompletedPillarModules([]);
             setHasSeenMissionComplete(false);
+            setLocalProgressSnapshotOverride(null);
 
             if (storageKey) {
                 secureStorage.setItem(storageKey, {
@@ -438,6 +467,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
             }
         });
         setPillarStatus(newStatus);
+        setLocalProgressSnapshotOverride(buildDevProgressSnapshotForLevel(safeLevel));
         setCompletedPillarModules([]);
         // Dev override keeps the legacy pillar pointer in sync during transition,
         // but no longer persists localPillarStatus as remote gating authority.
@@ -703,6 +733,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setCompletedModules({});
         setCompletedPillarModules([]);
         setHasSeenMissionComplete(false);
+        setLocalProgressSnapshotOverride(null);
         if (storageKey) {
             secureStorage.setItem(storageKey, {
                 pillarStatus: initial,
