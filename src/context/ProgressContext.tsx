@@ -7,6 +7,7 @@ import { secureStorage } from "@/lib/storage/secure-storage";
 import { useAuth } from "@/context/AuthContext";
 import type { User } from "@/lib/auth/service";
 import type { ProgressSnapshotSeed } from "@/lib/progress/contract";
+import { hasAdminClaim } from "@/lib/auth/admin-policy";
 
 // ============================================================================
 // PROGRESS CONTEXT
@@ -222,7 +223,7 @@ function serializeRemoteProgress(data: Pick<
 // Provider
 export function ProgressProvider({ children }: { children: ReactNode }) {
     const { user, subscriptionStatus } = useAuth(); // NOW using user
-    const isAdminUser = !!user?.email && ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"].includes(user.email);
+    const isAdminUser = hasAdminClaim(user);
     const canAccessPaidPillars = isAdminUser || subscriptionStatus === "premium";
     const remoteProgressSnapshot = extractProgressSnapshot(user);
     const [localProgressSnapshotOverride, setLocalProgressSnapshotOverride] = useState<AppProgressSnapshot | null>(null);

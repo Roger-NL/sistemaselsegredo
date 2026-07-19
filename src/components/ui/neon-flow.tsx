@@ -23,7 +23,6 @@ function TubesBackgroundComponent({
     const frameBudgetRef = useRef(1000 / 36);
     const lastPostedAtRef = useRef(0);
     const activationTimerRef = useRef<number | null>(null);
-    const fallbackTimerRef = useRef<number | null>(null);
 
     const activateIframe = useCallback(() => {
         if (hasActivatedIframeRef.current) return;
@@ -42,37 +41,9 @@ function TubesBackgroundComponent({
         const isMobilePointer = window.matchMedia("(pointer: coarse)").matches;
         frameBudgetRef.current = 1000 / (isLowPowerDevice ? 16 : 36);
 
-        if (isLowPowerDevice || isMobilePointer) {
-            const activateOnInteraction = () => {
-                activateIframe();
-            };
-
-            window.addEventListener("pointerdown", activateOnInteraction, { passive: true, once: true });
-            window.addEventListener("touchstart", activateOnInteraction, { passive: true, once: true });
-            window.addEventListener("keydown", activateOnInteraction, { once: true });
-            window.addEventListener("scroll", activateOnInteraction, { passive: true, once: true });
-
-            activationTimerRef.current = window.setTimeout(() => {
-                activateIframe();
-            }, 4000);
-
-            fallbackTimerRef.current = window.setTimeout(() => {
-                activateIframe();
-            }, 7000);
-
-            return () => {
-                if (activationTimerRef.current !== null) {
-                    window.clearTimeout(activationTimerRef.current);
-                }
-                if (fallbackTimerRef.current !== null) {
-                    window.clearTimeout(fallbackTimerRef.current);
-                }
-
-                window.removeEventListener("pointerdown", activateOnInteraction);
-                window.removeEventListener("touchstart", activateOnInteraction);
-                window.removeEventListener("keydown", activateOnInteraction);
-                window.removeEventListener("scroll", activateOnInteraction);
-            };
+        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (isLowPowerDevice || isMobilePointer || prefersReducedMotion) {
+            return;
         }
 
         activationTimerRef.current = window.setTimeout(() => {
@@ -173,6 +144,8 @@ function TubesBackgroundComponent({
                     }}
                     title="Neon Tubes Background"
                     loading="lazy"
+                    sandbox="allow-scripts"
+                    referrerPolicy="no-referrer"
                 />
             )}
 

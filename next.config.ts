@@ -1,5 +1,22 @@
 import type { NextConfig } from "next";
 
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+  "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  "img-src 'self' data: blob: https:",
+  "media-src 'self' blob: https:",
+  "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com",
+  "frame-src 'self' https://accounts.google.com https://*.firebaseapp.com",
+  "worker-src 'self' blob:",
+  "upgrade-insecure-requests",
+].join("; ");
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   productionBrowserSourceMaps: false, // Segurança: Oculta código fonte em produção
@@ -28,10 +45,6 @@ const nextConfig: NextConfig = {
           value: 'max-age=63072000; includeSubDomains; preload'
         },
         {
-          key: 'X-XSS-Protection',
-          value: '1; mode=block'
-        },
-        {
           key: 'X-Frame-Options',
           value: 'SAMEORIGIN' // Allows iframe from same origin (needed for neon-tubes.html)
         },
@@ -45,7 +58,15 @@ const nextConfig: NextConfig = {
         },
         {
           key: 'Referrer-Policy',
-          value: 'origin-when-cross-origin'
+          value: 'strict-origin-when-cross-origin'
+        },
+        {
+          key: 'Content-Security-Policy',
+          value: contentSecurityPolicy
+        },
+        {
+          key: 'Permissions-Policy',
+          value: 'camera=(), geolocation=(), microphone=(), payment=(), usb=()'
         }
       ]
     }

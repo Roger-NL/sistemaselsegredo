@@ -21,6 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard/service";
 import { prefetchClientRoutesDuringIdle } from "@/lib/navigation/safe-client-navigation";
 import { ROUTES } from "@/lib/routes";
+import { hasAdminClaim } from "@/lib/auth/admin-policy";
 
 const MOBILE_MISSION_DIRECTIVES = [
   "UNLOCK FLUENCY",
@@ -190,8 +191,7 @@ export default function Page() {
   const pillarsWithStatus = useProgress().getPillarsWithStatus();
 
   // Admin Check
-  const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
-  const isAdmin = user && ADMIN_EMAILS.includes(user.email);
+  const isAdmin = hasAdminClaim(user);
 
   return (
     <main className="relative min-h-screen min-h-[100dvh] w-full overflow-hidden text-white selection:bg-[#EEF4D4] selection:text-black flex items-center justify-center">
@@ -236,12 +236,12 @@ export default function Page() {
                 </h2>
                 <p className="mt-1 max-w-[52ch] text-sm leading-relaxed text-cyan-50/78 md:text-[15px]">
                   {schedulingStatus?.waitingReason ||
-                    "Seu espaço de agendamento já faz parte da conta premium. Quando a etapa certa for aprovada, ele vira sua área prática de marcação."}
+                    "Seu espaço de agendamento faz parte do beta completo. Quando a etapa certa for aprovada, ele vira sua área prática de marcação."}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.18em] text-cyan-100/65">
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Sessão ao vivo</span>
                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Acompanhamento humano</span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Fluxo premium</span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">Beta por convite</span>
                 </div>
               </div>
 
@@ -369,7 +369,7 @@ export default function Page() {
             <div className="text-[10px] text-white/20 animate-pulse">Carregando...</div>
           ) : (
             leaderboard.map((u, i) => {
-              const isMe = user?.id === u.id;
+              const isMe = u.isYou === true;
               return (
                 <div
                   key={u.id}
@@ -390,7 +390,7 @@ export default function Page() {
           )}
 
           {/* Always show current user if not in top 5? Optional, but nice. */}
-          {user && leaderboard.length > 0 && !leaderboard.find(u => u.id === user.id) && (
+          {user && leaderboard.length > 0 && !leaderboard.find(u => u.isYou) && (
             <>
               <div className="h-px w-8 bg-white/10 my-0.5" />
               <div className="flex items-center gap-2 text-right opacity-80">
@@ -612,7 +612,7 @@ export default function Page() {
                   )}
                   <span className={`text-xs md:text-sm font-medium uppercase tracking-wider ${shouldShowPremiumCTA ? "text-emerald-100" : currentSpec ? "text-violet-300" : "text-[#EEF4D4]"}`}>
                     {shouldShowPremiumCTA
-                      ? "Liberar Premium"
+                      ? "Ativar convite beta"
                       : currentSpec
                       ? "Continuar Estudo"
                       : specializationStatus === "completed"

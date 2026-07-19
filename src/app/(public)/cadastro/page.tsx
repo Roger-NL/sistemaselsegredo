@@ -35,7 +35,7 @@ function CadastroPageContent() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { register, loginWithGoogle, isAuthenticated, isLoading } = useAuth();
+    const { user, register, loginWithGoogle, isAuthenticated, isLoading } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const callbackUrl = searchParams?.get("callbackUrl");
@@ -46,20 +46,20 @@ function CadastroPageContent() {
         }, 250);
     };
 
-    const getPostSignupTarget = useCallback((userEmail?: string | null) => {
+    const getPostSignupTarget = useCallback((isAdmin?: boolean) => {
         return resolvePostAuthTarget({
             mode: "signup",
             callbackUrl,
-            email: userEmail,
+            isAdmin,
         });
     }, [callbackUrl]);
 
     // Auto-redirect if already logged in
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
-            router.replace(getPostSignupTarget());
+            router.replace(getPostSignupTarget(user?.isAdmin));
         }
-    }, [getPostSignupTarget, isAuthenticated, isLoading, router]);
+    }, [getPostSignupTarget, isAuthenticated, isLoading, router, user?.isAdmin]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -75,7 +75,7 @@ function CadastroPageContent() {
         const result = await register(name, email, password, confirmPassword);
 
         if (result.success) {
-            router.replace(getPostSignupTarget(result.user?.email ?? email));
+            router.replace(getPostSignupTarget(result.user?.isAdmin));
         } else {
             setError(result.error || "Erro ao criar conta");
             setIsSubmitting(false);
@@ -213,7 +213,7 @@ function CadastroPageContent() {
                                 setIsSubmitting(true);
                                 const result = await loginWithGoogle();
                                 if (result.success) {
-                                    router.replace(getPostSignupTarget(result.user?.email));
+                                    router.replace(getPostSignupTarget(result.user?.isAdmin));
                                 } else {
                                     setError(result.error || "Erro ao cadastrar com Google");
                                     setIsSubmitting(false);

@@ -8,41 +8,19 @@ import { SpecialtiesSection } from "./SpecialtiesSection";
 import { ResultsSection } from "./ResultsSection";
 import { CtaSection } from "./CtaSection";
 import { RanksSection } from "./RanksSection";
-import { useRouter } from "next/navigation";
 import { LandingThemeProvider } from "@/context/LandingThemeContext";
-import { useEffect } from "react";
 import { FaqSection } from "./FaqSection";
 import { ROUTES } from "@/lib/routes";
-import { useAuth } from "@/context/AuthContext";
-
-function useLandingSessionState() {
-    const { isAuthenticated, isLoading } = useAuth();
-
-    return {
-        isAuthenticated,
-        isLoading,
-    };
-}
 
 // Inner Content with Theme Access - NOW ENFORCED DARK
 function LandingContent() {
-    const router = useRouter();
-    const { isAuthenticated, isLoading } = useLandingSessionState();
-
-    // Auto-redirect to dashboard if logged in
-    useEffect(() => {
-        if (!isLoading && isAuthenticated) {
-            router.push(ROUTES.app.dashboard);
-        }
-    }, [isAuthenticated, isLoading, router]);
-
     return (
         <div className="overflow-x-hidden bg-[#050505] text-white min-h-screen">
             <TubesBackground className="overflow-x-hidden">
                 <LandingInner
                     isDark={true}
-                    isAuthenticated={isAuthenticated}
-                    isLoading={isLoading}
+                    isAuthenticated={false}
+                    isLoading={false}
                 />
             </TubesBackground>
         </div>
@@ -73,8 +51,8 @@ function InlineCta({ text, isDark, isAuthenticated }: {
             <div className={`flex items-center gap-4 text-[10px] font-mono uppercase tracking-widest
                 ${isDark ? "text-white/20" : "text-gray-400"}
             `}>
-                <span>✓ Pagamento Único</span>
-                <span>✓ 7 dias de garantia</span>
+                <span>✓ Beta gratuito</span>
+                <span>✓ Acesso por convite</span>
             </div>
         </div>
     );
@@ -130,7 +108,7 @@ function LandingInner({ isDark, isAuthenticated, isLoading }: {
             <DifferentiatorsSection />
 
             <InlineCta
-                text="Pilar 1 liberado gratuitamente. Prove que o método funciona antes de investir."
+                text="Conheça o Pilar 1 e ative um convite para continuar gratuitamente no beta."
                 isDark={isDark}
                 isAuthenticated={isAuthenticated}
             />
@@ -139,7 +117,7 @@ function LandingInner({ isDark, isAuthenticated, isLoading }: {
             <SpecialtiesSection />
 
             <InlineCta
-                text="Sem videoaula. Você escreve, é corrigido, e só avança com aprovação humana."
+                text="Sem videoaula: você produz ativamente e passa por revisões nos marcos da jornada."
                 isDark={isDark}
                 isAuthenticated={isAuthenticated}
             />
@@ -148,7 +126,7 @@ function LandingInner({ isDark, isAuthenticated, isLoading }: {
             <RanksSection />
 
             <InlineCta
-                text="Mais de 1.800 brasileiros já destravaram o inglês com este sistema."
+                text="Beta limitado: progresso acompanhado de perto para validar e melhorar o método."
                 isDark={isDark}
                 isAuthenticated={isAuthenticated}
             />
@@ -167,25 +145,23 @@ function LandingInner({ isDark, isAuthenticated, isLoading }: {
                                 BasedSpeak
                             </div>
                             <p className={`font-mono text-xs ${isDark ? "text-white/30" : "text-gray-500"}`}>
-                                Metodologia de alta performance para adultos desde 2023
+                                Aprendizagem prática de inglês para adultos
                             </p>
                         </div>
 
                         <div className={`flex items-center gap-8 text-xs font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>
-                            <button
-                                type="button"
-                                onClick={() => {}}
+                            <a
+                                href="/termos"
                                 className={`bg-transparent border-0 p-0 transition-colors ${isDark ? "hover:text-white" : "hover:text-gray-900"}`}
                             >
                                 Termos
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {}}
+                            </a>
+                            <a
+                                href="/privacidade"
                                 className={`bg-transparent border-0 p-0 transition-colors ${isDark ? "hover:text-white" : "hover:text-gray-900"}`}
                             >
                                 Privacidade
-                            </button>
+                            </a>
                             <button
                                 type="button"
                                 onClick={() => document.getElementById("faq")?.scrollIntoView({ behavior: "smooth", block: "start" })}

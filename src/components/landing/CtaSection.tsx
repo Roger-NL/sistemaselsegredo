@@ -6,10 +6,10 @@ import { useLandingTheme } from "@/context/LandingThemeContext";
 import { useRef } from "react";
 
 const BENEFITS = [
-    "Resposta Imediata — Sem Paralisações",
-    "Processamento Auditivo Natural",
-    "Comunicação Direta — Bloqueio Neural Eliminado",
-    "Estrutura de Alto Valor — Eliminação de Vícios"
+    "Missões curtas e orientadas",
+    "Prática de compreensão auditiva",
+    "Produção escrita e oral",
+    "Feedback humano nos marcos da jornada"
 ];
 
 export function CtaSection({ isAuthenticated }: { isAuthenticated: boolean }) {
@@ -79,7 +79,7 @@ export function CtaSection({ isAuthenticated }: { isAuthenticated: boolean }) {
                                 <Sparkles className="w-4 h-4 text-emerald-400" />
                             </motion.div>
                             <span className="text-emerald-300 font-mono text-xs uppercase tracking-widest">
-                                O resultado da adaptação ao sistema em 120 dias
+                                Uma jornada estruturada, no seu ritmo
                             </span>
                         </motion.div>
 
@@ -89,7 +89,7 @@ export function CtaSection({ isAuthenticated }: { isAuthenticated: boolean }) {
                         </h2>
 
                         <p className={`text-base md:text-lg font-mono font-bold max-w-2xl mx-auto mb-12 shadow-black drop-shadow-sm ${isDark ? "text-white/80" : "text-gray-800"}`}>
-                            Responda com exatidão. Condicionamos seu reflexo neural para a fluência.
+                            Pratique com consistência, receba feedback e acompanhe a sua evolução.
                         </p>
 
                         {/* Benefits grid - with staggered scroll animation */}
@@ -143,9 +143,9 @@ export function CtaSection({ isAuthenticated }: { isAuthenticated: boolean }) {
                         {/* Trust elements with scroll reveal */}
                         <div className={`flex flex-wrap items-center justify-center gap-6 mt-10 text-xs font-mono ${isDark ? "text-white/30" : "text-gray-400"}`}>
                             {[
-                                { icon: Shield, text: "7 DIAS DE GARANTIA" },
-                                { icon: Clock, text: "ACESSO IMEDIATO" },
-                                { icon: Headphones, text: "SUPORTE DEDICADO" }
+                                { icon: Shield, text: "BETA SEM COBRANÇA" },
+                                { icon: Clock, text: "ACESSO POR CONVITE" },
+                                { icon: Headphones, text: "BETA ACOMPANHADO" }
                             ].map((item, index) => (
                                 <motion.div
                                     key={index}

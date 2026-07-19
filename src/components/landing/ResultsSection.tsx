@@ -1,326 +1,57 @@
 "use client";
 
-import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import { Star, Quote, Mic, TrendingUp, Award, ChevronLeft, ChevronRight, LucideIcon } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { CheckCircle2, FlaskConical, MessageSquareText, ShieldCheck } from "lucide-react";
 import { useLandingTheme } from "@/context/LandingThemeContext";
 
-const TESTIMONIALS = [
-    {
-        name: "Diretor de Inovação Técnica",
-        role: "Setor de Tecnologia",
-        location: "São Paulo, SP",
-        image: "https://i.pravatar.cc/150?img=11",
-        rank: "Operador",
-        quote: "A estrutura forçou a produção desde o início. O bloqueio mental desapareceu ao fim do Pilar 2. O acesso direto e a ausência de distrações otimizaram minha fluência.",
-        stats: { level: "Pilar 9", months: "4 meses" }
-    },
-    {
-        name: "Desenvolvedora Sênior",
-        role: "Engenharia de Software",
-        location: "Curitiba, PR",
-        image: "https://i.pravatar.cc/150?img=9",
-        rank: "Operador",
-        quote: "A exigência na validação humana muda a perspectiva. Não é possível fingir a execução. O erro é atacado de imediato e o avanço metodológico se torna inegável.",
-        stats: { level: "Pilar 7", months: "3 meses" }
-    },
-    {
-        name: "Analista de Infraestrutura",
-        role: "Cloud & Devops",
-        location: "Rio de Janeiro, RJ",
-        image: "https://i.pravatar.cc/150?img=12",
-        rank: "Operador",
-        quote: "Um ambiente frio e objetivo. Exatamente o que adultos necessitam para dominar a ferramenta linguística sem infantilização.",
-        stats: { level: "Pilar 5", months: "2 meses" }
-    }
+const BETA_SIGNALS = [
+    { title: "Acesso limitado", text: "Turma inicial pequena para acompanhar cada fluxo.", icon: FlaskConical },
+    { title: "Validação humana", text: "Marcos importantes incluem revisão por uma pessoa autorizada.", icon: CheckCircle2 },
+    { title: "Feedback direto", text: "Problemas e sugestões do beta entram na priorização do produto.", icon: MessageSquareText },
+    { title: "Resultados individuais", text: "Ritmo e evolução variam conforme prática, nível e disponibilidade.", icon: ShieldCheck },
 ];
-
-const RESULTS = [
-    { value: "89%", label: "Alcançam Fluência Funcional", icon: TrendingUp },
-    { value: "6 meses", label: "Tempo Médio de Resultado", icon: Mic },
-    { value: "4.9/5", label: "Avaliação Média", icon: Star },
-    { value: "1.847+", label: "Operadores Ativos", icon: Award },
-];
-
-// Animated Stat Card with Spread Effect
-function StatCard({
-    result,
-    distanceFromCenter,
-    scrollProgress,
-    isDark
-}: {
-    result: { value: string; label: string; icon: LucideIcon };
-    distanceFromCenter: number;
-    scrollProgress: MotionValue<number>;
-    isDark: boolean;
-}) {
-    const x = useTransform(scrollProgress, [0, 0.6], [distanceFromCenter * 50, 0]);
-    const y = useTransform(scrollProgress, [0, 0.6], [Math.abs(distanceFromCenter) * 20, 0]);
-    const scale = useTransform(scrollProgress, [0, 0.5], [0.85, 1]);
-    const opacity = useTransform(scrollProgress, [0, 0.4], [0.4, 1]);
-
-    return (
-        <motion.div
-            style={{ x, y, scale, opacity }}
-            whileHover={{ scale: 1.05, y: -5 }}
-            className={`p-6 rounded-2xl border text-center group transition-all ${isDark
-                ? "border-white/10 bg-white/[0.02] hover:border-green-500/30"
-                : "border-gray-200 bg-white shadow-md hover:border-green-500/30"
-                }`}
-        >
-            <result.icon className="w-8 h-8 text-green-500 mx-auto mb-4 group-hover:scale-110 transition-transform" />
-            <div className={`text-2xl md:text-3xl font-bold font-mono mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>
-                {result.value}
-            </div>
-            <div className={`text-xs font-mono uppercase tracking-widest ${isDark ? "text-white/40" : "text-gray-500"}`}>
-                {result.label}
-            </div>
-        </motion.div>
-    );
-}
 
 export function ResultsSection() {
-    const [activeTestimonial, setActiveTestimonial] = useState(0);
-    const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-
-    // Auto-play functionality
-    useEffect(() => {
-        if (!isAutoPlaying) return;
-
-        const interval = setInterval(() => {
-            setActiveTestimonial((prev) => (prev + 1) % TESTIMONIALS.length);
-        }, 5000);
-
-        return () => clearInterval(interval);
-    }, [isAutoPlaying]);
-
-    const handleNext = () => {
-        setIsAutoPlaying(false);
-        setActiveTestimonial((prev) => (prev + 1) % TESTIMONIALS.length);
-    };
-
-    const handlePrev = () => {
-        setIsAutoPlaying(false);
-        setActiveTestimonial((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
-    };
-
-    // Theme - with safe fallback
-    let isDark = true;
-    try {
-        const theme = useLandingTheme();
-        isDark = theme.isDark;
-    } catch {
-        // Default to dark if outside provider
-    }
-
-    // Scroll animations
-    const statsRef = useRef<HTMLDivElement>(null);
-    const testimonialsRef = useRef<HTMLDivElement>(null);
-
-    const { scrollYProgress: statsScroll } = useScroll({
-        target: statsRef,
-        offset: ["start end", "center center"]
-    });
-
-    const { scrollYProgress: testimonialsScroll } = useScroll({
-        target: testimonialsRef,
-        offset: ["start end", "center center"]
-    });
-
-    // Parallax for testimonial card
-    const testimonialX = useTransform(testimonialsScroll, [0, 0.5], [60, 0]);
-    const testimonialOpacity = useTransform(testimonialsScroll, [0, 0.4], [0.3, 1]);
-    const testimonialScale = useTransform(testimonialsScroll, [0, 0.5], [0.95, 1]);
+    const { isDark } = useLandingTheme();
 
     return (
-        <section className={`py-32 px-4 relative overflow-hidden transition-colors duration-500 ${isDark ? "bg-black" : "bg-white"
-            }`}>
-            {/* Background pattern */}
-            <div className={`absolute inset-0 bg-[size:60px_60px] pointer-events-none ${isDark
-                ? "bg-[linear-gradient(rgba(238,244,212,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(238,244,212,0.02)_1px,transparent_1px)]"
-                : "bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)]"
-                }`} />
-
-            <div className="container mx-auto max-w-6xl relative z-10">
-                {/* Header */}
+        <section className={`relative overflow-hidden px-4 py-24 ${isDark ? "bg-black" : "bg-white"}`}>
+            <div className="container relative z-10 mx-auto max-w-6xl">
                 <motion.div
-                    initial={{ opacity: 0, y: 50 }}
+                    initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.8 }}
-                    className="text-center mb-20"
+                    className="mb-14 text-center"
                 >
-                    <span className="inline-block px-4 py-2 rounded-full border border-green-500/20 bg-green-500/5 text-green-500 font-mono text-xs tracking-widest uppercase mb-6">
-                        Registros confirmados
+                    <span className="mb-5 inline-block rounded-full border border-green-500/20 bg-green-500/5 px-4 py-2 font-mono text-xs uppercase tracking-widest text-green-500">
+                        Programa beta
                     </span>
-                    <h2 className={`text-4xl md:text-6xl font-serif mb-6 ${isDark ? "text-white" : "text-gray-900"}`}>
-                        Relatórios de<br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-                            Operação
-                        </span>
+                    <h2 className={`mb-5 font-serif text-4xl md:text-6xl ${isDark ? "text-white" : "text-gray-900"}`}>
+                        Construído com evidência,<br />sem promessas inventadas
                     </h2>
-                    <p className={`max-w-xl mx-auto text-base font-mono font-bold ${isDark ? "text-white/60" : "text-gray-600"}`}>
-                        Registros de usuários que romperam a barreira do bloqueio.
+                    <p className={`mx-auto max-w-2xl font-mono text-sm leading-7 ${isDark ? "text-white/55" : "text-gray-600"}`}>
+                        A BasedSpeak está em validação. Ainda não publicamos taxas de sucesso,
+                        avaliações ou depoimentos sem uma base verificável.
                     </p>
                 </motion.div>
 
-                {/* Stats Grid - with Spread Animation */}
-                <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-24">
-                    {RESULTS.map((result, index) => {
-                        const centerIndex = Math.floor(RESULTS.length / 2);
-                        const distanceFromCenter = index - centerIndex;
-
-                        return (
-                            <StatCard
-                                key={index}
-                                result={result}
-                                distanceFromCenter={distanceFromCenter}
-                                scrollProgress={statsScroll}
-                                isDark={isDark}
-                            />
-                        );
-                    })}
-                </div>
-
-                {/* Testimonials Carousel - with Slide Animation */}
-                <div
-                    ref={testimonialsRef}
-                    className="relative"
-                    onMouseEnter={() => setIsAutoPlaying(false)}
-                    onMouseLeave={() => setIsAutoPlaying(true)}
-                >
-                    <div className="flex flex-col lg:flex-row gap-8 items-center">
-                        {/* Main testimonial */}
-                        <motion.div
-                            style={{ x: testimonialX, opacity: testimonialOpacity, scale: testimonialScale }}
-                            className={`flex-1 p-8 md:p-12 rounded-3xl border relative overflow-hidden ${isDark
-                                ? "border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent"
-                                : "border-gray-200 bg-white shadow-lg"
-                                }`}
+                <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+                    {BETA_SIGNALS.map((item, index) => (
+                        <motion.article
+                            key={item.title}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: index * 0.06 }}
+                            className={`rounded-2xl border p-6 ${isDark ? "border-white/10 bg-white/[0.03]" : "border-gray-200 bg-gray-50"}`}
                         >
-                            <Quote className={`absolute top-8 right-8 w-16 h-16 ${isDark ? "text-white/5" : "text-gray-100"}`} />
-
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={activeTestimonial}
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="relative z-10"
-                                >
-                                    <div className="flex items-center gap-4 mb-8">
-                                        <div className="relative">
-                                            <Image
-                                                src={TESTIMONIALS[activeTestimonial].image}
-                                                alt={TESTIMONIALS[activeTestimonial].name}
-                                                width={64}
-                                                height={64}
-                                                unoptimized
-                                                className="w-16 h-16 rounded-full border-2 border-violet-500"
-                                            />
-                                            <div className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full bg-violet-500 text-[10px] font-mono text-white uppercase">
-                                                {TESTIMONIALS[activeTestimonial].rank}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <h4 className={`text-lg font-bold ${isDark ? "text-white" : "text-gray-900"}`}>{TESTIMONIALS[activeTestimonial].name}</h4>
-                                            <p className={`text-sm font-mono ${isDark ? "text-white/40" : "text-gray-500"}`}>{TESTIMONIALS[activeTestimonial].role} • {TESTIMONIALS[activeTestimonial].location}</p>
-                                        </div>
-                                    </div>
-
-                                    <p className={`text-xl md:text-2xl font-serif font-bold leading-relaxed mb-8 italic shadow-black drop-shadow-sm ${isDark ? "text-white/95" : "text-gray-800"}`}>
-                                        &ldquo;{TESTIMONIALS[activeTestimonial].quote}&rdquo;
-                                    </p>
-
-                                    <div className="flex gap-8">
-                                        <div>
-                                            <div className="text-2xl font-bold text-green-500 font-mono">
-                                                {TESTIMONIALS[activeTestimonial].stats.level}
-                                            </div>
-                                            <div className={`text-xs font-mono uppercase ${isDark ? "text-white/40" : "text-gray-500"}`}>Nível Atual</div>
-                                        </div>
-                                        <div>
-                                            <div className="text-2xl font-bold text-green-500 font-mono">
-                                                {TESTIMONIALS[activeTestimonial].stats.months}
-                                            </div>
-                                            <div className={`text-xs font-mono uppercase ${isDark ? "text-white/40" : "text-gray-500"}`}>Tempo de Estudo</div>
-                                        </div>
-                                    </div>
-
-                                    {/* Navigation Buttons */}
-                                    <div className="absolute bottom-8 right-8 flex gap-2 z-20">
-                                        <button
-                                            onClick={handlePrev}
-                                            className={`p-2 rounded-full transition-all ${isDark
-                                                ? "bg-white/10 hover:bg-white/20 text-white"
-                                                : "bg-gray-100 hover:bg-gray-200 text-gray-900"}`}
-                                            aria-label="Previous testimonial"
-                                        >
-                                            <ChevronLeft className="w-5 h-5" />
-                                        </button>
-                                        <button
-                                            onClick={handleNext}
-                                            className={`p-2 rounded-full transition-all ${isDark
-                                                ? "bg-white/10 hover:bg-white/20 text-white"
-                                                : "bg-gray-100 hover:bg-gray-200 text-gray-900"}`}
-                                            aria-label="Next testimonial"
-                                        >
-                                            <ChevronRight className="w-5 h-5" />
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            </AnimatePresence>
-                        </motion.div>
-
-                        {/* Testimonial selector with staggered animation */}
-                        <div className="flex lg:flex-col gap-4">
-                            {TESTIMONIALS.map((testimonial, index) => (
-                                <motion.button
-                                    key={index}
-                                    onClick={() => setActiveTestimonial(index)}
-                                    initial={{ opacity: 0, x: 20 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: index * 0.15 }}
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className={`relative p-1 rounded-full transition-all ${activeTestimonial === index
-                                        ? 'ring-2 ring-violet-500 ring-offset-2 ring-offset-black'
-                                        : 'opacity-50 hover:opacity-100'
-                                        }`}
-                                >
-                                    <Image
-                                        src={testimonial.image}
-                                        alt={testimonial.name}
-                                        width={48}
-                                        height={48}
-                                        unoptimized
-                                        className="w-12 h-12 rounded-full"
-                                    />
-                                </motion.button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* 5 stars with staggered reveal */}
-                    <div className="flex justify-center gap-1 mt-12">
-                        {[...Array(5)].map((_, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, scale: 0, rotate: -180 }}
-                                whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1, type: "spring", stiffness: 200 }}
-                            >
-                                <Star className="w-6 h-6 fill-amber-400 text-amber-400" />
-                            </motion.div>
-                        ))}
-                    </div>
-                    <p className={`text-center text-sm font-mono mt-4 ${isDark ? "text-white/40" : "text-gray-500"}`}>
-                        Média de 4.9/5 baseado em 847 avaliações
-                    </p>
+                            <item.icon className="mb-4 h-7 w-7 text-green-500" aria-hidden="true" />
+                            <h3 className={`mb-2 font-mono text-sm font-bold uppercase tracking-wide ${isDark ? "text-white" : "text-gray-900"}`}>
+                                {item.title}
+                            </h3>
+                            <p className={`text-sm leading-6 ${isDark ? "text-white/50" : "text-gray-600"}`}>{item.text}</p>
+                        </motion.article>
+                    ))}
                 </div>
             </div>
         </section>

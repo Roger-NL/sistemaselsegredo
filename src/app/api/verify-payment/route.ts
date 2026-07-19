@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
 import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
-import { AsaasApiError } from "@/lib/asaas";
+import { AsaasApiError, AsaasTransportError } from "@/lib/asaas";
 import { verifyPaymentStatus } from "@/lib/payments/service";
+import { PaymentsDisabledError } from "@/lib/payments/config";
+import { consumeRateLimit, RateLimitError, rateLimitErrorResponse } from "@/lib/server/rate-limit";
+import {
+  assertOnlyKeys,
+  readJsonObject,
+  RequestPayloadError,
+  requestPayloadErrorResponse,
+} from "@/lib/server/request";
 import type { PaymentReconciliationState, VerifyPaymentApiResponse } from "@/features/payment/payment-mode";
 
 export const dynamic = "force-dynamic";
+const MAX_VERIFY_PAYMENT_BODY_BYTES = 2 * 1_024;
 
 function isKnownReconciliationState(value: unknown): value is PaymentReconciliationState {
   return (
@@ -21,17 +30,25 @@ function normalizeVerificationResponse(verification: unknown): VerifyPaymentApiR
   const isPaid = payload.isPaid === true;
   const status = typeof payload.status === "string" ? payload.status : null;
   const message = typeof payload.message === "string" ? payload.message : undefined;
+  const reconciliationStatus =
+    typeof payload.reconciliationStatus === "string" ? payload.reconciliationStatus : undefined;
 
   let reconciliationState: PaymentReconciliationState = "pending";
 
-  if (isKnownReconciliationState(payload.reconciliationState)) {
-    reconciliationState = payload.reconciliationState;
-  } else if (payload.requiresManualReconciliation === true || payload.requiresManualAction === true) {
+  if (isPaid || reconciliationStatus === "paid") {
+    reconciliationState = "paid";
+  } else if (
+    payload.needsManualReconciliation === true ||
+    payload.requiresManualReconciliation === true ||
+    payload.requiresManualAction === true
+  ) {
     reconciliationState = "manual-reconciliation";
+  } else if (reconciliationStatus === "unresolved") {
+    reconciliationState = "unresolved";
+  } else if (isKnownReconciliationState(payload.reconciliationState)) {
+    reconciliationState = payload.reconciliationState;
   } else if (payload.unresolved === true || status === "UNRESOLVED") {
     reconciliationState = "unresolved";
-  } else if (isPaid) {
-    reconciliationState = "paid";
   }
 
   const shouldStopPolling =
@@ -52,9 +69,17 @@ function normalizeVerificationResponse(verification: unknown): VerifyPaymentApiR
 export async function POST(req: Request) {
   try {
     const authUser = await requireAuthenticatedUser(req);
-    const { paymentId } = (await req.json()) as { paymentId?: string; userId?: string };
+    await consumeRateLimit({
+      namespace: "verify-payment",
+      identifier: authUser.uid,
+      limit: 60,
+      windowMs: 60_000,
+    });
+    const payload = await readJsonObject(req, MAX_VERIFY_PAYMENT_BODY_BYTES);
+    assertOnlyKeys(payload, ["paymentId"]);
+    const paymentId = typeof payload.paymentId === "string" ? payload.paymentId.trim() : "";
 
-    if (!paymentId) {
+    if (!paymentId || paymentId.length > 200) {
       return NextResponse.json({ error: "Missing paymentId" }, { status: 400 });
     }
 
@@ -62,6 +87,21 @@ export async function POST(req: Request) {
     return NextResponse.json(normalizeVerificationResponse(verification));
   } catch (error: unknown) {
     console.error("[verify-payment] Error:", error);
+
+    if (error instanceof PaymentsDisabledError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.code,
+          isPaid: false,
+          status: null,
+          reconciliationState: "error",
+          message: "Os pagamentos estao desativados durante o beta gratuito.",
+          shouldStopPolling: true,
+        } satisfies VerifyPaymentApiResponse & { error: string },
+        { status: error.status }
+      );
+    }
 
     if (error instanceof AsaasApiError) {
       return NextResponse.json(
@@ -72,6 +112,29 @@ export async function POST(req: Request) {
         },
         { status: error.status >= 400 && error.status < 500 ? 400 : 502 }
       );
+    }
+
+    if (error instanceof AsaasTransportError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: error.message,
+          isPaid: false,
+          status: null,
+          reconciliationState: "error",
+          message: "Nao foi possivel consultar o estado desta cobranca agora.",
+          shouldStopPolling: false,
+        } satisfies VerifyPaymentApiResponse & { error: string },
+        { status: 502 }
+      );
+    }
+
+    if (error instanceof RateLimitError) {
+      return rateLimitErrorResponse(error);
+    }
+
+    if (error instanceof RequestPayloadError) {
+      return requestPayloadErrorResponse(error);
     }
 
     if (error instanceof RequestAuthError) {

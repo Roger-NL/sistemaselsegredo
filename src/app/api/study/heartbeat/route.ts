@@ -1,11 +1,29 @@
 import { NextResponse } from "next/server";
-import admin from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase-admin";
 import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
 import { buildStudyModuleKey } from "@/lib/study/stats";
+import { PILLARS_CONTENT } from "@/data/pillars-content";
+import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from "@/lib/server/rate-limit";
+import {
+  RequestPayloadError,
+  assertOnlyKeys,
+  readJsonObject,
+  requestPayloadErrorResponse,
+} from "@/lib/server/request";
 
 const MAX_ACCEPTED_SECONDS = 60;
 const MIN_ACCEPTED_SECONDS = 5;
+const MAX_HEARTBEAT_BODY_BYTES = 2_048;
+const MODULE_ID_PATTERN = /^[a-zA-Z0-9:_-]{1,100}$/;
+const MODULES_BY_PILLAR = new Map(
+  Object.entries(PILLARS_CONTENT).map(([pillarId, content]) => [
+    Number(pillarId),
+    new Set((content.modules ?? []).map((module) => module.id)),
+  ])
+);
+
+export const runtime = "nodejs";
 
 function normalizePositiveInt(value: unknown) {
   const parsed = Number(value);
@@ -20,16 +38,13 @@ function normalizePositiveInt(value: unknown) {
 export async function POST(req: Request) {
   try {
     const principal = await requireAuthenticatedUser(req);
-    const body = (await req.json()) as {
-      pillarId?: unknown;
-      moduleId?: unknown;
-      activeSeconds?: unknown;
-    };
+    const body = await readJsonObject(req, MAX_HEARTBEAT_BODY_BYTES);
+    assertOnlyKeys(body, ["pillarId", "moduleId", "activeSeconds"]);
 
     const pillarId = normalizePositiveInt(body.pillarId);
     const activeSeconds = normalizePositiveInt(body.activeSeconds);
 
-    if (!pillarId || !activeSeconds) {
+    if (!pillarId || pillarId > 9 || !activeSeconds) {
       return NextResponse.json({ error: "Missing study heartbeat fields." }, { status: 400 });
     }
 
@@ -37,34 +52,66 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid active study interval." }, { status: 400 });
     }
 
+    if (body.moduleId !== undefined && (typeof body.moduleId !== "string" || !MODULE_ID_PATTERN.test(body.moduleId.trim()))) {
+      throw new RequestPayloadError("INVALID_STUDY_MODULE");
+    }
+    const rawModuleId = typeof body.moduleId === "string" ? body.moduleId.trim() : "";
+    if (rawModuleId && !MODULES_BY_PILLAR.get(pillarId)?.has(rawModuleId)) {
+      throw new RequestPayloadError("INVALID_STUDY_MODULE");
+    }
+
+    await consumeRateLimit({
+      namespace: "study-heartbeat-seconds",
+      identifier: principal.uid,
+      limit: 90,
+      windowMs: 60 * 1_000,
+      cost: activeSeconds,
+    });
+
     const moduleId =
-      typeof body.moduleId === "string" && body.moduleId.trim().length > 0
-        ? buildStudyModuleKey(pillarId, body.moduleId)
+      rawModuleId.length > 0
+        ? buildStudyModuleKey(pillarId, rawModuleId)
         : buildStudyModuleKey(pillarId);
 
     const userRef = adminDb.collection("users").doc(principal.uid);
 
-    await userRef.set(
-      {
+    await adminDb.runTransaction(async (transaction) => {
+      const userSnapshot = await transaction.get(userRef);
+      if (!userSnapshot.exists) {
+        throw new RequestPayloadError("USER_PROFILE_NOT_FOUND", 404);
+      }
+      const userData = userSnapshot.data() ?? {};
+      const highestUnlockedPillar =
+        typeof userData.progressSnapshot?.highestUnlockedPillar === "number"
+          ? userData.progressSnapshot.highestUnlockedPillar
+          : typeof userData.approvedPillar === "number"
+            ? userData.approvedPillar
+            : 1;
+      if (principal.role !== "admin" && pillarId > highestUnlockedPillar) {
+        throw new RequestPayloadError("STUDY_PILLAR_LOCKED", 403);
+      }
+
+      transaction.set(userRef, {
         studyStats: {
-          totalActiveSeconds: admin.firestore.FieldValue.increment(activeSeconds),
+          totalActiveSeconds: FieldValue.increment(activeSeconds),
           byPillar: {
-            [String(pillarId)]: admin.firestore.FieldValue.increment(activeSeconds),
+            [String(pillarId)]: FieldValue.increment(activeSeconds),
           },
           byModule: {
-            [moduleId]: admin.firestore.FieldValue.increment(activeSeconds),
+            [moduleId]: FieldValue.increment(activeSeconds),
           },
           lastStudiedAt: new Date().toISOString(),
         },
-      },
-      { merge: true }
-    );
+      }, { merge: true });
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof RequestAuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
+    if (error instanceof RequestPayloadError) return requestPayloadErrorResponse(error);
+    if (error instanceof RateLimitError) return rateLimitErrorResponse(error);
 
     console.error("Study heartbeat API error:", error);
     return NextResponse.json({ error: "Failed to record study time." }, { status: 500 });

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getRequestPrincipal } from '@/lib/auth/principal';
 import { updateSchedulingStatusByAdmin } from '@/lib/scheduling/service';
+import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +10,6 @@ export async function POST(req: Request) {
     const principal = await getRequestPrincipal(req, {
       allowBearer: true,
       allowSessionCookie: true,
-      allowLegacyCookie: true,
     });
 
     if (!principal) {
@@ -27,15 +27,32 @@ export async function POST(req: Request) {
       reason?: string;
     };
 
-    if (!sessionId || !decision) {
+    if (
+      typeof sessionId !== 'string' ||
+      sessionId.length > 256 ||
+      !decision ||
+      !['confirm', 'pending', 'reject'].includes(decision) ||
+      (reason !== undefined && (typeof reason !== 'string' || reason.length > 2_000))
+    ) {
       return NextResponse.json({ error: 'Missing decision payload.' }, { status: 400 });
     }
+
+    await consumeRateLimit({
+      namespace: 'admin-scheduling-decision',
+      identifier: principal.uid,
+      limit: 30,
+      windowMs: 10 * 60 * 1000,
+    });
 
     await updateSchedulingStatusByAdmin({ sessionId, decision, reason });
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[admin/scheduling/decision] error', error);
+    if (error instanceof RateLimitError) return rateLimitErrorResponse(error);
     const message = error instanceof Error ? error.message : 'Failed to update scheduling status.';
-    return NextResponse.json({ error: message }, { status: 500 });
+    const code = /^[A-Z0-9_]+$/.test(message) ? message : 'UNEXPECTED_ERROR';
+    console.error(JSON.stringify({ level: 'error', event: 'admin_scheduling_decision_failed', code }));
+    return NextResponse.json({
+      error: code === 'UNEXPECTED_ERROR' ? 'Failed to update scheduling status.' : code,
+    }, { status: 500 });
   }
 }

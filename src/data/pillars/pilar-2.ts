@@ -3,12 +3,12 @@ import { PillarData } from "@/types/study";
 export const PILAR_2_DATA: PillarData = {
     id: 2,
     title: "PILAR 2: OUVIR O INGLES REAL",
-    subtitle: "Treinando seu ouvido para reconhecer som conectado, ritmo e intencao no ingles falado de verdade.",
+    subtitle: "Agora que voce ja percebeu que sabe mais ingles do que imaginava, o treino muda para o ouvido: som real, ritmo e intencao.",
     modules: [
         {
             id: "p2-intro",
             title: "MÓDULO 1: {{START HERE|COMECE POR AQUI}}",
-            subtitle: "O ajuste de mentalidade para parar de ouvir ingles como se fosse portugues.",
+            subtitle: "A ponte entre a primeira vitoria do Pilar 1 e a escuta real do ingles falado.",
             status: "active",
             blocks: [
                 {
@@ -21,7 +21,7 @@ export const PILAR_2_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "No Pilar 1, voce entendeu por que travava. Aqui, voce comeca a resolver isso na pratica. O Pilar 2 existe para te mostrar que o problema quase nunca e 'falta de vocabulario'. Na maioria das vezes, o problema e ouvir o ingles do jeito errado."
+                    content: "No Pilar 1, voce percebeu uma coisa importante: voce ja reconhece mais ingles do que imaginava. Palavras como {{love|amor}}, {{house|casa}}, {{red|vermelho}}, {{black|preto}}, {{car|carro}} e {{help|ajuda}} nao parecem mais tao distantes quando entram no contexto certo.\n\nAqui, o jogo muda de lugar. Em vez de provar que voce sabe palavras soltas, voce vai treinar o ouvido para reconhecer essas palavras quando elas aparecem dentro do som real. O Pilar 2 existe para te mostrar que o problema quase nunca e 'falta de vocabulario'. Na maioria das vezes, o problema e ouvir o ingles do jeito errado."
                 },
                 {
                     type: "box-warning",
@@ -34,7 +34,7 @@ export const PILAR_2_DATA: PillarData = {
                 },
                 {
                     type: "paragraph",
-                    content: "Este pilar nao e sobre decorar regra. E sobre perceber o que realmente acontece no audio. A progressao aqui e simples:"
+                    content: "Este pilar nao e sobre decorar regra. E sobre perceber o que realmente acontece no audio. A progressao aqui continua em pequenas vitorias, so que agora elas acontecem no ouvido:"
                 },
                 {
                     type: "list",
@@ -47,9 +47,14 @@ export const PILAR_2_DATA: PillarData = {
                     ]
                 },
                 {
+                    type: "completion-seal",
+                    content:
+                        "{{SMALL WIN|PEQUENA VITORIA}}\n\nSe voce chegou aqui depois do Pilar 1, ja existe uma base: voce sabe reconhecer palavras, contextos e reacoes simples.\n\nAgora a vitoria muda. Nao e mais apenas olhar e pensar 'eu sei essa palavra'. E ouvir um pedaco de fala real e pensar: 'eu peguei o principal'."
+                },
+                {
                     type: "elite-insight",
                     title: "Importante sobre o proximo passo",
-                    content: "Ao fim do Pilar 2, sua prova vai passar pela leitura da equipe antes de liberar o Pilar 3. A ideia aqui nao e te segurar: e confirmar se essa base auditiva realmente firmou. Se precisar, voce ajusta antes de seguir."
+                    content: "Ao fim do Pilar 2, sua prova vai passar pela leitura da equipe antes de liberar o Pilar 3. A ideia aqui nao e te segurar: e confirmar se essa base auditiva realmente firmou. Se precisar, voce ajusta antes de seguir.\n\nPensa assim: no Pilar 1 voce ganhou controle. No Pilar 2, voce ganha ouvido."
                 }
             ]
         },
@@ -68,7 +73,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "paragraph",
                     content:
-                        "Seu cerebro tenta economizar energia o tempo todo. Entao, quando ouve ingles, ele junta sons parecidos e transforma tudo numa massa so. No portugues isso quase nunca te atrapalha. No ingles, atrapalha bastante.\n\nNeste modulo, voce vai comecar a separar o que antes chegava embaralhado."
+                        "Seu cerebro tenta economizar energia o tempo todo. Entao, quando ouve ingles, ele junta sons parecidos e transforma tudo numa massa so. No portugues isso quase nunca te atrapalha. No ingles, atrapalha bastante.\n\nA boa noticia: voce nao esta comecando do zero. Quando aparece {{red|vermelho}}, {{cat|gato}}, {{ship|navio}} ou {{work|trabalho}} escrito, seu cerebro reconhece alguma coisa. Agora voce vai treinar o ouvido para fazer esse reconhecimento chegar mais cedo.\n\nNeste modulo, voce vai comecar a separar o que antes chegava embaralhado."
                 },
                 {
                     type: "sonic-scan",
@@ -107,7 +112,7 @@ export const PILAR_2_DATA: PillarData = {
                             { id: "ab5", label: "Alvo 5", a: "{{live|morar/viver}}", b: "{{leave|sair/partir}}" }
                         ],
                         scoring:
-                            "Voce nao precisa acertar tudo. Voce precisa descobrir quais pares ainda te confundem."
+                            "Voce nao precisa acertar tudo. Voce precisa descobrir quais pares ainda te confundem. Cada contraste percebido ja e uma pequena vitoria auditiva."
                     })
                 },
                 {
@@ -241,7 +246,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "tower-stamp",
                     content:
-                        "ETAPA CONCLUIDA — {{SOUND SEPARATION|SEPARACAO DOS SONS}}\nVoce ainda nao precisa entender tudo. O importante aqui era comecar a ouvir diferenca onde antes parecia tudo igual.\n\nNa proxima etapa, voce vai perceber por que o ingles parece rapido quando, na verdade, o som e que vem conectado."
+                        "ETAPA CONCLUIDA — {{SOUND SEPARATION|SEPARACAO DOS SONS}}\nVoce ainda nao precisa entender tudo. O importante aqui era comecar a ouvir diferenca onde antes parecia tudo igual.\n\nEssa e uma vitoria pequena, mas real: quando o ouvido percebe contraste, o ingles deixa de ser uma parede e vira partes.\n\nNa proxima etapa, voce vai perceber por que o ingles parece rapido quando, na verdade, o som e que vem conectado."
                 }
             ]
         },
@@ -254,7 +259,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "tower-log",
                     content:
-                        "AUDIO LOG #02 — {{CONNECTED SPEECH|SOM CONECTADO}}\n• Focus: {{LISTENING IN BLOCKS|ESCUTAR EM BLOCOS}}\n• Before: {{ISOLATED SOUNDS|SONS ISOLADOS}}\n• Now: {{FLOWING SPEECH|FALA CORRIDA}}\n\nNota: no ingles real, as palavras quase nunca chegam uma por uma do jeito que aparecem na tela."
+                        "AUDIO LOG #02 — {{CONNECTED SPEECH|SOM CONECTADO}}\n• Focus: {{LISTENING IN BLOCKS|ESCUTAR EM BLOCOS}}\n• Before: {{ISOLATED SOUNDS|SONS ISOLADOS}}\n• Now: {{FLOWING SPEECH|FALA CORRIDA}}\n\nNota: no ingles real, palavras simples tambem chegam coladas. O ganho aqui e reconhecer o bloco sem perder a calma."
                 },
 
                 {
@@ -264,7 +269,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "paragraph",
                     content:
-                        "Depois que voce comeca a separar melhor os sons, aparece outro problema: a sensacao de velocidade.\n\nMas o ingles nao parece rapido so porque a pessoa fala correndo. Ele parece rapido porque **as palavras se ligam, se encurtam e se empurram umas nas outras**.\n\nNeste modulo, voce vai aprender a ouvir isso do jeito certo."
+                        "Depois que voce comeca a separar melhor os sons, aparece outro problema: a sensacao de velocidade.\n\nMas o ingles nao parece rapido so porque a pessoa fala correndo. Ele parece rapido porque **as palavras se ligam, se encurtam e se empurram umas nas outras**.\n\nA boa noticia: muitas dessas palavras continuam sendo simples. {{Let me know|me avisa}}, {{black cat|gato preto}}, {{see you|te vejo}} e {{I need it|eu preciso disso}} nao sao monstros. O desafio e reconhecer quando elas chegam coladas.\n\nNeste modulo, voce vai aprender a ouvir isso do jeito certo."
                 },
 
                 {
@@ -492,7 +497,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "tower-stamp",
                     content:
-                        "ETAPA CONCLUIDA — {{CONNECTED SPEECH|SOM CONECTADO}}\n\nVoce parou de esperar palavras separadas demais e comecou a ouvir grupos de som mais reais.\n\nNa proxima etapa, voce vai aprender a pegar o que importa numa frase: tom, enfase e intencao."
+                        "ETAPA CONCLUIDA — {{CONNECTED SPEECH|SOM CONECTADO}}\n\nVoce parou de esperar palavras separadas demais e comecou a ouvir grupos de som mais reais.\n\nEssa vitoria importa porque aproxima voce da conversa de verdade: menos legenda na cabeca, mais leitura do bloco.\n\nNa proxima etapa, voce vai aprender a pegar o que importa numa frase: tom, enfase e intencao."
                 }
             ]
         },
@@ -515,7 +520,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "paragraph",
                     content:
-                        "Ate aqui, voce ja comecou a limpar o som e a ouvir em bloco. Agora entra uma camada muito importante: **priorizacao**.\n\nNo ingles falado, duas pistas ajudam muito:\n• **{{Stress|Enfase}}**: onde a frase bate mais forte\n• **{{Intonation|Entonacao}}**: para onde a frase aponta\n\nQuando voce aprende a ler isso, para de depender de entender cada palavra."
+                        "Ate aqui, voce ja comecou a limpar o som e a ouvir em bloco. Agora entra uma camada muito importante: **priorizacao**.\n\nNo ingles falado, duas pistas ajudam muito:\n• **{{Stress|Enfase}}**: onde a frase bate mais forte\n• **{{Intonation|Entonacao}}**: para onde a frase aponta\n\nQuando voce aprende a ler isso, para de depender de entender cada palavra. A vitoria aqui e simples e forte: pegar o recado antes de pegar todos os detalhes."
                 },
 
                 {
@@ -830,7 +835,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "completion-seal",
                     content:
-                        "{{CATCH THE INTENTION|PEGAR A INTENCAO}} — {{COMPLETE|CONCLUIDO}}\nVoce aprendeu a:\n• notar onde a frase bate mais forte\n• ler intencao pela entonacao\n• extrair o principal em poucos sinais\n• responder melhor mesmo sem audio perfeito\n\nNa proxima etapa, voce vai aplicar isso em fala mais baguncada, sotaque e pressao real."
+                        "{{CATCH THE INTENTION|PEGAR A INTENCAO}} — {{COMPLETE|CONCLUIDO}}\nVoce aprendeu a:\n• notar onde a frase bate mais forte\n• ler intencao pela entonacao\n• extrair o principal em poucos sinais\n• responder melhor mesmo sem audio perfeito\n\nAqui tem outra vitoria: voce nao esta mais tentando vencer o ingles palavra por palavra. Voce esta aprendendo a pegar o sentido.\n\nNa proxima etapa, voce vai aplicar isso em fala mais baguncada, sotaque e pressao real."
                 }
             ]
         },
@@ -853,7 +858,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "paragraph",
                     content:
-                        "Ate aqui, voce treinou por partes. Agora entra a etapa em que tudo mistura.\n\nAqui o audio pode vir:\n• cortado\n• acelerado\n• emocional\n• com {{accent|sotaque}}\n• com erro de quem esta falando\n\nE mesmo assim, voce ainda precisa entender o suficiente para agir. Esse e o treino que mais parece com conversa real."
+                        "Ate aqui, voce treinou por partes. Agora entra a etapa em que tudo mistura.\n\nAqui o audio pode vir:\n• cortado\n• acelerado\n• emocional\n• com {{accent|sotaque}}\n• com erro de quem esta falando\n\nE mesmo assim, voce ainda precisa entender o suficiente para agir. Esse e o treino que mais parece com conversa real. A boa noticia: voce ja tem ferramentas para nao voltar ao modo panico."
                 },
 
                 {
@@ -1182,7 +1187,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "completion-seal",
                     content:
-                        "{{MESSY ENGLISH, REAL LIFE|INGLES BAGUNCADO, VIDA REAL}} — {{COMPLETE|CONCLUIDO}}\n\nVoce nao precisa entender tudo para agir bem.\nPrecisa entender o suficiente para manter a conversa viva, fazer perguntas certas e nao desabar quando o audio vem imperfeito.\n\nEssa e a base real que este modulo queria construir."
+                        "{{MESSY ENGLISH, REAL LIFE|INGLES BAGUNCADO, VIDA REAL}} — {{COMPLETE|CONCLUIDO}}\n\nVoce nao precisa entender tudo para agir bem.\nPrecisa entender o suficiente para manter a conversa viva, fazer perguntas certas e nao desabar quando o audio vem imperfeito.\n\nEssa e a base real que este modulo queria construir. E ela nasce do mesmo ponto do Pilar 1: voce nao foge quando o ingles aparece; voce procura a proxima peca."
                 }
             ]
         },
@@ -1205,7 +1210,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "paragraph",
                     content:
-                        "Antes de pensar no proximo pilar, vale reconhecer o que aconteceu aqui.\n\nO Pilar 2 foi a parte mais pesada da escuta. E isso nao foi por acaso. Cada modulo apertou um ponto que costuma travar o brasileiro quando o ingles sai da tela e entra no audio."
+                        "Antes de pensar no proximo pilar, vale reconhecer o que aconteceu aqui.\n\nO Pilar 2 foi mais denso porque agora voce nao estava so reconhecendo palavras faceis. Voce estava treinando o ouvido para encontrar essas palavras, blocos e intencoes no meio do som real. Cada modulo apertou um ponto que costuma travar o brasileiro quando o ingles sai da tela e entra no audio."
                 },
 
                 {
@@ -1225,7 +1230,8 @@ export const PILAR_2_DATA: PillarData = {
                         "Você aprendeu a aceitar imperfeição como parte do processo",
                         "Você aprendeu a responder mesmo sem certeza total",
                         "Você aprendeu a se manter mais inteiro quando o inglês vem difícil",
-                        "Você treinou algo que a maioria nunca treina: {{composure|calma}} sob pressão real"
+                        "Você treinou algo que a maioria nunca treina: {{composure|calma}} sob pressão real",
+                        "Você provou que densidade nao precisa virar panico quando existe metodo"
                     ]
                 },
 
@@ -1275,7 +1281,7 @@ export const PILAR_2_DATA: PillarData = {
                 {
                     type: "final-note",
                     content:
-                        "Voce nao terminou o Pilar 2 tentando ouvir ingles como aluno de escola.\n\nVoce terminou aprendendo a lidar com ingles falado de verdade.\n\nIsso muda bastante coisa daqui para frente."
+                        "Voce nao terminou o Pilar 2 tentando ouvir ingles como aluno de escola.\n\nVoce terminou aprendendo a lidar com ingles falado de verdade.\n\nA vitoria aqui nao e entender tudo. E continuar presente, captar o principal e responder com mais controle.\n\nIsso muda bastante coisa daqui para frente."
                 },
 
                 {

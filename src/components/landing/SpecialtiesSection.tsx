@@ -45,7 +45,7 @@ const SPECIALTIES: Specialty[] = [
     {
         id: "spec-interview",
         title: "Entrevistas de Emprego",
-        desc: "Prepare-se para entrevistas em inglês. Respostas matadoras para perguntas difíceis.",
+        desc: "Prepare respostas claras para entrevistas e pratique perguntas frequentes.",
         icon: Briefcase,
         color: "#06b6d4",
         examples: ["'Tell me about yourself'", "Salary negotiation", "Follow-up emails"]
@@ -215,7 +215,7 @@ export function SpecialtiesSection() {
                         </span>
                     </h2>
                     <p className={`max-w-lg mx-auto text-sm ${isDark ? "text-white/45" : "text-gray-600"}`}>
-                        Após dominar os fundamentos, você escolhe uma área de foco para se tornar um verdadeiro especialista.
+                        Após concluir os fundamentos, você escolhe uma área para direcionar a prática do inglês.
                     </p>
                 </motion.div>
 
@@ -239,7 +239,7 @@ export function SpecialtiesSection() {
                 >
                     <p className={`text-xs flex items-center justify-center gap-2 ${isDark ? "text-white/25" : "text-gray-500"}`}>
                         <Star className="w-3 h-3 text-amber-400" />
-                        Novas especialidades são adicionadas regularmente
+                        O catálogo pode evoluir ao longo do beta
                         <Star className="w-3 h-3 text-amber-400" />
                     </p>
                 </motion.div>

@@ -27,6 +27,8 @@ export interface LiveSessionBooking {
   calendarHtmlLink?: string | null;
   requestedSlotStart?: string | null;
   requestedSlotEnd?: string | null;
+  slotLockId?: string | null;
+  bookingRevision?: number | null;
   confirmedAt?: string | null;
   cancelledAt?: string | null;
   completedAt?: string | null;

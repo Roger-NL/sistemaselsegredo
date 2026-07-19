@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { X, TrendingUp, Zap } from "lucide-react";
 import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard/service";
-import { useAuth } from "@/context/AuthContext";
 import { ModalShell } from "@/components/ui/modal-shell";
 
 interface LeaderboardModalProps {
@@ -12,7 +11,6 @@ interface LeaderboardModalProps {
 }
 
 export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
-    const { user } = useAuth();
     const [users, setUsers] = useState<LeaderboardUser[]>([]);
 
     useEffect(() => {
@@ -65,7 +63,7 @@ export function LeaderboardModal({ isOpen, onClose }: LeaderboardModalProps) {
                                 </div>
                             ) : (
                                 users.map((u, index) => {
-                                    const isMe = user?.id === u.id;
+                                    const isMe = u.isYou === true;
                                     const rank = index + 1;
                                     let rankColor = "text-white/40 bg-white/5 border-white/5";
                                     let icon = <span className="text-[10px] opacity-50">#{rank}</span>;

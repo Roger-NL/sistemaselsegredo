@@ -1,219 +1,83 @@
-# BasedSpeak Payments
+# BasedSpeak
 
-Projeto Next.js com autenticação Firebase e checkout Asaas para acesso vitalício.
+Aplicação Next.js para aprendizagem de inglês com autenticação Firebase, progressão por pilares, provas com revisão humana, agendamento via Google Calendar e pagamentos Asaas.
 
-## Configuração
+## Requisitos
 
-1. Copie [.env.example](/Users/rogera/Documents/projetos/ES/.env.example) para `.env.local`.
-2. Preencha:
-   - `ASAAS_API_KEY`
-   - `ASAAS_BASE_URL`
-   - `ASAAS_WEBHOOK_TOKEN`
-3. Para sandbox da Asaas, use:
-   - `ASAAS_BASE_URL=https://api-sandbox.asaas.com/v3`
-4. Se sua conta estiver habilitada para cartão direto/tokenização, opcionalmente ative:
-   - `ASAAS_ENABLE_DIRECT_CREDIT_CARD=true`
+- Node.js 22 ou superior
+- Projeto Firebase com Authentication e Firestore
+- Conta Asaas (sandbox para desenvolvimento)
+- Credenciais Google Calendar para o fluxo de sessões
 
 ## Desenvolvimento
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
-## Fluxos de pagamento suportados
+Antes de abrir uma alteração:
 
-### Pix
-
-- O frontend chama `POST /api/checkout` com `paymentMethod: "PIX"`.
-- O backend:
-  - cria ou reaproveita o customer na Asaas
-  - cria a cobrança Pix
-  - busca QR Code
-  - persiste a tentativa em `payment_attempts`
-  - devolve QR Code e payload copia-e-cola
-
-### Cartão via invoiceUrl
-
-- O frontend chama `POST /api/checkout` com `paymentMethod: "CREDIT_CARD"` e `creditCardMode: "INVOICE_URL"`.
-- O backend:
-  - cria ou reaproveita o customer na Asaas
-  - cria cobrança `CREDIT_CARD`
-  - devolve `invoiceUrl`
-- O frontend redireciona o cliente para a fatura segura da Asaas.
-
-### Cartão direto pela API
-
-- Endpoint separado:
-  - `POST /api/checkout/card/direct`
-- Requer:
-  - `ASAAS_ENABLE_DIRECT_CREDIT_CARD=true`
-  - conta Asaas habilitada para o fluxo
-- Envia cartão e dados do titular ao backend, que processa a cobrança via API.
-
-### Tokenização de cartão
-
-- Endpoint preparado:
-  - `POST /api/checkout/card/tokenize`
-- Também requer:
-  - `ASAAS_ENABLE_DIRECT_CREDIT_CARD=true`
-  - habilitação da funcionalidade na conta Asaas
-
-## Webhook
-
-Webhook implementado em:
-
-- `POST /api/webhooks/asaas`
-
-Validação:
-
-- Configure a URL na Asaas com o token na query string:
-  - `https://seu-dominio.com/api/webhooks/asaas?token=SEU_TOKEN`
-- O backend também aceita o header `x-asaas-webhook-token`.
-
-O webhook:
-
-- registra idempotência em `asaas_webhook_events`
-- sincroniza o status local em `payment_attempts`
-- libera o acesso premium quando o pagamento chega em status pago
-
-## Endpoints
-
-- `GET /api/checkout?userId=...`
-  - recupera cobrança pendente ou informa se o usuário já é premium
-- `POST /api/checkout`
-  - cria checkout Pix ou cartão
-- `POST /api/verify-payment`
-  - consulta o status atual na Asaas e sincroniza localmente
-- `POST /api/webhooks/asaas`
-  - recebe eventos da Asaas
-- `POST /api/checkout/card/direct`
-  - fluxo separado para pagamento direto com cartão
-- `POST /api/checkout/card/tokenize`
-  - fluxo separado para tokenização
-
-## Exemplo de payload: Pix
-
-```json
-{
-  "userId": "firebase_uid_123",
-  "localCustomerId": "user_123",
-  "name": "Maria Silva",
-  "email": "maria@email.com",
-  "cpfCnpj": "12345678909",
-  "paymentMethod": "PIX",
-  "value": 297,
-  "description": "Acesso Vitalicio - BasedSpeak PRO (9 Pilares)"
-}
+```bash
+npm test
+npm run lint
+npx tsc --noEmit
+npm run build
 ```
 
-## Exemplo de resposta: Pix
+## Segurança e autoridade
 
-```json
-{
-  "success": true,
-  "hasPendingPayment": true,
-  "paymentId": "pay_123",
-  "paymentMethod": "PIX",
-  "status": "PENDING",
-  "invoiceUrl": "https://www.asaas.com/i/pay_123",
-  "qrCode": "BASE64_QRCODE",
-  "qrCodePayload": "000201....",
-  "expiresAt": "2026-05-02T19:30:00.000Z",
-  "dueDate": "2026-05-02"
-}
+- A sessão do browser é trocada por cookie `httpOnly` verificado no servidor.
+- Administração depende da custom claim Firebase `admin: true`; não use allowlists de e-mail no código.
+- Progresso, pontuação de prova, convites, pagamentos e agendamentos são validados no servidor.
+- Cartão é informado apenas no checkout hospedado pelo Asaas; a aplicação não recebe PAN ou CVV.
+- As regras e índices Firestore são versionados em `firestore.rules` e `firestore.indexes.json`.
+
+Para auditar as claims sem alterar utilizadores:
+
+```bash
+npm run auth:admins
 ```
 
-## Exemplo de payload: Cartão via invoiceUrl
+Depois de confirmar a lista `FIREBASE_ADMIN_EMAILS`, aplique explicitamente:
 
-```json
-{
-  "userId": "firebase_uid_123",
-  "localCustomerId": "user_123",
-  "name": "Maria Silva",
-  "email": "maria@email.com",
-  "cpfCnpj": "12345678909",
-  "paymentMethod": "CREDIT_CARD",
-  "creditCardMode": "INVOICE_URL",
-  "value": 297,
-  "description": "Acesso Vitalicio - BasedSpeak PRO (9 Pilares)"
-}
+```bash
+npm run auth:admins -- --apply
 ```
 
-## Exemplo de resposta: Cartão via invoiceUrl
+## Beta gratuito por convite
 
-```json
-{
-  "success": true,
-  "hasPendingPayment": true,
-  "paymentId": "pay_456",
-  "paymentMethod": "CREDIT_CARD",
-  "creditCardMode": "INVOICE_URL",
-  "status": "PENDING",
-  "invoiceUrl": "https://www.asaas.com/i/pay_456",
-  "requiresRedirect": true,
-  "dueDate": "2026-05-07"
-}
+Defina `BETA_FREE_MODE=true` no ambiente do servidor enquanto o beta fechado estiver ativo. Com a flag ligada, `/pagamento` mostra apenas a ativação por convite, oculta preços e dados financeiros e não inicia pedidos de checkout ou reconciliação de pagamentos.
+
+A flag é exclusivamente de servidor e não deve receber o prefixo `NEXT_PUBLIC_`. Altere-a para `false` apenas quando o fluxo comercial estiver deliberadamente pronto e as credenciais Asaas do ambiente tiverem sido validadas.
+
+## Pagamentos
+
+- `POST /api/checkout`: cria ou recupera uma cobrança Pix/checkout hospedado.
+- `POST /api/verify-payment`: reconcilia o estado com o fornecedor.
+- `POST /api/webhooks/asaas`: recebe eventos autenticados e idempotentes.
+
+Em produção, `ASAAS_API_KEY`, `ASAAS_BASE_URL` e `ASAAS_WEBHOOK_TOKEN` devem pertencer ao mesmo ambiente. Nunca exponha esses valores com prefixo `NEXT_PUBLIC_`.
+
+## Operação
+
+```bash
+npm run scheduling:health
+npm run exams:audit-locks
+npm run payments:audit
 ```
 
-## Exemplo de payload: Cartão direto
+Os scripts de migração são dry-run por padrão. Qualquer opção `--apply` deve ser executada somente depois de rever o resultado e fazer backup.
 
-```json
-{
-  "userId": "firebase_uid_123",
-  "localCustomerId": "user_123",
-  "name": "Maria Silva",
-  "email": "maria@email.com",
-  "cpfCnpj": "12345678909",
-  "paymentMethod": "CREDIT_CARD",
-  "creditCardMode": "DIRECT",
-  "remoteIp": "201.10.20.30",
-  "postalCode": "01310930",
-  "addressNumber": "100",
-  "phone": "11999999999",
-  "card": {
-    "holderName": "MARIA SILVA",
-    "number": "5162306219378829",
-    "expiryMonth": "05",
-    "expiryYear": "2030",
-    "ccv": "318"
-  }
-}
-```
+Checklist mínimo de deploy:
 
-## Tratamento de erros
+1. Executar testes, lint, TypeScript e build.
+2. Aplicar claims administrativas antes das regras que dependem delas.
+3. Fazer deploy de regras e índices Firestore.
+4. Confirmar `BETA_FREE_MODE=true` para o beta gratuito; se a flag estiver desligada, confirmar credenciais Asaas de produção e token do webhook.
+5. Executar o healthcheck de scheduling.
+6. Fazer smoke test com utilizador não administrador e outro administrador.
+7. Com o beta gratuito ativo, validar geração e ativação de um convite; com pagamentos ativos, confirmar Pix/cartão em sandbox e, para produção, usar uma transação real controlada e o respetivo reembolso.
 
-- Erros da Asaas retornam:
-  - `error`
-  - `provider: "asaas"`
-  - `providerStatus`
-- O backend não loga número completo do cartão, CVV ou payload de cartão.
-- O webhook usa idempotência para ignorar eventos duplicados.
-
-## Como testar em sandbox
-
-1. Configure `ASAAS_BASE_URL=https://api-sandbox.asaas.com/v3`
-2. Gere uma cobrança Pix em `/pagamento`
-3. Gere uma cobrança de cartão em `/pagamento`
-4. Verifique:
-   - `payment_attempts` no Firestore
-   - atualização do usuário para premium
-   - webhook recebendo eventos
-
-## Como usar no frontend
-
-- Pix:
-  - selecione `PIX`
-  - gere a cobrança
-  - pague pelo QR Code
-- Cartão:
-  - selecione `Cartão`
-  - o frontend recebe `invoiceUrl`
-  - redireciona para a fatura da Asaas
-
-## Referência oficial da Asaas usada no desenho
-
-- Cobranças via cartão de crédito
-- Tokenização de cartão de crédito
-- Webhooks de cobrança
-- Guia de cobranças
+Termos e Privacidade publicados no produto são uma base operacional para o beta fechado e ainda exigem revisão jurídica/identificação completa do controlador antes de abertura comercial.

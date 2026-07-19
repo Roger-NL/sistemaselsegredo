@@ -41,11 +41,14 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                if (parsed.step) setStep(parsed.step);
-                if (parsed.quizIndex) setQuizIndex(parsed.quizIndex);
-                if (parsed.answers) setAnswers(parsed.answers);
-                if (parsed.writtenText) setWrittenAnswer(parsed.writtenText);
-                if (parsed.whatsapp) setWhatsapp(parsed.whatsapp);
+                const restoreTimer = window.setTimeout(() => {
+                    if (["intro", "quiz", "written", "whatsapp"].includes(parsed.step)) setStep(parsed.step);
+                    if (Number.isInteger(parsed.quizIndex) && parsed.quizIndex >= 0) setQuizIndex(parsed.quizIndex);
+                    if (Array.isArray(parsed.answers)) setAnswers(parsed.answers.filter(Number.isInteger));
+                    if (typeof parsed.writtenText === "string") setWrittenAnswer(parsed.writtenText);
+                    if (typeof parsed.whatsapp === "string") setWhatsapp(parsed.whatsapp);
+                }, 0);
+                return () => window.clearTimeout(restoreTimer);
             } catch (e) { console.error("Error parsing memory card state", e); }
         }
     }, [isOpen, pillarId, storageKey]);
@@ -96,14 +99,6 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
         }
     };
 
-    const calculateScore = () => {
-        let correct = 0;
-        answers.forEach((ans, idx) => {
-            if (ans === questions[idx].correctAnswer) correct++;
-        });
-        return Math.round((correct / questions.length) * 100);
-    };
-
     const handleSubmit = async (phoneOverride?: string) => {
         // Validation for WhatsApp (Optional or Mandatory? User said "se ela nao por ficala aguardando a resposta")
         // implying it might be optional, BUT "ficala aguardando a resposta" might mean "on platform only".
@@ -119,7 +114,6 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
         setStep('sending');
         setError("");
 
-        const score = calculateScore();
         const finalPhone = phoneOverride || whatsapp;
 
         // SYNC PHONE TO PROFILE IF NEW
@@ -141,8 +135,7 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
             userName: user!.name,
             userPhone: finalPhone, // NEW
             pillarId: pillarId,
-            quizScore: score,
-            quizAttempts: 1,
+            quizAnswers: answers,
             writtenAnswer: writtenText
         });
 
@@ -454,7 +447,7 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                                 <div>
                                                     <h3 className="text-3xl font-bold text-neutral-900 mb-3 tracking-tight">Avaliação recebida</h3>
                                                     <p className="text-neutral-600 text-base max-w-[500px] mx-auto leading-relaxed">
-                                                        Sua resposta foi salva com sucesso. Você concluiu a parte gratuita e já viu a lógica do método funcionando por dentro. A próxima etapa aprofunda isso com sequência completa, correção humana e continuidade guiada.
+                                                        Sua resposta foi salva com sucesso. Você concluiu a primeira etapa e já viu a lógica do método funcionando por dentro. Ative seu convite gratuito para continuar com a sequência completa, correção humana e continuidade guiada.
                                                     </p>
                                                 </div>
                                                 <div className="space-y-4 pt-6 max-w-sm mx-auto">
@@ -462,7 +455,7 @@ export function PillarExamModal({ pillarId, isOpen, onClose, onSuccess }: Pillar
                                                         className="w-full py-4 text-base font-bold rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-[0_4px_20px_rgba(124,58,237,0.4)] transition-all flex items-center justify-center hover:-translate-y-1"
                                                         onClick={() => { router.push(ROUTES.public.payment); onClose(); }}
                                                     >
-                                                        Continuar para a próxima etapa
+                                                        Ativar convite beta
                                                         <ArrowRight className="ml-2 w-5 h-5" />
                                                     </button>
                                                     <button

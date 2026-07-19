@@ -1,20 +1,41 @@
 import { NextResponse } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "@/lib/firebase-admin";
 import { RequestAuthError, requireRequestPrincipal } from "@/lib/auth/request-auth";
 import {
   buildPremiumAccessUpdate,
   buildStoredProgressSnapshot,
   deriveLegacyApprovedPillar,
-  normalizeInviteCode,
   type WriterExamStatus,
   type WriterLiveSessionStatus,
 } from "@/lib/auth/premium-access";
+import {
+  getHashedInviteDocumentId,
+  getInviteCodeLastFour,
+  getMaskedInviteCode,
+  hashInviteCode,
+  INVITE_CODES_COLLECTION,
+  normalizeSecureInviteCode,
+  timestampLikeToMillis,
+} from "@/lib/auth/invite-codes";
+import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from "@/lib/server/rate-limit";
+import {
+  RequestPayloadError,
+  assertOnlyKeys,
+  getRequestIp,
+  readJsonObject,
+  requestPayloadErrorResponse,
+} from "@/lib/server/request";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 type InviteActivationPayload = {
   code?: string;
 };
+
+const MAX_INVITE_BODY_BYTES = 2_048;
+const INVITE_ATTEMPT_WINDOW_MS = 15 * 60 * 1_000;
 
 async function getLatestExamStatus(userId: string, pillarId: number): Promise<WriterExamStatus> {
   const snapshot = await adminDb
@@ -91,12 +112,21 @@ function getErrorResponse(error: unknown) {
     return NextResponse.json({ error: error.message }, { status: error.status });
   }
 
+  if (error instanceof RequestPayloadError) {
+    return requestPayloadErrorResponse(error);
+  }
+
+  if (error instanceof RateLimitError) {
+    return rateLimitErrorResponse(error);
+  }
+
   if (error instanceof Error) {
     switch (error.message) {
       case "INVITE_CODE_REQUIRED":
         return NextResponse.json({ error: "Codigo de convite obrigatorio." }, { status: 400 });
       case "INVITE_CODE_INVALID":
-        return NextResponse.json({ error: "Codigo invalido ou ja utilizado." }, { status: 404 });
+      case "INVITE_CODE_EXPIRED":
+        return NextResponse.json({ error: "Codigo invalido ou indisponivel." }, { status: 400 });
       case "USER_PROFILE_NOT_FOUND":
         return NextResponse.json({ error: "Perfil do usuario nao encontrado." }, { status: 404 });
       case "ALREADY_PREMIUM":
@@ -114,36 +144,66 @@ export async function POST(req: Request) {
     const principal = await requireRequestPrincipal(req, {
       allowBearer: true,
       allowSessionCookie: true,
-      allowLegacyCookie: false,
     });
 
-    const payload = (await req.json().catch(() => ({}))) as InviteActivationPayload;
-    const normalizedCode = normalizeInviteCode(payload.code ?? "");
+    await Promise.all([
+      consumeRateLimit({
+        namespace: "invite-activation-user",
+        identifier: principal.uid,
+        limit: 8,
+        windowMs: INVITE_ATTEMPT_WINDOW_MS,
+      }),
+      consumeRateLimit({
+        namespace: "invite-activation-ip",
+        identifier: getRequestIp(req),
+        limit: 30,
+        windowMs: INVITE_ATTEMPT_WINDOW_MS,
+      }),
+    ]);
 
-    if (!normalizedCode) {
+    const payload = await readJsonObject(req, MAX_INVITE_BODY_BYTES) as InviteActivationPayload;
+    assertOnlyKeys(payload as Record<string, unknown>, ["code"]);
+    const normalizedCode = normalizeSecureInviteCode(typeof payload.code === "string" ? payload.code : "");
+
+    if (!normalizedCode || normalizedCode.length > 64) {
       throw new Error("INVITE_CODE_REQUIRED");
     }
 
-    const inviteCodesRef = adminDb.collection("invite_codes");
+    const codeHash = hashInviteCode(normalizedCode);
+    const inviteCodesRef = adminDb.collection(INVITE_CODES_COLLECTION);
+    const hashedInviteRef = inviteCodesRef.doc(getHashedInviteDocumentId(codeHash));
     const usersRef = adminDb.collection("users");
     const userRef = usersRef.doc(principal.uid);
 
-    await adminDb.runTransaction(async (transaction) => {
-      const inviteSnapshot = await transaction.get(
-        inviteCodesRef
-          .where("code", "==", normalizedCode)
-          .where("status", "==", "unused")
-          .limit(1)
-      );
+    const outcome = await adminDb.runTransaction(async (transaction) => {
+      const hashedInviteSnapshot = await transaction.get(hashedInviteRef);
+      let inviteDoc = hashedInviteSnapshot.exists ? hashedInviteSnapshot : null;
 
-      if (inviteSnapshot.empty) {
-        throw new Error("INVITE_CODE_INVALID");
+      if (!inviteDoc) {
+        const legacySnapshot = await transaction.get(
+          inviteCodesRef.where("code", "==", normalizedCode).limit(1)
+        );
+        inviteDoc = legacySnapshot.empty ? null : legacySnapshot.docs[0];
+      }
+
+      if (!inviteDoc) return { kind: "invalid" as const };
+
+      const inviteData = inviteDoc.data() ?? {};
+      if (inviteData.status !== "unused") return { kind: "invalid" as const };
+
+      const expiresAtMs = timestampLikeToMillis(inviteData.expiresAt);
+      if (expiresAtMs !== null && expiresAtMs <= Date.now()) {
+        transaction.update(inviteDoc.ref, {
+          status: "expired",
+          expiredAt: new Date().toISOString(),
+        });
+        return { kind: "expired" as const };
       }
 
       const userSnapshot = await transaction.get(userRef);
 
       if (!userSnapshot.exists) {
-        throw new Error("USER_PROFILE_NOT_FOUND");
+        return { kind: "user_missing" as const };
       }
 
       const userData = userSnapshot.data() ?? {};
@@ -151,33 +211,44 @@ export async function POST(req: Request) {
         typeof userData.approvedPillar === "number" ? userData.approvedPillar : 1;
 
       if (userData.subscriptionStatus === "premium") {
-        throw new Error("ALREADY_PREMIUM");
+        return { kind: "already_premium" as const };
       }
 
-      const inviteDoc = inviteSnapshot.docs[0];
       const nowIso = new Date().toISOString();
+      const lastFour = getInviteCodeLastFour(normalizedCode);
+      const maskedCode = getMaskedInviteCode(lastFour);
 
       transaction.update(inviteDoc.ref, {
         status: "used",
         usedBy: principal.uid,
         usedAt: nowIso,
+        codeHash,
+        codeLast4: lastFour,
+        ...(inviteData.code ? { code: FieldValue.delete(), migratedAt: nowIso } : {}),
       });
 
       transaction.update(
         userRef,
         buildPremiumAccessUpdate({
           currentApprovedPillar,
-          inviteCodeUsed: normalizedCode,
+          inviteCodeUsed: maskedCode,
           activatedAtIso: nowIso,
         })
       );
+
+      return { kind: "success" as const, maskedCode };
     });
+
+    if (outcome.kind === "invalid") throw new Error("INVITE_CODE_INVALID");
+    if (outcome.kind === "expired") throw new Error("INVITE_CODE_EXPIRED");
+    if (outcome.kind === "user_missing") throw new Error("USER_PROFILE_NOT_FOUND");
+    if (outcome.kind === "already_premium") throw new Error("ALREADY_PREMIUM");
 
     await recomputeInviteProgressSnapshot(principal.uid);
 
     return NextResponse.json({
       success: true,
-      inviteCode: normalizedCode,
+      inviteCode: outcome.maskedCode,
     });
   } catch (error) {
     console.error("[api/auth/invite] activation error", error);

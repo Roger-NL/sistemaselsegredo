@@ -6,17 +6,17 @@ import { ChevronDown, HelpCircle, ClipboardCheck, Route, PenTool, UserCheck, Bar
 import { useLandingTheme } from "@/context/LandingThemeContext";
 
 const HOW_IT_WORKS = [
-    { step: "01", title: "Diagnóstico", desc: "Pilar 1 grátis para testar o método", icon: ClipboardCheck, color: "#8b5cf6" },
+    { step: "01", title: "Diagnóstico", desc: "Pilar 1 aberto para conhecer o método", icon: ClipboardCheck, color: "#8b5cf6" },
     { step: "02", title: "Plano Personalizado", desc: "Rota adaptada ao seu nível", icon: Route, color: "#06b6d4" },
     { step: "03", title: "Treino Diário", desc: "15-20 min: ler + escrever + áudios", icon: PenTool, color: "#10b981" },
-    { step: "04", title: "Correção Humana", desc: "Professor valida cada missão", icon: UserCheck, color: "#f59e0b" },
+    { step: "04", title: "Correção Humana", desc: "Marcos da jornada recebem revisão", icon: UserCheck, color: "#f59e0b" },
     { step: "05", title: "Evolução Medida", desc: "Progresso por pilares e ranks", icon: BarChart3, color: "#ec4899" },
 ];
 
 const FAQS = [
     {
         question: "Qual a janela de tempo necessária por dia?",
-        answer: "O protocolo exige missões focadas. O sistema foi desenvolvido para resultados em sessões curtas e de alta densidade diária, permitindo integração perfeita à rotina de alta performance."
+        answer: "O protocolo usa missões curtas e focadas, pensadas para caber na rotina. O resultado depende da frequência e da prática de cada pessoa."
     },
     {
         question: "Há restrições de nível inicial para operar o sistema?",
@@ -24,11 +24,11 @@ const FAQS = [
     },
     {
         question: "E em caso de falha na execução de uma missão?",
-        answer: "A validação técnica irá bloquear o avanço. O relatório estrutural expõe a falha. O usuário refaz a missão até adquirir o padrão de fluência correto para a aprovação humana."
+        answer: "A validação pode bloquear o avanço e indicar pontos a rever. O participante refaz a missão e recebe uma nova avaliação humana."
     },
     {
         question: "Como confirmo a viabilidade do método?",
-        answer: "O sistema disponibiliza liberação imediata ao Pilar 1 de forma experimental. Investigue a funcionalidade prática da interface e ateste a metodologia em suas próprias vias neurais antes do compromisso integral."
+        answer: "O Pilar 1 fica aberto para você conhecer a interface e realizar as primeiras missões. Com um convite válido, o restante do beta também é liberado gratuitamente."
     },
 ];
 

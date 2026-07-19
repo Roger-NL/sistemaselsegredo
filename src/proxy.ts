@@ -8,12 +8,10 @@ export function proxy(request: NextRequest) {
   const pathnameWithSearch = `${pathname}${search}`;
 
   const verifiedSessionCookie = request.cookies.get(AUTH_SESSION_COOKIE_NAME)?.value;
-  const legacySessionHint = request.cookies.get('es_session_token')?.value;
   const decision = evaluateAuthGuard({
     pathname,
     pathnameWithSearch,
     hasVerifiedSession: Boolean(verifiedSessionCookie),
-    hasLegacySessionHint: Boolean(legacySessionHint),
   });
 
   if (!decision.allow && decision.redirectTo) {

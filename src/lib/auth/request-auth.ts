@@ -39,7 +39,6 @@ export async function requireAuthenticatedUser(req: Request) {
   const principal = await requireRequestPrincipal(req, {
     allowBearer: true,
     allowSessionCookie: true,
-    allowLegacyCookie: false,
   });
 
   return {

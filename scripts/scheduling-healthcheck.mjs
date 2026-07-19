@@ -3,7 +3,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { google } from "googleapis";
-import admin from "firebase-admin";
+import { cert, getApp, getApps, initializeApp } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 
 const ROOT = process.cwd();
 const ENV_FILES = [".env.local", ".env.vercel", ".env.production.vercel"];
@@ -54,7 +55,14 @@ function parseJsonEnv(key) {
   if (!raw) return null;
 
   try {
-    const parsed = JSON.parse(raw);
+    // Vercel's env export may append metadata after the JSON value and may
+    // preserve literal line breaks inside PEM keys. Mirror the application
+    // parser so the diagnostic checks exactly the same representation.
+    const lastBrace = raw.lastIndexOf("}");
+    const normalized = (lastBrace >= 0 ? raw.slice(0, lastBrace + 1) : raw)
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r");
+    const parsed = JSON.parse(normalized);
     if (parsed.private_key) {
       parsed.private_key = parsed.private_key.replace(/\\n/g, "\n");
     }
@@ -76,14 +84,14 @@ async function checkFirebase(serviceAccount) {
   }
 
   try {
-    const app = admin.apps.length
-      ? admin.app()
-      : admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount),
+    const app = getApps().length
+      ? getApp()
+      : initializeApp({
+          credential: cert(serviceAccount),
           projectId: serviceAccount.project_id,
         });
 
-    const db = app.firestore();
+    const db = getFirestore(app);
     await db.collection("users").limit(1).get();
     ok(`Firebase Admin conectado ao projeto ${serviceAccount.project_id}.`);
     return true;

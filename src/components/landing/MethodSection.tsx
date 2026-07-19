@@ -32,7 +32,7 @@ const METHOD_STEPS = [
             { label: "Tempo", value: "Curto" },
             { label: "Foco", value: "Máximo" }
         ],
-        insight: "Microtreinos diários. Tempo curto e exigência altíssima.",
+        insight: "Microtreinos focados, com duração curta e objetivos definidos.",
         visual: "brain"
     },
     {
@@ -56,7 +56,7 @@ const METHOD_STEPS = [
             { label: "Máquinas", value: "Zero" },
             { label: "Correção", value: "Absoluta" }
         ],
-        insight: "Humanos auditam sua produção. Erros mapeados e anulados. Nada de IA genérica.",
+        insight: "Pessoas autorizadas revêm sua produção e indicam pontos concretos de melhoria.",
         visual: "chart"
     }
 ];
@@ -320,7 +320,7 @@ export function MethodSection() {
                         </span>
                     </h2>
                     <p className={`max-w-lg mx-auto text-sm ${isDark ? "text-white/40" : "text-gray-500"}`}>
-                        Este não é um ambiente de aprendizado. É um simulador de fluência em alta densidade.
+                        Um ambiente de prática orientada, com missões e feedback ao longo da jornada.
                     </p>
                 </motion.div>
 

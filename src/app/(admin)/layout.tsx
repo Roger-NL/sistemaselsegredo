@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ROUTES } from "@/lib/routes";
+import { hasAdminClaim } from "@/lib/auth/admin-policy";
 import { 
     LayoutDashboard, 
     Users, 
@@ -18,7 +19,6 @@ import {
 } from "lucide-react";
 
 // ADMIN LIST (Hardcoded for MVP Phase - will move to Claims later)
-const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"]; 
 
 export default function AdminLayout({
     children,
@@ -50,7 +50,7 @@ function AdminLayoutInner({
                 return;
             }
             // Simple Email Check for MVP
-            if (user && user.email && !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+            if (user && !hasAdminClaim(user)) {
                 router.push(ROUTES.app.dashboard); // Kick regular users out
             }
         }
@@ -66,7 +66,7 @@ function AdminLayoutInner({
     if (!isAuthenticated) return null;
 
     // Se estiver logado mas não for admin (e o redirecionamento ainda não bateu), também não renderiza
-    if (!user || !user.email || !ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+    if (!user || !hasAdminClaim(user)) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 text-center">
                 <div className="bg-white p-6 rounded-xl shadow border border-slate-200">

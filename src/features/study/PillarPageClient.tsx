@@ -13,6 +13,7 @@ import { useState, useEffect, useCallback } from "react";
 import { PillarData } from "@/types/study";
 import { ROUTES } from "@/lib/routes";
 import { useStudyActivityTracker } from "@/lib/study/use-study-activity-tracker";
+import { hasAdminClaim } from "@/lib/auth/admin-policy";
 import {
     navigateWithMobileFallback,
     prefetchClientRoute,
@@ -24,7 +25,6 @@ interface PillarPageClientProps {
     initialContent: PillarData | null; // Content passed from server
 }
 
-const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
 const EXAM_STATUS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 const StudyEngineLoading = () => (
@@ -101,7 +101,7 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
 
     const { isPillarUnlocked, getCurrentPillarNumber, isPillarModuleCompleted, progressSnapshot } = useProgress();
     const { user, subscriptionStatus, isLoading: authLoading } = useAuth(); // Auth Check
-    const isAdminUser = !!user?.email && ADMIN_EMAILS.includes(user.email);
+    const isAdminUser = hasAdminClaim(user);
     const isPremiumLike = subscriptionStatus === "premium" || isAdminUser;
 
     const pillar = PILLARS[pillarId - 1];
@@ -356,9 +356,9 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                 <div className="mt-6 rounded-2xl border border-fuchsia-400/20 bg-[linear-gradient(135deg,rgba(91,33,182,0.18),rgba(232,121,249,0.12),rgba(34,211,238,0.12))] p-4 text-left shadow-[0_0_35px_rgba(217,70,239,0.12)]">
                                     <div className="mb-2 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-fuchsia-200">
                                         <Crown className="h-3.5 w-3.5" />
-                                        Acesso premium
+                                        Acesso ao beta
                                     </div>
-                                    <p className="text-lg font-semibold text-white">Desbloqueie este pilar e continue sem espera.</p>
+                                    <p className="text-lg font-semibold text-white">Ative seu convite e continue sem espera.</p>
                                     <p className="mt-1 text-sm leading-relaxed text-white/65">
                                         Jornada completa, acesso liberado e continuidade imediata.
                                     </p>
@@ -372,8 +372,8 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                                     <Crown className="h-4 w-4" />
                                                 </span>
                                                 <span className="text-left">
-                                                    <span className="block text-[10px] uppercase tracking-[0.22em] text-fuchsia-200/85">Liberar agora</span>
-                                                    <span className="block text-base text-white">Adquirir o premium</span>
+                                                    <span className="block text-[10px] uppercase tracking-[0.22em] text-fuchsia-200/85">Beta gratuito</span>
+                                                    <span className="block text-base text-white">Ativar convite</span>
                                                 </span>
                                             </span>
                                             <ArrowRight className="h-5 w-5 text-fuchsia-200" />
@@ -653,10 +653,10 @@ export default function PillarPageClient({ pillarId, initialContent }: PillarPag
                                     </div>
                                     <h2 className="text-2xl font-bold text-white mb-2">Acesso Restrito</h2>
                                     <p className="text-white/50 max-w-md mx-auto mb-6">
-                                        Este conteúdo está disponível apenas para membros do comando Premium.
+                                        Este conteúdo faz parte do beta completo por convite.
                                     </p>
                                     <FlightButton variant="neon" onClick={() => router.push(ROUTES.public.payment)}>
-                                        Desbloquear Acesso Agora
+                                        Ativar convite beta
                                     </FlightButton>
                                 </>
                             ) : (

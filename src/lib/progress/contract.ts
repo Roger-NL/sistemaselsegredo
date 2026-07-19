@@ -261,11 +261,7 @@ export function evaluatePillar2To3Contract(
 }
 
 export function buildProgressSnapshotSeed(facts: ProgressContractFacts): ProgressSnapshotSeed {
-  if (
-    facts.allPillarsMarkedComplete ||
-    (facts.completedSpecializationsCount ?? 0) > 0 ||
-    facts.chosenSpecialization
-  ) {
+  if (facts.allPillarsMarkedComplete) {
     return {
       currentPillar: 9,
       highestUnlockedPillar: 9,

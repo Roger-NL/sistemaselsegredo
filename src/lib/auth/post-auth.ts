@@ -2,23 +2,21 @@ import { ROUTES, isSafeInternalCallbackPath } from "@/lib/routes";
 
 type PostAuthMode = "login" | "signup";
 
-const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
-
 type ResolvePostAuthTargetParams = {
     mode: PostAuthMode;
     callbackUrl?: string | null;
-    email?: string | null;
+    isAdmin?: boolean;
 };
 
 export function resolvePostAuthTarget({
     callbackUrl,
-    email,
+    isAdmin,
 }: ResolvePostAuthTargetParams): string {
     if (callbackUrl && isSafeInternalCallbackPath(callbackUrl)) {
         return callbackUrl;
     }
 
-    if (email && ADMIN_EMAILS.includes(email)) {
+    if (isAdmin) {
         return ROUTES.admin.dashboard;
     }
 

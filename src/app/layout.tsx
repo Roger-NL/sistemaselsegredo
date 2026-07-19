@@ -26,10 +26,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://basedspeak.com"),
   title: {
-    default: "BasedSpeak | Global Command Center",
+    default: "BasedSpeak | Inglês com prática guiada",
     template: "%s | BasedSpeak",
   },
-  description: "Aprenda inglês com o sistema gamificado da BasedSpeak.",
+  description: "Pratique inglês com missões estruturadas, produção ativa e revisão humana em etapas-chave.",
   icons: {
     icon: [{ url: "/basedspeak-tab.png", type: "image/png" }],
     shortcut: ["/basedspeak-tab.png"],

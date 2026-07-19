@@ -11,7 +11,6 @@ export async function POST(req: Request) {
     const principal = await getRequestPrincipal(req, {
       allowBearer: true,
       allowSessionCookie: true,
-      allowLegacyCookie: true,
     });
 
     if (!principal) {

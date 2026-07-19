@@ -7,6 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { TubesBackground } from "@/components/ui/neon-flow";
 import { ROUTES } from "@/lib/routes";
+import { hasAdminClaim } from "@/lib/auth/admin-policy";
 
 export default function AuthenticatedLayout({
     children,
@@ -36,7 +37,7 @@ function AuthenticatedLayoutInner({
         }
 
         if (!isLoading && isAuthenticated && user) {
-            const isAdmin = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"].includes(user.email);
+            const isAdmin = hasAdminClaim(user);
             if (subscriptionStatus !== 'premium' && !isAdmin) {
                 // Permitir rotas que possuem seus próprios controles ou são grátis
                 const isFreeRoute = 
@@ -68,7 +69,7 @@ function AuthenticatedLayoutInner({
 
     // Proteção rigorosa de renderização (removida para permitir rotas livres)
     // As rotas premium lidam com a trava visual (PremiumWall)
-    const isAdminCheck = user && ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"].includes(user.email);
+    const isAdminCheck = hasAdminClaim(user);
     if (subscriptionStatus !== 'premium' && !isAdminCheck) {
         const isFreeRoute = 
             pathname.startsWith(ROUTES.app.dashboard) ||

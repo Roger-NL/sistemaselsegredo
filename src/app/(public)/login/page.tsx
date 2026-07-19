@@ -51,18 +51,18 @@ function LoginPageContent() {
 
     const callbackUrl = searchParams?.get("callbackUrl");
 
-    const getPostLoginTarget = useCallback((email?: string | null) => {
+    const getPostLoginTarget = useCallback((isAdmin?: boolean) => {
         return resolvePostAuthTarget({
             mode: "login",
             callbackUrl,
-            email,
+            isAdmin,
         });
     }, [callbackUrl]);
 
     // Auto-redirect if already logged in
     useEffect(() => {
         if (!isLoading && isAuthenticated) {
-            router.replace(getPostLoginTarget(user?.email));
+            router.replace(getPostLoginTarget(user?.isAdmin));
         }
     }, [getPostLoginTarget, isAuthenticated, isLoading, router, user]);
 
@@ -80,7 +80,7 @@ function LoginPageContent() {
         const result = await login(identifier, password);
 
         if (result.success) {
-            router.replace(getPostLoginTarget(result.user?.email));
+            router.replace(getPostLoginTarget(result.user?.isAdmin));
         } else {
             setError(result.error || "Erro ao fazer login");
             setIsSubmitting(false);
@@ -191,7 +191,7 @@ function LoginPageContent() {
                                 setIsSubmitting(true);
                                 const result = await loginWithGoogle();
                                 if (result.success) {
-                                    router.replace(getPostLoginTarget(result.user?.email));
+                                    router.replace(getPostLoginTarget(result.user?.isAdmin));
                                 } else {
                                     setError(result.error || "Erro ao entrar com Google");
                                     setIsSubmitting(false);
@@ -228,19 +228,7 @@ function LoginPageContent() {
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <input
-                                id="remember-me"
-                                name="remember-me"
-                                type="checkbox"
-                                className="h-4 w-4 rounded border-white/10 bg-black/40 text-white focus:ring-offset-0 focus:ring-0"
-                            />
-                            <label htmlFor="remember-me" className="ml-2 block text-xs text-slate-400">
-                                Lembrar sessão
-                            </label>
-                        </div>
-
+                    <div className="flex items-center justify-end">
                         <div className="text-xs">
                             <button
                                 type="button"

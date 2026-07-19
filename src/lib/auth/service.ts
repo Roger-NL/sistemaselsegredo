@@ -15,33 +15,12 @@ import {
     sendPasswordResetEmail,
     User as FirebaseUser
 } from "firebase/auth";
-import {
-    collection,
-    doc,
-    setDoc,
-    getDoc,
-    getDocs,
-    query,
-    updateDoc,
-    where,
-    deleteField,
-} from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, deleteField } from "firebase/firestore";
 import type { FirebaseError } from "firebase/app";
 import { auth, db } from "@/lib/firebase";
-import Cookies from 'js-cookie';
-import {
-    buildPremiumAccessUpdate,
-    buildStoredProgressSnapshot,
-    deriveLegacyApprovedPillar,
-    normalizeInviteCode,
-    type WriterExamStatus,
-    type WriterLiveSessionStatus,
-} from "@/lib/auth/premium-access";
+import { normalizeInviteCode } from "@/lib/auth/premium-access";
 import { readStoredProgressSnapshot, type ProgressSnapshot } from "@/lib/progress";
 import { normalizeStudyStats, type StudyStats } from "@/lib/study/stats";
-
-// ADMIN LIST (Hardcoded for MVP Phase)
-const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
 
 // Types
 export type SubscriptionStatus = 'free' | 'premium' | 'expired';
@@ -82,6 +61,7 @@ export interface User {
     localPillarStatus?: Record<string, string>; // Optional: Sync the full pillar status map if desired
     progressSnapshot?: ProgressSnapshot;
     studyStats?: StudyStats;
+    isAdmin?: boolean;
 }
 
 export interface AuthResult {
@@ -103,6 +83,7 @@ function buildFallbackUserFromAuth(fbUser: FirebaseUser): User {
         currentStreak: 0,
         subscriptionStatus: "free",
         approvedPillar: 1,
+        isAdmin: false,
     };
 }
 
@@ -150,89 +131,6 @@ function normalizeSubscriptionStatus(status: User["subscriptionStatus"] | "activ
     return status === "active" ? "free" : (status ?? "free");
 }
 
-async function getLatestExamStatusForUser(userId: string, pillarId: number): Promise<WriterExamStatus> {
-    const snapshot = await getDocs(
-        query(
-            collection(db, "pillar_exams"),
-            where("userId", "==", userId),
-            where("pillarId", "==", pillarId)
-        )
-    );
-
-    if (snapshot.empty) {
-        return "not_started";
-    }
-
-    const exams = snapshot.docs
-        .map((item) => item.data() as { status?: WriterExamStatus; createdAt?: { toMillis?: () => number } | null })
-        .sort((left, right) => {
-            const leftTime = left.createdAt?.toMillis?.() ?? 0;
-            const rightTime = right.createdAt?.toMillis?.() ?? 0;
-            return rightTime - leftTime;
-        });
-
-    return exams[0]?.status ?? "not_started";
-}
-
-async function recomputeClientProgressSnapshot(userId: string) {
-    const userRef = doc(db, "users", userId);
-    const userSnapshot = await getDoc(userRef);
-    if (!userSnapshot.exists()) {
-        return;
-    }
-
-    const userData = userSnapshot.data() as {
-        subscriptionStatus?: string;
-        completedPillarModules?: string[];
-        approvedPillar?: number;
-    };
-
-    const [pillar1ExamStatus, pillar2ExamStatus, liveSessionSnapshot] = await Promise.all([
-        getLatestExamStatusForUser(userId, 1),
-        getLatestExamStatusForUser(userId, 2),
-        getDoc(doc(db, "live_sessions", `${userId}_p2`)),
-    ]);
-
-    const snapshot = buildStoredProgressSnapshot({
-        subscriptionStatus: userData.subscriptionStatus,
-        completedPillarModules: userData.completedPillarModules,
-        pillar1ExamStatus,
-        pillar2ExamStatus,
-        pillar2LiveSessionStatus: (
-            liveSessionSnapshot.exists()
-                ? (liveSessionSnapshot.data()?.status as WriterLiveSessionStatus | undefined)
-                : "not_created"
-        ),
-        currentApprovedPillar: typeof userData.approvedPillar === "number" ? userData.approvedPillar : 1,
-    });
-
-    await updateDoc(userRef, {
-        progressSnapshot: snapshot,
-        approvedPillar: deriveLegacyApprovedPillar(snapshot),
-    });
-}
-
-function getLegacyRoleHint(email: string): "admin" | "student" {
-    return ADMIN_EMAILS.includes(email) ? "admin" : "student";
-}
-
-/**
- * Transitional client-side hints used by legacy SSR/route guards.
- * These cookies are not an authorization source and should disappear once
- * the server-side session rollout is complete.
- */
-export function setLegacySessionHintCookies(user: Pick<User, "id" | "email" | "subscriptionStatus">): void {
-    Cookies.set('es_session_token', user.id, { expires: 7, path: '/' });
-    Cookies.set('es_user_role', getLegacyRoleHint(user.email), { expires: 7, path: '/' });
-    Cookies.set('es_user_status', user.subscriptionStatus, { expires: 7, path: '/' });
-}
-
-export function clearLegacySessionHintCookies(): void {
-    Cookies.remove('es_session_token', { path: '/' });
-    Cookies.remove('es_user_role', { path: '/' });
-    Cookies.remove('es_user_status', { path: '/' });
-}
-
 export function isFirestorePermissionError(error: unknown): boolean {
     const errorCode = getFirebaseErrorCode(error);
     return errorCode === "permission-denied" || errorCode === "firestore/permission-denied";
@@ -254,6 +152,8 @@ export function initAuth(): void {
  * Convert Firebase User + Firestore Data to App User
  */
 async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
+    const tokenResult = await fbUser.getIdTokenResult();
+    const isAdmin = tokenResult.claims.admin === true;
     const userDocRef = doc(db, "users", fbUser.uid);
     const userDoc = await getDoc(userDocRef);
 
@@ -268,7 +168,7 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
         return {
             id: fbUser.uid,
             name: typeof data.name === "string" ? data.name : fbUser.displayName || "Usuário",
-            email: typeof data.email === "string" ? data.email : fbUser.email || "",
+            email: fbUser.email || (typeof data.email === "string" ? data.email : ""),
             createdAt: typeof data.createdAt === "string" ? data.createdAt : fbUser.metadata.creationTime || new Date().toISOString(),
             currentStreak: typeof data.currentStreak === "number" ? data.currentStreak : 0,
             lastLoginDate: typeof data.lastLoginDate === "string" ? data.lastLoginDate : undefined,
@@ -309,6 +209,7 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
                     : undefined,
             progressSnapshot: readStoredProgressSnapshot((data as { progressSnapshot?: unknown }).progressSnapshot) ?? undefined,
             studyStats: normalizeStudyStats((data as { studyStats?: unknown }).studyStats),
+            isAdmin,
         };
     }
     return null;
@@ -323,6 +224,7 @@ export async function loginWithGoogle(): Promise<AuthResult> {
         const result = await signInWithPopup(auth, provider);
         const fbUser = result.user;
         const fallbackUser = buildFallbackUserFromAuth(fbUser);
+        fallbackUser.isAdmin = (await fbUser.getIdTokenResult()).claims.admin === true;
 
         let user: User = fallbackUser;
 
@@ -331,9 +233,6 @@ export async function loginWithGoogle(): Promise<AuthResult> {
             const userDoc = await getDoc(userDocRef);
 
             if (userDoc.exists()) {
-                await updateDoc(userDocRef, {
-                    lastLoginDate: new Date().toISOString()
-                });
                 user = (await mapFirebaseUser(fbUser)) ?? fallbackUser;
             } else {
                 const newUser: User = {
@@ -343,7 +242,16 @@ export async function loginWithGoogle(): Promise<AuthResult> {
                     lastLoginDate: new Date().toISOString(),
                 };
 
-                await setDoc(userDocRef, newUser);
+                await setDoc(userDocRef, {
+                    id: newUser.id,
+                    name: newUser.name,
+                    email: newUser.email,
+                    createdAt: newUser.createdAt,
+                    currentStreak: newUser.currentStreak,
+                    lastLoginDate: newUser.lastLoginDate,
+                    subscriptionStatus: "free",
+                    approvedPillar: 1,
+                });
                 user = newUser;
             }
         } catch (firestoreError) {
@@ -353,8 +261,6 @@ export async function loginWithGoogle(): Promise<AuthResult> {
 
             console.warn("Google login succeeded, but Firestore profile access was denied. Using auth fallback user.", firestoreError);
         }
-
-        setLegacySessionHintCookies(user);
 
         return { success: true, user };
 
@@ -373,6 +279,7 @@ export async function login(identifier: string, password: string): Promise<AuthR
         const userCredential = await signInWithEmailAndPassword(auth, identifier, password);
         const fbUser = userCredential.user;
         const fallbackUser = buildFallbackUserFromAuth(fbUser);
+        fallbackUser.isAdmin = (await fbUser.getIdTokenResult()).claims.admin === true;
 
         let user = fallbackUser;
 
@@ -385,33 +292,6 @@ export async function login(identifier: string, password: string): Promise<AuthR
 
             user = firestoreUser;
 
-            // --- STREAK LOGIC ---
-            const today = new Date().toISOString().split('T')[0];
-            const lastLogin = user.lastLoginDate ? user.lastLoginDate.split('T')[0] : null;
-            let newStreak = user.currentStreak || 0;
-
-            if (lastLogin !== today) {
-                if (lastLogin) {
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-                    if (lastLogin === yesterdayStr) {
-                        newStreak += 1;
-                    } else {
-                        newStreak = 1; // Reset
-                    }
-                } else {
-                    newStreak = 1; // First login
-                }
-
-                const userRef = doc(db, "users", user.id);
-                await updateDoc(userRef, {
-                    currentStreak: newStreak,
-                    lastLoginDate: new Date().toISOString()
-                });
-                user.currentStreak = newStreak;
-            }
         } catch (firestoreError) {
             if (!isFirestorePermissionError(firestoreError)) {
                 throw firestoreError;
@@ -419,8 +299,6 @@ export async function login(identifier: string, password: string): Promise<AuthR
 
             console.warn("Email login succeeded, but Firestore profile access was denied. Using auth fallback user.", firestoreError);
         }
-
-        setLegacySessionHintCookies(user);
 
         return { success: true, user };
 
@@ -465,11 +343,21 @@ export async function register(
             lastLoginDate: new Date().toISOString(),
             subscriptionStatus: 'free', // Freemium Start
             approvedPillar: 1, // Start at Pillar 1
+            isAdmin: false,
         };
 
         try {
             await Promise.all([
-                setDoc(doc(db, "users", fbUser.uid), newUser),
+                setDoc(doc(db, "users", fbUser.uid), {
+                    id: newUser.id,
+                    name: newUser.name,
+                    email: newUser.email,
+                    createdAt: newUser.createdAt,
+                    currentStreak: newUser.currentStreak,
+                    lastLoginDate: newUser.lastLoginDate,
+                    subscriptionStatus: "free",
+                    approvedPillar: 1,
+                }),
                 firebaseUpdateProfile(fbUser, { displayName: name })
             ]);
         } catch (firestoreError) {
@@ -479,8 +367,6 @@ export async function register(
 
             console.warn("Registration succeeded, but Firestore profile creation was denied. Using auth fallback user.", firestoreError);
         }
-
-        setLegacySessionHintCookies(newUser);
 
         return { success: true, user: newUser };
 
@@ -512,6 +398,8 @@ export async function updateProfile(
 
         if (currentUser.email !== email) {
             await updateEmail(currentUser, email);
+            // Refresh the Firebase claim before Firestore validates the profile copy.
+            await currentUser.getIdToken(true);
         }
 
         if (currentUser.displayName !== name) {
@@ -595,7 +483,6 @@ export async function resetPassword(email: string): Promise<AuthResult> {
  */
 export async function logout(): Promise<void> {
     await signOut(auth);
-    clearLegacySessionHintCookies();
 }
 
 /**
@@ -702,35 +589,6 @@ export async function activateWithInvite(userId: string, code: string): Promise<
 }
 
 /**
- * Activate with Payment
- */
-export async function activateWithPayment(userId: string, paymentId: string): Promise<AuthResult> {
-    try {
-        const userRef = doc(db, "users", userId);
-        const userSnap = await getDoc(userRef);
-        const currentApprovedPillar =
-            userSnap.exists() && typeof userSnap.data()?.approvedPillar === "number"
-                ? userSnap.data()!.approvedPillar
-                : 1;
-
-        // Transitional legacy path:
-        // checkout + verification already converge on the server-side billing flow.
-        // We keep this helper compatible for older callers, but it still writes directly
-        // until the billing migration is moved to the same protected server pattern.
-        await updateDoc(userRef, buildPremiumAccessUpdate({
-            currentApprovedPillar,
-            paymentId,
-        }));
-        await recomputeClientProgressSnapshot(userId);
-
-        const user = await mapFirebaseUser(auth.currentUser!);
-        return { success: true, user: user! };
-    } catch {
-        return { success: false, error: 'Erro ao processar pagamento.' };
-    }
-}
-
-/**
  * Check Subscription Status
  */
 export function checkSubscriptionStatus(user: User): SubscriptionStatus | 'expired' {
@@ -753,7 +611,10 @@ export function checkSubscriptionStatus(user: User): SubscriptionStatus | 'expir
  */
 export async function updateUserProgress(userId: string, progressData: Partial<User>): Promise<void> {
     try {
-        const userRef = doc(db, "users", userId);
+        const currentUser = auth.currentUser;
+        if (!currentUser || currentUser.uid !== userId) {
+            throw new Error("Usuario nao autenticado.");
+        }
         // Only update fields that are actually progress related to be safe
         const safeUpdate = {
             ...(progressData.chosenSpecialization !== undefined && { chosenSpecialization: progressData.chosenSpecialization }),
@@ -767,18 +628,20 @@ export async function updateUserProgress(userId: string, progressData: Partial<U
         };
 
         if (Object.keys(safeUpdate).length > 0) {
-            await updateDoc(userRef, safeUpdate);
-        }
-
-        const shouldRefreshProgressSnapshot =
-            progressData.completedPillarModules !== undefined ||
-            progressData.localPillarStatus !== undefined ||
-            progressData.approvedPillar !== undefined ||
-            progressData.chosenSpecialization !== undefined ||
-            progressData.completedSpecializations !== undefined;
-
-        if (shouldRefreshProgressSnapshot) {
-            await recomputeClientProgressSnapshot(userId);
+            const token = await currentUser.getIdToken();
+            const response = await fetch("/api/progress", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                credentials: "include",
+                body: JSON.stringify(safeUpdate),
+            });
+            if (!response.ok) {
+                const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+                throw new Error(payload?.error || "PROGRESS_UPDATE_FAILED");
+            }
         }
     } catch (error) {
         if (!isFirestorePermissionError(error) && !isFirestoreQuotaError(error)) {

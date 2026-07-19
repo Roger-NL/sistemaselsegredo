@@ -1,13 +1,23 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { ROUTES } from "@/lib/routes";
 import { Check, ArrowRight, BookOpen, Fingerprint, Award, Users } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+import { hasAdminClaim } from "@/lib/auth/admin-policy";
 
 export default function ObrigadoPage() {
     const router = useRouter();
+    const { isLoading, subscriptionStatus, user } = useAuth();
+    const hasAccess = subscriptionStatus === "premium" || hasAdminClaim(user);
+
+    useEffect(() => {
+        if (!isLoading && !hasAccess) {
+            router.replace(ROUTES.app.dashboard);
+        }
+    }, [hasAccess, isLoading, router]);
 
     const navigateSafely = useCallback(
         (href: string) => {
@@ -35,6 +45,10 @@ export default function ObrigadoPage() {
     const handlePillar2 = () => {
         navigateSafely(`${ROUTES.app.pillar}/2`);
     };
+
+    if (isLoading || !hasAccess) {
+        return null;
+    }
 
     return (
         <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
@@ -83,7 +97,7 @@ export default function ObrigadoPage() {
                     </h1>
 
                     <p className="mx-auto mb-8 max-w-lg text-base leading-relaxed text-slate-400 sm:mb-10 md:text-lg">
-                        Seu pagamento foi confirmado com sucesso. Você agora faz parte da <span className="text-white font-medium">jornada premium</span> e seu acesso foi liberado na plataforma.
+                        Seu acesso foi ativado com sucesso. Você agora faz parte da <span className="text-white font-medium">jornada completa</span> e as próximas etapas serão liberadas conforme a sua progressão.
                     </p>
 
                     {/* Premium Unlocked Features Grid */}
@@ -96,7 +110,7 @@ export default function ObrigadoPage() {
                         <div className="flex min-h-[104px] items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:min-h-[132px]">
                             <Fingerprint className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400/80" strokeWidth={1.5} />
                             <div className="min-w-0">
-                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Jornada Premium</p>
+                                <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Jornada Completa</p>
                                 <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Acesso liberado conforme sua progressão</p>
                             </div>
                         </div>
@@ -111,7 +125,7 @@ export default function ObrigadoPage() {
                             <Award className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400/80" strokeWidth={1.5} />
                             <div className="min-w-0">
                                 <p className="mb-1 text-sm font-semibold uppercase tracking-[0.14em] text-slate-200 sm:text-xs sm:tracking-wider">Acompanhamento</p>
-                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Fluxo premium com acompanhamento e evolução controlada</p>
+                                <p className="text-sm leading-6 text-slate-400 sm:text-xs sm:leading-5">Acompanhamento e evolução controlada durante o beta</p>
                             </div>
                         </div>
                         <div className="flex min-h-[104px] items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4 sm:min-h-[132px]">

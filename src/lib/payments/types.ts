@@ -1,6 +1,6 @@
 export type CheckoutPaymentMethod = "PIX" | "CREDIT_CARD";
 
-export type CreditCardCheckoutMode = "INVOICE_URL" | "DIRECT";
+export type CreditCardCheckoutMode = "INVOICE_URL";
 
 export type CheckoutPlan = "lifetime" | "specialty";
 
@@ -19,38 +19,12 @@ export type AsaasPaymentStatus =
   | "DUNNING_RECEIVED"
   | "AWAITING_RISK_ANALYSIS";
 
-export interface CheckoutCustomerInput {
+interface CheckoutCustomerInput {
   userId: string;
   localCustomerId?: string;
   name: string;
   email: string;
   cpfCnpj: string;
-  phone?: string;
-  mobilePhone?: string;
-  postalCode?: string;
-  addressNumber?: string;
-  addressComplement?: string | null;
-  remoteIp?: string;
-}
-
-export interface CheckoutCardInput {
-  holderName: string;
-  number: string;
-  expiryMonth: string;
-  expiryYear: string;
-  ccv: string;
-  token?: string;
-}
-
-export interface CheckoutCardHolderInfoInput {
-  name: string;
-  email: string;
-  cpfCnpj: string;
-  postalCode: string;
-  addressNumber: string;
-  addressComplement?: string | null;
-  phone?: string;
-  mobilePhone?: string;
 }
 
 export interface CheckoutRequestInput extends CheckoutCustomerInput {
@@ -60,8 +34,6 @@ export interface CheckoutRequestInput extends CheckoutCustomerInput {
   paymentMethod?: CheckoutPaymentMethod;
   creditCardMode?: CreditCardCheckoutMode;
   installmentCount?: number;
-  card?: CheckoutCardInput;
-  cardHolderInfo?: CheckoutCardHolderInfoInput;
 }
 
 export interface PendingCheckoutPayment {

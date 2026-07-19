@@ -1,6 +1,8 @@
-import * as admin from 'firebase-admin';
+import { cert, getApp, getApps, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 
-if (!admin.apps.length) {
+if (!getApps().length) {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
 
   if (raw) {
@@ -10,18 +12,20 @@ if (!admin.apps.length) {
       const cleaned = trimmed.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
       const serviceAccount = JSON.parse(cleaned);
       serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
+      initializeApp({
+        credential: cert(serviceAccount),
       });
     } catch (e) {
       console.error('[firebase-admin] Erro ao parsear FIREBASE_SERVICE_ACCOUNT:', e);
-      admin.initializeApp({ projectId: 'esenglishacad' });
+      initializeApp({ projectId: 'esenglishacad' });
     }
   } else {
     console.warn('[firebase-admin] FIREBASE_SERVICE_ACCOUNT não configurado — usando ADC (falha no Vercel sem esta var)');
-    admin.initializeApp({ projectId: 'esenglishacad' });
+    initializeApp({ projectId: 'esenglishacad' });
   }
 }
 
-export const adminDb = admin.firestore();
-export const adminAuth = admin.auth();
+const adminApp = getApp();
+
+export const adminDb = getFirestore(adminApp);
+export const adminAuth = getAuth(adminApp);

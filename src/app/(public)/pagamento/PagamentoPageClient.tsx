@@ -15,14 +15,6 @@ import {
     type PaymentReconciliationState,
     type VerifyPaymentApiResponse
 } from "@/features/payment/payment-mode";
-import { DirectCardForm } from "@/components/payments/DirectCardForm";
-import {
-    buildDirectCardPayload,
-    digitsOnly,
-    EMPTY_DIRECT_CARD_FORM,
-    getDirectCardFieldErrors
-} from "@/lib/payments/direct-card";
-import type { DirectCardFieldErrors } from "@/lib/payments/direct-card";
 import { calculateCheckoutInstallmentTotals, MAX_CHECKOUT_INSTALLMENTS } from "@/lib/payments/installments";
 import {
     Check,
@@ -39,29 +31,6 @@ import {
 
 const PAYMENT_AMOUNT = 297;
 const SPECIALTY_TEST_PAYMENT_AMOUNT = 50;
-function detectCardBrand(cardNumber: string) {
-    const digits = digitsOnly(cardNumber);
-
-    if (digits.startsWith("4")) {
-        return "visa";
-    }
-
-    const firstTwo = Number(digits.slice(0, 2));
-    const firstFour = Number(digits.slice(0, 4));
-    if ((firstTwo >= 51 && firstTwo <= 55) || (firstFour >= 2221 && firstFour <= 2720)) {
-        return "mastercard";
-    }
-
-    if (/^3[47]/.test(digits)) {
-        return "amex";
-    }
-
-    if (/^(4011|4312|4389|4514|4576|5041|5066|5067|509|627780|636297|636368)/.test(digits)) {
-        return "elo";
-    }
-
-    return "unknown";
-}
 
 function formatCurrency(value: number) {
     return value.toLocaleString("pt-BR", {
@@ -85,39 +54,22 @@ async function createAuthenticatedHeaders() {
     };
 }
 
-type CheckoutField =
-    | "cpf"
-    | "holderName"
-    | "number"
-    | "expiryMonth"
-    | "expiryYear"
-    | "ccv"
-    | "postalCode"
-    | "addressNumber"
-    | "addressComplement"
-    | "phone";
-
 type CheckoutFieldErrors = {
     cpf?: string;
-} & DirectCardFieldErrors;
+};
 
-const CHECKOUT_FIELD_ORDER: CheckoutField[] = [
-    "cpf",
-    "holderName",
-    "number",
-    "expiryMonth",
-    "expiryYear",
-    "ccv",
-    "postalCode",
-    "addressNumber",
-    "phone",
-];
+type PagamentoPageClientProps = {
+    betaFreeMode: boolean;
+};
 
-function PagamentoPageContent() {
+function PagamentoPageContent({ betaFreeMode }: PagamentoPageClientProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { user, subscriptionStatus, activateWithInvite, isAuthenticated, isLoading, refreshUser } = useAuth();
-    const checkoutPlan = searchParams.get("plan") === "specialty" ? "specialty" : "lifetime";
+    const checkoutPlan =
+        process.env.NODE_ENV !== "production" && searchParams.get("plan") === "specialty"
+            ? "specialty"
+            : "lifetime";
     const isSpecialtyTestMode = checkoutPlan === "specialty";
     const currentPaymentReturnTo = useMemo(
         () => buildPaymentReturnTo(searchParams.toString()),
@@ -125,10 +77,9 @@ function PagamentoPageContent() {
     );
 
     const forceShowInvite = searchParams.get("invite") === "1" || searchParams.get("beta") === "1";
-    const [showCodeInput, setShowCodeInput] = useState(forceShowInvite);
+    const [showCodeInput, setShowCodeInput] = useState(betaFreeMode || forceShowInvite);
     const [inviteCode, setInviteCode] = useState('');
     const [cpf, setCpf] = useState('');
-    const [cardForm, setCardForm] = useState(EMPTY_DIRECT_CARD_FORM);
     const [installmentCount, setInstallmentCount] = useState(1);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<"PIX" | "CREDIT_CARD">("PIX");
     const [activePaymentMethod, setActivePaymentMethod] = useState<"PIX" | "CREDIT_CARD" | null>(null);
@@ -151,7 +102,6 @@ function PagamentoPageContent() {
         new Date(pixExpiresAt).getTime() <= Date.now()
     );
     const checkoutAmount = isSpecialtyTestMode ? SPECIALTY_TEST_PAYMENT_AMOUNT : PAYMENT_AMOUNT;
-    const detectedCardBrand = detectCardBrand(cardForm.number);
     const maxInstallments = MAX_CHECKOUT_INSTALLMENTS;
     const installmentTotals = calculateCheckoutInstallmentTotals(checkoutAmount, installmentCount);
     const normalizedInstallmentCount = installmentTotals.installmentCount;
@@ -159,18 +109,9 @@ function PagamentoPageContent() {
     const installmentTotalAmount = installmentTotals.totalAmount;
     const installmentFeeAmount = installmentTotals.feeAmount;
     const hasInstallmentFee = installmentTotals.hasFee;
-    const maskedCardNumber = cardForm.number || "0000 0000 0000 0000";
-    const maskedHolderName = (cardForm.holderName || "NOME DO TITULAR").toUpperCase();
-    const maskedExpiry = `${cardForm.expiryMonth || "MM"}/${(cardForm.expiryYear || "AA").slice(-2)}`;
-    const shouldAskPhone = digitsOnly(cardForm.phone || user?.phone || "").length < 10;
     const installmentOptions = Array.from({ length: maxInstallments }, (_, index) => index + 1);
     const cpfInputRef = useRef<HTMLInputElement | null>(null);
-    const cardSectionRef = useRef<HTMLDivElement | null>(null);
-    const fieldRefs = useRef<Partial<Record<CheckoutField, HTMLInputElement | null>>>({});
-    const activeInlineError = useMemo(
-        () => CHECKOUT_FIELD_ORDER.map((field) => fieldErrors[field]).find(Boolean) || "",
-        [fieldErrors]
-    );
+    const activeInlineError = fieldErrors.cpf || "";
     const hasPendingPayment = Boolean(
         paymentId ||
         qrCodeData ||
@@ -191,35 +132,26 @@ function PagamentoPageContent() {
         [hasPendingPayment, isAlreadyPremium, isAuthenticated, isLoading, recoveringPix, reconciliationState, showCodeInput]
     );
 
-    const setFieldRef = (field: CheckoutField) => (element: HTMLInputElement | null) => {
-        fieldRefs.current[field] = element;
-    };
-
-    const clearFieldError = (field: CheckoutField) => {
+    const clearCpfError = () => {
         setFieldErrors((current) => {
-            if (!current[field]) {
+            if (!current.cpf) {
                 return current;
             }
 
             const next = { ...current };
-            delete next[field];
+            delete next.cpf;
             return next;
         });
     };
 
-    const scrollToField = (field: CheckoutField) => {
-        const element = field === "cpf" ? cpfInputRef.current : fieldRefs.current[field];
+    const scrollToCpf = () => {
+        const element = cpfInputRef.current;
         if (element) {
             element.scrollIntoView({ behavior: "smooth", block: "center" });
             window.setTimeout(() => {
                 element.focus();
                 element.select?.();
             }, 250);
-            return;
-        }
-
-        if (field !== "cpf" && cardSectionRef.current) {
-            cardSectionRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
         }
     };
 
@@ -233,14 +165,6 @@ function PagamentoPageContent() {
                 : "Seu CPF precisa ter 11 dígitos.";
         }
 
-        if (selectedPaymentMethod === "CREDIT_CARD") {
-            const cardErrors = getDirectCardFieldErrors(cardForm, {
-                requireHolderName: true,
-                requirePhone: shouldAskPhone,
-            });
-            Object.assign(nextErrors, cardErrors);
-        }
-
         return nextErrors;
     };
 
@@ -249,28 +173,13 @@ function PagamentoPageContent() {
     }, [maxInstallments]);
 
     useEffect(() => {
-        setCardForm((current) => {
-            const nextPhone = current.phone || user?.phone || "";
-
-            if (nextPhone === current.phone) {
-                return current;
-            }
-
-            return {
-                ...current,
-                phone: nextPhone,
-            };
-        });
-    }, [user?.phone]);
-
-    useEffect(() => {
         if (isAlreadyPremium && !isLoading) {
             router.replace(ROUTES.app.thankYou);
         }
     }, [router, isAlreadyPremium, isLoading]);
 
     useEffect(() => {
-        if (!user?.id || isLoading || paymentId || isAlreadyPremium) {
+        if (betaFreeMode || !user?.id || isLoading || paymentId || isAlreadyPremium) {
             return;
         }
 
@@ -336,10 +245,10 @@ function PagamentoPageContent() {
         return () => {
             cancelled = true;
         };
-    }, [user?.id, isLoading, paymentId, isAlreadyPremium, refreshUser, router, checkoutPlan, isSpecialtyTestMode]);
+    }, [betaFreeMode, user?.id, isLoading, paymentId, isAlreadyPremium, refreshUser, router, checkoutPlan, isSpecialtyTestMode]);
 
     useEffect(() => {
-        if (!paymentId || !user?.id || isAlreadyPremium) return;
+        if (betaFreeMode || !paymentId || !user?.id || isAlreadyPremium) return;
 
         let navigationCompleted = false;
         let pollingPaused = false;
@@ -391,7 +300,7 @@ function PagamentoPageContent() {
             clearInterval(interval);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-    }, [paymentId, user?.id, isAlreadyPremium, router, refreshUser, isSpecialtyTestMode]);
+    }, [betaFreeMode, paymentId, user?.id, isAlreadyPremium, router, refreshUser, isSpecialtyTestMode]);
 
     const redirectToLogin = () => {
         router.push(`${ROUTES.auth.login}?callbackUrl=${encodeURIComponent(currentPaymentReturnTo)}`);
@@ -442,6 +351,10 @@ function PagamentoPageContent() {
     };
 
     const createPayment = async (options?: { redirectOnCard?: boolean }) => {
+        if (betaFreeMode) {
+            return;
+        }
+
         const redirectOnCard = options?.redirectOnCard ?? true;
         setError('');
         setHasAttemptedSubmit(true);
@@ -454,14 +367,9 @@ function PagamentoPageContent() {
         const validationErrors = validateCheckoutFields();
         setFieldErrors(validationErrors);
 
-        const firstErrorField = CHECKOUT_FIELD_ORDER.find((field) => validationErrors[field]);
-        if (firstErrorField) {
-            setError(
-                firstErrorField === "cpf"
-                    ? "Revise os dados destacados antes de continuar."
-                    : "Existem campos do pagamento com erro. Corrija para continuar."
-            );
-            scrollToField(firstErrorField);
+        if (validationErrors.cpf) {
+            setError("Revise os dados destacados antes de continuar.");
+            scrollToCpf();
             return;
         }
 
@@ -471,15 +379,7 @@ function PagamentoPageContent() {
 
         try {
             const headers = await createAuthenticatedHeaders();
-            const endpoint = selectedPaymentMethod === "CREDIT_CARD" ? '/api/checkout/card/direct' : '/api/checkout';
-            const directCardPayload = selectedPaymentMethod === "CREDIT_CARD"
-                ? buildDirectCardPayload(cardForm, {
-                    name: user.name || "Novo Aluno",
-                    email: user.email,
-                    cpfCnpj: cpf.replace(/\D/g, ''),
-                })
-                : {};
-            const res = await fetch(endpoint, {
+            const res = await fetch('/api/checkout', {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({
@@ -488,9 +388,8 @@ function PagamentoPageContent() {
                     cpfCnpj: cpf.replace(/\D/g, ''),
                     plan: checkoutPlan,
                     paymentMethod: selectedPaymentMethod,
-                    creditCardMode: selectedPaymentMethod === "CREDIT_CARD" ? "DIRECT" : undefined,
+                    creditCardMode: selectedPaymentMethod === "CREDIT_CARD" ? "INVOICE_URL" : undefined,
                     installmentCount: selectedPaymentMethod === "CREDIT_CARD" ? normalizedInstallmentCount : 1,
-                    ...directCardPayload
                 })
             });
 
@@ -541,9 +440,6 @@ function PagamentoPageContent() {
             }
 
             setError(err instanceof Error ? err.message : 'Erro de comunicação com o servidor.');
-            if (selectedPaymentMethod === "CREDIT_CARD") {
-                cardSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-            }
         } finally {
             setLoading(false);
         }
@@ -672,11 +568,11 @@ function PagamentoPageContent() {
                     Ativar acesso beta
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-zinc-600">
-                    Digite abaixo o codigo que voce recebeu. Se ele estiver valido, seu acesso premium sera liberado sem pagamento.
+              Digite abaixo o código que você recebeu. Se ele estiver válido, seu acesso completo será liberado sem pagamento.
                 </p>
                 {!isAuthenticated && (
                     <p className="mt-3 text-xs leading-relaxed text-zinc-500">
-                        Se voce ainda nao entrou na conta, o login sera pedido no proximo passo e o contexto desta pagina sera preservado.
+                        Se você ainda não entrou na conta, o login será pedido no próximo passo e o contexto desta página será preservado.
                     </p>
                 )}
             </div>
@@ -686,6 +582,9 @@ function PagamentoPageContent() {
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                     placeholder="CODIGO"
+                    aria-label="Código de convite"
+                    autoComplete="one-time-code"
+                    required
                     className="flex-1 rounded-xl border border-zinc-200 bg-white px-3 py-3 text-center font-mono text-sm text-zinc-950 outline-none transition focus:border-zinc-950 focus:ring-4 focus:ring-zinc-950/10"
                 />
                 <button
@@ -693,16 +592,18 @@ function PagamentoPageContent() {
                     className="rounded-xl bg-zinc-950 px-4 py-3 text-xs font-bold text-white transition-colors hover:bg-zinc-800 disabled:bg-zinc-400"
                     disabled={loading}
                 >
-                    OK
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-label="A validar convite" /> : "ATIVAR"}
                 </button>
             </div>
-            <button
-                type="button"
-                onClick={() => setShowCodeInput(false)}
-                className="mt-4 text-xs text-zinc-500 transition hover:text-zinc-950"
-            >
-                Voltar para o checkout
-            </button>
+            {!betaFreeMode && (
+                <button
+                    type="button"
+                    onClick={() => setShowCodeInput(false)}
+                    className="mt-4 text-xs text-zinc-500 transition hover:text-zinc-950"
+                >
+                    Voltar para o checkout
+                </button>
+            )}
         </motion.form>
     );
 
@@ -818,7 +719,7 @@ function PagamentoPageContent() {
                         <span className="text-sm font-bold uppercase tracking-[0.18em]">Cartao</span>
                     </div>
                     <p className={`text-sm leading-relaxed ${selectedPaymentMethod === "CREDIT_CARD" ? "text-white/70" : "text-zinc-500"}`}>
-                        Checkout direto com parcelamento na fatura e confirmacao imediata quando aprovado.
+                        Parcelamento no checkout seguro alojado pelo Asaas; os dados do cartao nao passam pela aplicacao.
                     </p>
                 </button>
             </div>
@@ -831,7 +732,7 @@ function PagamentoPageContent() {
                     value={cpf}
                     onChange={(e) => {
                         setCpf(e.target.value);
-                        clearFieldError("cpf");
+                        clearCpfError();
                     }}
                     ref={cpfInputRef}
                     aria-invalid={Boolean(fieldErrors.cpf)}
@@ -850,35 +751,16 @@ function PagamentoPageContent() {
                 )}
             </div>
             {selectedPaymentMethod === "CREDIT_CARD" && (
-                <div
-                    ref={cardSectionRef}
-                    className="space-y-5 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 sm:p-5"
-                >
-                    <div className="overflow-hidden rounded-[1.5rem] border border-zinc-800 bg-[linear-gradient(135deg,#111111_0%,#27272a_55%,#0a0a0a_100%)] p-5 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-[10px] uppercase tracking-[0.34em] text-emerald-100/55">Cartao</p>
-                                <p className="mt-3 text-lg font-semibold tracking-[0.32em] text-white/95">
-                                    {maskedCardNumber}
-                                </p>
-                            </div>
-                            <div className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/75">
-                                {detectedCardBrand === "unknown" ? "credito" : detectedCardBrand}
-                            </div>
-                        </div>
-                        <div className="mt-8 flex items-end justify-between gap-4">
-                            <div>
-                                <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Titular</p>
-                                <p className="mt-1 text-sm font-medium tracking-[0.18em] text-white/90">
-                                    {maskedHolderName}
-                                </p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-[10px] uppercase tracking-[0.28em] text-white/40">Validade</p>
-                                <p className="mt-1 text-sm font-medium tracking-[0.18em] text-white/90">
-                                    {maskedExpiry}
-                                </p>
-                            </div>
+                <div className="space-y-5 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 sm:p-5">
+                    <div className="flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-left">
+                        <Shield className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-900">
+                                Pagamento seguro no Asaas
+                            </p>
+                            <p className="mt-2 text-sm leading-relaxed text-emerald-900/75">
+                                Depois de continuar, voce sera redirecionado ao ambiente seguro do Asaas para informar os dados do cartao. Esta aplicacao nao recebe nem armazena numero ou codigo de seguranca.
+                            </p>
                         </div>
                     </div>
 
@@ -958,41 +840,11 @@ function PagamentoPageContent() {
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-zinc-200 bg-white p-5">
-                        <p className="mb-4 text-xs font-bold uppercase tracking-[0.16em] text-zinc-600">
-                            Dados de pagamento
-                        </p>
-                        <DirectCardForm
-                            value={cardForm}
-                            onChange={(nextValue) => {
-                                setCardForm(nextValue);
-                                clearFieldError("holderName");
-                                clearFieldError("number");
-                                clearFieldError("expiryMonth");
-                                clearFieldError("expiryYear");
-                                clearFieldError("ccv");
-                                clearFieldError("postalCode");
-                                clearFieldError("addressNumber");
-                                clearFieldError("phone");
-                            }}
-                            disabled={loading || recoveringPix}
-                            hidePhone={!shouldAskPhone}
-                            errors={fieldErrors}
-                            inputRefs={{
-                                holderName: setFieldRef("holderName"),
-                                number: setFieldRef("number"),
-                                expiryMonth: setFieldRef("expiryMonth"),
-                                expiryYear: setFieldRef("expiryYear"),
-                                ccv: setFieldRef("ccv"),
-                                postalCode: setFieldRef("postalCode"),
-                                addressNumber: setFieldRef("addressNumber"),
-                                addressComplement: setFieldRef("addressComplement"),
-                                phone: setFieldRef("phone"),
-                            }}
-                        />
-                    </div>
                 </div>
             )}
+            <p className="text-center text-xs leading-5 text-zinc-500">
+                Ao continuar, você concorda com os <a href="/termos" target="_blank" rel="noreferrer" className="font-semibold text-zinc-800 underline">Termos de Uso</a> e declara ter lido a <a href="/privacidade" target="_blank" rel="noreferrer" className="font-semibold text-zinc-800 underline">Política de Privacidade</a>.
+            </p>
             <button
                 type="button"
                 onClick={handlePayment}
@@ -1007,9 +859,7 @@ function PagamentoPageContent() {
                 ) : (
                     selectedPaymentMethod === "PIX"
                         ? "PAGAR COM PIX"
-                        : normalizedInstallmentCount > 1
-                            ? `PAGAR EM ${normalizedInstallmentCount}X`
-                            : "FINALIZAR NO CARTAO"
+                        : "CONTINUAR PARA PAGAMENTO SEGURO"
                 )}
             </button>
             <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-4 text-left">
@@ -1088,6 +938,70 @@ function PagamentoPageContent() {
                     <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin text-zinc-700" />
                     <p className="text-sm text-zinc-500">Redirecionando...</p>
                 </div>
+            </div>
+        );
+    }
+
+    if (betaFreeMode) {
+        return (
+            <div className="mobile-safe-screen overflow-x-hidden bg-zinc-50 text-zinc-950 selection:bg-zinc-950 selection:text-white">
+                <nav className="sticky top-0 z-50 flex min-h-16 items-center justify-between border-b border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur-md sm:px-6">
+                    <div className="text-lg font-bold tracking-tight text-zinc-950">
+                        BASEDSPEAK <span className="text-zinc-500">BETA</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => navigateSafely(isAuthenticated ? ROUTES.app.dashboard : ROUTES.home)}
+                        className="rounded-full px-3 py-2 text-xs uppercase tracking-[0.14em] text-zinc-500 transition hover:text-zinc-950"
+                    >
+                        Voltar
+                    </button>
+                </nav>
+
+                <main className="flex min-h-[calc(100vh-4rem)] items-center px-4 py-10 pb-[max(3rem,env(safe-area-inset-bottom))] sm:px-6">
+                    <div className="mx-auto grid w-full max-w-4xl gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-center">
+                        <motion.div
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.45 }}
+                        >
+                            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-700">
+                                <Shield className="h-3 w-3" />
+                                Beta fechado • acesso gratuito
+                            </div>
+                            <h1 className="text-4xl font-black leading-tight tracking-tight text-zinc-950 md:text-6xl">
+                                ATIVE O SEU ACESSO AO BETA.
+                            </h1>
+                            <p className="mt-5 max-w-xl text-base leading-relaxed text-zinc-600 md:text-lg">
+                                Durante esta fase, o acesso é gratuito e exclusivamente por convite. Não haverá cobrança nem pedido de dados de pagamento.
+                            </p>
+                            <ul className="mt-7 space-y-3 text-sm text-zinc-700">
+                                <li className="flex items-center gap-3">
+                                    <Check className="h-5 w-5 flex-shrink-0 text-zinc-950" />
+                                    Acesso gratuito durante o beta fechado
+                                </li>
+                                <li className="flex items-center gap-3">
+                                    <Check className="h-5 w-5 flex-shrink-0 text-zinc-950" />
+                                    Ativação protegida por convite individual
+                                </li>
+                                <li className="flex items-center gap-3">
+                                    <Check className="h-5 w-5 flex-shrink-0 text-zinc-950" />
+                                    Sem dados financeiros nesta etapa
+                                </li>
+                            </ul>
+                        </motion.div>
+
+                        <div>
+                            {error && (
+                                <div className="mb-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                                    <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                                    {error}
+                                </div>
+                            )}
+                            {renderInviteModeContent()}
+                        </div>
+                    </div>
+                </main>
             </div>
         );
     }
@@ -1359,16 +1273,16 @@ function PagamentoPageFallback() {
         <div className="min-h-screen bg-[#050505] flex items-center justify-center">
             <div className="text-center">
                 <Loader2 className="w-10 h-10 text-violet-500 animate-spin mx-auto mb-4" />
-                <p className="text-slate-400 text-sm">Carregando pagamento...</p>
+                <p className="text-slate-400 text-sm">Carregando acesso...</p>
             </div>
         </div>
     );
 }
 
-export default function PagamentoPageClient() {
+export default function PagamentoPageClient({ betaFreeMode }: PagamentoPageClientProps) {
     return (
         <Suspense fallback={<PagamentoPageFallback />}>
-            <PagamentoPageContent />
+            <PagamentoPageContent betaFreeMode={betaFreeMode} />
         </Suspense>
     );
 }

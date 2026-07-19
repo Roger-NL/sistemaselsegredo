@@ -1,7 +1,6 @@
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import {
     collection,
-    addDoc,
     updateDoc,
     deleteDoc,
     doc,
@@ -11,8 +10,6 @@ import {
     where,
     serverTimestamp,
     Timestamp,
-    limit,
-    runTransaction,
     type DocumentData
 } from "firebase/firestore";
 import {
@@ -89,37 +86,38 @@ async function recomputeUserProgressSnapshot(
 /**
  * Enviar uma nova prova
  */
-export async function submitExam(examData: Omit<PillarExam, 'status' | 'createdAt' | 'id'>) {
+export async function submitExam(
+    examData: Omit<PillarExam, 'status' | 'createdAt' | 'id' | 'quizScore' | 'quizAttempts'> & {
+        quizAnswers: number[];
+    }
+) {
     try {
-        const pendingQuery = query(
-            collection(db, COLLECTION),
-            where("userId", "==", examData.userId),
-            where("pillarId", "==", examData.pillarId),
-            where("status", "==", "pending"),
-            limit(1)
-        );
-        const pendingSnapshot = await getDocs(pendingQuery);
-
-        if (!pendingSnapshot.empty) {
-            return {
-                success: false,
-                error: "Ja existe uma missao pendente para este pilar. Aguarde a correcao antes de enviar novamente.",
-            };
+        const currentUser = auth.currentUser;
+        if (!currentUser || currentUser.uid !== examData.userId) {
+            return { success: false, error: "Usuario nao autenticado." };
         }
 
-        await addDoc(collection(db, COLLECTION), {
-            ...examData,
-            status: 'pending',
-            createdAt: serverTimestamp()
+        const token = await currentUser.getIdToken();
+        const response = await fetch("/api/exams", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                pillarId: examData.pillarId,
+                quizAnswers: examData.quizAnswers,
+                writtenAnswer: examData.writtenAnswer,
+                userPhone: examData.userPhone,
+            }),
         });
-        await recomputeUserProgressSnapshot(
-            examData.userId,
-            examData.pillarId === 1
-                ? { pillar1ExamStatus: "pending" }
-                : examData.pillarId === 2
-                    ? { pillar2ExamStatus: "pending" }
-                    : undefined
-        );
+
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        if (!response.ok) {
+            return { success: false, error: payload?.error || "Falha ao enviar missão." };
+        }
+
         return { success: true };
     } catch (error) {
         console.error("Erro ao enviar prova:", error);
@@ -163,41 +161,29 @@ export async function getUserExamStatus(userId: string, pillarId: number): Promi
  */
 export async function gradeExam(examId: string, status: 'approved' | 'rejected', feedback?: string) {
     try {
-        let affectedUserId: string | null = null;
-        let affectedPillarId: number | null = null;
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+            return { success: false, error: "Usuario nao autenticado." };
+        }
 
-        await runTransaction(db, async (transaction) => {
-            const examRef = doc(db, COLLECTION, examId);
-            const examSnapshot = await transaction.get(examRef);
-
-            if (!examSnapshot.exists()) {
-                throw new Error("EXAM_NOT_FOUND");
-            }
-
-            const exam = {
-                id: examSnapshot.id,
-                ...examSnapshot.data(),
-            } as PillarExam;
-            affectedUserId = exam.userId;
-            affectedPillarId = exam.pillarId;
-
-            // Agora sim, as "escritas" (updates/sets)
-            transaction.update(examRef, {
-                status,
-                adminFeedback: feedback || "",
-                gradedAt: serverTimestamp()
-            });
+        const token = await currentUser.getIdToken();
+        const response = await fetch("/api/admin/exams/decision", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                examId,
+                decision: status,
+                feedback,
+            }),
         });
 
-        if (affectedUserId) {
-            await recomputeUserProgressSnapshot(
-                affectedUserId,
-                affectedPillarId === 1
-                    ? { pillar1ExamStatus: status }
-                    : affectedPillarId === 2
-                        ? { pillar2ExamStatus: status }
-                        : undefined
-            );
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        if (!response.ok) {
+            return { success: false, error: payload?.error || "Erro ao avaliar." };
         }
 
         return { success: true };

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { adminDb } from '@/lib/firebase-admin';
 import { addDays, addHours, isAfter, parseISO, subHours } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
@@ -11,6 +12,7 @@ import {
 } from '@/lib/auth/premium-access';
 
 const COLLECTION = 'live_sessions';
+const SLOT_LOCKS_COLLECTION = 'live_session_slot_locks';
 const PURCHASE_WINDOW_DAYS = 7;
 const RESCHEDULE_DEADLINE_HOURS = 24;
 const PENDING_CONFIRMATION_TIMEOUT_HOURS = 24;
@@ -27,6 +29,75 @@ function nowIso() {
 
 function getSessionId(userId: string, sourcePillarId: number) {
   return `${userId}_p${sourcePillarId}`;
+}
+
+function getSlotLockId(slotStart: string, slotEnd: string) {
+  return createHash('sha256').update(`${slotStart}|${slotEnd}`).digest('hex');
+}
+
+async function updateSessionAndReleaseSlot(options: {
+  sessionId: string;
+  expectedStatuses: LiveSessionBooking['status'][];
+  expectedSlotStart?: string | null;
+  update: Partial<LiveSessionBooking>;
+}) {
+  const sessionRef = adminDb.collection(COLLECTION).doc(options.sessionId);
+  let updatedSession: LiveSessionBooking | null = null;
+
+  await adminDb.runTransaction(async (transaction) => {
+    const sessionSnapshot = await transaction.get(sessionRef);
+    if (!sessionSnapshot.exists) {
+      throw new Error('SESSION_NOT_FOUND');
+    }
+
+    const current = {
+      id: sessionSnapshot.id,
+      ...(sessionSnapshot.data() as LiveSessionBooking),
+    } as LiveSessionBooking;
+
+    if (!options.expectedStatuses.includes(current.status)) {
+      throw new Error('SESSION_STATE_CHANGED');
+    }
+
+    if (
+      options.expectedSlotStart !== undefined &&
+      current.requestedSlotStart !== options.expectedSlotStart
+    ) {
+      throw new Error('SESSION_STATE_CHANGED');
+    }
+
+    const currentLockId = current.slotLockId || (
+      current.requestedSlotStart && current.requestedSlotEnd
+        ? getSlotLockId(current.requestedSlotStart, current.requestedSlotEnd)
+        : null
+    );
+    const lockRef = currentLockId
+      ? adminDb.collection(SLOT_LOCKS_COLLECTION).doc(currentLockId)
+      : null;
+    const lockSnapshot = lockRef ? await transaction.get(lockRef) : null;
+
+    const patch = stripUndefined({
+      ...options.update,
+      slotLockId: null,
+    });
+    transaction.set(sessionRef, patch, { merge: true });
+
+    if (
+      lockRef &&
+      lockSnapshot?.exists &&
+      lockSnapshot.data()?.sessionId === current.id &&
+      lockSnapshot.data()?.userId === current.userId
+    ) {
+      transaction.delete(lockRef);
+    }
+
+    updatedSession = {
+      ...current,
+      ...patch,
+    } as LiveSessionBooking;
+  });
+
+  return updatedSession;
 }
 
 function getEarliestScheduleAt(premiumActivatedAt?: string) {
@@ -198,11 +269,22 @@ async function syncSessionWithCalendar(session: LiveSessionBooking) {
       } : {}),
     };
 
-    await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined(updatedSession), { merge: true });
+    const persistedSession = nextStatus === 'ready_to_schedule'
+      ? await updateSessionAndReleaseSlot({
+          sessionId: session.id!,
+          expectedStatuses: [session.status],
+          expectedSlotStart: session.requestedSlotStart,
+          update: updatedSession,
+        })
+      : null;
+
+    if (nextStatus !== 'ready_to_schedule') {
+      await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined(updatedSession), { merge: true });
+    }
 
     await recomputeStoredProgressSnapshot(session.userId, nextStatus);
 
-    return {
+    return persistedSession || {
       ...session,
       ...updatedSession,
       status: nextStatus,
@@ -246,10 +328,15 @@ async function expirePendingSessionIfNeeded(session: LiveSessionBooking) {
     lastActionMessage: 'Seu pedido expirou automaticamente após 24 horas sem confirmação. Escolha um novo horário disponível.',
   };
 
-  await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined(expiredUpdate), { merge: true });
+  const updatedSession = await updateSessionAndReleaseSlot({
+    sessionId: session.id!,
+    expectedStatuses: ['pending_confirmation'],
+    expectedSlotStart: session.requestedSlotStart,
+    update: expiredUpdate,
+  });
   await recomputeStoredProgressSnapshot(session.userId, nextStatus);
 
-  return {
+  return updatedSession || {
     ...session,
     ...expiredUpdate,
     status: nextStatus,
@@ -384,7 +471,13 @@ export async function requestLiveSessionBooking(options: {
   notes?: string;
 }) {
   const status = await getSchedulingStatusForUser(options.userId);
-  if (!status.session || !status.canRequestScheduling) {
+  const isIdempotentRetry = Boolean(
+    status.session?.status === 'pending_confirmation' &&
+    status.session.requestedSlotStart === options.slotStart &&
+    status.session.requestedSlotEnd === options.slotEnd
+  );
+
+  if (!status.session || (!status.canRequestScheduling && !isIdempotentRetry)) {
     throw new Error('SESSION_NOT_READY');
   }
 
@@ -393,33 +486,124 @@ export async function requestLiveSessionBooking(options: {
     throw new Error('SLOT_NOT_ALLOWED_YET');
   }
 
-  const availableSlots = await getSchedulingAvailability(options.userId);
-  const requestedSlotStillAvailable = availableSlots.some(
-    (slot) => slot.start === options.slotStart && slot.end === options.slotEnd
-  );
+  if (!isIdempotentRetry) {
+    const availableSlots = await getSchedulingAvailability(options.userId);
+    const requestedSlotStillAvailable = availableSlots.some(
+      (slot) => slot.start === options.slotStart && slot.end === options.slotEnd
+    );
 
-  if (!requestedSlotStillAvailable) {
-    throw new Error('SLOT_NO_LONGER_AVAILABLE');
+    if (!requestedSlotStillAvailable) {
+      throw new Error('SLOT_NO_LONGER_AVAILABLE');
+    }
   }
 
   const sessionId = status.session.id || getSessionId(options.userId, 2);
-  const nextSession: LiveSessionBooking = {
-    ...status.session,
-    id: sessionId,
-    status: 'pending_confirmation',
-    requestedSlotStart: options.slotStart,
-    requestedSlotEnd: options.slotEnd,
-    notes: options.notes,
-    updatedAt: nowIso(),
-    lastActionMessage: 'Seu pedido foi enviado. Agora o tutor confirma esse horário no painel.',
-    tutorEmail: status.session.tutorEmail || getSchedulingTutorEmail(),
-  };
+  const sessionRef = adminDb.collection(COLLECTION).doc(sessionId);
+  const slotLockId = getSlotLockId(options.slotStart, options.slotEnd);
+  const slotLockRef = adminDb.collection(SLOT_LOCKS_COLLECTION).doc(slotLockId);
 
-  await adminDb.collection(COLLECTION).doc(sessionId).set(stripUndefined({
-    ...nextSession,
-    calendarEventId: null,
-    calendarHtmlLink: null,
-  }), { merge: true });
+  const nextSession = await adminDb.runTransaction<LiveSessionBooking>(async (transaction) => {
+    const [freshSessionSnapshot, slotLockSnapshot] = await Promise.all([
+      transaction.get(sessionRef),
+      transaction.get(slotLockRef),
+    ]);
+
+    if (!freshSessionSnapshot.exists) {
+      throw new Error('SESSION_NOT_FOUND');
+    }
+
+    const freshSession = {
+      id: freshSessionSnapshot.id,
+      ...(freshSessionSnapshot.data() as LiveSessionBooking),
+    } as LiveSessionBooking;
+
+    if (freshSession.userId !== options.userId) {
+      throw new Error('SESSION_OWNER_MISMATCH');
+    }
+
+    const alreadyReserved =
+      freshSession.status === 'pending_confirmation' &&
+      freshSession.requestedSlotStart === options.slotStart &&
+      freshSession.requestedSlotEnd === options.slotEnd;
+
+    if (alreadyReserved) {
+      if (
+        slotLockSnapshot.exists &&
+        (slotLockSnapshot.data()?.sessionId !== sessionId ||
+          slotLockSnapshot.data()?.userId !== options.userId)
+      ) {
+        throw new Error('SLOT_NO_LONGER_AVAILABLE');
+      }
+
+      const bookingRevision = Number(freshSession.bookingRevision || 1);
+      if (!slotLockSnapshot.exists) {
+        const timestamp = nowIso();
+        transaction.set(slotLockRef, {
+          slotStart: options.slotStart,
+          slotEnd: options.slotEnd,
+          userId: options.userId,
+          sessionId,
+          status: 'reserved',
+          bookingRevision,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        });
+        transaction.set(sessionRef, { slotLockId, bookingRevision, updatedAt: timestamp }, { merge: true });
+      }
+
+      return {
+        ...freshSession,
+        slotLockId,
+        bookingRevision,
+      };
+    }
+
+    if (!['ready_to_schedule', 'cancelled'].includes(freshSession.status)) {
+      throw new Error('SESSION_STATE_CHANGED');
+    }
+
+    if (
+      slotLockSnapshot.exists &&
+      (slotLockSnapshot.data()?.sessionId !== sessionId ||
+        slotLockSnapshot.data()?.userId !== options.userId)
+    ) {
+      throw new Error('SLOT_NO_LONGER_AVAILABLE');
+    }
+
+    const timestamp = nowIso();
+    const bookingRevision = Number(freshSession.bookingRevision || 0) + 1;
+    const reservedSession = stripUndefined({
+      ...freshSession,
+      id: sessionId,
+      status: 'pending_confirmation' as const,
+      requestedSlotStart: options.slotStart,
+      requestedSlotEnd: options.slotEnd,
+      slotLockId,
+      bookingRevision,
+      notes: options.notes,
+      calendarEventId: null,
+      calendarHtmlLink: null,
+      confirmedAt: null,
+      updatedAt: timestamp,
+      lastActionMessage: 'Seu pedido foi enviado. Agora o tutor confirma esse horário no painel.',
+      tutorEmail: freshSession.tutorEmail || getSchedulingTutorEmail(),
+    }) as LiveSessionBooking;
+
+    transaction.set(slotLockRef, {
+      slotStart: options.slotStart,
+      slotEnd: options.slotEnd,
+      userId: options.userId,
+      sessionId,
+      status: 'reserved',
+      bookingRevision,
+      createdAt: slotLockSnapshot.exists
+        ? slotLockSnapshot.data()?.createdAt || timestamp
+        : timestamp,
+      updatedAt: timestamp,
+    });
+    transaction.set(sessionRef, reservedSession, { merge: true });
+    return reservedSession;
+  });
   await recomputeStoredProgressSnapshot(options.userId, nextSession.status);
 
   return nextSession;
@@ -448,16 +632,21 @@ export async function cancelLiveSessionBooking(userId: string) {
     ? 'awaiting_release_window'
     : 'ready_to_schedule';
 
-  await adminDb.collection(COLLECTION).doc(status.session.id!).set(stripUndefined({
-    status: nextStatus,
-    requestedSlotStart: null,
-    requestedSlotEnd: null,
-    calendarEventId: null,
-    calendarHtmlLink: null,
-    cancelledAt: nowIso(),
-    updatedAt: nowIso(),
-    lastActionMessage: 'Seu pedido foi cancelado. Quando quiser, escolha um novo horário válido.',
-  }), { merge: true });
+  await updateSessionAndReleaseSlot({
+    sessionId: status.session.id!,
+    expectedStatuses: [status.session.status],
+    expectedSlotStart: status.session.requestedSlotStart,
+    update: {
+      status: nextStatus,
+      requestedSlotStart: null,
+      requestedSlotEnd: null,
+      calendarEventId: null,
+      calendarHtmlLink: null,
+      cancelledAt: nowIso(),
+      updatedAt: nowIso(),
+      lastActionMessage: 'Seu pedido foi cancelado. Quando quiser, escolha um novo horário válido.',
+    },
+  });
   await recomputeStoredProgressSnapshot(userId, nextStatus);
 }
 
@@ -577,7 +766,7 @@ export async function updateSchedulingStatusByAdmin(options: {
   }
 
   const session = { id: snapshot.id, ...(snapshot.data() as LiveSessionBooking) } as LiveSessionBooking;
-  if (!session.requestedSlotStart && options.decision !== 'pending') {
+  if (!session.requestedSlotStart || !session.requestedSlotEnd) {
     throw new Error('SESSION_WITHOUT_SLOT');
   }
 
@@ -597,15 +786,61 @@ export async function updateSchedulingStatusByAdmin(options: {
       calendarHtmlLink = created?.htmlLink || null;
     }
 
-    await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined({
-      status: 'confirmed',
-      calendarEventId,
-      calendarHtmlLink,
-      confirmedAt: session.confirmedAt || nowIso(),
-      adminDecisionReason: null,
-      updatedAt: nowIso(),
-      lastActionMessage: 'Sua aula ao vivo foi confirmada. O Pilar 3 já está liberado para você continuar.',
-    }), { merge: true });
+    const sessionRef = adminDb.collection(COLLECTION).doc(session.id!);
+    const slotLockId = session.slotLockId || getSlotLockId(
+      session.requestedSlotStart!,
+      session.requestedSlotEnd!
+    );
+    const slotLockRef = adminDb.collection(SLOT_LOCKS_COLLECTION).doc(slotLockId);
+
+    try {
+      await adminDb.runTransaction(async (transaction) => {
+        const [currentSnapshot, slotLockSnapshot] = await Promise.all([
+          transaction.get(sessionRef),
+          transaction.get(slotLockRef),
+        ]);
+        if (!currentSnapshot.exists) throw new Error('SESSION_NOT_FOUND');
+
+        const current = {
+          id: currentSnapshot.id,
+          ...(currentSnapshot.data() as LiveSessionBooking),
+        } as LiveSessionBooking;
+        if (
+          !['pending_confirmation', 'confirmed'].includes(current.status) ||
+          current.requestedSlotStart !== session.requestedSlotStart ||
+          current.requestedSlotEnd !== session.requestedSlotEnd
+        ) {
+          throw new Error('SESSION_STATE_CHANGED');
+        }
+        if (
+          !slotLockSnapshot.exists ||
+          slotLockSnapshot.data()?.sessionId !== current.id ||
+          slotLockSnapshot.data()?.userId !== current.userId
+        ) {
+          throw new Error('SLOT_RESERVATION_MISSING');
+        }
+
+        transaction.set(sessionRef, stripUndefined({
+          status: 'confirmed',
+          slotLockId,
+          calendarEventId,
+          calendarHtmlLink,
+          confirmedAt: current.confirmedAt || nowIso(),
+          adminDecisionReason: null,
+          updatedAt: nowIso(),
+          lastActionMessage: 'Sua aula ao vivo foi confirmada. O Pilar 3 já está liberado para você continuar.',
+        }), { merge: true });
+      });
+    } catch (error) {
+      const errorCode = error instanceof Error ? error.message : '';
+      if (
+        calendarEventId &&
+        (errorCode === 'SESSION_STATE_CHANGED' || errorCode === 'SLOT_RESERVATION_MISSING')
+      ) {
+        await cancelCalendarEvent(calendarEventId);
+      }
+      throw error;
+    }
 
     await unlockPillarForConfirmedSession(session);
     return;
@@ -616,15 +851,56 @@ export async function updateSchedulingStatusByAdmin(options: {
       await cancelCalendarEvent(session.calendarEventId);
     }
 
-    await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined({
-      status: 'pending_confirmation',
-      calendarEventId: null,
-      calendarHtmlLink: null,
-      confirmedAt: null,
-      adminDecisionReason: null,
-      updatedAt: nowIso(),
-      lastActionMessage: 'Seu pedido segue pendente. A confirmação fica sob controle do admin no painel.',
-    }), { merge: true });
+    const sessionRef = adminDb.collection(COLLECTION).doc(session.id!);
+    const slotLockId = session.slotLockId || (
+      session.requestedSlotStart && session.requestedSlotEnd
+        ? getSlotLockId(session.requestedSlotStart, session.requestedSlotEnd)
+        : null
+    );
+    await adminDb.runTransaction(async (transaction) => {
+      const currentSnapshot = await transaction.get(sessionRef);
+      if (!currentSnapshot.exists) throw new Error('SESSION_NOT_FOUND');
+      const current = {
+        id: currentSnapshot.id,
+        ...(currentSnapshot.data() as LiveSessionBooking),
+      } as LiveSessionBooking;
+      if (
+        current.status !== session.status ||
+        current.requestedSlotStart !== session.requestedSlotStart ||
+        current.requestedSlotEnd !== session.requestedSlotEnd
+      ) {
+        throw new Error('SESSION_STATE_CHANGED');
+      }
+
+      const slotLockRef = slotLockId
+        ? adminDb.collection(SLOT_LOCKS_COLLECTION).doc(slotLockId)
+        : null;
+      const slotLockSnapshot = slotLockRef ? await transaction.get(slotLockRef) : null;
+      if (
+        slotLockRef &&
+        (!slotLockSnapshot?.exists ||
+          slotLockSnapshot.data()?.sessionId !== current.id ||
+          slotLockSnapshot.data()?.userId !== current.userId)
+      ) {
+        throw new Error('SLOT_RESERVATION_MISSING');
+      }
+
+      const bookingRevision = Number(current.bookingRevision || 0) + 1;
+      transaction.set(sessionRef, stripUndefined({
+        status: 'pending_confirmation',
+        slotLockId,
+        bookingRevision,
+        calendarEventId: null,
+        calendarHtmlLink: null,
+        confirmedAt: null,
+        adminDecisionReason: null,
+        updatedAt: nowIso(),
+        lastActionMessage: 'Seu pedido segue pendente. A confirmação fica sob controle do admin no painel.',
+      }), { merge: true });
+      if (slotLockRef) {
+        transaction.set(slotLockRef, { bookingRevision, updatedAt: nowIso() }, { merge: true });
+      }
+    });
     await recomputeStoredProgressSnapshot(session.userId, 'pending_confirmation');
     return;
   }
@@ -635,17 +911,23 @@ export async function updateSchedulingStatusByAdmin(options: {
     await cancelCalendarEvent(session.calendarEventId);
   }
 
-  await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined({
-    status: getReadyStatusFromSession(session),
-    requestedSlotStart: null,
-    requestedSlotEnd: null,
-    calendarEventId: null,
-    calendarHtmlLink: null,
-    confirmedAt: null,
-    adminDecisionReason: rejectionReason,
-    cancelledAt: nowIso(),
-    updatedAt: nowIso(),
-    lastActionMessage: `Esse horário não foi aprovado. Motivo: ${rejectionReason}`,
-  }), { merge: true });
-  await recomputeStoredProgressSnapshot(session.userId, getReadyStatusFromSession(session));
+  const nextStatus = getReadyStatusFromSession(session);
+  await updateSessionAndReleaseSlot({
+    sessionId: session.id!,
+    expectedStatuses: [session.status],
+    expectedSlotStart: session.requestedSlotStart,
+    update: {
+      status: nextStatus,
+      requestedSlotStart: null,
+      requestedSlotEnd: null,
+      calendarEventId: null,
+      calendarHtmlLink: null,
+      confirmedAt: null,
+      adminDecisionReason: rejectionReason,
+      cancelledAt: nowIso(),
+      updatedAt: nowIso(),
+      lastActionMessage: `Esse horário não foi aprovado. Motivo: ${rejectionReason}`,
+    },
+  });
+  await recomputeStoredProgressSnapshot(session.userId, nextStatus);
 }

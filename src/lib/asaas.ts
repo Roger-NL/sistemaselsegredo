@@ -1,11 +1,12 @@
 import type {
   AsaasPaymentStatus,
-  CheckoutCardHolderInfoInput,
-  CheckoutCardInput,
-  CreditCardCheckoutMode,
 } from "@/lib/payments/types";
+import { assertPaymentsEnabled } from "@/lib/payments/config";
 
-const DEFAULT_ASAAS_BASE_URL = "https://api-sandbox.asaas.com/v3";
+const ASAAS_PRODUCTION_BASE_URL = "https://api.asaas.com/v3";
+const ASAAS_SANDBOX_BASE_URL = "https://api-sandbox.asaas.com/v3";
+const ASAAS_REQUEST_TIMEOUT_MS = 15_000;
+const ASAAS_USER_AGENT = "BasedSpeak/0.1 (+https://basedspeak.com)";
 
 export class AsaasApiError extends Error {
   status: number;
@@ -19,30 +20,69 @@ export class AsaasApiError extends Error {
   }
 }
 
-export const ASAAS_API_URL =
-  process.env.ASAAS_BASE_URL ||
-  process.env.NEXT_PUBLIC_ASAAS_API_URL ||
-  DEFAULT_ASAAS_BASE_URL;
+export class AsaasTransportError extends Error {
+  cause: unknown;
 
-export function isAsaasSandboxEnvironment() {
-  return /sandbox\.asaas\.com|api-sandbox\.asaas\.com/i.test(ASAAS_API_URL);
+  constructor(message: string, cause?: unknown) {
+    super(message);
+    this.name = "AsaasTransportError";
+    this.cause = cause;
+  }
 }
 
-function getAsaasApiKey() {
-  const key = process.env.ASAAS_API_KEY;
+function getAsaasApiUrl() {
+  const configuredUrl = process.env.ASAAS_BASE_URL?.trim().replace(/\/$/, "");
 
-  if (!key) {
+  if (!configuredUrl) {
+    throw new Error("ASAAS_BASE_URL nao configurada.");
+  }
+
+  if (![ASAAS_PRODUCTION_BASE_URL, ASAAS_SANDBOX_BASE_URL].includes(configuredUrl)) {
+    throw new Error("ASAAS_BASE_URL invalida. Use apenas a URL oficial da Asaas.");
+  }
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    configuredUrl === ASAAS_SANDBOX_BASE_URL &&
+    process.env.ASAAS_ALLOW_SANDBOX_IN_PRODUCTION !== "true"
+  ) {
+    throw new Error("O sandbox da Asaas esta bloqueado em producao.");
+  }
+
+  return configuredUrl;
+}
+
+export function isAsaasSandboxEnvironment() {
+  return getAsaasApiUrl() === ASAAS_SANDBOX_BASE_URL;
+}
+
+function getAsaasApiKey(apiUrl: string) {
+  const rawKey = process.env.ASAAS_API_KEY;
+
+  if (!rawKey) {
     throw new Error("ASAAS_API_KEY nao configurada.");
   }
 
-  return key.replace(/'/g, "");
+  const key = rawKey.trim().replace(/^['"]|['"]$/g, "");
+  const expectedPrefix = apiUrl === ASAAS_SANDBOX_BASE_URL ? "$aact_hmlg_" : "$aact_prod_";
+
+  if (!key.startsWith(expectedPrefix)) {
+    throw new Error(
+      apiUrl === ASAAS_SANDBOX_BASE_URL
+        ? "ASAAS_API_KEY nao pertence ao ambiente sandbox."
+        : "ASAAS_API_KEY nao pertence ao ambiente de producao."
+    );
+  }
+
+  return key;
 }
 
-function getHeaders() {
+function getHeaders(apiUrl: string) {
   return {
     "Content-Type": "application/json",
     accept: "application/json",
-    access_token: getAsaasApiKey(),
+    "User-Agent": process.env.ASAAS_USER_AGENT?.trim() || ASAAS_USER_AGENT,
+    access_token: getAsaasApiKey(apiUrl),
   };
 }
 
@@ -71,14 +111,24 @@ function normalizeAsaasErrorMessage(operation: string, details: unknown) {
 }
 
 async function asaasFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${ASAAS_API_URL}${path}`, {
-    ...init,
-    headers: {
-      ...getHeaders(),
-      ...(init?.headers || {}),
-    },
-    cache: "no-store",
-  });
+  assertPaymentsEnabled();
+  const apiUrl = getAsaasApiUrl();
+  const headers = {
+    ...getHeaders(apiUrl),
+    ...(init?.headers || {}),
+  };
+  let response: Response;
+
+  try {
+    response = await fetch(`${apiUrl}${path}`, {
+      ...init,
+      headers,
+      signal: init?.signal ?? AbortSignal.timeout(ASAAS_REQUEST_TIMEOUT_MS),
+      cache: "no-store",
+    });
+  } catch (error) {
+    throw new AsaasTransportError(`Asaas ${init?.method || "GET"} ${path}: falha de transporte.`, error);
+  }
 
   const payload = await safeJsonParse(response);
 
@@ -148,10 +198,6 @@ interface AsaasCreatePaymentRequest {
   dueDate: string;
   description: string;
   externalReference: string;
-  creditCard?: CheckoutCardInput;
-  creditCardToken?: string;
-  creditCardHolderInfo?: CheckoutCardHolderInfoInput;
-  remoteIp?: string;
 }
 
 function normalizeDueDateForPix() {
@@ -183,12 +229,7 @@ export async function createCreditCardPayment(input: {
   description: string;
   dueDate: string;
   externalReference: string;
-  creditCardMode: CreditCardCheckoutMode;
   installmentCount?: number;
-  creditCard?: CheckoutCardInput;
-  creditCardToken?: string;
-  creditCardHolderInfo?: CheckoutCardHolderInfoInput;
-  remoteIp?: string;
 }): Promise<AsaasPayment> {
   const payload: AsaasCreatePaymentRequest = {
     customer: input.customer,
@@ -205,20 +246,6 @@ export async function createCreditCardPayment(input: {
     payload.value = input.value;
   }
 
-  if (input.creditCardMode === "DIRECT") {
-    if (input.creditCardToken) {
-      payload.creditCardToken = input.creditCardToken;
-    } else if (input.creditCard) {
-      payload.creditCard = input.creditCard;
-    }
-
-    if (input.creditCardHolderInfo) {
-      payload.creditCardHolderInfo = input.creditCardHolderInfo;
-    }
-
-    payload.remoteIp = input.remoteIp;
-  }
-
   return asaasFetch<AsaasPayment>("/payments", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -229,27 +256,16 @@ export async function getPayment(paymentId: string): Promise<AsaasPayment> {
   return asaasFetch<AsaasPayment>(`/payments/${paymentId}`);
 }
 
-export async function getPixQrCode(paymentId: string): Promise<{ encodedImage: string; payload: string }> {
-  return asaasFetch<{ encodedImage: string; payload: string }>(`/payments/${paymentId}/pixQrCode`);
+export async function getPixQrCode(paymentId: string): Promise<{
+  encodedImage: string;
+  payload: string;
+  expirationDate: string;
+}> {
+  return asaasFetch<{ encodedImage: string; payload: string; expirationDate: string }>(
+    `/payments/${paymentId}/pixQrCode`
+  );
 }
 
 export function isPaymentPaid(status: string) {
   return status === "RECEIVED" || status === "CONFIRMED" || status === "RECEIVED_IN_CASH";
-}
-
-export async function tokenizeCreditCard(input: {
-  customer: Pick<AsaasCustomer, "name" | "email" | "cpfCnpj">;
-  creditCard: CheckoutCardInput;
-  creditCardHolderInfo: CheckoutCardHolderInfoInput;
-  remoteIp: string;
-}): Promise<{ creditCardToken: string }> {
-  return asaasFetch<{ creditCardToken: string }>("/creditCard/tokenizeCreditCard", {
-    method: "POST",
-    body: JSON.stringify({
-      customer: input.customer,
-      creditCard: input.creditCard,
-      creditCardHolderInfo: input.creditCardHolderInfo,
-      remoteIp: input.remoteIp,
-    }),
-  });
 }

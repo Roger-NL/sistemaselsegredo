@@ -1,3 +1,4 @@
+import { createHash, randomUUID } from "node:crypto";
 import { adminDb } from "@/lib/firebase-admin";
 import {
   createCreditCardPayment,
@@ -5,13 +6,11 @@ import {
   createPixPayment,
   getPayment,
   getPixQrCode,
-  isAsaasSandboxEnvironment,
   isPaymentPaid,
-  tokenizeCreditCard,
+  AsaasApiError,
   type AsaasPayment,
 } from "@/lib/asaas";
 import type {
-  CheckoutCardHolderInfoInput,
   CheckoutPlan,
   CheckoutPaymentMethod,
   CheckoutRequestInput,
@@ -24,6 +23,7 @@ import type {
   PendingCheckoutPayment,
 } from "@/lib/payments/types";
 import { calculateCheckoutInstallmentTotals, MAX_CHECKOUT_INSTALLMENTS } from "@/lib/payments/installments";
+import { assertPaymentsEnabled } from "@/lib/payments/config";
 import {
   buildStoredProgressSnapshot,
   deriveLegacyApprovedPillar,
@@ -35,19 +35,14 @@ const PAYMENT_VALUE = 297.0;
 const PAYMENT_DESCRIPTION = "BasedSpeak PRO - Acesso Premium";
 const SPECIALTY_TEST_PAYMENT_VALUE = 50.0;
 const SPECIALTY_TEST_PAYMENT_DESCRIPTION = "Teste DevTools - Compra de Especialidade";
-const PIX_VALIDITY_MS = 5 * 60 * 1000;
 const CARD_DUE_DAYS = 5;
-function isDirectCardEnabled() {
-  if (isAsaasSandboxEnvironment()) {
-    return true;
-  }
-
-  return process.env.ASAAS_ENABLE_DIRECT_CREDIT_CARD === "true";
-}
 
 const USER_COLLECTION = "users";
 const PAYMENT_ATTEMPTS_COLLECTION = "payment_attempts";
+const CHECKOUT_INTENTS_COLLECTION = "checkout_intents";
 const WEBHOOK_EVENTS_COLLECTION = "asaas_webhook_events";
+const CHECKOUT_CREATION_LEASE_MS = 60 * 1000;
+const WEBHOOK_PROCESSING_LEASE_MS = 5 * 60 * 1000;
 
 type UserPaymentSnapshot = {
   subscriptionStatus?: string;
@@ -66,6 +61,24 @@ type UserPaymentSnapshot = {
   } | null;
   pendingCheckoutPayment?: PendingCheckoutPayment | null;
   approvedPillar?: number;
+  inviteCodeUsed?: string;
+  subscriptionExpiresAt?: string;
+  premiumPaymentId?: string;
+};
+
+type CheckoutIntentStatus =
+  | "creating"
+  | "pending"
+  | "paid"
+  | "cleared"
+  | "failed"
+  | "reconciliation_required";
+
+type CheckoutIntentClaim = {
+  id: string;
+  token: string;
+  userId: string;
+  plan: CheckoutPlan;
 };
 
 type TrackedPaymentResolution =
@@ -84,6 +97,15 @@ type TrackedPaymentResolution =
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function normalizeProviderDate(value: string | undefined, field: string) {
+  const timestamp = value ? Date.parse(value) : Number.NaN;
+  if (!Number.isFinite(timestamp)) {
+    throw new Error(`ASAAS_${field}_INVALID`);
+  }
+
+  return new Date(timestamp).toISOString();
 }
 
 function formatDateDaysFromNow(daysFromNow: number) {
@@ -106,10 +128,169 @@ function getPlanPricing(plan: CheckoutPlan) {
   };
 }
 
+function assertCheckoutPlanEnabled(plan: CheckoutPlan) {
+  if (plan !== "lifetime" && plan !== "specialty") {
+    throw new Error("INVALID_CHECKOUT_PLAN");
+  }
+
+  if (plan === "specialty" && process.env.ASAAS_ENABLE_SPECIALTY_CHECKOUT !== "true") {
+    throw new Error("SPECIALTY_CHECKOUT_DISABLED");
+  }
+}
+
 function stripUndefined<T extends object>(value: T): T {
   return Object.fromEntries(
     Object.entries(value as Record<string, unknown>).filter(([, entryValue]) => entryValue !== undefined)
   ) as T;
+}
+
+function getCheckoutIntentId(userId: string, plan: CheckoutPlan) {
+  return createHash("sha256").update(`${userId}:${plan}`).digest("hex");
+}
+
+async function claimCheckoutIntent(userId: string, plan: CheckoutPlan): Promise<CheckoutIntentClaim> {
+  const id = getCheckoutIntentId(userId, plan);
+  const intentRef = adminDb.collection(CHECKOUT_INTENTS_COLLECTION).doc(id);
+  const token = randomUUID();
+  const startedAt = nowIso();
+
+  await adminDb.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(intentRef);
+    const existing = snapshot.data() as {
+      status?: CheckoutIntentStatus;
+      leaseExpiresAt?: string;
+      attempts?: number;
+    } | undefined;
+    const leaseExpiresAt = Date.parse(existing?.leaseExpiresAt || "");
+    const activeLease = Number.isFinite(leaseExpiresAt) && leaseExpiresAt > Date.now();
+
+    if (existing?.status === "creating" && activeLease) {
+      throw new Error("CHECKOUT_IN_PROGRESS");
+    }
+
+    if (existing?.status === "pending" || existing?.status === "paid") {
+      throw new Error("CHECKOUT_ALREADY_TRACKED");
+    }
+
+    if (existing?.status === "reconciliation_required") {
+      throw new Error("CHECKOUT_RECONCILIATION_REQUIRED");
+    }
+
+    transaction.set(intentRef, {
+      userId,
+      plan,
+      status: "creating",
+      claimToken: token,
+      startedAt,
+      leaseExpiresAt: new Date(Date.now() + CHECKOUT_CREATION_LEASE_MS).toISOString(),
+      attempts: (existing?.attempts ?? 0) + 1,
+      paymentId: null,
+      lastError: null,
+      updatedAt: startedAt,
+      ...(!snapshot.exists ? { createdAt: startedAt } : {}),
+    }, { merge: true });
+  });
+
+  return { id, token, userId, plan };
+}
+
+async function finalizeCheckoutIntent(
+  claim: CheckoutIntentClaim,
+  status: Extract<CheckoutIntentStatus, "failed" | "reconciliation_required">,
+  error: unknown,
+  paymentId?: string
+) {
+  const intentRef = adminDb.collection(CHECKOUT_INTENTS_COLLECTION).doc(claim.id);
+
+  await adminDb.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(intentRef);
+    if (snapshot.data()?.claimToken !== claim.token) {
+      return;
+    }
+
+    transaction.set(intentRef, {
+      status,
+      ...(paymentId ? { paymentId } : {}),
+      leaseExpiresAt: null,
+      lastError: error instanceof Error ? error.message.slice(0, 500) : "Unexpected checkout error",
+      updatedAt: nowIso(),
+    }, { merge: true });
+  });
+}
+
+function buildUserPendingPaymentUpdate(attempt: PaymentAttemptRecord) {
+  return stripUndefined({
+    paymentId: attempt.id,
+    paymentMethod: attempt.paymentMethod,
+    paymentStatus: attempt.status,
+    pendingCheckoutPayment: buildPendingCheckoutPayment(attempt),
+    pendingPixPayment:
+      attempt.paymentMethod === "PIX"
+        ? stripUndefined({
+            paymentId: attempt.id,
+            qrCode: attempt.qrCode,
+            qrCodePayload: attempt.qrCodePayload,
+            createdAt: attempt.createdAt,
+            expiresAt: attempt.expiresAt,
+            status: attempt.status,
+            plan: attempt.plan,
+          })
+        : null,
+    updatedAt: nowIso(),
+  });
+}
+
+async function persistCreatedCheckoutAttempt(attempt: PaymentAttemptRecord, claim: CheckoutIntentClaim) {
+  const intentRef = adminDb.collection(CHECKOUT_INTENTS_COLLECTION).doc(claim.id);
+  const attemptRef = adminDb.collection(PAYMENT_ATTEMPTS_COLLECTION).doc(attempt.id);
+  const userRef = adminDb.collection(USER_COLLECTION).doc(attempt.userId);
+
+  await adminDb.runTransaction(async (transaction) => {
+    const intentSnapshot = await transaction.get(intentRef);
+    if (intentSnapshot.data()?.claimToken !== claim.token) {
+      throw new Error("CHECKOUT_INTENT_CLAIM_LOST");
+    }
+
+    transaction.set(attemptRef, stripUndefined(attempt), { merge: true });
+    transaction.set(userRef, buildUserPendingPaymentUpdate(attempt), { merge: true });
+    transaction.set(intentRef, {
+      status: isPaymentPaid(attempt.status) ? "paid" : "pending",
+      paymentId: attempt.id,
+      paymentMethod: attempt.paymentMethod,
+      leaseExpiresAt: null,
+      lastError: null,
+      updatedAt: nowIso(),
+    }, { merge: true });
+  });
+}
+
+async function markCheckoutIntentForAttempt(
+  attempt: PaymentAttemptRecord,
+  status: Extract<CheckoutIntentStatus, "paid" | "cleared">
+) {
+  const intentRef = adminDb.collection(CHECKOUT_INTENTS_COLLECTION).doc(
+    getCheckoutIntentId(attempt.userId, attempt.plan)
+  );
+
+  await adminDb.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(intentRef);
+    const existingPaymentId = snapshot.data()?.paymentId;
+
+    if (existingPaymentId && existingPaymentId !== attempt.id) {
+      return;
+    }
+
+    transaction.set(intentRef, {
+      userId: attempt.userId,
+      plan: attempt.plan,
+      paymentId: attempt.id,
+      paymentMethod: attempt.paymentMethod,
+      status,
+      leaseExpiresAt: null,
+      updatedAt: nowIso(),
+      ...(!snapshot.exists ? { createdAt: nowIso() } : {}),
+    }, { merge: true });
+  });
 }
 
 function buildPendingCheckoutPayment(attempt: PaymentAttemptRecord): PendingCheckoutPayment {
@@ -179,16 +360,123 @@ function shouldClearPendingPayment(status: string) {
   ].includes(status);
 }
 
-function sanitizeWebhookEventId(payload: { id?: string; event?: string; payment?: { id?: string; status?: string } }) {
-  if (typeof payload.id === "string" && payload.id.length > 0) {
-    return payload.id;
-  }
-
+function shouldRevokePaymentEntitlement(status: string) {
   return [
-    payload.event || "unknown-event",
-    payload.payment?.id || "unknown-payment",
-    payload.payment?.status || "unknown-status",
-  ].join(":");
+    "REFUNDED",
+    "REFUND_REQUESTED",
+    "CHARGEBACK_REQUESTED",
+    "CHARGEBACK_DISPUTE",
+    "AWAITING_CHARGEBACK_REVERSAL",
+  ].includes(status);
+}
+
+function sanitizeWebhookEventId(rawEventId: string) {
+  return rawEventId.trim().replaceAll("/", "_").slice(0, 500);
+}
+
+type WebhookClaim =
+  | { kind: "claimed"; token: string }
+  | { kind: "completed" }
+  | { kind: "processing" };
+
+async function claimWebhookEvent(params: {
+  eventId: string;
+  providerEventId: string;
+  event: string;
+  payment: AsaasPayment;
+  dateCreated?: string;
+}): Promise<WebhookClaim> {
+  const webhookRef = adminDb.collection(WEBHOOK_EVENTS_COLLECTION).doc(params.eventId);
+  const claimToken = randomUUID();
+  const claimedAt = nowIso();
+  let claim: WebhookClaim = { kind: "claimed", token: claimToken };
+
+  await adminDb.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(webhookRef);
+    const existing = snapshot.data() as {
+      processingStatus?: string;
+      processingStartedAt?: string;
+      attempts?: number;
+    } | undefined;
+
+    if (existing?.processingStatus === "completed") {
+      claim = { kind: "completed" };
+      return;
+    }
+
+    if (existing?.processingStatus === "processing") {
+      const startedAt = Date.parse(existing.processingStartedAt || "");
+      const leaseIsActive = Number.isFinite(startedAt) && Date.now() - startedAt < WEBHOOK_PROCESSING_LEASE_MS;
+      if (leaseIsActive) {
+        claim = { kind: "processing" };
+        return;
+      }
+    }
+
+    const minimalPaymentPayload = stripUndefined({
+      id: params.payment.id,
+      customer: params.payment.customer,
+      billingType: params.payment.billingType,
+      status: params.payment.status,
+      value: params.payment.value,
+      netValue: params.payment.netValue,
+      dueDate: params.payment.dueDate,
+      externalReference: params.payment.externalReference,
+      invoiceNumber: params.payment.invoiceNumber,
+    });
+
+    transaction.set(webhookRef, {
+      event: params.event,
+      paymentId: params.payment.id,
+      paymentStatus: params.payment.status,
+      payload: stripUndefined({
+        id: params.providerEventId,
+        event: params.event,
+        dateCreated: params.dateCreated,
+        payment: minimalPaymentPayload,
+      }),
+      processingStatus: "processing",
+      processingToken: claimToken,
+      processingStartedAt: claimedAt,
+      ...(!existing ? { receivedAt: claimedAt } : {}),
+      updatedAt: claimedAt,
+      attempts: (existing?.attempts ?? 0) + 1,
+      lastError: null,
+    }, { merge: true });
+  });
+
+  return claim;
+}
+
+async function finalizeWebhookEvent(params: {
+  eventId: string;
+  claimToken: string;
+  outcome: "completed" | "failed";
+  details?: Record<string, unknown>;
+}) {
+  const webhookRef = adminDb.collection(WEBHOOK_EVENTS_COLLECTION).doc(params.eventId);
+
+  await adminDb.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(webhookRef);
+    const currentToken = snapshot.data()?.processingToken;
+
+    if (currentToken !== params.claimToken) {
+      if (params.outcome === "completed") {
+        throw new Error("WEBHOOK_EVENT_CLAIM_LOST");
+      }
+      return;
+    }
+
+    const finishedAt = nowIso();
+    transaction.set(webhookRef, {
+      ...(params.details ?? {}),
+      processingStatus: params.outcome,
+      updatedAt: finishedAt,
+      ...(params.outcome === "completed"
+        ? { completedAt: finishedAt, lastError: null }
+        : { failedAt: finishedAt }),
+    }, { merge: true });
+  });
 }
 
 function buildUnresolvedVerificationResponse(params: {
@@ -325,28 +613,7 @@ async function syncUserPendingState(userId: string, attempt: PaymentAttemptRecor
     return;
   }
 
-  await userRef.set(
-    stripUndefined({
-      paymentId: attempt.id,
-      paymentMethod: attempt.paymentMethod,
-      paymentStatus: attempt.status,
-      pendingCheckoutPayment: buildPendingCheckoutPayment(attempt),
-      pendingPixPayment:
-        attempt.paymentMethod === "PIX"
-          ? stripUndefined({
-              paymentId: attempt.id,
-              qrCode: attempt.qrCode,
-              qrCodePayload: attempt.qrCodePayload,
-              createdAt: attempt.createdAt,
-              expiresAt: attempt.expiresAt,
-              status: attempt.status,
-              plan: attempt.plan,
-            })
-          : null,
-      updatedAt: nowIso(),
-    }),
-    { merge: true }
-  );
+  await userRef.set(buildUserPendingPaymentUpdate(attempt), { merge: true });
 }
 
 async function grantLifetimeAccess(userId: string, payment: AsaasPayment) {
@@ -361,6 +628,7 @@ async function grantLifetimeAccess(userId: string, payment: AsaasPayment) {
       purchasedPlan: "lifetime",
       premiumActivatedAt: activatedAt,
       paymentId: payment.id,
+      premiumPaymentId: payment.id,
       paymentMethod: payment.billingType as CheckoutPaymentMethod,
       paymentStatus: payment.status,
       pendingCheckoutPayment: null,
@@ -374,6 +642,95 @@ async function grantLifetimeAccess(userId: string, payment: AsaasPayment) {
   await recomputeStoredProgressSnapshot(userId, {
     subscriptionStatusOverride: "premium",
     currentApprovedPillarOverride: Math.max(currentApprovedPillar, 2),
+  });
+}
+
+async function findAlternativePaidLifetimeAttempt(userId: string, excludedPaymentId: string) {
+  const attempts = await adminDb.collection(PAYMENT_ATTEMPTS_COLLECTION)
+    .where("userId", "==", userId)
+    .get();
+
+  return attempts.docs
+    .map((document) => document.data() as PaymentAttemptRecord)
+    .filter(
+      (attempt) =>
+        attempt.id !== excludedPaymentId &&
+        attempt.plan === "lifetime" &&
+        isPaymentPaid(attempt.status)
+    )
+    .sort((left, right) => Date.parse(right.paidAt || right.updatedAt) - Date.parse(left.paidAt || left.updatedAt))[0];
+}
+
+function hasActiveInviteEntitlement(userData: UserPaymentSnapshot) {
+  if (!userData.inviteCodeUsed) {
+    return false;
+  }
+
+  if (!userData.subscriptionExpiresAt) {
+    return true;
+  }
+
+  const expiresAt = Date.parse(userData.subscriptionExpiresAt);
+  return Number.isFinite(expiresAt) && expiresAt > Date.now();
+}
+
+async function revokePaymentEntitlement(
+  userId: string,
+  attempt: PaymentAttemptRecord,
+  payment: AsaasPayment
+) {
+  if (attempt.plan !== "lifetime" || !shouldRevokePaymentEntitlement(payment.status)) {
+    return;
+  }
+
+  const [userSnapshot, alternativeAttempt] = await Promise.all([
+    getUserDoc(userId),
+    findAlternativePaidLifetimeAttempt(userId, payment.id),
+  ]);
+
+  if (!userSnapshot.exists) {
+    return;
+  }
+
+  const userData = userSnapshot.data() as UserPaymentSnapshot;
+  const entitlementPaymentId =
+    userData.premiumPaymentId ||
+    (userData.purchasedPlan === "lifetime" ? userData.paymentId : undefined);
+
+  // A reversal from an older payment must not overwrite a newer entitlement.
+  if (entitlementPaymentId && entitlementPaymentId !== payment.id) {
+    await userSnapshot.ref.set({
+      lastReversedPaymentId: payment.id,
+      lastReversedPaymentStatus: payment.status,
+      updatedAt: nowIso(),
+    }, { merge: true });
+    return;
+  }
+
+  const preserveInvite = hasActiveInviteEntitlement(userData);
+  const preserveOtherOrigin =
+    userData.subscriptionStatus === "premium" &&
+    userData.purchasedPlan !== "lifetime" &&
+    !entitlementPaymentId;
+  const preservePremium = Boolean(alternativeAttempt || preserveInvite || preserveOtherOrigin);
+  const updatedAt = nowIso();
+
+  await userSnapshot.ref.set({
+    subscriptionStatus: preservePremium ? "premium" : "cancelled",
+    purchasedPlan: alternativeAttempt ? "lifetime" : null,
+    premiumPaymentId: alternativeAttempt?.id ?? null,
+    paymentId: alternativeAttempt?.id ?? null,
+    paymentMethod: alternativeAttempt?.paymentMethod ?? null,
+    paymentStatus: alternativeAttempt?.status ?? payment.status,
+    pendingCheckoutPayment: null,
+    pendingPixPayment: null,
+    lastReversedPaymentId: payment.id,
+    lastReversedPaymentStatus: payment.status,
+    updatedAt,
+  }, { merge: true });
+
+  await recomputeStoredProgressSnapshot(userId, {
+    subscriptionStatusOverride: preservePremium ? "premium" : "cancelled",
   });
 }
 
@@ -520,45 +877,6 @@ function buildPaymentAttemptFromAsaas(params: {
   };
 }
 
-function ensureDirectCardFields(input: CheckoutRequestInput) {
-  if (!isDirectCardEnabled()) {
-    throw new Error("Pagamento direto com cartao nao esta habilitado neste ambiente.");
-  }
-
-  if (!input.card) {
-    throw new Error("Dados do cartao sao obrigatorios para o modo direto.");
-  }
-
-  if (!input.cardHolderInfo) {
-    throw new Error("Dados do titular do cartao sao obrigatorios para o modo direto.");
-  }
-
-  if (!input.remoteIp) {
-    throw new Error("O IP remoto do comprador e obrigatorio para o modo direto.");
-  }
-}
-
-function buildCardHolderInfo(input: CheckoutRequestInput): CheckoutCardHolderInfoInput {
-  if (input.cardHolderInfo) {
-    return input.cardHolderInfo;
-  }
-
-  if (!input.postalCode || !input.addressNumber) {
-    throw new Error("CEP e numero do endereco sao obrigatorios para pagamento direto com cartao.");
-  }
-
-  return {
-    name: input.name,
-    email: input.email,
-    cpfCnpj: input.cpfCnpj,
-    postalCode: input.postalCode,
-    addressNumber: input.addressNumber,
-    addressComplement: input.addressComplement,
-    phone: input.phone,
-    mobilePhone: input.mobilePhone,
-  };
-}
-
 async function syncAttemptFromAsaas(attempt: PaymentAttemptRecord, payment: AsaasPayment) {
   const updatedAttempt: PaymentAttemptRecord = {
     ...attempt,
@@ -630,6 +948,7 @@ async function applyPaidAttempt(userId: string, attempt: PaymentAttemptRecord, p
     await registerSpecialtyPurchase(userId, payment);
   }
   await syncUserPendingState(userId, null);
+  await markCheckoutIntentForAttempt(attempt, "paid");
 }
 
 async function resolveActiveAttempt(userId: string): Promise<PaymentAttemptRecord | null> {
@@ -655,6 +974,8 @@ async function resolveActiveAttempt(userId: string): Promise<PaymentAttemptRecor
 }
 
 export async function getCheckoutState(userId: string, plan: CheckoutPlan = "lifetime"): Promise<CheckoutStateResponse> {
+  assertPaymentsEnabled();
+  assertCheckoutPlanEnabled(plan);
   const userDoc = await getUserDoc(userId);
   const userData = userDoc.data() as UserPaymentSnapshot | undefined;
 
@@ -702,12 +1023,15 @@ export async function getCheckoutState(userId: string, plan: CheckoutPlan = "lif
 
   if (syncedAttempt.paymentMethod === "PIX" && !isPendingPixStillValid(pendingState)) {
     await syncUserPendingState(userId, null);
+    await markCheckoutIntentForAttempt(syncedAttempt, "cleared");
 
     return getAttemptResponse(syncedAttempt, { expired: true });
   }
 
   if (shouldClearPendingPayment(payment.status)) {
+    await revokePaymentEntitlement(userId, syncedAttempt, payment);
     await syncUserPendingState(userId, null);
+    await markCheckoutIntentForAttempt(syncedAttempt, "cleared");
     return getAttemptResponse(syncedAttempt, { expired: true });
   }
 
@@ -716,10 +1040,15 @@ export async function getCheckoutState(userId: string, plan: CheckoutPlan = "lif
 }
 
 export async function createCheckout(input: CheckoutRequestInput): Promise<CheckoutStateResponse> {
+  assertPaymentsEnabled();
   const plan = input.plan ?? "lifetime";
+  assertCheckoutPlanEnabled(plan);
   const paymentMethod = input.paymentMethod ?? "PIX";
   const creditCardMode: CreditCardCheckoutMode =
     paymentMethod === "CREDIT_CARD" ? input.creditCardMode ?? "INVOICE_URL" : "INVOICE_URL";
+  if (creditCardMode !== "INVOICE_URL") {
+    throw new Error("DIRECT_CARD_NOT_ALLOWED");
+  }
   const installmentCount =
     paymentMethod === "CREDIT_CARD" && Number.isFinite(input.installmentCount)
       ? Math.min(MAX_CHECKOUT_INSTALLMENTS, Math.max(1, Math.trunc(input.installmentCount as number)))
@@ -727,57 +1056,69 @@ export async function createCheckout(input: CheckoutRequestInput): Promise<Check
   const { value: baseValue, description } = getPlanPricing(plan);
   const installmentTotals = calculateCheckoutInstallmentTotals(baseValue, installmentCount);
   const value = paymentMethod === "CREDIT_CARD" ? installmentTotals.totalAmount : baseValue;
-
   const existingState = await getCheckoutState(input.userId, plan);
   if (existingState.alreadyPremium || existingState.hasPendingPayment) {
     return existingState;
   }
 
-  const customer = await createOrGetCustomer(input.name, input.email, input.cpfCnpj);
-
-  if (paymentMethod === "PIX") {
-    const payment = await createPixPayment(customer.id, value, description, input.userId);
-    const qrCode = await getPixQrCode(payment.id);
-    const expiresAt = new Date(Date.now() + PIX_VALIDITY_MS).toISOString();
-    const attempt = buildPaymentAttemptFromAsaas({
-      payment,
-      userId: input.userId,
-      asaasCustomerId: customer.id,
-      paymentMethod,
-      qrCode: qrCode.encodedImage,
-      qrCodePayload: qrCode.payload,
-      expiresAt,
-      value,
-      description,
-      plan,
-      installmentCount: 1,
-      localCustomerId: input.localCustomerId,
-    });
-
-    await upsertPaymentAttempt(attempt);
-    await syncUserPendingState(input.userId, attempt);
-
-    return getAttemptResponse(attempt);
+  let claim: CheckoutIntentClaim;
+  try {
+    claim = await claimCheckoutIntent(input.userId, plan);
+  } catch (error) {
+    if (error instanceof Error && error.message === "CHECKOUT_ALREADY_TRACKED") {
+      const trackedState = await getCheckoutState(input.userId, plan);
+      if (trackedState.alreadyPremium || trackedState.hasPendingPayment) {
+        return trackedState;
+      }
+    }
+    throw error;
   }
 
-  const dueDate = formatDateDaysFromNow(CARD_DUE_DAYS);
+  let paymentCreationStarted = false;
+  let paymentCreated = false;
+  let createdPaymentId: string | undefined;
 
-  if (creditCardMode === "DIRECT") {
-    ensureDirectCardFields(input);
-    const cardHolderInfo = buildCardHolderInfo(input);
+  try {
+    const customer = await createOrGetCustomer(input.name, input.email, input.cpfCnpj);
+
+    if (paymentMethod === "PIX") {
+      paymentCreationStarted = true;
+      const payment = await createPixPayment(customer.id, value, description, input.userId);
+      paymentCreated = true;
+      createdPaymentId = payment.id;
+      const qrCode = await getPixQrCode(payment.id);
+      const expiresAt = normalizeProviderDate(qrCode.expirationDate, "PIX_EXPIRATION_DATE");
+      const attempt = buildPaymentAttemptFromAsaas({
+        payment,
+        userId: input.userId,
+        asaasCustomerId: customer.id,
+        paymentMethod,
+        qrCode: qrCode.encodedImage,
+        qrCodePayload: qrCode.payload,
+        expiresAt,
+        value,
+        description,
+        plan,
+        installmentCount: 1,
+        localCustomerId: input.localCustomerId,
+      });
+
+      await persistCreatedCheckoutAttempt(attempt, claim);
+      return getAttemptResponse(attempt);
+    }
+
+    const dueDate = formatDateDaysFromNow(CARD_DUE_DAYS);
+    paymentCreationStarted = true;
     const payment = await createCreditCardPayment({
       customer: customer.id,
       value,
       description,
       dueDate,
       externalReference: input.userId,
-      creditCardMode,
       installmentCount,
-      creditCard: input.card?.token ? undefined : input.card!,
-      creditCardToken: input.card?.token,
-      creditCardHolderInfo: cardHolderInfo,
-      remoteIp: input.remoteIp!,
     });
+    paymentCreated = true;
+    createdPaymentId = payment.id;
 
     const attempt = buildPaymentAttemptFromAsaas({
       payment,
@@ -792,56 +1133,44 @@ export async function createCheckout(input: CheckoutRequestInput): Promise<Check
       localCustomerId: input.localCustomerId,
     });
 
-    await upsertPaymentAttempt(attempt);
-
+    await persistCreatedCheckoutAttempt(attempt, claim);
     if (isPaymentPaid(payment.status)) {
-      if (plan === "lifetime") {
-        await grantLifetimeAccess(input.userId, payment);
-      } else {
-        await registerSpecialtyPurchase(input.userId, payment);
-      }
-      await syncUserPendingState(input.userId, null);
-    } else {
-      await syncUserPendingState(input.userId, attempt);
+      await applyPaidAttempt(input.userId, attempt, payment);
     }
 
     return getAttemptResponse(attempt);
+  } catch (error) {
+    const reconciliationRequired =
+      paymentCreated ||
+      (paymentCreationStarted &&
+        !(error instanceof AsaasApiError && error.status >= 400 && error.status < 500));
+    const intentStatus = reconciliationRequired ? "reconciliation_required" : "failed";
+
+    await finalizeCheckoutIntent(claim, intentStatus, error, createdPaymentId);
+    if (reconciliationRequired) {
+      console.error("[payments] checkout_reconciliation_required", {
+        intentId: claim.id,
+        plan,
+        paymentMethod,
+        error: error instanceof Error ? error.message : "Unexpected checkout error",
+      });
+    }
+    throw error;
   }
-
-  const payment = await createCreditCardPayment({
-    customer: customer.id,
-    value,
-    description,
-    dueDate,
-    externalReference: input.userId,
-    creditCardMode,
-    installmentCount,
-  });
-
-  const attempt = buildPaymentAttemptFromAsaas({
-    payment,
-    userId: input.userId,
-    asaasCustomerId: customer.id,
-    paymentMethod,
-    creditCardMode,
-    value,
-    description,
-    plan,
-    localCustomerId: input.localCustomerId,
-  });
-
-  await upsertPaymentAttempt(attempt);
-  await syncUserPendingState(input.userId, attempt);
-
-  return getAttemptResponse(attempt);
 }
 
 export async function verifyPaymentStatus(userId: string, paymentId: string): Promise<PaymentVerificationResponse> {
+  assertPaymentsEnabled();
   const existingAttempt = await assertPaymentBelongsToUser(paymentId, userId);
   const payment = await getPayment(paymentId);
   const resolution = await resolveTrackedPaymentAttempt(userId, payment, { existingAttempt });
 
   if (resolution.kind === "unresolved") {
+    console.error("[payments] verification_reconciliation_unresolved", {
+      paymentId: payment.id,
+      reason: resolution.reason,
+      status: payment.status,
+    });
     return buildUnresolvedVerificationResponse({
       paymentId: payment.id,
       status: payment.status,
@@ -864,7 +1193,9 @@ export async function verifyPaymentStatus(userId: string, paymentId: string): Pr
   }
 
   if (shouldClearPendingPayment(payment.status)) {
+    await revokePaymentEntitlement(userId, syncedAttempt, payment);
     await syncUserPendingState(userId, null);
+    await markCheckoutIntentForAttempt(syncedAttempt, "cleared");
     return {
       isPaid: false,
       status: payment.status,
@@ -889,157 +1220,167 @@ export async function verifyPaymentStatus(userId: string, paymentId: string): Pr
 export async function handleAsaasWebhook(payload: {
   id?: string;
   event?: string;
+  dateCreated?: string;
   payment?: AsaasPayment;
 }) {
   const { event, payment } = payload;
+  const rawEventId = typeof payload.id === "string" ? payload.id.trim() : "";
 
-  if (!event || !payment?.id) {
-    throw new Error("Webhook payload invalido: evento ou pagamento ausente.");
+  if (!rawEventId || !event || !payment?.id) {
+    throw new Error("INVALID_ASAAS_WEBHOOK_PAYLOAD");
   }
 
-  const webhookEventId = sanitizeWebhookEventId(payload);
-  const webhookRef = adminDb.collection(WEBHOOK_EVENTS_COLLECTION).doc(webhookEventId);
-  const webhookDoc = await webhookRef.get();
+  const webhookEventId = sanitizeWebhookEventId(rawEventId);
+  const claim = await claimWebhookEvent({
+    eventId: webhookEventId,
+    providerEventId: rawEventId,
+    event,
+    payment,
+    dateCreated: payload.dateCreated,
+  });
 
-  if (webhookDoc.exists) {
+  if (claim.kind === "completed") {
     return { success: true, duplicated: true, ignoredEvent: event };
   }
 
-  await webhookRef.set({
-    event,
-    paymentId: payment.id,
-    status: payment.status,
-    receivedAt: nowIso(),
-  });
-
-  const attemptDoc = await getPaymentAttempt(payment.id);
-  let attempt: PaymentAttemptRecord | null = attemptDoc.exists
-    ? (attemptDoc.data() as PaymentAttemptRecord)
-    : null;
-
-  const userId = payment.externalReference || attempt?.userId;
-  if (!userId) {
-    throw new Error("Nao foi possivel determinar o usuario local para o pagamento recebido.");
+  if (claim.kind === "processing") {
+    throw new Error("WEBHOOK_EVENT_IN_PROGRESS");
   }
 
-  const userDoc = await getUserDoc(userId);
-  const userData = userDoc.data() as UserPaymentSnapshot | undefined;
-  const resolution = await resolveTrackedPaymentAttempt(userId, payment, {
-    existingAttempt: attempt,
-    userData,
-  });
+  try {
+    const attemptDoc = await getPaymentAttempt(payment.id);
+    let attempt: PaymentAttemptRecord | null = attemptDoc.exists
+      ? (attemptDoc.data() as PaymentAttemptRecord)
+      : null;
 
-  if (resolution.kind === "unresolved") {
-    await webhookRef.set(
-      {
+    const userId = payment.externalReference || attempt?.userId;
+    if (!userId) {
+      throw new Error("Nao foi possivel determinar o usuario local para o pagamento recebido.");
+    }
+
+    const userDoc = await getUserDoc(userId);
+    const userData = userDoc.data() as UserPaymentSnapshot | undefined;
+    const resolution = await resolveTrackedPaymentAttempt(userId, payment, {
+      existingAttempt: attempt,
+      userData,
+    });
+
+    if (resolution.kind === "unresolved") {
+      console.error("[payments] webhook_reconciliation_unresolved", {
+        eventId: rawEventId,
+        paymentId: payment.id,
+        event,
+        reason: resolution.reason,
+      });
+      await finalizeWebhookEvent({
+        eventId: webhookEventId,
+        claimToken: claim.token,
+        outcome: "completed",
+        details: {
+          reconciliationStatus: "unresolved",
+          reconciliationReason: resolution.reason,
+          userId,
+          needsManualReconciliation: true,
+        },
+      });
+
+      return {
+        success: true,
+        paymentId: payment.id,
+        ignoredEvent: event,
         reconciliationStatus: "unresolved",
         reconciliationReason: resolution.reason,
-        userId,
         needsManualReconciliation: true,
+      };
+    }
+
+    attempt = resolution.attempt;
+
+    if (!attemptDoc.exists) {
+      attempt = {
+        ...attempt,
+        lastWebhookEvent: event,
+      };
+    } else {
+      attempt = {
+        ...attempt,
+        status: payment.status,
+        dueDate: payment.dueDate,
+        invoiceUrl: payment.invoiceUrl || attempt.invoiceUrl,
+        lastWebhookEvent: event,
         updatedAt: nowIso(),
-      },
-      { merge: true }
-    );
+        paidAt: isPaymentPaid(payment.status) ? attempt.paidAt || nowIso() : attempt.paidAt,
+      };
+    }
 
-    return {
-      success: true,
-      paymentId: payment.id,
-      ignoredEvent: event,
-      reconciliationStatus: "unresolved" as PaymentReconciliationStatus,
-      reconciliationReason: resolution.reason,
-      needsManualReconciliation: true,
-    };
-  }
+    await upsertPaymentAttempt(attempt);
 
-  attempt = resolution.attempt;
-
-  if (!attemptDoc.exists) {
-    attempt = {
-      ...attempt,
-      lastWebhookEvent: event,
-    };
-  } else {
-    attempt = {
-      ...attempt,
-      status: payment.status,
-      dueDate: payment.dueDate,
-      invoiceUrl: payment.invoiceUrl || attempt.invoiceUrl,
-      lastWebhookEvent: event,
-      updatedAt: nowIso(),
-      paidAt: isPaymentPaid(payment.status) ? attempt.paidAt || nowIso() : attempt.paidAt,
-    };
-  }
-
-  await upsertPaymentAttempt(attempt);
-
-  if (isPaymentPaid(payment.status)) {
-    await applyPaidAttempt(userId, attempt, payment);
-    await webhookRef.set(
-      {
-        reconciliationStatus: "paid",
+    if (isPaymentPaid(payment.status)) {
+      await applyPaidAttempt(userId, attempt, payment);
+      await finalizeWebhookEvent({
+        eventId: webhookEventId,
+        claimToken: claim.token,
+        outcome: "completed",
+        details: {
+          reconciliationStatus: "paid",
+          reconciliationReason: resolution.reason,
+          userId,
+          needsManualReconciliation: false,
+        },
+      });
+      return {
+        success: true,
+        grantedAccess: true,
+        paymentId: payment.id,
+        reconciliationStatus: "paid" as PaymentReconciliationStatus,
         reconciliationReason: resolution.reason,
+      };
+    }
+
+    const shouldClear = shouldClearPendingPayment(payment.status);
+    if (shouldClear) {
+      await revokePaymentEntitlement(userId, attempt, payment);
+      await syncUserPendingState(userId, null);
+      await markCheckoutIntentForAttempt(attempt, "cleared");
+    } else {
+      await syncUserPendingState(userId, attempt);
+    }
+
+    const reconciliationStatus = shouldClear ? "cleared" : "pending";
+    await finalizeWebhookEvent({
+      eventId: webhookEventId,
+      claimToken: claim.token,
+      outcome: "completed",
+      details: {
+        reconciliationStatus,
+        reconciliationReason: reconciliationStatus,
         userId,
         needsManualReconciliation: false,
-        updatedAt: nowIso(),
       },
-      { merge: true }
-    );
+    });
+
     return {
       success: true,
-      grantedAccess: true,
+      ignoredEvent: event,
       paymentId: payment.id,
-      reconciliationStatus: "paid" as PaymentReconciliationStatus,
-      reconciliationReason: resolution.reason,
+      reconciliationStatus: reconciliationStatus as PaymentReconciliationStatus,
+      reconciliationReason: reconciliationStatus as PaymentReconciliationReason,
     };
-  }
-
-  if (shouldClearPendingPayment(payment.status)) {
-    await syncUserPendingState(userId, null);
-    await webhookRef.set(
-      {
-        reconciliationStatus: "cleared",
-        reconciliationReason: "cleared",
-        userId,
-        needsManualReconciliation: false,
-        updatedAt: nowIso(),
+  } catch (error) {
+    console.error("[payments] webhook_processing_failed", {
+      eventId: rawEventId,
+      paymentId: payment.id,
+      event,
+      error: error instanceof Error ? error.message : "Unexpected webhook error",
+    });
+    await finalizeWebhookEvent({
+      eventId: webhookEventId,
+      claimToken: claim.token,
+      outcome: "failed",
+      details: {
+        lastError: error instanceof Error ? error.message.slice(0, 500) : "Unexpected webhook error",
       },
-      { merge: true }
-    );
-  } else {
-    await syncUserPendingState(userId, attempt);
-    await webhookRef.set(
-      {
-        reconciliationStatus: "pending",
-        reconciliationReason: "pending",
-        userId,
-        needsManualReconciliation: false,
-        updatedAt: nowIso(),
-      },
-      { merge: true }
-    );
+    });
+    throw error;
   }
-
-  return {
-    success: true,
-    ignoredEvent: event,
-    paymentId: payment.id,
-    reconciliationStatus: shouldClearPendingPayment(payment.status) ? ("cleared" as PaymentReconciliationStatus) : ("pending" as PaymentReconciliationStatus),
-    reconciliationReason: shouldClearPendingPayment(payment.status) ? ("cleared" as PaymentReconciliationReason) : ("pending" as PaymentReconciliationReason),
-  };
-}
-
-export async function createCreditCardToken(input: CheckoutRequestInput) {
-  ensureDirectCardFields(input);
-  const cardHolderInfo = buildCardHolderInfo(input);
-
-  return tokenizeCreditCard({
-    customer: {
-      name: input.name,
-      email: input.email,
-      cpfCnpj: input.cpfCnpj,
-    },
-    creditCard: input.card!,
-    creditCardHolderInfo: cardHolderInfo,
-    remoteIp: input.remoteIp!,
-  });
 }

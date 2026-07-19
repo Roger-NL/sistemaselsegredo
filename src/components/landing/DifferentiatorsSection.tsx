@@ -17,7 +17,7 @@ export function DifferentiatorsSection() {
         },
         {
             title: "Prática Real vs. Teoria",
-            desc: "Foco 100% em comunicação do mundo real. Gramática inútil é descartada.",
+            desc: "Foco em situações de comunicação, com a gramática aplicada ao contexto.",
             icon: Cpu,
             color: "text-emerald-400",
             bg: "bg-emerald-400/10",
@@ -27,7 +27,7 @@ export function DifferentiatorsSection() {
         },
         {
             title: "Precisão vs. Volume",
-            desc: "Acúmulo de horas é ilusão. Condicionamos seu reflexo neural para a fluência.",
+            desc: "Sessões focadas combinam repetição, produção e feedback sobre pontos concretos.",
             icon: Crosshair,
             color: "text-cyan-400",
             bg: "bg-cyan-400/10",
@@ -37,7 +37,7 @@ export function DifferentiatorsSection() {
         },
         {
             title: "Humano vs. IA Genérica",
-            desc: "Só avança quem atinge o critério técnico validado por especialistas.",
+            desc: "Etapas-chave usam critérios definidos e revisão por uma pessoa autorizada.",
             icon: Fingerprint,
             color: "text-fuchsia-400",
             bg: "bg-fuchsia-400/10",
@@ -64,7 +64,7 @@ export function DifferentiatorsSection() {
                         O tradicional falhou.
                     </h2>
                     <p className="text-base md:text-lg font-bold text-gray-300 font-mono mb-6 max-w-2xl mx-auto leading-relaxed">
-                        Cursos comuns retêm tempo. Este sistema constrói capacidade funcional imediata.
+                        Aqui, leitura e explicação são acompanhadas por produção ativa e feedback.
                     </p>
                     <div className="w-32 h-1 bg-gradient-to-r from-transparent via-violet-500 to-transparent mx-auto opacity-70 shadow-[0_0_15px_#8b5cf6]" />
                 </motion.div>

@@ -6,6 +6,7 @@ interface LeaderboardRow {
   id: string;
   name: string;
   streak: number;
+  isYou: boolean;
 }
 
 function formatName(fullName: string) {
@@ -34,7 +35,7 @@ function normalizeLimit(value: string | null) {
 
 export async function GET(req: Request) {
   try {
-    await requireAuthenticatedUser(req);
+    const authUser = await requireAuthenticatedUser(req);
 
     const { searchParams } = new URL(req.url);
     const limitCount = normalizeLimit(searchParams.get("limit"));
@@ -46,7 +47,7 @@ export async function GET(req: Request) {
       .get();
 
     const rows: LeaderboardRow[] = snapshot.docs
-      .map((doc) => {
+      .map((doc, index) => {
         const data = doc.data() as {
           name?: string;
           currentStreak?: number;
@@ -57,9 +58,11 @@ export async function GET(req: Request) {
         }
 
         return {
-          id: doc.id,
+          // Never expose Firebase UIDs to other students.
+          id: `rank-${index + 1}`,
           name: formatName(data.name),
           streak: data.currentStreak,
+          isYou: doc.id === authUser.uid,
         };
       })
       .filter((row): row is LeaderboardRow => row !== null);

@@ -3,15 +3,10 @@ import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { AUTH_SESSION_COOKIE_NAME } from "@/lib/auth/session";
 
 const USERS_COLLECTION = "users";
-const ADMIN_EMAILS = new Set([
-  "roger@esacademy.com",
-  "admin@esacademy.com",
-  "raugerac@gmail.com",
-]);
 
 export type RequestPrincipalRole = "admin" | "student";
 export type RequestPrincipalSubscriptionStatus = "free" | "premium" | "expired";
-export type RequestPrincipalSource = "bearer_token" | "session_cookie" | "legacy_cookie";
+export type RequestPrincipalSource = "bearer_token" | "session_cookie";
 
 export interface RequestPrincipal {
   uid: string;
@@ -24,7 +19,6 @@ export interface RequestPrincipal {
 export interface RequestPrincipalOptions {
   allowBearer?: boolean;
   allowSessionCookie?: boolean;
-  allowLegacyCookie?: boolean;
 }
 
 function normalizeSubscriptionStatus(value: unknown): RequestPrincipalSubscriptionStatus {
@@ -35,12 +29,8 @@ function normalizeSubscriptionStatus(value: unknown): RequestPrincipalSubscripti
   return "free";
 }
 
-function normalizeRole(email: string | null): RequestPrincipalRole {
-  if (email && ADMIN_EMAILS.has(email.toLowerCase())) {
-    return "admin";
-  }
-
-  return "student";
+function normalizeRole(adminClaim: unknown): RequestPrincipalRole {
+  return adminClaim === true ? "admin" : "student";
 }
 
 function extractBearerToken(req: Request) {
@@ -83,15 +73,20 @@ async function readCookieValue(req: Request | undefined, name: string) {
   return cookieStore.get(name)?.value ?? null;
 }
 
-async function resolveProfile(uid: string, email: string | null, source: RequestPrincipalSource): Promise<RequestPrincipal> {
+async function resolveProfile(
+  uid: string,
+  email: string | null,
+  adminClaim: unknown,
+  source: RequestPrincipalSource
+): Promise<RequestPrincipal> {
   const snapshot = await adminDb.collection(USERS_COLLECTION).doc(uid).get();
   const data = snapshot.exists ? snapshot.data() : null;
-  const resolvedEmail = typeof data?.email === "string" && data.email ? data.email : email;
 
   return {
     uid,
-    email: resolvedEmail,
-    role: normalizeRole(resolvedEmail),
+    // Only verified Firebase identity claims may grant administrative access.
+    email,
+    role: normalizeRole(adminClaim),
     subscriptionStatus: normalizeSubscriptionStatus(data?.subscriptionStatus),
     source,
   };
@@ -104,7 +99,7 @@ async function resolveFromBearer(req: Request): Promise<RequestPrincipal | null>
   }
 
   const decodedToken = await adminAuth.verifyIdToken(token);
-  return resolveProfile(decodedToken.uid, decodedToken.email ?? null, "bearer_token");
+  return resolveProfile(decodedToken.uid, decodedToken.email ?? null, decodedToken.admin, "bearer_token");
 }
 
 async function resolveFromSessionCookie(req?: Request): Promise<RequestPrincipal | null> {
@@ -113,17 +108,8 @@ async function resolveFromSessionCookie(req?: Request): Promise<RequestPrincipal
     return null;
   }
 
-  const decodedCookie = await adminAuth.verifySessionCookie(sessionCookie, false);
-  return resolveProfile(decodedCookie.uid, decodedCookie.email ?? null, "session_cookie");
-}
-
-async function resolveFromLegacyCookie(req?: Request): Promise<RequestPrincipal | null> {
-  const legacyUid = await readCookieValue(req, "es_session_token");
-  if (!legacyUid) {
-    return null;
-  }
-
-  return resolveProfile(legacyUid, null, "legacy_cookie");
+  const decodedCookie = await adminAuth.verifySessionCookie(sessionCookie, true);
+  return resolveProfile(decodedCookie.uid, decodedCookie.email ?? null, decodedCookie.admin, "session_cookie");
 }
 
 export async function getRequestPrincipal(
@@ -133,7 +119,6 @@ export async function getRequestPrincipal(
   const {
     allowBearer = true,
     allowSessionCookie = true,
-    allowLegacyCookie = false,
   } = options;
 
   if (req && allowBearer) {
@@ -154,15 +139,7 @@ export async function getRequestPrincipal(
         return sessionPrincipal;
       }
     } catch {
-      // Keep going so legacy compatibility can still work where it is enabled.
-    }
-  }
-
-  if (allowLegacyCookie) {
-    try {
-      return await resolveFromLegacyCookie(req);
-    } catch {
-      return null;
+      // Invalid or expired sessions are unauthenticated.
     }
   }
 

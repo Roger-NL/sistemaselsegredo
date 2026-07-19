@@ -17,8 +17,8 @@ export function PremiumWall() {
                 
                 <h1 className="text-2xl font-bold text-white mb-2">Acesso Restrito</h1>
                 <p className="text-white/60 mb-8 text-sm leading-relaxed">
-                    Este conteúdo é exclusivo para Operadores de Elite (Premium).
-                    Complete sua inscrição para desbloquear o acesso total.
+                    Este conteúdo faz parte do beta completo por convite.
+                    Ative um convite válido para liberar o acesso total, sem cobrança.
                 </p>
 
                 <div className="space-y-3">
@@ -28,7 +28,7 @@ export function PremiumWall() {
                         className="w-full justify-center"
                     >
                         <Crown className="w-4 h-4 mr-2" />
-                        Desbloquear Acesso
+                        Ativar convite beta
                     </FlightButton>
                     
                     <button 

@@ -1,20 +1,33 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { handleAsaasWebhook } from "@/lib/payments/service";
+import {
+  readJsonObject,
+  RequestPayloadError,
+  requestPayloadErrorResponse,
+} from "@/lib/server/request";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+const MAX_WEBHOOK_BODY_BYTES = 128 * 1_024;
+
+function tokensMatch(receivedToken: string, expectedToken: string) {
+  const received = Buffer.from(receivedToken, "utf8");
+  const expected = Buffer.from(expectedToken, "utf8");
+
+  return received.length === expected.length && timingSafeEqual(received, expected);
+}
 
 function isWebhookAuthorized(req: Request) {
-  const expectedToken = process.env.ASAAS_WEBHOOK_TOKEN;
+  const expectedToken = process.env.ASAAS_WEBHOOK_TOKEN?.trim();
 
   if (!expectedToken) {
-    return process.env.NODE_ENV !== "production";
+    return false;
   }
 
-  const url = new URL(req.url);
-  const queryToken = url.searchParams.get("token");
-  const headerToken = req.headers.get("x-asaas-webhook-token");
+  const headerToken = req.headers.get("asaas-access-token")?.trim();
 
-  return queryToken === expectedToken || headerToken === expectedToken;
+  return Boolean(headerToken && tokensMatch(headerToken, expectedToken));
 }
 
 export async function POST(req: Request) {
@@ -23,12 +36,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized webhook request." }, { status: 401 });
     }
 
-    const payload = await req.json();
+    const payload = await readJsonObject(req, MAX_WEBHOOK_BODY_BYTES);
     const result = await handleAsaasWebhook(payload);
     return NextResponse.json(result);
   } catch (error: unknown) {
-    console.error("Asaas webhook error:", error);
+    if (error instanceof RequestPayloadError) {
+      return requestPayloadErrorResponse(error);
+    }
     const message = error instanceof Error ? error.message : "Unexpected webhook error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const status = message === "INVALID_ASAAS_WEBHOOK_PAYLOAD" ? 400 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

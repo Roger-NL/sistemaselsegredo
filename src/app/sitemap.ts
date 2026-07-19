@@ -6,14 +6,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Define your static routes here
     const routes = [
         '',
-        '/especialidades',
-        // Add other main routes as they become stable
+        '/termos',
+        '/privacidade',
     ]
 
     return routes.map((route) => ({
         url: `${baseUrl}${route}`,
         lastModified: new Date(),
-        changeFrequency: 'daily',
-        priority: route === '' ? 1 : 0.8,
+        changeFrequency: route === '' ? 'weekly' as const : 'monthly' as const,
+        priority: route === '' ? 1 : 0.4,
     }))
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getRequestPrincipal } from '@/lib/auth/principal';
 import { getSchedulingAvailability } from '@/lib/scheduling/service';
+import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from '@/lib/server/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +12,6 @@ export async function GET(req: Request) {
     const principal = await getRequestPrincipal(req, {
       allowBearer: true,
       allowSessionCookie: true,
-      allowLegacyCookie: true,
     });
 
     if (!principal) {
@@ -26,10 +26,20 @@ export async function GET(req: Request) {
       ? requestedUserId
       : principal.uid;
 
+    await consumeRateLimit({
+      namespace: 'scheduling-availability',
+      identifier: `${principal.uid}:${userId}`,
+      limit: 60,
+      windowMs: 60 * 1000,
+    });
+
     const slots = await getSchedulingAvailability(userId);
     return NextResponse.json({ success: true, slots });
   } catch (error) {
-    console.error('[scheduling/availability] error', error);
+    if (error instanceof RateLimitError) return rateLimitErrorResponse(error);
+    const message = error instanceof Error ? error.message : '';
+    const code = /^[A-Z0-9_]+$/.test(message) ? message : 'UNEXPECTED_ERROR';
+    console.error(JSON.stringify({ level: 'error', event: 'scheduling_availability_failed', code }));
     return NextResponse.json({ error: 'Failed to load availability.' }, { status: 500 });
   }
 }

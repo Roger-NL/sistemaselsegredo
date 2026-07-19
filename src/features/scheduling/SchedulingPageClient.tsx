@@ -466,7 +466,7 @@ export default function SchedulingPageClient() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.25em] text-emerald-200">
               <Crown className="w-3.5 h-3.5" />
-              Premium
+              Beta completo
             </div>
             <h1 className="mt-4 text-3xl md:text-4xl font-bold tracking-tight">
               Agendamentos

@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, onIdTokenChanged } from "firebase/auth";
-import { doc, getDoc, updateDoc, getDocFromServer } from "firebase/firestore";
+import { doc, getDoc, getDocFromServer } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 import {
@@ -13,7 +13,6 @@ import {
     updateProfile as authUpdateProfile,
     logout as authLogout,
     activateWithInvite as authActivateWithInvite,
-    activateWithPayment as authActivateWithPayment,
     changePassword as authChangePassword,
     resetPassword as authResetPassword,
     checkSubscriptionStatus,
@@ -21,8 +20,6 @@ import {
     AuthResult,
     SubscriptionStatus,
     isFirestorePermissionError,
-    setLegacySessionHintCookies,
-    clearLegacySessionHintCookies,
 } from "@/lib/auth/service";
 
 import type { User as FirebaseUser } from "firebase/auth";
@@ -35,7 +32,6 @@ interface AuthContextType {
     register: (name: string, email: string, password: string, confirmPassword: string) => Promise<AuthResult>;
     updateProfile: (name: string, email: string, phone?: string) => Promise<AuthResult>;
     activateWithInvite: (code: string) => Promise<AuthResult>;
-    activateWithPayment: (paymentId: string) => Promise<AuthResult>;
     loginWithGoogle: () => Promise<AuthResult>;
     changePassword: (newPassword: string) => Promise<AuthResult>;
     resetPassword: (email: string) => Promise<AuthResult>;
@@ -56,6 +52,7 @@ function buildFallbackUser(firebaseUser: FirebaseUser): User {
         currentStreak: 0,
         subscriptionStatus: "free",
         approvedPillar: 1,
+        isAdmin: false,
     };
 }
 
@@ -64,34 +61,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const lastSyncedTokenRef = useRef<string | null>(null);
-    const warnedSessionEndpointRef = useRef(false);
-    const sessionEndpointUnavailableRef = useRef(false);
 
-    const syncServerSession = useCallback(async (firebaseUser: FirebaseUser | null, forceRefresh = false) => {
-        if (sessionEndpointUnavailableRef.current) {
-            return;
-        }
-
+    const syncServerSession = useCallback(async (firebaseUser: FirebaseUser | null, forceRefresh = false): Promise<boolean> => {
         if (!firebaseUser) {
             lastSyncedTokenRef.current = null;
 
             try {
-                await fetch(AUTH_SESSION_ENDPOINT, {
+                const response = await fetch(AUTH_SESSION_ENDPOINT, {
                     method: "DELETE",
                     credentials: "include",
                 });
+                return response.ok;
             } catch (error) {
                 console.error("Error clearing server session:", error);
+                return false;
             }
-
-            return;
         }
 
         try {
             const idToken = await firebaseUser.getIdToken(forceRefresh);
 
             if (!forceRefresh && lastSyncedTokenRef.current === idToken) {
-                return;
+                return true;
             }
 
             const response = await fetch(AUTH_SESSION_ENDPOINT, {
@@ -104,32 +95,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             });
 
             if (!response.ok) {
-                if (response.status === 404) {
-                    sessionEndpointUnavailableRef.current = true;
-                    if (!warnedSessionEndpointRef.current) {
-                        console.warn("Server auth session endpoint not available yet. Continuing with transitional client auth sync.");
-                        warnedSessionEndpointRef.current = true;
-                    }
-                    return;
-                }
-
+                lastSyncedTokenRef.current = null;
+                await fetch(AUTH_SESSION_ENDPOINT, {
+                    method: "DELETE",
+                    credentials: "include",
+                }).catch(() => undefined);
                 throw new Error(`Failed to sync server session (${response.status})`);
             }
 
             lastSyncedTokenRef.current = idToken;
+            return true;
         } catch (error) {
             console.error("Error syncing server session:", error);
+            return false;
         }
     }, []);
-
-    useEffect(() => {
-        if (!user) {
-            clearLegacySessionHintCookies();
-            return;
-        }
-
-        setLegacySessionHintCookies(user);
-    }, [user]);
 
     // FIREBASE REAL-TIME LISTENER
     useEffect(() => {
@@ -143,7 +123,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
+                const hasServerSession = await syncServerSession(firebaseUser);
+                if (!hasServerSession) {
+                    setUser(null);
+                    setIsLoading(false);
+                    return;
+                }
+
                 const fallbackUser = buildFallbackUser(firebaseUser);
+                fallbackUser.isAdmin = (await firebaseUser.getIdTokenResult()).claims.admin === true;
                 // User is signed in, fetch Firestore data
                 try {
                     const userDocRef = doc(db, "users", firebaseUser.uid);
@@ -161,55 +149,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     if (userDoc.exists()) {
                         const userData = userDoc.data() as User;
                         // Ensure ID is set
-                        const fullUser = { ...userData, id: firebaseUser.uid };
-
-                        // --- STREAK LOGIC (BRAZIL TIME) ---
-                        try {
-                            const now = new Date();
-                            // Helper to get YYYY-MM-DD in Brazil
-                            const getBrazilDate = (date: Date) => {
-                                return new Intl.DateTimeFormat('en-CA', {
-                                    timeZone: 'America/Sao_Paulo',
-                                    year: 'numeric',
-                                    month: '2-digit',
-                                    day: '2-digit'
-                                }).format(date);
-                            };
-
-                            const todayStr = getBrazilDate(now);
-                            const lastLoginStr = fullUser.lastLoginDate
-                                ? getBrazilDate(new Date(fullUser.lastLoginDate))
-                                : null;
-
-                            // Update if it's a new day OR if we just logged in for the first time
-                            if (lastLoginStr !== todayStr) {
-                                let newStreak = fullUser.currentStreak || 0;
-
-                                // Check if yesterday
-                                const yesterday = new Date(now);
-                                yesterday.setDate(yesterday.getDate() - 1);
-                                const yesterdayStr = getBrazilDate(yesterday);
-
-                                if (lastLoginStr === yesterdayStr) {
-                                    newStreak += 1;
-                                } else {
-                                    newStreak = 1; // Missed a day or first login
-                                }
-
-                                // Update Firestore
-                                await updateDoc(userDocRef, {
-                                    currentStreak: newStreak,
-                                    lastLoginDate: now.toISOString()
-                                });
-
-                                // Update local state immediately
-                                fullUser.currentStreak = newStreak;
-                                fullUser.lastLoginDate = now.toISOString();
-                            }
-                        } catch (err) {
-                            console.error("Streak Error:", err);
-                        }
-                        // -----------------------------------
+                        const fullUser = {
+                            ...userData,
+                            id: firebaseUser.uid,
+                            email: firebaseUser.email || userData.email || "",
+                            isAdmin: fallbackUser.isAdmin,
+                        };
 
                         setUser(fullUser);
                     } else {
@@ -232,16 +177,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Cleanup subscription
         return () => unsubscribe();
-    }, []);
+    }, [syncServerSession]);
 
     const login = async (identifier: string, password: string): Promise<AuthResult> => {
         const result = await authLogin(identifier, password);
         if (result.success && auth.currentUser) {
+            const hasServerSession = await syncServerSession(auth.currentUser, true);
+            if (!hasServerSession) {
+                await authLogout();
+                setUser(null);
+                setIsLoading(false);
+                return { success: false, error: "Não foi possível criar uma sessão segura. Tente novamente." };
+            }
             if (result.user) {
                 setUser(result.user);
             }
             setIsLoading(false);
-            void syncServerSession(auth.currentUser, true);
         }
         return result;
     };
@@ -249,11 +200,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const loginWithGoogle = async (): Promise<AuthResult> => {
         const result = await authLoginWithGoogle();
         if (result.success && auth.currentUser) {
+            const hasServerSession = await syncServerSession(auth.currentUser, true);
+            if (!hasServerSession) {
+                await authLogout();
+                setUser(null);
+                setIsLoading(false);
+                return { success: false, error: "Não foi possível criar uma sessão segura. Tente novamente." };
+            }
             if (result.user) {
                 setUser(result.user);
             }
             setIsLoading(false);
-            void syncServerSession(auth.currentUser, true);
         }
         return result;
     };
@@ -266,11 +223,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ): Promise<AuthResult> => {
         const result = await authRegister(name, email, password, confirmPassword);
         if (result.success && auth.currentUser) {
+            const hasServerSession = await syncServerSession(auth.currentUser, true);
+            if (!hasServerSession) {
+                await authLogout();
+                setUser(null);
+                setIsLoading(false);
+                return { success: false, error: "Conta criada, mas a sessão segura falhou. Entre novamente." };
+            }
             if (result.user) {
                 setUser(result.user);
             }
             setIsLoading(false);
-            void syncServerSession(auth.currentUser, true);
         }
         return result;
     };
@@ -282,6 +245,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // For efficiency, we update local state here too if successful.
         const result = await authUpdateProfile(user.id, name, email, phone);
         if (result.success && result.user) {
+            if (auth.currentUser && !(await syncServerSession(auth.currentUser, true))) {
+                return { success: false, error: "Perfil atualizado. Entre novamente para renovar a sessão segura." };
+            }
             setUser(result.user);
         }
         return result;
@@ -290,19 +256,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const activateWithInvite = async (code: string): Promise<AuthResult> => {
         if (!user) return { success: false, error: 'Usuário não autenticado' };
         const result = await authActivateWithInvite(user.id, code);
-        if (result.success && result.user) {
-            setUser(result.user);
-            setIsLoading(false);
-            if (auth.currentUser) {
-                await syncServerSession(auth.currentUser, true);
-            }
-        }
-        return result;
-    };
-
-    const activateWithPayment = async (paymentId: string): Promise<AuthResult> => {
-        if (!user) return { success: false, error: 'Usuário não autenticado' };
-        const result = await authActivateWithPayment(user.id, paymentId);
         if (result.success && result.user) {
             setUser(result.user);
             setIsLoading(false);
@@ -332,7 +285,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const userDoc = await getDocFromServer(userDocRef);
             if (userDoc.exists()) {
                 const userData = userDoc.data() as User;
-                setUser({ ...userData, id: auth.currentUser.uid });
+                setUser({
+                    ...userData,
+                    id: auth.currentUser.uid,
+                    email: auth.currentUser.email || userData.email || "",
+                    isAdmin: (await auth.currentUser.getIdTokenResult()).claims.admin === true,
+                });
             } else {
                 setUser(buildFallbackUser(auth.currentUser));
             }
@@ -385,7 +343,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 register,
                 updateProfile,
                 activateWithInvite,
-                activateWithPayment,
                 changePassword,
                 resetPassword,
                 logout,

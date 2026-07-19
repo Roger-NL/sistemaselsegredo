@@ -9,8 +9,7 @@ import { RankGuideModal } from "@/features/dashboard/RankGuideModal";
 import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard/service"; // Added Import
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/lib/routes";
-
-const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
+import { hasAdminClaim } from "@/lib/auth/admin-policy";
 
 interface DashboardNavProps {
     studentName?: string;
@@ -38,7 +37,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
     const currentRank = getRank(completedCount);
     const currentRankIndex = getRankIndex(completedCount);
     const globalProgress = getGlobalProgress();
-    const canAccessScheduling = subscriptionStatus === "premium" || ADMIN_EMAILS.includes(user?.email || "");
+    const canAccessScheduling = subscriptionStatus === "premium" || hasAdminClaim(user);
 
     const menuActions = [
         { label: "👤 Meu Perfil", action: () => router.push(ROUTES.app.profile) },
@@ -166,7 +165,7 @@ export function DashboardNav({ studentName = "Aluno", studentStreak = 0 }: Dashb
                                             <div className="text-[10px] text-white/30 animate-pulse">Carregando...</div>
                                         ) : (
                                             miniLeaderboard.map((u, i) => {
-                                                const isMe = user?.id === u.id;
+                                                const isMe = u.isYou === true;
                                                 return (
                                                     <div key={i} className={`flex items-center justify-between text-xs ${isMe ? 'text-orange-400' : 'text-white/50'}`}>
                                                         <span>{i === 0 ? '🥇' : i === 1 ? '🥈' : '🔥'} {isMe ? 'Você' : u.name}</span>

@@ -90,7 +90,7 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
                         viewport={{ once: true }}
                         className="mt-5 max-w-[320px] [font-family:var(--font-geist-sans)] text-[1.05rem] leading-[1.55] text-white/45 md:text-[1.08rem] lg:max-w-[360px]"
                     >
-                        Correção humana. Sem videoaula. Resultados em 120 dias.
+                        Prática guiada, produção ativa e correção humana.
                     </motion.p>
 
                     {/* CTA Button */}
@@ -121,7 +121,7 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
                                 </span>
                             </GradientButton>
                             <p className="mt-3 text-center [font-family:var(--font-geist-sans)] text-xs font-medium text-white/55">
-                                Estude agora, pague só quando avançar.
+                                Beta gratuito com acesso completo por convite.
                             </p>
                         </div>
                     </motion.div>

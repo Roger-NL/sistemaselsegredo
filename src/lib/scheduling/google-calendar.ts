@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { google } from 'googleapis';
 import { addMinutes, eachDayOfInterval, format, isAfter, isBefore, parseISO, startOfDay } from 'date-fns';
 import { fromZonedTime, toZonedTime } from 'date-fns-tz';
@@ -19,6 +20,30 @@ const WORKDAYS = (process.env.GOOGLE_CALENDAR_WORKDAYS || '1,2,3,4,5')
 interface BusyRange {
   start: Date;
   end: Date;
+}
+
+function getGoogleApiStatus(error: unknown) {
+  if (!error || typeof error !== 'object') return null;
+
+  const candidate = error as {
+    code?: unknown;
+    response?: { status?: unknown };
+  };
+  const status = candidate.response?.status ?? candidate.code;
+  return typeof status === 'number' ? status : Number(status) || null;
+}
+
+export function getDeterministicCalendarEventId(booking: LiveSessionBooking) {
+  const bookingKey = [
+    booking.id || `${booking.userId}_p${booking.sourcePillarId}`,
+    String(booking.bookingRevision ?? 0),
+    booking.requestedSlotStart || '',
+    booking.requestedSlotEnd || '',
+  ].join('|');
+
+  // Google Calendar accepts lowercase base32hex-compatible identifiers. A
+  // SHA-256 hex digest is deterministic, opaque, and valid for that alphabet.
+  return `bs${createHash('sha256').update(bookingKey).digest('hex').slice(0, 50)}`;
 }
 
 function parseServiceAccount() {
@@ -155,40 +180,90 @@ export async function createCalendarEventForBooking(booking: LiveSessionBooking)
     ? 'Status inicial: confirmado pelo admin no painel.'
     : 'Status inicial: pendente de confirmação do tutor no painel.';
 
-  const response = await calendar.events.insert({
-    calendarId: DEFAULT_CALENDAR_ID,
-    requestBody: {
-      summary: `${summaryPrefix} Sessão ao vivo • ${booking.studentName || 'Aluno'} • Pilar ${booking.sourcePillarId}`,
-      description: [
-        `Aluno: ${booking.studentName || '-'}`,
-        `Email: ${booking.studentEmail || '-'}`,
-        `Telefone: ${booking.studentPhone || '-'}`,
-        `Pilar de origem: ${booking.sourcePillarId}`,
-        `Booking ID: ${booking.id || '-'}`,
-        `Tutor principal: ${booking.tutorEmail || DEFAULT_TUTOR_EMAIL || '-'}`,
-        '',
-        statusLine,
-        'Gestão oficial pelo painel admin do BasedSpeak.',
-      ].join('\n'),
-      start: {
-        dateTime: booking.requestedSlotStart,
-        timeZone: DEFAULT_TIMEZONE,
-      },
-      end: {
-        dateTime: booking.requestedSlotEnd,
-        timeZone: DEFAULT_TIMEZONE,
-      },
-      colorId: isConfirmed ? '10' : '5',
-      reminders: {
-        useDefault: true,
-      },
-    },
-  });
+  const eventId = getDeterministicCalendarEventId(booking);
 
-  return {
-    eventId: response.data.id || undefined,
-    htmlLink: response.data.htmlLink || undefined,
-  };
+  try {
+    const existing = await calendar.events.get({
+      calendarId: DEFAULT_CALENDAR_ID,
+      eventId,
+    });
+
+    if (existing.data.status === 'cancelled') {
+      throw new Error('CALENDAR_EVENT_ID_CANCELLED');
+    }
+
+    return {
+      eventId,
+      htmlLink: existing.data.htmlLink || undefined,
+    };
+  } catch (error) {
+    if (getGoogleApiStatus(error) !== 404) {
+      throw error;
+    }
+  }
+
+  try {
+    const response = await calendar.events.insert({
+      calendarId: DEFAULT_CALENDAR_ID,
+      requestBody: {
+        id: eventId,
+        summary: `${summaryPrefix} Sessão ao vivo • ${booking.studentName || 'Aluno'} • Pilar ${booking.sourcePillarId}`,
+        description: [
+          `Aluno: ${booking.studentName || '-'}`,
+          `Email: ${booking.studentEmail || '-'}`,
+          `Telefone: ${booking.studentPhone || '-'}`,
+          `Pilar de origem: ${booking.sourcePillarId}`,
+          `Booking ID: ${booking.id || '-'}`,
+          `Tutor principal: ${booking.tutorEmail || DEFAULT_TUTOR_EMAIL || '-'}`,
+          '',
+          statusLine,
+          'Gestão oficial pelo painel admin do BasedSpeak.',
+        ].join('\n'),
+        start: {
+          dateTime: booking.requestedSlotStart,
+          timeZone: DEFAULT_TIMEZONE,
+        },
+        end: {
+          dateTime: booking.requestedSlotEnd,
+          timeZone: DEFAULT_TIMEZONE,
+        },
+        colorId: isConfirmed ? '10' : '5',
+        extendedProperties: {
+          private: {
+            bookingId: booking.id || `${booking.userId}_p${booking.sourcePillarId}`,
+            bookingRevision: String(booking.bookingRevision ?? 0),
+            slotLockId: booking.slotLockId || '',
+          },
+        },
+        reminders: {
+          useDefault: true,
+        },
+      },
+    });
+
+    return {
+      eventId: response.data.id || eventId,
+      htmlLink: response.data.htmlLink || undefined,
+    };
+  } catch (error) {
+    // Concurrent retries may both observe the initial 404. The deterministic
+    // ID makes the loser receive 409; reading the winner makes the retry safe.
+    if (getGoogleApiStatus(error) === 409) {
+      const existing = await calendar.events.get({
+        calendarId: DEFAULT_CALENDAR_ID,
+        eventId,
+      });
+      if (existing.data.status === 'cancelled') {
+        throw new Error('CALENDAR_EVENT_ID_CANCELLED');
+      }
+      return {
+        eventId,
+        htmlLink: existing.data.htmlLink || undefined,
+      };
+    }
+
+    throw error;
+  }
 }
 
 export async function getCalendarEventState(eventId: string) {
@@ -208,7 +283,19 @@ export async function getCalendarEventState(eventId: string) {
       summary: event.summary || undefined,
     };
   } catch (error) {
-    console.error('[scheduling] Falha ao consultar evento no Google Calendar', error);
+    const providerStatus = getGoogleApiStatus(error);
+    if (providerStatus === 404 || providerStatus === 410) {
+      return {
+        status: 'cancelled',
+        htmlLink: undefined,
+        summary: undefined,
+      };
+    }
+    console.error(JSON.stringify({
+      level: 'error',
+      event: 'scheduling_calendar_event_read_failed',
+      providerStatus,
+    }));
     return null;
   }
 }
@@ -285,6 +372,14 @@ export async function cancelCalendarEvent(eventId: string) {
       eventId,
     });
   } catch (error) {
-    console.error('[scheduling] Falha ao cancelar evento no Google Calendar', error);
+    const providerStatus = getGoogleApiStatus(error);
+    if (providerStatus === 404 || providerStatus === 410) return;
+
+    console.error(JSON.stringify({
+      level: 'error',
+      event: 'scheduling_calendar_event_cancel_failed',
+      providerStatus,
+    }));
+    throw error;
   }
 }

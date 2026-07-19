@@ -11,17 +11,7 @@ type StoredProgressSnapshot = {
   completedPillars?: number[];
 };
 
-function hasCompletedAllPillars(localPillarStatus: Record<string, unknown> | undefined) {
-  if (!localPillarStatus) {
-    return false;
-  }
-
-  return Array.from({ length: 9 }, (_, index) => `pilar-${index + 1}`).every(
-    (pillarId) => localPillarStatus[pillarId] === "completed"
-  );
-}
-
-function canAccessSpecialization(progressSnapshot: StoredProgressSnapshot | undefined, localPillarStatus: Record<string, unknown> | undefined) {
+function canAccessSpecialization(progressSnapshot: StoredProgressSnapshot | undefined) {
   if (progressSnapshot?.eligibleForSpecialization === true) {
     return true;
   }
@@ -30,7 +20,7 @@ function canAccessSpecialization(progressSnapshot: StoredProgressSnapshot | unde
     return true;
   }
 
-  return hasCompletedAllPillars(localPillarStatus);
+  return false;
 }
 
 interface EspecialidadePageProps {
@@ -42,7 +32,6 @@ export default async function EspecialidadePage({ params }: EspecialidadePagePro
   const principal = await getRequestPrincipal(undefined, {
     allowBearer: false,
     allowSessionCookie: true,
-    allowLegacyCookie: true,
   });
 
   if (!principal) {
@@ -57,11 +46,10 @@ export default async function EspecialidadePage({ params }: EspecialidadePagePro
 
   const userSnapshot = await adminDb.collection("users").doc(principal.uid).get();
   const userData = userSnapshot.data() as {
-    localPillarStatus?: Record<string, unknown>;
     progressSnapshot?: StoredProgressSnapshot;
   } | undefined;
 
-  if (!canAccessSpecialization(userData?.progressSnapshot, userData?.localPillarStatus)) {
+  if (principal.role !== "admin" && !canAccessSpecialization(userData?.progressSnapshot)) {
     redirect(ROUTES.app.specialties);
   }
 

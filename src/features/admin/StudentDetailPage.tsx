@@ -9,8 +9,7 @@ import { ArrowLeft, User, Mail, Calendar, Clock, CalendarClock, ArrowUpRight, Sp
 import { gradeExam, PillarExam } from "@/lib/exam/service";
 import { ROUTES } from "@/lib/routes";
 import type { LiveSessionBooking } from "@/lib/scheduling/types";
-
-const ADMIN_EMAILS = ["roger@esacademy.com", "admin@esacademy.com", "raugerac@gmail.com"];
+import { hasAdminClaim } from "@/lib/auth/admin-policy";
 
 interface StudentProfile {
     id: string;
@@ -47,7 +46,7 @@ export default function StudentDetailPage({ studentId }: StudentDetailPageProps)
             return;
         }
 
-        if (!ADMIN_EMAILS.includes(user.email)) {
+        if (!hasAdminClaim(user)) {
             router.push(ROUTES.app.dashboard);
             return;
         }

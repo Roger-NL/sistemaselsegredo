@@ -6,18 +6,14 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && (
-        request.auth.token.email == "roger@esacademy.com" ||
-        request.auth.token.email == "admin@esacademy.com" ||
-        request.auth.token.email == "raugerac@gmail.com"
-      );
+      return isSignedIn() && request.auth.token.admin == true;
     }
 
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function ownerWritableUserFields() {
+    function initialUserFields() {
       return [
         "id",
         "name",
@@ -27,38 +23,35 @@ service cloud.firestore {
         "currentStreak",
         "lastLoginDate",
         "subscriptionStatus",
-        "approvedPillar",
-        "chosenSpecialization",
-        "specializationStatus",
-        "completedSpecializations",
-        "completedModules",
-        "completedPillarModules",
-        "hasSeenMissionComplete"
+        "approvedPillar"
       ];
     }
 
     function ownerCanCreateUser(userId) {
       return isOwner(userId) &&
         request.resource.data.id == userId &&
+        request.resource.data.email == request.auth.token.email &&
         request.resource.data.subscriptionStatus == "free" &&
         request.resource.data.approvedPillar == 1 &&
-        request.resource.data.keys().hasOnly(ownerWritableUserFields());
+        request.resource.data.currentStreak == 1 &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 &&
+        request.resource.data.name.size() <= 120 &&
+        request.resource.data.createdAt is string &&
+        request.resource.data.lastLoginDate is string &&
+        request.resource.data.keys().hasOnly(initialUserFields());
     }
 
     function ownerCanUpdateUser() {
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+      let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return affectedKeys.hasOnly([
         "name",
         "email",
-        "phone",
-        "currentStreak",
-        "lastLoginDate",
-        "chosenSpecialization",
-        "specializationStatus",
-        "completedSpecializations",
-        "completedModules",
-        "completedPillarModules",
-        "hasSeenMissionComplete"
-      ]);
+        "phone"
+      ]) && (
+        !affectedKeys.hasAny(["email"]) ||
+        request.resource.data.email == request.auth.token.email
+      );
     }
 
     match /users/{userId} {
@@ -69,9 +62,7 @@ service cloud.firestore {
     }
 
     match /pillar_exams/{examId} {
-      allow create: if isSignedIn() &&
-        request.resource.data.userId == request.auth.uid &&
-        request.resource.data.status == "pending";
+      allow create: if false;
       allow read: if (isSignedIn() && request.auth.uid == resource.data.userId) || isAdmin();
       allow update, delete: if isAdmin();
     }
@@ -109,7 +100,8 @@ service cloud.firestore {
     }
 
     match /invite_codes/{codeId} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     match /payment_attempts/{paymentId} {
