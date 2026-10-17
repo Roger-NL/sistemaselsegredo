@@ -40,11 +40,13 @@ import {
 } from "@/lib/welcome/visitor-name";
 import { VisitorNameSettings } from "@/components/welcome/VisitorNameSettings";
 import { languageLabel, type LearningLanguage } from "./language";
+import { getOrbitUiCopy } from "./ui-copy";
 import { saveLearningLanguage, useLearningLanguage } from "@/lib/welcome/use-learning-language";
 import styles from "./welcome.module.css";
 
 function TypedMessage({
   message,
+  language,
   active,
   onFinish,
   onLetter,
@@ -52,6 +54,7 @@ function TypedMessage({
   onPlay,
 }: {
   message: Message;
+  language: LearningLanguage;
   active: boolean;
   onFinish: (id: number) => void;
   onLetter: () => void;
@@ -102,6 +105,7 @@ function TypedMessage({
       <div className={styles.messageText}>
         <LessonCards
           cards={message.lesson}
+          language={language}
           title={message.lessonTitle}
           hint={message.lessonHint}
           playback={playback}
@@ -117,6 +121,7 @@ function TypedMessage({
         <p className={styles.recapLead}>{message.text}</p>
         <ConversationRecapCard
           recap={message.recap}
+          language={language}
           playback={playback}
           onPlay={onPlay}
         />
@@ -132,6 +137,7 @@ function TypedMessage({
         <InlineSpeechText
           text={message.text}
           phrases={message.speech}
+          language={language}
           playback={playback}
           onPlay={onPlay}
         />
@@ -145,15 +151,18 @@ function TypedMessage({
 
 function ConversationRecapCard({
   recap,
+  language,
   playback,
   onPlay,
 }: {
   recap: NonNullable<Message["recap"]>;
+  language: LearningLanguage;
   playback: SpeechPlayback;
   onPlay: (phrase: string) => void;
 }) {
+  const copy = getOrbitUiCopy(language);
   return (
-    <section className={styles.recap} aria-label="Resumo da conversa">
+    <section className={styles.recap} aria-label={copy.recap}>
       <div className={styles.recapContext}>
       <span className={styles.recapContextLabel}>{recap.contextLabel}</span>
         <span className={styles.recapContextPhrase}>{recap.context.phrase}</span>
@@ -170,14 +179,14 @@ function ConversationRecapCard({
               <div className={styles.recapWords}>
                 <span className={styles.recapPhrase}>{turn.phrase}</span>
                 <span className={styles.recapTranslation}>{turn.translation}</span>
-                {error && <span className={styles.speechError} role="alert">Não foi possível tocar o áudio agora.</span>}
+                {error && <span className={styles.speechError} role="alert">{copy.audioError}</span>}
               </div>
               <button
                 className={styles.speechInlineButton}
                 type="button"
                 onClick={() => onPlay(turn.phrase)}
-                aria-label={`${playing ? "Parar" : "Ouvir"}: ${turn.phrase}`}
-                title={playing ? "Parar áudio" : "Ouvir em inglês"}
+                aria-label={`${playing ? copy.stop : copy.play}: ${turn.phrase}`}
+                title={playing ? copy.stop : copy.playEnglish}
               >
                 {loading ? <LoaderCircle className={styles.speechSpinner} size={14} aria-hidden="true" /> : playing ? <Square size={11} fill="currentColor" aria-hidden="true" /> : <Play size={14} fill="currentColor" aria-hidden="true" />}
               </button>
@@ -202,23 +211,26 @@ function ConversationRecapCard({
 
 function LessonCards({
   cards,
+  language,
   title,
   hint,
   playback,
   onPlay,
 }: {
   cards: NonNullable<Message["lesson"]>;
+  language: LearningLanguage;
   title?: string;
   hint?: string;
   playback: SpeechPlayback;
   onPlay: (phrase: string) => void;
 }) {
+  const copy = getOrbitUiCopy(language);
   return (
-    <section className={styles.lesson} aria-label="A frase em três partes">
+    <section className={styles.lesson} aria-label={copy.lesson}>
       <div className={styles.lessonHeading}>
-        <span className={styles.lessonEyebrow}>{title ?? "MINI MISSÃO"}</span>
+        <span className={styles.lessonEyebrow}>{title ?? copy.miniMission}</span>
         <span className={styles.lessonHint}>
-          {hint ?? "Toque em cada parte para ouvir"}
+          {hint ?? copy.tapToHear}
         </span>
       </div>
       <div className={styles.lessonCards}>
@@ -238,8 +250,8 @@ function LessonCards({
                   className={styles.speechInlineButton}
                   type="button"
                   onClick={() => onPlay(card.phrase)}
-                  aria-label={`${isPlaying ? "Parar" : "Ouvir"}: ${card.phrase}`}
-                  title={isPlaying ? "Parar áudio" : "Ouvir em inglês"}
+                  aria-label={`${isPlaying ? copy.stop : copy.play}: ${card.phrase}`}
+                  title={isPlaying ? copy.stop : copy.playEnglish}
                 >
                   {isLoading ? (
                     <LoaderCircle
@@ -255,7 +267,7 @@ function LessonCards({
                 </button>
               </div>
               <p className={styles.lessonTranslation}>{card.translation}</p>
-              <div className={styles.lessonClues} aria-label="Palavras e sentidos">
+              <div className={styles.lessonClues} aria-label={copy.clues}>
                 {card.clues.map((clue) => (
                   <span className={styles.lessonClue} key={clue.english}>
                     <strong>{clue.english}</strong>
@@ -266,7 +278,7 @@ function LessonCards({
               <p className={styles.lessonNote}>{card.note}</p>
               {isError && (
                 <span className={styles.speechError} role="alert">
-                  Não foi possível tocar o áudio agora.
+                  {copy.audioError}
                 </span>
               )}
             </article>
@@ -356,14 +368,17 @@ function useSpeechPlayer() {
 function InlineSpeechText({
   text,
   phrases,
+  language,
   playback,
   onPlay,
 }: {
   text: string;
   phrases: string[];
+  language: LearningLanguage;
   playback: SpeechPlayback;
   onPlay: (phrase: string) => void;
 }) {
+  const copy = getOrbitUiCopy(language);
   const lines = text.split("\n");
 
   return (
@@ -388,8 +403,8 @@ function InlineSpeechText({
                   className={styles.speechInlineButton}
                   data-sound-control
                   onClick={() => onPlay(phrase)}
-                  aria-label={`${playing || loading ? "Parar" : "Ouvir"}: ${phrase}`}
-                  title={error ? "Não foi possível tocar o áudio" : phrase}
+                  aria-label={`${playing || loading ? copy.stop : copy.play}: ${phrase}`}
+                  title={error ? copy.audioErrorTitle : phrase}
                 >
                   {loading ? (
                     <LoaderCircle
@@ -406,7 +421,7 @@ function InlineSpeechText({
                 {line.slice(position + phrase.length)}
                 {error && (
                   <span className={styles.speechError} role="alert">
-                    Não foi possível tocar o áudio agora.
+                    {copy.audioError}
                   </span>
                 )}
               </>
@@ -451,17 +466,18 @@ function LanguagePicker({
   selected: LearningLanguage | null;
   onSelect: (language: LearningLanguage) => void;
 }) {
+  const copy = getOrbitUiCopy(selected ?? "pt");
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <Link href={ROUTES.home} className={styles.brand} aria-label="BasedSpeak — início">
+        <Link href={ROUTES.home} className={styles.brand} aria-label={copy.brandHome}>
           <span className={styles.brandMark} aria-hidden="true"><span /><span /><span /><span /></span>
           based<span className={styles.brandLight}>speak</span>.
         </Link>
       </header>
       <div className={styles.content}>
         <main className={styles.languageEntryMain}>
-          <div className={styles.languageOptions} role="group" aria-label="Escolha o idioma de apoio para aprender inglês">
+          <div className={styles.languageOptions} role="group" aria-label={copy.languagePickerLabel}>
             {(["pt", "es", "de"] as const).map((language) => (
               <button
                 className={`${styles.languageOption} ${selected === language ? styles.languageOptionDefault : ""}`}
@@ -477,10 +493,10 @@ function LanguagePicker({
         </main>
       </div>
       <footer className={styles.footer}>
-        <span>BasedSpeak · Uma conversa de cada vez.</span>
-        <nav aria-label="Informações do site">
-          <Link href="/termos">Termos</Link>
-          <Link href="/privacidade">Privacidade</Link>
+        <span>{copy.tagline}</span>
+        <nav aria-label={copy.info}>
+          <Link href="/termos">{copy.terms}</Link>
+          <Link href="/privacidade">{copy.privacy}</Link>
         </nav>
       </footer>
     </div>
@@ -519,20 +535,12 @@ function ConversationExperience({
   const latestMessageIdRef = useRef(lastMessage.id);
   const isTyping = completedId !== lastMessage.id;
   const choices = getChoices(conversation);
-  const namePlaceholder = conversation.language === "de" ? "Dein Name" : conversation.language === "es" ? "Tu nombre" : "Digite seu nome";
-  const nameHint = conversation.language === "de"
-    ? "Ich merke mir deinen Namen in diesem Browser. Du kannst ihn in den Einstellungen ändern."
-    : conversation.language === "es"
-      ? "Recordaré tu nombre en este navegador. Puedes cambiarlo en Configuración."
-      : "Vou lembrar neste navegador. Você pode mudar em Configurações.";
+  const copy = getOrbitUiCopy(conversation.language);
+  const namePlaceholder = copy.namePlaceholder;
+  const nameHint = copy.nameHint;
   const [feedbackRating, setFeedbackRating] = useState<number | null>(null);
   const [feedbackComment, setFeedbackComment] = useState("");
   const [feedbackSent, setFeedbackSent] = useState(false);
-  const feedbackCopy = conversation.language === "de"
-    ? { title: "Danke fürs Ausprobieren!", question: "Wie bewertest du die Benutzerfreundlichkeit?", comment: "Was können wir verbessern? (optional)", send: "Bewertung senden", thanks: "Danke für deine Rückmeldung." }
-    : conversation.language === "es"
-      ? { title: "¡Gracias por probarlo!", question: "¿Cómo calificarías la facilidad de uso?", comment: "¿Qué podríamos mejorar? (opcional)", send: "Enviar opinión", thanks: "Gracias por compartir tu opinión." }
-      : { title: "Obrigado por testar!", question: "De 1 a 10, como você avalia a facilidade de uso?", comment: "O que poderíamos melhorar? (opcional)", send: "Enviar avaliação", thanks: "Obrigado por compartilhar sua opinião." };
 
   useEffect(() => {
     if (rememberedName && rememberedName !== conversation.name) {
@@ -557,7 +565,7 @@ function ConversationExperience({
     if (lastAnsweredMessageRef.current === lastMessage.id) return;
     const error = visitorNameError(nameDraft);
     if (error) {
-      setNameError(error);
+      setNameError(!nameDraft.trim() ? copy.nameRequired : nameDraft.length > 60 ? copy.nameTooLong : copy.nameInvalid);
       return;
     }
     const name = normalizeVisitorName(nameDraft);
@@ -570,7 +578,7 @@ function ConversationExperience({
     setStorageNotice(
       saved
         ? ""
-        : "Seu nome será usado nesta conversa. O navegador não permitiu salvá-lo para as próximas visitas.",
+        : copy.nameStorageError,
     );
     dispatch({ type: "name", name });
   }
@@ -645,16 +653,8 @@ function ConversationExperience({
     setFeedbackSent(true);
   }
 
-  const soundLabel = conversation.language === "de"
-    ? sound.enabled ? "Tippgeräusch ausschalten" : "Tippgeräusch einschalten"
-    : conversation.language === "es"
-      ? sound.enabled ? "Desactivar sonido de escritura" : "Activar sonido de escritura"
-      : sound.enabled ? "Desativar som da digitação" : "Ativar som da digitação";
-  const soundStatus = conversation.language === "de"
-    ? sound.enabled ? "Tippgeräusch an" : "Tippgeräusch aus"
-    : conversation.language === "es"
-      ? sound.enabled ? "Sonido de escritura activado" : "Sonido de escritura desactivado"
-      : sound.enabled ? "Digitação ligada" : "Digitação desligada";
+  const soundLabel = sound.enabled ? copy.soundToggleOff : copy.soundToggleOn;
+  const soundStatus = sound.enabled ? copy.soundOn : copy.soundOff;
 
   return (
     <div className={styles.page}>
@@ -662,7 +662,7 @@ function ConversationExperience({
         <Link
           href={ROUTES.home}
           className={styles.brand}
-          aria-label="BasedSpeak — início"
+          aria-label={copy.brandHome}
         >
           <span className={styles.brandMark} aria-hidden="true">
             <span />
@@ -672,15 +672,15 @@ function ConversationExperience({
           </span>
           based<span className={styles.brandLight}>speak</span>.
         </Link>
-        <nav className={styles.desktopNav} aria-label="Menu principal">
-          <a href="#como-funciona">Como funciona</a>
-          <button onClick={openSettings}>Configurações</button>
+        <nav className={styles.desktopNav} aria-label={copy.mainMenu}>
+          <a href="#como-funciona">{copy.how}</a>
+          <button onClick={openSettings}>{copy.settings}</button>
         </nav>
         <div className={styles.headerActions}>
           <button
             className={styles.menuButton}
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
+            aria-label={menuOpen ? copy.closeMenu : copy.openMenu}
             aria-expanded={menuOpen}
             aria-controls="welcome-menu"
           >
@@ -692,12 +692,12 @@ function ConversationExperience({
         <nav
           id="welcome-menu"
           className={styles.mobileNav}
-          aria-label="Menu principal no celular"
+          aria-label={copy.mobileMenu}
         >
           <a href="#como-funciona" onClick={() => setMenuOpen(false)}>
-            Como funciona
+            {copy.how}
           </a>
-          <button onClick={openSettings}>Configurações</button>
+          <button onClick={openSettings}>{copy.settings}</button>
         </nav>
       )}
 
@@ -705,8 +705,8 @@ function ConversationExperience({
         <main className={styles.main}>
           <div className={styles.chatHeader}>
             <div>
-              <span className={styles.eyebrow}>BOAS-VINDAS À BASEDSPEAK</span>
-              <h1>Um começo com a sua cara.</h1>
+              <span className={styles.eyebrow}>{copy.welcome}</span>
+              <h1>{copy.heading}</h1>
             </div>
             <button
               data-sound-control
@@ -732,7 +732,7 @@ function ConversationExperience({
               className={styles.history}
               tabIndex={0}
               role="region"
-              aria-label="Histórico da conversa"
+              aria-label={copy.history}
               onScroll={() => {
                 const container = scrollRef.current;
                 if (!container) return;
@@ -754,7 +754,7 @@ function ConversationExperience({
               <div ref={contentRef} className={styles.messages}>
                 <ol
                   className={styles.messageList}
-                  aria-label="Mensagens"
+                  aria-label={copy.messages}
                   aria-live="off"
                 >
                   {conversation.messages.map((message) => (
@@ -767,7 +767,7 @@ function ConversationExperience({
                       }
                     >
                       <span className={styles.srOnly}>
-                        {message.role === "user" ? "Você: " : "BasedSpeak: "}
+                        {message.role === "user" ? copy.you : copy.assistant}
                       </span>
                       {message.role === "assistant" && (
                         <span className={styles.avatar} aria-hidden="true">
@@ -778,6 +778,7 @@ function ConversationExperience({
                         <div className={styles.assistantContent}>
                           <TypedMessage
                             message={message}
+                            language={conversation.language}
                             active={message.id === lastMessage.id && isTyping}
                             onFinish={finishTyping}
                             onLetter={sound.tick}
@@ -798,7 +799,7 @@ function ConversationExperience({
               <button
                 className={styles.latest}
                 onClick={scrollToLatest}
-                aria-label="Ir para a mensagem mais recente"
+                aria-label={copy.latest}
               >
                 <ArrowDown size={17} />
               </button>
@@ -806,12 +807,12 @@ function ConversationExperience({
           </div>
           <div
             className={styles.composer}
-            aria-label="Respostas disponíveis"
+            aria-label={copy.replies}
           >
             {conversation.stage === "name" ? (
               <form className={styles.nameForm} onSubmit={submitName}>
                 <label htmlFor="welcome-name" className={styles.srOnly}>
-                  Como você quer ser chamado?
+                  {copy.nameLabel}
                 </label>
                 <div className={styles.inputRow}>
                   <input
@@ -831,7 +832,7 @@ function ConversationExperience({
                   />
                   <button
                     type="submit"
-                    aria-label="Enviar meu nome"
+                    aria-label={copy.sendName}
                     disabled={!nameDraft.trim()}
                   >
                     <ArrowUp size={19} />
@@ -846,12 +847,12 @@ function ConversationExperience({
               </form>
             ) : conversation.stage === "done" ? (
               feedbackSent ? (
-                <div className={styles.feedbackThanks} role="status">{feedbackCopy.thanks}</div>
+                <div className={styles.feedbackThanks} role="status">{copy.feedbackThanks}</div>
               ) : (
                 <form className={styles.feedbackForm} onSubmit={submitFeedback}>
-                  <strong>{feedbackCopy.title}</strong>
-                  <label>{feedbackCopy.question}</label>
-                  <div className={styles.ratingChoices} role="group" aria-label={feedbackCopy.question}>
+                  <strong>{copy.feedbackTitle}</strong>
+                  <label>{copy.feedbackQuestion}</label>
+                  <div className={styles.ratingChoices} role="group" aria-label={copy.feedbackQuestion}>
                     {Array.from({ length: 10 }, (_, index) => index + 1).map((rating) => (
                       <button
                         type="button"
@@ -865,7 +866,7 @@ function ConversationExperience({
                     ))}
                   </div>
                   <div className={styles.ratingScale} aria-hidden="true"><span>1</span><span>10</span></div>
-                  <label className={styles.feedbackCommentLabel} htmlFor="orbita-feedback-comment">{feedbackCopy.comment}</label>
+                  <label className={styles.feedbackCommentLabel} htmlFor="orbita-feedback-comment">{copy.feedbackComment}</label>
                   <textarea
                     id="orbita-feedback-comment"
                     className={styles.feedbackComment}
@@ -875,7 +876,7 @@ function ConversationExperience({
                     rows={2}
                   />
                   <button className={styles.feedbackSubmit} type="submit" disabled={!feedbackRating}>
-                    {feedbackCopy.send} <ArrowUpRight size={15} />
+                    {copy.feedbackSend} <ArrowUpRight size={15} />
                   </button>
                 </form>
               )
@@ -883,7 +884,7 @@ function ConversationExperience({
               <div
                 className={styles.options}
                 role="group"
-                aria-label="Escolha sua resposta"
+                aria-label={copy.replies}
               >
                 {choices.map((choice) => (
                   <button
@@ -915,28 +916,28 @@ function ConversationExperience({
         <section
           id="como-funciona"
           className={styles.support}
-          aria-label="Como funciona a BasedSpeak"
+          aria-label={copy.supportLabel}
         >
           <div>
-            <h2>Inglês para a vida real.</h2>
-            <p>Pratique conversas que fazem sentido para você.</p>
+            <h2>{copy.support1Title}</h2>
+            <p>{copy.support1Text}</p>
           </div>
           <div>
-            <h2>Um passo por vez.</h2>
-            <p>Um caminho guiado, com espaço para tentar de novo.</p>
+            <h2>{copy.support2Title}</h2>
+            <p>{copy.support2Text}</p>
           </div>
           <div>
-            <h2>No seu ritmo.</h2>
-            <p>Comece de onde está e avance com a prática.</p>
+            <h2>{copy.support3Title}</h2>
+            <p>{copy.support3Text}</p>
           </div>
         </section>
       </div>
       <footer className={styles.footer}>
-        <span>BasedSpeak · Uma conversa de cada vez.</span>
-        <nav aria-label="Informações do site">
-          <Link href="/termos">Termos</Link>
-          <Link href="/privacidade">Privacidade</Link>
-          <button onClick={openSettings}>Configurações</button>
+        <span>{copy.tagline}</span>
+        <nav aria-label={copy.info}>
+          <Link href="/termos">{copy.terms}</Link>
+          <Link href="/privacidade">{copy.privacy}</Link>
+          <button onClick={openSettings}>{copy.settings}</button>
         </nav>
       </footer>
       <dialog
@@ -946,10 +947,10 @@ function ConversationExperience({
         onClose={() => setSettingsOpen(false)}
       >
         <div className={styles.dialogHeader}>
-          <h2 id="welcome-settings-title">Configurações das boas-vindas</h2>
+          <h2 id="welcome-settings-title">{copy.settingsTitle}</h2>
           <button
             onClick={() => dialogRef.current?.close()}
-            aria-label="Fechar configurações"
+            aria-label={copy.closeSettings}
           >
             <X size={20} />
           </button>
@@ -957,14 +958,17 @@ function ConversationExperience({
         {settingsOpen && (
           <>
             <div className={styles.languageSetting}>
-              <label htmlFor="welcome-learning-language">Idioma de apoio</label>
-              <p>As frases continuam em inglês; traduções e explicações usam este idioma.</p>
+              <label htmlFor="welcome-learning-language">{copy.language}</label>
+              <p>{copy.languageHelp}</p>
               <select
                 id="welcome-learning-language"
                 value={conversation.language}
                 onChange={(event) => {
                   const language = event.target.value as LearningLanguage;
                   saveLearningLanguage(language);
+                  setFeedbackRating(null);
+                  setFeedbackComment("");
+                  setFeedbackSent(false);
                   lastAnsweredMessageRef.current = null;
                   followRef.current = true;
                   setShowLatest(false);
@@ -977,9 +981,10 @@ function ConversationExperience({
                   <option key={language} value={language}>{languageLabel(language)}</option>
                 ))}
               </select>
-              <span className={styles.languageHint}>A troca reinicia esta conversa para aplicar o idioma escolhido.</span>
+              <span className={styles.languageHint}>{copy.languageRestart}</span>
             </div>
             <VisitorNameSettings
+              language={conversation.language}
               onSaved={(name) => {
                 dispatch({
                   type: conversation.stage === "name" ? "name" : "rename",

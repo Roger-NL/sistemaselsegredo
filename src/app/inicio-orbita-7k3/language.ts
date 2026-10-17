@@ -278,7 +278,8 @@ export function localizedVariant(
 }
 
 export function languageLabel(language: LearningLanguage): string {
-  return `${localeCopy[language].languageName} → English`;
+  const target = language === "de" ? "Englisch" : language === "es" ? "Inglés" : "Inglês";
+  return `${localeCopy[language].languageName} → ${target}`;
 }
 
 export function isLearningLanguage(value: unknown): value is LearningLanguage {
