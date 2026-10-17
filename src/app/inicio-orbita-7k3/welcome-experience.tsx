@@ -458,11 +458,6 @@ function LanguagePicker({
           <span className={styles.brandMark} aria-hidden="true"><span /><span /><span /><span /></span>
           based<span className={styles.brandLight}>speak</span>.
         </Link>
-        <div className={styles.headerActions}>
-          <Link href={ROUTES.auth.login} className={styles.login}>
-            <span>Já tem conta?</span> Entrar <ArrowUpRight size={15} />
-          </Link>
-        </div>
       </header>
       <div className={styles.content}>
         <main className={styles.languageEntryMain}>
@@ -530,8 +525,14 @@ function ConversationExperience({
     : conversation.language === "es"
       ? "Recordaré tu nombre en este navegador. Puedes cambiarlo en Configuración."
       : "Vou lembrar neste navegador. Você pode mudar em Configurações.";
-  const continueLabel = conversation.language === "de" ? "Weiterlernen" : conversation.language === "es" ? "Seguir aprendiendo" : "Continuar aprendendo";
-  const continueHint = conversation.language === "de" ? "Dein nächster Schritt beginnt im ersten Lernpfad." : conversation.language === "es" ? "Tu próximo paso empieza en el primer pilar." : "Seu próximo passo começa no primeiro pilar.";
+  const [feedbackRating, setFeedbackRating] = useState<number | null>(null);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [feedbackSent, setFeedbackSent] = useState(false);
+  const feedbackCopy = conversation.language === "de"
+    ? { title: "Danke fürs Ausprobieren!", question: "Wie bewertest du die Benutzerfreundlichkeit?", comment: "Was können wir verbessern? (optional)", send: "Bewertung senden", thanks: "Danke für deine Rückmeldung." }
+    : conversation.language === "es"
+      ? { title: "¡Gracias por probarlo!", question: "¿Cómo calificarías la facilidad de uso?", comment: "¿Qué podríamos mejorar? (opcional)", send: "Enviar opinión", thanks: "Gracias por compartir tu opinión." }
+      : { title: "Obrigado por testar!", question: "De 1 a 10, como você avalia a facilidade de uso?", comment: "O que poderíamos melhorar? (opcional)", send: "Enviar avaliação", thanks: "Obrigado por compartilhar sua opinião." };
 
   useEffect(() => {
     if (rememberedName && rememberedName !== conversation.name) {
@@ -625,6 +626,25 @@ function ConversationExperience({
     dispatch({ stage: conversation.stage, choiceId });
   }
 
+  function submitFeedback(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!feedbackRating) return;
+    try {
+      const key = "basedspeak-orbita-feedback-v1";
+      const previous = JSON.parse(window.localStorage.getItem(key) ?? "[]") as unknown[];
+      const record = {
+        rating: feedbackRating,
+        comment: feedbackComment.trim(),
+        language: conversation.language,
+        submittedAt: new Date().toISOString(),
+      };
+      window.localStorage.setItem(key, JSON.stringify([...previous, record]));
+    } catch {
+      // The thank-you state still works if browser storage is unavailable.
+    }
+    setFeedbackSent(true);
+  }
+
   const soundLabel = conversation.language === "de"
     ? sound.enabled ? "Tippgeräusch ausschalten" : "Tippgeräusch einschalten"
     : conversation.language === "es"
@@ -657,9 +677,6 @@ function ConversationExperience({
           <button onClick={openSettings}>Configurações</button>
         </nav>
         <div className={styles.headerActions}>
-          <Link href={ROUTES.auth.login} className={styles.login}>
-            <span>Já tem conta?</span> Entrar <ArrowUpRight size={15} />
-          </Link>
           <button
             className={styles.menuButton}
             onClick={() => setMenuOpen(!menuOpen)}
@@ -828,15 +845,40 @@ function ConversationExperience({
                 </p>
               </form>
             ) : conversation.stage === "done" ? (
-              <div className={styles.continue}>
-                <Link
-                  className={styles.continueLink}
-                  href={`${ROUTES.app.pillar}/1`}
-                >
-                  {continueLabel} <ArrowUpRight size={16} />
-                </Link>
-                <span>{continueHint}</span>
-              </div>
+              feedbackSent ? (
+                <div className={styles.feedbackThanks} role="status">{feedbackCopy.thanks}</div>
+              ) : (
+                <form className={styles.feedbackForm} onSubmit={submitFeedback}>
+                  <strong>{feedbackCopy.title}</strong>
+                  <label>{feedbackCopy.question}</label>
+                  <div className={styles.ratingChoices} role="group" aria-label={feedbackCopy.question}>
+                    {Array.from({ length: 10 }, (_, index) => index + 1).map((rating) => (
+                      <button
+                        type="button"
+                        key={rating}
+                        className={`${styles.ratingChoice} ${feedbackRating === rating ? styles.ratingChoiceSelected : ""}`}
+                        aria-pressed={feedbackRating === rating}
+                        onClick={() => setFeedbackRating(rating)}
+                      >
+                        {rating}
+                      </button>
+                    ))}
+                  </div>
+                  <div className={styles.ratingScale} aria-hidden="true"><span>1</span><span>10</span></div>
+                  <label className={styles.feedbackCommentLabel} htmlFor="orbita-feedback-comment">{feedbackCopy.comment}</label>
+                  <textarea
+                    id="orbita-feedback-comment"
+                    className={styles.feedbackComment}
+                    value={feedbackComment}
+                    onChange={(event) => setFeedbackComment(event.target.value)}
+                    maxLength={1000}
+                    rows={2}
+                  />
+                  <button className={styles.feedbackSubmit} type="submit" disabled={!feedbackRating}>
+                    {feedbackCopy.send} <ArrowUpRight size={15} />
+                  </button>
+                </form>
+              )
             ) : (
               <div
                 className={styles.options}
