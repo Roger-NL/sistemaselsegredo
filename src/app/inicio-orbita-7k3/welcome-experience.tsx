@@ -423,16 +423,73 @@ function InlineSpeechText({
 
 export default function WelcomeExperience() {
   const rememberedName = useVisitorName();
-  const learningLanguage = useLearningLanguage();
-  if (rememberedName === undefined || learningLanguage === undefined)
+  const savedLanguage = useLearningLanguage();
+  const [entryLanguageOverride, setEntryLanguageOverride] = useState<LearningLanguage | null>(null);
+  const [entryRequested, setEntryRequested] = useState(false);
+  const entryLanguage = entryLanguageOverride ?? savedLanguage ?? "pt";
+
+  if (!entryRequested || rememberedName === undefined) {
     return (
-      <div className={styles.page}>
-        <p className={styles.loading} role="status">
-          Preparando suas boas-vindas…
-        </p>
-      </div>
+      <LanguagePicker
+        selected={entryLanguageOverride ?? savedLanguage ?? null}
+        onSelect={(language) => {
+          setEntryLanguageOverride(language);
+          saveLearningLanguage(language);
+          setEntryRequested(true);
+        }}
+      />
     );
-  return <ConversationExperience rememberedName={rememberedName} initialLanguage={learningLanguage} />;
+  }
+
+  return <ConversationExperience rememberedName={rememberedName} initialLanguage={entryLanguage} />;
+}
+
+function LanguagePicker({
+  selected,
+  onSelect,
+}: {
+  selected: LearningLanguage | null;
+  onSelect: (language: LearningLanguage) => void;
+}) {
+  return (
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <Link href={ROUTES.home} className={styles.brand} aria-label="BasedSpeak — início">
+          <span className={styles.brandMark} aria-hidden="true"><span /><span /><span /><span /></span>
+          based<span className={styles.brandLight}>speak</span>.
+        </Link>
+        <div className={styles.headerActions}>
+          <Link href={ROUTES.auth.login} className={styles.login}>
+            <span>Já tem conta?</span> Entrar <ArrowUpRight size={15} />
+          </Link>
+        </div>
+      </header>
+      <div className={styles.content}>
+        <main className={styles.languageEntryMain}>
+          <div className={styles.languageOptions} role="group" aria-label="Escolha o idioma de apoio para aprender inglês">
+            {(["pt", "es", "de"] as const).map((language) => (
+              <button
+                className={`${styles.languageOption} ${selected === language ? styles.languageOptionDefault : ""}`}
+                type="button"
+                key={language}
+                onClick={() => onSelect(language)}
+              >
+                {languageLabel(language)}
+                <ArrowUpRight size={17} aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+        </main>
+      </div>
+      <footer className={styles.footer}>
+        <span>BasedSpeak · Uma conversa de cada vez.</span>
+        <nav aria-label="Informações do site">
+          <Link href="/termos">Termos</Link>
+          <Link href="/privacidade">Privacidade</Link>
+        </nav>
+      </footer>
+    </div>
+  );
 }
 
 function ConversationExperience({
