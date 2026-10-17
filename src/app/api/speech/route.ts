@@ -11,7 +11,7 @@ import {
 import { Timestamp } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
 import { welcomeSpeechPhrases } from "@/app/inicio-orbita-7k3/conversation";
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb } from "@/lib/firebase-admin-firestore";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
