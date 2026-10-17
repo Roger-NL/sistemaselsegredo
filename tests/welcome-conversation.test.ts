@@ -7,6 +7,7 @@ import {
   welcomeSpeechPhrases,
   type Conversation,
 } from "../src/app/inicio-orbita-7k3/conversation";
+import { localeCopy, localizedVariant, type LearningLanguage } from "../src/app/inicio-orbita-7k3/language";
 
 function answer(state: Conversation, choiceId: string) {
   return conversationReducer(state, { stage: state.stage, choiceId });
@@ -22,7 +23,79 @@ function startPractice(scene: string, barrier: string) {
   );
 }
 
+function startPracticeInLanguage(scene: string, barrier: string, language: LearningLanguage) {
+  const hello = answer(createConversation("Ana", language), "begin");
+  return answer(answer(hello, scene), barrier);
+}
+
 describe("welcome conversation", () => {
+  it.each(["de", "es"] as const)("starts in Portuguese by default and supports switching to %s", (language) => {
+    const initial = createConversation("Ana");
+    expect(initial.language).toBe("pt");
+    const started = createConversation("Ana", language);
+    expect(started.language).toBe(language);
+    expect(started.messages[0].text).toContain(localeCopy[language].greetingReturning.split("{name}")[0]);
+    const changed = conversationReducer(startPractice("world", "freeze"), {
+      type: "set-language",
+      language,
+    });
+    expect(changed.name).toBe("Ana");
+    expect(changed.language).toBe(language);
+    expect(changed.stage).toBe("hello");
+    expect(getChoices(changed)[0].label).toBe(language === "de" ? "Los geht's" : language === "es" ? "Vamos" : "Vamos lá");
+  });
+
+  it.each([
+    ["world", "freeze"], ["world", "translate"], ["world", "words"], ["world", "start"],
+    ["work", "freeze"], ["work", "translate"], ["work", "words"], ["work", "start"],
+    ["life", "freeze"], ["life", "translate"], ["life", "words"], ["life", "start"],
+  ])("keeps the full teaching flow translated into German for %s / %s", (scene, barrier) => {
+    const practice = startPracticeInLanguage(scene, barrier, "de");
+    const base = localeCopy.de.variants[scene as keyof typeof localeCopy.de.variants][barrier === "start" ? "beginner" : "standard"];
+    const practiceText = practice.messages.at(-1)?.text ?? "";
+    expect(practice.language).toBe("de");
+    expect(practiceText).toContain(base.translation);
+    expect(practiceText).not.toContain("Tenho uma ideia");
+    const answerLesson = answer(practice, "understand");
+    const cards = answerLesson.messages.at(-1)?.lesson ?? [];
+    expect(cards).toHaveLength(base.partNotes.length);
+    expect(cards.map((card) => card.translation)).toEqual(base.partMeanings);
+    expect(cards.map((card) => card.clues.length)).toEqual(base.partClueMeanings.map((items) => items.length));
+    expect(cards.every((card) => card.note.length > 35)).toBe(true);
+    expect(cards.flatMap((card) => card.clues).every((clue) => clue.meaning.length > 0)).toBe(true);
+    const replyLesson = answer(answerLesson, "ready");
+    const replyCards = replyLesson.messages.at(-1)?.lesson ?? [];
+    expect(replyCards.map((card) => card.translation)).toEqual(base.replyPartMeanings);
+    expect(replyCards.map((card) => card.clues.length)).toEqual(base.replyClueMeanings.map((items) => items.length));
+    const done = answer(replyLesson, "continue");
+    expect(done.messages.at(-1)?.recap?.turns[0].translation).toBe(base.openingTranslation);
+  });
+
+  it.each([
+    ["world", "freeze"], ["world", "translate"], ["world", "words"], ["world", "start"],
+    ["work", "freeze"], ["work", "translate"], ["work", "words"], ["work", "start"],
+    ["life", "freeze"], ["life", "translate"], ["life", "words"], ["life", "start"],
+  ])("keeps the full teaching flow translated into Spanish for %s / %s", (scene, barrier) => {
+    const practice = startPracticeInLanguage(scene, barrier, "es");
+    const base = localizedVariant("es", scene as "world" | "work" | "life", barrier === "start");
+    const practiceText = practice.messages.at(-1)?.text ?? "";
+    expect(practiceText).toContain(base.translation);
+    expect(practiceText).not.toContain("Tenho uma ideia");
+    const answerLesson = answer(practice, "understand");
+    const cards = answerLesson.messages.at(-1)?.lesson ?? [];
+    expect(cards).toHaveLength(base.partNotes.length);
+    expect(cards.map((card) => card.translation)).toEqual(base.partMeanings);
+    expect(cards.map((card) => card.clues.length)).toEqual(base.partClueMeanings.map((items) => items.length));
+    expect(cards.every((card) => card.note.length > 35)).toBe(true);
+    expect(cards.flatMap((card) => card.clues).every((clue) => clue.meaning.length > 0)).toBe(true);
+    const replyLesson = answer(answerLesson, "ready");
+    const replyCards = replyLesson.messages.at(-1)?.lesson ?? [];
+    expect(replyCards.map((card) => card.translation)).toEqual(base.replyPartMeanings);
+    expect(replyCards.map((card) => card.clues.length)).toEqual(base.replyClueMeanings.map((items) => items.length));
+    const done = answer(replyLesson, "continue");
+    expect(done.messages.at(-1)?.recap?.turns[0].translation).toBe(base.openingTranslation);
+  });
+
   it.each([
     [
       "world",

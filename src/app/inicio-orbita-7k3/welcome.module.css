@@ -805,6 +805,34 @@
 .dialogHeader button:hover {
   background: #eee8df;
 }
+.languageSetting {
+  display: grid;
+  gap: 7px;
+  padding: 0 0 20px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.languageSetting label {
+  font-size: 14px;
+  font-weight: 600;
+}
+.languageSetting p,
+.languageHint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.languageSetting select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
 .loading {
   padding: 40px;
   color: var(--muted);

@@ -39,6 +39,8 @@ import {
   visitorNameError,
 } from "@/lib/welcome/visitor-name";
 import { VisitorNameSettings } from "@/components/welcome/VisitorNameSettings";
+import { languageLabel, type LearningLanguage } from "./language";
+import { saveLearningLanguage, useLearningLanguage } from "@/lib/welcome/use-learning-language";
 import styles from "./welcome.module.css";
 
 function TypedMessage({
@@ -153,7 +155,7 @@ function ConversationRecapCard({
   return (
     <section className={styles.recap} aria-label="Resumo da conversa">
       <div className={styles.recapContext}>
-        <span className={styles.recapContextLabel}>O CONTEXTO</span>
+      <span className={styles.recapContextLabel}>{recap.contextLabel}</span>
         <span className={styles.recapContextPhrase}>{recap.context.phrase}</span>
         <span className={styles.recapTranslation}>{recap.context.translation}</span>
       </div>
@@ -190,7 +192,7 @@ function ConversationRecapCard({
           <i />
         </span>
         <div>
-          <span className={styles.recapProgressLabel}>VOCÊ CONSEGUIU</span>
+          <span className={styles.recapProgressLabel}>{recap.progressLabel}</span>
           <strong>{recap.progress}</strong>
         </div>
       </div>
@@ -257,7 +259,7 @@ function LessonCards({
                 {card.clues.map((clue) => (
                   <span className={styles.lessonClue} key={clue.english}>
                     <strong>{clue.english}</strong>
-                    <span>{clue.portuguese}</span>
+                    <span>{clue.meaning}</span>
                   </span>
                 ))}
               </div>
@@ -421,7 +423,8 @@ function InlineSpeechText({
 
 export default function WelcomeExperience() {
   const rememberedName = useVisitorName();
-  if (rememberedName === undefined)
+  const learningLanguage = useLearningLanguage();
+  if (rememberedName === undefined || learningLanguage === undefined)
     return (
       <div className={styles.page}>
         <p className={styles.loading} role="status">
@@ -429,18 +432,20 @@ export default function WelcomeExperience() {
         </p>
       </div>
     );
-  return <ConversationExperience rememberedName={rememberedName} />;
+  return <ConversationExperience rememberedName={rememberedName} initialLanguage={learningLanguage} />;
 }
 
 function ConversationExperience({
   rememberedName,
+  initialLanguage,
 }: {
   rememberedName: string | null;
+  initialLanguage: LearningLanguage;
 }) {
   const [conversation, dispatch] = useReducer(
     conversationReducer,
-    rememberedName,
-    createConversation,
+    { rememberedName, language: initialLanguage },
+    (initial) => createConversation(initial.rememberedName, initial.language),
   );
   const [nameDraft, setNameDraft] = useState("");
   const [nameError, setNameError] = useState("");
@@ -462,6 +467,14 @@ function ConversationExperience({
   const latestMessageIdRef = useRef(lastMessage.id);
   const isTyping = completedId !== lastMessage.id;
   const choices = getChoices(conversation);
+  const namePlaceholder = conversation.language === "de" ? "Dein Name" : conversation.language === "es" ? "Tu nombre" : "Digite seu nome";
+  const nameHint = conversation.language === "de"
+    ? "Ich merke mir deinen Namen in diesem Browser. Du kannst ihn in den Einstellungen ändern."
+    : conversation.language === "es"
+      ? "Recordaré tu nombre en este navegador. Puedes cambiarlo en Configuración."
+      : "Vou lembrar neste navegador. Você pode mudar em Configurações.";
+  const continueLabel = conversation.language === "de" ? "Weiterlernen" : conversation.language === "es" ? "Seguir aprendiendo" : "Continuar aprendendo";
+  const continueHint = conversation.language === "de" ? "Dein nächster Schritt beginnt im ersten Lernpfad." : conversation.language === "es" ? "Tu próximo paso empieza en el primer pilar." : "Seu próximo passo começa no primeiro pilar.";
 
   useEffect(() => {
     if (rememberedName && rememberedName !== conversation.name) {
@@ -555,9 +568,16 @@ function ConversationExperience({
     dispatch({ stage: conversation.stage, choiceId });
   }
 
-  const soundLabel = sound.enabled
-    ? "Desativar som da digitação"
-    : "Ativar som da digitação";
+  const soundLabel = conversation.language === "de"
+    ? sound.enabled ? "Tippgeräusch ausschalten" : "Tippgeräusch einschalten"
+    : conversation.language === "es"
+      ? sound.enabled ? "Desactivar sonido de escritura" : "Activar sonido de escritura"
+      : sound.enabled ? "Desativar som da digitação" : "Ativar som da digitação";
+  const soundStatus = conversation.language === "de"
+    ? sound.enabled ? "Tippgeräusch an" : "Tippgeräusch aus"
+    : conversation.language === "es"
+      ? sound.enabled ? "Sonido de escritura activado" : "Sonido de escritura desactivado"
+      : sound.enabled ? "Digitação ligada" : "Digitação desligada";
 
   return (
     <div className={styles.page}>
@@ -628,9 +648,7 @@ function ConversationExperience({
                 <VolumeX size={17} />
               )}
               <span>
-                {sound.enabled
-                  ? "Digitação ligada"
-                  : "Digitação desligada"}
+                {soundStatus}
               </span>
             </button>
           </div>
@@ -726,7 +744,7 @@ function ConversationExperience({
                     id="welcome-name"
                     name="givenName"
                     autoComplete="given-name"
-                    placeholder="Digite seu nome"
+                  placeholder={namePlaceholder}
                     maxLength={60}
                     value={nameDraft}
                     onChange={(event) => {
@@ -746,7 +764,7 @@ function ConversationExperience({
                   </button>
                 </div>
                 <p id="name-hint" className={styles.inputHint}>
-                  Vou lembrar neste navegador. Você pode mudar em Configurações.
+                  {nameHint}
                 </p>
                 <p id="name-error" className={styles.error} role="alert">
                   {nameError}
@@ -758,9 +776,9 @@ function ConversationExperience({
                   className={styles.continueLink}
                   href={`${ROUTES.app.pillar}/1`}
                 >
-                  Continuar aprendendo <ArrowUpRight size={16} />
+                  {continueLabel} <ArrowUpRight size={16} />
                 </Link>
-                <span>Seu próximo passo começa no primeiro pilar.</span>
+                <span>{continueHint}</span>
               </div>
             ) : (
               <div
@@ -838,23 +856,48 @@ function ConversationExperience({
           </button>
         </div>
         {settingsOpen && (
-          <VisitorNameSettings
-            onSaved={(name) => {
-              dispatch({
-                type: conversation.stage === "name" ? "name" : "rename",
-                name,
-              });
-              setStorageNotice("");
-            }}
-            onRestart={() => {
-              lastAnsweredMessageRef.current = null;
-              followRef.current = true;
-              setShowLatest(false);
-              setCompletedId(-1);
-              dispatch({ type: "restart" });
-              dialogRef.current?.close();
-            }}
-          />
+          <>
+            <div className={styles.languageSetting}>
+              <label htmlFor="welcome-learning-language">Idioma de apoio</label>
+              <p>As frases continuam em inglês; traduções e explicações usam este idioma.</p>
+              <select
+                id="welcome-learning-language"
+                value={conversation.language}
+                onChange={(event) => {
+                  const language = event.target.value as LearningLanguage;
+                  saveLearningLanguage(language);
+                  lastAnsweredMessageRef.current = null;
+                  followRef.current = true;
+                  setShowLatest(false);
+                  setCompletedId(-1);
+                  dispatch({ type: "set-language", language });
+                  setStorageNotice("");
+                }}
+              >
+                {(["pt", "es", "de"] as const).map((language) => (
+                  <option key={language} value={language}>{languageLabel(language)}</option>
+                ))}
+              </select>
+              <span className={styles.languageHint}>A troca reinicia esta conversa para aplicar o idioma escolhido.</span>
+            </div>
+            <VisitorNameSettings
+              onSaved={(name) => {
+                dispatch({
+                  type: conversation.stage === "name" ? "name" : "rename",
+                  name,
+                });
+                setStorageNotice("");
+              }}
+              onRestart={() => {
+                lastAnsweredMessageRef.current = null;
+                followRef.current = true;
+                setShowLatest(false);
+                setCompletedId(-1);
+                dispatch({ type: "restart" });
+                dialogRef.current?.close();
+              }}
+            />
+          </>
         )}
       </dialog>
     </div>

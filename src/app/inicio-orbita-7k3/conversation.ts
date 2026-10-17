@@ -2,6 +2,7 @@ import {
   normalizeVisitorName,
   visitorNameError,
 } from "@/lib/welcome/visitor-name";
+import { localizedVariant, localeCopy, type BarrierId, type LearningLanguage, type SceneId } from "./language";
 
 export type Stage =
   | "name"
@@ -15,10 +16,12 @@ export type Stage =
 export type LessonCard = {
   phrase: string;
   translation: string;
-  clues: { english: string; portuguese: string }[];
+  clues: { english: string; meaning: string }[];
   note: string;
 };
 export type ConversationRecap = {
+  contextLabel: string;
+  progressLabel: string;
   context: { phrase: string; translation: string };
   turns: { speaker: string; phrase: string; translation: string }[];
   progress: string;
@@ -51,12 +54,12 @@ const scenes = [
     parts: ["Yes!", "What do you", "recommend?"],
     partMeanings: ["Sim!", "O que você", "recomenda?"],
     partClues: [
-      [{ english: "Yes", portuguese: "sim" }],
+      [{ english: "Yes", meaning: "sim" }],
       [
-        { english: "what", portuguese: "o que" },
-        { english: "do you", portuguese: "você" },
+        { english: "what", meaning: "o que" },
+        { english: "do you", meaning: "você" },
       ],
-      [{ english: "recommend", portuguese: "recomendar" }],
+      [{ english: "recommend", meaning: "recomendar" }],
     ],
     partNotes: [
       "Yes! responde diretamente à pergunta. Em inglês, você pode confirmar com uma palavra e acrescentar um detalhe depois.",
@@ -70,12 +73,12 @@ const scenes = [
     replyPartMeanings: ["O café é ótimo.", "De onde você é?"],
     replyPartClues: [
       [
-        { english: "coffee", portuguese: "café" },
-        { english: "great", portuguese: "ótimo" },
+        { english: "coffee", meaning: "café" },
+        { english: "great", meaning: "ótimo" },
       ],
       [
-        { english: "where", portuguese: "onde" },
-        { english: "from", portuguese: "de" },
+        { english: "where", meaning: "onde" },
+        { english: "from", meaning: "de" },
       ],
     ],
     replyPartNotes: [
@@ -93,12 +96,12 @@ const scenes = [
       parts: ["Yes,", "I like", "coffee."],
       partMeanings: ["Sim,", "eu gosto", "de café."],
       partClues: [
-        [{ english: "yes", portuguese: "sim" }],
+        [{ english: "yes", meaning: "sim" }],
         [
-          { english: "I", portuguese: "eu" },
-          { english: "like", portuguese: "gosto" },
+          { english: "I", meaning: "eu" },
+          { english: "like", meaning: "gosto" },
         ],
-        [{ english: "coffee", portuguese: "café" }],
+        [{ english: "coffee", meaning: "café" }],
       ],
       partNotes: [
         "Yes responde à pergunta. A pausa da vírgula prepara o detalhe que vem em seguida.",
@@ -110,7 +113,7 @@ const scenes = [
       replyTranslation: "Eu também!",
       replyParts: ["Me too!"],
       replyPartMeanings: ["Eu também!"],
-      replyPartClues: [[{ english: "me too", portuguese: "eu também" }]],
+      replyPartClues: [[{ english: "me too", meaning: "eu também" }]],
       replyPartNotes: ["Me too! é uma resposta pronta para dizer “eu também” sem repetir a frase toda."],
     },
   },
@@ -129,17 +132,17 @@ const scenes = [
     partMeanings: ["Tenho uma ideia.", "Posso", "compartilhar?"],
     partClues: [
       [
-        { english: "I", portuguese: "eu" },
-        { english: "have", portuguese: "tenho" },
-        { english: "an idea", portuguese: "uma ideia" },
+        { english: "I", meaning: "eu" },
+        { english: "have", meaning: "tenho" },
+        { english: "an idea", meaning: "uma ideia" },
       ],
       [
-        { english: "can", portuguese: "posso" },
-        { english: "I", portuguese: "eu" },
+        { english: "can", meaning: "posso" },
+        { english: "I", meaning: "eu" },
       ],
       [
-        { english: "share", portuguese: "compartilhar" },
-        { english: "it", portuguese: "isso" },
+        { english: "share", meaning: "compartilhar" },
+        { english: "it", meaning: "isso" },
       ],
     ],
     partNotes: [
@@ -153,10 +156,10 @@ const scenes = [
     replyParts: ["Of course.", "We'd love to hear it."],
     replyPartMeanings: ["Claro.", "Adoraríamos ouvir."],
     replyPartClues: [
-      [{ english: "of course", portuguese: "claro" }],
+      [{ english: "of course", meaning: "claro" }],
       [
-        { english: "we'd love to", portuguese: "adoraríamos" },
-        { english: "hear it", portuguese: "ouvir isso" },
+        { english: "we'd love to", meaning: "adoraríamos" },
+        { english: "hear it", meaning: "ouvir isso" },
       ],
     ],
     replyPartNotes: [
@@ -175,12 +178,12 @@ const scenes = [
       partMeanings: ["Eu gosto", "da sua ideia."],
       partClues: [
         [
-          { english: "I", portuguese: "eu" },
-          { english: "like", portuguese: "gosto" },
+          { english: "I", meaning: "eu" },
+          { english: "like", meaning: "gosto" },
         ],
         [
-          { english: "your", portuguese: "sua" },
-          { english: "idea", portuguese: "ideia" },
+          { english: "your", meaning: "sua" },
+          { english: "idea", meaning: "ideia" },
         ],
       ],
       partNotes: [
@@ -192,7 +195,7 @@ const scenes = [
       replyTranslation: "Obrigado(a)!",
       replyParts: ["Thank you!"],
       replyPartMeanings: ["Obrigado(a)!"],
-      replyPartClues: [[{ english: "thank you", portuguese: "obrigado(a)" }]],
+      replyPartClues: [[{ english: "thank you", meaning: "obrigado(a)" }]],
       replyPartNotes: ["Thank you! é a forma natural de agradecer quando alguém elogia uma ideia."],
     },
   },
@@ -211,15 +214,15 @@ const scenes = [
     partMeanings: ["Eu adoro música.", "E quanto a", "você?"],
     partClues: [
       [
-        { english: "I", portuguese: "eu" },
-        { english: "love", portuguese: "adoro" },
-        { english: "music", portuguese: "música" },
+        { english: "I", meaning: "eu" },
+        { english: "love", meaning: "adoro" },
+        { english: "music", meaning: "música" },
       ],
       [
-        { english: "how", portuguese: "como" },
-        { english: "about", portuguese: "sobre" },
+        { english: "how", meaning: "como" },
+        { english: "about", meaning: "sobre" },
       ],
-      [{ english: "you", portuguese: "você" }],
+      [{ english: "you", meaning: "você" }],
     ],
     partNotes: [
       "I é quem fala, love é o que sente e music completa a ideia. Em inglês, a ordem é pessoa + verbo + assunto.",
@@ -232,10 +235,10 @@ const scenes = [
     replyParts: ["Me too!", "What kind of music?"],
     replyPartMeanings: ["Eu também!", "Que tipo de música?"],
     replyPartClues: [
-      [{ english: "me too", portuguese: "eu também" }],
+      [{ english: "me too", meaning: "eu também" }],
       [
-        { english: "what kind of", portuguese: "que tipo de" },
-        { english: "music", portuguese: "música" },
+        { english: "what kind of", meaning: "que tipo de" },
+        { english: "music", meaning: "música" },
       ],
     ],
     replyPartNotes: [
@@ -254,10 +257,10 @@ const scenes = [
       partMeanings: ["Eu adoro", "música."],
       partClues: [
         [
-          { english: "I", portuguese: "eu" },
-          { english: "love", portuguese: "adoro" },
+          { english: "I", meaning: "eu" },
+          { english: "love", meaning: "adoro" },
         ],
-        [{ english: "music", portuguese: "música" }],
+        [{ english: "music", meaning: "música" }],
       ],
       partNotes: [
         "I mostra quem fala; love é o verbo. Juntos, I love quer dizer “eu adoro”.",
@@ -268,7 +271,7 @@ const scenes = [
       replyTranslation: "Eu também!",
       replyParts: ["Me too!"],
       replyPartMeanings: ["Eu também!"],
-      replyPartClues: [[{ english: "me too", portuguese: "eu também" }]],
+      replyPartClues: [[{ english: "me too", meaning: "eu também" }]],
       replyPartNotes: ["Me too! responde “eu também” e mostra que vocês têm algo em comum."],
     },
   },
@@ -328,23 +331,36 @@ const barriers = [
 type Scene = (typeof scenes)[number];
 type Barrier = (typeof barriers)[number];
 
-function sceneForBarrier(scene: Scene, barrier: Barrier): Scene {
-  return barrier.id === "start" ? { ...scene, ...scene.beginner } : scene;
+function sceneForBarrier(scene: Scene, barrier: Barrier, language: LearningLanguage): Scene {
+  const beginner = barrier.id === "start";
+  const base = beginner ? { ...scene, ...scene.beginner } : scene;
+  const copy = localizedVariant(language, scene.id as SceneId, beginner);
+  return {
+    ...base,
+    setting: copy.setting,
+    contextTranslation: copy.contextTranslation,
+    openingTranslation: copy.openingTranslation,
+    translation: copy.translation,
+    partMeanings: copy.partMeanings,
+    partNotes: copy.partNotes,
+    partClues: base.partClues.map((items, part) => items.map((item, index) => ({
+      english: item.english,
+      meaning: copy.partClueMeanings[part]?.[index] ?? item.meaning,
+    }))),
+    replyTranslation: copy.replyTranslation,
+    replyPartMeanings: copy.replyPartMeanings,
+    replyPartNotes: copy.replyPartNotes,
+    replyPartClues: base.replyPartClues.map((items, part) => items.map((item, index) => ({
+      english: item.english,
+      meaning: copy.replyClueMeanings[part]?.[index] ?? item.meaning,
+    }))),
+  } as Scene;
 }
 
-function buildPracticeMessage(scene: Scene, barrier: Barrier) {
+function buildPracticeMessage(scene: Scene, barrier: Barrier, language: LearningLanguage) {
+  const copy = localeCopy[language];
   const situation = `${scene.setting}\n“${scene.opening}” — ${scene.openingTranslation}`;
-  const guidance: Record<Barrier["id"], string> = {
-    freeze:
-      "Você disse que às vezes dá branco. Em vez de inventar na hora, use uma resposta pronta:",
-    translate:
-      "Você disse que costuma traduzir tudo na cabeça. Primeiro, veja a ideia completa:",
-    words:
-      "Você disse que faltam palavras. Comece com esta frase útil e veja como ela soa:",
-    start:
-      "Como você está começando do zero, vamos usar uma frase curta e completa:",
-  };
-  return `${situation}\n\n${guidance[barrier.id]}\n“${scene.phrase}”\n${scene.translation}`;
+  return `${situation}\n\n${copy.guidance[barrier.id as BarrierId]}\n“${scene.phrase}”\n${scene.translation}`;
 }
 
 function makeLessonCards(
@@ -361,14 +377,9 @@ function makeLessonCards(
   }));
 }
 
-function buildLessonIntro(barrier: Barrier) {
-  const focus: Record<Barrier["id"], string> = {
-    freeze: "sem precisar guardar a frase inteira de uma vez",
-    translate: "olhando para a função de cada bloco, não só a tradução",
-    words: "usando as palavras conhecidas como pistas",
-    start: "com uma explicação curta para cada bloco",
-  };
-  return `Agora vamos entender por que essa frase funciona ${focus[barrier.id]}.`;
+function buildLessonIntro(barrier: Barrier, language: LearningLanguage) {
+  const lead = language === "de" ? "Jetzt schauen wir uns an, warum dieser Satz funktioniert" : "Ahora vamos a entender por qué funciona esta frase";
+  return `${lead} ${localeCopy[language].lessonIntro[barrier.id as BarrierId]}.`;
 }
 
 function makeReplyLessonStep(
@@ -376,7 +387,9 @@ function makeReplyLessonStep(
   choiceLabel: string,
   scene: Scene,
   intro: string,
+  language: LearningLanguage,
 ): Conversation {
+  const copy = localeCopy[language];
   const lesson = makeLessonCards(
     scene.replyParts,
     scene.replyPartMeanings,
@@ -394,38 +407,32 @@ function makeReplyLessonStep(
         role: "assistant",
         text: intro,
         lesson,
-        lessonTitle: "A RESPOSTA DO OUTRO LADO",
-        lessonHint: "Ela também tem pistas. Toque para ouvir",
+        lessonTitle: copy.replyLessonTitle,
+        lessonHint: copy.replyLessonHint,
       },
     ],
   };
 }
 
-function buildConversationRecap(scene: Scene, barrier: Barrier): ConversationRecap {
-  const progress = ({
-    freeze:
-      "Você partiu do branco, montou sua resposta e entendeu o que veio depois.",
-    translate:
-      "Você conectou os blocos de sentido e acompanhou a conversa inteira.",
-    words:
-      "Você usou palavras como pistas para montar a resposta e entender a reação.",
-    start:
-      "Sua primeira conversa em inglês: você entendeu a pergunta, a resposta e a reação.",
-  } satisfies Record<Barrier["id"], string>)[barrier.id]!;
+function buildConversationRecap(scene: Scene, barrier: Barrier, language: LearningLanguage): ConversationRecap {
+  const copy = localeCopy[language];
 
   return {
+    contextLabel: language === "de" ? "DER KONTEXT" : language === "es" ? "EL CONTEXTO" : "O CONTEXTO",
+    progressLabel: language === "de" ? "DAS HAST DU GESCHAFFT" : language === "es" ? "LO CONSEGUISTE" : "VOCÊ CONSEGUIU",
     context: { phrase: scene.contextLine, translation: scene.contextTranslation },
     turns: [
-      { speaker: "Outra pessoa", phrase: scene.opening, translation: scene.openingTranslation },
-      { speaker: "Você", phrase: scene.phrase, translation: scene.translation },
-      { speaker: "Outra pessoa", phrase: scene.reply, translation: scene.replyTranslation },
+      { speaker: copy.speakers.other, phrase: scene.opening, translation: scene.openingTranslation },
+      { speaker: copy.speakers.you, phrase: scene.phrase, translation: scene.translation },
+      { speaker: copy.speakers.other, phrase: scene.reply, translation: scene.replyTranslation },
     ],
-    progress,
+    progress: copy.recapProgress[barrier.id as BarrierId],
   };
 }
 
 export type Conversation = {
   stage: Stage;
+  language: LearningLanguage;
   name?: string;
   messages: Message[];
   sceneId?: string;
@@ -434,21 +441,22 @@ export type Conversation = {
 
 export function createConversation(
   rememberedName?: string | null,
+  language: LearningLanguage = "pt",
 ): Conversation {
+  const copy = localeCopy[language];
   const name =
     rememberedName && !visitorNameError(rememberedName)
       ? normalizeVisitorName(rememberedName)
       : undefined;
   return {
     stage: name ? "hello" : "name",
+    language,
     name,
     messages: [
       {
         id: 0,
         role: "assistant",
-        text: name
-          ? `Oi de novo, ${name}!\nVamos encontrar seu próximo passo no inglês?`
-          : "Oi! Que bom ter você por aqui.\nComo você gosta de ser chamado?",
+        text: name ? copy.greetingReturning.replace("{name}", name) : copy.greeting,
       },
     ],
   };
@@ -461,30 +469,32 @@ export type ConversationAction =
   | { type: "name"; name: string }
   | { type: "rename"; name: string }
   | { type: "forget-name" }
+  | { type: "set-language"; language: LearningLanguage }
   | { type: "restart" };
 
 export function getChoices(state: Conversation): Choice[] {
+  const copy = localeCopy[state.language];
   switch (state.stage) {
     case "name":
       return [];
     case "hello":
-      return [{ id: "begin", label: "Vamos lá" }];
+      return [{ id: "begin", label: state.language === "de" ? "Los geht's" : state.language === "es" ? "Vamos" : "Vamos lá" }];
     case "scene":
-      return scenes;
+      return scenes.map((scene) => ({ id: scene.id, label: copy.sceneLabels[scene.id as SceneId].label }));
     case "barrier":
-      return barriers;
+      return barriers.map((barrier) => ({ id: barrier.id, label: copy.barriers[barrier.id as BarrierId].label }));
     case "practice": {
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!barrier) return [];
       return [
-        { id: "understand", label: barrier.translateLabel },
-        { id: "spoken", label: barrier.actionLabel },
+        { id: "understand", label: copy.barriers[barrier.id as BarrierId].understand },
+        { id: "spoken", label: copy.barriers[barrier.id as BarrierId].action },
       ];
     }
     case "lesson":
-      return [{ id: "ready", label: "Juntar a frase" }];
+      return [{ id: "ready", label: copy.ready }];
     case "replyLesson":
-      return [{ id: "continue", label: "Continuar a conversa" }];
+      return [{ id: "continue", label: copy.continue }];
     case "done":
       return [];
   }
@@ -494,10 +504,15 @@ export function conversationReducer(
   state: Conversation,
   action: ConversationAction,
 ): Conversation {
+  if (action.type === "set-language") {
+    if (action.language === state.language) return state;
+    return createConversation(state.name, action.language);
+  }
   if (action.type === "restart") {
-    if (!state.name) return createConversation();
+    if (!state.name) return createConversation(undefined, state.language);
     return {
       stage: "scene",
+      language: state.language,
       name: state.name,
       sceneId: undefined,
       barrierId: undefined,
@@ -505,7 +520,11 @@ export function conversationReducer(
         {
           id: 0,
           role: "assistant",
-          text: `${state.name}, vamos por outro caminho.\nOnde você quer praticar agora?`,
+          text: state.language === "de"
+            ? `${state.name}, probieren wir einen anderen Weg.\nWo möchtest du jetzt üben?`
+            : state.language === "es"
+              ? `${state.name}, vamos por otro camino.\n¿Dónde quieres practicar ahora?`
+              : `${state.name}, vamos por outro caminho.\nOnde você quer praticar agora?`,
         },
       ],
     };
@@ -527,7 +546,7 @@ export function conversationReducer(
         {
           id: state.messages.length + 1,
           role: "assistant",
-          text: `Prazer, ${name}.\nOnde você mais gostaria de usar o inglês?`,
+          text: localeCopy[state.language].afterName.replace("{name}", name),
         },
       ],
     };
@@ -544,21 +563,26 @@ export function conversationReducer(
   switch (state.stage) {
     case "hello":
       next.stage = "scene";
-      response = `${state.name ? `${state.name}, me` : "Me"} conta: onde você mais gostaria de usar o inglês?`;
+      response = localeCopy[state.language].hello.replace("{name}, ", state.name ? `${state.name}, ` : "");
       break;
     case "scene": {
       const scene = scenes.find((item) => item.id === choice.id)!;
       next = { ...next, stage: "barrier", sceneId: scene.id };
-      response = `${state.name ? `${state.name}, vamos` + scene.response.slice(5) : scene.response}\nE o que mais pega na hora de falar?`;
+      const copy = localeCopy[state.language];
+      const localized = copy.sceneLabels[scene.id as SceneId];
+      const sceneResponse = state.name
+        ? `${state.name}, ${localized.response[0].toLowerCase()}${localized.response.slice(1)}`
+        : localized.response;
+      response = `${sceneResponse}\n${copy.chooseScene}`;
       break;
     }
     case "barrier": {
       const baseScene = scenes.find((item) => item.id === state.sceneId);
       const barrier = barriers.find((item) => item.id === choice.id);
       if (!baseScene || !barrier) return state;
-      const scene = sceneForBarrier(baseScene, barrier);
+      const scene = sceneForBarrier(baseScene, barrier, state.language);
       next = { ...next, stage: "practice", barrierId: barrier.id };
-      response = buildPracticeMessage(scene, barrier);
+      response = buildPracticeMessage(scene, barrier, state.language);
       speech = [scene.opening, scene.phrase];
       break;
     }
@@ -566,17 +590,20 @@ export function conversationReducer(
       const baseScene = scenes.find((item) => item.id === state.sceneId);
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!baseScene || !barrier) return state;
-      const scene = sceneForBarrier(baseScene, barrier);
+      const scene = sceneForBarrier(baseScene, barrier, state.language);
       if (choice.id === "spoken") {
         return makeReplyLessonStep(
           state,
           choice.label,
           scene,
-          "Boa. Sua frase está montada. Agora veja o que a outra pessoa responde:",
+          state.language === "de" ? "Gut. Dein Satz steht. Jetzt sieh dir an, was die andere Person antwortet:" : state.language === "es" ? "Bien. Ya formaste la frase. Ahora mira lo que responde la otra persona:" : "Boa. Sua frase está montada. Agora veja o que a outra pessoa responde:",
+          state.language,
         );
       }
       next.stage = "lesson";
-      response = buildLessonIntro(barrier);
+      response = state.language === "pt"
+        ? `Agora vamos entender por que essa frase funciona ${localeCopy.pt.lessonIntro[barrier.id as BarrierId]}.`
+        : buildLessonIntro(barrier, state.language);
       const lesson = makeLessonCards(
         scene.parts,
         scene.partMeanings,
@@ -591,8 +618,8 @@ export function conversationReducer(
           role: "assistant",
           text: response,
           lesson,
-          lessonTitle: "SUA RESPOSTA, EM PEÇAS",
-          lessonHint: "Toque em cada parte para ouvir",
+          lessonTitle: localeCopy[state.language].answerLessonTitle,
+          lessonHint: localeCopy[state.language].lessonHint,
         },
       ];
       return next;
@@ -601,22 +628,23 @@ export function conversationReducer(
       const baseScene = scenes.find((item) => item.id === state.sceneId);
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!baseScene || !barrier) return state;
-      const scene = sceneForBarrier(baseScene, barrier);
+      const scene = sceneForBarrier(baseScene, barrier, state.language);
       return makeReplyLessonStep(
         state,
         choice.label,
         scene,
-        "Agora vamos entender também o que a outra pessoa pode responder:",
+        localeCopy[state.language].replyIntro,
+        state.language,
       );
     }
     case "replyLesson": {
       const baseScene = scenes.find((item) => item.id === state.sceneId);
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!baseScene || !barrier) return state;
-      const scene = sceneForBarrier(baseScene, barrier);
+      const scene = sceneForBarrier(baseScene, barrier, state.language);
       next.stage = "done";
-      response = "Olha a conversa que você acabou de conseguir acompanhar.";
-      recap = buildConversationRecap(scene, barrier);
+      response = localeCopy[state.language].recapTitle;
+      recap = buildConversationRecap(scene, barrier, state.language);
       break;
     }
     default:
