@@ -55,11 +55,16 @@ describe("welcome conversation", () => {
         "user",
         "assistant",
       ]);
-      expect(state.messages.at(-1)?.text).toContain(parts[0]);
-      expect(state.messages.at(-1)?.speech).toEqual(
-        expect.arrayContaining(parts),
+      expect(state.messages.at(-1)?.text).toContain(`“${phrase}”`);
+      expect(state.messages.at(-1)?.text).toContain(
+        scene === "world" ? "Sim! O que você recomenda?" :
+          scene === "work" ? "Tenho uma ideia. Posso compartilhar?" :
+            "Eu adoro música. E você?",
       );
-      expect(state.messages.at(-1)?.speech).not.toContain(phrase);
+      expect(state.messages.at(-1)?.speech).toEqual(
+        expect.arrayContaining([phrase]),
+      );
+      expect(state.messages.at(-1)?.speech).not.toContain(parts[0]);
       expect(new Set(state.messages.map((message) => message.id)).size).toBe(
         state.messages.length,
       );
@@ -68,19 +73,16 @@ describe("welcome conversation", () => {
 
   it("adds translation as a new exchange without overwriting earlier answers", () => {
     const before = startPractice("work", "words");
-    const translated = answer(before, "translate");
-    expect(translated.messages.slice(0, before.messages.length)).toEqual(
+    const lesson = answer(before, "understand");
+    expect(lesson.messages.slice(0, before.messages.length)).toEqual(
       before.messages,
     );
-    expect(translated.messages.at(-1)?.text).toContain(
-      "Tenho uma ideia. Posso compartilhar?",
-    );
-    expect(getChoices(translated).map((choice) => choice.id)).toEqual([
-      "spoken",
-    ]);
-    expect(answer(translated, "translate")).toBe(translated);
-    const lesson = answer(translated, "spoken");
     expect(lesson.stage).toBe("lesson");
+    expect(lesson.messages.at(-1)?.text).toContain("usando as palavras conhecidas como pistas");
+    expect(lesson.messages.at(-1)?.lesson?.map((card) => card.note)).toEqual(
+      expect.arrayContaining([expect.stringContaining("Can I…? pede permissão")]),
+    );
+    expect(answer(lesson, "understand")).toBe(lesson);
     const replyLesson = answer(lesson, "ready");
     expect(replyLesson.stage).toBe("replyLesson");
     expect(replyLesson.messages.at(-1)?.lesson).toEqual([
@@ -99,44 +101,44 @@ describe("welcome conversation", () => {
     expect(getChoices(done)).toEqual([]);
   });
 
-  it("shows translated support automatically for beginners", () => {
+  it("shows the full translated phrase before teaching beginners each part", () => {
     const state = startPractice("world", "start");
-    expect(state.translated).toBe(true);
     expect(state.messages.at(-1)?.text).toContain("Você gosta de café?");
     expect(state.messages.at(-1)?.text).toContain("Yes, I like coffee.");
+    expect(state.messages.at(-1)?.text).toContain("Sim, eu gosto de café.");
     expect(state.messages.at(-1)?.text).toContain(
       "Como você está começando do zero",
     );
-    expect(state.messages.at(-1)?.text).toContain(
-      "Leia devagar, uma parte por vez",
-    );
-    expect(getChoices(state).map((choice) => choice.id)).toEqual(["spoken"]);
+    expect(getChoices(state).map((choice) => choice.id)).toEqual(["understand", "spoken"]);
+    const lesson = answer(state, "understand");
+    expect(lesson.stage).toBe("lesson");
+    expect(lesson.messages.at(-1)?.lesson?.[1]?.note).toContain("pessoa vem antes do verbo");
   });
 
   it.each([
     [
       "freeze",
-      "Você disse que dá branco na hora de falar",
-      "Vamos montar a resposta em três pedaços",
+      "Você disse que às vezes dá branco",
+      "use uma resposta pronta",
       "Consegui montar a frase",
     ],
     [
       "translate",
-      "Você disse que traduz tudo na cabeça",
-      "Vamos usar blocos prontos",
+      "Você disse que costuma traduzir tudo na cabeça",
+      "veja a ideia completa",
       "Consegui usar os blocos",
     ],
     [
       "words",
-      "Você disse que faltam as palavras",
-      "idea = ideia",
+      "Você disse que faltam palavras",
+      "veja como ela soa",
       "Consegui usar essas palavras",
     ],
     [
       "start",
       "Como você está começando do zero",
-      "Eu gosto da sua ideia.",
-      "Li cada parte",
+      "I like your idea.",
+      "Consegui montar a frase",
     ],
   ])(
     "adapts the next exercise to the %s difficulty",
@@ -144,32 +146,29 @@ describe("welcome conversation", () => {
       const state = startPractice("work", barrier);
       expect(state.messages.at(-1)?.text).toContain(context);
       expect(state.messages.at(-1)?.text).toContain(exercise);
-      expect(getChoices(state).at(-1)?.label).toBe(actionLabel);
+    expect(getChoices(state).at(-1)?.label).toBe(actionLabel);
     },
   );
 
   it.each([
-    ["world", ["freeze", "translate", "words"], "Yes!", "Sim!", "What do you", "O que você", "recommend?", "recomenda?"],
-    ["world", ["start"], "Yes,", "Sim,", "I like", "eu gosto", "coffee.", "de café."],
-    ["work", ["freeze", "translate", "words"], "I have an idea.", "Tenho uma ideia.", "Can I", "Posso", "share it?", "compartilhar?"],
-    ["work", ["start"], "I like", "Eu gosto", "your idea.", "da sua ideia.", "", ""],
-    ["life", ["freeze", "translate", "words"], "I love music.", "Eu adoro música.", "How about", "E quanto a", "you?", "você?"],
-    ["life", ["start"], "I love", "Eu adoro", "music.", "música.", "", ""],
+    ["world", ["freeze", "translate", "words"], "Yes! What do you recommend?", "Sim! O que você recomenda?", ["Yes!", "What do you", "recommend?"]],
+    ["world", ["start"], "Yes, I like coffee.", "Sim, eu gosto de café.", ["Yes,", "I like", "coffee."]],
+    ["work", ["freeze", "translate", "words"], "I have an idea. Can I share it?", "Tenho uma ideia. Posso compartilhar?", ["I have an idea.", "Can I", "share it?"]],
+    ["work", ["start"], "I like your idea.", "Eu gosto da sua ideia.", ["I like", "your idea."]],
+    ["life", ["freeze", "translate", "words"], "I love music. How about you?", "Eu adoro música. E você?", ["I love music.", "How about", "you?"]],
+    ["life", ["start"], "I love music.", "Eu adoro música.", ["I love", "music."]],
   ])(
     "shows English and Portuguese together for the %s phrase variants",
-    (scene, barriers, firstPart, firstMeaning, secondPart, secondMeaning, thirdPart, thirdMeaning) => {
+    (scene, barriers, phrase, translation, parts) => {
       for (const barrier of barriers) {
         const practice = startPractice(scene, barrier);
         const text = practice.messages.at(-1)?.text ?? "";
-        expect(text).toContain(`${firstPart} — ${firstMeaning}`);
-        expect(text).toContain(`${secondPart} — ${secondMeaning}`);
-        if (thirdPart && thirdMeaning) expect(text).toContain(`${thirdPart} — ${thirdMeaning}`);
-        if (barrier !== "start") {
-          const support = answer(practice, "translate").messages.at(-1)?.text ?? "";
-          expect(support).toContain(`${firstPart} — ${firstMeaning}`);
-          expect(support).toContain(`${secondPart} — ${secondMeaning}`);
-          if (thirdPart && thirdMeaning) expect(support).toContain(`${thirdPart} — ${thirdMeaning}`);
-        }
+        expect(text).toContain(`“${phrase}”`);
+        expect(text).toContain(translation);
+        const lesson = answer(practice, "understand");
+        expect(lesson.stage).toBe("lesson");
+        expect(lesson.messages.at(-1)?.lesson?.map((card) => card.phrase)).toEqual(parts);
+        expect(lesson.messages.at(-1)?.lesson?.every((card) => card.note.length > 35)).toBe(true);
       }
     },
   );
@@ -180,8 +179,7 @@ describe("welcome conversation", () => {
     ["words", "palavras como pistas"],
     ["start", "primeira conversa em inglês"],
   ])("keeps the %s path reflected after practice", (barrier, confirmation) => {
-    const lesson = answer(startPractice("work", barrier), "spoken");
-    const replyLesson = answer(lesson, "ready");
+    const replyLesson = answer(startPractice("work", barrier), "spoken");
     const done = answer(replyLesson, "continue");
     expect(done.messages.at(-1)?.recap?.progress).toContain(confirmation);
     expect(done.messages.at(-1)?.text).toBe(
@@ -191,7 +189,7 @@ describe("welcome conversation", () => {
 
   it("teaches the people-conversation phrase with easy visual lesson cards", () => {
     const practice = startPractice("life", "start");
-    const lesson = answer(practice, "spoken");
+    const lesson = answer(practice, "understand");
 
     expect(lesson.stage).toBe("lesson");
     expect(lesson.messages.slice(0, practice.messages.length)).toEqual(
@@ -238,7 +236,7 @@ describe("welcome conversation", () => {
         "I have an idea. Can I share it?",
       );
 
-      const answerLesson = answer(practice, "spoken");
+      const answerLesson = answer(practice, "understand");
       expect(answerLesson.messages.at(-1)?.lesson?.length).toBeGreaterThan(0);
       const replyLesson = answer(answerLesson, "ready");
       expect(replyLesson.messages.at(-1)?.lesson?.map((card) => card.phrase)).toContain(reply);
@@ -260,7 +258,7 @@ describe("welcome conversation", () => {
     ["life", "words"],
     ["life", "start"],
   ])("teaches both sides for the %s / %s path", (scene, barrier) => {
-    const answerLesson = answer(startPractice(scene, barrier), "spoken");
+    const answerLesson = answer(startPractice(scene, barrier), "understand");
     expect(answerLesson.stage).toBe("lesson");
     expect(answerLesson.messages.at(-1)?.lesson?.length).toBeGreaterThan(0);
 

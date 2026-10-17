@@ -59,9 +59,9 @@ const scenes = [
       [{ english: "recommend", portuguese: "recomendar" }],
     ],
     partNotes: [
-      "Uma resposta curta já confirma: sim!",
-      "What do you… já começa a pergunta: “o que você…?”.",
-      "Recommend é recomendar. Em viagem, é um jeito ótimo de pedir uma sugestão.",
+      "Yes! responde diretamente à pergunta. Em inglês, você pode confirmar com uma palavra e acrescentar um detalhe depois.",
+      "What do you…? é o molde “o que você…?”. O do ajuda a formar a pergunta; aqui não significa “fazer”.",
+      "Depois de What do you, o verbo vem na forma simples: recommend. Juntos, os blocos perguntam o que a pessoa sugere.",
     ],
     vocabulary: ["recommend = recomendar", "coffee = café"],
     reply: "The coffee is great. Where are you from?",
@@ -79,8 +79,8 @@ const scenes = [
       ],
     ],
     replyPartNotes: [
-      "The coffee é “o café”; great dá a ideia de “ótimo”.",
-      "Where are you from? é uma pergunta comum para conhecer alguém.",
+      "The aponta para aquele café do lugar; great descreve a experiência. Em inglês, a palavra que descreve vem depois de is.",
+      "Where are you from? pergunta de onde alguém é. From fecha a pergunta com a ideia de origem.",
     ],
     beginner: {
       setting: "Você está em um café, em outro país. Alguém pergunta:",
@@ -101,9 +101,9 @@ const scenes = [
         [{ english: "coffee", portuguese: "café" }],
       ],
       partNotes: [
-        "Yes é uma resposta curtinha para dizer “sim”.",
-        "I like é “eu gosto”. Você já montou o começo da ideia!",
-        "Coffee é café. Pronto: você falou do que gosta.",
+        "Yes responde à pergunta. A pausa da vírgula prepara o detalhe que vem em seguida.",
+        "I é quem fala; like diz do que essa pessoa gosta. Em inglês, a pessoa vem antes do verbo.",
+        "Coffee completa a ideia: você gosta de café. Em inglês, não precisa colocar “de” antes dessa palavra.",
       ],
       vocabulary: ["coffee = café", "like = gostar"],
       reply: "Me too!",
@@ -111,7 +111,7 @@ const scenes = [
       replyParts: ["Me too!"],
       replyPartMeanings: ["Eu também!"],
       replyPartClues: [[{ english: "me too", portuguese: "eu também" }]],
-      replyPartNotes: ["A pessoa também gosta de café. Vocês já têm algo em comum!"],
+      replyPartNotes: ["Me too! é uma resposta pronta para dizer “eu também” sem repetir a frase toda."],
     },
   },
   {
@@ -143,9 +143,9 @@ const scenes = [
       ],
     ],
     partNotes: [
-      "I have… apresenta algo que você tem: uma ideia.",
-      "Can I…? pede licença: “posso…?”.",
-      "Share it é compartilhar essa ideia com o grupo.",
+      "I have… diz o que você tem. O inglês costuma mostrar quem fala antes do verbo; an aparece antes do som de vogal em idea.",
+      "Can I…? pede permissão. Para perguntar, can vem antes de I; numa afirmação seria I can.",
+      "Share é a ação; it retoma a ideia já mencionada. Assim você não precisa repetir idea.",
     ],
     vocabulary: ["idea = ideia", "share = compartilhar"],
     reply: "Of course. We'd love to hear it.",
@@ -160,8 +160,8 @@ const scenes = [
       ],
     ],
     replyPartNotes: [
-      "Of course! é um “claro!” simpático e direto.",
-      "We'd love to… mostra entusiasmo: “adoraríamos…”.",
+      "Of course! é uma expressão pronta para aceitar um pedido com naturalidade: “claro!”.",
+      "We’d love to… mostra entusiasmo e deixa hear para completar a ação. It aponta de volta para a ideia.",
     ],
     beginner: {
       setting: "Um colega mostra uma ideia na reunião e pergunta:",
@@ -184,8 +184,8 @@ const scenes = [
         ],
       ],
       partNotes: [
-        "I like é “eu gosto”. Uma forma simples e direta de dar sua opinião.",
-        "Your idea é “sua ideia”. Você já conseguiu falar o que pensa na reunião!",
+        "I é quem fala e like é a opinião. A ordem comum em inglês é pessoa + verbo.",
+        "Your vem antes do que pertence a alguém: your idea, “sua ideia”.",
       ],
       vocabulary: ["like = gostar", "idea = ideia"],
       reply: "Thank you!",
@@ -193,7 +193,7 @@ const scenes = [
       replyParts: ["Thank you!"],
       replyPartMeanings: ["Obrigado(a)!"],
       replyPartClues: [[{ english: "thank you", portuguese: "obrigado(a)" }]],
-      replyPartNotes: ["Uma resposta curta e simpática depois de receber um elogio."],
+      replyPartNotes: ["Thank you! é a forma natural de agradecer quando alguém elogia uma ideia."],
     },
   },
   {
@@ -222,9 +222,9 @@ const scenes = [
       [{ english: "you", portuguese: "você" }],
     ],
     partNotes: [
-      "Não precisa saber tudo: love e music dão pistas. O sentido já começa a aparecer!",
-      "How é “como” e about é “sobre”. Mas juntas, How about…? vira um convite: “E quanto a…?”.",
-      "Agora devolva a bola: e você? A conversa continua com a outra pessoa.",
+      "I é quem fala, love é o que sente e music completa a ideia. Em inglês, a ordem é pessoa + verbo + assunto.",
+      "How about…? funciona como um convite para a outra pessoa responder. Aqui, o conjunto vale “e você?”, não a soma literal das palavras.",
+      "You devolve a pergunta à outra pessoa. O resto fica subentendido porque o contexto já está claro.",
     ],
     vocabulary: ["love = adoro", "How about you? = E você?"],
     reply: "Me too! What kind of music?",
@@ -239,8 +239,8 @@ const scenes = [
       ],
     ],
     replyPartNotes: [
-      "Me too! é uma forma rápida de dizer que vocês têm algo em comum.",
-      "What kind of…? pergunta “que tipo de…?”. A conversa segue pelo assunto que vocês gostam.",
+      "Me too! é uma resposta pronta para mostrar que você sente o mesmo, sem repetir a frase.",
+      "What kind of…? pergunta qual tipo. Of faz parte desse bloco e music completa o assunto.",
     ],
     beginner: {
       setting: "Você está conhecendo alguém. A pessoa pergunta:",
@@ -260,8 +260,8 @@ const scenes = [
         [{ english: "music", portuguese: "música" }],
       ],
       partNotes: [
-        "Love é uma palavra que muita gente já reconhece. Aqui, quer dizer “adoro”.",
-        "Music é música. Duas pistas e você já entendeu a ideia!",
+        "I mostra quem fala; love é o verbo. Juntos, I love quer dizer “eu adoro”.",
+        "Music completa a ideia: é o que a pessoa adora. Em inglês, o assunto vem depois do verbo.",
       ],
       vocabulary: ["love = adoro", "music = música"],
       reply: "Me too!",
@@ -269,7 +269,7 @@ const scenes = [
       replyParts: ["Me too!"],
       replyPartMeanings: ["Eu também!"],
       replyPartClues: [[{ english: "me too", portuguese: "eu também" }]],
-      replyPartNotes: ["A pessoa também gosta de música: a conversa já criou conexão."],
+      replyPartNotes: ["Me too! responde “eu também” e mostra que vocês têm algo em comum."],
     },
   },
 ];
@@ -319,8 +319,8 @@ const barriers = [
   {
     id: "start",
     label: "Estou começando do zero",
-    actionLabel: "Li cada parte",
-    translateLabel: "Ver tradução",
+    actionLabel: "Consegui montar a frase",
+    translateLabel: "Quero entender cada parte",
     focus: "Podemos construir sua base, uma conversa de cada vez.",
   },
 ];
@@ -332,42 +332,19 @@ function sceneForBarrier(scene: Scene, barrier: Barrier): Scene {
   return barrier.id === "start" ? { ...scene, ...scene.beginner } : scene;
 }
 
-function numberedParts(scene: Scene) {
-  return scene.parts
-    .map((part, index) => `${index + 1}. ${part} — ${scene.partMeanings[index]}`)
-    .join("\n");
-}
-
 function buildPracticeMessage(scene: Scene, barrier: Barrier) {
   const situation = `${scene.setting}\n“${scene.opening}” — ${scene.openingTranslation}`;
-
-  switch (barrier.id) {
-    case "freeze":
-      return `${situation}\n\nVocê disse que dá branco na hora de falar. Então não tente lembrar a frase inteira. Vamos montar a resposta em três pedaços:\n\n${numberedParts(scene)}\n\nLeia um pedaço, faça uma pausa e junte o próximo.`;
-    case "translate":
-      return `${situation}\n\nVocê disse que traduz tudo na cabeça. Vamos usar blocos prontos, sem montar palavra por palavra:\n\n${numberedParts(scene)}\n\nLeia cada bloco como uma ideia completa e depois junte os três.`;
-    case "words":
-      return `${situation}\n\nVocê disse que faltam as palavras. Para esta conversa, guarde só estas duas:\n\n${scene.vocabulary.join("\n")}\n\nAgora use as duas na resposta. Em três partes:\n${numberedParts(scene)}`;
-    case "start":
-      return `${situation}\n\nComo você está começando do zero, vamos por partes. Você pode responder:\n“${scene.phrase}” — ${scene.translation}\n\nLeia devagar, uma parte por vez:\n${numberedParts(scene)}`;
-    default:
-      return situation;
-  }
-}
-
-function buildTranslationSupport(scene: Scene, barrier: Barrier) {
-  switch (barrier.id) {
-    case "freeze":
-      return `Vamos tirar mais peso da memória. Cada pedaço quer dizer:\n\n${numberedParts(scene)}\n\nOlhe só para um pedaço por vez. Depois junte os três.`;
-    case "translate":
-      return `A pergunta quer dizer:\n“${scene.opening}” — ${scene.openingTranslation}\n\nOs blocos da resposta formam esta ideia:\n“${scene.phrase}” — ${scene.translation}\n\nAgora volte ao inglês. Cada bloco tem seu sentido ao lado:\n${numberedParts(scene)}`;
-    case "words":
-      return `A pergunta é:\n“${scene.opening}” — ${scene.openingTranslation}\n\nCom as palavras que você acabou de guardar, a resposta completa é:\n“${scene.phrase}” — ${scene.translation}\n\nAgora experimente dizer cada parte:\n${numberedParts(scene)}`;
-    case "start":
-      return `A pergunta é “${scene.opening}” — ${scene.openingTranslation}. Sua resposta é “${scene.phrase}” — ${scene.translation}.\n\nLeia cada parte em inglês no seu tempo:\n${numberedParts(scene)}`;
-    default:
-      return `Sua resposta quer dizer “${scene.translation}”. Agora experimente dizer a frase em inglês.`;
-  }
+  const guidance: Record<Barrier["id"], string> = {
+    freeze:
+      "Você disse que às vezes dá branco. Em vez de inventar na hora, use uma resposta pronta:",
+    translate:
+      "Você disse que costuma traduzir tudo na cabeça. Primeiro, veja a ideia completa:",
+    words:
+      "Você disse que faltam palavras. Comece com esta frase útil e veja como ela soa:",
+    start:
+      "Como você está começando do zero, vamos usar uma frase curta e completa:",
+  };
+  return `${situation}\n\n${guidance[barrier.id]}\n“${scene.phrase}”\n${scene.translation}`;
 }
 
 function makeLessonCards(
@@ -385,18 +362,43 @@ function makeLessonCards(
 }
 
 function buildLessonIntro(barrier: Barrier) {
-  switch (barrier.id) {
-    case "freeze":
-      return "Você já montou sua resposta. Agora vamos ver por que ela funciona, sem decorar tudo de uma vez.";
-    case "translate":
-      return "Agora vamos ligar os blocos de sentido e entender a resposta sem traduzir palavra por palavra.";
-    case "words":
-      return "Vamos usar as pistas de vocabulário para entender como a resposta se forma.";
-    case "start":
-      return "Agora vamos entender sua primeira resposta em partes pequenas, sem pressa.";
-    default:
-      return "Vamos descobrir por que essa frase funciona.";
-  }
+  const focus: Record<Barrier["id"], string> = {
+    freeze: "sem precisar guardar a frase inteira de uma vez",
+    translate: "olhando para a função de cada bloco, não só a tradução",
+    words: "usando as palavras conhecidas como pistas",
+    start: "com uma explicação curta para cada bloco",
+  };
+  return `Agora vamos entender por que essa frase funciona ${focus[barrier.id]}.`;
+}
+
+function makeReplyLessonStep(
+  state: Conversation,
+  choiceLabel: string,
+  scene: Scene,
+  intro: string,
+): Conversation {
+  const lesson = makeLessonCards(
+    scene.replyParts,
+    scene.replyPartMeanings,
+    scene.replyPartClues,
+    scene.replyPartNotes,
+  );
+  return {
+    ...state,
+    stage: "replyLesson",
+    messages: [
+      ...state.messages,
+      { id: state.messages.length, role: "user", text: choiceLabel },
+      {
+        id: state.messages.length + 1,
+        role: "assistant",
+        text: intro,
+        lesson,
+        lessonTitle: "A RESPOSTA DO OUTRO LADO",
+        lessonHint: "Ela também tem pistas. Toque para ouvir",
+      },
+    ],
+  };
 }
 
 function buildConversationRecap(scene: Scene, barrier: Barrier): ConversationRecap {
@@ -428,7 +430,6 @@ export type Conversation = {
   messages: Message[];
   sceneId?: string;
   barrierId?: string;
-  translated: boolean;
 };
 
 export function createConversation(
@@ -450,7 +451,6 @@ export function createConversation(
           : "Oi! Que bom ter você por aqui.\nComo você gosta de ser chamado?",
       },
     ],
-    translated: false,
   };
 }
 
@@ -477,9 +477,7 @@ export function getChoices(state: Conversation): Choice[] {
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!barrier) return [];
       return [
-        ...(!state.translated
-          ? [{ id: "translate", label: barrier.translateLabel }]
-          : []),
+        { id: "understand", label: barrier.translateLabel },
         { id: "spoken", label: barrier.actionLabel },
       ];
     }
@@ -503,7 +501,6 @@ export function conversationReducer(
       name: state.name,
       sceneId: undefined,
       barrierId: undefined,
-      translated: false,
       messages: [
         {
           id: 0,
@@ -560,10 +557,9 @@ export function conversationReducer(
       const barrier = barriers.find((item) => item.id === choice.id);
       if (!baseScene || !barrier) return state;
       const scene = sceneForBarrier(baseScene, barrier);
-      const translated = barrier.id === "start";
-      next = { ...next, stage: "practice", barrierId: barrier.id, translated };
+      next = { ...next, stage: "practice", barrierId: barrier.id };
       response = buildPracticeMessage(scene, barrier);
-      speech = [scene.opening, ...scene.parts];
+      speech = [scene.opening, scene.phrase];
       break;
     }
     case "practice": {
@@ -571,47 +567,21 @@ export function conversationReducer(
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!baseScene || !barrier) return state;
       const scene = sceneForBarrier(baseScene, barrier);
-      if (choice.id === "translate") {
-        next.translated = true;
-        response = buildTranslationSupport(scene, barrier);
-        speech = [...scene.parts];
-      } else {
-        next.stage = "lesson";
-        response = buildLessonIntro(barrier);
-        const lesson = makeLessonCards(
-          scene.parts,
-          scene.partMeanings,
-          scene.partClues,
-          scene.partNotes,
+      if (choice.id === "spoken") {
+        return makeReplyLessonStep(
+          state,
+          choice.label,
+          scene,
+          "Boa. Sua frase está montada. Agora veja o que a outra pessoa responde:",
         );
-        next.messages = [
-          ...state.messages,
-          { id: state.messages.length, role: "user", text: choice.label },
-          {
-            id: state.messages.length + 1,
-            role: "assistant",
-            text: response,
-            lesson,
-            lessonTitle: "SUA RESPOSTA, EM PEÇAS",
-            lessonHint: "Toque em cada parte para ouvir",
-          },
-        ];
-        return next;
       }
-      break;
-    }
-    case "lesson": {
-      const baseScene = scenes.find((item) => item.id === state.sceneId);
-      const barrier = barriers.find((item) => item.id === state.barrierId);
-      if (!baseScene || !barrier) return state;
-      const scene = sceneForBarrier(baseScene, barrier);
-      next.stage = "replyLesson";
-      response = "Agora vamos entender também o que a outra pessoa pode responder:";
+      next.stage = "lesson";
+      response = buildLessonIntro(barrier);
       const lesson = makeLessonCards(
-        scene.replyParts,
-        scene.replyPartMeanings,
-        scene.replyPartClues,
-        scene.replyPartNotes,
+        scene.parts,
+        scene.partMeanings,
+        scene.partClues,
+        scene.partNotes,
       );
       next.messages = [
         ...state.messages,
@@ -621,11 +591,23 @@ export function conversationReducer(
           role: "assistant",
           text: response,
           lesson,
-          lessonTitle: "A RESPOSTA DO OUTRO LADO",
-          lessonHint: "Ela também tem pistas. Toque para ouvir",
+          lessonTitle: "SUA RESPOSTA, EM PEÇAS",
+          lessonHint: "Toque em cada parte para ouvir",
         },
       ];
       return next;
+    }
+    case "lesson": {
+      const baseScene = scenes.find((item) => item.id === state.sceneId);
+      const barrier = barriers.find((item) => item.id === state.barrierId);
+      if (!baseScene || !barrier) return state;
+      const scene = sceneForBarrier(baseScene, barrier);
+      return makeReplyLessonStep(
+        state,
+        choice.label,
+        scene,
+        "Agora vamos entender também o que a outra pessoa pode responder:",
+      );
     }
     case "replyLesson": {
       const baseScene = scenes.find((item) => item.id === state.sceneId);
