@@ -37,6 +37,8 @@ type LocaleCopy = {
   ready: string;
   continue: string;
   recapTitle: string;
+  testAnotherPath: string;
+  chooseAnotherBarrier: string;
   recapProgress: Record<BarrierId, string>;
   speakers: { other: string; you: string };
   variants: Record<SceneId, { standard: LocalizedVariant; beginner: LocalizedVariant }>;
@@ -82,6 +84,8 @@ const pt: LocaleCopy = {
   ready: "Juntar a frase",
   continue: "Continuar a conversa",
   recapTitle: "Olha a conversa que você acabou de conseguir acompanhar.",
+  testAnotherPath: "Testar outro caminho",
+  chooseAnotherBarrier: "Vamos manter a situação e experimentar outra dificuldade. O que acontece com você na hora de falar?",
   recapProgress: {
     freeze: "Você partiu do branco, montou sua resposta e entendeu o que veio depois.",
     translate: "Você conectou os blocos de sentido e acompanhou a conversa inteira.",
@@ -157,6 +161,8 @@ const de: LocaleCopy = {
   ready: "Den Satz zusammensetzen",
   continue: "Das Gespräch fortsetzen",
   recapTitle: "Schau mal, welchem Gespräch du gerade folgen konntest.",
+  testAnotherPath: "Einen anderen Weg ausprobieren",
+  chooseAnotherBarrier: "Wir behalten die Situation bei und probieren eine andere Schwierigkeit. Was passiert bei dir, wenn du sprichst?",
   recapProgress: {
     freeze: "Du bist vom Blackout ausgegangen, hast deine Antwort gebaut und die Reaktion verstanden.",
     translate: "Du hast die Bausteine verbunden und dem ganzen Gespräch folgen können.",
@@ -232,6 +238,8 @@ const es: LocaleCopy = {
   ready: "Unir la frase",
   continue: "Continuar la conversación",
   recapTitle: "Mira la conversación que acabas de poder seguir.",
+  testAnotherPath: "Probar otro camino",
+  chooseAnotherBarrier: "Mantengamos la situación y probemos otra dificultad. ¿Qué te pasa cuando hablas?",
   recapProgress: {
     freeze: "Empezaste quedándote en blanco, formaste tu respuesta y entendiste lo que vino después.",
     translate: "Conectaste los bloques de significado y seguiste toda la conversación.",

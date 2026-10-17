@@ -4,6 +4,8 @@ import {
   getChoices,
   initialConversation,
   createConversation,
+  readConversationProgress,
+  saveConversationProgress,
   welcomeSpeechPhrases,
   type Conversation,
 } from "../src/app/inicio-orbita-7k3/conversation";
@@ -379,6 +381,47 @@ describe("welcome conversation", () => {
       "work",
       "life",
     ]);
+  });
+
+  it("lets testers try an untested difficulty branch before rating the experience", () => {
+    const practice = startPracticeInLanguage("world", "start", "de");
+    const completed = answer(answer(practice, "spoken"), "continue");
+    expect(completed.stage).toBe("done");
+    expect(completed.testedBarrierIds).toEqual(["start"]);
+
+    const nextBranch = conversationReducer(completed, { type: "try-another-path" });
+    expect(nextBranch.stage).toBe("barrier");
+    expect(nextBranch.messages.at(-1)?.text).toContain("andere Schwierigkeit");
+    expect(getChoices(nextBranch).map(({ id }) => id)).not.toContain("start");
+    expect(getChoices(nextBranch)).toHaveLength(3);
+
+    const chosenBranch = answer(nextBranch, getChoices(nextBranch)[0].id);
+    expect(chosenBranch.stage).toBe("practice");
+    expect(chosenBranch.testedBarrierIds).toHaveLength(2);
+  });
+
+  it("saves and restores the conversation so a mobile refresh keeps progress", () => {
+    const values = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => { values.set(key, value); },
+      removeItem: (key: string) => { values.delete(key); },
+    };
+    const progress = answer(answer(createConversation("Ana", "de"), "begin"), "world");
+
+    expect(saveConversationProgress(storage, progress)).toBe(true);
+    expect(readConversationProgress(storage)).toEqual(progress);
+  });
+
+  it("discards invalid saved conversation data", () => {
+    const values = new Map<string, string>([["basedspeak:orbit-progress:v1", JSON.stringify({ stage: "done", language: "de", messages: [{ id: 0, role: "assistant", text: "hi", lesson: "bad" }] })]]);
+    const storage = {
+      getItem: (key: string) => values.get(key) ?? null,
+      removeItem: (key: string) => { values.delete(key); },
+    };
+
+    expect(readConversationProgress(storage)).toBeNull();
+    expect(values.has("basedspeak:orbit-progress:v1")).toBe(false);
   });
 
   it("rejects empty names and updates the preference without rewriting history", () => {

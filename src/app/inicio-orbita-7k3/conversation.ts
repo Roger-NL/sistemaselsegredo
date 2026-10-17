@@ -437,7 +437,86 @@ export type Conversation = {
   messages: Message[];
   sceneId?: string;
   barrierId?: string;
+  testedBarrierIds?: string[];
 };
+
+export const ORBIT_PROGRESS_STORAGE_KEY = "basedspeak:orbit-progress:v1";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isStringList(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function isValidMessage(value: unknown): value is Message {
+  if (!isRecord(value) || !Number.isInteger(value.id) ||
+      (value.role !== "assistant" && value.role !== "user") ||
+      typeof value.text !== "string" || value.text.length > 5000) return false;
+  if (value.speech !== undefined && !isStringList(value.speech)) return false;
+  if (value.lesson !== undefined) {
+    if (!Array.isArray(value.lesson) || value.lesson.length > 6) return false;
+    for (const card of value.lesson) {
+      if (!isRecord(card) || typeof card.phrase !== "string" ||
+          typeof card.translation !== "string" || typeof card.note !== "string" ||
+          !Array.isArray(card.clues) || !card.clues.every((clue) =>
+            isRecord(clue) && typeof clue.english === "string" && typeof clue.meaning === "string")) return false;
+    }
+  }
+  if (value.recap !== undefined) {
+    const recap = value.recap;
+    if (!isRecord(recap) || typeof recap.contextLabel !== "string" ||
+        typeof recap.progressLabel !== "string" || typeof recap.progress !== "string" ||
+        !isRecord(recap.context) || typeof recap.context.phrase !== "string" ||
+        typeof recap.context.translation !== "string" || !Array.isArray(recap.turns) ||
+        !recap.turns.every((turn) => isRecord(turn) && typeof turn.speaker === "string" &&
+          typeof turn.phrase === "string" && typeof turn.translation === "string")) return false;
+  }
+  return true;
+}
+
+export function isValidConversation(value: unknown): value is Conversation {
+  return isRecord(value) &&
+    ["name", "hello", "scene", "barrier", "practice", "lesson", "replyLesson", "done"].includes(String(value.stage)) &&
+    (value.language === "pt" || value.language === "de" || value.language === "es") &&
+    (value.name === undefined || (typeof value.name === "string" && value.name.length <= 60)) &&
+    (value.sceneId === undefined || ["world", "work", "life"].includes(String(value.sceneId))) &&
+    (value.barrierId === undefined || ["freeze", "translate", "words", "start"].includes(String(value.barrierId))) &&
+    (value.testedBarrierIds === undefined || (Array.isArray(value.testedBarrierIds) && value.testedBarrierIds.length <= 4 && value.testedBarrierIds.every((id) => ["freeze", "translate", "words", "start"].includes(String(id))))) &&
+    Array.isArray(value.messages) && value.messages.length > 0 && value.messages.length <= 32 &&
+    value.messages.every(isValidMessage);
+}
+
+export function readConversationProgress(
+  storage: Pick<Storage, "getItem" | "removeItem">,
+): Conversation | null {
+  try {
+    const raw = storage.getItem(ORBIT_PROGRESS_STORAGE_KEY);
+    if (!raw) return null;
+    const value: unknown = JSON.parse(raw);
+    if (isValidConversation(value)) return value;
+    storage.removeItem(ORBIT_PROGRESS_STORAGE_KEY);
+  } catch {
+    try { storage.removeItem(ORBIT_PROGRESS_STORAGE_KEY); } catch { /* storage unavailable */ }
+  }
+  return null;
+}
+
+export function saveConversationProgress(
+  storage: Pick<Storage, "setItem">,
+  conversation: Conversation,
+): boolean {
+  try {
+    storage.setItem(ORBIT_PROGRESS_STORAGE_KEY, JSON.stringify(conversation));
+    if (typeof window !== "undefined" && storage === window.localStorage) {
+      window.dispatchEvent(new Event("basedspeak:orbit-progress-change"));
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export function createConversation(
   rememberedName?: string | null,
@@ -470,7 +549,9 @@ export type ConversationAction =
   | { type: "rename"; name: string }
   | { type: "forget-name" }
   | { type: "set-language"; language: LearningLanguage }
-  | { type: "restart" };
+  | { type: "restart" }
+  | { type: "try-another-path" }
+  | { type: "restore"; conversation: Conversation };
 
 export function getChoices(state: Conversation): Choice[] {
   const copy = localeCopy[state.language];
@@ -482,7 +563,9 @@ export function getChoices(state: Conversation): Choice[] {
     case "scene":
       return scenes.map((scene) => ({ id: scene.id, label: copy.sceneLabels[scene.id as SceneId].label }));
     case "barrier":
-      return barriers.map((barrier) => ({ id: barrier.id, label: copy.barriers[barrier.id as BarrierId].label }));
+      return barriers
+        .filter((barrier) => !state.testedBarrierIds?.includes(barrier.id))
+        .map((barrier) => ({ id: barrier.id, label: copy.barriers[barrier.id as BarrierId].label }));
     case "practice": {
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!barrier) return [];
@@ -504,6 +587,23 @@ export function conversationReducer(
   state: Conversation,
   action: ConversationAction,
 ): Conversation {
+  if (action.type === "restore") {
+    return isValidConversation(action.conversation) ? action.conversation : state;
+  }
+  if (action.type === "try-another-path") {
+    if (state.stage !== "done" || !state.sceneId || getChoices({ ...state, stage: "barrier" }).length === 0) return state;
+    const copy = localeCopy[state.language];
+    return {
+      ...state,
+      stage: "barrier",
+      barrierId: undefined,
+      messages: [
+        ...state.messages,
+        { id: state.messages.length, role: "user", text: copy.testAnotherPath },
+        { id: state.messages.length + 1, role: "assistant", text: copy.chooseAnotherBarrier },
+      ],
+    };
+  }
   if (action.type === "set-language") {
     if (action.language === state.language) return state;
     return createConversation(state.name, action.language);
@@ -516,6 +616,7 @@ export function conversationReducer(
       name: state.name,
       sceneId: undefined,
       barrierId: undefined,
+      testedBarrierIds: [],
       messages: [
         {
           id: 0,
@@ -567,7 +668,7 @@ export function conversationReducer(
       break;
     case "scene": {
       const scene = scenes.find((item) => item.id === choice.id)!;
-      next = { ...next, stage: "barrier", sceneId: scene.id };
+      next = { ...next, stage: "barrier", sceneId: scene.id, testedBarrierIds: [] };
       const copy = localeCopy[state.language];
       const localized = copy.sceneLabels[scene.id as SceneId];
       const sceneResponse = state.name
@@ -581,7 +682,12 @@ export function conversationReducer(
       const barrier = barriers.find((item) => item.id === choice.id);
       if (!baseScene || !barrier) return state;
       const scene = sceneForBarrier(baseScene, barrier, state.language);
-      next = { ...next, stage: "practice", barrierId: barrier.id };
+      next = {
+        ...next,
+        stage: "practice",
+        barrierId: barrier.id,
+        testedBarrierIds: [...new Set([...(state.testedBarrierIds ?? []), barrier.id])],
+      };
       response = buildPracticeMessage(scene, barrier, state.language);
       speech = [scene.opening, scene.phrase];
       break;

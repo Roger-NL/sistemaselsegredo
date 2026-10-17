@@ -7,6 +7,8 @@ import {
   useReducer,
   useRef,
   useState,
+  useSyncExternalStore,
+  useMemo,
   type FormEvent,
 } from "react";
 import Link from "next/link";
@@ -27,6 +29,10 @@ import {
   conversationReducer,
   getChoices,
   createConversation,
+  isValidConversation,
+  ORBIT_PROGRESS_STORAGE_KEY,
+  saveConversationProgress,
+  type Conversation,
   type Message,
 } from "./conversation";
 import { useTypingSound } from "./use-typing-sound";
@@ -442,8 +448,44 @@ export default function WelcomeExperience() {
   const [entryLanguageOverride, setEntryLanguageOverride] = useState<LearningLanguage | null>(null);
   const [entryRequested, setEntryRequested] = useState(false);
   const entryLanguage = entryLanguageOverride ?? savedLanguage ?? "pt";
+  const progressSnapshot = useSyncExternalStore(
+    subscribeToOrbitProgress,
+    getOrbitProgressSnapshot,
+    () => null,
+  );
+  const resumeProgress = useMemo(() => {
+    if (!progressSnapshot) return null;
+    try {
+      const progress: unknown = JSON.parse(progressSnapshot);
+      return isValidConversation(progress) ? progress : null;
+    } catch {
+      return null;
+    }
+  }, [progressSnapshot]);
 
-  if (!entryRequested || rememberedName === undefined) {
+  if (rememberedName === undefined) {
+    return (
+      <LanguagePicker
+        selected={entryLanguageOverride ?? savedLanguage ?? null}
+        onSelect={(language) => {
+          setEntryLanguageOverride(language);
+          saveLearningLanguage(language);
+          setEntryRequested(true);
+        }}
+      />
+    );
+  }
+
+  if (resumeProgress) {
+    return (
+      <ConversationExperience
+        rememberedName={rememberedName}
+        initialConversation={resumeProgress}
+      />
+    );
+  }
+
+  if (!entryRequested) {
     return (
       <LanguagePicker
         selected={entryLanguageOverride ?? savedLanguage ?? null}
@@ -457,6 +499,24 @@ export default function WelcomeExperience() {
   }
 
   return <ConversationExperience rememberedName={rememberedName} initialLanguage={entryLanguage} />;
+}
+
+function getOrbitProgressSnapshot(): string | null {
+  try {
+    return window.localStorage.getItem(ORBIT_PROGRESS_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function subscribeToOrbitProgress(onChange: () => void) {
+  if (typeof window === "undefined") return () => undefined;
+  window.addEventListener("storage", onChange);
+  window.addEventListener("basedspeak:orbit-progress-change", onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener("basedspeak:orbit-progress-change", onChange);
+  };
 }
 
 function LanguagePicker({
@@ -506,14 +566,16 @@ function LanguagePicker({
 function ConversationExperience({
   rememberedName,
   initialLanguage,
+  initialConversation,
 }: {
   rememberedName: string | null;
-  initialLanguage: LearningLanguage;
+  initialLanguage?: LearningLanguage;
+  initialConversation?: Conversation;
 }) {
   const [conversation, dispatch] = useReducer(
     conversationReducer,
-    { rememberedName, language: initialLanguage },
-    (initial) => createConversation(initial.rememberedName, initial.language),
+    { rememberedName, language: initialLanguage ?? "pt", initialConversation },
+    (initial) => initial.initialConversation ?? createConversation(initial.rememberedName, initial.language),
   );
   const [nameDraft, setNameDraft] = useState("");
   const [nameError, setNameError] = useState("");
@@ -530,6 +592,7 @@ function ConversationExperience({
   const lastAnsweredMessageRef = useRef<number | null>(null);
   const soundStartedRef = useRef(false);
   const sound = useTypingSound();
+  const soundUnlockRef = useRef(sound.unlock);
   const speech = useSpeechPlayer();
   const lastMessage = conversation.messages[conversation.messages.length - 1];
   const latestMessageIdRef = useRef(lastMessage.id);
@@ -541,6 +604,30 @@ function ConversationExperience({
   const [feedbackRating, setFeedbackRating] = useState<number | null>(null);
   const [feedbackComment, setFeedbackComment] = useState("");
   const [feedbackSent, setFeedbackSent] = useState(false);
+
+  useEffect(() => {
+    try {
+      saveConversationProgress(window.localStorage, conversation);
+    } catch {
+      // The conversation remains usable if browser storage is blocked.
+    }
+  }, [conversation]);
+
+  useEffect(() => {
+    soundUnlockRef.current = sound.unlock;
+  }, [sound.unlock]);
+
+  const unlockTypingSound = useCallback(() => {
+    if (soundStartedRef.current) return;
+    soundStartedRef.current = true;
+    soundUnlockRef.current();
+  }, []);
+
+  useEffect(() => {
+    const unlockOnGesture = () => unlockTypingSound();
+    window.addEventListener("pointerdown", unlockOnGesture, { once: true, passive: true });
+    return () => window.removeEventListener("pointerdown", unlockOnGesture);
+  }, [unlockTypingSound]);
 
   useEffect(() => {
     if (rememberedName && rememberedName !== conversation.name) {
@@ -569,6 +656,7 @@ function ConversationExperience({
       return;
     }
     const name = normalizeVisitorName(nameDraft);
+    unlockTypingSound();
     lastAnsweredMessageRef.current = lastMessage.id;
     setCompletedId(lastMessage.id);
     followRef.current = true;
@@ -625,10 +713,7 @@ function ConversationExperience({
     if (lastAnsweredMessageRef.current === lastMessage.id) return;
     lastAnsweredMessageRef.current = lastMessage.id;
     if (isTyping) setCompletedId(lastMessage.id);
-    if (!soundStartedRef.current) {
-      soundStartedRef.current = true;
-      sound.unlock();
-    }
+    unlockTypingSound();
     followRef.current = true;
     setShowLatest(false);
     dispatch({ stage: conversation.stage, choiceId });
@@ -846,40 +931,59 @@ function ConversationExperience({
                 </p>
               </form>
             ) : conversation.stage === "done" ? (
-              feedbackSent ? (
-                <div className={styles.feedbackThanks} role="status">{copy.feedbackThanks}</div>
-              ) : (
-                <form className={styles.feedbackForm} onSubmit={submitFeedback}>
-                  <strong>{copy.feedbackTitle}</strong>
-                  <label>{copy.feedbackQuestion}</label>
-                  <div className={styles.ratingChoices} role="group" aria-label={copy.feedbackQuestion}>
-                    {Array.from({ length: 10 }, (_, index) => index + 1).map((rating) => (
-                      <button
-                        type="button"
-                        key={rating}
-                        className={`${styles.ratingChoice} ${feedbackRating === rating ? styles.ratingChoiceSelected : ""}`}
-                        aria-pressed={feedbackRating === rating}
-                        onClick={() => setFeedbackRating(rating)}
-                      >
-                        {rating}
-                      </button>
-                    ))}
-                  </div>
-                  <div className={styles.ratingScale} aria-hidden="true"><span>1</span><span>10</span></div>
-                  <label className={styles.feedbackCommentLabel} htmlFor="orbita-feedback-comment">{copy.feedbackComment}</label>
-                  <textarea
-                    id="orbita-feedback-comment"
-                    className={styles.feedbackComment}
-                    value={feedbackComment}
-                    onChange={(event) => setFeedbackComment(event.target.value)}
-                    maxLength={1000}
-                    rows={2}
-                  />
-                  <button className={styles.feedbackSubmit} type="submit" disabled={!feedbackRating}>
-                    {copy.feedbackSend} <ArrowUpRight size={15} />
+              <div className={styles.feedbackActions}>
+                {(conversation.testedBarrierIds?.length ?? 0) < 4 && (
+                  <button
+                    className={styles.tryAnotherPathButton}
+                    type="button"
+                    onClick={() => {
+                      lastAnsweredMessageRef.current = null;
+                      followRef.current = true;
+                      setShowLatest(false);
+                      setFeedbackRating(null);
+                      setFeedbackComment("");
+                      setFeedbackSent(false);
+                      setCompletedId(lastMessage.id);
+                      dispatch({ type: "try-another-path" });
+                    }}
+                  >
+                    {copy.testAnotherPath} <ArrowUpRight size={15} />
                   </button>
-                </form>
-              )
+                )}
+                {feedbackSent ? (
+                  <div className={styles.feedbackThanks} role="status">{copy.feedbackThanks}</div>
+                ) : (
+                  <form className={styles.feedbackForm} onSubmit={submitFeedback}>
+                    <label>{copy.feedbackQuestion}</label>
+                    <div className={styles.ratingChoices} role="group" aria-label={copy.feedbackQuestion}>
+                      {Array.from({ length: 10 }, (_, index) => index + 1).map((rating) => (
+                        <button
+                          type="button"
+                          key={rating}
+                          className={`${styles.ratingChoice} ${feedbackRating === rating ? styles.ratingChoiceSelected : ""}`}
+                          aria-pressed={feedbackRating === rating}
+                          onClick={() => setFeedbackRating(rating)}
+                        >
+                          {rating}
+                        </button>
+                      ))}
+                    </div>
+                    <div className={styles.ratingScale} aria-hidden="true"><span>1</span><span>10</span></div>
+                    <label className={styles.feedbackCommentLabel} htmlFor="orbita-feedback-comment">{copy.feedbackComment}</label>
+                    <textarea
+                      id="orbita-feedback-comment"
+                      className={styles.feedbackComment}
+                      value={feedbackComment}
+                      onChange={(event) => setFeedbackComment(event.target.value)}
+                      maxLength={1000}
+                      rows={2}
+                    />
+                    <button className={styles.feedbackSubmit} type="submit" disabled={!feedbackRating}>
+                      {copy.feedbackSend} <ArrowUpRight size={15} />
+                    </button>
+                  </form>
+                )}
+              </div>
             ) : (
               <div
                 className={styles.options}
@@ -913,6 +1017,9 @@ function ConversationExperience({
             {!isTyping ? lastMessage.text : ""}
           </div>
         </main>
+        {conversation.stage === "done" && (
+          <p className={styles.feedbackIntro}>{copy.feedbackTitle}</p>
+        )}
         <section
           id="como-funciona"
           className={styles.support}
