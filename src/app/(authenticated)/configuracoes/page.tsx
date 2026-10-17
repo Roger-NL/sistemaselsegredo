@@ -6,6 +6,7 @@ import { DashboardNav } from "@/components/core/DashboardNav";
 
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/lib/routes";
+import { VisitorNameSettings } from "@/components/welcome/VisitorNameSettings";
 
 function Toggle({
     enabled,
@@ -58,6 +59,11 @@ export default function ConfiguracoesPage() {
                     <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>
                     <p className="text-gray-500 mt-1">Personalize sua experiência de aprendizado</p>
                 </div>
+
+                <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6" aria-labelledby="welcome-name-title">
+                    <h2 id="welcome-name-title" className="text-lg font-semibold text-gray-900 mb-4">Seu nome nas boas-vindas</h2>
+                    <VisitorNameSettings />
+                </section>
 
                 {/* Notifications Section */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
