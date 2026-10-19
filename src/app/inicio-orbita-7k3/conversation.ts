@@ -36,7 +36,7 @@ export type Message = {
   lessonHint?: string;
   recap?: ConversationRecap;
 };
-export type Choice = { id: string; label: string };
+export type Choice = { id: string; label: string; description?: string };
 
 const scenes = [
   {
@@ -565,7 +565,11 @@ export function getChoices(state: Conversation): Choice[] {
     case "barrier":
       return barriers
         .filter((barrier) => !state.testedBarrierIds?.includes(barrier.id))
-        .map((barrier) => ({ id: barrier.id, label: copy.barriers[barrier.id as BarrierId].label }));
+        .map((barrier) => ({
+          id: barrier.id,
+          label: copy.barriers[barrier.id as BarrierId].label,
+          description: copy.barriers[barrier.id as BarrierId].description,
+        }));
     case "practice": {
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!barrier) return [];

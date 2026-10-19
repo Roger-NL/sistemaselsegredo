@@ -26,7 +26,7 @@ type LocaleCopy = {
   chooseScene: string;
   chooseBarrier: string;
   sceneLabels: Record<SceneId, { label: string; response: string }>;
-  barriers: Record<BarrierId, { label: string; action: string; understand: string }>;
+  barriers: Record<BarrierId, { label: string; description: string; action: string; understand: string }>;
   guidance: Record<BarrierId, string>;
   lessonIntro: Record<BarrierId, string>;
   answerLessonTitle: string;
@@ -59,10 +59,10 @@ const pt: LocaleCopy = {
     life: { label: "Conversar com as pessoas", response: "Vamos começar por uma conexão do dia a dia." },
   },
   barriers: {
-    freeze: { label: "Na hora, dá branco", action: "Consegui montar a frase", understand: "Quero entender cada parte" },
-    translate: { label: "Traduzo tudo na cabeça", action: "Consegui usar os blocos", understand: "Quero entender cada parte" },
-    words: { label: "Faltam as palavras", action: "Consegui usar essas palavras", understand: "Quero entender cada parte" },
-    start: { label: "Estou começando do zero", action: "Consegui montar a frase", understand: "Quero entender cada parte" },
+    freeze: { label: "Na hora me dá branco", description: "Sei um pouco, mas travo na conversa.", action: "Consegui montar a frase", understand: "Quero entender cada parte" },
+    translate: { label: "Quero falar sem traduzir tudo na cabeça", description: "Quero formar frases sem passar palavra por palavra pelo português.", action: "Consegui usar os blocos", understand: "Quero entender cada parte" },
+    words: { label: "Sei o que quero dizer, mas faltam as palavras", description: "A ideia está na cabeça, mas não encontro as palavras em inglês.", action: "Consegui usar essas palavras", understand: "Quero entender cada parte" },
+    start: { label: "Estou começando do zero", description: "Quero aprender com frases simples, desde o começo.", action: "Consegui montar a frase", understand: "Quero entender cada parte" },
   },
   guidance: {
     freeze: "Você disse que às vezes dá branco. Em vez de inventar na hora, use uma resposta pronta:",
@@ -136,10 +136,10 @@ const de: LocaleCopy = {
     life: { label: "Mit Menschen ins Gespräch kommen", response: "Wir beginnen mit einer Verbindung aus dem Alltag." },
   },
   barriers: {
-    freeze: { label: "Beim Sprechen habe ich einen Blackout", action: "Ich habe den Satz geschafft", understand: "Ich möchte jeden Teil verstehen" },
-    translate: { label: "Ich übersetze alles im Kopf", action: "Ich konnte die Bausteine nutzen", understand: "Ich möchte jeden Teil verstehen" },
-    words: { label: "Mir fehlen die Wörter", action: "Ich konnte diese Wörter nutzen", understand: "Ich möchte jeden Teil verstehen" },
-    start: { label: "Ich fange ganz von vorn an", action: "Ich habe den Satz geschafft", understand: "Ich möchte jeden Teil verstehen" },
+    freeze: { label: "Beim Sprechen habe ich einen Blackout", description: "Ich kann schon etwas, aber im Gespräch blockiere ich.", action: "Ich habe den Satz geschafft", understand: "Ich möchte jeden Teil verstehen" },
+    translate: { label: "Ich möchte sprechen, ohne alles im Kopf zu übersetzen", description: "Ich möchte Sätze bilden, ohne jedes Wort erst auf Deutsch zu denken.", action: "Ich konnte die Bausteine nutzen", understand: "Ich möchte jeden Teil verstehen" },
+    words: { label: "Ich weiß, was ich sagen will, aber mir fehlen die Wörter", description: "Die Idee ist da, aber die englischen Wörter fallen mir nicht ein.", action: "Ich konnte diese Wörter nutzen", understand: "Ich möchte jeden Teil verstehen" },
+    start: { label: "Ich fange ganz von vorn an", description: "Ich möchte von Anfang an mit einfachen Sätzen lernen.", action: "Ich habe den Satz geschafft", understand: "Ich möchte jeden Teil verstehen" },
   },
   guidance: {
     freeze: "Du hast gesagt, dass dir manchmal die Worte fehlen. Versuch nicht, den ganzen Satz auswendig zu lernen:",
@@ -213,10 +213,10 @@ const es: LocaleCopy = {
     life: { label: "Conversar con otras personas", response: "Empecemos con una conexión cotidiana." },
   },
   barriers: {
-    freeze: { label: "Me quedo en blanco al hablar", action: "Ya pude formar la frase", understand: "Quiero entender cada parte" },
-    translate: { label: "Lo traduzco todo mentalmente", action: "Ya pude usar los bloques", understand: "Quiero entender cada parte" },
-    words: { label: "Me faltan palabras", action: "Ya pude usar estas palabras", understand: "Quiero entender cada parte" },
-    start: { label: "Estoy empezando desde cero", action: "Ya pude formar la frase", understand: "Quiero entender cada parte" },
+    freeze: { label: "Al hablar, me quedo en blanco", description: "Sé un poco, pero me bloqueo en la conversación.", action: "Ya pude formar la frase", understand: "Quiero entender cada parte" },
+    translate: { label: "Quiero hablar sin traducirlo todo mentalmente", description: "Quiero formar frases sin pensar cada palabra primero en español.", action: "Ya pude usar los bloques", understand: "Quiero entender cada parte" },
+    words: { label: "Sé lo que quiero decir, pero me faltan las palabras", description: "Tengo la idea, pero no encuentro las palabras en inglés.", action: "Ya pude usar estas palabras", understand: "Quiero entender cada parte" },
+    start: { label: "Estoy empezando desde cero", description: "Quiero aprender desde el principio con frases sencillas.", action: "Ya pude formar la frase", understand: "Quiero entender cada parte" },
   },
   guidance: {
     freeze: "Dijiste que a veces te quedas en blanco. En vez de improvisar, usa una respuesta preparada:",

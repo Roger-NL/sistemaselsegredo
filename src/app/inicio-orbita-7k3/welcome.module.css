@@ -455,6 +455,11 @@
   flex-wrap: wrap;
   gap: 9px;
 }
+.barrierOptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
 .option,
 .continueLink {
   display: inline-flex;
@@ -478,6 +483,32 @@
 .option:hover {
   border-color: var(--ink);
   background: #faf8f4;
+}
+.barrierOption {
+  min-height: 106px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 17px 18px;
+}
+.barrierOption svg {
+  margin-top: 3px;
+}
+.optionCopy {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+.optionLabel {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+.optionDescription {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
 }
 .option svg,
 .continueLink svg {
@@ -728,10 +759,25 @@
   .options {
     gap: 8px;
   }
+  .barrierOptions {
+    gap: 8px;
+  }
   .option {
     padding: 10px 12px;
     font-size: 14px;
     gap: 10px;
+  }
+  .barrierOption {
+    min-height: 120px;
+    padding: 12px;
+    gap: 6px;
+  }
+  .optionLabel {
+    font-size: 14px;
+  }
+  .optionDescription {
+    font-size: 11px;
+    line-height: 1.45;
   }
   .continue {
     gap: 10px;

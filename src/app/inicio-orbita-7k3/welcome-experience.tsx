@@ -986,17 +986,20 @@ function ConversationExperience({
               </div>
             ) : (
               <div
-                className={styles.options}
+                className={`${styles.options} ${conversation.stage === "barrier" ? styles.barrierOptions : ""}`}
                 role="group"
                 aria-label={copy.replies}
               >
                 {choices.map((choice) => (
                   <button
                     key={choice.id}
-                    className={styles.option}
+                    className={`${styles.option} ${conversation.stage === "barrier" ? styles.barrierOption : ""}`}
                     onClick={() => answer(choice.id)}
                   >
-                    {choice.label}
+                    <span className={styles.optionCopy}>
+                      <span className={styles.optionLabel}>{choice.label}</span>
+                      {choice.description && <span className={styles.optionDescription}>{choice.description}</span>}
+                    </span>
                     <ArrowUpRight size={14} aria-hidden="true" />
                   </button>
                 ))}
