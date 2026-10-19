@@ -3,12 +3,18 @@ import {
   visitorNameError,
 } from "@/lib/welcome/visitor-name";
 import { localizedVariant, localeCopy, type BarrierId, type LearningLanguage, type SceneId } from "./language";
+import { musicAnswers, musicStarterCopy, type MusicAnswer } from "./music-starter";
+import { guidedContent, guidedSpeechPhrases, guidedContrastTitle, guidedIntentLabel, guidedLessonOpening, guidedProgress, guidedSelectionLabel } from "./guided-practice";
+import { translate, type GuidedScenarioContent, type TeachingUnit } from "./guided-content-types";
+import { getOrbitUiCopy } from "./ui-copy";
 
 export type Stage =
   | "name"
   | "hello"
   | "scene"
   | "barrier"
+  | "question"
+  | "answerChoice"
   | "practice"
   | "lesson"
   | "replyLesson"
@@ -18,6 +24,7 @@ export type LessonCard = {
   translation: string;
   clues: { english: string; meaning: string }[];
   note: string;
+  focus?: string;
 };
 export type ConversationRecap = {
   contextLabel: string;
@@ -25,6 +32,10 @@ export type ConversationRecap = {
   context: { phrase: string; translation: string };
   turns: { speaker: string; phrase: string; translation: string }[];
   progress: string;
+};
+export type PracticeCue = {
+  title: string;
+  items: { phrase?: string; meaning: string; note?: string }[];
 };
 export type Message = {
   id: number;
@@ -35,8 +46,9 @@ export type Message = {
   lessonTitle?: string;
   lessonHint?: string;
   recap?: ConversationRecap;
+  practiceCue?: PracticeCue;
 };
-export type Choice = { id: string; label: string; description?: string };
+export type Choice = { id: string; label: string; description?: string; speech?: string };
 
 const scenes = [
   {
@@ -278,22 +290,28 @@ const scenes = [
 ];
 
 export const welcomeSpeechPhrases = Array.from(
-    new Set(
-      scenes.flatMap((scene) => [
-        scene.opening,
-        scene.phrase,
-        scene.reply,
-        scene.contextLine,
-        ...scene.parts,
-        ...scene.replyParts,
-        scene.beginner.opening,
-        scene.beginner.phrase,
-        scene.beginner.reply,
-        scene.beginner.contextLine,
-        ...scene.beginner.parts,
-        ...scene.beginner.replyParts,
-      ]),
-  ),
+  new Set([
+    ...scenes.flatMap((scene) => [
+      scene.opening,
+      scene.phrase,
+      scene.reply,
+      scene.contextLine,
+      ...scene.parts,
+      ...scene.replyParts,
+      scene.beginner.opening,
+      scene.beginner.phrase,
+      scene.beginner.reply,
+      scene.beginner.contextLine,
+      ...scene.beginner.parts,
+      ...scene.beginner.replyParts,
+    ]),
+    ...Object.values(localeCopy).flatMap((copy) =>
+      Object.values(copy.practiceWords).flatMap((items) => items.map((item) => item.phrase))),
+    ...Object.values(musicAnswers).flatMap((answer) => [answer.phrase, answer.verb, answer.reply]),
+    "I",
+    "music.",
+    ...guidedSpeechPhrases,
+  ]),
 );
 
 const barriers = [
@@ -331,11 +349,11 @@ const barriers = [
 type Scene = (typeof scenes)[number];
 type Barrier = (typeof barriers)[number];
 
-function sceneForBarrier(scene: Scene, barrier: Barrier, language: LearningLanguage): Scene {
+function sceneForBarrier(scene: Scene, barrier: Barrier, language: LearningLanguage, musicAnswer?: MusicAnswer): Scene {
   const beginner = barrier.id === "start";
   const base = beginner ? { ...scene, ...scene.beginner } : scene;
   const copy = localizedVariant(language, scene.id as SceneId, beginner);
-  return {
+  const localized = {
     ...base,
     setting: copy.setting,
     contextTranslation: copy.contextTranslation,
@@ -355,12 +373,27 @@ function sceneForBarrier(scene: Scene, barrier: Barrier, language: LearningLangu
       meaning: copy.replyClueMeanings[part]?.[index] ?? item.meaning,
     }))),
   } as Scene;
-}
-
-function buildPracticeMessage(scene: Scene, barrier: Barrier, language: LearningLanguage) {
-  const copy = localeCopy[language];
-  const situation = `${scene.setting}\n“${scene.opening}” — ${scene.openingTranslation}`;
-  return `${situation}\n\n${copy.guidance[barrier.id as BarrierId]}\n“${scene.phrase}”\n${scene.translation}`;
+  if (scene.id !== "life" || !beginner || !musicAnswer) return localized;
+  const english = musicAnswers[musicAnswer];
+  const musicCopy = musicStarterCopy[language];
+  const answer = musicCopy.answers[musicAnswer];
+  return {
+    ...localized,
+    contextLine: "",
+    contextTranslation: musicCopy.context,
+    phrase: english.phrase,
+    translation: answer.meaning,
+    parts: ["I", english.verb, "music."],
+    partMeanings: answer.parts,
+    partClues: ["I", english.verb, "music"].map((word, index) => [{ english: word, meaning: answer.clues[index] }]),
+    partNotes: answer.notes,
+    reply: english.reply,
+    replyTranslation: answer.replyMeaning,
+    replyParts: [english.reply],
+    replyPartMeanings: [answer.replyMeaning],
+    replyPartClues: [[{ english: english.reply, meaning: answer.replyMeaning }]],
+    replyPartNotes: [answer.replyNote],
+  } as Scene;
 }
 
 function makeLessonCards(
@@ -368,18 +401,38 @@ function makeLessonCards(
   meanings: string[],
   clues: Scene["partClues"],
   notes: string[],
+  focuses?: (string | undefined)[],
 ): LessonCard[] {
   return parts.map((phrase, index) => ({
     phrase,
     translation: meanings[index],
     clues: clues[index],
     note: notes[index],
+    focus: focuses?.[index],
   }));
 }
 
+function answerLessonFocus(scene: Scene, barrier: Barrier, language: LearningLanguage): (string | undefined)[] {
+  const copy = localeCopy[language];
+  const sceneId = scene.id as SceneId;
+  return scene.parts.map((part, index) => {
+    switch (barrier.id) {
+      case "freeze":
+        return index === 0 ? copy.lessonFocus.freezeFirst : copy.lessonFocus.freezeNext;
+      case "translate":
+        return copy.practiceIntents[sceneId][index === 0 ? 0 : 1];
+      case "words":
+        return copy.practiceWords[sceneId].some((word) => part.toLowerCase().includes(word.phrase.toLowerCase()))
+          ? copy.lessonFocus.wordsAnchor
+          : undefined;
+      default:
+        return index === 0 ? copy.lessonFocus.startFirst : copy.lessonFocus.startNext;
+    }
+  });
+}
+
 function buildLessonIntro(barrier: Barrier, language: LearningLanguage) {
-  const lead = language === "de" ? "Jetzt schauen wir uns an, warum dieser Satz funktioniert" : "Ahora vamos a entender por qué funciona esta frase";
-  return `${lead} ${localeCopy[language].lessonIntro[barrier.id as BarrierId]}.`;
+  return localeCopy[language].lessonIntro[barrier.id as BarrierId];
 }
 
 function makeReplyLessonStep(
@@ -438,7 +491,118 @@ export type Conversation = {
   sceneId?: string;
   barrierId?: string;
   testedBarrierIds?: string[];
+  musicAnswer?: MusicAnswer;
+  questionTranslated?: boolean;
+  guidedVersion?: 1;
+  answerId?: "first" | "second" | "love" | "hate";
 };
+
+function isMusicStarter(state: Conversation) {
+  return state.sceneId === "life" && state.barrierId === "start";
+}
+
+function guidedScenario(state: Conversation): GuidedScenarioContent | undefined {
+  if (!state.sceneId || !state.barrierId) return undefined;
+  if (state.guidedVersion !== 1 && state.stage !== "question" && state.stage !== "answerChoice" && !state.musicAnswer) return undefined;
+  return guidedContent[state.sceneId as SceneId]?.[state.barrierId as BarrierId];
+}
+
+function guidedCards(parts: TeachingUnit[], state: Conversation, reaction = false): LessonCard[] {
+  const copy = localeCopy[state.language];
+  return parts.map((part, index) => ({
+    phrase: part.en,
+    translation: translate(part.meaning, state.language),
+    note: translate(part.note, state.language),
+    clues: [],
+    ...(!reaction ? { focus: state.barrierId === "translate"
+      ? guidedIntentLabel(state.language, index, parts.length)
+      : state.barrierId === "freeze"
+        ? index === 0 ? copy.lessonFocus.freezeFirst : copy.lessonFocus.freezeNext
+        : state.barrierId === "words" ? copy.lessonFocus.wordsAnchor
+          : index === 0 ? copy.lessonFocus.startFirst : copy.lessonFocus.startNext } : {}),
+  }));
+}
+
+function guidedExchange(state: Conversation, choice: Choice, stage: Stage, message: Omit<Message, "id" | "role">): Conversation {
+  return {
+    ...state,
+    stage,
+    messages: [...state.messages,
+      { id: state.messages.length, role: "user", text: choice.label },
+      { ...message, id: state.messages.length + 1, role: "assistant" },
+    ],
+  };
+}
+
+function reduceGuidedConversation(state: Conversation, choice: Choice, scenario: GuidedScenarioContent): Conversation {
+  const language = state.language;
+  const copy = localeCopy[language];
+  const ui = musicStarterCopy[language];
+  if ((state.stage === "practice" || state.stage === "lesson") && choice.id === "change-answer") {
+    return {
+      ...guidedExchange(state, choice, "answerChoice", { text: ui.choose }),
+      answerId: undefined,
+      musicAnswer: undefined,
+    };
+  }
+  if (state.stage === "question") {
+    if (choice.id === "translate-question") return {
+      ...guidedExchange(state, choice, "question", {
+        text: `“${scenario.question}”\n${translate(scenario.questionMeaning, language)}`,
+        speech: [scenario.question],
+      }), questionTranslated: true,
+    };
+    return guidedExchange(state, choice, "answerChoice", { text: ui.choose });
+  }
+  if (state.stage === "answerChoice") {
+    const answer = scenario.answers.find((item) => item.id === choice.id);
+    if (!answer) return state;
+    return {
+      ...guidedExchange(state, { ...choice, label: guidedSelectionLabel(language) }, "practice", {
+        text: `${ui.draft}\n“${answer.phrase}”\n\n${ui.draftHint}`, speech: [answer.phrase],
+      }), guidedVersion: 1, answerId: answer.id,
+    };
+  }
+  const answer = scenario.answers.find((item) => item.id === (state.answerId ?? state.musicAnswer));
+  if (!answer) return state;
+  if (state.stage === "practice" && choice.id === "understand") {
+    return guidedExchange(state, choice, "lesson", {
+      text: `${guidedLessonOpening(language, state.name, answer.phrase, translate(answer.meaning, language))}\n\n${copy.lessonIntro[state.barrierId as BarrierId]}`,
+      lesson: guidedCards(answer.parts, state),
+      lessonTitle: copy.lessonTitles[state.barrierId as BarrierId],
+      lessonHint: copy.lessonHint,
+      practiceCue: {
+        title: guidedContrastTitle(language),
+        items: scenario.contrast.map((part) => ({ phrase: part.en, meaning: translate(part.meaning, language), note: translate(part.note, language) })),
+      },
+    });
+  }
+  if ((state.stage === "practice" && choice.id === "spoken") || state.stage === "lesson") {
+    return guidedExchange(state, { ...choice, label: answer.phrase }, "replyLesson", {
+      text: ui.reactionIntro,
+      lesson: guidedCards(answer.reaction.parts, state, true),
+      lessonTitle: copy.replyLessonTitle,
+      lessonHint: copy.replyLessonHint,
+    });
+  }
+  if (state.stage === "replyLesson") {
+    return guidedExchange(state, choice, "done", {
+      text: copy.recapTitle,
+      recap: {
+        contextLabel: language === "de" ? "DER KONTEXT" : language === "es" ? "EL CONTEXTO" : "O CONTEXTO",
+        progressLabel: language === "de" ? "DAS HAST DU GESCHAFFT" : language === "es" ? "LO CONSEGUISTE" : "VOCÊ CONSEGUIU",
+        context: { phrase: "", translation: translate(scenario.context, language) },
+        turns: [
+          { speaker: copy.speakers.other, phrase: scenario.question, translation: translate(scenario.questionMeaning, language) },
+          { speaker: copy.speakers.you, phrase: answer.phrase, translation: translate(answer.meaning, language) },
+          { speaker: copy.speakers.other, phrase: answer.reaction.phrase, translation: translate(answer.reaction.meaning, language) },
+        ],
+        progress: guidedProgress(language, state.barrierId as BarrierId),
+      },
+    });
+  }
+  return state;
+}
 
 export const ORBIT_PROGRESS_STORAGE_KEY = "basedspeak:orbit-progress:v1";
 
@@ -455,11 +619,19 @@ function isValidMessage(value: unknown): value is Message {
       (value.role !== "assistant" && value.role !== "user") ||
       typeof value.text !== "string" || value.text.length > 5000) return false;
   if (value.speech !== undefined && !isStringList(value.speech)) return false;
+  if (value.practiceCue !== undefined) {
+    const cue = value.practiceCue;
+    if (!isRecord(cue) || typeof cue.title !== "string" || !Array.isArray(cue.items) || cue.items.length > 3 ||
+        !cue.items.every((item) => isRecord(item) && typeof item.meaning === "string" &&
+          (item.note === undefined || typeof item.note === "string") &&
+          (item.phrase === undefined || typeof item.phrase === "string"))) return false;
+  }
   if (value.lesson !== undefined) {
     if (!Array.isArray(value.lesson) || value.lesson.length > 6) return false;
     for (const card of value.lesson) {
       if (!isRecord(card) || typeof card.phrase !== "string" ||
           typeof card.translation !== "string" || typeof card.note !== "string" ||
+          (card.focus !== undefined && typeof card.focus !== "string") ||
           !Array.isArray(card.clues) || !card.clues.every((clue) =>
             isRecord(clue) && typeof clue.english === "string" && typeof clue.meaning === "string")) return false;
     }
@@ -476,16 +648,30 @@ function isValidMessage(value: unknown): value is Message {
   return true;
 }
 
+function isValidGuidedState(value: Record<string, unknown>): boolean {
+  if (value.guidedVersion !== 1) return true;
+  const scenario = guidedContent[value.sceneId as SceneId]?.[value.barrierId as BarrierId];
+  if (!scenario) return false;
+  if (value.stage === "question" || value.stage === "answerChoice") return value.answerId === undefined;
+  return ["practice", "lesson", "replyLesson", "done"].includes(String(value.stage)) &&
+    scenario.answers.some((answer) => answer.id === value.answerId);
+}
+
 export function isValidConversation(value: unknown): value is Conversation {
   return isRecord(value) &&
-    ["name", "hello", "scene", "barrier", "practice", "lesson", "replyLesson", "done"].includes(String(value.stage)) &&
+    ["name", "hello", "scene", "barrier", "question", "answerChoice", "practice", "lesson", "replyLesson", "done"].includes(String(value.stage)) &&
     (value.language === "pt" || value.language === "de" || value.language === "es") &&
     (value.name === undefined || (typeof value.name === "string" && value.name.length <= 60)) &&
     (value.sceneId === undefined || ["world", "work", "life"].includes(String(value.sceneId))) &&
     (value.barrierId === undefined || ["freeze", "translate", "words", "start"].includes(String(value.barrierId))) &&
+    (value.musicAnswer === undefined || value.musicAnswer === "love" || value.musicAnswer === "hate") &&
+    (value.guidedVersion === undefined || value.guidedVersion === 1) &&
+    (value.answerId === undefined || ["first", "second", "love", "hate"].includes(String(value.answerId))) &&
+    (value.questionTranslated === undefined || typeof value.questionTranslated === "boolean") &&
+    (!["question", "answerChoice"].includes(String(value.stage)) || (typeof value.sceneId === "string" && typeof value.barrierId === "string")) &&
     (value.testedBarrierIds === undefined || (Array.isArray(value.testedBarrierIds) && value.testedBarrierIds.length <= 4 && value.testedBarrierIds.every((id) => ["freeze", "translate", "words", "start"].includes(String(id))))) &&
-    Array.isArray(value.messages) && value.messages.length > 0 && value.messages.length <= 32 &&
-    value.messages.every(isValidMessage);
+    Array.isArray(value.messages) && value.messages.length > 0 &&
+    value.messages.every(isValidMessage) && isValidGuidedState(value);
 }
 
 export function readConversationProgress(
@@ -555,6 +741,7 @@ export type ConversationAction =
 
 export function getChoices(state: Conversation): Choice[] {
   const copy = localeCopy[state.language];
+  const ui = getOrbitUiCopy(state.language);
   switch (state.stage) {
     case "name":
       return [];
@@ -570,7 +757,22 @@ export function getChoices(state: Conversation): Choice[] {
           label: copy.barriers[barrier.id as BarrierId].label,
           description: copy.barriers[barrier.id as BarrierId].description,
         }));
+    case "question":
+      return [
+        ...(!state.questionTranslated ? [{ id: "translate-question", label: musicStarterCopy[state.language].translate }] : []),
+        { id: "answer-question", label: musicStarterCopy[state.language].respond },
+      ];
+    case "answerChoice":
+      return guidedScenario(state)?.answers.map((answer) => ({ id: answer.id, label: answer.phrase, speech: answer.phrase })) ?? [];
     case "practice": {
+      if (guidedScenario(state)) {
+        const musicCopy = musicStarterCopy[state.language];
+        return [
+          { id: "understand", label: musicCopy.understand },
+          { id: "change-answer", label: ui.changeAnswer },
+          { id: "spoken", label: musicCopy.respond },
+        ];
+      }
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!barrier) return [];
       return [
@@ -579,9 +781,11 @@ export function getChoices(state: Conversation): Choice[] {
       ];
     }
     case "lesson":
-      return [{ id: "ready", label: copy.ready }];
+      return guidedScenario(state)
+        ? [{ id: "ready", label: musicStarterCopy[state.language].respond }, { id: "change-answer", label: ui.changeAnswer }]
+        : [{ id: "ready", label: copy.ready }];
     case "replyLesson":
-      return [{ id: "continue", label: copy.continue }];
+      return [{ id: "continue", label: guidedScenario(state) ? ui.viewSummary : copy.continue }];
     case "done":
       return [];
   }
@@ -601,6 +805,10 @@ export function conversationReducer(
       ...state,
       stage: "barrier",
       barrierId: undefined,
+      musicAnswer: undefined,
+      guidedVersion: undefined,
+      answerId: undefined,
+      questionTranslated: undefined,
       messages: [
         ...state.messages,
         { id: state.messages.length, role: "user", text: copy.testAnotherPath },
@@ -660,6 +868,8 @@ export function conversationReducer(
   if (action.stage !== state.stage) return state;
   const choice = getChoices(state).find((item) => item.id === action.choiceId);
   if (!choice) return state;
+  const guided = guidedScenario(state);
+  if (guided) return reduceGuidedConversation(state, choice, guided);
 
   let next = { ...state };
   let response: string;
@@ -668,11 +878,13 @@ export function conversationReducer(
   switch (state.stage) {
     case "hello":
       next.stage = "scene";
-      response = localeCopy[state.language].hello.replace("{name}, ", state.name ? `${state.name}, ` : "");
+      response = state.name
+        ? localeCopy[state.language].hello.replace("{name}", state.name)
+        : localeCopy[state.language].hello.replace(/^\{name\},?\s*/, "").replace(/^./u, (letter) => letter.toLocaleUpperCase());
       break;
     case "scene": {
       const scene = scenes.find((item) => item.id === choice.id)!;
-      next = { ...next, stage: "barrier", sceneId: scene.id, testedBarrierIds: [] };
+      next = { ...next, stage: "barrier", sceneId: scene.id, testedBarrierIds: [], musicAnswer: undefined, questionTranslated: undefined, guidedVersion: undefined, answerId: undefined };
       const copy = localeCopy[state.language];
       const localized = copy.sceneLabels[scene.id as SceneId];
       const sceneResponse = state.name
@@ -682,43 +894,53 @@ export function conversationReducer(
       break;
     }
     case "barrier": {
-      const baseScene = scenes.find((item) => item.id === state.sceneId);
-      const barrier = barriers.find((item) => item.id === choice.id);
-      if (!baseScene || !barrier) return state;
-      const scene = sceneForBarrier(baseScene, barrier, state.language);
+      if (!state.sceneId) return state;
+      const scenario = guidedContent[state.sceneId as SceneId]?.[choice.id as BarrierId];
+      if (!scenario) return state;
       next = {
         ...next,
-        stage: "practice",
-        barrierId: barrier.id,
-        testedBarrierIds: [...new Set([...(state.testedBarrierIds ?? []), barrier.id])],
+        stage: "question",
+        barrierId: choice.id,
+        guidedVersion: 1,
+        answerId: undefined,
+        musicAnswer: undefined,
+        questionTranslated: undefined,
+        testedBarrierIds: [...new Set([...(state.testedBarrierIds ?? []), choice.id])],
       };
-      response = buildPracticeMessage(scene, barrier, state.language);
-      speech = [scene.opening, scene.phrase];
+      response = `${translate(scenario.setting, state.language)}\n“${scenario.question}”`;
+      speech = [scenario.question];
       break;
     }
     case "practice": {
       const baseScene = scenes.find((item) => item.id === state.sceneId);
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!baseScene || !barrier) return state;
-      const scene = sceneForBarrier(baseScene, barrier, state.language);
+      const scene = sceneForBarrier(baseScene, barrier, state.language, state.musicAnswer);
+      const musicCopy = isMusicStarter(state) && state.musicAnswer ? musicStarterCopy[state.language] : undefined;
       if (choice.id === "spoken") {
         return makeReplyLessonStep(
           state,
-          choice.label,
+          musicCopy ? scene.phrase : choice.label,
           scene,
-          state.language === "de" ? "Gut. Dein Satz steht. Jetzt sieh dir an, was die andere Person antwortet:" : state.language === "es" ? "Bien. Ya formaste la frase. Ahora mira lo que responde la otra persona:" : "Boa. Sua frase está montada. Agora veja o que a outra pessoa responde:",
+          musicCopy?.reactionIntro ?? (state.language === "de" ? "Gut. Dein Satz steht. Jetzt sieh dir an, was die andere Person antwortet:" : state.language === "es" ? "Bien. Ya formaste la frase. Ahora mira lo que responde la otra persona:" : "Boa. Sua frase está montada. Agora veja o que a outra pessoa responde:"),
           state.language,
         );
       }
       next.stage = "lesson";
-      response = state.language === "pt"
-        ? `Agora vamos entender por que essa frase funciona ${localeCopy.pt.lessonIntro[barrier.id as BarrierId]}.`
+      response = musicCopy
+        ? musicCopy.lessonIntro
+          .replace("{address}", state.name ? `, ${state.name}` : "")
+          .replace("{phrase}", scene.phrase)
+          .replace("{meaning}", scene.translation)
         : buildLessonIntro(barrier, state.language);
       const lesson = makeLessonCards(
         scene.parts,
         scene.partMeanings,
         scene.partClues,
         scene.partNotes,
+        musicCopy
+          ? [localeCopy[state.language].lessonFocus.startFirst, musicCopy.contrastTitle, localeCopy[state.language].lessonFocus.startNext]
+          : answerLessonFocus(scene, barrier, state.language),
       );
       next.messages = [
         ...state.messages,
@@ -728,8 +950,17 @@ export function conversationReducer(
           role: "assistant",
           text: response,
           lesson,
-          lessonTitle: localeCopy[state.language].answerLessonTitle,
-          lessonHint: localeCopy[state.language].lessonHint,
+          lessonTitle: musicCopy?.lessonTitle ?? localeCopy[state.language].lessonTitles[barrier.id as BarrierId],
+          lessonHint: musicCopy?.lessonHint ?? localeCopy[state.language].lessonHint,
+          ...(musicCopy ? {
+            practiceCue: {
+              title: musicCopy.contrastTitle,
+              items: [
+                { phrase: "love", meaning: musicCopy.love },
+                { phrase: "hate", meaning: musicCopy.hate },
+              ],
+            },
+          } : {}),
         },
       ];
       return next;
@@ -738,12 +969,13 @@ export function conversationReducer(
       const baseScene = scenes.find((item) => item.id === state.sceneId);
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!baseScene || !barrier) return state;
-      const scene = sceneForBarrier(baseScene, barrier, state.language);
+      const scene = sceneForBarrier(baseScene, barrier, state.language, state.musicAnswer);
+      const musicCopy = isMusicStarter(state) && state.musicAnswer ? musicStarterCopy[state.language] : undefined;
       return makeReplyLessonStep(
         state,
-        choice.label,
+        musicCopy ? scene.phrase : choice.label,
         scene,
-        localeCopy[state.language].replyIntro,
+        musicCopy?.reactionIntro ?? localeCopy[state.language].replyIntro,
         state.language,
       );
     }
@@ -751,10 +983,11 @@ export function conversationReducer(
       const baseScene = scenes.find((item) => item.id === state.sceneId);
       const barrier = barriers.find((item) => item.id === state.barrierId);
       if (!baseScene || !barrier) return state;
-      const scene = sceneForBarrier(baseScene, barrier, state.language);
+      const scene = sceneForBarrier(baseScene, barrier, state.language, state.musicAnswer);
       next.stage = "done";
       response = localeCopy[state.language].recapTitle;
       recap = buildConversationRecap(scene, barrier, state.language);
+      if (isMusicStarter(state) && state.musicAnswer) recap.progress = musicStarterCopy[state.language].progress;
       break;
     }
     default:

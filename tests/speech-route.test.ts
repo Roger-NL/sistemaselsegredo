@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "../src/app/api/speech/route";
+import { guidedSpeechPhrases } from "../src/app/inicio-orbita-7k3/guided-practice";
 
 describe("speech route", () => {
   let cacheDirectory: string;
@@ -29,6 +30,23 @@ describe("speech route", () => {
 
     expect(response.status).toBe(400);
     expect(provider).not.toHaveBeenCalled();
+  });
+
+  it("speaks every question, choice, lesson part and reaction in the guided paths", async () => {
+    vi.stubEnv("ELEVENLABS_API_KEY", "secret-test-key");
+    const provider = vi.fn().mockImplementation(async () =>
+      new Response(new Uint8Array([1, 2, 3]), {
+        headers: { "Content-Type": "audio/mpeg" },
+      }),
+    );
+    vi.stubGlobal("fetch", provider);
+
+    const phrases = Array.from(new Set(["recommend", "what", "idea", "share", "music", "love", "hate", ...guidedSpeechPhrases]));
+    for (const word of phrases) {
+      const response = await GET(new Request(`http://localhost/api/speech?text=${encodeURIComponent(word)}`));
+      expect(response.status).toBe(200);
+    }
+    expect(provider).toHaveBeenCalledTimes(phrases.length);
   });
 
   it("reports that ElevenLabs still needs to be connected", async () => {

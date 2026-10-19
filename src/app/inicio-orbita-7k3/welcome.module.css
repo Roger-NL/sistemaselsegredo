@@ -79,12 +79,12 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: clamp(520px, 69svh, 720px);
+  height: max(720px, calc(100svh - 112px));
   border: 1px solid var(--line);
   border-radius: 24px;
   background: #fcfaf6;
   overflow: hidden;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: auto;
 }
 .languageEntryMain {
   min-height: clamp(520px, 69svh, 720px);
@@ -140,7 +140,7 @@
 .history {
   overflow-y: auto;
   overflow-anchor: none;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: auto;
   flex: 1;
   min-height: 0;
   scrollbar-width: thin;
@@ -196,10 +196,64 @@
   flex: 1;
   min-width: 0;
 }
+.practiceCue {
+  margin-top: 20px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.practiceCueTitle {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+}
+.practiceCueItems {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.practiceCueItem {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.practiceCuePhrase {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.practiceCuePhrase strong {
+  font-size: 16px;
+  font-weight: 620;
+}
+.practiceCuePhrase .speechInlineButton {
+  flex-shrink: 0;
+}
+.practiceCuePhrase + span {
+  color: var(--muted);
+}
 .lesson {
   display: grid;
   gap: 12px;
   margin: 8px 0 2px;
+}
+.lessonLead {
+  margin: 0 0 12px;
+  font-size: 17px;
+  line-height: 1.6;
 }
 .lessonHeading {
   display: flex;
@@ -222,12 +276,28 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 9px;
 }
+.lessonCardsOne {
+  grid-template-columns: minmax(0, 1fr);
+}
+.lessonCardsTwo {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .lessonCard {
   min-width: 0;
   padding: 14px 13px 13px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--surface);
+}
+.lessonCardFocus {
+  display: block;
+  min-height: 22px;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.3;
+  letter-spacing: 0.09em;
 }
 .lessonCardTop {
   display: flex;
@@ -306,6 +376,10 @@
   padding: 10px 13px;
   border-bottom: 1px solid var(--line);
   background: #f4f0e8;
+}
+.recapTranslationsToggle {
+  margin: 10px 13px;
+  max-width: calc(100% - 26px);
 }
 .recapContextLabel {
   color: var(--muted);
@@ -454,6 +528,15 @@
   display: flex;
   flex-wrap: wrap;
   gap: 9px;
+}
+.spokenChoice {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.spokenChoice .speechError {
+  flex-basis: 100%;
 }
 .barrierOptions {
   display: grid;
@@ -645,8 +728,16 @@
   color: var(--muted);
   font-size: 14px;
 }
+.feedbackSection {
+  width: min(780px, calc(100% - 24px));
+  margin: 24px auto 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+}
 .feedbackIntro {
-  margin: 10px 12px 0;
+  margin: 0 0 16px;
   color: var(--ink);
   font-size: 14px;
   font-weight: 600;
@@ -750,6 +841,21 @@
   }
   .userMessage .messageText {
     font-size: 15px;
+  }
+  .practiceCue {
+    margin-top: 14px;
+    padding: 10px;
+  }
+  .practiceCueItems {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .practiceCueItem {
+    padding: 8px;
+    font-size: 11px;
+  }
+  .practiceCuePhrase strong {
+    font-size: 13px;
   }
   .composer {
     padding-top: 15px;
@@ -1098,8 +1204,7 @@
     margin-top: 8px;
   }
   .main {
-    height: min(82svh, calc(100svh - 92px));
-    min-height: min(540px, calc(100svh - 100px));
+    height: max(640px, calc(100svh - 76px));
     border-radius: 18px;
   }
   .chatHeader {

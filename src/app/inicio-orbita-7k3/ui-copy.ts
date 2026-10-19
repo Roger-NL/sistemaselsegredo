@@ -4,7 +4,7 @@ export const orbitUiCopy = {
   pt: {
     brandHome: "BasedSpeak — início", languagePickerLabel: "Escolha o idioma de apoio para aprender inglês",
     tagline: "BasedSpeak · Uma conversa de cada vez.", info: "Informações do site", terms: "Termos", privacy: "Privacidade",
-    recap: "Resumo da conversa", lesson: "A frase em três partes", clues: "Palavras e sentidos", miniMission: "MINI MISSÃO", tapToHear: "Toque em cada parte para ouvir",
+    recap: "Resumo da conversa", showTranslations: "Ver traduções", hideTranslations: "Ocultar traduções", changeAnswer: "Escolher outra resposta", viewSummary: "Ver resumo", lesson: "A frase em partes", clues: "Palavras e sentidos", miniMission: "MINI MISSÃO", tapToHear: "Toque em cada parte para ouvir",
     play: "Ouvir", stop: "Parar", playEnglish: "Ouvir em inglês", audioError: "Não foi possível tocar o áudio agora.", audioErrorTitle: "Não foi possível tocar o áudio",
     how: "Como funciona", settings: "Configurações", closeMenu: "Fechar menu", openMenu: "Abrir menu", mobileMenu: "Menu principal no celular",
     welcome: "BOAS-VINDAS À BASEDSPEAK", heading: "Um começo com a sua cara.", mainMenu: "Menu principal", history: "Histórico da conversa", messages: "Mensagens", you: "Você: ", assistant: "BasedSpeak: ",
@@ -20,7 +20,7 @@ export const orbitUiCopy = {
   es: {
     brandHome: "BasedSpeak — inicio", languagePickerLabel: "Elige el idioma de apoyo para aprender inglés",
     tagline: "BasedSpeak · Una conversación a la vez.", info: "Información del sitio", terms: "Términos", privacy: "Privacidad",
-    recap: "Resumen de la conversación", lesson: "La frase en tres partes", clues: "Palabras y significados", miniMission: "MINI MISIÓN", tapToHear: "Toca cada parte para escucharla",
+    recap: "Resumen de la conversación", showTranslations: "Ver traducciones", hideTranslations: "Ocultar traducciones", changeAnswer: "Elegir otra respuesta", viewSummary: "Ver resumen", lesson: "La frase por partes", clues: "Palabras y significados", miniMission: "MINI MISIÓN", tapToHear: "Toca cada parte para escucharla",
     play: "Escuchar", stop: "Parar", playEnglish: "Escuchar en inglés", audioError: "No se pudo reproducir el audio ahora.", audioErrorTitle: "No se pudo reproducir el audio",
     how: "Cómo funciona", settings: "Configuración", closeMenu: "Cerrar menú", openMenu: "Abrir menú", mobileMenu: "Menú principal en el móvil",
     welcome: "TE DAMOS LA BIENVENIDA A BASEDSPEAK", heading: "Un comienzo hecho para ti.", mainMenu: "Menú principal", history: "Historial de la conversación", messages: "Mensajes", you: "Tú: ", assistant: "BasedSpeak: ",
@@ -36,7 +36,7 @@ export const orbitUiCopy = {
   de: {
     brandHome: "BasedSpeak — Startseite", languagePickerLabel: "Wähle die Unterstützungssprache zum Englischlernen",
     tagline: "BasedSpeak · Ein Gespräch nach dem anderen.", info: "Informationen zur Website", terms: "Nutzungsbedingungen", privacy: "Datenschutz",
-    recap: "Gesprächszusammenfassung", lesson: "Der Satz in drei Teilen", clues: "Wörter und Bedeutungen", miniMission: "MINI-MISSION", tapToHear: "Tippe auf einen Teil, um ihn anzuhören",
+    recap: "Gesprächszusammenfassung", showTranslations: "Übersetzungen anzeigen", hideTranslations: "Übersetzungen ausblenden", changeAnswer: "Eine andere Antwort wählen", viewSummary: "Zusammenfassung ansehen", lesson: "Der Satz in Teilen", clues: "Wörter und Bedeutungen", miniMission: "MINI-MISSION", tapToHear: "Tippe auf einen Teil, um ihn anzuhören",
     play: "Anhören", stop: "Stoppen", playEnglish: "Auf Englisch anhören", audioError: "Der Ton konnte gerade nicht abgespielt werden.", audioErrorTitle: "Der Ton konnte nicht abgespielt werden",
     how: "So funktioniert es", settings: "Einstellungen", closeMenu: "Menü schließen", openMenu: "Menü öffnen", mobileMenu: "Hauptmenü auf dem Handy",
     welcome: "WILLKOMMEN BEI BASEDSPEAK", heading: "Ein Einstieg, der zu dir passt.", mainMenu: "Hauptmenü", history: "Gesprächsverlauf", messages: "Nachrichten", you: "Du: ", assistant: "BasedSpeak: ",

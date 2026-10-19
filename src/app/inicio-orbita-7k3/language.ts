@@ -29,6 +29,12 @@ type LocaleCopy = {
   barriers: Record<BarrierId, { label: string; description: string; action: string; understand: string }>;
   guidance: Record<BarrierId, string>;
   lessonIntro: Record<BarrierId, string>;
+  lessonTitles: Record<BarrierId, string>;
+  lessonFocus: { freezeFirst: string; freezeNext: string; wordsAnchor: string; startFirst: string; startNext: string };
+  practiceCueTitles: Record<"freeze" | "translate" | "words", string>;
+  freezeCueHint: string;
+  practiceIntents: Record<SceneId, [string, string]>;
+  practiceWords: Record<SceneId, [{ phrase: string; meaning: string }, { phrase: string; meaning: string }]>;
   answerLessonTitle: string;
   lessonHint: string;
   replyIntro: string;
@@ -65,16 +71,45 @@ const pt: LocaleCopy = {
     start: { label: "Estou começando do zero", description: "Quero aprender com frases simples, desde o começo.", action: "Consegui montar a frase", understand: "Quero entender cada parte" },
   },
   guidance: {
-    freeze: "Você disse que às vezes dá branco. Em vez de inventar na hora, use uma resposta pronta:",
-    translate: "Você disse que costuma traduzir tudo na cabeça. Primeiro, veja a ideia completa:",
-    words: "Você disse que faltam palavras. Comece com esta frase útil e veja como ela soa:",
-    start: "Como você está começando do zero, vamos usar uma frase curta e completa:",
+    freeze: "Se der branco, uma resposta pronta ajuda você a começar. Leia a frase inteira:",
+    translate: "Pense no que você quer fazer na conversa. A frase inteira em inglês é:",
+    words: "Você não precisa conhecer todas as palavras para responder. Veja a frase completa:",
+    start: "Vamos começar com uma frase curta, que você pode usar de verdade:",
   },
   lessonIntro: {
-    freeze: "sem precisar guardar a frase inteira de uma vez",
-    translate: "olhando para a função de cada bloco, não só a tradução",
-    words: "usando as palavras conhecidas como pistas",
-    start: "com uma explicação curta para cada bloco",
+    freeze: "Agora encontre uma pista em cada parte. Se der branco, comece pela primeira e deixe a próxima vir depois.",
+    translate: "Agora veja o que cada parte faz na conversa. A tradução fica ao lado para ajudar, mas você pode pensar na ideia inteira.",
+    words: "Agora encontre as palavras úteis dentro da frase e veja como elas se ligam. Assim você ganha uma resposta, não só uma lista de vocabulário.",
+    start: "Agora descubra, uma parte de cada vez, como essa frase simples funciona.",
+  },
+  lessonTitles: {
+    freeze: "UMA PISTA DE CADA VEZ",
+    translate: "BLOCOS DE SENTIDO",
+    words: "PALAVRAS NA CONVERSA",
+    start: "SUA PRIMEIRA FRASE, EM PARTES",
+  },
+  lessonFocus: {
+    freezeFirst: "SEU PONTO DE PARTIDA",
+    freezeNext: "PUXE O PRÓXIMO PEDAÇO",
+    wordsAnchor: "UMA PARTE ÚTIL",
+    startFirst: "PRIMEIRO PASSO",
+    startNext: "MAIS UMA PARTE",
+  },
+  practiceCueTitles: {
+    freeze: "SE DER BRANCO, COMECE POR AQUI",
+    translate: "DUAS IDEIAS, UMA RESPOSTA",
+    words: "DUAS PALAVRAS PARA GUARDAR",
+  },
+  freezeCueHint: "Diga só este começo. Depois, continue com o resto da frase.",
+  practiceIntents: {
+    world: ["Responder que sim", "Pedir uma sugestão"],
+    work: ["Apresentar sua ideia", "Pedir espaço para compartilhá-la"],
+    life: ["Contar do que você gosta", "Devolver a pergunta"],
+  },
+  practiceWords: {
+    world: [{ phrase: "recommend", meaning: "recomendar" }, { phrase: "what", meaning: "o que" }],
+    work: [{ phrase: "idea", meaning: "ideia" }, { phrase: "share", meaning: "compartilhar" }],
+    life: [{ phrase: "music", meaning: "música" }, { phrase: "love", meaning: "adorar" }],
   },
   answerLessonTitle: "SUA RESPOSTA, EM PEÇAS",
   lessonHint: "Toque em cada parte para ouvir",
@@ -132,7 +167,7 @@ const de: LocaleCopy = {
   chooseBarrier: "Da du ganz am Anfang stehst, nehmen wir einen kurzen, vollständigen Satz:",
   sceneLabels: {
     world: { label: "Selbstständig reisen", response: "Wir nehmen Englisch mit auf deine Reisen." },
-    work: { label: "Bei der Arbeit ausdrücken", response: "Geben wir deinen Ideen bei der Arbeit Raum." },
+    work: { label: "Mich bei der Arbeit ausdrücken", response: "Geben wir deinen Ideen bei der Arbeit Raum." },
     life: { label: "Mit Menschen ins Gespräch kommen", response: "Wir beginnen mit einer Verbindung aus dem Alltag." },
   },
   barriers: {
@@ -142,16 +177,45 @@ const de: LocaleCopy = {
     start: { label: "Ich fange ganz von vorn an", description: "Ich möchte von Anfang an mit einfachen Sätzen lernen.", action: "Ich habe den Satz geschafft", understand: "Ich möchte jeden Teil verstehen" },
   },
   guidance: {
-    freeze: "Du hast gesagt, dass dir manchmal die Worte fehlen. Versuch nicht, den ganzen Satz auswendig zu lernen:",
-    translate: "Du hast gesagt, dass du alles im Kopf übersetzt. Sieh dir zuerst die ganze Aussage an:",
-    words: "Du hast gesagt, dass dir Wörter fehlen. Fang mit diesem nützlichen Satz an:",
-    start: "Da du ganz am Anfang stehst, nehmen wir einen kurzen, vollständigen Satz:",
+    freeze: "Wenn du blockierst, hilft dir ein fertiger Satz beim Einstieg. Lies zuerst die ganze Antwort:",
+    translate: "Denk daran, was du im Gespräch erreichen möchtest. Der ganze Satz auf Englisch lautet:",
+    words: "Du musst nicht jedes Wort kennen, um zu antworten. Hier ist der ganze Satz:",
+    start: "Beginnen wir mit einem kurzen Satz, den du wirklich benutzen kannst:",
   },
   lessonIntro: {
-    freeze: "ohne den ganzen Satz auf einmal behalten zu müssen",
-    translate: "indem du auf die Aufgabe jedes Bausteins achtest, nicht nur auf die Übersetzung",
-    words: "mit bekannten Wörtern als Hinweisen",
-    start: "mit einer kurzen Erklärung zu jedem Baustein",
+    freeze: "Jetzt findest du in jedem Teil einen Anhaltspunkt. Wenn du blockierst, beginne mit dem ersten und mach dann weiter.",
+    translate: "Jetzt siehst du, welche Aufgabe jeder Teil im Gespräch hat. Die Übersetzung hilft dir, aber denk an die ganze Aussage.",
+    words: "Jetzt entdeckst du nützliche Wörter im Satz und siehst, wie sie zusammengehören. So lernst du eine Antwort, nicht nur eine Wortliste.",
+    start: "Jetzt sehen wir uns Schritt für Schritt an, wie dieser einfache Satz funktioniert.",
+  },
+  lessonTitles: {
+    freeze: "EIN ANHALTSPUNKT NACH DEM ANDEREN",
+    translate: "SINNBAUSTEINE",
+    words: "WÖRTER IM GESPRÄCH",
+    start: "DEIN ERSTER SATZ IN TEILEN",
+  },
+  lessonFocus: {
+    freezeFirst: "DEIN EINSTIEG",
+    freezeNext: "DANN DER NÄCHSTE TEIL",
+    wordsAnchor: "EIN NÜTZLICHER BAUSTEIN",
+    startFirst: "ERSTER SCHRITT",
+    startNext: "NOCH EIN TEIL",
+  },
+  practiceCueTitles: {
+    freeze: "WENN DU BLOCKIERST, BEGINNE HIER",
+    translate: "ZWEI GEDANKEN, EINE ANTWORT",
+    words: "ZWEI NÜTZLICHE WÖRTER",
+  },
+  freezeCueHint: "Sag erst diesen Anfang. Danach kommt der Rest des Satzes.",
+  practiceIntents: {
+    world: ["Mit Ja antworten", "Nach einer Empfehlung fragen"],
+    work: ["Deine Idee vorstellen", "Fragen, ob du sie teilen darfst"],
+    life: ["Sagen, was du magst", "Die Frage zurückgeben"],
+  },
+  practiceWords: {
+    world: [{ phrase: "recommend", meaning: "empfehlen" }, { phrase: "what", meaning: "was" }],
+    work: [{ phrase: "idea", meaning: "Idee" }, { phrase: "share", meaning: "teilen" }],
+    life: [{ phrase: "music", meaning: "Musik" }, { phrase: "love", meaning: "lieben" }],
   },
   answerLessonTitle: "DEINE ANTWORT IN BAUSTEINEN",
   lessonHint: "Tippe auf einen Teil, um ihn anzuhören",
@@ -173,7 +237,7 @@ const de: LocaleCopy = {
   variants: {
     world: {
       standard: {
-        setting: "Stell dir vor, du bist in einem Café im Ausland. Jemand fragt:", contextTranslation: "Du bist in einem Café.", openingTranslation: "Bist du zum ersten Mal hier?", translation: "Ja! Was empfiehlst du?", partMeanings: ["Ja!", "Was … du", "empfiehlst?"], partClueMeanings: [["ja"], ["was", "du"], ["empfehlen"]], partNotes: ["Yes! antwortet direkt auf die Frage. Du kannst auf Englisch erst kurz bestätigen und danach noch etwas ergänzen.", "What do you…? ist das Muster für „Was … du?“. Do hilft dabei, die Frage zu bilden; hier bedeutet es nicht „tun“.", "Nach What do you steht das Verb in seiner Grundform: recommend. Im Deutschen wird das Verb angepasst: empfiehlst."], replyTranslation: "Der Kaffee ist sehr gut. Woher kommst du?", replyPartMeanings: ["Der Kaffee ist sehr gut.", "Woher kommst du?"], replyClueMeanings: [["Kaffee", "sehr gut"], ["wo", "her"]], replyPartNotes: ["The zeigt auf den Kaffee an diesem Ort; great beschreibt ihn. Im Englischen steht die Beschreibung nach is.", "Where are you from? fragt nach deiner Herkunft. From ergänzt die Idee „aus/von“."],
+        setting: "Stell dir vor, du bist in einem Café im Ausland. Jemand fragt:", contextTranslation: "Du bist in einem Café.", openingTranslation: "Bist du zum ersten Mal hier?", translation: "Ja! Was empfiehlst du?", partMeanings: ["Ja!", "Was …", "empfiehlst du?"], partClueMeanings: [["ja"], ["was", "Frage an dich"], ["empfehlen"]], partNotes: ["Yes! antwortet direkt auf die Frage. Du kannst auf Englisch erst kurz bestätigen und danach noch etwas ergänzen.", "What do you…? beginnt eine Frage an die andere Person. Im Deutschen steckt die Frageform im Verb; do wird nicht als eigenes Wort übersetzt.", "Nach What do you steht recommend in seiner Grundform. Auf Deutsch wird daraus empfiehlst du?"], replyTranslation: "Der Kaffee ist sehr gut. Woher kommst du?", replyPartMeanings: ["Der Kaffee ist sehr gut.", "Woher kommst du?"], replyClueMeanings: [["Kaffee", "sehr gut"], ["wo", "her"]], replyPartNotes: ["The zeigt auf den Kaffee an diesem Ort; great beschreibt ihn. Im Englischen steht die Beschreibung nach is.", "Where are you from? fragt nach deiner Herkunft. From ergänzt die Idee „aus/von“."],
       },
       beginner: {
         setting: "Du bist in einem Café im Ausland. Jemand fragt:", contextTranslation: "Du bist in einem Café.", openingTranslation: "Magst du Kaffee?", translation: "Ja, ich mag Kaffee.", partMeanings: ["Ja,", "ich mag", "Kaffee."], partClueMeanings: [["ja"], ["ich", "mögen"], ["Kaffee"]], partNotes: ["Yes beantwortet die Frage. Das Komma macht eine kleine Pause, bevor das Detail kommt.", "I zeigt, wer spricht; like sagt, was diese Person mag. Im Englischen steht die Person vor dem Verb.", "Coffee ergänzt den Gedanken: Du magst Kaffee. Im Englischen steht hier kein Wort für „von“ davor."], replyTranslation: "Ich auch!", replyPartMeanings: ["Ich auch!"], replyClueMeanings: [["ich auch"]], replyPartNotes: ["Me too! ist eine feste Antwort für „ich auch“, ohne den ganzen Satz zu wiederholen."],
@@ -219,16 +283,45 @@ const es: LocaleCopy = {
     start: { label: "Estoy empezando desde cero", description: "Quiero aprender desde el principio con frases sencillas.", action: "Ya pude formar la frase", understand: "Quiero entender cada parte" },
   },
   guidance: {
-    freeze: "Dijiste que a veces te quedas en blanco. En vez de improvisar, usa una respuesta preparada:",
-    translate: "Dijiste que sueles traducir todo mentalmente. Primero, mira la idea completa:",
-    words: "Dijiste que te faltan palabras. Empieza con esta frase útil y escucha cómo suena:",
-    start: "Como estás empezando desde cero, vamos con una frase corta y completa:",
+    freeze: "Si te quedas en blanco, una respuesta preparada te ayuda a empezar. Lee la frase completa:",
+    translate: "Piensa en lo que quieres hacer en la conversación. La frase completa en inglés es:",
+    words: "No necesitas conocer todas las palabras para responder. Mira la frase completa:",
+    start: "Empecemos con una frase corta que puedes usar de verdad:",
   },
   lessonIntro: {
-    freeze: "sin tener que memorizar toda la frase de una vez",
-    translate: "mirando la función de cada bloque, no solo su traducción",
-    words: "usando las palabras conocidas como pistas",
-    start: "con una explicación breve para cada bloque",
+    freeze: "Ahora encuentra una pista en cada parte. Si te quedas en blanco, empieza por la primera y sigue después.",
+    translate: "Ahora mira qué hace cada parte en la conversación. La traducción está al lado para ayudarte, pero piensa en la idea completa.",
+    words: "Ahora encuentra las palabras útiles dentro de la frase y observa cómo se unen. Así aprendes una respuesta, no solo una lista.",
+    start: "Ahora descubre, parte por parte, cómo funciona esta frase sencilla.",
+  },
+  lessonTitles: {
+    freeze: "UNA PISTA A LA VEZ",
+    translate: "BLOQUES DE SENTIDO",
+    words: "PALABRAS EN LA CONVERSACIÓN",
+    start: "TU PRIMERA FRASE, POR PARTES",
+  },
+  lessonFocus: {
+    freezeFirst: "TU PUNTO DE PARTIDA",
+    freezeNext: "SIGUE CON LA PRÓXIMA PARTE",
+    wordsAnchor: "UNA PARTE ÚTIL",
+    startFirst: "PRIMER PASO",
+    startNext: "UNA PARTE MÁS",
+  },
+  practiceCueTitles: {
+    freeze: "SI TE QUEDAS EN BLANCO, EMPIEZA AQUÍ",
+    translate: "DOS IDEAS, UNA RESPUESTA",
+    words: "DOS PALABRAS PARA RECORDAR",
+  },
+  freezeCueHint: "Di solo este comienzo. Después, continúa con el resto de la frase.",
+  practiceIntents: {
+    world: ["Responder que sí", "Pedir una recomendación"],
+    work: ["Presentar tu idea", "Pedir permiso para compartirla"],
+    life: ["Decir lo que te gusta", "Devolver la pregunta"],
+  },
+  practiceWords: {
+    world: [{ phrase: "recommend", meaning: "recomendar" }, { phrase: "what", meaning: "qué" }],
+    work: [{ phrase: "idea", meaning: "idea" }, { phrase: "share", meaning: "compartir" }],
+    life: [{ phrase: "music", meaning: "música" }, { phrase: "love", meaning: "encantar / amar" }],
   },
   answerLessonTitle: "TU RESPUESTA, POR PARTES",
   lessonHint: "Toca cada parte para escucharla",
@@ -250,23 +343,23 @@ const es: LocaleCopy = {
   variants: {
     world: {
       standard: {
-        setting: "Imagina que estás en una cafetería, en otro país. Alguien pregunta:", contextTranslation: "Estás en una cafetería.", openingTranslation: "¿Es tu primera vez aquí?", translation: "¡Sí! ¿Qué recomiendas?", partMeanings: ["¡Sí!", "¿Qué … tú", "recomiendas?"], partClueMeanings: [["sí"], ["qué", "tú"], ["recomendar"]], partNotes: ["Yes! responde directamente a la pregunta. En inglés puedes confirmar primero y añadir un detalle después.", "What do you…? es el patrón para preguntar «¿Qué… tú?». Do ayuda a formar la pregunta; aquí no significa «hacer».", "Después de What do you, el verbo va en su forma simple: recommend. En español se conjuga: recomiendas."], replyTranslation: "El café está muy bueno. ¿De dónde eres?", replyPartMeanings: ["El café está muy bueno.", "¿De dónde eres?"], replyClueMeanings: [["café", "muy bueno"], ["dónde", "de"]], replyPartNotes: ["The señala ese café del lugar; great lo describe. En inglés, la descripción va después de is.", "Where are you from? pregunta de dónde eres. From completa la idea de origen."],
+        setting: "Imagina que estás en una cafetería, en otro país. Alguien pregunta:", contextTranslation: "Estás en una cafetería.", openingTranslation: "¿Es tu primera vez aquí?", translation: "¡Sí! ¿Qué recomiendas?", partMeanings: ["¡Sí!", "¿Qué …", "recomiendas?"], partClueMeanings: [["sí"], ["qué", "pregunta dirigida a ti"], ["recomendar"]], partNotes: ["Yes! responde directamente a la pregunta. En inglés puedes confirmar primero y añadir un detalle después.", "What do you…? inicia una pregunta dirigida a la otra persona. En español basta con ¿Qué…?; do no se traduce por separado.", "Recommend completa la pregunta. En español se conjuga como recomiendas, aunque en inglés el verbo queda igual."], replyTranslation: "El café está muy bueno. ¿De dónde eres?", replyPartMeanings: ["El café está muy bueno.", "¿De dónde eres?"], replyClueMeanings: [["café", "muy bueno"], ["dónde", "de"]], replyPartNotes: ["The señala ese café del lugar; great lo describe. En inglés, la descripción va después de is.", "Where are you from? pregunta de dónde eres. From completa la idea de origen."],
       },
       beginner: {
-        setting: "Estás en una cafetería, en otro país. Alguien pregunta:", contextTranslation: "Estás en una cafetería.", openingTranslation: "¿Te gusta el café?", translation: "Sí, me gusta el café.", partMeanings: ["Sí,", "me gusta", "el café."], partClueMeanings: [["sí"], ["yo", "gustar"], ["café"]], partNotes: ["Yes responde a la pregunta. La pausa de la coma prepara el detalle que viene después.", "I indica quién habla; like dice lo que le gusta. En inglés, la persona va antes del verbo.", "Coffee completa la idea: te gusta el café. En inglés no hace falta poner una palabra equivalente a «de» antes."], replyTranslation: "¡A mí también!", replyPartMeanings: ["¡A mí también!"], replyClueMeanings: [["a mí también"]], replyPartNotes: ["Me too! es una respuesta fija para decir «yo también» sin repetir toda la frase."],
+        setting: "Estás en una cafetería, en otro país. Alguien pregunta:", contextTranslation: "Estás en una cafetería.", openingTranslation: "¿Te gusta el café?", translation: "Sí, me gusta el café.", partMeanings: ["Sí,", "me gusta", "el café."], partClueMeanings: [["sí"], ["yo / me", "gustar"], ["café"]], partNotes: ["Yes responde a la pregunta. La pausa de la coma prepara el detalle que viene después.", "I like se expresa como me gusta en español. En inglés, I va primero y like no cambia aquí; no traduzcas cada palabra en el mismo orden.", "Coffee completa la idea: me gusta el café. En inglés no hace falta poner el antes de coffee."], replyTranslation: "¡A mí también!", replyPartMeanings: ["¡A mí también!"], replyClueMeanings: [["a mí también"]], replyPartNotes: ["Me too! es una respuesta fija para decir «yo también» sin repetir toda la frase."],
       },
     },
     work: {
       standard: {
-        setting: "Imagina una reunión. Tienes una idea y alguien pregunta:", contextTranslation: "Estamos en una reunión.", openingTranslation: "¿Qué te parece?", translation: "Tengo una idea. ¿Puedo compartirla?", partMeanings: ["Tengo una idea.", "¿Puedo yo", "compartirla?"], partClueMeanings: [["yo", "tener", "una idea"], ["poder", "yo"], ["compartir", "eso"]], partNotes: ["I have… dice lo que tienes. En inglés suele aparecer primero quién habla; an va antes del sonido vocálico de idea.", "Can I…? pide permiso. En la pregunta, can va antes de I; en una afirmación sería I can.", "Share es la acción; it se refiere a la idea que ya mencionaste. Así no tienes que repetir idea."], replyTranslation: "Por supuesto. Nos encantaría escucharla.", replyPartMeanings: ["Por supuesto.", "Nos encantaría escucharla."], replyClueMeanings: [["por supuesto"], ["nos encantaría", "escucharla"]], replyPartNotes: ["Of course! es una expresión natural para aceptar una petición: «¡Claro!».", "We’d love to… expresa entusiasmo; hear completa la acción. It vuelve a referirse a la idea."],
+        setting: "Imagina una reunión. Tienes una idea y alguien pregunta:", contextTranslation: "Estamos en una reunión.", openingTranslation: "¿Qué te parece?", translation: "Tengo una idea. ¿Puedo compartirla?", partMeanings: ["Tengo una idea.", "¿Puedo", "compartirla?"], partClueMeanings: [["yo", "tener", "una idea"], ["poder", "yo"], ["compartir", "eso"]], partNotes: ["I have… dice lo que tienes. En inglés suele aparecer primero quién habla; an va antes del sonido vocálico de idea.", "Can I…? pide permiso. En la pregunta, can va antes de I; en una afirmación sería I can.", "Share es la acción; it se refiere a la idea que ya mencionaste. Así no tienes que repetir idea."], replyTranslation: "Por supuesto. Nos encantaría escucharla.", replyPartMeanings: ["Por supuesto.", "Nos encantaría escucharla."], replyClueMeanings: [["por supuesto"], ["nos encantaría", "escucharla"]], replyPartNotes: ["Of course! es una expresión natural para aceptar una petición: «¡Claro!».", "We’d love to… expresa entusiasmo; hear completa la acción. It vuelve a referirse a la idea."],
       },
       beginner: {
-        setting: "Un compañero muestra una idea en la reunión y pregunta:", contextTranslation: "Hagamos el trabajo más fácil.", openingTranslation: "¿Te gusta mi idea?", translation: "Me gusta tu idea.", partMeanings: ["Me gusta", "tu idea."], partClueMeanings: [["yo", "gustar"], ["tu", "idea"]], partNotes: ["I indica quién habla y like expresa su opinión. El orden común en inglés es persona + verbo.", "Your va antes de lo que pertenece a alguien: your idea significa «tu idea»."], replyTranslation: "¡Gracias!", replyPartMeanings: ["¡Gracias!"], replyClueMeanings: [["gracias"]], replyPartNotes: ["Thank you! es la forma natural de dar las gracias cuando alguien elogia una idea."],
+        setting: "Un compañero muestra una idea en la reunión y pregunta:", contextTranslation: "Hagamos el trabajo más fácil.", openingTranslation: "¿Te gusta mi idea?", translation: "Me gusta tu idea.", partMeanings: ["Me gusta", "tu idea."], partClueMeanings: [["yo / me", "gustar"], ["tu", "idea"]], partNotes: ["I like se expresa como me gusta en español. El inglés pone primero a quien habla: I like; no copies el orden del español.", "Your va antes de lo que pertenece a alguien: your idea significa «tu idea»."], replyTranslation: "¡Gracias!", replyPartMeanings: ["¡Gracias!"], replyClueMeanings: [["gracias"]], replyPartNotes: ["Thank you! es la forma natural de dar las gracias cuando alguien elogia una idea."],
       },
     },
     life: {
       standard: {
-        setting: "Imagina que acabas de conocer a alguien. La persona pregunta:", contextTranslation: "Hablemos de música.", openingTranslation: "¿Qué te gusta hacer?", translation: "Me encanta la música. ¿Y a ti?", partMeanings: ["Me encanta la música.", "¿Y qué hay de", "ti?"], partClueMeanings: [["yo", "encantar", "música"], ["cómo", "sobre"], ["tú"]], partNotes: ["I indica quién habla, love expresa lo que siente y music completa la idea. El orden es persona + verbo + tema.", "How about…? invita a la otra persona a responder. Aquí la expresión completa significa «¿Y tú?», no la suma literal de las palabras.", "You devuelve la pregunta a la otra persona. El resto se sobreentiende porque el contexto ya está claro."], replyTranslation: "¡A mí también! ¿Qué tipo de música?", replyPartMeanings: ["¡A mí también!", "¿Qué tipo de música?"], replyClueMeanings: [["a mí también"], ["qué tipo de", "música"]], replyPartNotes: ["Me too! muestra que sientes lo mismo, sin repetir toda la frase.", "What kind of…? pregunta por el tipo. Of forma parte de esa expresión y music completa el tema."],
+        setting: "Imagina que acabas de conocer a alguien. La persona pregunta:", contextTranslation: "Hablemos de música.", openingTranslation: "¿Qué te gusta hacer?", translation: "Me encanta la música. ¿Y a ti?", partMeanings: ["Me encanta la música.", "¿Y a", "ti?"], partClueMeanings: [["yo / me", "encantar", "música"], ["cómo", "sobre"], ["ti"]], partNotes: ["I love music se expresa como me encanta la música. En inglés, I va primero; en español cambia la estructura.", "How about…? invita a la otra persona a responder. Aquí la expresión funciona como ¿Y a…?, no como la suma literal de sus palabras.", "You devuelve la pregunta a la otra persona: How about you? equivale a ¿Y a ti?"], replyTranslation: "¡A mí también! ¿Qué tipo de música?", replyPartMeanings: ["¡A mí también!", "¿Qué tipo de música?"], replyClueMeanings: [["a mí también"], ["qué tipo de", "música"]], replyPartNotes: ["Me too! muestra que sientes lo mismo, sin repetir toda la frase.", "What kind of…? pregunta por el tipo. Of forma parte de esa expresión y music completa el tema."],
       },
       beginner: {
         setting: "Estás conociendo a alguien. La persona pregunta:", contextTranslation: "Hablemos de música.", openingTranslation: "¿Te gusta la música?", translation: "Me encanta la música.", partMeanings: ["Me encanta", "la música."], partClueMeanings: [["yo", "encantar"], ["música"]], partNotes: ["I indica quién habla; love es el verbo. Juntos, I love significa «me encanta».", "Music completa la idea: es lo que le encanta a la persona. En inglés, el tema va después del verbo."], replyTranslation: "¡A mí también!", replyPartMeanings: ["¡A mí también!"], replyClueMeanings: [["a mí también"]], replyPartNotes: ["Me too! significa «a mí también» y muestra que tienen algo en común."],

@@ -9,6 +9,7 @@ import {
   useState,
   useSyncExternalStore,
   useMemo,
+  useId,
   type FormEvent,
 } from "react";
 import Link from "next/link";
@@ -109,6 +110,7 @@ function TypedMessage({
   if (!active && message.lesson?.length) {
     return (
       <div className={styles.messageText}>
+        <p className={styles.lessonLead}>{message.text}</p>
         <LessonCards
           cards={message.lesson}
           language={language}
@@ -117,6 +119,9 @@ function TypedMessage({
           playback={playback}
           onPlay={onPlay}
         />
+        {message.practiceCue && (
+          <PracticeCueCard cue={message.practiceCue} language={language} playback={playback} onPlay={onPlay} />
+        )}
       </div>
     );
   }
@@ -131,6 +136,23 @@ function TypedMessage({
           playback={playback}
           onPlay={onPlay}
         />
+      </div>
+    );
+  }
+
+  if (!active && message.practiceCue) {
+    return (
+      <div>
+        <p className={styles.messageText}>
+          <InlineSpeechText
+            text={message.text}
+            phrases={message.speech ?? []}
+            language={language}
+            playback={playback}
+            onPlay={onPlay}
+          />
+        </p>
+        <PracticeCueCard cue={message.practiceCue} language={language} playback={playback} onPlay={onPlay} />
       </div>
     );
   }
@@ -155,6 +177,55 @@ function TypedMessage({
   );
 }
 
+function PracticeCueCard({
+  cue,
+  language,
+  playback,
+  onPlay,
+}: {
+  cue: NonNullable<Message["practiceCue"]>;
+  language: LearningLanguage;
+  playback: SpeechPlayback;
+  onPlay: (phrase: string) => void;
+}) {
+  const copy = getOrbitUiCopy(language);
+  return (
+    <section className={styles.practiceCue} aria-label={cue.title}>
+      <span className={styles.practiceCueTitle}>{cue.title}</span>
+      <div className={styles.practiceCueItems}>
+        {cue.items.map((item, index) => {
+          const loading = playback.phrase === item.phrase && playback.status === "loading";
+          const playing = playback.phrase === item.phrase && playback.status === "playing";
+          const error = playback.phrase === item.phrase && playback.status === "error";
+          return (
+            <div className={styles.practiceCueItem} key={`${item.phrase ?? item.meaning}-${index}`}>
+              {item.phrase && (
+                <div className={styles.practiceCuePhrase}>
+                  <strong>{item.phrase}</strong>
+                  <button
+                    className={styles.speechInlineButton}
+                    type="button"
+                    onClick={() => onPlay(item.phrase!)}
+                    aria-label={`${playing ? copy.stop : copy.play}: ${item.phrase}`}
+                    title={playing ? copy.stop : copy.playEnglish}
+                  >
+                    {loading ? <LoaderCircle className={styles.speechSpinner} size={14} aria-hidden="true" /> :
+                      playing ? <Square size={11} fill="currentColor" aria-hidden="true" /> :
+                        <Play size={14} fill="currentColor" aria-hidden="true" />}
+                  </button>
+                </div>
+              )}
+              <span>{item.meaning}</span>
+              {item.note && <p className={styles.lessonNote}>{item.note}</p>}
+              {error && <span className={styles.speechError} role="alert">{copy.audioError}</span>}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function ConversationRecapCard({
   recap,
   language,
@@ -167,14 +238,25 @@ function ConversationRecapCard({
   onPlay: (phrase: string) => void;
 }) {
   const copy = getOrbitUiCopy(language);
+  const [translationsVisible, setTranslationsVisible] = useState(false);
+  const turnsId = useId();
   return (
     <section className={styles.recap} aria-label={copy.recap}>
       <div className={styles.recapContext}>
       <span className={styles.recapContextLabel}>{recap.contextLabel}</span>
-        <span className={styles.recapContextPhrase}>{recap.context.phrase}</span>
+        {recap.context.phrase && <span className={styles.recapContextPhrase}>{recap.context.phrase}</span>}
         <span className={styles.recapTranslation}>{recap.context.translation}</span>
       </div>
-      <div className={styles.recapTurns}>
+      <button
+        className={`${styles.tryAnotherPathButton} ${styles.recapTranslationsToggle}`}
+        type="button"
+        aria-expanded={translationsVisible}
+        aria-controls={turnsId}
+        onClick={() => setTranslationsVisible((visible) => !visible)}
+      >
+        {translationsVisible ? copy.hideTranslations : copy.showTranslations}
+      </button>
+      <div className={styles.recapTurns} id={turnsId}>
         {recap.turns.map((turn) => {
           const loading = playback.phrase === turn.phrase && playback.status === "loading";
           const playing = playback.phrase === turn.phrase && playback.status === "playing";
@@ -184,7 +266,7 @@ function ConversationRecapCard({
               <span className={styles.recapSpeaker}>{turn.speaker}</span>
               <div className={styles.recapWords}>
                 <span className={styles.recapPhrase}>{turn.phrase}</span>
-                <span className={styles.recapTranslation}>{turn.translation}</span>
+                {translationsVisible && <span className={styles.recapTranslation}>{turn.translation}</span>}
                 {error && <span className={styles.speechError} role="alert">{copy.audioError}</span>}
               </div>
               <button
@@ -239,7 +321,7 @@ function LessonCards({
           {hint ?? copy.tapToHear}
         </span>
       </div>
-      <div className={styles.lessonCards}>
+      <div className={`${styles.lessonCards} ${cards.length === 1 ? styles.lessonCardsOne : cards.length === 2 ? styles.lessonCardsTwo : ""}`}>
         {cards.map((card, index) => {
           const isLoading =
             playback.phrase === card.phrase && playback.status === "loading";
@@ -249,6 +331,7 @@ function LessonCards({
             playback.phrase === card.phrase && playback.status === "error";
           return (
             <article className={styles.lessonCard} key={card.phrase}>
+              {card.focus && <span className={styles.lessonCardFocus}>{card.focus}</span>}
               <div className={styles.lessonCardTop}>
                 <span className={styles.lessonNumber}>{index + 1}</span>
                 <span className={styles.lessonPhrase}>{card.phrase}</span>
@@ -890,122 +973,92 @@ function ConversationExperience({
               </button>
             )}
           </div>
-          <div
-            className={styles.composer}
-            aria-label={copy.replies}
-          >
-            {conversation.stage === "name" ? (
-              <form className={styles.nameForm} onSubmit={submitName}>
-                <label htmlFor="welcome-name" className={styles.srOnly}>
-                  {copy.nameLabel}
-                </label>
-                <div className={styles.inputRow}>
-                  <input
-                    id="welcome-name"
-                    name="givenName"
-                    autoComplete="given-name"
-                  placeholder={namePlaceholder}
-                    maxLength={60}
-                    value={nameDraft}
-                    onChange={(event) => {
-                      setNameDraft(event.target.value);
-                      setNameError("");
-                    }}
-                    aria-invalid={!!nameError}
-                    aria-describedby="name-hint name-error"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    aria-label={copy.sendName}
-                    disabled={!nameDraft.trim()}
-                  >
-                    <ArrowUp size={19} />
-                  </button>
-                </div>
-                <p id="name-hint" className={styles.inputHint}>
-                  {nameHint}
-                </p>
-                <p id="name-error" className={styles.error} role="alert">
-                  {nameError}
-                </p>
-              </form>
-            ) : conversation.stage === "done" ? (
-              <div className={styles.feedbackActions}>
-                {(conversation.testedBarrierIds?.length ?? 0) < 4 && (
-                  <button
-                    className={styles.tryAnotherPathButton}
-                    type="button"
-                    onClick={() => {
-                      lastAnsweredMessageRef.current = null;
-                      followRef.current = true;
-                      setShowLatest(false);
-                      setFeedbackRating(null);
-                      setFeedbackComment("");
-                      setFeedbackSent(false);
-                      setCompletedId(lastMessage.id);
-                      dispatch({ type: "try-another-path" });
-                    }}
-                  >
-                    {copy.testAnotherPath} <ArrowUpRight size={15} />
-                  </button>
-                )}
-                {feedbackSent ? (
-                  <div className={styles.feedbackThanks} role="status">{copy.feedbackThanks}</div>
-                ) : (
-                  <form className={styles.feedbackForm} onSubmit={submitFeedback}>
-                    <label>{copy.feedbackQuestion}</label>
-                    <div className={styles.ratingChoices} role="group" aria-label={copy.feedbackQuestion}>
-                      {Array.from({ length: 10 }, (_, index) => index + 1).map((rating) => (
-                        <button
-                          type="button"
-                          key={rating}
-                          className={`${styles.ratingChoice} ${feedbackRating === rating ? styles.ratingChoiceSelected : ""}`}
-                          aria-pressed={feedbackRating === rating}
-                          onClick={() => setFeedbackRating(rating)}
-                        >
-                          {rating}
-                        </button>
-                      ))}
-                    </div>
-                    <div className={styles.ratingScale} aria-hidden="true"><span>1</span><span>10</span></div>
-                    <label className={styles.feedbackCommentLabel} htmlFor="orbita-feedback-comment">{copy.feedbackComment}</label>
-                    <textarea
-                      id="orbita-feedback-comment"
-                      className={styles.feedbackComment}
-                      value={feedbackComment}
-                      onChange={(event) => setFeedbackComment(event.target.value)}
-                      maxLength={1000}
-                      rows={2}
+          {conversation.stage !== "done" && (
+            <div
+              className={styles.composer}
+              aria-label={copy.replies}
+            >
+              {conversation.stage === "name" ? (
+                <form className={styles.nameForm} onSubmit={submitName}>
+                  <label htmlFor="welcome-name" className={styles.srOnly}>
+                    {copy.nameLabel}
+                  </label>
+                  <div className={styles.inputRow}>
+                    <input
+                      id="welcome-name"
+                      name="givenName"
+                      autoComplete="given-name"
+                    placeholder={namePlaceholder}
+                      maxLength={60}
+                      value={nameDraft}
+                      onChange={(event) => {
+                        setNameDraft(event.target.value);
+                        setNameError("");
+                      }}
+                      aria-invalid={!!nameError}
+                      aria-describedby="name-hint name-error"
+                      required
                     />
-                    <button className={styles.feedbackSubmit} type="submit" disabled={!feedbackRating}>
-                      {copy.feedbackSend} <ArrowUpRight size={15} />
+                    <button
+                      type="submit"
+                      aria-label={copy.sendName}
+                      disabled={!nameDraft.trim()}
+                    >
+                      <ArrowUp size={19} />
                     </button>
-                  </form>
-                )}
-              </div>
-            ) : (
-              <div
-                className={`${styles.options} ${conversation.stage === "barrier" ? styles.barrierOptions : ""}`}
-                role="group"
-                aria-label={copy.replies}
-              >
-                {choices.map((choice) => (
-                  <button
-                    key={choice.id}
-                    className={`${styles.option} ${conversation.stage === "barrier" ? styles.barrierOption : ""}`}
-                    onClick={() => answer(choice.id)}
-                  >
-                    <span className={styles.optionCopy}>
-                      <span className={styles.optionLabel}>{choice.label}</span>
-                      {choice.description && <span className={styles.optionDescription}>{choice.description}</span>}
-                    </span>
-                    <ArrowUpRight size={14} aria-hidden="true" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+                  </div>
+                  <p id="name-hint" className={styles.inputHint}>
+                    {nameHint}
+                  </p>
+                  <p id="name-error" className={styles.error} role="alert">
+                    {nameError}
+                  </p>
+                </form>
+              ) : (
+                <div
+                  className={`${styles.options} ${conversation.stage === "barrier" ? styles.barrierOptions : ""}`}
+                  role="group"
+                  aria-label={copy.replies}
+                >
+                  {choices.map((choice) => {
+                    const option = <button
+                      key={choice.id}
+                      className={`${styles.option} ${conversation.stage === "barrier" ? styles.barrierOption : ""}`}
+                      onClick={() => answer(choice.id)}
+                    >
+                      <span className={styles.optionCopy}>
+                        <span className={styles.optionLabel}>{choice.label}</span>
+                        {choice.description && <span className={styles.optionDescription}>{choice.description}</span>}
+                      </span>
+                      <ArrowUpRight size={14} aria-hidden="true" />
+                    </button>;
+                    if (!choice.speech) return option;
+                    const phrase = choice.speech;
+                    const loading = speech.playback.phrase === phrase && speech.playback.status === "loading";
+                    const playing = speech.playback.phrase === phrase && speech.playback.status === "playing";
+                    const error = speech.playback.phrase === phrase && speech.playback.status === "error";
+                    return (
+                      <div className={styles.spokenChoice} key={choice.id}>
+                        {option}
+                        <button
+                          className={styles.speechInlineButton}
+                          type="button"
+                          onClick={() => speech.toggle(phrase)}
+                          aria-label={`${playing ? copy.stop : copy.play}: ${phrase}`}
+                          title={playing ? copy.stop : copy.playEnglish}
+                        >
+                          {loading ? <LoaderCircle className={styles.speechSpinner} size={14} aria-hidden="true" /> :
+                            playing ? <Square size={11} fill="currentColor" aria-hidden="true" /> :
+                              <Play size={14} fill="currentColor" aria-hidden="true" />}
+                        </button>
+                        {error && <span className={styles.speechError} role="alert">{copy.audioError}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
           {storageNotice && (
             <p className={styles.storageNotice} role="status">
               {storageNotice}
@@ -1021,7 +1074,65 @@ function ConversationExperience({
           </div>
         </main>
         {conversation.stage === "done" && (
-          <p className={styles.feedbackIntro}>{copy.feedbackTitle}</p>
+          <section className={styles.feedbackSection} aria-label={copy.feedbackTitle}>
+            <h2 className={styles.feedbackIntro}>{copy.feedbackTitle}</h2>
+            <div className={styles.feedbackActions}>
+              {(conversation.testedBarrierIds?.length ?? 0) < 4 && (
+                <button
+                  className={styles.tryAnotherPathButton}
+                  type="button"
+                  onClick={() => {
+                    lastAnsweredMessageRef.current = null;
+                    followRef.current = true;
+                    setShowLatest(false);
+                    setFeedbackRating(null);
+                    setFeedbackComment("");
+                    setFeedbackSent(false);
+                    setCompletedId(lastMessage.id);
+                    dispatch({ type: "try-another-path" });
+                    requestAnimationFrame(() => {
+                      scrollRef.current?.closest("main")?.scrollIntoView({ block: "start", behavior: "smooth" });
+                    });
+                  }}
+                >
+                  {copy.testAnotherPath} <ArrowUpRight size={15} />
+                </button>
+              )}
+              {feedbackSent ? (
+                <div className={styles.feedbackThanks} role="status">{copy.feedbackThanks}</div>
+              ) : (
+                <form className={styles.feedbackForm} onSubmit={submitFeedback}>
+                  <label>{copy.feedbackQuestion}</label>
+                  <div className={styles.ratingChoices} role="group" aria-label={copy.feedbackQuestion}>
+                    {Array.from({ length: 10 }, (_, index) => index + 1).map((rating) => (
+                      <button
+                        type="button"
+                        key={rating}
+                        className={`${styles.ratingChoice} ${feedbackRating === rating ? styles.ratingChoiceSelected : ""}`}
+                        aria-pressed={feedbackRating === rating}
+                        onClick={() => setFeedbackRating(rating)}
+                      >
+                        {rating}
+                      </button>
+                    ))}
+                  </div>
+                  <div className={styles.ratingScale} aria-hidden="true"><span>1</span><span>10</span></div>
+                  <label className={styles.feedbackCommentLabel} htmlFor="orbita-feedback-comment">{copy.feedbackComment}</label>
+                  <textarea
+                    id="orbita-feedback-comment"
+                    className={styles.feedbackComment}
+                    value={feedbackComment}
+                    onChange={(event) => setFeedbackComment(event.target.value)}
+                    maxLength={1000}
+                    rows={2}
+                  />
+                  <button className={styles.feedbackSubmit} type="submit" disabled={!feedbackRating}>
+                    {copy.feedbackSend} <ArrowUpRight size={15} />
+                  </button>
+                </form>
+              )}
+            </div>
+          </section>
         )}
         <section
           id="como-funciona"
