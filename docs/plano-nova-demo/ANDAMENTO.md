@@ -83,3 +83,17 @@ O cache global solicitado agora **ainda não está implementado**; o adaptador a
 ## Retomada aprovada em 23/10/2026
 
 O responsável respondeu “comece”, aprovando REVISAO-EXPERIENCIA-E-AUDIO.md. A pausa foi encerrada. A falha do teste novo de reconciliação era isolamento do contador do mock entre testes; corrigida antes das novas alterações. Baseline da retomada: 70 testes/16 arquivos, lint e TypeScript aprovados. Refinamentos pendentes de apoio/foco/player e recuperação foram preservados; cache global e identidade entram nos próximos commits.
+
+## Lote 6 — revisão aprovada implementada localmente
+
+- Backend em `842e63d`: `POST /api/demo/audio` aceita somente IDs do catálogo, valida origem/payload, aplica rate limit persistente e falha sanitizada. O adaptador tem um único chamador de produção, o serviço de cache; gerador direto antigo desativado.
+- Cache global SHA-256, texto NFC/espaços normalizados e parâmetros de síntese completos. Firestore `speech_audio_cache_v3` coordena reservas e tentativa única; Blob guarda MP3 imutável no caminho determinístico. Transações não chamam o provedor. Falhas após início preservam o contador e bloqueiam regeneração; arquivo já salvo pode ser reconciliado. Sem TTL/exclusão do ledger. Cache antigo preservado sem leituras.
+- Frontend em `d91626b`: mesma marca de quatro barras e palavra BasedSpeak, paleta Orbit e Geist local aplicadas à composição própria da cafeteria. Histórico das falas reais permanece consultável; recolhido durante tentativa mental para não revelar Really automaticamente. Não houve restauração de UI/reducer/rotas Orbit.
+- Áudio somente após clique, sem pré-geração/autoplay. Player único, pausa/retomada/parada e velocidade local 1×/0,9× sobre o mesmo arquivo. Mudança de etapa invalida pedidos/reprodução antigos. A preferência mais recente é respeitada mesmo durante preparação assíncrona. Erros não alteram o enredo nem exigem login/microfone.
+- README, env de exemplo, mídia, contratos, legal e inventários atualizados. Avaliação remota e telemetria continuam desativadas; rascunho local sem confirmação falsa de envio.
+- Verificação: **89 testes em 20 arquivos**, incluindo 384 percursos narrativos, contrato do catálogo, configuração sem fallback de voz, concorrência entre instâncias, reserva perdida, processo interrompido após início, falha ambígua, upload sem confirmação e recuperação de Blob. Lint e TypeScript sem avisos. Build de produção local aprovado; rodada final após ajustes do player também aprovada.
+- Inspeção dos chunks públicos não encontrou `xi-api-key`, `ELEVENLABS_API_KEY`, `BLOB_READ_WRITE_TOKEN`, `firebase-admin`, URL do provedor ou coleções curriculares. Configuração Firebase/regras/índices permaneceu intocada.
+- A abertura do navegador em `http://localhost:3100` foi recusada pela autorização do navegador nesta rodada. Nenhum contorno foi tentado. Portanto, a identidade foi conferida em código contra a referência anteriormente observada; **a conferência visual/interativa da versão final está pendente**. Não anexar capturas antigas como prova desta versão.
+- Servidor local de verificação iniciado com os três valores de voz/Blob explicitamente vazios, para impedir chamadas pagas ou uploads. Nenhum serviço remoto consultado/alterado; nenhum deploy ou script operacional executado.
+
+Pendências de prontidão pública: nove imagens finais; validação autorizada da voz/gravações e infraestrutura real; conferência visual no navegador; duração aproximada validada com participantes. Não declarar essas verificações como concluídas.

@@ -1,5 +1,7 @@
 # Ordem de execução para a substituição
 
+**Atualização aprovada em 23/10/2026:** [REVISAO-EXPERIENCIA-E-AUDIO.md](REVISAO-EXPERIENCIA-E-AUDIO.md) substitui as decisões abaixo sobre identidade e voz estática. A implementação usa a marca/paleta Orbit, histórico contínuo e áudio sob demanda com coordenação Firestore/Blob global e nenhuma repetição automática após início de tentativa. Lotes originais abaixo são o registro-base; resultados em ANDAMENTO.md.
+
 Execução local autorizada em 23/10/2026, seguindo os lotes abaixo. Estado e evidências em [ANDAMENTO.md](ANDAMENTO.md). Não publicar regras, fazer deploy ou alterar serviços/dados remotos.
 
 ## Princípios de execução
@@ -31,7 +33,7 @@ Lotes 1 e 2 podem ter implementação independente depois do contrato do lote 0;
 
 **Integração de UI:** executar percurso completo para os três perfis e os dois ramos das escolhas, incluindo os três finais; caminho curto e longo; reload em cada estado relevante; áudio falhando; storage indisponível; falha de rede; feedback com escolha, comentário e ambos vazios.
 
-**Fronteira client/server:** inspeção do grafo e chunks para garantir ausência de Firebase Admin, credenciais, Asaas, Calendar e código de currículo no browser. Todas as nove imagens e cinquenta vozes do manifesto existem e retornam sucesso. Não carregar todos os áudios na entrada.
+**Fronteira client/server:** inspeção do grafo e chunks para garantir ausência de Firebase Admin, credenciais, Asaas, Calendar e código de currículo no browser. As nove imagens finais existem e os cinquenta IDs de voz são validados via cache global; concorrência e falhas não duplicam tentativas de geração. Não carregar todos os áudios na entrada.
 
 **Regressão:** confirmar 19 rotas API inventariadas e contratos explicitamente preservados/aposentados. Antes da implementação, baseline registrada nesta auditoria foi 112 testes, lint e TypeScript aprovados; repetir após a mudança e explicar diferenças. Build ainda não foi verificado na auditoria base.
 

@@ -10,16 +10,24 @@ Node.js 22 ou superior e npm. Use `npm ci`, `npm run dev` e abra `http://localho
 
 ## Estado da entrega
 
-A conversa, os 128 caminhos narrativos, os três perfis, ajuda, retrospectiva e recuperação local estão implementados. A biblioteca final de nove imagens/cinquenta áudios está pendente. As quatro artes de apresentação são referências conceituais explicitamente identificadas. Ver `docs/plano-nova-demo/MIDIA.md`. Ainda não declarar a prévia pronta para publicação.
+A conversa, os 128 caminhos narrativos, os três perfis, ajuda, retrospectiva e recuperação local estão implementados. As nove imagens finais ainda estão pendentes. O áudio sob demanda está implementado com cache global, mas não foi gerado nem validado com o provedor real. As quatro artes de apresentação são referências conceituais explicitamente identificadas. Ver `docs/plano-nova-demo/MIDIA.md`. Ainda não declarar a prévia pronta para publicação.
 
 A sessão e o rascunho de avaliação ficam neste navegador. Storage indisponível não bloqueia a história. Recomeçar pede confirmação e limpa somente as chaves da demo. Não há sincronização entre dispositivos.
 
-Coleta de eventos e envio de avaliação remotos estão desativados, conforme a opção aprovada de teste local + observação humana. O formulário não confirma recebimento. Responsável, contato e retenção devem estar definidos antes de implementar/ativar os endpoints `/api/demo/*`.
+Coleta de eventos e envio de avaliação remotos estão desativados, conforme a opção aprovada de teste local + observação humana. O formulário não confirma recebimento. Responsável, contato e retenção devem estar definidos antes de implementar/ativar os endpoints de sessão, eventos e avaliação.
+
+## Áudio no servidor
+
+A revisão aprovada em `docs/plano-nova-demo/REVISAO-EXPERIENCIA-E-AUDIO.md` substitui a biblioteca estática de voz. Ao clicar em Ouvir, o cliente envia somente um ID permitido para `POST /api/demo/audio`. O servidor resolve texto e configuração, usa SHA-256 determinístico, coordena a tentativa por transação Firestore e salva MP3 imutável no Vercel Blob. Frases idênticas com os mesmos parâmetros compartilham o arquivo em todo o site. Abertura e retomada não geram áudio; velocidade local reutiliza o arquivo.
+
+São necessários `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `BLOB_READ_WRITE_TOKEN` e o Firebase Admin já documentado. Sem configuração, o texto continua funcionando. Segredos nunca são retornados ao cliente. Modelo `eleven_flash_v2_5`, MP3 `mp3_44100_128`, idioma inglês e síntese a `0.78`.
+
+O ledger `speech_audio_cache_v3` não deve ter TTL nem ser apagado: após registrar o início de uma tentativa, uma falha incerta bloqueia nova geração automática da mesma chave. O serviço procura um Blob já salvo para recuperação. Essa política preserva o limite de custo mesmo após timeout ou reinício. O cache antigo permanece intacto e não é lido. Testes usam provedores simulados; nenhuma chamada paga ou alteração remota foi realizada.
 
 ## Código
 
 - `src/features/demo/content/parts/`: roteiro aprovado em dez partes; `content/media.ts`: inventário de mídia.
-- `src/features/demo/model/`: transições puras, histórico e retrospectiva. `session/`: persistência local versionada; nenhum Firebase no caminho da demo.
+- `src/features/demo/model/`: transições puras, histórico e retrospectiva. `session/`: persistência local versionada; nenhum Firebase no cliente da demo.
 - `src/client/auth/`: SDK browser, perfil mínimo, navegação e sincronização de cookie para futuras telas autenticadas.
 - `src/server/`: Firebase Admin lazy, autorização, convites, entitlement financeiro, pagamentos, reservas/locks e adaptadores Asaas, Calendar, ElevenLabs/Blob.
 - `src/contracts/`: contratos compartilháveis sem SDKs. `src/app/api/`: URLs preservadas.
@@ -35,7 +43,7 @@ A sessão cria um perfil mínimo após verificar o token Firebase. Não escreve 
 
 A agenda mantém identificadores/metadados históricos para não duplicar reservas. Nenhuma aprovação de prova é consultada. Uma operação server-only autorizada chama `releaseLiveSession({ userId })`; então o cliente autenticado pode consultar disponibilidade/pedir um horário. Os locks, revisões e IDs determinísticos do Calendar permanecem.
 
-Os scripts `scheduling:health`, `payments:audit` e `auth:admins` são operacionais e podem consultar/alterar serviços externos. Não fazem parte do build nem foram executados nesta substituição. Produção de voz em `scripts/media-production/produce.mjs` também exige autorização específica e revisão da gravação.
+Os scripts `scheduling:health`, `payments:audit` e `auth:admins` são operacionais e podem consultar/alterar serviços externos. Não fazem parte do build nem foram executados nesta substituição. O antigo caminho direto de produção de voz em `scripts/media-production/produce.mjs` foi desativado para impedir geração fora do cache compartilhado.
 
 ## Plano e recuperação
 

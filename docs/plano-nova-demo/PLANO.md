@@ -1,5 +1,7 @@
 # BasedSpeak: plano de substituição do site
 
+**Atualização aprovada em 23/10/2026:** [REVISAO-EXPERIENCIA-E-AUDIO.md](REVISAO-EXPERIENCIA-E-AUDIO.md) substitui as decisões abaixo sobre identidade e voz estática. A implementação usa a marca/paleta Orbit, histórico contínuo e áudio sob demanda com coordenação Firestore/Blob global e nenhuma repetição automática após início de tentativa. Lotes originais abaixo são o registro-base; resultados em ANDAMENTO.md.
+
 **Data:** 23/10/2026. **Base auditada:** commit `b881b3e`. **Estado:** execução local iniciada; acompanhamento em [ANDAMENTO.md](ANDAMENTO.md). Ações remotas e deploy permanecem fora do escopo.
 
 ## 1. Decisão de escopo consolidada
@@ -39,7 +41,7 @@ Os caminhos atuais foram verificados. Caminhos futuros são propostas de impleme
 | `src/lib/payments/service.ts` e `src/lib/scheduling/service.ts` importam `auth/premium-access.ts`, que alcança progresso/currículo | Apagar `src/data` primeiro quebra integrações preservadas | Separar identidade, entitlement financeiro e reserva de agenda das regras de provas/pilares |
 | `src/lib/auth/service.ts` mistura autenticação, usuário, progresso e estatísticas | Guardar esse arquivo inteiro perpetua o curso antigo | Extrair auth/perfil mínimos; remover updateUserProgress e os tipos curriculares |
 | `src/context/AuthContext.tsx` contém POST/DELETE de `/api/auth/session` | Apagar apenas o provider perde parte da integração de sessão | Extrair sincronização de cookie para utilitário client independente de React/router |
-| `/api/speech` importa `welcomeSpeechPhrases` de `app/inicio-orbita-7k3/conversation.ts` | A API impede excluir o protótipo | Extrair ElevenLabs/armazenamento para ferramenta de produção; retirar síntese pública durante a demo |
+| `/api/speech` importa `welcomeSpeechPhrases` de `app/inicio-orbita-7k3/conversation.ts` | A API impede excluir o protótipo | Extrair ElevenLabs/armazenamento para ferramenta de produção; aposentar endpoint antigo; novo áudio somente via cache global aprovado |
 | `/api/verify-payment` importa tipo de `src/features/payment/payment-mode.ts` | Excluir `features/**` diretamente quebra API | Extrair o contrato útil para `src/contracts/payments.ts`; apagar estado visual antigo |
 | Bootstrap Admin duplicado em `firebase-admin.ts` e `firebase-admin-firestore.ts` | Configuração e comportamento divergentes | Uma inicialização canônica, server-only e sob demanda |
 | Fallbacks de erro usam neon; botão antigo usa Radix/CVA | Remover pacotes sem trocar os fallbacks quebra a aplicação | Reescrever fallbacks e botão simples antes de podar dependências |
@@ -56,7 +58,7 @@ Os caminhos atuais foram verificados. Caminhos futuros são propostas de impleme
 | Protótipo `inicio-orbita-7k3` | Retirar completamente; não reutilizar seu motor ou onboarding de nome |
 | APIs de autenticação, convites, pagamentos e calendário | Preservar endereços, segurança e núcleo; adaptar dependências e estado de disponibilidade |
 | APIs de exames, decisão de exames, progresso, heartbeat e ranking | Manter endereço com JSON 410; retirar implementação curricular |
-| `/api/speech` | Manter endereço com JSON 410 na nova versão; preservar provedor como ferramenta de produção, não geração na visita |
+| `/api/speech` | Manter endereço com JSON 410 na nova versão; novo endpoint público de áudio com cache global, sem reutilizar contrato antigo |
 | `termos` e `privacidade` | Manter rotas e adaptar texto ao produto real, sem providers antigos |
 | Documentos/arte/PDFs novos em `output` | Preservar como materiais atuais do produto, fora do runtime |
 | Relatórios, scripts de atualização e conteúdo antigos | Retirar conforme manifesto; não executar scripts mutadores para limpar |
@@ -112,7 +114,7 @@ src/
   lib/routes.ts, lib/ui/cn.ts          rotas e pequeno utilitário compartilhado
   proxy.ts                           somente aliases browser; não auth da demo
 public/demo/cafe/v1/images/           nove ilustrações finais
-public/demo/cafe/v1/audio/            cinquenta arquivos de voz finais
+src/server/speech/                  cache global durável + coordenação de áudio
 scripts/                             operação preservada + produção de mídia
 tests/                               contratos preservados e invariantes da demo
 docs/plano-nova-demo/                 este plano
@@ -146,7 +148,7 @@ Se o responsável escolher outra política, alterar esta seção antes do lote c
 
 Fonte funcional: narrativa e mecânicas completas aprovadas das partes 1-10, com refinamentos posteriores. O PDF detalhado anterior documenta essa base. Os PDFs de 22 páginas são recortes de apresentação, não especificação de todas as atividades.
 
-As quatro artes produzidas para os PDFs não substituem automaticamente as nove ilustrações de produção. O conjunto de 50 áudios ainda precisa ser produzido/validado. Não usar o cache antigo como se fosse a biblioteca final. A primeira implementação pode usar referências provisórias identificadas em desenvolvimento; a aceitação pública exige as nove imagens e os cinquenta arquivos corretos.
+As quatro artes produzidas para os PDFs não substituem automaticamente as nove ilustrações de produção. Os 50 contextos de fala passam a usar geração sob demanda e ainda precisam de validação real da voz. Não usar o cache antigo como se fosse a biblioteca final. A primeira implementação pode usar referências provisórias identificadas em desenvolvimento; a aceitação pública exige as nove imagens e reprodução validada dos contextos de fala pelo cache global.
 
 ## 9. Ordem e conclusão
 

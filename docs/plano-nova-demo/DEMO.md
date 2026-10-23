@@ -1,6 +1,6 @@
 # Projeto técnico da demo pública
 
-Proposta de implementação do roteiro já aprovado. Este documento não substitui o diálogo completo nem autoriza adicionar cenas.
+Projeto do roteiro aprovado. A revisão de 23/10/2026 em [REVISAO-EXPERIENCIA-E-AUDIO.md](REVISAO-EXPERIENCIA-E-AUDIO.md) define a identidade Orbit, a conversa contínua e o áudio sob demanda; prevalece sobre decisões antigas de voz estática. Este documento não substitui o diálogo completo nem autoriza adicionar cenas.
 
 Execução: motor e interface locais implementados no Lote 2; fonte literal complementar em `output/pdf/BasedSpeak_Demo_Experiencia_Visual.pdf` (55 páginas). Estado de produção de mídia em [MIDIA.md](MIDIA.md). Coleta remota adiada; a avaliação preserva rascunho e não confirma envio.
 
@@ -9,7 +9,7 @@ Execução: motor e interface locais implementados no Lote 2; fonte literal comp
 - `/`: título, proposta curta, duração estimada, aviso de microfone dispensável e escolha de apoio sem opção pré-selecionada.
 - `/demo`: uma experiência com estados internos para partes 1-10, retrospectiva, conversa completa, conclusão e avaliação opcional.
 - Nenhum `AuthProvider`, Firebase cliente, plano/pagamento, progresso de pilares ou motor órbita no caminho de renderização da demo.
-- Nenhuma chamada a Asaas, Calendar, ElevenLabs, Google Translate TTS, Youdao ou geração de imagem durante a conversa.
+- Nenhuma chamada a Asaas, Calendar, Google Translate TTS, Youdao ou geração de imagem. ElevenLabs somente pelo servidor após clique, com cache global persistente. Carregar a demo não inicia serviços externos.
 - React `useReducer` e funções TypeScript puras são suficientes. Não adotar uma plataforma genérica de cursos nem interpretar HTML arbitrário dentro do conteúdo.
 
 ## Conteúdo e transições
@@ -76,15 +76,19 @@ Se storage falhar/quota estiver indisponível, manter estado em memória e permi
 
 ## Mídia
 
-Manifesto `src/features/demo/content/media.ts`: IDs V01-V09 e C01-C30/U01-U20, versão, caminho, papel e contexto. Dois arquivos podem ter o mesmo texto; o ID não pode ser um hash apenas da frase. O mesmo arquivo pode ser reutilizado quando a referência aprovada for a mesma.
+Manifesto `src/features/demo/content/media.ts`: imagens V01–V09 e falas C01–C30/U01–U20, com papel, texto, significado e contexto. IDs narrativos distintos podem compartilhar o mesmo áudio quando os parâmetros forem iguais.
 
-Produção inicial em `public/demo/cafe/v1/`, com URLs estáticas. A integração Blob é preservada como capacidade de publicação; se for escolhida para a biblioteca, mudar a origem no manifesto e publicar uma única cópia de runtime. Não adicionar alternância de origens complexa sem necessidade.
+Imagens locais em `public/demo/cafe/v1/`. Voz via `POST /api/demo/audio`, somente ID permitido: chave SHA-256 normalizada, reserva transacional Firestore, no máximo uma tentativa de provedor por chave e MP3 imutável no Blob. Detalhes, parâmetros e política de falha incerta na revisão aprovada. Não há fallback direto ao provedor. Segredos somente no servidor.
 
 Player único com play/pause/cancel, replay e tratamento de falha. Nova reprodução interrompe a anterior. Ao avançar, parar áudio abandonado. A fala de referência do aluno e a reação seguem ordem causal; erro/autoplay bloqueado não impede o texto e não força permissão de microfone. Cancelar efeitos ao desmontar/alterar fase. Não marcar ouvir apenas porque o usuário tentou play se a reprodução falhou.
 
 Carregar imagem atual e antecipar a próxima provável; não baixar os cinquenta áudios na entrada. Replays reutilizam recurso/cache; não geram novo arquivo nem nova fala narrativa. Textos, foco de teclado e clique por seleção continuam suficientes para montar blocos; arrastar não é obrigatório.
 
-## Novas APIs: contratos propostos, ainda não implementados
+## API de áudio implementada e coleta remota adiada
+
+`POST /api/demo/audio` é público, mesma origem, payload até 1 KiB, sem login e com rate limit persistente (120 pedidos/minuto/IP). Recebe somente audioId e retorna 200 com URL opaca de Blob, 202 com Retry-After durante preparação ou erro sanitizado. O cliente faz espera limitada e pode cancelar sem avançar a história. Velocidade local 1×/0,9× não muda a síntese fixa a 0.78.
+
+Os contratos abaixo de sessão, eventos e avaliação permanecem propostas **não implementadas**, conforme a decisão de coleta local.
 
 Os atuais endpoints curriculares não são reaproveitados para analytics da demo. Usar três handlers finos e serviços em `src/server/demo`.
 
@@ -123,4 +127,4 @@ Primeiros seis participantes continuam com ficha de observação humana. Não co
 5. Transcript contém somente falas da tentativa, e transformação só aparece quando aconteceu.
 6. Recarregar não duplica áudio, fala, decisão, avaliação ou evento.
 7. Falha de rede não trava a história nem fabrica confirmação de feedback.
-8. O catálogo publicado resolve todas as nove imagens/cinquenta vozes; não depende da pasta órbita nem de geração durante uso.
+8. As nove imagens finais e os cinquenta contextos de fala são revisados; áudio sob demanda reutiliza arquivos globais, sem depender da pasta órbita. Não gerar novamente após resultado incerto.

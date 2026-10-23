@@ -15,7 +15,7 @@ Página / componente client
   → adaptador Firebase / Asaas / Calendar
 ~~~
 
-A demo usa apenas `/api/demo/*` e recursos estáticos versionados. O estado da conversa fica no navegador; a API anônima serve apenas sessão de teste, telemetria e avaliação opcional. Esses dois conjuntos de integração não se chamam.
+A demo usa `POST /api/demo/audio` após clique e imagens locais versionadas. O estado da conversa fica no navegador. Sessão remota, telemetria e envio de avaliação estão adiados. O serviço de áudio usa apenas o Admin/Firestore como coordenador persistente e Blob/ElevenLabs; não chama auth, pagamentos ou agenda.
 
 ## Firebase, autenticação e banco
 
@@ -62,11 +62,15 @@ Rotas a manter: `GET/POST /api/checkout`, `POST /api/verify-payment`, `POST /api
 
 Desacoplar entitlement e dependências curriculares do serviço antes da limpeza. “Guardar a rota” significa manter o handler operacional/documentado; não preservar a tela de calendário antiga.
 
-## Áudio pronto e publicação de mídia
+## Áudio sob demanda e cache persistente global
 
-A experiência usa 9 imagens e 50 arquivos de voz aprovados, servidos estaticamente de `public/demo/cafe/v1/`. O manifesto futuro fica em `src/features/demo/content/media.ts`.
+A [revisão aprovada em 23/10/2026](REVISAO-EXPERIENCIA-E-AUDIO.md) substitui o plano estático anterior. O manifesto `src/features/demo/content/media.ts` contém nove imagens e cinquenta IDs de fala. Textos e configurações iguais compartilham um arquivo, independentemente de usuário/rota/contexto.
 
-Hoje, `GET /api/speech` e `src/hooks/useTTS.ts` dão suporte a geração/reprodução antiga; a rota importa falas de `src/app/inicio-orbita-7k3/conversation.ts`. Antes de excluir o protótipo, extrair a capacidade de produção para `src/server/integrations/elevenlabs.ts` e uma ferramenta de publicação. O visitante não gera TTS. O endereço antigo `/api/speech` deve responder JSON 410 com código estável após extração, sem redirect HTML. `@vercel/blob` pode permanecer para publicação/armazenamento futuro, mas a demo pública não depende dele se a biblioteca aprovada estiver no deploy como assets estáticos.
+`POST /api/demo/audio` aceita apenas um ID permitido, valida origem/payload e aplica rate limit persistente. `src/server/speech/runtime.ts` resolve os parâmetros server-only e conecta `cache.ts` ao Firestore, ao Blob e ao adaptador ElevenLabs. O cache usa SHA-256 do texto normalizado e dos parâmetros. Transações reservam a chave e registram uma única tentativa antes da chamada externa; o arquivo imutável fica em `speech-cache/v3/{key}.mp3`. Segredos nunca são retornados. Modelo `eleven_flash_v2_5`, MP3 `mp3_44100_128`, idioma en, velocidade 0.78, stability 0.62 e similarity_boost 0.75; voiceId somente de ambiente.
+
+Registro durável em `speech_audio_cache_v3/{key}`: identidade/hash/versão, status, ownerToken, leaseExpiresAt, providerAttemptCount, timestamps e metadados de áudio (URL/caminho/bytes/checksum quando disponível). Não usar TTL nem apagar esse ledger. Após início de chamada com resultado incerto, não repetir a geração automaticamente, mesmo se o lease expirar; recuperar Blob já gravado quando existir. Uma Function perdida antes da chamada pode ter sua reserva recuperada. Chamadas ao provedor e uploads ficam fora de callbacks transacionais.
+
+`GET /api/speech` continua JSON 410. O antigo script de produção direta foi desativado para impedir desvio do controle global. O único chamador de produção do adaptador é o runtime de cache. Nenhuma geração, upload, teste pago ou consulta remota foi executada nesta revisão; os testes usam mocks. A duração e a voz reais precisam de validação autorizada. Replays e seleção de velocidade local não criam arquivos.
 
 ## Banco e dados remotos
 
@@ -80,7 +84,8 @@ Coleções identificadas no código/contratos da base atual:
 | `live_sessions`, `live_session_slot_locks`, `access_requests` | agendamento e pedidos de acesso | Preservar e manter contrato operacional |
 | `pillar_exams`, `exam_submission_locks` | provas curriculares | Não excluir documentos nesta mudança. Código antigo pode ser retirado depois de confirmar que nenhuma integração financeira/agenda depende dele; não há promessa de leitura futura dessas coleções |
 | `rate_limits` | controles de abuso | Preservar; separar namespaces de endpoint |
-| `speech_audio_cache` | TTS antigo | Não apagar remotamente; deixar de ler pela experiência pública. Política de retenção é decisão separada |
+| `speech_audio_cache` | TTS antigo | Não apagar remotamente; não lido pela experiência pública |
+| `speech_audio_cache_v3` | Novo coordenador de áudio | Ledger persistente global, sem TTL/exclusão; impede nova tentativa por chave. Somente servidor |
 | `webhook_events` | regras/uso histórico | Não confundir com `asaas_webhook_events`; não renomear nem apagar nesta limpeza |
 | `demo_sessions`, subcoleção `events`, `demo_feedback` | ainda não existem | Coleções propostas apenas se sessão anônima/telemetria remota forem implementadas; acesso público negado e validação server-side obrigatória |
 
@@ -96,7 +101,7 @@ Os nomes são referências de localização/configuração, não valores. Nunca 
 | Firebase Admin/auth | `FIREBASE_SERVICE_ACCOUNT`, `FIREBASE_ADMIN_EMAILS` |
 | Asaas | `ASAAS_API_KEY`, `ASAAS_BASE_URL`, `ASAAS_WEBHOOK_TOKEN`, `ASAAS_USER_AGENT`, `ASAAS_ALLOW_SANDBOX_IN_PRODUCTION`, `ASAAS_ENABLE_SPECIALTY_CHECKOUT`, `BETA_FREE_MODE` |
 | Calendar | `GOOGLE_CALENDAR_ID`, `GOOGLE_CALENDAR_SERVICE_ACCOUNT`, `GOOGLE_CALENDAR_TUTOR_EMAIL`, `GOOGLE_CALENDAR_TIMEZONE`, `GOOGLE_CALENDAR_SLOT_DURATION_MINUTES`, `GOOGLE_CALENDAR_SLOT_GAP_MINUTES`, `GOOGLE_CALENDAR_WORKDAYS`, `GOOGLE_CALENDAR_WORKDAY_START_HOUR`, `GOOGLE_CALENDAR_WORKDAY_END_HOUR` |
-| Voz e Blob | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `BLOB_READ_WRITE_TOKEN`; `SPEECH_CACHE_DIR` somente em desenvolvimento |
+| Voz e Blob | `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `BLOB_READ_WRITE_TOKEN`; Firestore Admin para coordenação. Sem fallback de voz nem cache em disco |
 
 `NEXT_PUBLIC_APP_URL` também aparece na configuração atual. O `.env.example` será atualizado em implementação para documentar todas as chaves esperadas e valores fictícios/placeholder, sem substituir a configuração do ambiente. `configuracoes/scheduling.env.example` pode ser consolidado. Não executar `vercel env pull`, publicar configurações ou abrir secrets como parte deste planejamento.
 
@@ -126,7 +131,7 @@ Aceitação: nenhum import de UI/currículo antigo em serviços preservados; Adm
 
 Os destinos acima agora existem, exceto `src/server/auth/service.ts`: o serviço original era browser SDK, por isso a extração mínima correta é `src/client/auth/service.ts`, e o servidor continua representado por principal/request-auth/convites/cookie. Não mover SDK browser para server-only. O serviço misto antigo será retirado com a UI.
 
-`getAdminAuth()` e `getAdminDb()` são os únicos pontos de bootstrap do runtime Next. `/api/speech` já retorna JSON 410; produção explícita em `scripts/media-production/produce.mjs` usa o adaptador de voz. Ferramenta não executada nesta tarefa.
+`getAdminAuth()` e `getAdminDb()` são os únicos pontos de bootstrap do runtime Next. `/api/speech` retorna JSON 410. A produção direta antiga foi posteriormente desativada; todo novo áudio usa o cache compartilhado descrito acima.
 
 Agenda: contratos de leitura, pedido, cancelamento e decisão preservados. A chave histórica `userId_p2` e campos de origem ficam como compatibilidade de armazenamento/IDs do provedor; nenhuma consulta a provas, gravação de progresso ou exigência curricular permanece no serviço. Uma futura ação autorizada chama `releaseLiveSession({ userId })` no servidor antes de oferecer horários. A demo não chama esse serviço.
 
@@ -136,4 +141,4 @@ A sessão anônima/telemetria remota pode ser adiada conforme plano. Sem respons
 
 `src/server/auth/service.ts` agora existe: `recordVerifiedLogin` recebe somente identidade já verificada pelo handler de sessão, cria perfil mínimo se ausente e atualiza apenas timestamps se existente. `src/client/auth/service.ts` estabelece o cookie seguro antes de ler o perfil. Isso evita depender dos campos curriculares exigidos nas regras publicadas antigas; nenhum ajuste de regras ou dado remoto foi aplicado. A autorização administrativa reutiliza `requireAdminPrincipal` em `src/server/auth/route-guards.ts`.
 
-A CSP específica de `/` e `/demo` não abre conexão a integrações. Uma futura tela de login deve usar sua própria rota e revisar CSP apropriada; não importar esses serviços no shell público.
+A CSP específica de `/` e `/demo` permite conexões à própria origem e mídia de Blob público; não permite chamar ElevenLabs do browser. Uma futura tela de login deve usar sua própria rota e revisar CSP apropriada; não importar esses serviços no shell público.
