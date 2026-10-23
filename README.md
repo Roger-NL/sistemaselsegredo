@@ -10,7 +10,7 @@ Node.js 22 ou superior e npm. Use `npm ci`, `npm run dev` e abra `http://localho
 
 ## Estado da entrega
 
-A conversa, os 128 caminhos narrativos, os três perfis, ajuda, retrospectiva e recuperação local estão implementados. As nove imagens finais ainda estão pendentes. O áudio sob demanda está habilitado localmente e a primeira frase foi validada com ElevenLabs, Blob e Firestore reais, incluindo reutilização concorrente; a revisão dos demais contextos continua pendente. As quatro artes de apresentação são referências conceituais explicitamente identificadas. Ver `docs/plano-nova-demo/MIDIA.md`. Ainda não declarar a prévia pronta para publicação.
+A conversa, os 128 caminhos narrativos, os três perfis, ajuda, retrospectiva e recuperação local estão implementados. As nove imagens finais ainda estão pendentes. O áudio sob demanda está habilitado localmente e os 50 IDs foram validados tecnicamente com ElevenLabs, Blob e Firestore reais: 46 MP3s únicos, todos decodificados, com reutilização concorrente e após reinício sem nova geração. A escuta editorial permanece separada. As quatro artes de apresentação são referências conceituais explicitamente identificadas. Ver `docs/plano-nova-demo/MIDIA.md`. Ainda não declarar a prévia pronta para publicação.
 
 A sessão e o rascunho de avaliação ficam neste navegador. Storage indisponível não bloqueia a história. Recomeçar pede confirmação e limpa somente as chaves da demo. Não há sincronização entre dispositivos.
 
@@ -22,7 +22,7 @@ A revisão aprovada em `docs/plano-nova-demo/REVISAO-EXPERIENCIA-E-AUDIO.md` sub
 
 São necessários `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `BLOB_READ_WRITE_TOKEN` e o Firebase Admin já documentado. Sem configuração, o texto continua funcionando. Segredos nunca são retornados ao cliente. Modelo `eleven_flash_v2_5`, MP3 `mp3_44100_128`, idioma inglês e síntese a `0.78`.
 
-O ledger `speech_audio_cache_v3` não deve ter TTL nem ser apagado: após registrar o início de uma tentativa, uma falha incerta bloqueia nova geração automática da mesma chave. O serviço procura um Blob já salvo para recuperação. Essa política preserva o limite de custo mesmo após timeout ou reinício. O cache antigo permanece intacto e não é lido. Testes automáticos usam provedores simulados. Após autorização específica, a frase C01 foi gerada uma vez e reutilizada em três pedidos concorrentes; o ledger real registra uma única tentativa. O token do Blob existente foi sincronizado somente para o arquivo local ignorado pelo Git.
+O ledger `speech_audio_cache_v3` não deve ter TTL nem ser apagado: após registrar o início de uma tentativa, uma falha incerta bloqueia nova geração automática da mesma chave. O serviço procura um Blob já salvo para recuperação. Essa política preserva o limite de custo mesmo após timeout ou reinício. O cache antigo permanece intacto e não é lido. Testes automáticos usam provedores simulados. Após autorização específica, todos os 50 IDs foram verificados: o ledger real registra uma única tentativa para cada um dos 46 textos únicos. Repetições entre IDs, concorrência e reinício reutilizaram os mesmos arquivos; ver `docs/plano-nova-demo/VALIDACAO-AUDIO-COMPLETA.md`. O token do Blob existente foi sincronizado somente para o arquivo local ignorado pelo Git.
 
 ## Código
 
