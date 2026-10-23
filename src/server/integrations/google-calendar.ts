@@ -1,8 +1,10 @@
+import "server-only";
+
 import { createHash } from 'node:crypto';
 import { google } from 'googleapis';
 import { addMinutes, eachDayOfInterval, format, isAfter, isBefore, parseISO, startOfDay } from 'date-fns';
 import { fromZonedTime, toZonedTime } from 'date-fns-tz';
-import type { LiveSessionAvailabilitySlot, LiveSessionBooking, SchedulingCalendarDayItem } from '@/lib/scheduling/types';
+import type { LiveSessionAvailabilitySlot, LiveSessionBooking, SchedulingCalendarDayItem } from '@/server/scheduling/types';
 
 const CALENDAR_SCOPE = ['https://www.googleapis.com/auth/calendar'];
 const DEFAULT_TIMEZONE = process.env.GOOGLE_CALENDAR_TIMEZONE || 'America/Sao_Paulo';

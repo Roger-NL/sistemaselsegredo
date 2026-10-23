@@ -8,7 +8,7 @@ import Link from "next/link";
 import AuthBackground from "@/components/auth/AuthBackground";
 import ConciergeModal from "@/components/core/ConciergeModal";
 import { ROUTES } from "@/lib/routes";
-import { buildAuthEntryHref, resolvePostAuthTarget } from "@/lib/auth/post-auth";
+import { buildAuthEntryHref, resolvePostAuthTarget } from "@/client/auth/navigation";
 
 export default function LoginPage() {
     return (

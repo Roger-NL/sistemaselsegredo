@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase";
+import { db } from "@/client/auth/firebase";
 import { collection, getCountFromServer, query, where } from "firebase/firestore";
 import { Users, Ticket, TrendingUp, DollarSign } from "lucide-react";
 

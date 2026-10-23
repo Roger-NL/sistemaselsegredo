@@ -1,14 +1,13 @@
+import { assertOnlyKeys, readJsonObject, RequestPayloadError, requestPayloadErrorResponse } from "@/server/http/request";
 import { NextResponse } from 'next/server';
-import { getRequestPrincipal } from '@/lib/auth/principal';
-import { requestLiveSessionBooking } from '@/lib/scheduling/service';
-import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from '@/lib/server/rate-limit';
+import { getRequestPrincipal } from '@/server/auth/principal';
+import { requestLiveSessionBooking } from '@/server/scheduling/service';
+import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from '@/server/http/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { userId: requestedUserId, slotStart, slotEnd, notes } = body;
     const principal = await getRequestPrincipal(req, {
       allowBearer: true,
       allowSessionCookie: true,
@@ -16,6 +15,13 @@ export async function POST(req: Request) {
 
     if (!principal) {
       return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+    }
+
+    const body = await readJsonObject(req, 8 * 1024);
+    assertOnlyKeys(body, ['userId', 'slotStart', 'slotEnd', 'notes']);
+    const { userId: requestedUserId, slotStart, slotEnd, notes } = body;
+    if (requestedUserId !== undefined && (typeof requestedUserId !== "string" || !requestedUserId || requestedUserId.length > 256)) {
+      return NextResponse.json({ error: "Invalid user ID." }, { status: 400 });
     }
 
     if (
@@ -44,6 +50,7 @@ export async function POST(req: Request) {
     const session = await requestLiveSessionBooking({ userId, slotStart, slotEnd, notes });
     return NextResponse.json({ success: true, session });
   } catch (error) {
+    if (error instanceof RequestPayloadError) return requestPayloadErrorResponse(error);
     if (error instanceof RateLimitError) return rateLimitErrorResponse(error);
     const message = error instanceof Error ? error.message : 'Failed to request booking.';
     const code = /^[A-Z0-9_]+$/.test(message) ? message : 'UNEXPECTED_ERROR';

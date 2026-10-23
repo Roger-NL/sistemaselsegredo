@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
 import PillarPageClient from "@/features/study/PillarPageClient";
-import { getRequestPrincipal } from "@/lib/auth/principal";
+import { getRequestPrincipal } from "@/server/auth/principal";
 import { getAdminDb } from "@/server/firebase";
 
 export const dynamic = "force-dynamic";

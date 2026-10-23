@@ -1,11 +1,11 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
-import { handleAsaasWebhook } from "@/lib/payments/service";
+import { handleAsaasWebhook } from "@/server/payments/service";
 import {
   readJsonObject,
   RequestPayloadError,
   requestPayloadErrorResponse,
-} from "@/lib/server/request";
+} from "@/server/http/request";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

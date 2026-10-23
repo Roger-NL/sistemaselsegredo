@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { getDeterministicCalendarEventId } from '../src/lib/scheduling/google-calendar';
-import type { LiveSessionBooking } from '../src/lib/scheduling/types';
+import { getDeterministicCalendarEventId } from '../src/server/integrations/google-calendar';
+import type { LiveSessionBooking } from '../src/server/scheduling/types';
 
 const booking: LiveSessionBooking = {
   id: 'user-1_p2',

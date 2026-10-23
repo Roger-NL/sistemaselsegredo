@@ -10,7 +10,7 @@ import {
   type WriterExamStatus,
   type WriterLiveSessionStatus,
 } from "@/lib/auth/premium-access";
-import { releaseLiveSessionAfterApproval } from "@/lib/scheduling/service";
+import { releaseLiveSession as releaseLiveSessionAfterApproval } from "@/server/scheduling/service";
 
 const EXAMS_COLLECTION = "pillar_exams";
 const USERS_COLLECTION = "users";

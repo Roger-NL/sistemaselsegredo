@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
 import { getAdminDb } from "@/server/firebase";
-import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
+import { RequestAuthError, requireAuthenticatedUser } from "@/server/auth/request-auth";
 import {
   DEFAULT_INVITE_EXPIRY_DAYS,
   generateSecureInviteCode,
@@ -11,14 +11,14 @@ import {
   hashInviteCode,
   INVITE_CODES_COLLECTION,
   timestampLikeToMillis,
-} from "@/lib/auth/invite-codes";
-import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from "@/lib/server/rate-limit";
+} from "@/server/auth/invites";
+import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from "@/server/http/rate-limit";
 import {
   RequestPayloadError,
   assertOnlyKeys,
   readJsonObject,
   requestPayloadErrorResponse,
-} from "@/lib/server/request";
+} from "@/server/http/request";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

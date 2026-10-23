@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AsaasTransportError, createPixPayment, getPixQrCode } from "@/lib/asaas";
-import { PaymentsDisabledError } from "@/lib/payments/config";
+import { AsaasTransportError, createPixPayment, getPixQrCode } from "@/server/integrations/asaas";
+import { PaymentsDisabledError } from "@/server/payments/config";
 
 const originalEnvironment = {
   baseUrl: process.env.ASAAS_BASE_URL,

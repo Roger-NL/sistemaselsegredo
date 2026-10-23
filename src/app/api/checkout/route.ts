@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
-import { AsaasApiError, AsaasTransportError } from "@/lib/asaas";
-import { createCheckout, getCheckoutState } from "@/lib/payments/service";
-import { PaymentsDisabledError } from "@/lib/payments/config";
-import type { CheckoutPlan } from "@/lib/payments/types";
-import { consumeRateLimit, RateLimitError, rateLimitErrorResponse } from "@/lib/server/rate-limit";
+import { RequestAuthError, requireAuthenticatedUser } from "@/server/auth/request-auth";
+import { AsaasApiError, AsaasTransportError } from "@/server/integrations/asaas";
+import { createCheckout, getCheckoutState } from "@/server/payments/service";
+import { PaymentsDisabledError } from "@/server/payments/config";
+import type { CheckoutPlan } from "@/server/payments/types";
+import { consumeRateLimit, RateLimitError, rateLimitErrorResponse } from "@/server/http/rate-limit";
 import {
   assertOnlyKeys,
   readJsonObject,
   RequestPayloadError,
   requestPayloadErrorResponse,
-} from "@/lib/server/request";
+} from "@/server/http/request";
 
 export const dynamic = "force-dynamic";
 const MAX_CHECKOUT_BODY_BYTES = 8 * 1_024;

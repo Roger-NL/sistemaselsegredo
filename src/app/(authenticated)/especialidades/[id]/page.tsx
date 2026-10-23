@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { PLANETS } from "@/data/curriculum";
 import { SPECIALIZATIONS_CONTENT } from "@/data/specializations-content";
 import { SpecializationStudyPage } from "@/features/decision/SpecializationStudyPage";
-import { getRequestPrincipal } from "@/lib/auth/principal";
+import { getRequestPrincipal } from "@/server/auth/principal";
 import { getAdminDb } from "@/server/firebase";
 import { ROUTES } from "@/lib/routes";
 

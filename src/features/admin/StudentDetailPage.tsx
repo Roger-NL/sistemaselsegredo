@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { db } from "@/lib/firebase";
+import { db } from "@/client/auth/firebase";
 import { collection, getDocs, updateDoc, doc, getDoc, query, where } from "firebase/firestore";
 import { ArrowLeft, User, Mail, Calendar, Clock, CalendarClock, ArrowUpRight, Sparkles } from "lucide-react";
 import { gradeExam, PillarExam } from "@/lib/exam/service";
 import { ROUTES } from "@/lib/routes";
-import type { LiveSessionBooking } from "@/lib/scheduling/types";
-import { hasAdminClaim } from "@/lib/auth/admin-policy";
+import type { LiveSessionBooking } from "@/server/scheduling/types";
+import { hasAdminClaim } from "@/server/auth/admin-policy";
 
 interface StudentProfile {
     id: string;

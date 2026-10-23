@@ -6,7 +6,7 @@ import { ROUTES } from "@/lib/routes";
 import { Check, ArrowRight, BookOpen, Fingerprint, Award, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
-import { hasAdminClaim } from "@/lib/auth/admin-policy";
+import { hasAdminClaim } from "@/server/auth/admin-policy";
 
 export default function ObrigadoPage() {
     const router = useRouter();

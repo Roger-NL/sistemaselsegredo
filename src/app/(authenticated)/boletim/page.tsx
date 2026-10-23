@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { db } from "@/lib/firebase";
+import { db } from "@/client/auth/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { PillarExam } from "@/lib/exam/service";
 import { ROUTES } from "@/lib/routes";

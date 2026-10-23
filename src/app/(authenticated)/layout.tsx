@@ -7,7 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { TubesBackground } from "@/components/ui/neon-flow";
 import { ROUTES } from "@/lib/routes";
-import { hasAdminClaim } from "@/lib/auth/admin-policy";
+import { hasAdminClaim } from "@/server/auth/admin-policy";
 
 export default function AuthenticatedLayout({
     children,

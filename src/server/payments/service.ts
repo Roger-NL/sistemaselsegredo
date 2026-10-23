@@ -1,3 +1,5 @@
+import "server-only";
+
 import { createHash, randomUUID } from "node:crypto";
 import { getAdminDb } from "@/server/firebase";
 import {
@@ -9,7 +11,7 @@ import {
   isPaymentPaid,
   AsaasApiError,
   type AsaasPayment,
-} from "@/lib/asaas";
+} from "@/server/integrations/asaas";
 import type {
   CheckoutPlan,
   CheckoutPaymentMethod,
@@ -21,15 +23,9 @@ import type {
   PaymentReconciliationStatus,
   PaymentVerificationResponse,
   PendingCheckoutPayment,
-} from "@/lib/payments/types";
-import { calculateCheckoutInstallmentTotals, MAX_CHECKOUT_INSTALLMENTS } from "@/lib/payments/installments";
-import { assertPaymentsEnabled } from "@/lib/payments/config";
-import {
-  buildStoredProgressSnapshot,
-  deriveLegacyApprovedPillar,
-  type WriterExamStatus,
-  type WriterLiveSessionStatus,
-} from "@/lib/auth/premium-access";
+} from "@/server/payments/types";
+import { calculateCheckoutInstallmentTotals, MAX_CHECKOUT_INSTALLMENTS } from "@/server/payments/installments";
+import { assertPaymentsEnabled } from "@/server/payments/config";
 
 const PAYMENT_VALUE = 297.0;
 const PAYMENT_DESCRIPTION = "BasedSpeak PRO - Acesso Premium";
@@ -60,7 +56,6 @@ type UserPaymentSnapshot = {
     plan?: CheckoutPlan;
   } | null;
   pendingCheckoutPayment?: PendingCheckoutPayment | null;
-  approvedPillar?: number;
   inviteCodeUsed?: string;
   subscriptionExpiresAt?: string;
   premiumPaymentId?: string;
@@ -501,75 +496,6 @@ async function getUserDoc(userId: string) {
   return getAdminDb().collection(USER_COLLECTION).doc(userId).get();
 }
 
-async function getLatestExamStatus(userId: string, pillarId: number): Promise<WriterExamStatus> {
-  const snapshot = await getAdminDb().collection("pillar_exams")
-    .where("userId", "==", userId)
-    .where("pillarId", "==", pillarId)
-    .get();
-
-  if (snapshot.empty) {
-    return "not_started";
-  }
-
-  const exams = snapshot.docs
-    .map((item) => item.data() as { status?: WriterExamStatus; createdAt?: { toMillis?: () => number } | null })
-    .sort((left, right) => {
-      const leftTime = left.createdAt?.toMillis?.() ?? 0;
-      const rightTime = right.createdAt?.toMillis?.() ?? 0;
-      return rightTime - leftTime;
-    });
-
-  return exams[0]?.status ?? "not_started";
-}
-
-async function recomputeStoredProgressSnapshot(
-  userId: string,
-  options?: {
-    subscriptionStatusOverride?: string;
-    currentApprovedPillarOverride?: number;
-    completedPillarModulesOverride?: string[];
-  }
-) {
-  const userSnapshot = await getUserDoc(userId);
-  if (!userSnapshot.exists) {
-    return;
-  }
-
-  const userData = userSnapshot.data() as UserPaymentSnapshot & {
-    completedPillarModules?: string[];
-  };
-
-  const [pillar1ExamStatus, pillar2ExamStatus, liveSessionSnapshot] = await Promise.all([
-    getLatestExamStatus(userId, 1),
-    getLatestExamStatus(userId, 2),
-    getAdminDb().collection("live_sessions").doc(`${userId}_p2`).get(),
-  ]);
-
-  const snapshot = buildStoredProgressSnapshot({
-    subscriptionStatus: options?.subscriptionStatusOverride ?? userData.subscriptionStatus,
-    completedPillarModules: options?.completedPillarModulesOverride ?? userData.completedPillarModules,
-    pillar1ExamStatus,
-    pillar2ExamStatus,
-    pillar2LiveSessionStatus: (
-      liveSessionSnapshot.exists
-        ? (liveSessionSnapshot.data()?.status as WriterLiveSessionStatus | undefined)
-        : "not_created"
-    ),
-    currentApprovedPillar:
-      options?.currentApprovedPillarOverride ??
-      (typeof userData.approvedPillar === "number" ? userData.approvedPillar : 1),
-  });
-
-  await getAdminDb().collection(USER_COLLECTION).doc(userId).set(
-    {
-      progressSnapshot: snapshot,
-      approvedPillar: deriveLegacyApprovedPillar(snapshot),
-      updatedAt: nowIso(),
-    },
-    { merge: true }
-  );
-}
-
 async function getPaymentAttempt(paymentId: string) {
   return getAdminDb().collection(PAYMENT_ATTEMPTS_COLLECTION).doc(paymentId).get();
 }
@@ -618,8 +544,6 @@ async function syncUserPendingState(userId: string, attempt: PaymentAttemptRecor
 
 async function grantLifetimeAccess(userId: string, payment: AsaasPayment) {
   const userRef = getAdminDb().collection(USER_COLLECTION).doc(userId);
-  const userDoc = await userRef.get();
-  const currentApprovedPillar = userDoc.exists ? Number(userDoc.data()?.approvedPillar || 1) : 1;
   const activatedAt = nowIso();
 
   await userRef.set(
@@ -633,16 +557,11 @@ async function grantLifetimeAccess(userId: string, payment: AsaasPayment) {
       paymentStatus: payment.status,
       pendingCheckoutPayment: null,
       pendingPixPayment: null,
-      approvedPillar: Math.max(currentApprovedPillar, 2),
       updatedAt: activatedAt,
     },
     { merge: true }
   );
 
-  await recomputeStoredProgressSnapshot(userId, {
-    subscriptionStatusOverride: "premium",
-    currentApprovedPillarOverride: Math.max(currentApprovedPillar, 2),
-  });
 }
 
 async function findAlternativePaidLifetimeAttempt(userId: string, excludedPaymentId: string) {
@@ -729,9 +648,6 @@ async function revokePaymentEntitlement(
     updatedAt,
   }, { merge: true });
 
-  await recomputeStoredProgressSnapshot(userId, {
-    subscriptionStatusOverride: preservePremium ? "premium" : "cancelled",
-  });
 }
 
 async function registerSpecialtyPurchase(userId: string, payment: AsaasPayment) {

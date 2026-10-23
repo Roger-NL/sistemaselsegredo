@@ -7,7 +7,7 @@ import { secureStorage } from "@/lib/storage/secure-storage";
 import { useAuth } from "@/context/AuthContext";
 import type { User } from "@/lib/auth/service";
 import type { ProgressSnapshotSeed } from "@/lib/progress/contract";
-import { hasAdminClaim } from "@/lib/auth/admin-policy";
+import { hasAdminClaim } from "@/server/auth/admin-policy";
 
 // ============================================================================
 // PROGRESS CONTEXT

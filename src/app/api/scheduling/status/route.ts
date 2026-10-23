@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getRequestPrincipal } from '@/lib/auth/principal';
-import { getSchedulingStatusForUser } from '@/lib/scheduling/service';
+import { getRequestPrincipal } from '@/server/auth/principal';
+import { getSchedulingStatusForUser } from '@/server/scheduling/service';
 
 export const dynamic = 'force-dynamic';
 

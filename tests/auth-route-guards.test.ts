@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluateAuthGuard } from "@/lib/auth/route-guards";
+import { evaluateAuthGuard } from "@/server/auth/route-guards";
 
 describe("evaluateAuthGuard", () => {
     it("keeps login reachable even when a stale cookie exists", () => {

@@ -1,5 +1,5 @@
 import PagamentoPageClient from "./PagamentoPageClient";
-import { isBetaFreeMode } from "@/lib/payments/config";
+import { isBetaFreeMode } from "@/server/payments/config";
 
 export const dynamic = "force-dynamic";
 

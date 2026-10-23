@@ -20,7 +20,7 @@ import { ROUTES } from "@/lib/routes";
 import type {
   LiveSessionAvailabilitySlot,
   LiveSessionStatusPayload,
-} from "@/lib/scheduling/types";
+} from "@/server/scheduling/types";
 import { PremiumWall } from "@/features/subscription/PremiumWall";
 
 function formatDateTime(value?: string | null) {

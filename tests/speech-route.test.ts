@@ -1,112 +1,32 @@
-import { mkdtemp, rm } from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GET } from "../src/app/api/speech/route";
-import { guidedSpeechPhrases } from "../src/app/inicio-orbita-7k3/guided-practice";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { GET } from "@/app/api/speech/route";
+import { generatePreparedSpeech } from "@/server/integrations/elevenlabs";
 
-describe("speech route", () => {
-  let cacheDirectory: string;
+afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
-  beforeEach(async () => {
-    cacheDirectory = await mkdtemp(path.join(os.tmpdir(), "speech-route-"));
-    vi.stubEnv("SPEECH_CACHE_DIR", cacheDirectory);
-    vi.stubEnv("BLOB_READ_WRITE_TOKEN", "");
-  });
-
-  afterEach(async () => {
-    vi.unstubAllGlobals();
-    vi.unstubAllEnvs();
-    await rm(cacheDirectory, { recursive: true, force: true });
-  });
-
-  it("rejects text that does not belong to the welcome conversation", async () => {
-    const provider = vi.fn();
-    vi.stubGlobal("fetch", provider);
-
-    const response = await GET(
-      new Request("http://localhost/api/speech?text=arbitrary%20text"),
-    );
-
-    expect(response.status).toBe(400);
+describe("retired speech endpoint and preserved production adapter", () => {
+  it("returns stable JSON 410 without generating audio or redirecting", async () => {
+    const provider = vi.fn(); vi.stubGlobal("fetch", provider);
+    const response = GET();
+    expect(response.status).toBe(410);
+    expect(response.headers.get("content-type")).toContain("application/json");
+    expect(response.headers.get("location")).toBeNull();
+    expect(await response.json()).toMatchObject({ error: "API_RETIRED" });
     expect(provider).not.toHaveBeenCalled();
   });
-
-  it("speaks every question, choice, lesson part and reaction in the guided paths", async () => {
-    vi.stubEnv("ELEVENLABS_API_KEY", "secret-test-key");
-    const provider = vi.fn().mockImplementation(async () =>
-      new Response(new Uint8Array([1, 2, 3]), {
-        headers: { "Content-Type": "audio/mpeg" },
-      }),
-    );
-    vi.stubGlobal("fetch", provider);
-
-    const phrases = Array.from(new Set(["recommend", "what", "idea", "share", "music", "love", "hate", ...guidedSpeechPhrases]));
-    for (const word of phrases) {
-      const response = await GET(new Request(`http://localhost/api/speech?text=${encodeURIComponent(word)}`));
-      expect(response.status).toBe(200);
-    }
-    expect(provider).toHaveBeenCalledTimes(phrases.length);
-  });
-
-  it("reports that ElevenLabs still needs to be connected", async () => {
+  it("fails before calling a provider without production credentials", async () => {
     vi.stubEnv("ELEVENLABS_API_KEY", "");
-
-    const response = await GET(
-      new Request(
-        "http://localhost/api/speech?text=What%20do%20you%20think%3F",
-      ),
-    );
-
-    expect(response.status).toBe(503);
-    await expect(response.json()).resolves.toEqual({
-      error: "ELEVENLABS_NOT_CONFIGURED",
-    });
+    const provider = vi.fn(); vi.stubGlobal("fetch", provider);
+    await expect(generatePreparedSpeech("Approved text")).rejects.toThrow("ELEVENLABS_NOT_CONFIGURED");
+    expect(provider).not.toHaveBeenCalled();
   });
-
-  it("generates an approved phrase once and serves later plays from cache", async () => {
-    vi.stubEnv("ELEVENLABS_API_KEY", "secret-test-key");
-    vi.stubEnv("ELEVENLABS_VOICE_ID", "voice-test-id");
-    const provider = vi.fn().mockResolvedValue(
-      new Response(new Uint8Array([1, 2, 3]), {
-        headers: { "Content-Type": "audio/mpeg" },
-      }),
-    );
+  it("preserves the production voice settings without relying on orbit content", async () => {
+    vi.stubEnv("ELEVENLABS_API_KEY", "test-key");
+    const provider = vi.fn().mockResolvedValue(new Response(new Uint8Array([1, 2, 3])));
     vi.stubGlobal("fetch", provider);
-
-    const response = await GET(
-      new Request(
-        "http://localhost/api/speech?text=What%20do%20you%20think%3F",
-      ),
-    );
-
-    expect(response.status).toBe(200);
-    expect(response.headers.get("content-type")).toBe("audio/mpeg");
-    expect(response.headers.get("x-speech-cache")).toBe("MISS");
-    expect(new Uint8Array(await response.arrayBuffer())).toEqual(
-      new Uint8Array([1, 2, 3]),
-    );
-    expect(provider).toHaveBeenCalledOnce();
+    expect(await generatePreparedSpeech("Approved text", "test-voice")).toEqual(Buffer.from([1, 2, 3]));
     const [url, options] = provider.mock.calls[0];
-    expect(url).toContain("/voice-test-id/stream");
-    expect(options.headers["xi-api-key"]).toBe("secret-test-key");
-    expect(JSON.parse(options.body)).toMatchObject({
-      text: "What do you think?",
-      model_id: "eleven_flash_v2_5",
-      language_code: "en",
-      voice_settings: { speed: 0.78 },
-    });
-
-    const cachedResponse = await GET(
-      new Request(
-        "http://localhost/api/speech?text=What%20do%20you%20think%3F",
-      ),
-    );
-    expect(cachedResponse.status).toBe(200);
-    expect(cachedResponse.headers.get("x-speech-cache")).toBe("HIT");
-    expect(new Uint8Array(await cachedResponse.arrayBuffer())).toEqual(
-      new Uint8Array([1, 2, 3]),
-    );
-    expect(provider).toHaveBeenCalledOnce();
+    expect(url).toContain("test-voice");
+    expect(JSON.parse(options.body)).toMatchObject({ text: "Approved text", voice_settings: { speed: 0.78 } });
   });
 });

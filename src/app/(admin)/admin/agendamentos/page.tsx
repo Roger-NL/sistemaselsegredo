@@ -1,5 +1,5 @@
 import AdminSchedulingPageClient from "@/features/admin/AdminSchedulingPageClient";
-import { getAdminSchedulingSnapshot } from "@/lib/scheduling/service";
+import { getAdminSchedulingSnapshot } from "@/server/scheduling/service";
 
 export const dynamic = "force-dynamic";
 

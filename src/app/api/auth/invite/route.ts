@@ -1,14 +1,8 @@
 import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/server/firebase";
-import { RequestAuthError, requireRequestPrincipal } from "@/lib/auth/request-auth";
-import {
-  buildPremiumAccessUpdate,
-  buildStoredProgressSnapshot,
-  deriveLegacyApprovedPillar,
-  type WriterExamStatus,
-  type WriterLiveSessionStatus,
-} from "@/lib/auth/premium-access";
+import { RequestAuthError, requireRequestPrincipal } from "@/server/auth/request-auth";
+import { buildPremiumAccessUpdate } from "@/server/access/service";
 import {
   getHashedInviteDocumentId,
   getInviteCodeLastFour,
@@ -17,15 +11,15 @@ import {
   INVITE_CODES_COLLECTION,
   normalizeSecureInviteCode,
   timestampLikeToMillis,
-} from "@/lib/auth/invite-codes";
-import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from "@/lib/server/rate-limit";
+} from "@/server/auth/invites";
+import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from "@/server/http/rate-limit";
 import {
   RequestPayloadError,
   assertOnlyKeys,
   getRequestIp,
   readJsonObject,
   requestPayloadErrorResponse,
-} from "@/lib/server/request";
+} from "@/server/http/request";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -36,75 +30,6 @@ type InviteActivationPayload = {
 
 const MAX_INVITE_BODY_BYTES = 2_048;
 const INVITE_ATTEMPT_WINDOW_MS = 15 * 60 * 1_000;
-
-async function getLatestExamStatus(userId: string, pillarId: number): Promise<WriterExamStatus> {
-  const snapshot = await getAdminDb().collection("pillar_exams")
-    .where("userId", "==", userId)
-    .where("pillarId", "==", pillarId)
-    .get();
-
-  if (snapshot.empty) {
-    return "not_started";
-  }
-
-  const exams = snapshot.docs
-    .map((doc) => doc.data() as { status?: WriterExamStatus; createdAt?: { toMillis?: () => number } | null })
-    .sort((left, right) => {
-      const leftTime = left.createdAt?.toMillis?.() ?? 0;
-      const rightTime = right.createdAt?.toMillis?.() ?? 0;
-      return rightTime - leftTime;
-    });
-
-  return exams[0]?.status ?? "not_started";
-}
-
-async function recomputeInviteProgressSnapshot(userId: string) {
-  const userRef = getAdminDb().collection("users").doc(userId);
-  const userSnapshot = await userRef.get();
-  if (!userSnapshot.exists) {
-    return;
-  }
-
-  const userData = userSnapshot.data() as {
-    subscriptionStatus?: string;
-    completedPillarModules?: string[];
-    localPillarStatus?: Record<string, string>;
-    chosenSpecialization?: string | null;
-    completedSpecializations?: string[];
-    approvedPillar?: number;
-  };
-
-  const [pillar1ExamStatus, pillar2ExamStatus, liveSessionSnapshot] = await Promise.all([
-    getLatestExamStatus(userId, 1),
-    getLatestExamStatus(userId, 2),
-    getAdminDb().collection("live_sessions").doc(`${userId}_p2`).get(),
-  ]);
-
-  const snapshot = buildStoredProgressSnapshot({
-    subscriptionStatus: userData.subscriptionStatus,
-    completedPillarModules: userData.completedPillarModules,
-    localPillarStatus: userData.localPillarStatus,
-    chosenSpecialization: userData.chosenSpecialization,
-    completedSpecializations: userData.completedSpecializations,
-    pillar1ExamStatus,
-    pillar2ExamStatus,
-    pillar2LiveSessionStatus: (
-      liveSessionSnapshot.exists
-        ? (liveSessionSnapshot.data()?.status as WriterLiveSessionStatus | undefined)
-        : "not_created"
-    ),
-    currentApprovedPillar: typeof userData.approvedPillar === "number" ? userData.approvedPillar : 1,
-  });
-
-  await userRef.set(
-    {
-      progressSnapshot: snapshot,
-      approvedPillar: deriveLegacyApprovedPillar(snapshot),
-      updatedAt: new Date().toISOString(),
-    },
-    { merge: true }
-  );
-}
 
 function getErrorResponse(error: unknown) {
   if (error instanceof RequestAuthError) {
@@ -206,8 +131,6 @@ export async function POST(req: Request) {
       }
 
       const userData = userSnapshot.data() ?? {};
-      const currentApprovedPillar =
-        typeof userData.approvedPillar === "number" ? userData.approvedPillar : 1;
 
       if (userData.subscriptionStatus === "premium") {
         return { kind: "already_premium" as const };
@@ -229,7 +152,6 @@ export async function POST(req: Request) {
       transaction.update(
         userRef,
         buildPremiumAccessUpdate({
-          currentApprovedPillar,
           inviteCodeUsed: maskedCode,
           activatedAtIso: nowIso,
         })
@@ -243,7 +165,6 @@ export async function POST(req: Request) {
     if (outcome.kind === "user_missing") throw new Error("USER_PROFILE_NOT_FOUND");
     if (outcome.kind === "already_premium") throw new Error("ALREADY_PREMIUM");
 
-    await recomputeInviteProgressSnapshot(principal.uid);
 
     return NextResponse.json({
       success: true,

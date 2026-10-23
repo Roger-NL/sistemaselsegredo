@@ -6,7 +6,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, onIdTokenChanged } from "firebase/auth";
 import { doc, getDoc, getDocFromServer } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { auth, db } from "@/client/auth/firebase";
 
 import {
     login as authLogin,

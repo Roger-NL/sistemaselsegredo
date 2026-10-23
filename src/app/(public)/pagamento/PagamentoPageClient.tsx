@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { motion } from "framer-motion";
 import { FlightButton } from "@/components/ui/FlightCard";
 import { ROUTES } from "@/lib/routes";
-import { auth } from "@/lib/firebase";
+import { auth } from "@/client/auth/firebase";
 import {
     buildPaymentReturnTo,
     getReconciliationMessage,
@@ -15,7 +15,7 @@ import {
     type PaymentReconciliationState,
     type VerifyPaymentApiResponse
 } from "@/features/payment/payment-mode";
-import { calculateCheckoutInstallmentTotals, MAX_CHECKOUT_INSTALLMENTS } from "@/lib/payments/installments";
+import { calculateCheckoutInstallmentTotals, MAX_CHECKOUT_INSTALLMENTS } from "@/server/payments/installments";
 import {
     Check,
     AlertCircle,

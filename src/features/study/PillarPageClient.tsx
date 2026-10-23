@@ -13,7 +13,7 @@ import { useState, useEffect, useCallback } from "react";
 import { PillarData } from "@/types/study";
 import { ROUTES } from "@/lib/routes";
 import { useStudyActivityTracker } from "@/lib/study/use-study-activity-tracker";
-import { hasAdminClaim } from "@/lib/auth/admin-policy";
+import { hasAdminClaim } from "@/server/auth/admin-policy";
 import {
     navigateWithMobileFallback,
     prefetchClientRoute,

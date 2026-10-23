@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import AuthBackground from "@/components/auth/AuthBackground";
 import { ROUTES } from "@/lib/routes";
-import { buildAuthEntryHref, resolvePostAuthTarget } from "@/lib/auth/post-auth";
+import { buildAuthEntryHref, resolvePostAuthTarget } from "@/client/auth/navigation";
 
 export default function CadastroPage() {
     return (

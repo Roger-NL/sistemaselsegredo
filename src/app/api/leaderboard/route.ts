@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdminDb } from "@/server/firebase";
-import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
+import { RequestAuthError, requireAuthenticatedUser } from "@/server/auth/request-auth";
 
 interface LeaderboardRow {
   id: string;

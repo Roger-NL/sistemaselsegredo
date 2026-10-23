@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getRequestPrincipal } from '@/lib/auth/principal';
-import { updateSchedulingStatusByAdmin } from '@/lib/scheduling/service';
-import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from '@/lib/server/rate-limit';
+import { getRequestPrincipal } from '@/server/auth/principal';
+import { updateSchedulingStatusByAdmin } from '@/server/scheduling/service';
+import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from '@/server/http/rate-limit';
 
 export const dynamic = 'force-dynamic';
 

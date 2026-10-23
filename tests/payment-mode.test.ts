@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { resolvePaymentMode } from "@/features/payment/payment-mode";
-import { calculateCheckoutInstallmentTotals } from "@/lib/payments/installments";
+import { calculateCheckoutInstallmentTotals } from "@/server/payments/installments";
 
 const baseMode = {
     isAuthenticated: true,

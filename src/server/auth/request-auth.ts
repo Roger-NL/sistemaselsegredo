@@ -1,8 +1,10 @@
+import "server-only";
+
 import {
   getRequestPrincipal,
   type RequestPrincipal,
   type RequestPrincipalOptions,
-} from "@/lib/auth/principal";
+} from "@/server/auth/principal";
 
 export class RequestAuthError extends Error {
   status: number;
@@ -50,4 +52,4 @@ export async function requireAuthenticatedUser(req: Request) {
   };
 }
 
-export type { RequestPrincipal, RequestPrincipalOptions } from "@/lib/auth/principal";
+export type { RequestPrincipal, RequestPrincipalOptions } from "@/server/auth/principal";

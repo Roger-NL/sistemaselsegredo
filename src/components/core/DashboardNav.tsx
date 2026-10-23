@@ -9,7 +9,7 @@ import { RankGuideModal } from "@/features/dashboard/RankGuideModal";
 import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard/service"; // Added Import
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/lib/routes";
-import { hasAdminClaim } from "@/lib/auth/admin-policy";
+import { hasAdminClaim } from "@/server/auth/admin-policy";
 
 interface DashboardNavProps {
     studentName?: string;

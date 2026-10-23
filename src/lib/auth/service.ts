@@ -17,7 +17,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, getDoc, updateDoc, deleteField } from "firebase/firestore";
 import type { FirebaseError } from "firebase/app";
-import { auth, db } from "@/lib/firebase";
+import { auth, db } from "@/client/auth/firebase";
 import { normalizeInviteCode } from "@/lib/auth/premium-access";
 import { readStoredProgressSnapshot, type ProgressSnapshot } from "@/lib/progress";
 import { normalizeStudyStats, type StudyStats } from "@/lib/study/stats";

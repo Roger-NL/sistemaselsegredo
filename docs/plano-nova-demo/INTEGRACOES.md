@@ -1,6 +1,6 @@
 # Integrações preservadas e pontos de conexão
 
-**Escopo:** mapa para implementação futura. Esta auditoria não modifica código, credenciais, banco ou serviços externos. Os caminhos em “hoje” existem na base auditada (`b881b3e`); os caminhos em “depois” são propostas.
+**Escopo:** mapa-base e contratos preservados. Extrações locais executadas nos sublotes 1a/1b; ver ANDAMENTO.md. Esta auditoria não modifica código, credenciais, banco ou serviços externos. Os caminhos em “hoje” existem na base auditada (`b881b3e`); os caminhos em “depois” são propostas.
 
 ## Regra de fronteira
 
@@ -121,3 +121,13 @@ Os limites de payload, idempotência, retenção e rate limits são propostas de
 5. Só então retirar `src/data`, autenticação visual antiga, `inicio-orbita`, curso, provas, dashboard, providers e APIs curriculares.
 
 Aceitação: nenhum import de UI/currículo antigo em serviços preservados; Admin/Asaas/Calendar não entram no client bundle; rotas preservadas continuam retornando JSON e mantendo seus guardas; APIs aposentadas retornam JSON 410; nenhuma ação remota de migração de dados integra esta limpeza.
+
+## Estado implementado no Lote 1
+
+Os destinos acima agora existem, exceto `src/server/auth/service.ts`: o serviço original era browser SDK, por isso a extração mínima correta é `src/client/auth/service.ts`, e o servidor continua representado por principal/request-auth/convites/cookie. Não mover SDK browser para server-only. O serviço misto antigo será retirado com a UI.
+
+`getAdminAuth()` e `getAdminDb()` são os únicos pontos de bootstrap do runtime Next. `/api/speech` já retorna JSON 410; produção explícita em `scripts/media-production/produce.mjs` usa o adaptador de voz. Ferramenta não executada nesta tarefa.
+
+Agenda: contratos de leitura, pedido, cancelamento e decisão preservados. A chave histórica `userId_p2` e campos de origem ficam como compatibilidade de armazenamento/IDs do provedor; nenhuma consulta a provas, gravação de progresso ou exigência curricular permanece no serviço. Uma futura ação autorizada chama `releaseLiveSession({ userId })` no servidor antes de oferecer horários. A demo não chama esse serviço.
+
+A sessão anônima/telemetria remota pode ser adiada conforme plano. Sem responsável e retenção definidos, a implementação inicial fica local e não afirma receber feedback remoto.

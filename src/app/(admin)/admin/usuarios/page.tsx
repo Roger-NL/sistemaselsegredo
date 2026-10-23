@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase";
+import { db } from "@/client/auth/firebase";
 import { collection, query, orderBy, limit, getDocs, where, Timestamp } from "firebase/firestore";
 import { Loader2, User } from "lucide-react";
 import { StudentDetailModal } from "@/features/admin/StudentDetailModal";

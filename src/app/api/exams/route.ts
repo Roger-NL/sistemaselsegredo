@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
-import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
+import { RequestAuthError, requireAuthenticatedUser } from "@/server/auth/request-auth";
 import { submitExamServer } from "@/lib/exam/server-service";
-import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from "@/lib/server/rate-limit";
+import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from "@/server/http/rate-limit";
 import {
   RequestPayloadError,
   assertOnlyKeys,
   readJsonObject,
   requestPayloadErrorResponse,
-} from "@/lib/server/request";
+} from "@/server/http/request";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

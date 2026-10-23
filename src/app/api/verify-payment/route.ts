@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
-import { AsaasApiError, AsaasTransportError } from "@/lib/asaas";
-import { verifyPaymentStatus } from "@/lib/payments/service";
-import { PaymentsDisabledError } from "@/lib/payments/config";
-import { consumeRateLimit, RateLimitError, rateLimitErrorResponse } from "@/lib/server/rate-limit";
+import { RequestAuthError, requireAuthenticatedUser } from "@/server/auth/request-auth";
+import { AsaasApiError, AsaasTransportError } from "@/server/integrations/asaas";
+import { verifyPaymentStatus } from "@/server/payments/service";
+import { PaymentsDisabledError } from "@/server/payments/config";
+import { consumeRateLimit, RateLimitError, rateLimitErrorResponse } from "@/server/http/rate-limit";
 import {
   assertOnlyKeys,
   readJsonObject,
   RequestPayloadError,
   requestPayloadErrorResponse,
-} from "@/lib/server/request";
+} from "@/server/http/request";
 import type { PaymentReconciliationState, VerifyPaymentApiResponse } from "@/contracts/payments";
 
 export const dynamic = "force-dynamic";

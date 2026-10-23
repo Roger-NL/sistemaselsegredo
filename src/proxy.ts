@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { evaluateAuthGuard } from "@/lib/auth/route-guards";
-import { AUTH_SESSION_COOKIE_NAME } from "@/lib/auth/session";
+import { evaluateAuthGuard } from "@/server/auth/route-guards";
+import { AUTH_SESSION_COOKIE_NAME } from "@/server/auth/session-cookie";
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;

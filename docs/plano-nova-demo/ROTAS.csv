@@ -1,23 +1,23 @@
 ﻿url_ou_padrao,metodo,acao_destino,motivo,condicao_ou_nota,lote,estado_execucao,evidencia_execucao
 /api/admin/exams/decision,POST,410 JSON,API curricular aposentada; preservar URL e resposta legível por máquina.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
-/api/admin/invite-codes,"GET, POST",Preservar,Gestão de convites; autenticação e papel admin server-side.,—,1,PENDENTE,Contrato congelado no Lote 0
-/api/admin/scheduling/day,GET,Preservar,Agenda administrativa; manter guardas server-side.,Desacoplar dependência curricular,1,PENDENTE,Contrato congelado no Lote 0
-/api/admin/scheduling/decision,POST,Preservar,Decisão administrativa de agenda; manter guardas server-side.,Desacoplar dependência curricular,1,PENDENTE,Contrato congelado no Lote 0
-/api/admin/scheduling/snapshot,GET,Preservar,Snapshot administrativo de agenda; manter guardas server-side.,Desacoplar dependência curricular,1,PENDENTE,Contrato congelado no Lote 0
-/api/auth/invite,POST,Preservar,Convites/autenticação; não expor na experiência pública.,Remover checagens curriculares do fluxo,1,PENDENTE,Contrato congelado no Lote 0
-/api/auth/session,"GET, POST, DELETE",Preservar,Cookie de sessão; independente do login visual da demo.,Extrair helper do AuthContext,1,PENDENTE,Contrato congelado no Lote 0
-/api/checkout,"GET, POST",Preservar,Checkout Asaas; manter JSON e proteções.,Separar entitlement do currículo,1,PENDENTE,Contrato congelado no Lote 0
+/api/admin/invite-codes,"GET, POST",Preservar,Gestão de convites; autenticação e papel admin server-side.,—,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
+/api/admin/scheduling/day,GET,Preservar,Agenda administrativa; manter guardas server-side.,Desacoplar dependência curricular,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
+/api/admin/scheduling/decision,POST,Preservar,Decisão administrativa de agenda; manter guardas server-side.,Desacoplar dependência curricular,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
+/api/admin/scheduling/snapshot,GET,Preservar,Snapshot administrativo de agenda; manter guardas server-side.,Desacoplar dependência curricular,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
+/api/auth/invite,POST,Preservar,Convites/autenticação; não expor na experiência pública.,Remover checagens curriculares do fluxo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
+/api/auth/session,"GET, POST, DELETE",Preservar,Cookie de sessão; independente do login visual da demo.,Extrair helper do AuthContext,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
+/api/checkout,"GET, POST",Preservar,Checkout Asaas; manter JSON e proteções.,Separar entitlement do currículo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /api/exams,POST,410 JSON,API de prova curricular aposentada.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
 /api/leaderboard,GET,410 JSON,Ranking antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
 /api/progress,POST,410 JSON,Progresso do curso antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
-/api/scheduling/availability,GET,Preservar,Disponibilidade de agenda.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
-/api/scheduling/cancel,POST,Preservar,Cancelamento de agenda.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
-/api/scheduling/request,POST,Preservar,Pedido de agendamento.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
-/api/scheduling/status,GET,Preservar,Status de agendamento.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
-/api/speech,GET,410 JSON,Geração pública aposentada; extrair ferramenta de produção de áudio.,Extrair ElevenLabs do protótipo,1,PENDENTE,Contrato congelado no Lote 0
+/api/scheduling/availability,GET,Preservar,Disponibilidade de agenda.,Desacoplar entitlement/currículo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
+/api/scheduling/cancel,POST,Preservar,Cancelamento de agenda.,Desacoplar entitlement/currículo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
+/api/scheduling/request,POST,Preservar,Pedido de agendamento.,Desacoplar entitlement/currículo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
+/api/scheduling/status,GET,Preservar,Status de agendamento.,Desacoplar entitlement/currículo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
+/api/speech,GET,410 JSON,Geração pública aposentada; extrair ferramenta de produção de áudio.,Extrair ElevenLabs do protótipo,1,CONCLUÍDO 1b,GET JSON 410; síntese pública removida
 /api/study/heartbeat,POST,410 JSON,Heartbeat do curso antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
-/api/verify-payment,POST,Preservar,Verificação/reconciliação Asaas.,Mover payment-mode para contrato puro,1,PENDENTE,Contrato congelado no Lote 0
-/api/webhooks/asaas,POST,Preservar,Webhook Asaas; preservar validação e idempotência.,—,1,PENDENTE,Contrato congelado no Lote 0
+/api/verify-payment,POST,Preservar,Verificação/reconciliação Asaas.,Mover payment-mode para contrato puro,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
+/api/webhooks/asaas,POST,Preservar,Webhook Asaas; preservar validação e idempotência.,—,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /,—,ADAPTAR,Entrada pública da demo; escolha de apoio e início.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
 /login,—,307 → /,Retirar login visual; destino sem query.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
 /cadastro,—,307 → /,Retirar cadastro visual; destino sem query.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0

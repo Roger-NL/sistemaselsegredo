@@ -4,11 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import { X, User, Mail, Phone, Calendar, TrendingUp, ShieldCheck, CheckCircle2, AlertCircle, Clock, BookOpen, RotateCcw, Loader2, Crown, CalendarClock, ArrowUpRight, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
-import { db } from "@/lib/firebase";
+import { db } from "@/client/auth/firebase";
 import { collection, query, where, getDocs, updateDoc, doc, deleteField } from "firebase/firestore";
 import { PillarExam } from "@/lib/exam/service";
 import { resetUserCourseProgress } from "@/lib/admin/reset-user-course-progress";
-import type { LiveSessionBooking } from "@/lib/scheduling/types";
+import type { LiveSessionBooking } from "@/server/scheduling/types";
 
 interface StudentSummary {
     id: string;

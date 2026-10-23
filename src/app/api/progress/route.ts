@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
+import { RequestAuthError, requireAuthenticatedUser } from "@/server/auth/request-auth";
 import { updateProgressServer, type ProgressUpdateInput } from "@/lib/progress/server-service";
 
 export const dynamic = "force-dynamic";

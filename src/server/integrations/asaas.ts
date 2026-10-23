@@ -1,7 +1,9 @@
+import "server-only";
+
 import type {
   AsaasPaymentStatus,
-} from "@/lib/payments/types";
-import { assertPaymentsEnabled } from "@/lib/payments/config";
+} from "@/server/payments/types";
+import { assertPaymentsEnabled } from "@/server/payments/config";
 
 const ASAAS_PRODUCTION_BASE_URL = "https://api.asaas.com/v3";
 const ASAAS_SANDBOX_BASE_URL = "https://api-sandbox.asaas.com/v3";

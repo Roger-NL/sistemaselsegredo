@@ -9,7 +9,7 @@ const asaasMocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/server/firebase", () => ({ getAdminDb: () => ({}) }));
-vi.mock("@/lib/asaas", () => ({
+vi.mock("@/server/integrations/asaas", () => ({
   ...asaasMocks,
   AsaasApiError: class AsaasApiError extends Error {
     status = 500;
@@ -17,8 +17,8 @@ vi.mock("@/lib/asaas", () => ({
   isPaymentPaid: (status: string) => ["RECEIVED", "CONFIRMED", "RECEIVED_IN_CASH"].includes(status),
 }));
 
-import { isBetaFreeMode, PaymentsDisabledError } from "@/lib/payments/config";
-import { createCheckout, getCheckoutState, verifyPaymentStatus } from "@/lib/payments/service";
+import { isBetaFreeMode, PaymentsDisabledError } from "@/server/payments/config";
+import { createCheckout, getCheckoutState, verifyPaymentStatus } from "@/server/payments/service";
 
 const originalBetaFreeMode = process.env.BETA_FREE_MODE;
 

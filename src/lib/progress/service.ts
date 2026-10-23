@@ -1,6 +1,6 @@
 import { PILLARS_CONTENT } from "@/data/pillars-content";
 import type { PillarExam } from "@/lib/exam/service";
-import type { LiveSessionBooking } from "@/lib/scheduling/types";
+import type { LiveSessionBooking } from "@/server/scheduling/types";
 import type { User } from "@/lib/auth/service";
 import {
   buildPillarRange,

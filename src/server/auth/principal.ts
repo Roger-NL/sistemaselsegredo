@@ -1,6 +1,8 @@
+import "server-only";
+
 import { cookies } from "next/headers";
 import { getAdminAuth, getAdminDb } from "@/server/firebase";
-import { AUTH_SESSION_COOKIE_NAME } from "@/lib/auth/session";
+import { AUTH_SESSION_COOKIE_NAME } from "@/server/auth/session-cookie";
 
 const USERS_COLLECTION = "users";
 

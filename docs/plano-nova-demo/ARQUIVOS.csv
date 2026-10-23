@@ -112,7 +112,7 @@ src/app/api/scheduling/availability/route.ts,Preservar,/api/scheduling/availabil
 src/app/api/scheduling/cancel/route.ts,Preservar,/api/scheduling/cancel,Cancelamento de agenda.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
 src/app/api/scheduling/request/route.ts,Preservar,/api/scheduling/request,Pedido de agendamento.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
 src/app/api/scheduling/status/route.ts,Preservar,/api/scheduling/status,Status de agendamento.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
-src/app/api/speech/route.ts,410 JSON,/api/speech,Geração pública aposentada; extrair ferramenta de produção de áudio.,Extrair ElevenLabs do protótipo,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/speech/route.ts,410 JSON,/api/speech,Geração pública aposentada; extrair ferramenta de produção de áudio.,Extrair ElevenLabs do protótipo,1,CONCLUÍDO 1b,JSON 410; produção preservada em server/integrations/elevenlabs.ts
 src/app/api/study/heartbeat/route.ts,410 JSON,/api/study/heartbeat,Heartbeat de estudo antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
 src/app/api/verify-payment/route.ts,Preservar,/api/verify-payment,Verificação/reconciliação Asaas.,Mover payment-mode para contrato puro,1,PENDENTE,Contrato congelado no Lote 0
 src/app/api/webhooks/asaas/route.ts,Preservar,/api/webhooks/asaas,Webhook Asaas; preservar validação e idempotência.,,1,PENDENTE,Contrato congelado no Lote 0
@@ -201,38 +201,38 @@ src/features/study/exam/PillarExamViewModal.tsx,REMOVER,—,UI/modelo de aluno/a
 src/features/subscription/PremiumWall.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
 src/hooks/useTTS.ts,MOVER/ADAPTAR,scripts/media-production/,Separar produção de mídia do hook antigo; player demo será novo.,Extrair integração antes de apagar protótipo,1,PENDENTE,Contrato congelado no Lote 0
 src/lib/admin/reset-user-course-progress.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
-src/lib/asaas.ts,MOVER/ADAPTAR,src/server/payments/ e src/server/integrations/asaas.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/auth/admin-policy.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/auth/invite-codes.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/auth/post-auth.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/asaas.ts,MOVER/ADAPTAR,src/server/integrations/asaas.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/auth/admin-policy.ts,MOVER/ADAPTAR,src/server/auth/admin-policy.ts,"Preservar guards, principal, sessão, convites e política de admin.",,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/auth/invite-codes.ts,MOVER/ADAPTAR,src/server/auth/invites.ts,"Preservar guards, principal, sessão, convites e política de admin.",,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/auth/post-auth.ts,MOVER/ADAPTAR,src/client/auth/navigation.ts,"Preservar guards, principal, sessão, convites e política de admin.",,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
 src/lib/auth/premium-access.ts,MOVER/ADAPTAR,src/server/access/service.ts,Separar entitlement de progresso/currículo.,Antes de apagar progress/data,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/auth/principal.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/auth/request-auth.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/auth/route-guards.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/auth/service.ts,MOVER/ADAPTAR,src/server/auth/service.ts,Separar auth mínima de perfil/progresso/currículo.,,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/auth/session.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/auth/principal.ts,MOVER/ADAPTAR,src/server/auth/principal.ts,"Preservar guards, principal, sessão, convites e política de admin.",,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/auth/request-auth.ts,MOVER/ADAPTAR,src/server/auth/request-auth.ts,"Preservar guards, principal, sessão, convites e política de admin.",,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/auth/route-guards.ts,MOVER/ADAPTAR,src/server/auth/route-guards.ts,"Preservar guards, principal, sessão, convites e política de admin.",,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/auth/service.ts,MOVER/ADAPTAR,src/server/auth/service.ts,Separar auth mínima de perfil/progresso/currículo.,,1,PARCIAL 1b,Auth mínima em src/client/auth/service.ts; serviço curricular aguarda remoção da UI
+src/lib/auth/session.ts,MOVER/ADAPTAR,src/server/auth/session-cookie.ts,"Preservar guards, principal, sessão, convites e política de admin.",,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
 src/lib/exam/server-service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/exam/service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/firebase-admin-firestore.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,CONCLUÍDO 1a,src/server/firebase.ts; duplicação retirada
 src/lib/firebase-admin.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,CONCLUÍDO 1a,src/server/firebase.ts; bootstrap lazy único; getters migrados
-src/lib/firebase.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/firebase/index.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/firebase.ts,MOVER/ADAPTAR,src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/firebase/index.ts,MOVER/ADAPTAR,src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
 src/lib/leaderboard/service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/navigation/safe-client-navigation.ts,REMOVER,—,Navegação antiga; redirects ficam em proxy e links novos.,,4,PENDENTE,Contrato congelado no Lote 0
-src/lib/payments/config.ts,MOVER/ADAPTAR,src/server/payments/ e src/server/integrations/asaas.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/payments/installments.ts,MOVER/ADAPTAR,src/server/payments/ e src/server/integrations/asaas.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/payments/service.ts,MOVER/ADAPTAR,src/server/payments/ e src/server/integrations/asaas.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/payments/types.ts,MOVER/ADAPTAR,src/server/payments/ e src/server/integrations/asaas.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/payments/config.ts,MOVER/ADAPTAR,src/server/payments/config.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/payments/installments.ts,MOVER/ADAPTAR,src/server/payments/installments.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/payments/service.ts,MOVER/ADAPTAR,src/server/payments/service.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/payments/types.ts,MOVER/ADAPTAR,src/server/payments/types.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
 src/lib/progress/contract.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/progress/index.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/progress/server-service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/progress/service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/routes.ts,ADAPTAR,src/lib/routes.ts / src/lib/ui/cn.ts,Manter apenas rota/utilidade pura com consumidores reais; remover utilidades órfãs.,,2/5,PENDENTE,Contrato congelado no Lote 0
-src/lib/scheduling/google-calendar.ts,MOVER/ADAPTAR,src/server/scheduling/ e integrations/google-calendar.ts,Preservar agenda/locks desacoplados de currículo.,,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/scheduling/service.ts,MOVER/ADAPTAR,src/server/scheduling/ e integrations/google-calendar.ts,Preservar agenda/locks desacoplados de currículo.,,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/scheduling/types.ts,MOVER/ADAPTAR,src/server/scheduling/ e integrations/google-calendar.ts,Preservar agenda/locks desacoplados de currículo.,,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/server/rate-limit.ts,MOVER/ADAPTAR,src/server/http/,Preservar validação/rate-limit com namespaces isolados.,,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/server/request.ts,MOVER/ADAPTAR,src/server/http/,Preservar validação/rate-limit com namespaces isolados.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/scheduling/google-calendar.ts,MOVER/ADAPTAR,src/server/integrations/google-calendar.ts,Preservar agenda/locks desacoplados de currículo.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/scheduling/service.ts,MOVER/ADAPTAR,src/server/scheduling/service.ts,Preservar agenda/locks desacoplados de currículo.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/scheduling/types.ts,MOVER/ADAPTAR,src/server/scheduling/types.ts,Preservar agenda/locks desacoplados de currículo.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/server/rate-limit.ts,MOVER/ADAPTAR,src/server/http/rate-limit.ts,Preservar validação/rate-limit com namespaces isolados.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
+src/lib/server/request.ts,MOVER/ADAPTAR,src/server/http/request.ts,Preservar validação/rate-limit com namespaces isolados.,,1,CONCLUÍDO 1b,Imports migrados; serviços sem currículo; consumidores antigos só até Lote 4
 src/lib/storage/secure-storage.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/study/stats.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/study/use-study-activity-tracker.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
@@ -265,3 +265,11 @@ src/contracts/payments.ts,CRIAR,src/contracts/payments.ts,Tipos API sem UI,,1,CO
 tests/client-session.test.ts,CRIAR,tests/client-session.test.ts,Contrato de sessão client,,1,CONCLUÍDO 1a,Contrato de sessão client
 tests/firebase-bootstrap.test.ts,CRIAR,tests/firebase-bootstrap.test.ts,Inicialização lazy/fail closed,,1,CONCLUÍDO 1a,Inicialização lazy/fail closed
 tests/setup.ts,CRIAR,tests/setup.ts,Resolver server-only fora do Next,,1,CONCLUÍDO 1a,Resolver server-only fora do Next
+src/server/access/service.ts,CRIAR,src/server/access/service.ts,Extração de integração/contrato preservado,,1,CONCLUÍDO 1b,Testes locais; sem execução remota
+src/client/auth/service.ts,CRIAR,src/client/auth/service.ts,Extração de integração/contrato preservado,,1,CONCLUÍDO 1b,Testes locais; sem execução remota
+src/server/integrations/elevenlabs.ts,CRIAR,src/server/integrations/elevenlabs.ts,Extração de integração/contrato preservado,,1,CONCLUÍDO 1b,Testes locais; sem execução remota
+src/server/http/retired.ts,CRIAR,src/server/http/retired.ts,Extração de integração/contrato preservado,,1,CONCLUÍDO 1b,Testes locais; sem execução remota
+scripts/media-production/produce.mjs,CRIAR,scripts/media-production/produce.mjs,Extração de integração/contrato preservado,,1,CONCLUÍDO 1b,Testes locais; sem execução remota
+tests/access-entitlement.test.ts,CRIAR,tests/access-entitlement.test.ts,Extração de integração/contrato preservado,,1,CONCLUÍDO 1b,Testes locais; sem execução remota
+tests/integration-route-auth.test.ts,CRIAR,tests/integration-route-auth.test.ts,Extração de integração/contrato preservado,,1,CONCLUÍDO 1b,Testes locais; sem execução remota
+tests/scheduling-access.test.ts,CRIAR,tests/scheduling-access.test.ts,Extração de integração/contrato preservado,,1,CONCLUÍDO 1b,Testes locais; sem execução remota

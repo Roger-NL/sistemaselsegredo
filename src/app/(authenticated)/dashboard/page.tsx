@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Crown, ArrowRight, CalendarClock, CheckCircle2, Clock3 } from "lucide-react";
-import type { LiveSessionStatusPayload } from "@/lib/scheduling/types";
+import type { LiveSessionStatusPayload } from "@/server/scheduling/types";
 import RotatingEarth from "@/components/ui/wireframe-dotted-globe";
 import { DevControls } from "@/components/core/DevControls";
 import { useProgress } from "@/context/ProgressContext";
@@ -21,7 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getLeaderboard, LeaderboardUser } from "@/lib/leaderboard/service";
 import { prefetchClientRoutesDuringIdle } from "@/lib/navigation/safe-client-navigation";
 import { ROUTES } from "@/lib/routes";
-import { hasAdminClaim } from "@/lib/auth/admin-policy";
+import { hasAdminClaim } from "@/server/auth/admin-policy";
 
 const MOBILE_MISSION_DIRECTIVES = [
   "UNLOCK FLUENCY",

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAdminAuth } from "@/server/firebase";
 import { getAdminDb } from "@/server/firebase";
-import { getRequestPrincipal } from "@/lib/auth/principal";
-import { AUTH_SESSION_COOKIE_NAME, AUTH_SESSION_MAX_AGE_SECONDS, getAuthSessionCookieOptions } from "@/lib/auth/session";
+import { getRequestPrincipal } from "@/server/auth/principal";
+import { AUTH_SESSION_COOKIE_NAME, AUTH_SESSION_MAX_AGE_SECONDS, getAuthSessionCookieOptions } from "@/server/auth/session-cookie";
 
 export const dynamic = "force-dynamic";
 
@@ -59,39 +59,13 @@ async function resolveIdToken(req: Request) {
   }
 }
 
-function dateKeyInSaoPaulo(date: Date) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Sao_Paulo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
-}
-
 async function recordServerLogin(uid: string) {
   const userRef = getAdminDb().collection("users").doc(uid);
   await getAdminDb().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(userRef);
     if (!snapshot.exists) return;
-    const data = snapshot.data() ?? {};
-    const now = new Date();
-    const today = dateKeyInSaoPaulo(now);
-    const lastLogin = typeof data.lastLoginDate === "string" ? new Date(data.lastLoginDate) : null;
-    if (lastLogin && Number.isFinite(lastLogin.getTime()) && dateKeyInSaoPaulo(lastLogin) === today) return;
-
-    const yesterday = new Date(now);
-    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-    const currentStreak = typeof data.currentStreak === "number" ? data.currentStreak : 0;
-    const nextStreak = lastLogin && Number.isFinite(lastLogin.getTime()) &&
-      dateKeyInSaoPaulo(lastLogin) === dateKeyInSaoPaulo(yesterday)
-      ? currentStreak + 1
-      : 1;
-
-    transaction.update(userRef, {
-      currentStreak: nextStreak,
-      lastLoginDate: now.toISOString(),
-      updatedAt: now.toISOString(),
-    });
+    const now = new Date().toISOString();
+    transaction.update(userRef, { lastLoginDate: now, updatedAt: now });
   });
 }
 

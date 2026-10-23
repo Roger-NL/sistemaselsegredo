@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/server/firebase";
-import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
+import { RequestAuthError, requireAuthenticatedUser } from "@/server/auth/request-auth";
 import { buildStudyModuleKey } from "@/lib/study/stats";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
-import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from "@/lib/server/rate-limit";
+import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from "@/server/http/rate-limit";
 import {
   RequestPayloadError,
   assertOnlyKeys,
   readJsonObject,
   requestPayloadErrorResponse,
-} from "@/lib/server/request";
+} from "@/server/http/request";
 
 const MAX_ACCEPTED_SECONDS = 60;
 const MIN_ACCEPTED_SECONDS = 5;

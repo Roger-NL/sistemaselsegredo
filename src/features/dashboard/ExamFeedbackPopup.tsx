@@ -10,7 +10,7 @@ import { useProgress } from "@/context/ProgressContext";
 import { type PillarExam } from "@/lib/exam/service";
 import { ROUTES } from "@/lib/routes";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db } from "@/client/auth/firebase";
 import { isFirestorePermissionError } from "@/lib/auth/service";
 
 export function ExamFeedbackPopup() {

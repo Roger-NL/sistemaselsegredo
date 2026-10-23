@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CalendarClock, CheckCircle2, ExternalLink, Loader2, Sparkles, XCircle } from "lucide-react";
-import type { AdminSchedulingSnapshot, LiveSessionBooking, SchedulingCalendarDayItem, SchedulingDayOverview } from "@/lib/scheduling/types";
+import type { AdminSchedulingSnapshot, LiveSessionBooking, SchedulingCalendarDayItem, SchedulingDayOverview } from "@/server/scheduling/types";
 
 function formatDate(value?: string | null) {
   if (!value) return "—";
