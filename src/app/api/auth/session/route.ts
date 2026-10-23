@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdminAuth } from "@/server/firebase";
-import { getAdminDb } from "@/server/firebase";
+import { recordVerifiedLogin } from "@/server/auth/service";
 import { getRequestPrincipal } from "@/server/auth/principal";
 import { AUTH_SESSION_COOKIE_NAME, AUTH_SESSION_MAX_AGE_SECONDS, getAuthSessionCookieOptions } from "@/server/auth/session-cookie";
 
@@ -59,16 +59,6 @@ async function resolveIdToken(req: Request) {
   }
 }
 
-async function recordServerLogin(uid: string) {
-  const userRef = getAdminDb().collection("users").doc(uid);
-  await getAdminDb().runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(userRef);
-    if (!snapshot.exists) return;
-    const now = new Date().toISOString();
-    transaction.update(userRef, { lastLoginDate: now, updatedAt: now });
-  });
-}
-
 export async function GET(req: Request) {
   const principal = await getRequestPrincipal(req, {
     allowBearer: true,
@@ -94,7 +84,7 @@ export async function POST(req: Request) {
     }
 
     const decodedToken = await getAdminAuth().verifyIdToken(idToken, true);
-    await recordServerLogin(decodedToken.uid);
+    await recordVerifiedLogin(decodedToken);
 
     const sessionCookie = await getAdminAuth().createSessionCookie(idToken, {
       expiresIn: AUTH_SESSION_MAX_AGE_SECONDS * 1000,

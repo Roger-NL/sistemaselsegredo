@@ -1,42 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-
-export const metadata: Metadata = {
-    title: "Política de Privacidade",
-    description: "Como a BasedSpeak trata dados pessoais no programa beta.",
-};
-
-const sections = [
-    ["Dados tratados", "No beta gratuito tratamos dados de conta e contacto (nome, e-mail e telefone), respostas e progresso académico, agendamentos, eventos de autenticação e informações técnicas de segurança. O beta não pede CPF nem dados de pagamento. Esses dados só poderão ser solicitados futuramente se o utilizador optar por um fluxo comercial claramente identificado."],
-    ["Finalidades e bases legais", "Usamos os dados para prestar o serviço e executar o contrato; autenticar e proteger contas; processar pagamentos; organizar avaliações e sessões; atender suporte; cumprir obrigações legais; e, com base em interesse legítimo sujeito a avaliação, prevenir fraude e melhorar estabilidade e usabilidade."],
-    ["Fornecedores e partilha", "Dados podem ser tratados por fornecedores essenciais de hospedagem, autenticação, base de dados e agenda, atualmente incluindo Vercel e Google/Firebase. A integração Asaas permanece desativada durante o beta gratuito. Partilhamos apenas o necessário para a finalidade correspondente e não vendemos dados pessoais."],
-    ["Transferências internacionais", "Alguns fornecedores podem tratar dados fora do Brasil. Nesses casos, adotamos mecanismos contratuais e medidas exigidas pela LGPD para proteger a transferência."],
-    ["Retenção", "Mantemos dados enquanto a conta estiver ativa e depois pelo tempo necessário para obrigações legais, defesa de direitos, prevenção de fraude e resolução de cobranças. Dados sem necessidade legítima são eliminados ou anonimizados."],
-    ["Segurança", "Aplicamos controlo de acesso, autenticação, encriptação em trânsito, registos operacionais e separação de credenciais. Nenhum sistema é infalível; incidentes relevantes serão avaliados e comunicados conforme a lei."],
-    ["Seus direitos", "Você pode pedir confirmação e acesso, correção, portabilidade quando regulamentada, informação sobre partilhas, oposição, revisão de decisões automatizadas e eliminação ou anonimização quando cabível. Também pode revogar consentimento sem afetar tratamentos anteriores."],
-    ["Cookies e sessão", "Utilizamos cookies estritamente necessários para manter a sessão autenticada e proteger áreas restritas. Não descrevemos cookies publicitários porque não estão previstos no beta atual."],
-    ["Crianças e adolescentes", "O serviço não é direcionado intencionalmente a menores de 18 anos no beta. Se identificarmos tratamento sem autorização adequada, adotaremos medidas para interrompê-lo e eliminar os dados quando aplicável."],
-    ["Contacto e alterações", "Pedidos de privacidade podem ser enviados pelo canal de suporte informado na plataforma. Alterações materiais desta política serão comunicadas, e a data de vigência será atualizada."],
-];
-
+export const metadata: Metadata = { title: "Privacidade", description: "Armazenamento local e privacidade na demo BasedSpeak." };
 export default function PrivacyPage() {
-    return (
-        <main className="mx-auto max-w-3xl px-6 py-16 text-slate-800">
-            <Link href="/" className="text-sm font-semibold text-violet-700 hover:text-violet-900">← Voltar</Link>
-            <h1 className="mt-8 text-4xl font-bold tracking-tight text-slate-950">Política de Privacidade</h1>
-            <p className="mt-3 text-sm text-slate-500">Vigente desde 18 de julho de 2026.</p>
-            <p className="mt-8 leading-7">Esta política explica, em linguagem direta, o tratamento de dados pessoais no beta da BasedSpeak.</p>
-            <div className="mt-10 space-y-9">
-                {sections.map(([title, body]) => (
-                    <section key={title}>
-                        <h2 className="text-xl font-semibold text-slate-950">{title}</h2>
-                        <p className="mt-3 leading-7">{body}</p>
-                    </section>
-                ))}
-            </div>
-            <p className="mt-12 rounded-xl bg-amber-50 p-4 text-sm leading-6 text-amber-950">
-                Antes do lançamento comercial, devem ser acrescentados os dados completos do controlador e do encarregado, canal de contacto validado e prazos formais de retenção.
-            </p>
-        </main>
-    );
+  return <main className="demo-shell"><article className="legal"><Link href="/">← Voltar ao início</Link><h1>Privacidade</h1><p>Atualizado em 23 de outubro de 2026.</p>
+    <h2>Sem conta e sem gravação</h2><p>Esta demo não pede nome, e-mail, telefone, dados financeiros ou acesso ao microfone. As falas em inglês fazem parte de uma história fictícia. Você não precisa gravar sua voz.</p>
+    <h2>O que fica neste navegador</h2><p>Guardamos localmente um identificador aleatório da tentativa, seu apoio escolhido, ponto da história, decisões, blocos, ajuda consultada e falas ocorridas. Isso permite retomar a conversa e mostrar uma retrospectiva coerente. O rascunho da avaliação opcional também pode ficar neste dispositivo.</p>
+    <p>Não há sincronização entre dispositivos. A tentativa fica no navegador até você recomeçar, limpar os dados do site ou o navegador remover esse armazenamento. Outras pessoas com acesso ao mesmo perfil do navegador podem ter acesso a esse conteúdo.</p>
+    <h2>Avaliação e coleta</h2><p>Nesta prévia, o envio de avaliações e a telemetria remota estão desativados. Clicar em enviar não produz uma confirmação de recebimento. Evite incluir informações pessoais no rascunho. Qualquer coleta futura terá finalidade, responsável, contato e prazo de retenção informados antes de ser ativada.</p>
+    <h2>Hospedagem e serviços</h2><p>A hospedagem pode registrar informações técnicas das requisições, como endereço IP, horário e URL, para funcionamento e segurança. A demo não usa cookies de autenticação nem carrega os serviços de conta, cobrança e agenda durante a conversa. A produção de mídia ocorre separadamente da visita.</p>
+    <h2>Como apagar sua tentativa</h2><p>Use “Recomeçar” e confirme o descarte. Essa ação apaga somente a tentativa e a avaliação guardadas pela demo. Você também pode limpar os dados deste site nas configurações do navegador.</p>
+    <p><Link href="/termos">Ler os termos de uso</Link></p>
+  </article></main>;
 }

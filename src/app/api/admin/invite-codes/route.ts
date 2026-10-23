@@ -1,7 +1,8 @@
+import { requireAdminPrincipal } from "@/server/auth/route-guards";
 import { Timestamp } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
 import { getAdminDb } from "@/server/firebase";
-import { RequestAuthError, requireAuthenticatedUser } from "@/server/auth/request-auth";
+import { RequestAuthError } from "@/server/auth/request-auth";
 import {
   DEFAULT_INVITE_EXPIRY_DAYS,
   generateSecureInviteCode,
@@ -29,11 +30,7 @@ const MAX_GENERATION_BODY_BYTES = 1_024;
 const MAX_BATCH_SIZE = 500;
 const MAX_EXPIRY_DAYS = 365;
 
-function assertAdmin(role: string) {
-  if (role !== "admin") {
-    throw new RequestAuthError("Forbidden.", 403);
-  }
-}
+
 
 function parseInteger(value: unknown, fallback: number, min: number, max: number) {
   if (value === undefined) return fallback;
@@ -61,8 +58,8 @@ function getErrorResponse(error: unknown) {
 
 export async function GET(req: Request) {
   try {
-    const principal = await requireAuthenticatedUser(req);
-    assertAdmin(principal.role);
+    await requireAdminPrincipal(req);
+
 
     const snapshot = await getAdminDb().collection(INVITE_CODES_COLLECTION)
       .orderBy("createdAt", "desc")
@@ -100,8 +97,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const principal = await requireAuthenticatedUser(req);
-    assertAdmin(principal.role);
+    const principal = await requireAdminPrincipal(req);
+
     await consumeRateLimit({
       namespace: "admin-invite-generation",
       identifier: principal.uid,

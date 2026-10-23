@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { profiles } from "./content/copy.pt-BR";
@@ -21,7 +22,7 @@ export function DemoEntry({ onStart }: { onStart: (profile: SupportProfile) => v
         </label>)}
       </fieldset>
       <p className="muted">Você pode mudar o apoio durante a experiência.</p>
-      <button className="primary" disabled={!profile} onClick={() => profile && onStart(profile)}>Começar a conversa <span aria-hidden>↗</span></button>
+      <button className="primary" disabled={!profile} onClick={() => profile && onStart(profile)}>Começar a conversa <ArrowUpRight aria-hidden size={18} /></button>
     </div>
     <figure className="entry-art"><Image width={1536} height={1024} sizes="(max-width: 760px) 100vw, 50vw" priority src="/demo/cafe/v1/previews/counter.jpg" alt="Ilustração conceitual: uma cliente com café no balcão de uma cafeteria." /><figcaption>Uma cafeteria. Um primeiro encontro.<br /><span>Prévia visual conceitual</span></figcaption></figure>
   </section>;

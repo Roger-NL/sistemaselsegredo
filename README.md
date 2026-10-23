@@ -1,83 +1,44 @@
 # BasedSpeak
 
-Aplicação Next.js para aprendizagem de inglês com autenticação Firebase, progressão por pilares, provas com revisão humana, agendamento via Google Calendar e pagamentos Asaas.
+Demo pública de uma conversa em uma cafeteria. Sem login, conta, pagamento ou microfone. A pessoa escolhe seu apoio, participa de dez partes, percorre escolhas e recebe uma retrospectiva da conversa que realmente aconteceu.
 
-## Requisitos
+## Desenvolvimento local
 
-- Node.js 22 ou superior
-- Projeto Firebase com Authentication e Firestore
-- Conta Asaas (sandbox para desenvolvimento)
-- Credenciais Google Calendar para o fluxo de sessões
+Node.js 22 ou superior e npm. Use `npm ci`, `npm run dev` e abra `http://localhost:3000`. O motor local não exige credenciais. Os exemplos de integração estão em `.env.example`; não copie valores reais para o Git.
 
-## Desenvolvimento
+`npm test`, `npm run lint`, `npx tsc --noEmit --incremental false` e `npm run build` verificam a aplicação. Após remover rotas com um dev server aberto, pare o servidor e regenere os tipos (`npx next typegen`); arquivos em `.next` são artefatos regeneráveis.
 
-```bash
-npm install
-cp .env.example .env.local
-npm run dev
-```
+## Estado da entrega
 
-Antes de abrir uma alteração:
+A conversa, os 128 caminhos narrativos, os três perfis, ajuda, retrospectiva e recuperação local estão implementados. A biblioteca final de nove imagens/cinquenta áudios está pendente. As quatro artes de apresentação são referências conceituais explicitamente identificadas. Ver `docs/plano-nova-demo/MIDIA.md`. Ainda não declarar a prévia pronta para publicação.
 
-```bash
-npm test
-npm run lint
-npx tsc --noEmit
-npm run build
-```
+A sessão e o rascunho de avaliação ficam neste navegador. Storage indisponível não bloqueia a história. Recomeçar pede confirmação e limpa somente as chaves da demo. Não há sincronização entre dispositivos.
 
-## Segurança e autoridade
+Coleta de eventos e envio de avaliação remotos estão desativados, conforme a opção aprovada de teste local + observação humana. O formulário não confirma recebimento. Responsável, contato e retenção devem estar definidos antes de implementar/ativar os endpoints `/api/demo/*`.
 
-- A sessão do browser é trocada por cookie `httpOnly` verificado no servidor.
-- Administração depende da custom claim Firebase `admin: true`; não use allowlists de e-mail no código.
-- Progresso, pontuação de prova, convites, pagamentos e agendamentos são validados no servidor.
-- Cartão é informado apenas no checkout hospedado pelo Asaas; a aplicação não recebe PAN ou CVV.
-- As regras e índices Firestore são versionados em `firestore.rules` e `firestore.indexes.json`.
+## Código
 
-Para auditar as claims sem alterar utilizadores:
+- `src/features/demo/content/parts/`: roteiro aprovado em dez partes; `content/media.ts`: inventário de mídia.
+- `src/features/demo/model/`: transições puras, histórico e retrospectiva. `session/`: persistência local versionada; nenhum Firebase no caminho da demo.
+- `src/client/auth/`: SDK browser, perfil mínimo, navegação e sincronização de cookie para futuras telas autenticadas.
+- `src/server/`: Firebase Admin lazy, autorização, convites, entitlement financeiro, pagamentos, reservas/locks e adaptadores Asaas, Calendar, ElevenLabs/Blob.
+- `src/contracts/`: contratos compartilháveis sem SDKs. `src/app/api/`: URLs preservadas.
+- `src/lib/page-aliases.ts` e `src/proxy.ts`: somente os 22 aliases inventariados respondem 307 para `/`, sem query. Rotas desconhecidas retornam 404. Seis APIs aposentadas respondem JSON 410 em seus métodos originais; outros métodos permanecem 405.
 
-```bash
-npm run auth:admins
-```
+Nenhuma tela ou modelo de aluno/admin, currículo, prova, ranking ou motor órbita foi arquivado dentro do produto.
 
-Depois de confirmar a lista `FIREBASE_ADMIN_EMAILS`, aplique explicitamente:
+## Integrações reservadas
 
-```bash
-npm run auth:admins -- --apply
-```
+O detalhe está em `docs/plano-nova-demo/INTEGRACOES.md`. Handlers protegidos verificam identidade e papel no servidor; o proxy não autoriza acesso. Uma tela futura deve importar um helper específico ou chamar a API apropriada, sem trazer credenciais/SDK Admin para o browser.
 
-## Beta gratuito por convite
+A sessão cria um perfil mínimo após verificar o token Firebase. Não escreve progresso ou streak. As regras/índices locais antigos foram revisados e preservados; sua publicação não faz parte desta mudança. A criação mínima de perfil passa pelo servidor, sem depender das regras curriculares antigas de criação pelo browser.
 
-Defina `BETA_FREE_MODE=true` no ambiente do servidor enquanto o beta fechado estiver ativo. Com a flag ligada, `/pagamento` mostra apenas a ativação por convite, oculta preços e dados financeiros e não inicia pedidos de checkout ou reconciliação de pagamentos.
+A agenda mantém identificadores/metadados históricos para não duplicar reservas. Nenhuma aprovação de prova é consultada. Uma operação server-only autorizada chama `releaseLiveSession({ userId })`; então o cliente autenticado pode consultar disponibilidade/pedir um horário. Os locks, revisões e IDs determinísticos do Calendar permanecem.
 
-A flag é exclusivamente de servidor e não deve receber o prefixo `NEXT_PUBLIC_`. Altere-a para `false` apenas quando o fluxo comercial estiver deliberadamente pronto e as credenciais Asaas do ambiente tiverem sido validadas.
+Os scripts `scheduling:health`, `payments:audit` e `auth:admins` são operacionais e podem consultar/alterar serviços externos. Não fazem parte do build nem foram executados nesta substituição. Produção de voz em `scripts/media-production/produce.mjs` também exige autorização específica e revisão da gravação.
 
-## Pagamentos
+## Plano e recuperação
 
-- `POST /api/checkout`: cria ou recupera uma cobrança Pix/checkout hospedado.
-- `POST /api/verify-payment`: reconcilia o estado com o fornecedor.
-- `POST /api/webhooks/asaas`: recebe eventos autenticados e idempotentes.
+`docs/plano-nova-demo/ANDAMENTO.md` registra commits/lotes e verificações; `ARQUIVOS.csv` e `ROTAS.csv` mantêm o inventário-base e o resultado de execução. A base anterior é o commit `b881b3e`, com tag local `basedspeak-pre-demo-b881b3e`.
 
-Em produção, `ASAAS_API_KEY`, `ASAAS_BASE_URL` e `ASAAS_WEBHOOK_TOKEN` devem pertencer ao mesmo ambiente. Nunca exponha esses valores com prefixo `NEXT_PUBLIC_`.
-
-## Operação
-
-```bash
-npm run scheduling:health
-npm run exams:audit-locks
-npm run payments:audit
-```
-
-Os scripts de migração são dry-run por padrão. Qualquer opção `--apply` deve ser executada somente depois de rever o resultado e fazer backup.
-
-Checklist mínimo de deploy:
-
-1. Executar testes, lint, TypeScript e build.
-2. Aplicar claims administrativas antes das regras que dependem delas.
-3. Fazer deploy de regras e índices Firestore.
-4. Confirmar `BETA_FREE_MODE=true` para o beta gratuito; se a flag estiver desligada, confirmar credenciais Asaas de produção e token do webhook.
-5. Executar o healthcheck de scheduling.
-6. Fazer smoke test com utilizador não administrador e outro administrador.
-7. Com o beta gratuito ativo, validar geração e ativação de um convite; com pagamentos ativos, confirmar Pix/cartão em sandbox e, para produção, usar uma transação real controlada e o respetivo reembolso.
-
-Termos e Privacidade publicados no produto são uma base operacional para o beta fechado e ainda exigem revisão jurídica/identificação completa do controlador antes de abertura comercial.
+Não houve deploy, publicação de regras/índices, migração/exclusão de dados remotos, alteração de credenciais ou mudança de configuração externa.

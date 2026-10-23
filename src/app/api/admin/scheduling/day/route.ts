@@ -1,23 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getRequestPrincipal } from '@/server/auth/principal';
+import { requireAdminPrincipal } from "@/server/auth/route-guards";
+import { RequestAuthError } from "@/server/auth/request-auth";
 import { getSchedulingDayOverview } from '@/server/scheduling/service';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   try {
-    const principal = await getRequestPrincipal(req, {
-      allowBearer: true,
-      allowSessionCookie: true,
-    });
-
-    if (!principal) {
-      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
-    }
-
-    if (principal.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
-    }
+    await requireAdminPrincipal(req);
 
     const { searchParams } = new URL(req.url);
     const sessionId = searchParams.get('sessionId');
@@ -29,6 +19,7 @@ export async function GET(req: Request) {
     const overview = await getSchedulingDayOverview(sessionId);
     return NextResponse.json({ success: true, overview });
   } catch (error) {
+    if (error instanceof RequestAuthError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error('[admin/scheduling/day] error', error);
     const message = error instanceof Error ? error.message : 'Failed to load day overview.';
     return NextResponse.json({ error: message }, { status: 500 });

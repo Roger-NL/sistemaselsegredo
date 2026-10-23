@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getRequestPrincipal } from '@/server/auth/principal';
+import { requireAdminPrincipal } from "@/server/auth/route-guards";
+import { RequestAuthError } from "@/server/auth/request-auth";
 import { updateSchedulingStatusByAdmin } from '@/server/scheduling/service';
 import { RateLimitError, consumeRateLimit, rateLimitErrorResponse } from '@/server/http/rate-limit';
 
@@ -7,18 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const principal = await getRequestPrincipal(req, {
-      allowBearer: true,
-      allowSessionCookie: true,
-    });
-
-    if (!principal) {
-      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
-    }
-
-    if (principal.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
-    }
+    const principal = await requireAdminPrincipal(req);
 
     const body = await req.json();
     const { sessionId, decision, reason } = body as {
@@ -47,6 +37,7 @@ export async function POST(req: Request) {
     await updateSchedulingStatusByAdmin({ sessionId, decision, reason });
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof RequestAuthError) return NextResponse.json({ error: error.message }, { status: error.status });
     if (error instanceof RateLimitError) return rateLimitErrorResponse(error);
     const message = error instanceof Error ? error.message : 'Failed to update scheduling status.';
     const code = /^[A-Z0-9_]+$/.test(message) ? message : 'UNEXPECTED_ERROR';

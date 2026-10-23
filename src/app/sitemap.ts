@@ -1,19 +1,4 @@
-import { MetadataRoute } from 'next'
-
+import type { MetadataRoute } from "next";
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://basedspeak.com'
-
-    // Define your static routes here
-    const routes = [
-        '',
-        '/termos',
-        '/privacidade',
-    ]
-
-    return routes.map((route) => ({
-        url: `${baseUrl}${route}`,
-        lastModified: new Date(),
-        changeFrequency: route === '' ? 'weekly' as const : 'monthly' as const,
-        priority: route === '' ? 1 : 0.4,
-    }))
+  return ["", "/demo", "/termos", "/privacidade"].map(route => ({ url: `https://basedspeak.com${route}`, changeFrequency: "monthly", priority: route ? 0.5 : 1 }));
 }

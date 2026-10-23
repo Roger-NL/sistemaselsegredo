@@ -23,8 +23,8 @@
 /cadastro,—,307 → /,Retirar cadastro visual; destino sem query.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
 /pagamento,—,307 → /,Retirar checkout visual; API Asaas permanece.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
 /obrigado,—,307 → /,Retirar confirmação visual antiga.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
-/termos,—,MANTER/ADAPTAR,Preservar rota legal e revisar conteúdo para o produto.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
-/privacidade,—,MANTER/ADAPTAR,Preservar rota legal e revisar conteúdo/telemetria.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
+/termos,—,MANTER/ADAPTAR,Preservar rota legal e revisar conteúdo para o produto.,URL listada explicitamente; query descartada nos aliases,2/5,CONCLUÍDO 5,Rotas públicas sem providers; texto/metadata coerentes com prévia local
+/privacidade,—,MANTER/ADAPTAR,Preservar rota legal e revisar conteúdo/telemetria.,URL listada explicitamente; query descartada nos aliases,2/5,CONCLUÍDO 5,Rotas públicas sem providers; texto/metadata coerentes com prévia local
 /agendamentos,—,307 → /,Retirar UI de agenda; APIs de agenda permanecem.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
 /boletim,—,307 → /,Retirar página de boletim.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
 /configuracoes,—,307 → /,Retirar configurações de aluno.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
@@ -44,10 +44,10 @@
 /admin/alunos/[id],—,307 → /,Retirar detalhe de aluno fora do route group.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
 /inicio-orbita-7k3,—,307 → /,Retirar protótipo e seu motor.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
 /demo,—,CRIAR,Host da história pública e dos estados 1–10.,URL listada explicitamente; query descartada nos aliases,2/5,IMPLEMENTADO 2,Demo pública local; sem auth/mic/pagamento; mídia final pendente
-/manifest.webmanifest,—,ADAPTAR,Manifest mínimo da demo.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
-/sitemap.xml,—,ADAPTAR,Remover URLs antigas; publicar rotas públicas atuais.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
-/robots.txt,—,ADAPTAR,Revisar indexação das rotas públicas.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
-/favicon.ico,—,MANTER/ADAPTAR,Manter se a identidade visual for aprovada.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
+/manifest.webmanifest,—,ADAPTAR,Manifest mínimo da demo.,URL listada explicitamente; query descartada nos aliases,2/5,CONCLUÍDO 5,Rotas públicas sem providers; texto/metadata coerentes com prévia local
+/sitemap.xml,—,ADAPTAR,Remover URLs antigas; publicar rotas públicas atuais.,URL listada explicitamente; query descartada nos aliases,2/5,CONCLUÍDO 5,Rotas públicas sem providers; texto/metadata coerentes com prévia local
+/robots.txt,—,ADAPTAR,Revisar indexação das rotas públicas.,URL listada explicitamente; query descartada nos aliases,2/5,CONCLUÍDO 5,Rotas públicas sem providers; texto/metadata coerentes com prévia local
+/favicon.ico,—,MANTER/ADAPTAR,Manter se a identidade visual for aprovada.,URL listada explicitamente; query descartada nos aliases,2/5,CONCLUÍDO 5,Rotas públicas sem providers; texto/metadata coerentes com prévia local
 /api/demo/session,POST,CRIAR,Sessão/telemetria/avaliação anônima conforme contrato de DEMO.md.,Proposta; pode ser adiada para sessão local + ficha humana,2,ADIADO,Coleta desativada: responsável/retenção não definidos; sessão local e ficha humana
 /api/demo/events,POST,CRIAR,Sessão/telemetria/avaliação anônima conforme contrato de DEMO.md.,Proposta; pode ser adiada para sessão local + ficha humana,2,ADIADO,Coleta desativada: responsável/retenção não definidos; sessão local e ficha humana
 /api/demo/feedback,POST,CRIAR,Sessão/telemetria/avaliação anônima conforme contrato de DEMO.md.,Proposta; pode ser adiada para sessão local + ficha humana,2,ADIADO,Coleta desativada: responsável/retenção não definidos; sessão local e ficha humana

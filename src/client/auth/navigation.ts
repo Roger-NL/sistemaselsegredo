@@ -10,17 +10,12 @@ type ResolvePostAuthTargetParams = {
 
 export function resolvePostAuthTarget({
     callbackUrl,
-    isAdmin,
 }: ResolvePostAuthTargetParams): string {
     if (callbackUrl && isSafeInternalCallbackPath(callbackUrl)) {
         return callbackUrl;
     }
 
-    if (isAdmin) {
-        return ROUTES.admin.dashboard;
-    }
-
-    return ROUTES.app.dashboard;
+    return ROUTES.home;
 }
 
 export function buildAuthEntryHref(basePath: string, callbackUrl?: string | null): string {

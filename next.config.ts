@@ -17,21 +17,17 @@ const contentSecurityPolicy = [
   "upgrade-insecure-requests",
 ].join("; ");
 
+const publicDemoCsp = [
+  "default-src 'self'", "base-uri 'self'", "object-src 'none'", "form-action 'self'", "frame-ancestors 'self'",
+  `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'", "font-src 'self' data:", "img-src 'self' data: blob:",
+  "media-src 'self'", `connect-src 'self' ${process.env.NODE_ENV === "development" ? "ws:" : ""}`,
+  "frame-src 'none'", "worker-src 'self' blob:",
+].join("; ");
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   productionBrowserSourceMaps: false, // Segurança: Oculta código fonte em produção
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "randomuser.me",
-      },
-      {
-        protocol: "https",
-        hostname: "i.pravatar.cc",
-      },
-    ],
-  },
   headers: async () => [
     {
       source: '/:path*',
@@ -46,7 +42,7 @@ const nextConfig: NextConfig = {
         },
         {
           key: 'X-Frame-Options',
-          value: 'SAMEORIGIN' // Allows iframe from same origin (needed for neon-tubes.html)
+          value: 'SAMEORIGIN'
         },
         {
           key: 'Cross-Origin-Opener-Policy',
@@ -69,7 +65,8 @@ const nextConfig: NextConfig = {
           value: 'camera=(), geolocation=(), microphone=(), payment=(), usb=()'
         }
       ]
-    }
+    },
+    ...["/", "/demo"].map(source => ({ source, headers: [{ key: "Content-Security-Policy", value: publicDemoCsp }] })),
   ]
 };
 

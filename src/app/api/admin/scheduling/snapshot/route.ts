@@ -1,27 +1,18 @@
 import { NextResponse } from 'next/server';
-import { getRequestPrincipal } from '@/server/auth/principal';
+import { requireAdminPrincipal } from "@/server/auth/route-guards";
+import { RequestAuthError } from "@/server/auth/request-auth";
 import { getAdminSchedulingSnapshot } from '@/server/scheduling/service';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   try {
-    const principal = await getRequestPrincipal(req, {
-      allowBearer: true,
-      allowSessionCookie: true,
-    });
-
-    if (!principal) {
-      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
-    }
-
-    if (principal.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
-    }
+    await requireAdminPrincipal(req);
 
     const snapshot = await getAdminSchedulingSnapshot();
     return NextResponse.json({ success: true, snapshot });
   } catch (error) {
+    if (error instanceof RequestAuthError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error('[admin/scheduling/snapshot] error', error);
     return NextResponse.json({ error: 'Failed to load admin scheduling snapshot.' }, { status: 500 });
   }

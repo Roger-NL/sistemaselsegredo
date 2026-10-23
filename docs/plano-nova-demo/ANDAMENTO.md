@@ -58,3 +58,14 @@ Lote 1: separar integrações de currículo/UI, extrair sessão client e contrat
 - Fallbacks de erro/404 e botão reescritos antes da remoção dos componentes neon. CSS global antigo retirado junto com seus consumidores.
 - Documentos, relatórios Lighthouse e scripts one-off listados para remoção retirados; nenhum script mutador foi executado. `output/` e `tmp/` preexistentes preservados.
 - Testes de progresso, visitor-name e welcome retirados com suas implementações; teste de estado visual de pagamento substituído pela cobertura útil de parcelamento. Diferença no total de testes nesta etapa é intencional, não falha silencenciada.
+
+## Lote 5 — recursos e configuração
+
+- 13 assets antigos retirados; oito pacotes diretos sem consumidores removidos e lockfile atualizado offline, sem scripts de instalação/upgrade. Plataforma não atualizada.
+- README, `.env.example`, manifest/robots/sitemap e legal reescritos para a demo real. Exemplo Calendar consolidado. Materiais locais em output/tmp preservados e ignorados no Git.
+- CSP da entrada e `/demo` restringe imagem/mídia/conexão à própria origem (com websocket local em desenvolvimento). Capacidades reservadas não são importadas pela demo. Microfone e pagamento continuam negados por Permissions-Policy.
+- `firestore.rules`, `firestore.indexes.json`, `firebase.json` e `.firebaserc` revisados sem alteração. As regras antigas exigem campos curriculares na criação pelo browser: a auth mínima agora estabelece sessão e cria perfil mínimo no servidor após verificar o token. Essa adaptação evita publicar regras e não migra documentos existentes; login de perfil existente atualiza somente timestamps. Testes usam mocks.
+- Guard administrativo real consolidado; navegação futura usa `/` como fallback seguro e não aponta para dashboards retirados. Tipos/IDs históricos de reservas mantidos por compatibilidade, sem exigência curricular ou promessa de desbloqueio.
+- O TypeScript após Lote 4 encontrou lixo sintático em `.next/dev/types/routes.d.ts` gerado durante exclusões; removido apenas esse diretório gerado com servidor parado. Typegen e TypeScript finais sem essa interferência. Build com permissão local compilou e revelou chamada residual do guard antigo; corrigida, nova execução em andamento.
+
+- Verificação do Lote 5: 64 testes/14 arquivos, lint sem avisos, TypeScript e build de produção local aprovados. Nenhuma fonte externa necessária para o build.

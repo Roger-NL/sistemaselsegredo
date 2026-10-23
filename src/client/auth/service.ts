@@ -1,3 +1,4 @@
+import { createSessionSynchronizer } from "./session";
 /**
  * Authentication Service (FIREBASE EDITION)
  * Firebase Auth + Firestore authentication service
@@ -15,7 +16,7 @@ import {
     sendPasswordResetEmail,
     User as FirebaseUser
 } from "firebase/auth";
-import { doc, setDoc, getDoc, updateDoc, deleteField } from "firebase/firestore";
+import { doc, getDoc, updateDoc, deleteField } from "firebase/firestore";
 import type { FirebaseError } from "firebase/app";
 import { auth, db } from "@/client/auth/firebase";
 
@@ -110,6 +111,7 @@ export function isFirestorePermissionError(error: unknown): boolean {
  * Convert Firebase User + Firestore Data to App User
  */
 async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
+    if (!(await createSessionSynchronizer()(fbUser, true))) throw new Error("SERVER_SESSION_FAILED");
     const tokenResult = await fbUser.getIdTokenResult();
     const isAdmin = tokenResult.claims.admin === true;
     const userDocRef = doc(db, "users", fbUser.uid);
@@ -158,38 +160,7 @@ export async function loginWithGoogle(): Promise<AuthResult> {
         const fallbackUser = buildFallbackUserFromAuth(fbUser);
         fallbackUser.isAdmin = (await fbUser.getIdTokenResult()).claims.admin === true;
 
-        let user: User = fallbackUser;
-
-        try {
-            const userDocRef = doc(db, "users", fbUser.uid);
-            const userDoc = await getDoc(userDocRef);
-
-            if (userDoc.exists()) {
-                user = (await mapFirebaseUser(fbUser)) ?? fallbackUser;
-            } else {
-                const newUser: User = {
-                    ...fallbackUser,
-                    name: fbUser.displayName || "Usuário Google",
-                    lastLoginDate: new Date().toISOString(),
-                };
-
-                await setDoc(userDocRef, {
-                    id: newUser.id,
-                    name: newUser.name,
-                    email: newUser.email,
-                    createdAt: newUser.createdAt,
-                    lastLoginDate: newUser.lastLoginDate,
-                    subscriptionStatus: "free",
-                });
-                user = newUser;
-            }
-        } catch (firestoreError) {
-            if (!isFirestorePermissionError(firestoreError)) {
-                throw firestoreError;
-            }
-
-            console.warn("Google login succeeded, but Firestore profile access was denied. Using auth fallback user.", firestoreError);
-        }
+        const user = (await mapFirebaseUser(fbUser)) ?? fallbackUser;
 
         return { success: true, user };
 
@@ -262,36 +233,8 @@ export async function register(
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const fbUser = userCredential.user;
 
-        // Create Firestore Document
-        const newUser: User = {
-            id: fbUser.uid,
-            name: name,
-            email: email,
-            createdAt: new Date().toISOString(),
-            lastLoginDate: new Date().toISOString(),
-            subscriptionStatus: 'free', // Freemium Start
-            isAdmin: false,
-        };
-
-        try {
-            await Promise.all([
-                setDoc(doc(db, "users", fbUser.uid), {
-                    id: newUser.id,
-                    name: newUser.name,
-                    email: newUser.email,
-                    createdAt: newUser.createdAt,
-                    lastLoginDate: newUser.lastLoginDate,
-                    subscriptionStatus: "free",
-                }),
-                firebaseUpdateProfile(fbUser, { displayName: name })
-            ]);
-        } catch (firestoreError) {
-            if (!isFirestorePermissionError(firestoreError)) {
-                throw firestoreError;
-            }
-
-            console.warn("Registration succeeded, but Firestore profile creation was denied. Using auth fallback user.", firestoreError);
-        }
+        await firebaseUpdateProfile(fbUser, { displayName: name });
+        const newUser = (await mapFirebaseUser(fbUser)) ?? buildFallbackUserFromAuth(fbUser);
 
         return { success: true, user: newUser };
 

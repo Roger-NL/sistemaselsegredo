@@ -131,3 +131,9 @@ Os destinos acima agora existem, exceto `src/server/auth/service.ts`: o serviço
 Agenda: contratos de leitura, pedido, cancelamento e decisão preservados. A chave histórica `userId_p2` e campos de origem ficam como compatibilidade de armazenamento/IDs do provedor; nenhuma consulta a provas, gravação de progresso ou exigência curricular permanece no serviço. Uma futura ação autorizada chama `releaseLiveSession({ userId })` no servidor antes de oferecer horários. A demo não chama esse serviço.
 
 A sessão anônima/telemetria remota pode ser adiada conforme plano. Sem responsável e retenção definidos, a implementação inicial fica local e não afirma receber feedback remoto.
+
+## Perfil mínimo e guard após limpeza
+
+`src/server/auth/service.ts` agora existe: `recordVerifiedLogin` recebe somente identidade já verificada pelo handler de sessão, cria perfil mínimo se ausente e atualiza apenas timestamps se existente. `src/client/auth/service.ts` estabelece o cookie seguro antes de ler o perfil. Isso evita depender dos campos curriculares exigidos nas regras publicadas antigas; nenhum ajuste de regras ou dado remoto foi aplicado. A autorização administrativa reutiliza `requireAdminPrincipal` em `src/server/auth/route-guards.ts`.
+
+A CSP específica de `/` e `/demo` não abre conexão a integrações. Uma futura tela de login deve usar sua própria rota e revisar CSP apropriada; não importar esses serviços no shell público.

@@ -209,12 +209,11 @@ export async function createCalendarEventForBooking(booking: LiveSessionBooking)
       calendarId: DEFAULT_CALENDAR_ID,
       requestBody: {
         id: eventId,
-        summary: `${summaryPrefix} Sessão ao vivo • ${booking.studentName || 'Aluno'} • Pilar ${booking.sourcePillarId}`,
+        summary: `${summaryPrefix} Sessão ao vivo • ${booking.studentName || 'Aluno'}`,
         description: [
           `Aluno: ${booking.studentName || '-'}`,
           `Email: ${booking.studentEmail || '-'}`,
           `Telefone: ${booking.studentPhone || '-'}`,
-          `Pilar de origem: ${booking.sourcePillarId}`,
           `Booking ID: ${booking.id || '-'}`,
           `Tutor principal: ${booking.tutorEmail || DEFAULT_TUTOR_EMAIL || '-'}`,
           '',
