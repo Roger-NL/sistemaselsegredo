@@ -17,7 +17,7 @@ export function DemoHost({ experience = false }: { experience?: boolean }) {
     if (snapshot.state && !window.confirm("Recomeçar descarta esta tentativa e a avaliação guardada neste dispositivo. Deseja continuar?")) return;
     restart(); router.push("/");
   }
-  return <main className="demo-shell">
+  return <main className="demo-shell app-shell">
     <header className="site-header"><Brand /><nav aria-label="Navegação principal"><span className="public-label">Uma conversa em inglês</span>{snapshot.state && <button className="text-button" onClick={reset}>Recomeçar</button>}</nav></header>
     <p className="preview-notice">Prévia · ilustrações conceituais.</p>
     {snapshot.status === "loading" ? <p role="status">Preparando a conversa…</p>

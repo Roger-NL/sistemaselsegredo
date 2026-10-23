@@ -16,6 +16,8 @@ A sessão e o rascunho de avaliação ficam neste navegador. Storage indisponív
 
 Coleta de eventos e envio de avaliação remotos estão desativados, conforme a opção aprovada de teste local + observação humana. O formulário não confirma recebimento. Responsável, contato e retenção devem estar definidos antes de implementar/ativar os endpoints de sessão, eventos e avaliação.
 
+A interface usa a altura disponível da janela, com cena e atividade compactas. Histórico, pistas e retrospectiva são paginados para não acumularem conteúdo abaixo da atividade. O layout final ainda precisa de conferência visual: a permissão salva do navegador bloqueou a inspeção automatizada da aba local.
+
 ## Áudio no servidor
 
 A revisão aprovada em `docs/plano-nova-demo/REVISAO-EXPERIENCIA-E-AUDIO.md` substitui a biblioteca estática de voz. Ao clicar em Ouvir, o cliente envia somente um ID permitido para `POST /api/demo/audio`. O servidor resolve texto e configuração, usa SHA-256 determinístico, coordena a tentativa por transação Firestore e salva MP3 imutável no Vercel Blob. Frases idênticas com os mesmos parâmetros compartilham o arquivo em todo o site. Abertura e retomada não geram áudio; velocidade local reutiliza o arquivo.

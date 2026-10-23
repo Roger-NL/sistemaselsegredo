@@ -115,3 +115,15 @@ C01 está validado com serviços reais. A revisão dos demais contextos de áudi
 ## Validação integral de áudio autorizada — 23/10/2026
 
 Resultado em [VALIDACAO-AUDIO-COMPLETA.md](VALIDACAO-AUDIO-COMPLETA.md): 50 IDs, 46 MP3s únicos decodificados, 45 primeiras gerações novas (C01 já existia), nenhum erro de API e nenhuma geração adicional nos replays. Os quatro pares de textos iguais compartilharam a chave e o MP3, inclusive sob concorrência. Após reiniciar o servidor, todos os 46 arquivos mantiveram suas chaves e hashes; o ledger permaneceu ready, uma tentativa por chave, timestamps de início/fim imutáveis. Suite: 89 testes/20 arquivos aprovada. Nenhum contador foi resetado; arquivos/registro antigos preservados.
+
+## Ajuste solicitado: atividade na área visível da janela
+
+O responsável enviou uma captura mostrando cabeçalho/controles/histórico ocupando a tela e solicitou não precisar rolar para alcançar a atividade. A alteração foi implementada após essa instrução:
+
+- Shell da aplicação em `100dvh`, com linhas separadas para cabeçalho, aviso de prévia, área principal flexível e rodapé compacto. As imagens usam somente o espaço disponível; cabeçalho, áudio, pedidos e tipografia foram compactados. Barra de progresso ganhou renderização explícita preta para evitar a cor nativa verde.
+- Histórico em diálogo nativo, uma fala por página, com significado, replay e anterior/próxima. Nenhuma fala foi removida do transcript; a revisão continua restrita ao percurso real e a tentativa mental mantém consulta explícita com apoio.
+- Pistas em diálogo paginado, sem acrescentar a escada completa abaixo da montagem. Consulta de modelo, tentar sem modelo e usar com apoio preservados. Retrospectiva exibe um momento por vez; conversa completa usa o mesmo histórico paginado.
+- Entrada mais curta preserva marca, gratuidade, duração aproximada, aviso de microfone dispensável e três escolhas de apoio sem pré-seleção. Feedback compacto, sem alterar seu rascunho nem ativar coleta.
+- Foco das etapas usa preventScroll. Diálogos nativos mantêm Escape, foco contido e retorno ao controle de abertura. CSS mobile usa cena em faixa compacta. Em janelas excepcionalmente baixas (menos de 540px)/zoom extremo, mantém reflow acessível em vez de cortar controles. Páginas legais extensas ficam fora do frame de aplicação.
+- A narrativa, o reducer, o catálogo e o serviço de cache não foram alterados. A suíte de 89 testes passou, assim como lint, TypeScript e build local.
+- A inspeção visual foi tentada usando a aba local já aberta, mas uma permissão salva/gerenciada do navegador negou observar `http://localhost:3100`. Não houve tentativa de contorno. Alteração revisada em código e baseada na captura enviada; a confirmação de dimensões e interação no navegador permanece pendente. Não alegar medição de overflow nem anexar captura antiga como prova.

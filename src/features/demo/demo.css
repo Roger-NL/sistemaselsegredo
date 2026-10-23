@@ -566,3 +566,168 @@
 .audio-controls { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; padding:.5rem 0; color:var(--muted); font-size:.75rem; border-bottom:1px solid var(--line); }
 .audio-controls select { border:1px solid var(--line); background:white; color:var(--ink); padding:.4rem; border-radius:6px; margin-left:.5rem; }
 .audio-controls .text-button { font-size:.75rem; }
+
+/* App frame: the current interaction stays in the viewport; long reviews use pages. */
+.app-shell {
+  height:100dvh;
+  min-height:0;
+  display:grid;
+  grid-template-rows:auto auto minmax(0,1fr) auto;
+  padding-inline:clamp(1rem,3vw,3rem);
+  line-height:1.4;
+}
+.app-shell .site-header { padding:.65rem 0; min-height:58px; }
+.app-shell .preview-notice { padding:.15rem 0; font-size:.65rem; }
+.app-shell > footer { padding:.4rem 0; font-size:.65rem; align-items:center; }
+.app-shell > footer nav { gap:1rem; }
+.app-shell p { margin:.45rem 0; }
+.app-shell h1 { font-size:clamp(2rem,3.5vw,3.6rem); margin:.4rem 0 .7rem; }
+.app-shell button,.app-shell .button-link { padding:.55rem .85rem; font-size:.9rem; }
+.app-shell .text-button { padding:.25rem 0; min-height:36px; font-size:.8rem; }
+.app-shell .experience {
+  width:100%; min-height:0; max-width:1440px; margin:0 auto;
+  display:grid; grid-template-rows:auto auto auto minmax(0,1fr);
+}
+.app-shell .experience-bar { padding:.2rem 0; gap:1rem; min-height:38px; font-size:.75rem; }
+.app-shell progress { appearance:none; border:0; background:var(--line); color:var(--ink); border-radius:4px; overflow:hidden; }
+.app-shell progress::-webkit-progress-bar { background:var(--line); }
+.app-shell progress::-webkit-progress-value { background:var(--ink); }
+.app-shell progress::-moz-progress-bar { background:var(--ink); }
+.app-shell .audio-controls { padding:.15rem 0; gap:1rem; min-height:38px; }
+.app-shell .audio-controls select { padding:.25rem; }
+.app-shell .audio-controls .text-button { font-size:.7rem; }
+.app-shell .notice:not(:empty) { padding:.35rem .65rem; margin:.2rem 0; font-size:.75rem; }
+.app-shell .scene-grid { min-height:0; gap:clamp(1.5rem,4vw,4rem); padding:.75rem 0; grid-template-columns:minmax(0,.95fr) minmax(0,1fr); align-items:stretch; }
+.app-shell .scene-column { position:relative; top:auto; min-height:0; display:flex; flex-direction:column; gap:.5rem; }
+.app-shell .scene-art { display:flex; flex-direction:column; min-height:0; flex:1; }
+.app-shell .scene-art img { min-height:0; flex:1; width:100%; height:0; aspect-ratio:auto; object-fit:cover; object-position:center; border-radius:12px; }
+.app-shell .scene-art figcaption { flex-shrink:0; font-size:.75rem; padding:.35rem 0 0; }
+.app-shell .scene-art figcaption span { display:none; }
+.app-shell .order { margin:0; max-width:none; padding:.45rem .65rem; font-size:.75rem; border-radius:6px; }
+.app-shell .order p { margin:.3rem 0 0; }
+.app-shell .conversation-panel { min-width:0; min-height:0; display:flex; flex-direction:column; justify-content:center; align-items:stretch; }
+.app-shell .conversation-panel h1 { font-size:clamp(1.4rem,2.2vw,2.2rem); margin:.2rem 0 .4rem; }
+.app-shell .context { font-size:.9rem; margin:.3rem 0 .6rem; }
+.app-shell .speech { padding:.6rem .85rem; margin:.3rem 0; }
+.app-shell .speech.sent { display:flex; flex-wrap:wrap; align-items:baseline; gap:.3rem .65rem; padding:.4rem .75rem; }
+.app-shell .speech.sent small { width:100%; }
+.app-shell .speech.sent p[lang=en] { font-size:1.05rem; margin:0; }
+.app-shell .speech p[lang=en],.app-shell .expression p[lang=en] { font-size:clamp(1.15rem,1.8vw,1.55rem); margin:.2rem 0; line-height:1.25; }
+.app-shell .speech .meaning { font-size:.8rem; margin:.2rem 0; }
+.app-shell .expression { margin:.4rem 0; padding:.55rem 0; }
+.app-shell .expression > p:not([lang]) { font-size:.85rem; }
+.app-shell .expression > button { min-height:36px; padding:.35rem .65rem; }
+.app-shell .choices { margin:.55rem 0; gap:.5rem; }
+.app-shell .actions { gap:.5rem; margin:.5rem 0; }
+.app-shell .construction { padding:.2rem 0; }
+.app-shell .construction > p { font-size:.85rem; margin:.25rem 0 .45rem; }
+.app-shell .construction .skeleton { font-size:1.3rem; }
+.app-shell .answer { min-height:52px; padding:.35rem .5rem; }
+.app-shell .blocks { gap:.4rem; margin:.55rem 0; }
+.app-shell .blocks button,.app-shell .answer button { padding:.4rem .65rem; }
+.app-shell .help { margin:.25rem 0 0; padding:.25rem 0 0; }
+.app-shell .recall { margin:.5rem 0; font-size:.9rem; }
+.app-shell .conversation-history { margin:0 0 .35rem; padding:0; border:0; flex-shrink:0; }
+.app-shell .conversation-history > button { color:var(--muted); font-size:.75rem; }
+.app-shell .entry-grid { width:100%; min-height:0; max-width:1300px; margin:0 auto; padding:1rem 0; gap:clamp(2rem,5vw,5rem); align-items:center; }
+.app-shell .entry-copy { min-width:0; }
+.app-shell .entry-copy h1 { margin:.5rem 0 .7rem; }
+.app-shell .entry-copy .lead { font-size:1rem; }
+.app-shell .entry-details { font-size:.85rem; }
+.app-shell .profile-options { margin:1rem 0 .5rem; }
+.app-shell .profile-options legend { font-size:.9rem; margin-bottom:.35rem; }
+.app-shell .profile-option { margin:.4rem 0; padding:.55rem .75rem; }
+.app-shell .profile-option small { font-size:.7rem; }
+.app-shell .entry-art { position:static; height:100%; min-height:0; margin:0; display:flex; flex-direction:column; }
+.app-shell .entry-art img { flex:1; min-height:0; height:0; aspect-ratio:auto; border-radius:16px; object-position:center; }
+.app-shell .entry-art figcaption { padding:.5rem; font-size:.9rem; }
+.app-shell .resume,.app-shell .ending { min-height:0; margin:auto 0; padding:1rem 0; }
+.app-shell .review-stage,.app-shell .feedback-form { width:min(100%,740px); margin:auto; min-height:0; padding:.5rem 0; }
+.app-shell .review-stage h1 { font-size:clamp(1.5rem,3vw,2.5rem); }
+.moment-card { background:var(--surface,#fcfaf6); border:1px solid var(--line); border-radius:12px; padding:.75rem 1rem; }
+.moment-card small { text-transform:uppercase; color:var(--muted); letter-spacing:.08em; font-size:.65rem; }
+.moment-card p[lang=en] { font-size:1.3rem; }
+.app-shell .feedback-form h2 { font-size:1.7rem; margin:.5rem 0; }
+.app-shell .feedback-options { margin:.5rem 0; padding:.5rem 0; }
+.app-shell textarea { padding:.6rem; height:clamp(70px,13dvh,120px); resize:none; }
+.demo-dialog { color:var(--ink); background:var(--paper); width:min(640px,calc(100vw - 2rem)); max-height:calc(100dvh - 2rem); padding:1.25rem; border:1px solid var(--line); border-radius:16px; margin:auto; box-shadow:0 16px 80px #19191930; }
+.demo-dialog::backdrop { background:#19191970; }
+.dialog-heading { display:flex; gap:1rem; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+.app-shell .dialog-heading h2 { font-size:1.4rem; margin:0; }
+.dialog-heading > button { flex-shrink:0; }
+.history-line { padding:1rem; background:#fcfaf6; border:1px solid var(--line); border-radius:12px; }
+.history-line small { font-size:.7rem; text-transform:uppercase; color:var(--muted); }
+.app-shell .history-line p[lang=en] { font-size:1.5rem; margin:.75rem 0; }
+.history-you { margin-left:1rem; }
+.pager { display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin:.75rem 0; font-size:.75rem; }
+.help-clue { font-size:1.15rem; padding:1rem 0; }
+@media(min-width:761px) and (max-height:760px) {
+  .app-shell .entry-copy h1 { font-size:2.5rem; margin:.3rem 0; }
+  .app-shell .profile-options { margin:.5rem 0; }
+  .app-shell .profile-option { padding:.4rem .65rem; margin:.3rem 0; }
+  .app-shell .speech p[lang=en],.app-shell .expression p[lang=en] { font-size:1.2rem; }
+  .app-shell .context { font-size:.8rem; }
+  .app-shell .conversation-panel h1 { font-size:1.5rem; }
+  .app-shell .speech { padding:.4rem .65rem; }
+  .app-shell .expression { padding:.4rem 0; margin:.3rem 0; }
+}
+@media(max-width:760px) {
+  .app-shell { padding-inline:.85rem; }
+  .app-shell .site-header { min-height:46px; padding:.25rem 0; }
+  .app-shell .brand { font-size:19px; }
+  .app-shell > footer { flex-direction:row; font-size:.6rem; gap:.5rem; }
+  .app-shell > footer > span { max-width:50%; }
+  .app-shell > footer nav { gap:.65rem; }
+  .app-shell .experience-bar { min-height:34px; gap:.5rem; font-size:.7rem; }
+  .app-shell .audio-controls { gap:.65rem; flex-wrap:nowrap; justify-content:space-between; font-size:.65rem; min-height:38px; }
+  .app-shell .audio-controls label { display:flex; align-items:center; gap:.15rem; }
+  .app-shell .audio-controls select { margin-left:0; max-width:82px; }
+  .app-shell .audio-controls .text-button { font-size:.65rem; white-space:nowrap; }
+  .app-shell .audio-label { display:none; }
+  .app-shell .scene-grid { grid-template-columns:minmax(0,1fr); grid-template-rows:clamp(64px,15dvh,130px) minmax(0,1fr); gap:.5rem; padding:.5rem 0; }
+  .app-shell .scene-art img { object-position:center 48%; }
+  .app-shell .scene-art figcaption { display:none; }
+  .app-shell .order { position:absolute; right:.4rem; bottom:.4rem; padding:.3rem .5rem; font-size:.65rem; max-width:75%; background:#fcfaf6ed; }
+  .app-shell .conversation-panel { justify-content:center; }
+  .app-shell .conversation-panel h1 { font-size:1.35rem; }
+  .app-shell .context { font-size:.8rem; margin:.2rem 0 .35rem; }
+  .app-shell .speech { padding:.4rem .65rem; }
+  .app-shell .speech small,.app-shell .expression small { font-size:.6rem; }
+  .app-shell .speech p[lang=en],.app-shell .expression p[lang=en] { font-size:1.2rem; }
+  .app-shell .speech.sent p[lang=en] { font-size:.95rem; }
+  .app-shell .expression { padding:.4rem 0; margin:.3rem 0; }
+  .app-shell .primary { width:auto; justify-content:space-between; }
+  .app-shell .entry-grid { grid-template-rows:clamp(60px,12dvh,110px) minmax(0,1fr); gap:.5rem; padding:.5rem 0; }
+  .app-shell .entry-art { grid-row:1; }
+  .app-shell .entry-art figcaption { display:none; }
+  .app-shell .entry-copy h1 { font-size:1.9rem; margin:.3rem 0; }
+  .app-shell .entry-copy .lead { font-size:.85rem; }
+  .app-shell .entry-copy > p { font-size:.75rem; margin:.3rem 0; }
+  .app-shell .entry-copy .eyebrow { font-size:.6rem; }
+  .app-shell .entry-copy .primary { width:100%; }
+  .app-shell .profile-options { margin:.55rem 0 .3rem; }
+  .app-shell .profile-option { margin:.3rem 0; padding:.4rem .65rem; gap:.5rem; }
+  .app-shell .profile-option strong { font-size:.8rem; }
+  .app-shell .profile-option small { font-size:.65rem; }
+  .app-shell .dialog-heading { align-items:flex-start; }
+  .app-shell .dialog-heading h2 { font-size:1.1rem; }
+  .demo-dialog { padding:1rem; }
+  .app-shell .pager button { padding:.45rem .6rem; font-size:.75rem; }
+}
+/* Preserve access at extreme zoom/very short windows instead of clipping controls. */
+@media(max-height:540px) {
+  .app-shell { height:auto; min-height:100dvh; grid-template-rows:auto auto auto auto; }
+  .app-shell .scene-grid { min-height:360px; }
+  .app-shell .entry-grid { min-height:420px; }
+}
+
+.app-shell .audio-controls select { font:inherit; }
+
+.conversation-tools { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.75rem; flex-shrink:0; min-height:36px; }
+.app-shell .conversation-tools .conversation-history,.app-shell .conversation-tools .help { border:0; padding:0; margin:0; }
+
+@media(max-width:760px) and (max-height:740px) {
+  .app-shell .entry-copy h1 { font-size:1.65rem; }
+  .app-shell .entry-grid { grid-template-rows:60px minmax(0,1fr); }
+  .app-shell .profile-option { padding:.35rem .6rem; }
+}
