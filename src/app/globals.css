@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-:root { color-scheme: light; background: #f6f0e6; color: #35291f; }
+:root { color-scheme: light; background: #f4f0e8; color: #191919; }
 * { box-sizing: border-box; }
 body { margin: 0; }
 button, input, textarea { font: inherit; }

@@ -1,9 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import "@/features/demo/demo.css";
 
+// Reuse the local Geist bundled with the pinned Next dependency; no font download at build time.
+const geist = localFont({ src: "../../node_modules/next/dist/next-devtools/server/font/geist-latin.woff2", variable: "--font-geist-sans", weight: "100 900", style: "normal", display: "swap" });
+
 export const viewport: Viewport = {
-  themeColor: "#f6f0e6",
+  themeColor: "#f4f0e8",
   width: "device-width",
   initialScale: 1,
 };
@@ -34,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="scroll-smooth" data-scroll-behavior="smooth">
       <body
-        className="antialiased overflow-x-hidden"
+        className={`${geist.variable} antialiased overflow-x-hidden`}
       >
         {children}
       </body>

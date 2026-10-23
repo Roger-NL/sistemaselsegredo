@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
+import { Brand } from "@/components/ui/Brand";
 import { DemoEntry } from "./DemoEntry";
 import { DemoExperience } from "./DemoExperience";
 import { createDemo } from "./model/reducer";
@@ -17,8 +18,8 @@ export function DemoHost({ experience = false }: { experience?: boolean }) {
     restart(); router.push("/");
   }
   return <main className="demo-shell">
-    <header className="site-header"><Link className="brand" href="/">based<span>speak</span><span className="brand-dot" aria-hidden>●</span></Link><nav aria-label="Navegação principal"><span className="public-label">Uma conversa em inglês</span>{snapshot.state && <button className="text-button" onClick={reset}>Recomeçar</button>}</nav></header>
-    <p className="preview-notice">Prévia local · imagens conceituais e áudios em produção.</p>
+    <header className="site-header"><Brand /><nav aria-label="Navegação principal"><span className="public-label">Uma conversa em inglês</span>{snapshot.state && <button className="text-button" onClick={reset}>Recomeçar</button>}</nav></header>
+    <p className="preview-notice">Prévia · ilustrações conceituais.</p>
     {snapshot.status === "loading" ? <p role="status">Preparando a conversa…</p>
       : snapshot.state && experience ? <DemoExperience key={snapshot.state.runId} initial={snapshot.state} />
       : snapshot.state ? <section className="resume"><p className="eyebrow">Sua conversa está aqui</p><h1>Vamos continuar?</h1><p>Você pode retomar do ponto em que parou, sem repetir as falas já enviadas.</p><div className="actions"><Link className="primary button-link" href="/demo">Retomar conversa</Link><button onClick={reset}>Começar de novo</button></div></section>

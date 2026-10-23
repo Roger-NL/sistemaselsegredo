@@ -1,6 +1,6 @@
 import type { AudioId, ImageId } from "../model/types";
 
-// Approved inventory, PDF pages 47–52. Pending media must never be called production-ready.
+// Approved inventory, PDF pages 47–52. Voices resolve through the global server cache on explicit request; final illustrations remain pending.
 const character = [
   ["Is this yours?", "Esse café é seu?"], ["Oh! Sorry!", "Ah! Desculpa!"],
   ["An iced coffee. And you?", "Um café com gelo. E você?"], ["Nice!", "Legal!"],
@@ -30,11 +30,11 @@ const you = [
   ["Nice talking to you.", "Foi bom conversar com você."], ["Bye!", "Tchau!"],
 ] as const;
 
-export type AudioAsset = { id: AudioId; text: string; meaning: string; role: "character" | "you"; path: string; ready: boolean };
+export type AudioAsset = { id: AudioId; text: string; meaning: string; role: "character" | "you"; delivery: "server-cache" };
 export const audio = Object.fromEntries([
   ...character.map(([text, meaning], i) => ({ id: `C${String(i + 1).padStart(2, "0")}` as AudioId, text, meaning, role: "character" as const })),
   ...you.map(([text, meaning], i) => ({ id: `U${String(i + 1).padStart(2, "0")}` as AudioId, text, meaning, role: "you" as const })),
-].map(asset => [asset.id, { ...asset, path: `/demo/cafe/v1/audio/${asset.id}.mp3`, ready: false }])) as Record<AudioId, AudioAsset>;
+].map(asset => [asset.id, { ...asset, delivery: "server-cache" }])) as Record<AudioId, AudioAsset>;
 
 export type ImageAsset = { id: ImageId; description: string; path: string; preview: string; ready: boolean };
 const scenes = [

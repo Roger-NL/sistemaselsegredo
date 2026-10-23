@@ -6,7 +6,7 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "form-action 'self'",
   "frame-ancestors 'self'",
-  `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval' " : ""}https://cdn.jsdelivr.net https://accounts.google.com https://apis.google.com`,
+  `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval' " : ""}https://accounts.google.com https://apis.google.com`,
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",
   "img-src 'self' data: blob: https:",
@@ -21,7 +21,7 @@ const publicDemoCsp = [
   "default-src 'self'", "base-uri 'self'", "object-src 'none'", "form-action 'self'", "frame-ancestors 'self'",
   `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'", "font-src 'self' data:", "img-src 'self' data: blob:",
-  "media-src 'self'", `connect-src 'self' ${process.env.NODE_ENV === "development" ? "ws:" : ""}`,
+  "media-src 'self' https://*.public.blob.vercel-storage.com", `connect-src 'self' ${process.env.NODE_ENV === "development" ? "ws:" : ""}`,
   "frame-src 'none'", "worker-src 'self' blob:",
 ].join("; ");
 

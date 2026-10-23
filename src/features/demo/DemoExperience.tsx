@@ -10,6 +10,8 @@ import { expressionHistory } from "./model/history";
 import { remember } from "./session/browser";
 import { DemoAudioPlayer } from "./audio/player";
 import { Retrospective } from "./components/Retrospective";
+import { requestCatalogAudio } from "./services/audio-client";
+import { ConversationHistory } from "./components/ConversationHistory";
 import type { AudioId, DemoEvent, DemoState } from "./model/types";
 
 export function DemoExperience({ initial }: { initial: DemoState }) {
@@ -22,51 +24,67 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
   const player = useRef<DemoAudioPlayer | null>(null);
   const supportMenu = useRef<HTMLDetailsElement>(null);
   const [draftProfile, setDraftProfile] = useState(initial.profile);
-  const transcriptCount = useRef(initial.transcript.length);
+  const pendingAudio = useRef<AbortController | null>(null);
+  const audioOperation = useRef({ version: 0, rate: 1 });
+  const [playbackRate, setPlaybackRate] = useState(1);
   const event = (type: DemoEvent["type"]) => dispatch({ at: node.id, type } as DemoEvent);
   useEffect(() => {
     if (!remember(state) && storageNotice.current) storageNotice.current.textContent = "O navegador não está guardando esta tentativa. Você pode concluir, mas sair desta página pode perder a retomada.";
   }, [state]);
   useEffect(() => {
     heading.current?.focus();
-    return () => { player.current?.cancel(); };
-  }, [state.nodeId, state.phase]);
-  useEffect(() => {
-    const added = state.transcript.slice(transcriptCount.current);
-    transcriptCount.current = state.transcript.length;
-    const urls = added.map(line => audio[line.audioId]).filter(asset => asset.ready).map(asset => asset.path);
-    if (!urls.length) return;
-    player.current ??= new DemoAudioPlayer();
-    void player.current.playSequence(urls).then(ok => {
-      if (!ok && audioNotice.current) audioNotice.current.textContent = "A reprodução foi interrompida. O texto continua disponível.";
-    });
-    return () => { player.current?.cancel(); };
-  }, [state.transcript]);
+    const operation = audioOperation.current;
+    const notice = audioNotice.current;
+    return () => {
+      operation.version++;
+      pendingAudio.current?.abort();
+      player.current?.cancel();
+      if (notice) notice.textContent = "";
+    };
+  }, [state.nodeId, state.phase, state.reviewView]);
   async function replay(id: AudioId) {
-    if (!audio[id].ready) {
-      if (audioNotice.current) audioNotice.current.textContent = "Este áudio ainda está em produção. O texto e a conversa continuam disponíveis.";
-      return;
+    const version = ++audioOperation.current.version;
+    pendingAudio.current?.abort();
+    player.current?.cancel();
+    const controller = new AbortController(); pendingAudio.current = controller;
+    if (audioNotice.current) audioNotice.current.textContent = "Preparando o áudio… Você pode continuar pelo texto.";
+    try {
+      const url = await requestCatalogAudio(id, controller.signal);
+      if (version !== audioOperation.current.version) return;
+      pendingAudio.current = null;
+      player.current ??= new DemoAudioPlayer();
+      player.current.setPlaybackRate(audioOperation.current.rate);
+      if (audioNotice.current) audioNotice.current.textContent = "Reproduzindo áudio.";
+      const ok = await player.current.playSequence([url]);
+      if (version === audioOperation.current.version && audioNotice.current) audioNotice.current.textContent = ok ? "" : "Não foi possível tocar o áudio. Você pode continuar pelo texto ou tentar ouvir novamente.";
+    } catch {
+      if (version === audioOperation.current.version && !controller.signal.aborted && audioNotice.current) audioNotice.current.textContent = "O áudio está indisponível agora. O texto e sua conversa continuam disponíveis.";
     }
-    player.current ??= new DemoAudioPlayer();
-    const ok = await player.current.play(audio[id].path);
-    if (audioNotice.current) audioNotice.current.textContent = ok ? "" : "Não foi possível tocar o áudio. Você pode continuar pelo texto ou tentar ouvir novamente.";
   }
   const response = node.kind === "response" ? audio[node.response] : null;
   const helpLevel = state.help[node.id] ?? 0;
   const previous = [...state.transcript].reverse().find(line => line.role === "you");
   const previousNode = previous ? catalog[previous.nodeId] : null;
   const justSent = previousNode && "next" in previousNode && previousNode.next === node.id ? previous : null;
+  const history = state.transcript.filter(line => line.id !== justSent?.id && line.nodeId !== node.id
+    && !(node.kind === "comprehension" && line.audioId === "C01"));
   const modelVisible = state.phase === "present" || state.phase === "ready" || (node.kind === "response" && helpLevel === node.help.length && !state.modelHidden);
   return <div className="experience">
     <div className="experience-bar"><span>Parte {node.part} de 10</span><progress max={10} value={node.part} aria-label="Parte da conversa" /><details ref={supportMenu} className="support-control"><summary>Ajustar apoio</summary><fieldset><legend>Como prefere continuar?</legend>{profiles.map(profile => <label key={profile.id}><input type="radio" name="change-support" checked={draftProfile === profile.id} onChange={() => setDraftProfile(profile.id)} /> {profile.label}</label>)}<div className="actions"><button onClick={() => { dispatch({ at: node.id, type: "PROFILE", profile: draftProfile }); if (supportMenu.current) supportMenu.current.open = false; }}>Aplicar</button><button onClick={() => { setDraftProfile(state.profile); if (supportMenu.current) supportMenu.current.open = false; }}>Voltar sem alterar</button></div></fieldset></details></div>
     <p ref={storageNotice} className="notice" role="status" />
     <p ref={audioNotice} className="notice" role="status" />
-    {Object.values(audio).some(asset => asset.ready) && <button className="text-button" onClick={() => player.current?.pause()}>Pausar áudio</button>}
+    <div className="audio-controls" aria-label="Controles de áudio">
+      <label>Velocidade <select aria-label="Velocidade de reprodução" value={playbackRate} onChange={event => { const rate = Number(event.target.value); setPlaybackRate(rate); audioOperation.current.rate = rate; player.current?.setPlaybackRate(rate); }}><option value={1}>Padrão</option><option value={0.9}>Mais lenta</option></select></label>
+      <button className="text-button" onClick={() => { if (pendingAudio.current) { audioOperation.current.version++; pendingAudio.current.abort(); pendingAudio.current = null; } player.current?.pause(); if (audioNotice.current) audioNotice.current.textContent = "Áudio pausado."; }}>Pausar áudio</button>
+      <button className="text-button" onClick={async () => { const version = audioOperation.current.version; const ok = await player.current?.resume(); if (version !== audioOperation.current.version) return; if (audioNotice.current) audioNotice.current.textContent = ok ? "Reproduzindo áudio." : "Selecione Ouvir junto de uma fala para começar."; }}>Continuar áudio</button>
+      <button className="text-button" onClick={() => { audioOperation.current.version++; pendingAudio.current?.abort(); player.current?.cancel(); if (audioNotice.current) audioNotice.current.textContent = ""; }}>Parar áudio</button>
+    </div>
     {node.kind === "end" ? <Retrospective state={state} onReplay={replay} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <div className="scene-grid">
       <aside className="scene-column"><figure className="scene-art"><Image width={1536} height={1024} sizes="(max-width: 760px) 100vw, 45vw" src={image.ready ? image.path : image.preview} alt={image.description} /><figcaption>{image.description}<span>Ilustração conceitual · arte final em produção</span></figcaption></figure>
         <details className="order" open={node.image === "V02" || node.image === "V05"}><summary>Seu pedido · #24</summary><p lang="en">Your order · #24 · Iced coffee</p>{node.image === "V02" && <p>Copo apresentado: <strong>SARAH / #18</strong></p>}{node.image === "V05" && <p>Pedido que acaba de chegar: <strong>#24</strong></p>}</details>
       </aside>
       <section className="conversation-panel">
+        <ConversationHistory key={`${node.id}:${state.phase}`} state={state} lines={history} onReplay={replay} />
         <p className="eyebrow">Um encontro na cafeteria</p><h1 ref={heading} tabIndex={-1}>{node.kind === "choice" ? node.prompt : node.kind === "comprehension" ? "O que ela está perguntando?" : node.id === "p6.safe" ? "Ela segura o copo a tempo." : node.id === "p2.send" ? "Agora responda à personagem." : "A conversa continua."}</h1>
         {node.id === "p10.contact" && state.decisions["p9.pause"] === "stay" && <p>Depois de mais alguns minutos, chega a hora de se despedir.</p>}
         <p className="context">{node.context}</p>

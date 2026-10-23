@@ -3,9 +3,17 @@ import { DemoAudioPlayer } from "@/features/demo/audio/player";
 
 class FakeAudio extends EventTarget {
   preload = ""; src = "test";
+  playbackRate = 1;
   play = vi.fn(async () => {}); pause = vi.fn();
 }
 describe("single prepared-audio player", () => {
+  it("changes playback rate and resumes the same file without creating another resource", async () => {
+    const element = new FakeAudio(); const create = vi.fn().mockReturnValue(element);
+    const player = new DemoAudioPlayer(create);
+    await player.play("recording.mp3"); player.pause(); player.setPlaybackRate(0.9);
+    expect(element.playbackRate).toBe(0.9); expect(await player.resume()).toBe(true);
+    expect(create).toHaveBeenCalledTimes(1);
+  });
   it("interrupts a previous resource and handles blocked playback", async () => {
     const first = new FakeAudio(); const second = new FakeAudio();
     second.play.mockRejectedValue(new Error("autoplay blocked"));

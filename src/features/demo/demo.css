@@ -1,12 +1,12 @@
 .demo-shell {
-  --paper:#f6f0e6;
-  --ink:#35291f;
-  --muted:#766454;
-  --line:#d9cbbc;
-  --accent:#9b3e25;
+  --paper:#f4f0e8;
+  --ink:#191919;
+  --muted:#716c64;
+  --line:#ded8cd;
+  --accent:#191919;
   background:var(--paper);
   color:var(--ink);
-  font-family:Arial,Helvetica,sans-serif;
+  font-family:var(--font-geist-sans),Arial,Helvetica,sans-serif;
   min-height:100vh;
   padding:0 clamp(1rem,4vw,4rem);
   line-height:1.55
@@ -15,7 +15,7 @@
   box-sizing:border-box
 }
 .demo-shell h1,.demo-shell h2 {
-  font-family:Georgia,'Times New Roman',serif;
+  font-family:inherit;
   letter-spacing:-.035em;
   font-weight:400;
   line-height:1.07
@@ -36,7 +36,7 @@
   padding:.85rem 1.1rem;
   cursor:pointer;
   font-size:1rem;
-  background:#fffaf2;
+  background:#ffffff;
   color:var(--ink);
   font-family:inherit;
   line-height:1.4;
@@ -45,10 +45,10 @@
   transition:background .15s
 }
 .demo-shell button:hover,.demo-shell .button-link:hover {
-  background:#efe2d0
+  background:#e9e3d8
 }
 .demo-shell :focus-visible {
-  outline:3px solid #176966;
+  outline:3px solid #191919;
   outline-offset:4px
 }
 .demo-shell button:disabled {
@@ -57,7 +57,7 @@
 }
 .demo-shell .primary {
   background:var(--accent);
-  color:#fffaf2;
+  color:var(--paper);
   border-color:var(--accent);
   font-weight:600;
   display:inline-flex;
@@ -66,7 +66,7 @@
   text-decoration:none
 }
 .demo-shell .primary:hover {
-  background:#77321f
+  background:#333333
 }
 .demo-shell .text-button {
   background:transparent;
@@ -88,21 +88,13 @@
   gap:1.5rem;
   align-items:center
 }
-.brand {
-  font-size:1.6rem;
-  font-weight:800;
-  letter-spacing:-.07em;
-  text-decoration:none;
-  color:var(--ink)
-}
-.brand span:first-child {
-  font-weight:400
-}
-.brand .brand-dot {
-  font-size:.55rem;
-  vertical-align:top;
-  margin:.35rem
-}
+.brand { display:inline-flex; align-items:center; font-size:21px; font-weight:750; letter-spacing:-1px; text-decoration:none; color:var(--ink); }
+.brand-light { font-weight:400; }
+.brand-mark { display:flex; align-items:center; gap:3px; margin-right:10px; height:24px; }
+.brand-mark span { width:3px; height:12px; background:var(--ink); border-radius:3px; transform:rotate(18deg); }
+.brand-mark span:nth-child(2) { height:23px; }
+.brand-mark span:nth-child(3) { height:18px; }
+.brand-mark span:nth-child(4) { height:9px; }
 .public-label,.preview-notice {
   font-size:.8rem;
   color:var(--muted)
@@ -152,7 +144,7 @@
   padding:.85rem 1rem;
   margin:.6rem 0;
   cursor:pointer;
-  background:#fffaf2
+  background:#ffffff
 }
 .profile-option input {
   flex-shrink:0;
@@ -191,7 +183,7 @@
   border-radius:45% 45% 3px 3px
 }
 .entry-art figcaption {
-  font-family:Georgia,serif;
+  font-family:inherit;
   font-size:1.3rem;
   text-align:center;
   padding:1rem
@@ -251,7 +243,7 @@
   background:var(--paper);
   padding:1rem;
   width:280px;
-  box-shadow:0 4px 20px #35291f24;
+  box-shadow:0 4px 20px #19191924;
   border:1px solid var(--line)
 }
 .support-control label {
@@ -294,7 +286,7 @@
   border:1px dashed var(--muted);
   margin-top:1rem;
   max-width:360px;
-  background:#fffaf2;
+  background:#ffffff;
   font-size:.85rem
 }
 .order summary {
@@ -305,10 +297,10 @@
   font-size:clamp(2rem,3vw,3.1rem)
 }
 .context {
-  color:#655343
+  color:#716c64
 }
 .speech {
-  background:#e8dfd1;
+  background:#fcfaf6;
   padding:1.25rem 1.5rem;
   border-radius:3px 16px 16px 16px;
   margin:1.2rem 0
@@ -321,7 +313,7 @@
   color:var(--muted)
 }
 .speech p[lang=en],.expression p[lang=en] {
-  font-family:Georgia,serif;
+  font-family:inherit;
   font-size:1.8rem;
   line-height:1.3;
   margin:.4rem 0
@@ -357,7 +349,7 @@
   padding:1rem 0
 }
 .construction .skeleton {
-  font-family:Georgia,serif;
+  font-family:inherit;
   font-size:1.7rem
 }
 .answer {
@@ -392,13 +384,13 @@
 }
 .help p {
   font-size:.9rem;
-  border-left:2px solid #b89b77;
+  border-left:2px solid #ded8cd;
   padding-left:.8rem
 }
 .notice:not(:empty) {
   padding:.8rem 1rem;
   border-left:3px solid var(--accent);
-  background:#eee0ce;
+  background:#f8f5ef;
   font-size:.85rem
 }
 .notice:empty {
@@ -413,10 +405,10 @@
 .highlights article {
   padding:1.5rem;
   border:1px solid var(--line);
-  background:#fffaf2
+  background:#ffffff
 }
 .highlights p[lang=en] {
-  font-family:Georgia,serif;
+  font-family:inherit;
   font-size:1.45rem
 }
 .highlights span {
@@ -440,11 +432,11 @@
 .transcript li {
   margin:1rem 0;
   padding:1rem;
-  background:#e8dfd1;
+  background:#fcfaf6;
   border-radius:12px
 }
 .transcript li.your-line {
-  background:#e4eadb;
+  background:#f4f0e8;
   margin-left:2rem
 }
 .transcript li p {
@@ -471,7 +463,7 @@
 .demo-shell textarea {
   width:100%;
   max-width:800px;
-  background:#fffaf2;
+  background:#ffffff;
   border:1px solid var(--line);
   padding:1rem;
   font:inherit;
@@ -558,3 +550,19 @@
 }
 
 }
+
+.conversation-history { margin-bottom:2rem; border-bottom:1px solid var(--line); padding-bottom:1.2rem; }
+.conversation-history > summary { color:var(--muted); cursor:pointer; font-size:.8rem; padding:.4rem 0; }
+.conversation-history ol { list-style:none; margin:1.5rem 0 0; padding:0 0 0 1rem; border-left:1px solid var(--line); }
+.conversation-history li { margin:0 0 1.3rem; padding:.6rem 1rem; }
+.conversation-history li.history-you { background:var(--paper); border-radius:8px; margin-left:1.5rem; }
+.conversation-history small { font-size:.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+.conversation-history p[lang=en] { font-size:1.1rem; margin:.35rem 0; }
+.history-tools { display:flex; align-items:baseline; gap:1rem; font-size:.75rem; flex-wrap:wrap; }
+.history-tools summary { cursor:pointer; }
+.history-tools details p { max-width:30rem; }
+.speech.sent { border-radius:16px 3px 16px 16px; border:1px solid var(--line); background:var(--paper); }
+
+.audio-controls { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; padding:.5rem 0; color:var(--muted); font-size:.75rem; border-bottom:1px solid var(--line); }
+.audio-controls select { border:1px solid var(--line); background:white; color:var(--ink); padding:.4rem; border-radius:6px; margin-left:.5rem; }
+.audio-controls .text-button { font-size:.75rem; }
