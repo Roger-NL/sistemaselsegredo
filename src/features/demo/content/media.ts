@@ -1,6 +1,6 @@
 import type { AudioId, ImageId } from "../model/types";
 
-// Approved inventory, PDF pages 47–52. Voices resolve through the global server cache on explicit request; final illustrations remain pending.
+// Approved inventory, PDF pages 47–52. Voices resolve through the global server cache on explicit request; twelve approved illustrations use local responsive WebPs.
 const character = [
   ["Is this yours?", "Esse café é seu?"], ["Oh! Sorry!", "Ah! Desculpa!"],
   ["An iced coffee. And you?", "Um café com gelo. E você?"], ["Nice!", "Legal!"],

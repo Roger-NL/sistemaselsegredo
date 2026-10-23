@@ -38,11 +38,18 @@ describe("approved café graph", () => {
     for (const profile of PROFILES) {
       let paths = 0;
       const endings = new Set<string>();
-      function walk(state: DemoState, depth = 0) {
+      function walk(state: DemoState, depth = 0, seenImages: string[] = []) {
         expect(depth).toBeLessThan(150);
         const node = catalog[state.nodeId]; visited.add(node.id);
+        const sequence = seenImages.at(-1) === node.image ? seenImages : [...seenImages, node.image];
         if (node.kind === "end") {
           paths++; endings.add(ending(state));
+          // Every path includes the encounter, cups, warning/rescue, invitation and goodbye.
+          const firstScenes = ["V01", "V02", "V03", "V04", "V05", "V06", "V07", "V08", "V09", "V10"];
+          expect(sequence.slice(0, 10)).toEqual(firstScenes);
+          expect(sequence.at(-1)).toBe("V12");
+          expect(sequence.includes("V11")).toBe(state.decisions["p8.topic"] === "english");
+          expect(new Set(sequence).size).toBe(state.decisions["p8.topic"] === "english" ? 12 : 11);
           expect(state.transcript.filter(line => line.role === "you" && line.audioId === "U01")).toHaveLength(1);
           expect(new Set(state.transcript.map(line => line.id)).size).toBe(state.transcript.length);
           expect(decodeSnapshot(encodeSnapshot(state))).toEqual(state);
@@ -54,8 +61,8 @@ describe("approved café graph", () => {
           expect(state.transcript.some(line => line.audioId === "U18")).toBe(state.decisions["p10.contact"] === "contact");
           return;
         }
-        if (node.kind === "choice") for (const choice of node.choices) walk(transition(state, { type: "CHOOSE", at: node.id, choice: choice.id }), depth + 1);
-        else walk(advance(state), depth + 1);
+        if (node.kind === "choice") for (const choice of node.choices) walk(transition(state, { type: "CHOOSE", at: node.id, choice: choice.id }), depth + 1, sequence);
+        else walk(advance(state), depth + 1, sequence);
       }
       walk(createDemo(profile, "test-run-id", 1000));
       expect(paths).toBe(128); expect(endings.size).toBe(3);

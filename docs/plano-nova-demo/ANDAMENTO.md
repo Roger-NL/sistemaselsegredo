@@ -137,3 +137,11 @@ Níveis implementados em política pura de prática: modelo/montagem/reconhecime
 Catálogo inglês intacto (SHA-256 verificado), IDs e parâmetros de síntese intactos, serviço de cache não alterado. Nenhum áudio gerado, dado remoto alterado ou deploy realizado nesta rodada. A história passa a cafe-v2 para não aplicar as regras novas a snapshots antigos; UI informa incompatibilidade sem executar eventos antigos silenciosamente.
 
 Suite ampliada: 100 testes/21 arquivos aprovados, incluindo 384 percursos, práticas dos três perfis, escrita/contrações/rejeição sem mudança de sentido, mudança de perfil, recuperação de rascunho, segurança de recall/Careful, decode de todas as variantes WebP e orçamento de bytes. Lint, TypeScript e build local aprovados. Inspeção local de amostras/folha de contato; inspeção interativa de layout ainda pendente do acesso ao navegador.
+
+## Conferência dos três níveis e sequência de imagens — 24/10/2026
+
+Nova tentativa explícita de observar a aba Chrome em localhost:3100 foi negada por permissão salva/política gerenciada. Não foram usados caminhos alternativos para observar/renderizar a página. Teste interativo e medição de overflow permanecem pendentes.
+
+Suíte ampliada para 101 testes/21 arquivos: os 384 percursos agora verificam também a ordem das dez cenas iniciais; V11 somente na escolha sobre aprender inglês; despedida V12 ao final. Caminhos sobre inglês usam as 12 imagens; caminhos sobre trabalho usam 11, sem ilustrar um assunto não escolhido. Teste específico associa 16 momentos/ramificações às imagens esperadas e restringe aviso/copo salvo às etapas corretas. Todas as 24 variantes decodificam. Guiado, Com pistas e Mais autônomo mantêm as verificações de resposta, ajuda e recuperação. Testes, lint e TypeScript aprovados.
+
+Revisão estática encontrou a exceção já existente em max-height:540px: o frame permite rolagem para manter acesso aos controles em janelas muito baixas/zoom. Portanto não se declara que toda a UI está visível sem rolagem em qualquer dimensão. Nenhuma mudança visual sem medição foi aplicada nesta conferência.

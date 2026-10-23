@@ -3,7 +3,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import sharp from "sharp";
 import { audio, images } from "@/features/demo/content/media";
-import { nodes } from "@/features/demo/content/catalog";
+import { catalog, nodes } from "@/features/demo/content/catalog";
 
 describe("approved lightweight café media", () => {
   it("ships every approved scene in mobile and desktop WebP within the total budgets", async () => {
@@ -22,6 +22,20 @@ describe("approved lightweight café media", () => {
       }
     }
     expect(mobile).toBeLessThan(512 * 1024); expect(desktop).toBeLessThan(1024 * 1024);
+  });
+  it("binds the twelve illustrations to their narrative triggers", () => {
+    const moments = {
+      "p1.first": "V01", "p2.question": "V02", "p2.reaction": "V03",
+      "p4.arrival-a": "V04", "p4.new-cup": "V04", "p5.taste": "V05",
+      "p6.warn": "V06", "p6.safe": "V07", "p7.tired": "V08",
+      "p8.table": "V09", "p8.topic": "V10", "p8.english": "V11",
+      "p8.nice": "V11", "p8.job": "V10", "p10.contact": "V12", "p10.bye": "V12",
+    };
+    for (const [id, image] of Object.entries(moments)) expect(catalog[id].image, id).toBe(image);
+    expect(nodes.filter(n => n.image === "V06").map(n => n.id)).toEqual(["p6.warn"]);
+    expect(nodes.filter(n => n.image === "V07").map(n => n.id)).toEqual(["p6.safe"]);
+    expect(nodes.filter(n => n.image === "V11").map(n => n.id)).toEqual(["p8.english", "p8.nice"]);
+    expect(nodes.filter(n => n.image === "V12").every(n => n.part === 10)).toBe(true);
   });
   it("removes retired visual cues and preview assets from the product", () => {
     const copy = JSON.stringify([nodes, images, Object.values(audio).map(a => a.meaning)]);
