@@ -1,6 +1,5 @@
 "use client";
 
-import "./demo.css";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
