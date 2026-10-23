@@ -1,5 +1,5 @@
 ﻿url_ou_padrao,metodo,acao_destino,motivo,condicao_ou_nota,lote,estado_execucao,evidencia_execucao
-/api/admin/exams/decision,POST,410 JSON,API curricular aposentada; preservar URL e resposta legível por máquina.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
+/api/admin/exams/decision,POST,410 JSON,API curricular aposentada; preservar URL e resposta legível por máquina.,Sem redirect HTML,3,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
 /api/admin/invite-codes,"GET, POST",Preservar,Gestão de convites; autenticação e papel admin server-side.,—,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /api/admin/scheduling/day,GET,Preservar,Agenda administrativa; manter guardas server-side.,Desacoplar dependência curricular,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /api/admin/scheduling/decision,POST,Preservar,Decisão administrativa de agenda; manter guardas server-side.,Desacoplar dependência curricular,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
@@ -7,42 +7,42 @@
 /api/auth/invite,POST,Preservar,Convites/autenticação; não expor na experiência pública.,Remover checagens curriculares do fluxo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /api/auth/session,"GET, POST, DELETE",Preservar,Cookie de sessão; independente do login visual da demo.,Extrair helper do AuthContext,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /api/checkout,"GET, POST",Preservar,Checkout Asaas; manter JSON e proteções.,Separar entitlement do currículo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
-/api/exams,POST,410 JSON,API de prova curricular aposentada.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
-/api/leaderboard,GET,410 JSON,Ranking antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
-/api/progress,POST,410 JSON,Progresso do curso antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
+/api/exams,POST,410 JSON,API de prova curricular aposentada.,Sem redirect HTML,3,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/api/leaderboard,GET,410 JSON,Ranking antigo aposentado.,Sem redirect HTML,3,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/api/progress,POST,410 JSON,Progresso do curso antigo aposentado.,Sem redirect HTML,3,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
 /api/scheduling/availability,GET,Preservar,Disponibilidade de agenda.,Desacoplar entitlement/currículo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /api/scheduling/cancel,POST,Preservar,Cancelamento de agenda.,Desacoplar entitlement/currículo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /api/scheduling/request,POST,Preservar,Pedido de agendamento.,Desacoplar entitlement/currículo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /api/scheduling/status,GET,Preservar,Status de agendamento.,Desacoplar entitlement/currículo,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
-/api/speech,GET,410 JSON,Geração pública aposentada; extrair ferramenta de produção de áudio.,Extrair ElevenLabs do protótipo,1,CONCLUÍDO 1b,GET JSON 410; síntese pública removida
-/api/study/heartbeat,POST,410 JSON,Heartbeat do curso antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
+/api/speech,GET,410 JSON,Geração pública aposentada; extrair ferramenta de produção de áudio.,Extrair ElevenLabs do protótipo,1,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/api/study/heartbeat,POST,410 JSON,Heartbeat do curso antigo aposentado.,Sem redirect HTML,3,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
 /api/verify-payment,POST,Preservar,Verificação/reconciliação Asaas.,Mover payment-mode para contrato puro,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /api/webhooks/asaas,POST,Preservar,Webhook Asaas; preservar validação e idempotência.,—,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /,—,ADAPTAR,Entrada pública da demo; escolha de apoio e início.,URL listada explicitamente; query descartada nos aliases,2/5,IMPLEMENTADO 2,Demo pública local; sem auth/mic/pagamento; mídia final pendente
-/login,—,307 → /,Retirar login visual; destino sem query.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/cadastro,—,307 → /,Retirar cadastro visual; destino sem query.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/pagamento,—,307 → /,Retirar checkout visual; API Asaas permanece.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/obrigado,—,307 → /,Retirar confirmação visual antiga.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
+/login,—,307 → /,Retirar login visual; destino sem query.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/cadastro,—,307 → /,Retirar cadastro visual; destino sem query.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/pagamento,—,307 → /,Retirar checkout visual; API Asaas permanece.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/obrigado,—,307 → /,Retirar confirmação visual antiga.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
 /termos,—,MANTER/ADAPTAR,Preservar rota legal e revisar conteúdo para o produto.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
 /privacidade,—,MANTER/ADAPTAR,Preservar rota legal e revisar conteúdo/telemetria.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
-/agendamentos,—,307 → /,Retirar UI de agenda; APIs de agenda permanecem.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/boletim,—,307 → /,Retirar página de boletim.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/configuracoes,—,307 → /,Retirar configurações de aluno.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/dashboard,—,307 → /,Retirar dashboard antigo.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/especialidades,—,307 → /,Retirar índice de especialidades.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/especialidades/[id],—,307 → /,Retirar detalhe de especialidade.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/especialidades/[id]/modulo/[moduleId],—,307 → /,Retirar módulo de especialidade.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/perfil,—,307 → /,Retirar perfil de aluno.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/pilar/[id],—,307 → /,Retirar rota de pilar/currículo.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/admin/dashboard,—,307 → /,Retirar dashboard administrativo.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/admin/analytics,—,307 → /,Retirar analytics administrativo.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/admin/aprovacoes,—,307 → /,Retirar aprovações administrativas.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/admin/codigos,—,307 → /,Retirar UI de códigos; API de convites preservada.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/admin/usuarios,—,307 → /,Retirar lista administrativa de usuários.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/admin/usuarios/[id],—,307 → /,Retirar detalhe administrativo de usuário.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/admin/agendamentos,—,307 → /,Retirar UI de agenda; APIs permanecem.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/admin/alunos/[id],—,307 → /,Retirar detalhe de aluno fora do route group.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/inicio-orbita-7k3,—,307 → /,Retirar protótipo e seu motor.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
+/agendamentos,—,307 → /,Retirar UI de agenda; APIs de agenda permanecem.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/boletim,—,307 → /,Retirar página de boletim.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/configuracoes,—,307 → /,Retirar configurações de aluno.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/dashboard,—,307 → /,Retirar dashboard antigo.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/especialidades,—,307 → /,Retirar índice de especialidades.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/especialidades/[id],—,307 → /,Retirar detalhe de especialidade.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/especialidades/[id]/modulo/[moduleId],—,307 → /,Retirar módulo de especialidade.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/perfil,—,307 → /,Retirar perfil de aluno.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/pilar/[id],—,307 → /,Retirar rota de pilar/currículo.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/admin/dashboard,—,307 → /,Retirar dashboard administrativo.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/admin/analytics,—,307 → /,Retirar analytics administrativo.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/admin/aprovacoes,—,307 → /,Retirar aprovações administrativas.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/admin/codigos,—,307 → /,Retirar UI de códigos; API de convites preservada.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/admin/usuarios,—,307 → /,Retirar lista administrativa de usuários.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/admin/usuarios/[id],—,307 → /,Retirar detalhe administrativo de usuário.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/admin/agendamentos,—,307 → /,Retirar UI de agenda; APIs permanecem.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/admin/alunos/[id],—,307 → /,Retirar detalhe de aluno fora do route group.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
+/inicio-orbita-7k3,—,307 → /,Retirar protótipo e seu motor.,URL listada explicitamente; query descartada nos aliases,2/3/4,CONCLUÍDO 3,22 aliases explícitos sem query; 6 APIs JSON 410; teste por método
 /demo,—,CRIAR,Host da história pública e dos estados 1–10.,URL listada explicitamente; query descartada nos aliases,2/5,IMPLEMENTADO 2,Demo pública local; sem auth/mic/pagamento; mídia final pendente
 /manifest.webmanifest,—,ADAPTAR,Manifest mínimo da demo.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
 /sitemap.xml,—,ADAPTAR,Remover URLs antigas; publicar rotas públicas atuais.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0

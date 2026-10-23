@@ -97,7 +97,7 @@ src/app/(public)/privacidade/page.tsx,MANTER/ADAPTAR,src/app/(public)/,Preservar
 src/app/(public)/termos/page.tsx,MANTER/ADAPTAR,src/app/(public)/,Preservar somente páginas legais; remover provider global desnecessário.,,5,PENDENTE,Contrato congelado no Lote 0
 src/app/AppProviders.tsx,REMOVER,—,Providers globais antigos não entram no shell demo.,Separar sessão client se necessário,4,PENDENTE,Contrato congelado no Lote 0
 src/app/admin/alunos/[id]/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
-src/app/api/admin/exams/decision/route.ts,410 JSON,/api/admin/exams/decision,API curricular aposentada; preservar URL e resposta legível por máquina.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
+src/app/api/admin/exams/decision/route.ts,410 JSON,/api/admin/exams/decision,API curricular aposentada; preservar URL e resposta legível por máquina.,Sem redirect HTML,3,CONCLUÍDO 3,Aliases browser e respostas JSON aposentadas conforme inventário
 src/app/api/admin/invite-codes/route.ts,Preservar,/api/admin/invite-codes,Gestão de convites; manter autenticação e papel admin server-side.,,1,PENDENTE,Contrato congelado no Lote 0
 src/app/api/admin/scheduling/day/route.ts,Preservar,/api/admin/scheduling/day,Agenda administrativa; manter guardas server-side.,Desacoplar premium/currículo,1,PENDENTE,Contrato congelado no Lote 0
 src/app/api/admin/scheduling/decision/route.ts,Preservar,/api/admin/scheduling/decision,Decisão administrativa de agenda; manter guardas server-side.,Desacoplar premium/currículo,1,PENDENTE,Contrato congelado no Lote 0
@@ -105,15 +105,15 @@ src/app/api/admin/scheduling/snapshot/route.ts,Preservar,/api/admin/scheduling/s
 src/app/api/auth/invite/route.ts,Preservar,/api/auth/invite,Convites/autenticação; não expor na experiência pública.,,1,PENDENTE,Contrato congelado no Lote 0
 src/app/api/auth/session/route.ts,Preservar,/api/auth/session,Cookie de sessão; independente do login visual da demo.,Extrair helper do AuthContext,1,PENDENTE,Contrato congelado no Lote 0
 src/app/api/checkout/route.ts,Preservar,/api/checkout,Checkout Asaas; manter JSON e proteções.,Separar entitlement do currículo,1,PENDENTE,Contrato congelado no Lote 0
-src/app/api/exams/route.ts,410 JSON,/api/exams,API de prova curricular aposentada.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
-src/app/api/leaderboard/route.ts,410 JSON,/api/leaderboard,Ranking antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
-src/app/api/progress/route.ts,410 JSON,/api/progress,Progresso do curso antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
+src/app/api/exams/route.ts,410 JSON,/api/exams,API de prova curricular aposentada.,Sem redirect HTML,3,CONCLUÍDO 3,Aliases browser e respostas JSON aposentadas conforme inventário
+src/app/api/leaderboard/route.ts,410 JSON,/api/leaderboard,Ranking antigo aposentado.,Sem redirect HTML,3,CONCLUÍDO 3,Aliases browser e respostas JSON aposentadas conforme inventário
+src/app/api/progress/route.ts,410 JSON,/api/progress,Progresso do curso antigo aposentado.,Sem redirect HTML,3,CONCLUÍDO 3,Aliases browser e respostas JSON aposentadas conforme inventário
 src/app/api/scheduling/availability/route.ts,Preservar,/api/scheduling/availability,Disponibilidade de agenda.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
 src/app/api/scheduling/cancel/route.ts,Preservar,/api/scheduling/cancel,Cancelamento de agenda.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
 src/app/api/scheduling/request/route.ts,Preservar,/api/scheduling/request,Pedido de agendamento.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
 src/app/api/scheduling/status/route.ts,Preservar,/api/scheduling/status,Status de agendamento.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
-src/app/api/speech/route.ts,410 JSON,/api/speech,Geração pública aposentada; extrair ferramenta de produção de áudio.,Extrair ElevenLabs do protótipo,1,CONCLUÍDO 1b,JSON 410; produção preservada em server/integrations/elevenlabs.ts
-src/app/api/study/heartbeat/route.ts,410 JSON,/api/study/heartbeat,Heartbeat de estudo antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
+src/app/api/speech/route.ts,410 JSON,/api/speech,Geração pública aposentada; extrair ferramenta de produção de áudio.,Extrair ElevenLabs do protótipo,1,CONCLUÍDO 3,Aliases browser e respostas JSON aposentadas conforme inventário
+src/app/api/study/heartbeat/route.ts,410 JSON,/api/study/heartbeat,Heartbeat de estudo antigo aposentado.,Sem redirect HTML,3,CONCLUÍDO 3,Aliases browser e respostas JSON aposentadas conforme inventário
 src/app/api/verify-payment/route.ts,Preservar,/api/verify-payment,Verificação/reconciliação Asaas.,Mover payment-mode para contrato puro,1,PENDENTE,Contrato congelado no Lote 0
 src/app/api/webhooks/asaas/route.ts,Preservar,/api/webhooks/asaas,Webhook Asaas; preservar validação e idempotência.,,1,PENDENTE,Contrato congelado no Lote 0
 src/app/error.tsx,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
@@ -241,7 +241,7 @@ src/lib/utils.ts,ADAPTAR,src/lib/routes.ts / src/lib/ui/cn.ts,Manter apenas rota
 src/lib/welcome/use-learning-language.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/welcome/use-visitor-name.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/welcome/visitor-name.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
-src/proxy.ts,ADAPTAR,src/proxy.ts,Aliases browser explícitos 307; sem redirect genérico de API nem autoridade de auth.,,3,PENDENTE,Contrato congelado no Lote 0
+src/proxy.ts,ADAPTAR,src/proxy.ts,Aliases browser explícitos 307; sem redirect genérico de API nem autoridade de auth.,,3,CONCLUÍDO 3,Aliases browser e respostas JSON aposentadas conforme inventário
 src/types/study.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/utils/content-parsers.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/utils/ranks.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
@@ -306,3 +306,5 @@ public/demo/cafe/v1/previews/careful.jpg,CRIAR,public/demo/cafe/v1/previews/care
 public/demo/cafe/v1/previews/counter.jpg,CRIAR,public/demo/cafe/v1/previews/counter.jpg,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
 public/demo/cafe/v1/previews/tasting.jpg,CRIAR,public/demo/cafe/v1/previews/tasting.jpg,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
 public/demo/cafe/v1/previews/seated.jpg,CRIAR,public/demo/cafe/v1/previews/seated.jpg,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/lib/page-aliases.ts,CRIAR,src/lib/page-aliases.ts,Compatibilidade de URLs sem UI antiga,,3,CONCLUÍDO 3,22 aliases/6 APIs; unknown passa para 404
+tests/retired-routes.test.ts,CRIAR,tests/retired-routes.test.ts,Compatibilidade de URLs sem UI antiga,,3,CONCLUÍDO 3,22 aliases/6 APIs; unknown passa para 404
