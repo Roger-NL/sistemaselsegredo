@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/server/firebase";
 import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
 
 interface LeaderboardRow {
@@ -40,8 +40,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const limitCount = normalizeLimit(searchParams.get("limit"));
 
-    const snapshot = await adminDb
-      .collection("users")
+    const snapshot = await getAdminDb().collection("users")
       .orderBy("currentStreak", "desc")
       .limit(limitCount)
       .get();

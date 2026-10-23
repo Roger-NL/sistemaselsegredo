@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase-admin";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminAuth } from "@/server/firebase";
+import { getAdminDb } from "@/server/firebase";
 import { getRequestPrincipal } from "@/lib/auth/principal";
 import { AUTH_SESSION_COOKIE_NAME, AUTH_SESSION_MAX_AGE_SECONDS, getAuthSessionCookieOptions } from "@/lib/auth/session";
 
@@ -69,8 +69,8 @@ function dateKeyInSaoPaulo(date: Date) {
 }
 
 async function recordServerLogin(uid: string) {
-  const userRef = adminDb.collection("users").doc(uid);
-  await adminDb.runTransaction(async (transaction) => {
+  const userRef = getAdminDb().collection("users").doc(uid);
+  await getAdminDb().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(userRef);
     if (!snapshot.exists) return;
     const data = snapshot.data() ?? {};
@@ -119,10 +119,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing Firebase ID token." }, { status: 400 });
     }
 
-    const decodedToken = await adminAuth.verifyIdToken(idToken, true);
+    const decodedToken = await getAdminAuth().verifyIdToken(idToken, true);
     await recordServerLogin(decodedToken.uid);
 
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, {
+    const sessionCookie = await getAdminAuth().createSessionCookie(idToken, {
       expiresIn: AUTH_SESSION_MAX_AGE_SECONDS * 1000,
     });
 

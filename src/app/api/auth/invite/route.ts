@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/server/firebase";
 import { RequestAuthError, requireRequestPrincipal } from "@/lib/auth/request-auth";
 import {
   buildPremiumAccessUpdate,
@@ -38,8 +38,7 @@ const MAX_INVITE_BODY_BYTES = 2_048;
 const INVITE_ATTEMPT_WINDOW_MS = 15 * 60 * 1_000;
 
 async function getLatestExamStatus(userId: string, pillarId: number): Promise<WriterExamStatus> {
-  const snapshot = await adminDb
-    .collection("pillar_exams")
+  const snapshot = await getAdminDb().collection("pillar_exams")
     .where("userId", "==", userId)
     .where("pillarId", "==", pillarId)
     .get();
@@ -60,7 +59,7 @@ async function getLatestExamStatus(userId: string, pillarId: number): Promise<Wr
 }
 
 async function recomputeInviteProgressSnapshot(userId: string) {
-  const userRef = adminDb.collection("users").doc(userId);
+  const userRef = getAdminDb().collection("users").doc(userId);
   const userSnapshot = await userRef.get();
   if (!userSnapshot.exists) {
     return;
@@ -78,7 +77,7 @@ async function recomputeInviteProgressSnapshot(userId: string) {
   const [pillar1ExamStatus, pillar2ExamStatus, liveSessionSnapshot] = await Promise.all([
     getLatestExamStatus(userId, 1),
     getLatestExamStatus(userId, 2),
-    adminDb.collection("live_sessions").doc(`${userId}_p2`).get(),
+    getAdminDb().collection("live_sessions").doc(`${userId}_p2`).get(),
   ]);
 
   const snapshot = buildStoredProgressSnapshot({
@@ -170,12 +169,12 @@ export async function POST(req: Request) {
     }
 
     const codeHash = hashInviteCode(normalizedCode);
-    const inviteCodesRef = adminDb.collection(INVITE_CODES_COLLECTION);
+    const inviteCodesRef = getAdminDb().collection(INVITE_CODES_COLLECTION);
     const hashedInviteRef = inviteCodesRef.doc(getHashedInviteDocumentId(codeHash));
-    const usersRef = adminDb.collection("users");
+    const usersRef = getAdminDb().collection("users");
     const userRef = usersRef.doc(principal.uid);
 
-    const outcome = await adminDb.runTransaction(async (transaction) => {
+    const outcome = await getAdminDb().runTransaction(async (transaction) => {
       const hashedInviteSnapshot = await transaction.get(hashedInviteRef);
       let inviteDoc = hashedInviteSnapshot.exists ? hashedInviteSnapshot : null;
 

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { Timestamp, type Transaction } from "firebase-admin/firestore";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/server/firebase";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
 import { getQuizByPillarNumber } from "@/data/quizzes";
 import {
@@ -101,8 +101,7 @@ async function getLatestExamStatus(
   pillarId: number,
   transaction?: Transaction
 ): Promise<WriterExamStatus> {
-  const examQuery = adminDb
-    .collection(EXAMS_COLLECTION)
+  const examQuery = getAdminDb().collection(EXAMS_COLLECTION)
     .where("userId", "==", userId)
     .where("pillarId", "==", pillarId);
   const snapshot = transaction ? await transaction.get(examQuery) : await examQuery.get();
@@ -117,7 +116,7 @@ async function getLatestExamStatus(
 }
 
 async function getProgressContext(userId: string, transaction?: Transaction) {
-  const liveSessionRef = adminDb.collection("live_sessions").doc(`${userId}_p2`);
+  const liveSessionRef = getAdminDb().collection("live_sessions").doc(`${userId}_p2`);
   const [pillar1ExamStatus, pillar2ExamStatus, liveSessionSnapshot] = await Promise.all([
     getLatestExamStatus(userId, 1, transaction),
     getLatestExamStatus(userId, 2, transaction),
@@ -177,8 +176,7 @@ export async function submitExamServer(input: ServerExamSubmissionInput) {
   validateSubmission(input);
   const quizScore = calculateQuizScore(input.pillarId, input.quizAnswers);
 
-  const pendingSnapshot = await adminDb
-    .collection(EXAMS_COLLECTION)
+  const pendingSnapshot = await getAdminDb().collection(EXAMS_COLLECTION)
     .where("userId", "==", input.userId)
     .where("pillarId", "==", input.pillarId)
     .where("status", "==", "pending")
@@ -187,10 +185,10 @@ export async function submitExamServer(input: ServerExamSubmissionInput) {
 
   if (!pendingSnapshot.empty) {
     const existingExam = pendingSnapshot.docs[0];
-    const userRef = adminDb.collection(USERS_COLLECTION).doc(input.userId);
-    const repairLockRef = adminDb.collection(SUBMISSION_LOCKS_COLLECTION).doc(lockId(input.userId, input.pillarId));
+    const userRef = getAdminDb().collection(USERS_COLLECTION).doc(input.userId);
+    const repairLockRef = getAdminDb().collection(SUBMISSION_LOCKS_COLLECTION).doc(lockId(input.userId, input.pillarId));
 
-    await adminDb.runTransaction(async (transaction) => {
+    await getAdminDb().runTransaction(async (transaction) => {
       const [userSnapshot, context] = await Promise.all([
         transaction.get(userRef),
         getProgressContext(input.userId, transaction),
@@ -216,12 +214,12 @@ export async function submitExamServer(input: ServerExamSubmissionInput) {
     return { success: true, examId: existingExam.id, reusedExisting: true, quizScore };
   }
 
-  const examRef = adminDb.collection(EXAMS_COLLECTION).doc();
-  const userRef = adminDb.collection(USERS_COLLECTION).doc(input.userId);
-  const lockRef = adminDb.collection(SUBMISSION_LOCKS_COLLECTION).doc(lockId(input.userId, input.pillarId));
+  const examRef = getAdminDb().collection(EXAMS_COLLECTION).doc();
+  const userRef = getAdminDb().collection(USERS_COLLECTION).doc(input.userId);
+  const lockRef = getAdminDb().collection(SUBMISSION_LOCKS_COLLECTION).doc(lockId(input.userId, input.pillarId));
   let reusedExamId: string | null = null;
 
-  await adminDb.runTransaction(async (transaction) => {
+  await getAdminDb().runTransaction(async (transaction) => {
     const [userSnapshot, lockSnapshot, context] = await Promise.all([
       transaction.get(userRef),
       transaction.get(lockRef),
@@ -277,7 +275,7 @@ export async function gradeExamServer(examId: string, decision: ExamDecision, fe
     throw new Error("INVALID_EXAM_DECISION");
   }
 
-  const examRef = adminDb.collection(EXAMS_COLLECTION).doc(examId);
+  const examRef = getAdminDb().collection(EXAMS_COLLECTION).doc(examId);
   const initialExam = await examRef.get();
   if (!initialExam.exists) throw new Error("EXAM_NOT_FOUND");
 
@@ -287,11 +285,11 @@ export async function gradeExamServer(examId: string, decision: ExamDecision, fe
   if (!userId || !Number.isInteger(pillarId)) throw new Error("INVALID_EXAM_RECORD");
 
   const context = await getProgressContext(userId);
-  const userRef = adminDb.collection(USERS_COLLECTION).doc(userId);
-  const lockRef = adminDb.collection(SUBMISSION_LOCKS_COLLECTION).doc(lockId(userId, pillarId));
+  const userRef = getAdminDb().collection(USERS_COLLECTION).doc(userId);
+  const lockRef = getAdminDb().collection(SUBMISSION_LOCKS_COLLECTION).doc(lockId(userId, pillarId));
   let alreadyApplied = false;
 
-  await adminDb.runTransaction(async (transaction) => {
+  await getAdminDb().runTransaction(async (transaction) => {
     const [examSnapshot, userSnapshot] = await Promise.all([
       transaction.get(examRef),
       transaction.get(userRef),

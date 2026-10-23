@@ -11,7 +11,7 @@ import {
 import { Timestamp } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
 import { welcomeSpeechPhrases } from "@/app/inicio-orbita-7k3/conversation";
-import { adminDb } from "@/lib/firebase-admin-firestore";
+import { getAdminDb } from "@/server/firebase";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -187,8 +187,7 @@ function audioResponse(audio: CachedAudio, cacheStatus: "HIT" | "MISS") {
 }
 
 async function readSharedAudio(identity: string): Promise<CachedAudio | null> {
-  const snapshot = await adminDb
-    .collection(CACHE_COLLECTION)
+  const snapshot = await getAdminDb().collection(CACHE_COLLECTION)
     .doc(identity)
     .get();
   const current = snapshot.data() as SharedCacheEntry | undefined;
@@ -197,10 +196,10 @@ async function readSharedAudio(identity: string): Promise<CachedAudio | null> {
 }
 
 async function claimSharedGeneration(identity: string, token: string) {
-  const reference = adminDb.collection(CACHE_COLLECTION).doc(identity);
+  const reference = getAdminDb().collection(CACHE_COLLECTION).doc(identity);
   const now = Date.now();
 
-  return adminDb.runTransaction(async (transaction) => {
+  return getAdminDb().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(reference);
     const current = snapshot.data() as SharedCacheEntry | undefined;
     if (current?.status === "generating" && Number(current.expiresAtMs) > now) {
@@ -229,7 +228,7 @@ async function publishSharedAudio(
   }
 
   const now = Timestamp.now();
-  await adminDb.collection(CACHE_COLLECTION).doc(identity).set({
+  await getAdminDb().collection(CACHE_COLLECTION).doc(identity).set({
     status: "ready",
     audioUrl: audio.url,
     token,
@@ -239,8 +238,8 @@ async function publishSharedAudio(
 }
 
 async function releaseSharedGeneration(identity: string, token: string) {
-  const reference = adminDb.collection(CACHE_COLLECTION).doc(identity);
-  await adminDb.runTransaction(async (transaction) => {
+  const reference = getAdminDb().collection(CACHE_COLLECTION).doc(identity);
+  await getAdminDb().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(reference);
     const current = snapshot.data() as SharedCacheEntry | undefined;
     if (current?.status === "generating" && current.token === token) {

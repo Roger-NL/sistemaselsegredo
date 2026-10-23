@@ -9,21 +9,8 @@ export type PaymentMode =
     | "loading-reconciliation"
     | "error";
 
-export type PaymentReconciliationState =
-    | "paid"
-    | "pending"
-    | "manual-reconciliation"
-    | "unresolved"
-    | "error";
-
-export type VerifyPaymentApiResponse = {
-    success: boolean;
-    isPaid: boolean;
-    status: string | null;
-    reconciliationState: PaymentReconciliationState;
-    message?: string;
-    shouldStopPolling?: boolean;
-};
+import type { PaymentReconciliationState } from "@/contracts/payments";
+export type { PaymentReconciliationState, VerifyPaymentApiResponse } from "@/contracts/payments";
 
 export type ResolvePaymentModeInput = {
     isAuthenticated: boolean;

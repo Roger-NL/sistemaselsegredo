@@ -3,7 +3,7 @@ import { PLANETS } from "@/data/curriculum";
 import { SPECIALIZATIONS_CONTENT } from "@/data/specializations-content";
 import { SpecializationStudyPage } from "@/features/decision/SpecializationStudyPage";
 import { getRequestPrincipal } from "@/lib/auth/principal";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/server/firebase";
 import { ROUTES } from "@/lib/routes";
 
 type StoredProgressSnapshot = {
@@ -44,7 +44,7 @@ export default async function EspecialidadePage({ params }: EspecialidadePagePro
     redirect(ROUTES.app.specialties);
   }
 
-  const userSnapshot = await adminDb.collection("users").doc(principal.uid).get();
+  const userSnapshot = await getAdminDb().collection("users").doc(principal.uid).get();
   const userData = userSnapshot.data() as {
     progressSnapshot?: StoredProgressSnapshot;
   } | undefined;

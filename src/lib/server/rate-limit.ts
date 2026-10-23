@@ -3,7 +3,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { Timestamp } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/server/firebase";
 
 const RATE_LIMIT_COLLECTION = "rate_limits";
 
@@ -42,9 +42,9 @@ export async function consumeRateLimit({
 
   const normalizedCost = Math.max(1, Math.trunc(cost));
   const nowMs = Date.now();
-  const ref = adminDb.collection(RATE_LIMIT_COLLECTION).doc(getRateLimitDocumentId(namespace, identifier));
+  const ref = getAdminDb().collection(RATE_LIMIT_COLLECTION).doc(getRateLimitDocumentId(namespace, identifier));
 
-  const result = await adminDb.runTransaction(async (transaction) => {
+  const result = await getAdminDb().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(ref);
     const data = snapshot.data() as { windowStartedAtMs?: number; consumed?: number } | undefined;
     const storedWindowStart = Number(data?.windowStartedAtMs);

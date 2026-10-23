@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from "react";
+import { createSessionSynchronizer } from "@/client/auth/session";
+
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, onIdTokenChanged } from "firebase/auth";
 import { doc, getDoc, getDocFromServer } from "firebase/firestore";
@@ -41,7 +43,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
-const AUTH_SESSION_ENDPOINT = "/api/auth/session";
+
 
 function buildFallbackUser(firebaseUser: FirebaseUser): User {
     return {
@@ -60,56 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
-    const lastSyncedTokenRef = useRef<string | null>(null);
-
-    const syncServerSession = useCallback(async (firebaseUser: FirebaseUser | null, forceRefresh = false): Promise<boolean> => {
-        if (!firebaseUser) {
-            lastSyncedTokenRef.current = null;
-
-            try {
-                const response = await fetch(AUTH_SESSION_ENDPOINT, {
-                    method: "DELETE",
-                    credentials: "include",
-                });
-                return response.ok;
-            } catch (error) {
-                console.error("Error clearing server session:", error);
-                return false;
-            }
-        }
-
-        try {
-            const idToken = await firebaseUser.getIdToken(forceRefresh);
-
-            if (!forceRefresh && lastSyncedTokenRef.current === idToken) {
-                return true;
-            }
-
-            const response = await fetch(AUTH_SESSION_ENDPOINT, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify({ idToken }),
-            });
-
-            if (!response.ok) {
-                lastSyncedTokenRef.current = null;
-                await fetch(AUTH_SESSION_ENDPOINT, {
-                    method: "DELETE",
-                    credentials: "include",
-                }).catch(() => undefined);
-                throw new Error(`Failed to sync server session (${response.status})`);
-            }
-
-            lastSyncedTokenRef.current = idToken;
-            return true;
-        } catch (error) {
-            console.error("Error syncing server session:", error);
-            return false;
-        }
-    }, []);
+    const [syncServerSession] = useState(() => createSessionSynchronizer());
 
     // FIREBASE REAL-TIME LISTENER
     useEffect(() => {

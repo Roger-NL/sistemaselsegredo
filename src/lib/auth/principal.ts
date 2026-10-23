@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { getAdminAuth, getAdminDb } from "@/server/firebase";
 import { AUTH_SESSION_COOKIE_NAME } from "@/lib/auth/session";
 
 const USERS_COLLECTION = "users";
@@ -79,7 +79,7 @@ async function resolveProfile(
   adminClaim: unknown,
   source: RequestPrincipalSource
 ): Promise<RequestPrincipal> {
-  const snapshot = await adminDb.collection(USERS_COLLECTION).doc(uid).get();
+  const snapshot = await getAdminDb().collection(USERS_COLLECTION).doc(uid).get();
   const data = snapshot.exists ? snapshot.data() : null;
 
   return {
@@ -98,7 +98,7 @@ async function resolveFromBearer(req: Request): Promise<RequestPrincipal | null>
     return null;
   }
 
-  const decodedToken = await adminAuth.verifyIdToken(token);
+  const decodedToken = await getAdminAuth().verifyIdToken(token);
   return resolveProfile(decodedToken.uid, decodedToken.email ?? null, decodedToken.admin, "bearer_token");
 }
 
@@ -108,7 +108,7 @@ async function resolveFromSessionCookie(req?: Request): Promise<RequestPrincipal
     return null;
   }
 
-  const decodedCookie = await adminAuth.verifySessionCookie(sessionCookie, true);
+  const decodedCookie = await getAdminAuth().verifySessionCookie(sessionCookie, true);
   return resolveProfile(decodedCookie.uid, decodedCookie.email ?? null, decodedCookie.admin, "session_cookie");
 }
 

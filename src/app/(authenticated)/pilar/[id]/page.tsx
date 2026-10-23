@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
 import PillarPageClient from "@/features/study/PillarPageClient";
 import { getRequestPrincipal } from "@/lib/auth/principal";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/server/firebase";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -26,7 +26,7 @@ export default async function PillarPage({ params }: { params: Promise<{ id: str
     let highestUnlockedPillar = 1;
 
     if (principal && !isAdmin && isPremium) {
-        const profile = await adminDb.collection("users").doc(principal.uid).get();
+        const profile = await getAdminDb().collection("users").doc(principal.uid).get();
         const profileData = profile.data() as {
             approvedPillar?: number;
             progressSnapshot?: { highestUnlockedPillar?: number };

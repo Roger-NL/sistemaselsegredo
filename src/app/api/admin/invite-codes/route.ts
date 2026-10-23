@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/server/firebase";
 import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
 import {
   DEFAULT_INVITE_EXPIRY_DAYS,
@@ -64,8 +64,7 @@ export async function GET(req: Request) {
     const principal = await requireAuthenticatedUser(req);
     assertAdmin(principal.role);
 
-    const snapshot = await adminDb
-      .collection(INVITE_CODES_COLLECTION)
+    const snapshot = await getAdminDb().collection(INVITE_CODES_COLLECTION)
       .orderBy("createdAt", "desc")
       .limit(50)
       .get();
@@ -116,11 +115,11 @@ export async function POST(req: Request) {
     const expiresInDays = parseInteger(body.expiresInDays, DEFAULT_INVITE_EXPIRY_DAYS, 1, MAX_EXPIRY_DAYS);
     const createdAt = Timestamp.now();
     const expiresAt = Timestamp.fromMillis(createdAt.toMillis() + expiresInDays * 24 * 60 * 60 * 1_000);
-    const batch = adminDb.batch();
+    const batch = getAdminDb().batch();
     const codes = Array.from({ length: amount }, () => {
       const code = generateSecureInviteCode();
       const codeHash = hashInviteCode(code);
-      const ref = adminDb.collection(INVITE_CODES_COLLECTION).doc(getHashedInviteDocumentId(codeHash));
+      const ref = getAdminDb().collection(INVITE_CODES_COLLECTION).doc(getHashedInviteDocumentId(codeHash));
       batch.create(ref, {
         codeHash,
         codeLast4: getInviteCodeLastFour(code),

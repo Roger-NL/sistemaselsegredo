@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/server/firebase";
 import { RequestAuthError, requireAuthenticatedUser } from "@/lib/auth/request-auth";
 import { buildStudyModuleKey } from "@/lib/study/stats";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
@@ -73,9 +73,9 @@ export async function POST(req: Request) {
         ? buildStudyModuleKey(pillarId, rawModuleId)
         : buildStudyModuleKey(pillarId);
 
-    const userRef = adminDb.collection("users").doc(principal.uid);
+    const userRef = getAdminDb().collection("users").doc(principal.uid);
 
-    await adminDb.runTransaction(async (transaction) => {
+    await getAdminDb().runTransaction(async (transaction) => {
       const userSnapshot = await transaction.get(userRef);
       if (!userSnapshot.exists) {
         throw new RequestPayloadError("USER_PROFILE_NOT_FOUND", 404);

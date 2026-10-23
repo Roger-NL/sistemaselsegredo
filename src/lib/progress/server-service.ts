@@ -1,6 +1,6 @@
 import "server-only";
 
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/server/firebase";
 import { PILLARS_CONTENT } from "@/data/pillars-content";
 import { PLANETS } from "@/data/curriculum";
 import {
@@ -61,7 +61,7 @@ function normalizeCompletedModules(value: unknown): Record<string, number[]> | u
 }
 
 async function latestExamStatus(userId: string, pillarId: number): Promise<WriterExamStatus> {
-  const snapshot = await adminDb.collection(EXAMS_COLLECTION)
+  const snapshot = await getAdminDb().collection(EXAMS_COLLECTION)
     .where("userId", "==", userId)
     .where("pillarId", "==", pillarId)
     .get();
@@ -82,7 +82,7 @@ export async function updateProgressServer(
   input: ProgressUpdateInput,
   isAdmin: boolean
 ) {
-  const userRef = adminDb.collection(USERS_COLLECTION).doc(userId);
+  const userRef = getAdminDb().collection(USERS_COLLECTION).doc(userId);
   const userSnapshot = await userRef.get();
   if (!userSnapshot.exists) throw new Error("USER_NOT_FOUND");
   const current = userSnapshot.data() as Record<string, unknown>;
@@ -184,7 +184,7 @@ export async function updateProgressServer(
   const [pillar1ExamStatus, pillar2ExamStatus, liveSession] = await Promise.all([
     latestExamStatus(userId, 1),
     latestExamStatus(userId, 2),
-    adminDb.collection(LIVE_SESSIONS_COLLECTION).doc(`${userId}_p2`).get(),
+    getAdminDb().collection(LIVE_SESSIONS_COLLECTION).doc(`${userId}_p2`).get(),
   ]);
   const progressSnapshot = buildStoredProgressSnapshot({
     subscriptionStatus: typeof current.subscriptionStatus === "string" ? current.subscriptionStatus : "free",

@@ -165,7 +165,7 @@ src/components/ui/neon-tubes-html.ts,REMOVER,—,Efeitos/componentes visuais ant
 src/components/ui/typewriter.tsx,REMOVER,—,Efeitos/componentes visuais antigos sem consumidor na demo.,,4,PENDENTE,Contrato congelado no Lote 0
 src/components/ui/wireframe-dotted-globe.tsx,REMOVER,—,Efeitos/componentes visuais antigos sem consumidor na demo.,,4,PENDENTE,Contrato congelado no Lote 0
 src/components/welcome/VisitorNameSettings.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
-src/context/AuthContext.tsx,MOVER/ADAPTAR,src/client/auth/session.ts,Extrair POST/DELETE sessão para helper sem provider; remover estado de currículo.,Antes de excluir provider,1,PENDENTE,Contrato congelado no Lote 0
+src/context/AuthContext.tsx,MOVER/ADAPTAR,src/client/auth/session.ts,Extrair POST/DELETE sessão para helper sem provider; remover estado de currículo.,Antes de excluir provider,1,PARCIAL 1a,Helper extraído em src/client/auth/session.ts; provider só até remoção da UI
 src/context/LandingThemeContext.tsx,REMOVER,—,"Providers/utilitários de currículo, tema antigo e tradução não usados pela demo.",,4,PENDENTE,Contrato congelado no Lote 0
 src/context/ProgressContext.tsx,REMOVER,—,"Providers/utilitários de currículo, tema antigo e tradução não usados pela demo.",,4,PENDENTE,Contrato congelado no Lote 0
 src/context/TranslationContext.tsx,REMOVER,—,"Providers/utilitários de currículo, tema antigo e tradução não usados pela demo.",,4,PENDENTE,Contrato congelado no Lote 0
@@ -191,7 +191,7 @@ src/features/dashboard/LeaderboardModal.tsx,REMOVER,—,UI/modelo de aluno/admin
 src/features/dashboard/RankGuideModal.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
 src/features/decision/DecisionMatrix.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
 src/features/decision/SpecializationStudyPage.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
-src/features/payment/payment-mode.ts,MOVER,src/contracts/payments.ts,Separar tipo usado por verify-payment da UI antiga.,Antes de remover feature,1,PENDENTE,Contrato congelado no Lote 0
+src/features/payment/payment-mode.ts,MOVER,src/contracts/payments.ts,Separar tipo usado por verify-payment da UI antiga.,Antes de remover feature,1,PARCIAL 1a,Contrato API em src/contracts/payments.ts; estado visual aguarda remoção
 src/features/scheduling/SchedulingPageClient.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
 src/features/study/PillarOperationalView.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
 src/features/study/PillarPageClient.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
@@ -213,8 +213,8 @@ src/lib/auth/service.ts,MOVER/ADAPTAR,src/server/auth/service.ts,Separar auth m�
 src/lib/auth/session.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
 src/lib/exam/server-service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/lib/exam/service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
-src/lib/firebase-admin-firestore.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,PENDENTE,Contrato congelado no Lote 0
-src/lib/firebase-admin.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/firebase-admin-firestore.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,CONCLUÍDO 1a,src/server/firebase.ts; duplicação retirada
+src/lib/firebase-admin.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,CONCLUÍDO 1a,src/server/firebase.ts; bootstrap lazy único; getters migrados
 src/lib/firebase.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,PENDENTE,Contrato congelado no Lote 0
 src/lib/firebase/index.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,PENDENTE,Contrato congelado no Lote 0
 src/lib/leaderboard/service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
@@ -259,3 +259,9 @@ tests/welcome-conversation.test.ts,REMOVER/SUBSTITUIR,tests/,Testes do produto a
 tsconfig.json,ADAPTAR,raiz,Manter configuração da plataforma e retirar referências obsoletas.,,5,PENDENTE,Contrato congelado no Lote 0
 update_new_firebase.ps1,REMOVER,—,Scripts mutadores/one-off antigos; não carregar para a base nova.,,4,PENDENTE,Contrato congelado no Lote 0
 vitest.config.ts,ADAPTAR,raiz,Manter configuração da plataforma e retirar referências obsoletas.,,5,PENDENTE,Contrato congelado no Lote 0
+src/server/firebase.ts,CRIAR,src/server/firebase.ts,Bootstrap canônico,,1,CONCLUÍDO 1a,Bootstrap canônico
+src/client/auth/session.ts,CRIAR,src/client/auth/session.ts,Helper sem React/SDK,,1,CONCLUÍDO 1a,Helper sem React/SDK
+src/contracts/payments.ts,CRIAR,src/contracts/payments.ts,Tipos API sem UI,,1,CONCLUÍDO 1a,Tipos API sem UI
+tests/client-session.test.ts,CRIAR,tests/client-session.test.ts,Contrato de sessão client,,1,CONCLUÍDO 1a,Contrato de sessão client
+tests/firebase-bootstrap.test.ts,CRIAR,tests/firebase-bootstrap.test.ts,Inicialização lazy/fail closed,,1,CONCLUÍDO 1a,Inicialização lazy/fail closed
+tests/setup.ts,CRIAR,tests/setup.ts,Resolver server-only fora do Next,,1,CONCLUÍDO 1a,Resolver server-only fora do Next

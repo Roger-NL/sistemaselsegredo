@@ -10,7 +10,7 @@ import {
   RequestPayloadError,
   requestPayloadErrorResponse,
 } from "@/lib/server/request";
-import type { PaymentReconciliationState, VerifyPaymentApiResponse } from "@/features/payment/payment-mode";
+import type { PaymentReconciliationState, VerifyPaymentApiResponse } from "@/contracts/payments";
 
 export const dynamic = "force-dynamic";
 const MAX_VERIFY_PAYMENT_BODY_BYTES = 2 * 1_024;

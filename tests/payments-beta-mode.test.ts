@@ -8,7 +8,7 @@ const asaasMocks = vi.hoisted(() => ({
   getPixQrCode: vi.fn(),
 }));
 
-vi.mock("@/lib/firebase-admin", () => ({ adminDb: {} }));
+vi.mock("@/server/firebase", () => ({ getAdminDb: () => ({}) }));
 vi.mock("@/lib/asaas", () => ({
   ...asaasMocks,
   AsaasApiError: class AsaasApiError extends Error {

@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/server/firebase";
 import {
   createCreditCardPayment,
   createOrGetCustomer,
@@ -150,11 +150,11 @@ function getCheckoutIntentId(userId: string, plan: CheckoutPlan) {
 
 async function claimCheckoutIntent(userId: string, plan: CheckoutPlan): Promise<CheckoutIntentClaim> {
   const id = getCheckoutIntentId(userId, plan);
-  const intentRef = adminDb.collection(CHECKOUT_INTENTS_COLLECTION).doc(id);
+  const intentRef = getAdminDb().collection(CHECKOUT_INTENTS_COLLECTION).doc(id);
   const token = randomUUID();
   const startedAt = nowIso();
 
-  await adminDb.runTransaction(async (transaction) => {
+  await getAdminDb().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(intentRef);
     const existing = snapshot.data() as {
       status?: CheckoutIntentStatus;
@@ -200,9 +200,9 @@ async function finalizeCheckoutIntent(
   error: unknown,
   paymentId?: string
 ) {
-  const intentRef = adminDb.collection(CHECKOUT_INTENTS_COLLECTION).doc(claim.id);
+  const intentRef = getAdminDb().collection(CHECKOUT_INTENTS_COLLECTION).doc(claim.id);
 
-  await adminDb.runTransaction(async (transaction) => {
+  await getAdminDb().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(intentRef);
     if (snapshot.data()?.claimToken !== claim.token) {
       return;
@@ -241,11 +241,11 @@ function buildUserPendingPaymentUpdate(attempt: PaymentAttemptRecord) {
 }
 
 async function persistCreatedCheckoutAttempt(attempt: PaymentAttemptRecord, claim: CheckoutIntentClaim) {
-  const intentRef = adminDb.collection(CHECKOUT_INTENTS_COLLECTION).doc(claim.id);
-  const attemptRef = adminDb.collection(PAYMENT_ATTEMPTS_COLLECTION).doc(attempt.id);
-  const userRef = adminDb.collection(USER_COLLECTION).doc(attempt.userId);
+  const intentRef = getAdminDb().collection(CHECKOUT_INTENTS_COLLECTION).doc(claim.id);
+  const attemptRef = getAdminDb().collection(PAYMENT_ATTEMPTS_COLLECTION).doc(attempt.id);
+  const userRef = getAdminDb().collection(USER_COLLECTION).doc(attempt.userId);
 
-  await adminDb.runTransaction(async (transaction) => {
+  await getAdminDb().runTransaction(async (transaction) => {
     const intentSnapshot = await transaction.get(intentRef);
     if (intentSnapshot.data()?.claimToken !== claim.token) {
       throw new Error("CHECKOUT_INTENT_CLAIM_LOST");
@@ -268,11 +268,11 @@ async function markCheckoutIntentForAttempt(
   attempt: PaymentAttemptRecord,
   status: Extract<CheckoutIntentStatus, "paid" | "cleared">
 ) {
-  const intentRef = adminDb.collection(CHECKOUT_INTENTS_COLLECTION).doc(
+  const intentRef = getAdminDb().collection(CHECKOUT_INTENTS_COLLECTION).doc(
     getCheckoutIntentId(attempt.userId, attempt.plan)
   );
 
-  await adminDb.runTransaction(async (transaction) => {
+  await getAdminDb().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(intentRef);
     const existingPaymentId = snapshot.data()?.paymentId;
 
@@ -386,12 +386,12 @@ async function claimWebhookEvent(params: {
   payment: AsaasPayment;
   dateCreated?: string;
 }): Promise<WebhookClaim> {
-  const webhookRef = adminDb.collection(WEBHOOK_EVENTS_COLLECTION).doc(params.eventId);
+  const webhookRef = getAdminDb().collection(WEBHOOK_EVENTS_COLLECTION).doc(params.eventId);
   const claimToken = randomUUID();
   const claimedAt = nowIso();
   let claim: WebhookClaim = { kind: "claimed", token: claimToken };
 
-  await adminDb.runTransaction(async (transaction) => {
+  await getAdminDb().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(webhookRef);
     const existing = snapshot.data() as {
       processingStatus?: string;
@@ -454,9 +454,9 @@ async function finalizeWebhookEvent(params: {
   outcome: "completed" | "failed";
   details?: Record<string, unknown>;
 }) {
-  const webhookRef = adminDb.collection(WEBHOOK_EVENTS_COLLECTION).doc(params.eventId);
+  const webhookRef = getAdminDb().collection(WEBHOOK_EVENTS_COLLECTION).doc(params.eventId);
 
-  await adminDb.runTransaction(async (transaction) => {
+  await getAdminDb().runTransaction(async (transaction) => {
     const snapshot = await transaction.get(webhookRef);
     const currentToken = snapshot.data()?.processingToken;
 
@@ -498,11 +498,11 @@ function buildUnresolvedVerificationResponse(params: {
 }
 
 async function getUserDoc(userId: string) {
-  return adminDb.collection(USER_COLLECTION).doc(userId).get();
+  return getAdminDb().collection(USER_COLLECTION).doc(userId).get();
 }
 
 async function getLatestExamStatus(userId: string, pillarId: number): Promise<WriterExamStatus> {
-  const snapshot = await adminDb.collection("pillar_exams")
+  const snapshot = await getAdminDb().collection("pillar_exams")
     .where("userId", "==", userId)
     .where("pillarId", "==", pillarId)
     .get();
@@ -542,7 +542,7 @@ async function recomputeStoredProgressSnapshot(
   const [pillar1ExamStatus, pillar2ExamStatus, liveSessionSnapshot] = await Promise.all([
     getLatestExamStatus(userId, 1),
     getLatestExamStatus(userId, 2),
-    adminDb.collection("live_sessions").doc(`${userId}_p2`).get(),
+    getAdminDb().collection("live_sessions").doc(`${userId}_p2`).get(),
   ]);
 
   const snapshot = buildStoredProgressSnapshot({
@@ -560,7 +560,7 @@ async function recomputeStoredProgressSnapshot(
       (typeof userData.approvedPillar === "number" ? userData.approvedPillar : 1),
   });
 
-  await adminDb.collection(USER_COLLECTION).doc(userId).set(
+  await getAdminDb().collection(USER_COLLECTION).doc(userId).set(
     {
       progressSnapshot: snapshot,
       approvedPillar: deriveLegacyApprovedPillar(snapshot),
@@ -571,7 +571,7 @@ async function recomputeStoredProgressSnapshot(
 }
 
 async function getPaymentAttempt(paymentId: string) {
-  return adminDb.collection(PAYMENT_ATTEMPTS_COLLECTION).doc(paymentId).get();
+  return getAdminDb().collection(PAYMENT_ATTEMPTS_COLLECTION).doc(paymentId).get();
 }
 
 async function assertPaymentBelongsToUser(paymentId: string, userId: string) {
@@ -593,11 +593,11 @@ async function assertPaymentBelongsToUser(paymentId: string, userId: string) {
 }
 
 async function upsertPaymentAttempt(attempt: PaymentAttemptRecord) {
-  await adminDb.collection(PAYMENT_ATTEMPTS_COLLECTION).doc(attempt.id).set(stripUndefined(attempt), { merge: true });
+  await getAdminDb().collection(PAYMENT_ATTEMPTS_COLLECTION).doc(attempt.id).set(stripUndefined(attempt), { merge: true });
 }
 
 async function syncUserPendingState(userId: string, attempt: PaymentAttemptRecord | null) {
-  const userRef = adminDb.collection(USER_COLLECTION).doc(userId);
+  const userRef = getAdminDb().collection(USER_COLLECTION).doc(userId);
 
   if (!attempt) {
     await userRef.set(
@@ -617,7 +617,7 @@ async function syncUserPendingState(userId: string, attempt: PaymentAttemptRecor
 }
 
 async function grantLifetimeAccess(userId: string, payment: AsaasPayment) {
-  const userRef = adminDb.collection(USER_COLLECTION).doc(userId);
+  const userRef = getAdminDb().collection(USER_COLLECTION).doc(userId);
   const userDoc = await userRef.get();
   const currentApprovedPillar = userDoc.exists ? Number(userDoc.data()?.approvedPillar || 1) : 1;
   const activatedAt = nowIso();
@@ -646,7 +646,7 @@ async function grantLifetimeAccess(userId: string, payment: AsaasPayment) {
 }
 
 async function findAlternativePaidLifetimeAttempt(userId: string, excludedPaymentId: string) {
-  const attempts = await adminDb.collection(PAYMENT_ATTEMPTS_COLLECTION)
+  const attempts = await getAdminDb().collection(PAYMENT_ATTEMPTS_COLLECTION)
     .where("userId", "==", userId)
     .get();
 
@@ -735,7 +735,7 @@ async function revokePaymentEntitlement(
 }
 
 async function registerSpecialtyPurchase(userId: string, payment: AsaasPayment) {
-  const userRef = adminDb.collection(USER_COLLECTION).doc(userId);
+  const userRef = getAdminDb().collection(USER_COLLECTION).doc(userId);
 
   await userRef.set(
     {

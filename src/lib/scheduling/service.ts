@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { adminDb } from '@/lib/firebase-admin';
+import { getAdminDb } from '@/server/firebase';
 import { addDays, addHours, isAfter, parseISO, subHours } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { cancelCalendarEvent, createCalendarEventForBooking, getAvailableSchedulingSlots, getCalendarEventState, getSchedulingTimezone, getSchedulingTutorEmail, isGoogleCalendarConfigured, listCalendarEventsForDate, updateCalendarEventMarker } from '@/lib/scheduling/google-calendar';
@@ -41,10 +41,10 @@ async function updateSessionAndReleaseSlot(options: {
   expectedSlotStart?: string | null;
   update: Partial<LiveSessionBooking>;
 }) {
-  const sessionRef = adminDb.collection(COLLECTION).doc(options.sessionId);
+  const sessionRef = getAdminDb().collection(COLLECTION).doc(options.sessionId);
   let updatedSession: LiveSessionBooking | null = null;
 
-  await adminDb.runTransaction(async (transaction) => {
+  await getAdminDb().runTransaction(async (transaction) => {
     const sessionSnapshot = await transaction.get(sessionRef);
     if (!sessionSnapshot.exists) {
       throw new Error('SESSION_NOT_FOUND');
@@ -72,7 +72,7 @@ async function updateSessionAndReleaseSlot(options: {
         : null
     );
     const lockRef = currentLockId
-      ? adminDb.collection(SLOT_LOCKS_COLLECTION).doc(currentLockId)
+      ? getAdminDb().collection(SLOT_LOCKS_COLLECTION).doc(currentLockId)
       : null;
     const lockSnapshot = lockRef ? await transaction.get(lockRef) : null;
 
@@ -106,13 +106,13 @@ function getEarliestScheduleAt(premiumActivatedAt?: string) {
 }
 
 async function getUserProfile(userId: string) {
-  const snapshot = await adminDb.collection('users').doc(userId).get();
+  const snapshot = await getAdminDb().collection('users').doc(userId).get();
   if (!snapshot.exists) return null;
   return snapshot.data() as Record<string, unknown>;
 }
 
 async function getLatestExamStatus(userId: string, pillarId: number): Promise<WriterExamStatus> {
-  const snapshot = await adminDb.collection('pillar_exams')
+  const snapshot = await getAdminDb().collection('pillar_exams')
     .where('userId', '==', userId)
     .where('pillarId', '==', pillarId)
     .get();
@@ -133,7 +133,7 @@ async function getLatestExamStatus(userId: string, pillarId: number): Promise<Wr
 }
 
 async function recomputeStoredProgressSnapshot(userId: string, liveSessionStatusOverride?: WriterLiveSessionStatus) {
-  const userSnapshot = await adminDb.collection('users').doc(userId).get();
+  const userSnapshot = await getAdminDb().collection('users').doc(userId).get();
   if (!userSnapshot.exists) {
     return;
   }
@@ -161,7 +161,7 @@ async function recomputeStoredProgressSnapshot(userId: string, liveSessionStatus
     currentApprovedPillar: typeof userData.approvedPillar === 'number' ? userData.approvedPillar : 1,
   });
 
-  await adminDb.collection('users').doc(userId).set({
+  await getAdminDb().collection('users').doc(userId).set({
     progressSnapshot: snapshot,
     approvedPillar: deriveLegacyApprovedPillar(snapshot),
     updatedAt: nowIso(),
@@ -169,7 +169,7 @@ async function recomputeStoredProgressSnapshot(userId: string, liveSessionStatus
 }
 
 export async function getLiveSessionByUserAndPillar(userId: string, sourcePillarId: number) {
-  const snapshot = await adminDb.collection(COLLECTION).doc(getSessionId(userId, sourcePillarId)).get();
+  const snapshot = await getAdminDb().collection(COLLECTION).doc(getSessionId(userId, sourcePillarId)).get();
   if (!snapshot.exists) return null;
   return { id: snapshot.id, ...(snapshot.data() as LiveSessionBooking) } as LiveSessionBooking;
 }
@@ -228,7 +228,7 @@ export async function releaseLiveSessionAfterApproval(options: {
       : 'Sua primeira sessão ao vivo já pode ser marcada.',
   };
 
-  await adminDb.collection(COLLECTION).doc(sessionId).set(stripUndefined(session), { merge: true });
+  await getAdminDb().collection(COLLECTION).doc(sessionId).set(stripUndefined(session), { merge: true });
   await recomputeStoredProgressSnapshot(options.userId, session.status);
   return session;
 }
@@ -279,7 +279,7 @@ async function syncSessionWithCalendar(session: LiveSessionBooking) {
       : null;
 
     if (nextStatus !== 'ready_to_schedule') {
-      await adminDb.collection(COLLECTION).doc(session.id!).set(stripUndefined(updatedSession), { merge: true });
+      await getAdminDb().collection(COLLECTION).doc(session.id!).set(stripUndefined(updatedSession), { merge: true });
     }
 
     await recomputeStoredProgressSnapshot(session.userId, nextStatus);
@@ -364,7 +364,7 @@ export async function getSchedulingStatusForUser(userId: string): Promise<LiveSe
   let session = await getLiveSessionByUserAndPillar(userId, 2);
 
   if (!session) {
-    const pillarTwoExamQuery = await adminDb.collection('pillar_exams')
+    const pillarTwoExamQuery = await getAdminDb().collection('pillar_exams')
       .where('userId', '==', userId)
       .where('pillarId', '==', 2)
       .where('status', '==', 'approved')
@@ -395,7 +395,7 @@ export async function getSchedulingStatusForUser(userId: string): Promise<LiveSe
         lastActionMessage: "Sua primeira sessão ao vivo já pode ser marcada.",
       };
 
-      await adminDb.collection(COLLECTION).doc(session.id!).set(promoted, { merge: true });
+      await getAdminDb().collection(COLLECTION).doc(session.id!).set(promoted, { merge: true });
       await recomputeStoredProgressSnapshot(userId, promoted.status);
       session = {
         ...session,
@@ -498,11 +498,11 @@ export async function requestLiveSessionBooking(options: {
   }
 
   const sessionId = status.session.id || getSessionId(options.userId, 2);
-  const sessionRef = adminDb.collection(COLLECTION).doc(sessionId);
+  const sessionRef = getAdminDb().collection(COLLECTION).doc(sessionId);
   const slotLockId = getSlotLockId(options.slotStart, options.slotEnd);
-  const slotLockRef = adminDb.collection(SLOT_LOCKS_COLLECTION).doc(slotLockId);
+  const slotLockRef = getAdminDb().collection(SLOT_LOCKS_COLLECTION).doc(slotLockId);
 
-  const nextSession = await adminDb.runTransaction<LiveSessionBooking>(async (transaction) => {
+  const nextSession = await getAdminDb().runTransaction<LiveSessionBooking>(async (transaction) => {
     const [freshSessionSnapshot, slotLockSnapshot] = await Promise.all([
       transaction.get(sessionRef),
       transaction.get(slotLockRef),
@@ -651,7 +651,7 @@ export async function cancelLiveSessionBooking(userId: string) {
 }
 
 export async function getAdminSchedulingSnapshot() {
-  const snapshot = await adminDb.collection(COLLECTION).get();
+  const snapshot = await getAdminDb().collection(COLLECTION).get();
   const sessions = snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as LiveSessionBooking) }));
 
   return {
@@ -675,7 +675,7 @@ function getReadyStatusFromSession(session: LiveSessionBooking) {
 }
 
 async function getReservedSessionRanges(excludeUserId?: string) {
-  const snapshot = await adminDb.collection(COLLECTION).get();
+  const snapshot = await getAdminDb().collection(COLLECTION).get();
 
   return snapshot.docs
     .map((doc) => ({ id: doc.id, ...(doc.data() as LiveSessionBooking) } as LiveSessionBooking))
@@ -692,7 +692,7 @@ async function getReservedSessionRanges(excludeUserId?: string) {
 }
 
 async function getBookedSessionsForDate(dateKey: string, excludeSessionId?: string) {
-  const snapshot = await adminDb.collection(COLLECTION).get();
+  const snapshot = await getAdminDb().collection(COLLECTION).get();
 
   return snapshot.docs
     .map((doc) => ({ id: doc.id, ...(doc.data() as LiveSessionBooking) } as LiveSessionBooking))
@@ -707,7 +707,7 @@ async function getBookedSessionsForDate(dateKey: string, excludeSessionId?: stri
 }
 
 export async function getSchedulingDayOverview(sessionId: string): Promise<SchedulingDayOverview> {
-  const snapshot = await adminDb.collection(COLLECTION).doc(sessionId).get();
+  const snapshot = await getAdminDb().collection(COLLECTION).doc(sessionId).get();
   if (!snapshot.exists) {
     throw new Error('SESSION_NOT_FOUND');
   }
@@ -760,7 +760,7 @@ export async function updateSchedulingStatusByAdmin(options: {
   decision: 'confirm' | 'pending' | 'reject';
   reason?: string;
 }) {
-  const snapshot = await adminDb.collection(COLLECTION).doc(options.sessionId).get();
+  const snapshot = await getAdminDb().collection(COLLECTION).doc(options.sessionId).get();
   if (!snapshot.exists) {
     throw new Error('SESSION_NOT_FOUND');
   }
@@ -786,15 +786,15 @@ export async function updateSchedulingStatusByAdmin(options: {
       calendarHtmlLink = created?.htmlLink || null;
     }
 
-    const sessionRef = adminDb.collection(COLLECTION).doc(session.id!);
+    const sessionRef = getAdminDb().collection(COLLECTION).doc(session.id!);
     const slotLockId = session.slotLockId || getSlotLockId(
       session.requestedSlotStart!,
       session.requestedSlotEnd!
     );
-    const slotLockRef = adminDb.collection(SLOT_LOCKS_COLLECTION).doc(slotLockId);
+    const slotLockRef = getAdminDb().collection(SLOT_LOCKS_COLLECTION).doc(slotLockId);
 
     try {
-      await adminDb.runTransaction(async (transaction) => {
+      await getAdminDb().runTransaction(async (transaction) => {
         const [currentSnapshot, slotLockSnapshot] = await Promise.all([
           transaction.get(sessionRef),
           transaction.get(slotLockRef),
@@ -851,13 +851,13 @@ export async function updateSchedulingStatusByAdmin(options: {
       await cancelCalendarEvent(session.calendarEventId);
     }
 
-    const sessionRef = adminDb.collection(COLLECTION).doc(session.id!);
+    const sessionRef = getAdminDb().collection(COLLECTION).doc(session.id!);
     const slotLockId = session.slotLockId || (
       session.requestedSlotStart && session.requestedSlotEnd
         ? getSlotLockId(session.requestedSlotStart, session.requestedSlotEnd)
         : null
     );
-    await adminDb.runTransaction(async (transaction) => {
+    await getAdminDb().runTransaction(async (transaction) => {
       const currentSnapshot = await transaction.get(sessionRef);
       if (!currentSnapshot.exists) throw new Error('SESSION_NOT_FOUND');
       const current = {
@@ -873,7 +873,7 @@ export async function updateSchedulingStatusByAdmin(options: {
       }
 
       const slotLockRef = slotLockId
-        ? adminDb.collection(SLOT_LOCKS_COLLECTION).doc(slotLockId)
+        ? getAdminDb().collection(SLOT_LOCKS_COLLECTION).doc(slotLockId)
         : null;
       const slotLockSnapshot = slotLockRef ? await transaction.get(slotLockRef) : null;
       if (
