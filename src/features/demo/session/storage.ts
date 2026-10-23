@@ -9,7 +9,7 @@ const isRecord = (x: unknown): x is Record<string, unknown> => Boolean(x && type
 function validEvent(value: unknown): value is DemoEvent {
   if (!isRecord(value) || typeof value.at !== "string" || !catalog[value.at]) return false;
   switch (value.type) {
-    case "NEXT": case "PREPARE": case "SUBMIT": case "CHECK": case "HELP": case "USE_SUPPORT": case "CLEAR": return true;
+    case "NEXT": case "PREPARE": case "SUBMIT": case "CHECK": case "HELP": case "USE_SUPPORT": case "CLEAR": case "TOGGLE_MODEL": return true;
     case "CHOOSE": return typeof value.choice === "string";
     case "UNDERSTAND": return typeof value.correct === "boolean";
     case "BLOCK": return typeof value.block === "string";

@@ -126,6 +126,7 @@ describe("approved café graph", () => {
   });
 
   it("declares exactly nine illustrations and fifty distinct contextual voices", () => {
+    expect(catalog["p1.first"].help).toEqual([]);
     expect(Object.keys(images)).toHaveLength(9); expect(Object.keys(audio)).toHaveLength(50);
     expect(audio.C25.text).toBe("Me too."); expect(audio.C30.text).toBe("Me too!");
     expect(audio.U08.meaning).toBe("Cuidado!");
@@ -133,6 +134,16 @@ describe("approved café graph", () => {
 });
 
 describe("versioned local recovery", () => {
+  it("restores review position and an explicitly hidden model without losing open help", () => {
+    let state = reach("p2.send");
+    for (let i = 0; i < 3; i++) state = dispatch(state, { type: "HELP" });
+    state = dispatch(state, { type: "TOGGLE_MODEL" });
+    const restored = decodeSnapshot(encodeSnapshot(state));
+    expect(restored?.modelHidden).toBe(true); expect(restored?.help["p2.send"]).toBe(3);
+    state = reach("end");
+    state = transition(state, { at: "end", type: "REVIEW", view: "feedback" });
+    expect(decodeSnapshot(encodeSnapshot(state))?.reviewView).toBe("feedback");
+  });
   it("rejects corrupt, incompatible and impossible snapshots", () => {
     for (const raw of ["{", "null", "{}", JSON.stringify({ ...JSON.parse(encodeSnapshot(reach("p2.send"))), storyVersion: "unknown" }),
       JSON.stringify({ ...JSON.parse(encodeSnapshot(createDemo("less", "test-run-id", 0))), journal: [{ at: "p1.first", type: "BLOCK", block: "evil" }] })]) expect(decodeSnapshot(raw)).toBeNull();

@@ -69,3 +69,17 @@ Lote 1: separar integrações de currículo/UI, extrair sessão client e contrat
 - O TypeScript após Lote 4 encontrou lixo sintático em `.next/dev/types/routes.d.ts` gerado durante exclusões; removido apenas esse diretório gerado com servidor parado. Typegen e TypeScript finais sem essa interferência. Build com permissão local compilou e revelou chamada residual do guard antigo; corrigida, nova execução em andamento.
 
 - Verificação do Lote 5: 64 testes/14 arquivos, lint sem avisos, TypeScript e build de produção local aprovados. Nenhuma fonte externa necessária para o build.
+
+## Pausa solicitada — revisão de experiência, identidade e áudio
+
+Após o Lote 5, durante a verificação final, o responsável pediu explicitamente uma especificação aprovada antes de novas alterações de código. Também confirmou a mesma logo e cores do Orbit e mudou o requisito de áudio pronto para geração sob demanda com cache persistente global. Implementação pausada a partir dessa instrução.
+
+A proposta está em [REVISAO-EXPERIENCIA-E-AUDIO.md](REVISAO-EXPERIENCIA-E-AUDIO.md). O Orbit publicado foi observado; logo/paleta conferidas também por leitura da base Git, sem restaurar arquivos removidos. Nenhuma geração, upload ou alteração remota foi feita.
+
+Último commit estável: `c8fd65d` (64 testes, lint, TypeScript e build aprovados). Há mudanças locais anteriores à pausa em refinamentos de apoio/foco/player/reducer e testes novos, ainda sem commit final. A última suite em andamento teve 69 testes aprovados e uma falha no teste novo de reconciliação, na expectativa de contagem de chamadas do mock. Não declarar o Lote 6 concluído nem essas mudanças verificadas. Nenhuma correção de código será aplicada enquanto a revisão estiver aguardando aprovação.
+
+O cache global solicitado agora **ainda não está implementado**; o adaptador atual é a extração de produção offline do plano anterior. Logo/paleta da prévia local ainda não foram trocadas para a identidade confirmada nesta revisão.
+
+## Retomada aprovada em 23/10/2026
+
+O responsável respondeu “comece”, aprovando REVISAO-EXPERIENCIA-E-AUDIO.md. A pausa foi encerrada. A falha do teste novo de reconciliação era isolamento do contador do mock entre testes; corrigida antes das novas alterações. Baseline da retomada: 70 testes/16 arquivos, lint e TypeScript aprovados. Refinamentos pendentes de apoio/foco/player e recuperação foram preservados; cache global e identidade entram nos próximos commits.

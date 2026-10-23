@@ -12,13 +12,13 @@ function enter(state: DemoState, nodeId: string): DemoState {
   const phase = node.kind !== "response" ? "scene" : node.teach ? "present"
     : node.mode === "blocks" || node.mode === "recombine" ? "build"
     : node.mode === "recall" && expressionHistory(state, node.response) !== "new" ? "recall" : "ready";
-  return { ...state, nodeId, phase, transcript, selected: [], notice: "" };
+  return { ...state, nodeId, phase, transcript, selected: [], notice: "", modelHidden: false };
 }
 
 export function createDemo(profile: SupportProfile, runId: string, startedAt: number): DemoState {
   return enter({ schemaVersion: SCHEMA_VERSION, storyVersion: STORY_VERSION, runId, startedAt,
     initialProfile: profile, profile, nodeId: "p1.first", phase: "scene", selected: [], help: {}, checked: [],
-    decisions: {}, transcript: [], evidence: [], journal: [], notice: "", reviewView: "end",
+    decisions: {}, transcript: [], evidence: [], journal: [], notice: "", reviewView: "end", modelHidden: false,
   }, "p1.first");
 }
 
@@ -28,6 +28,9 @@ export function transition(state: DemoState, event: DemoEvent): DemoState {
   const node = catalog[state.nodeId];
   let next = state;
   switch (event.type) {
+    case "TOGGLE_MODEL":
+      if (node.kind !== "response" || state.phase !== "build" || (state.help[node.id] ?? 0) !== node.help.length) return state;
+      next = { ...state, modelHidden: !state.modelHidden }; break;
     case "REVIEW":
       if (node.kind !== "end" || !REVIEW_VIEWS.includes(event.view) || event.view === state.reviewView) return state;
       next = { ...state, reviewView: event.view }; break;
@@ -83,7 +86,7 @@ export function transition(state: DemoState, event: DemoEvent): DemoState {
       const transcript = [...state.transcript, { id: `${node.id}:${node.response}`, nodeId: node.id, part: node.part, audioId: node.response, role: "you" as const }];
       next = enter({ ...state, transcript, evidence: [...state.evidence, {
         nodeId: node.id, response: node.response,
-        kind: supported || state.checked.includes(node.id) || state.phase === "ready" ? "supported" : node.mode === "recombine" ? "recombined" : "blocks",
+        kind: supported || state.checked.includes(node.id) || state.phase === "ready" || (state.help[node.id] ?? 0) === node.help.length ? "supported" : node.mode === "recombine" ? "recombined" : "blocks",
       }] }, node.next);
       break;
     }

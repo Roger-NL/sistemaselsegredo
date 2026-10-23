@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { catalog } from "./content/catalog";
 import { audio, images } from "./content/media";
 import { profiles } from "./content/copy.pt-BR";
@@ -20,6 +20,9 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
   const audioNotice = useRef<HTMLParagraphElement>(null);
   const storageNotice = useRef<HTMLParagraphElement>(null);
   const player = useRef<DemoAudioPlayer | null>(null);
+  const supportMenu = useRef<HTMLDetailsElement>(null);
+  const [draftProfile, setDraftProfile] = useState(initial.profile);
+  const transcriptCount = useRef(initial.transcript.length);
   const event = (type: DemoEvent["type"]) => dispatch({ at: node.id, type } as DemoEvent);
   useEffect(() => {
     if (!remember(state) && storageNotice.current) storageNotice.current.textContent = "O navegador não está guardando esta tentativa. Você pode concluir, mas sair desta página pode perder a retomada.";
@@ -28,6 +31,17 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
     heading.current?.focus();
     return () => { player.current?.cancel(); };
   }, [state.nodeId, state.phase]);
+  useEffect(() => {
+    const added = state.transcript.slice(transcriptCount.current);
+    transcriptCount.current = state.transcript.length;
+    const urls = added.map(line => audio[line.audioId]).filter(asset => asset.ready).map(asset => asset.path);
+    if (!urls.length) return;
+    player.current ??= new DemoAudioPlayer();
+    void player.current.playSequence(urls).then(ok => {
+      if (!ok && audioNotice.current) audioNotice.current.textContent = "A reprodução foi interrompida. O texto continua disponível.";
+    });
+    return () => { player.current?.cancel(); };
+  }, [state.transcript]);
   async function replay(id: AudioId) {
     if (!audio[id].ready) {
       if (audioNotice.current) audioNotice.current.textContent = "Este áudio ainda está em produção. O texto e a conversa continuam disponíveis.";
@@ -42,11 +56,12 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
   const previous = [...state.transcript].reverse().find(line => line.role === "you");
   const previousNode = previous ? catalog[previous.nodeId] : null;
   const justSent = previousNode && "next" in previousNode && previousNode.next === node.id ? previous : null;
-  const modelVisible = state.phase === "present" || state.phase === "ready" || (node.kind === "response" && helpLevel === node.help.length);
+  const modelVisible = state.phase === "present" || state.phase === "ready" || (node.kind === "response" && helpLevel === node.help.length && !state.modelHidden);
   return <div className="experience">
-    <div className="experience-bar"><span>Parte {node.part} de 10</span><progress max={10} value={node.part} aria-label="Parte da conversa" /><details className="support-control"><summary>Ajustar apoio</summary><fieldset><legend>Como prefere continuar?</legend>{profiles.map(profile => <label key={profile.id}><input type="radio" name="change-support" checked={state.profile === profile.id} onChange={() => dispatch({ at: node.id, type: "PROFILE", profile: profile.id })} /> {profile.label}</label>)}</fieldset></details></div>
+    <div className="experience-bar"><span>Parte {node.part} de 10</span><progress max={10} value={node.part} aria-label="Parte da conversa" /><details ref={supportMenu} className="support-control"><summary>Ajustar apoio</summary><fieldset><legend>Como prefere continuar?</legend>{profiles.map(profile => <label key={profile.id}><input type="radio" name="change-support" checked={draftProfile === profile.id} onChange={() => setDraftProfile(profile.id)} /> {profile.label}</label>)}<div className="actions"><button onClick={() => { dispatch({ at: node.id, type: "PROFILE", profile: draftProfile }); if (supportMenu.current) supportMenu.current.open = false; }}>Aplicar</button><button onClick={() => { setDraftProfile(state.profile); if (supportMenu.current) supportMenu.current.open = false; }}>Voltar sem alterar</button></div></fieldset></details></div>
     <p ref={storageNotice} className="notice" role="status" />
     <p ref={audioNotice} className="notice" role="status" />
+    {Object.values(audio).some(asset => asset.ready) && <button className="text-button" onClick={() => player.current?.pause()}>Pausar áudio</button>}
     {node.kind === "end" ? <Retrospective state={state} onReplay={replay} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <div className="scene-grid">
       <aside className="scene-column"><figure className="scene-art"><Image width={1536} height={1024} sizes="(max-width: 760px) 100vw, 45vw" src={image.ready ? image.path : image.preview} alt={image.description} /><figcaption>{image.description}<span>Ilustração conceitual · arte final em produção</span></figcaption></figure>
         <details className="order" open={node.image === "V02" || node.image === "V05"}><summary>Seu pedido · #24</summary><p lang="en">Your order · #24 · Iced coffee</p>{node.image === "V02" && <p>Copo apresentado: <strong>SARAH / #18</strong></p>}{node.image === "V05" && <p>Pedido que acaba de chegar: <strong>#24</strong></p>}</details>
@@ -76,8 +91,8 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
         </>}
         <p role="status" className="notice">{state.notice}</p>
         {!!node.help.length && <aside className="help"><button onClick={() => event("HELP")} disabled={helpLevel === node.help.length}>{helpLevel === 0 ? "Preciso de ajuda" : helpLevel < node.help.length ? "Mais uma pista" : "Ajuda aberta"}</button>
-          {node.help.slice(0, helpLevel).map((text, index) => <p key={index}>{text}</p>)}
-          {node.kind === "response" && state.phase === "build" && helpLevel === node.help.length && <div className="actions"><button onClick={() => event("USE_SUPPORT")}>Usar com apoio</button><span className="muted">Ou continue com sua montagem.</span></div>}
+          {node.help.slice(0, helpLevel).filter((_, index) => !state.modelHidden || index < node.help.length - 1).map((text, index) => <p key={index}>{text}</p>)}
+          {node.kind === "response" && state.phase === "build" && helpLevel === node.help.length && <div className="actions"><button onClick={() => event("TOGGLE_MODEL")}>{state.modelHidden ? "Consultar o modelo" : "Tentar sem o modelo"}</button><button onClick={() => event("USE_SUPPORT")}>Usar com apoio</button></div>}
         </aside>}
       </section>
     </div>}
