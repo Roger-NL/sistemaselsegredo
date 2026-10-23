@@ -97,3 +97,17 @@ O responsável respondeu “comece”, aprovando REVISAO-EXPERIENCIA-E-AUDIO.md.
 - Servidor local de verificação iniciado com os três valores de voz/Blob explicitamente vazios, para impedir chamadas pagas ou uploads. Nenhum serviço remoto consultado/alterado; nenhum deploy ou script operacional executado.
 
 Pendências de prontidão pública: nove imagens finais; validação autorizada da voz/gravações e infraestrutura real; conferência visual no navegador; duração aproximada validada com participantes. Não declarar essas verificações como concluídas.
+
+## Ativação real de áudio autorizada — 23/10/2026
+
+O responsável solicitou explicitamente configurar o Blob e habilitar áudio, mantendo o cache global. Essa autorização específica substitui a restrição anterior de testes exclusivamente simulados para esta ativação.
+
+- O projeto vinculado `novoessite` já possui o Blob público `basedspeak-speech-cache` ativo e credencial configurada no ambiente Production. Não foi criado outro store nem alterada configuração remota. A CLI renovou a sessão Vercel existente; o token do Blob foi sincronizado diretamente para `.env.local`, ignorado pelo Git e com permissões 0600, sem impressão de valores.
+- Corrigida somente a representação local de `FIREBASE_SERVICE_ACCOUNT`: JSON canônico com aspas adequadas ao carregador de env, sem alterar identidade/chave. Blob e Firestore passaram nos checks reais de acesso.
+- O preflight de leitura da voz retornou `missing_permissions` por restrição de leitura da chave; a operação de síntese permitida funcionou normalmente. Nenhuma permissão do provedor foi ampliada.
+- Servidor reiniciado sem os overrides vazios de áudio. `POST /api/demo/audio` para C01 retornou 200/ready; MP3 persistido com 20.106 bytes, `audio/mpeg`, assinatura MP3 válida e download 200.
+- Três pedidos concorrentes de replay receberam a mesma chave e o mesmo arquivo. O ledger real `speech_audio_cache_v3` registra `ready`, áudio persistido e `providerAttemptCount: 1`.
+- Após novo reinício do servidor, outro pedido retornou a mesma chave e o contador permaneceu 1. Isso confirma persistência além da memória da Function/processo. Cache antigo e gravações existentes preservados.
+- Evidência técnica sanitizada em `tmp/audio-activation-proof.json`, ignorada no Git. Nenhuma credencial foi adicionada ao código, documentação, cliente, URL pública ou Git. Não houve deploy, alteração de regras/índices ou mudança de permissões remotas. Apenas os registros operacionais necessários de cache/rate limit e o MP3 autorizado foram gravados.
+
+C01 está validado com serviços reais. A revisão dos demais contextos de áudio e das artes finais continua pendente; o restante do catálogo usa o mesmo fluxo sob demanda. A suíte de 89 testes previamente aprovada permanece aplicável, sem alterações de código nesta ativação.

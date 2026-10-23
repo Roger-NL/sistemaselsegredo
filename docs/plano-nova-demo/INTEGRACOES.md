@@ -70,7 +70,7 @@ A [revisão aprovada em 23/10/2026](REVISAO-EXPERIENCIA-E-AUDIO.md) substitui o 
 
 Registro durável em `speech_audio_cache_v3/{key}`: identidade/hash/versão, status, ownerToken, leaseExpiresAt, providerAttemptCount, timestamps e metadados de áudio (URL/caminho/bytes/checksum quando disponível). Não usar TTL nem apagar esse ledger. Após início de chamada com resultado incerto, não repetir a geração automaticamente, mesmo se o lease expirar; recuperar Blob já gravado quando existir. Uma Function perdida antes da chamada pode ter sua reserva recuperada. Chamadas ao provedor e uploads ficam fora de callbacks transacionais.
 
-`GET /api/speech` continua JSON 410. O antigo script de produção direta foi desativado para impedir desvio do controle global. O único chamador de produção do adaptador é o runtime de cache. Nenhuma geração, upload, teste pago ou consulta remota foi executada nesta revisão; os testes usam mocks. A duração e a voz reais precisam de validação autorizada. Replays e seleção de velocidade local não criam arquivos.
+`GET /api/speech` continua JSON 410. O antigo script de produção direta foi desativado para impedir desvio do controle global. O único chamador de produção do adaptador é o runtime de cache. Na implementação inicial, os testes usaram mocks. Após autorização específica para ativar áudio, o Blob existente foi configurado localmente e C01 validado com serviços reais, uma única tentativa e replays concorrentes. Os demais contextos e a duração ainda precisam de revisão. Replays e seleção de velocidade local não criam arquivos.
 
 ## Banco e dados remotos
 
