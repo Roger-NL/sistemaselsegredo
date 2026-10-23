@@ -133,10 +133,10 @@ src/app/inicio-orbita-7k3/ui-copy.ts,REMOVER,—,"Protótipo, motor de conteúdo
 src/app/inicio-orbita-7k3/use-typing-sound.ts,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/app/inicio-orbita-7k3/welcome-experience.tsx,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
 src/app/inicio-orbita-7k3/welcome.module.css,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
-src/app/layout.tsx,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
+src/app/layout.tsx,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,CONCLUÍDO 2,Entrada/shell públicos; fontes do sistema sem download em build
 src/app/manifest.ts,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
 src/app/not-found.tsx,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
-src/app/page.tsx,ADAPTAR,src/app/page.tsx,Reescrever como entrada pública aprovada.,,2,PENDENTE,Contrato congelado no Lote 0
+src/app/page.tsx,ADAPTAR,src/app/page.tsx,Reescrever como entrada pública aprovada.,,2,CONCLUÍDO 2,Entrada/shell públicos; fontes do sistema sem download em build
 src/app/robots.ts,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
 src/app/sitemap.ts,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
 src/components/auth/AuthBackground.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
@@ -273,3 +273,36 @@ scripts/media-production/produce.mjs,CRIAR,scripts/media-production/produce.mjs,
 tests/access-entitlement.test.ts,CRIAR,tests/access-entitlement.test.ts,Extração de integração/contrato preservado,,1,CONCLUÍDO 1b,Testes locais; sem execução remota
 tests/integration-route-auth.test.ts,CRIAR,tests/integration-route-auth.test.ts,Extração de integração/contrato preservado,,1,CONCLUÍDO 1b,Testes locais; sem execução remota
 tests/scheduling-access.test.ts,CRIAR,tests/scheduling-access.test.ts,Extração de integração/contrato preservado,,1,CONCLUÍDO 1b,Testes locais; sem execução remota
+src/features/demo/demo.css,CRIAR,src/features/demo/demo.css,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/DemoExperience.tsx,CRIAR,src/features/demo/DemoExperience.tsx,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/DemoHost.tsx,CRIAR,src/features/demo/DemoHost.tsx,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/DemoEntry.tsx,CRIAR,src/features/demo/DemoEntry.tsx,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/copy.pt-BR.ts,CRIAR,src/features/demo/content/copy.pt-BR.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/media.ts,CRIAR,src/features/demo/content/media.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/catalog.ts,CRIAR,src/features/demo/content/catalog.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/builders.ts,CRIAR,src/features/demo/content/builders.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/parts/part-05.ts,CRIAR,src/features/demo/content/parts/part-05.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/parts/part-01.ts,CRIAR,src/features/demo/content/parts/part-01.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/parts/part-10.ts,CRIAR,src/features/demo/content/parts/part-10.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/parts/part-04.ts,CRIAR,src/features/demo/content/parts/part-04.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/parts/part-09.ts,CRIAR,src/features/demo/content/parts/part-09.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/parts/part-08.ts,CRIAR,src/features/demo/content/parts/part-08.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/parts/part-03.ts,CRIAR,src/features/demo/content/parts/part-03.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/parts/part-07.ts,CRIAR,src/features/demo/content/parts/part-07.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/parts/part-06.ts,CRIAR,src/features/demo/content/parts/part-06.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/content/parts/part-02.ts,CRIAR,src/features/demo/content/parts/part-02.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/components/Retrospective.tsx,CRIAR,src/features/demo/components/Retrospective.tsx,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/components/Feedback.tsx,CRIAR,src/features/demo/components/Feedback.tsx,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/audio/player.ts,CRIAR,src/features/demo/audio/player.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/model/history.ts,CRIAR,src/features/demo/model/history.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/model/types.ts,CRIAR,src/features/demo/model/types.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/model/reducer.ts,CRIAR,src/features/demo/model/reducer.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/model/retrospective.ts,CRIAR,src/features/demo/model/retrospective.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/session/storage.ts,CRIAR,src/features/demo/session/storage.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/features/demo/session/browser.ts,CRIAR,src/features/demo/session/browser.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+src/app/demo/page.tsx,CRIAR,src/app/demo/page.tsx,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+tests/demo-model.test.ts,CRIAR,tests/demo-model.test.ts,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+public/demo/cafe/v1/previews/careful.jpg,CRIAR,public/demo/cafe/v1/previews/careful.jpg,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+public/demo/cafe/v1/previews/counter.jpg,CRIAR,public/demo/cafe/v1/previews/counter.jpg,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+public/demo/cafe/v1/previews/tasting.jpg,CRIAR,public/demo/cafe/v1/previews/tasting.jpg,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md
+public/demo/cafe/v1/previews/seated.jpg,CRIAR,public/demo/cafe/v1/previews/seated.jpg,Demo local independente,,2,IMPLEMENTADO 2,Mídia final pendente; ver MIDIA.md

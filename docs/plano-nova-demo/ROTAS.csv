@@ -18,7 +18,7 @@
 /api/study/heartbeat,POST,410 JSON,Heartbeat do curso antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
 /api/verify-payment,POST,Preservar,Verificação/reconciliação Asaas.,Mover payment-mode para contrato puro,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
 /api/webhooks/asaas,POST,Preservar,Webhook Asaas; preservar validação e idempotência.,—,1,CONCLUÍDO 1b,Serviços migrados; guardas JSON exercitados com mocks
-/,—,ADAPTAR,Entrada pública da demo; escolha de apoio e início.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
+/,—,ADAPTAR,Entrada pública da demo; escolha de apoio e início.,URL listada explicitamente; query descartada nos aliases,2/5,IMPLEMENTADO 2,Demo pública local; sem auth/mic/pagamento; mídia final pendente
 /login,—,307 → /,Retirar login visual; destino sem query.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
 /cadastro,—,307 → /,Retirar cadastro visual; destino sem query.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
 /pagamento,—,307 → /,Retirar checkout visual; API Asaas permanece.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
@@ -43,11 +43,11 @@
 /admin/agendamentos,—,307 → /,Retirar UI de agenda; APIs permanecem.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
 /admin/alunos/[id],—,307 → /,Retirar detalhe de aluno fora do route group.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
 /inicio-orbita-7k3,—,307 → /,Retirar protótipo e seu motor.,URL listada explicitamente; query descartada nos aliases,2/3/4,PENDENTE,Contrato congelado no Lote 0
-/demo,—,CRIAR,Host da história pública e dos estados 1–10.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
+/demo,—,CRIAR,Host da história pública e dos estados 1–10.,URL listada explicitamente; query descartada nos aliases,2/5,IMPLEMENTADO 2,Demo pública local; sem auth/mic/pagamento; mídia final pendente
 /manifest.webmanifest,—,ADAPTAR,Manifest mínimo da demo.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
 /sitemap.xml,—,ADAPTAR,Remover URLs antigas; publicar rotas públicas atuais.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
 /robots.txt,—,ADAPTAR,Revisar indexação das rotas públicas.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
 /favicon.ico,—,MANTER/ADAPTAR,Manter se a identidade visual for aprovada.,URL listada explicitamente; query descartada nos aliases,2/5,PENDENTE,Contrato congelado no Lote 0
-/api/demo/session,POST,CRIAR,Sessão/telemetria/avaliação anônima conforme contrato de DEMO.md.,Proposta; pode ser adiada para sessão local + ficha humana,2,PENDENTE,Contrato congelado no Lote 0
-/api/demo/events,POST,CRIAR,Sessão/telemetria/avaliação anônima conforme contrato de DEMO.md.,Proposta; pode ser adiada para sessão local + ficha humana,2,PENDENTE,Contrato congelado no Lote 0
-/api/demo/feedback,POST,CRIAR,Sessão/telemetria/avaliação anônima conforme contrato de DEMO.md.,Proposta; pode ser adiada para sessão local + ficha humana,2,PENDENTE,Contrato congelado no Lote 0
+/api/demo/session,POST,CRIAR,Sessão/telemetria/avaliação anônima conforme contrato de DEMO.md.,Proposta; pode ser adiada para sessão local + ficha humana,2,ADIADO,Coleta desativada: responsável/retenção não definidos; sessão local e ficha humana
+/api/demo/events,POST,CRIAR,Sessão/telemetria/avaliação anônima conforme contrato de DEMO.md.,Proposta; pode ser adiada para sessão local + ficha humana,2,ADIADO,Coleta desativada: responsável/retenção não definidos; sessão local e ficha humana
+/api/demo/feedback,POST,CRIAR,Sessão/telemetria/avaliação anônima conforme contrato de DEMO.md.,Proposta; pode ser adiada para sessão local + ficha humana,2,ADIADO,Coleta desativada: responsável/retenção não definidos; sessão local e ficha humana

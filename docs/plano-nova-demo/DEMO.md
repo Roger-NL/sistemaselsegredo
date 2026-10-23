@@ -2,6 +2,8 @@
 
 Proposta de implementação do roteiro já aprovado. Este documento não substitui o diálogo completo nem autoriza adicionar cenas.
 
+Execução: motor e interface locais implementados no Lote 2; fonte literal complementar em `output/pdf/BasedSpeak_Demo_Experiencia_Visual.pdf` (55 páginas). Estado de produção de mídia em [MIDIA.md](MIDIA.md). Coleta remota adiada; a avaliação preserva rascunho e não confirma envio.
+
 ## Superfícies e limites
 
 - `/`: título, proposta curta, duração estimada, aviso de microfone dispensável e escolha de apoio sem opção pré-selecionada.

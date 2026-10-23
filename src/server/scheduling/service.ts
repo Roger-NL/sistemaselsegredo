@@ -188,7 +188,7 @@ async function syncSessionWithCalendar(session: LiveSessionBooking) {
     nextMessage = 'Esse horário não foi confirmado. Escolha outro horário para continuar.';
   } else if (confirmedByMarker) {
     nextStatus = 'confirmed';
-    nextMessage = 'Sua aula ao vivo foi confirmada. O Pilar 3 já está liberado para você continuar.';
+    nextMessage = 'Sua aula ao vivo foi confirmada.';
   }
 
   if (nextStatus !== session.status || calendarState.htmlLink !== session.calendarHtmlLink) {
@@ -744,7 +744,7 @@ export async function updateSchedulingStatusByAdmin(options: {
           confirmedAt: current.confirmedAt || nowIso(),
           adminDecisionReason: null,
           updatedAt: nowIso(),
-          lastActionMessage: 'Sua aula ao vivo foi confirmada. O Pilar 3 já está liberado para você continuar.',
+          lastActionMessage: 'Sua aula ao vivo foi confirmada.',
         }), { merge: true });
       });
     } catch (error) {

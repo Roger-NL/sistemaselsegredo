@@ -1,5 +1,2 @@
-import LandingPage from "@/components/landing/LandingPage";
-
-export default function RootPage() {
-    return <LandingPage />;
-}
+import { DemoHost } from "@/features/demo/DemoHost";
+export default function HomePage() { return <DemoHost />; }

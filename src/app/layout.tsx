@@ -1,24 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: "#f6f0e6",
   width: "device-width",
   initialScale: 1,
 };
@@ -29,7 +13,7 @@ export const metadata: Metadata = {
     default: "BasedSpeak | Inglês com prática guiada",
     template: "%s | BasedSpeak",
   },
-  description: "Pratique inglês com missões estruturadas, produção ativa e revisão humana em etapas-chave.",
+  description: "Participe de uma conversa guiada em uma cafeteria. Escolha o que quer dizer e construa respostas com ajuda, sem microfone.",
   icons: {
     icon: [{ url: "/basedspeak-tab.png", type: "image/png" }],
     shortcut: ["/basedspeak-tab.png"],
@@ -49,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="scroll-smooth" data-scroll-behavior="smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased overflow-x-hidden`}
+        className="antialiased overflow-x-hidden"
       >
         {children}
       </body>
