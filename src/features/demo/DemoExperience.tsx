@@ -24,7 +24,8 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
   const audioNotice = useRef<HTMLParagraphElement>(null);
   const storageNotice = useRef<HTMLParagraphElement>(null);
   const player = useRef<DemoAudioPlayer | null>(null);
-  const supportMenu = useRef<HTMLDetailsElement>(null);
+  const supportMenu = useRef<HTMLDialogElement>(null);
+  const audioMenu = useRef<HTMLDialogElement>(null);
   const [draftProfile, setDraftProfile] = useState(initial.profile);
   const pendingAudio = useRef<AbortController | null>(null);
   const audioOperation = useRef({ version: 0, rate: 1 });
@@ -73,15 +74,28 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
     && !(node.kind === "comprehension" && line.audioId === "C01"));
   const modelVisible = state.phase === "present" || state.phase === "ready";
   return <div className="experience">
-    <div className="experience-bar"><span>Parte {node.part} de 10</span><progress max={10} value={node.part} aria-label="Parte da conversa" /><details ref={supportMenu} className="support-control"><summary>Ajustar apoio</summary><fieldset><legend>Como prefere continuar?</legend>{profiles.map(profile => <label key={profile.id}><input type="radio" name="change-support" checked={draftProfile === profile.id} onChange={() => setDraftProfile(profile.id)} /> {profile.label}</label>)}<div className="actions"><button onClick={() => { dispatch({ at: node.id, type: "PROFILE", profile: draftProfile }); if (supportMenu.current) supportMenu.current.open = false; }}>Aplicar</button><button onClick={() => { setDraftProfile(state.profile); if (supportMenu.current) supportMenu.current.open = false; }}>Voltar sem alterar</button></div></fieldset></details></div>
+    <div className="experience-bar"><span>Parte {node.part} de 10</span><progress max={10} value={node.part} aria-label="Parte da conversa" />
+      <button className="text-button" aria-haspopup="dialog" onClick={() => audioMenu.current?.showModal()}>Áudio</button>
+      <button className="text-button" aria-haspopup="dialog" onClick={() => { setDraftProfile(state.profile); supportMenu.current?.showModal(); }}>Apoio</button>
+      <dialog ref={supportMenu} className="demo-dialog support-dialog" aria-labelledby="support-title">
+        <div className="dialog-heading"><h2 id="support-title">Como prefere continuar?</h2><button autoFocus onClick={() => supportMenu.current?.close()} aria-label="Fechar ajustes de apoio">Fechar ×</button></div>
+        <fieldset><legend>Nível de apoio</legend>{profiles.map(profile => <label key={profile.id}><input type="radio" name="change-support" checked={draftProfile === profile.id} onChange={() => setDraftProfile(profile.id)} /><span>{profile.label}<small>{profile.description}</small></span></label>)}</fieldset>
+        <p className="muted">A mudança começa na próxima atividade. Sua resposta atual será mantida.</p>
+        <div className="actions"><button className="primary" onClick={() => { dispatch({ at: node.id, type: "PROFILE", profile: draftProfile }); supportMenu.current?.close(); }}>Aplicar apoio</button><button onClick={() => supportMenu.current?.close()}>Voltar sem alterar</button></div>
+      </dialog>
+      <dialog ref={audioMenu} className="demo-dialog audio-dialog" aria-labelledby="audio-title">
+        <div className="dialog-heading"><h2 id="audio-title">Áudio e velocidade</h2><button autoFocus onClick={() => audioMenu.current?.close()} aria-label="Fechar ajustes de áudio">Fechar ×</button></div>
+        <div className="audio-controls" aria-label="Controles de áudio">
+          <label>Velocidade <select aria-label="Velocidade de reprodução" value={playbackRate} onChange={event => { const rate = Number(event.target.value); setPlaybackRate(rate); audioOperation.current.rate = rate; player.current?.setPlaybackRate(rate); }}><option value={1}>Padrão</option><option value={0.9}>Mais lenta</option></select></label>
+          <button className="text-button" onClick={() => { if (pendingAudio.current) { audioOperation.current.version++; pendingAudio.current.abort(); pendingAudio.current = null; } player.current?.pause(); if (audioNotice.current) audioNotice.current.textContent = "Áudio pausado."; }} aria-label="Pausar áudio">Pausar<span className="audio-label"> áudio</span></button>
+          <button className="text-button" onClick={async () => { const version = audioOperation.current.version; const ok = await player.current?.resume(); if (version !== audioOperation.current.version) return; if (audioNotice.current) audioNotice.current.textContent = ok ? "Reproduzindo áudio." : "Selecione Ouvir junto de uma fala para começar."; }} aria-label="Continuar áudio">Continuar<span className="audio-label"> áudio</span></button>
+          <button className="text-button" onClick={() => { audioOperation.current.version++; pendingAudio.current?.abort(); player.current?.cancel(); if (audioNotice.current) audioNotice.current.textContent = ""; }} aria-label="Parar áudio">Parar<span className="audio-label"> áudio</span></button>
+        </div>
+        <p className="muted">A velocidade muda a reprodução do mesmo áudio. Para ouvir uma frase, volte à conversa e toque em Ouvir.</p>
+      </dialog>
+    </div>
     <div className="session-notices"><p ref={storageNotice} className="notice" role="status" />
     <p ref={audioNotice} className="notice" role="status" /></div>
-    <div className="audio-controls" aria-label="Controles de áudio">
-      <label>Velocidade <select aria-label="Velocidade de reprodução" value={playbackRate} onChange={event => { const rate = Number(event.target.value); setPlaybackRate(rate); audioOperation.current.rate = rate; player.current?.setPlaybackRate(rate); }}><option value={1}>Padrão</option><option value={0.9}>Mais lenta</option></select></label>
-      <button className="text-button" onClick={() => { if (pendingAudio.current) { audioOperation.current.version++; pendingAudio.current.abort(); pendingAudio.current = null; } player.current?.pause(); if (audioNotice.current) audioNotice.current.textContent = "Áudio pausado."; }} aria-label="Pausar áudio">Pausar<span className="audio-label"> áudio</span></button>
-      <button className="text-button" onClick={async () => { const version = audioOperation.current.version; const ok = await player.current?.resume(); if (version !== audioOperation.current.version) return; if (audioNotice.current) audioNotice.current.textContent = ok ? "Reproduzindo áudio." : "Selecione Ouvir junto de uma fala para começar."; }} aria-label="Continuar áudio">Continuar<span className="audio-label"> áudio</span></button>
-      <button className="text-button" onClick={() => { audioOperation.current.version++; pendingAudio.current?.abort(); player.current?.cancel(); if (audioNotice.current) audioNotice.current.textContent = ""; }} aria-label="Parar áudio">Parar<span className="audio-label"> áudio</span></button>
-    </div>
     {node.kind === "end" ? <Retrospective state={state} onReplay={replay} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <div className="scene-grid">
       <aside className="scene-column"><figure className="scene-art"><picture><source media="(max-width: 760px)" srcSet={image.mobile} /><Image unoptimized width={960} height={640} src={image.path} alt={image.description} /></picture><figcaption>{image.description}</figcaption></figure>
         <details className="order" open={node.image === "V02" || node.image === "V04"}><summary>Seu pedido · BASEDSPEAK · Iced coffee</summary>{node.image === "V02" && <p>Copo apresentado: <strong>LUCAS</strong></p>}{node.image === "V04" && <p>Copo apresentado: <strong>BASEDSPEAK</strong></p>}</details>
@@ -109,7 +123,7 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
           </div>}
           {state.phase === "write" && <form className="written-response" onSubmit={event => { event.preventDefault(); dispatch({ at: node.id, type: "SUBMIT" }); }}>
             <label htmlFor="written-answer">Sua resposta em inglês</label>
-            <input id="written-answer" lang="en" value={state.draft} maxLength={240} autoComplete="off" spellCheck={false} autoCapitalize="sentences" onChange={event => dispatch({ at: node.id, type: "TYPE", text: event.target.value })} />
+            <input id="written-answer" type="text" enterKeyHint="send" lang="en" value={state.draft} maxLength={240} autoComplete="off" spellCheck={false} autoCapitalize="sentences" onChange={event => dispatch({ at: node.id, type: "TYPE", text: event.target.value })} />
             <div className="actions"><button className="primary" disabled={!state.draft.trim()} type="submit">Responder</button><button type="button" onClick={() => event("USE_BLOCKS")}>Tentar com peças</button></div>
           </form>}
           {state.phase === "select" && <div className="recognition-response"><p>Qual expressão combina com o que você quer dizer?</p><div className="choices">{recognitionOptions(node).map(id => <button key={id} lang="en" aria-pressed={state.recognized === id} onClick={() => dispatch({ at: node.id, type: "RECOGNIZE", response: id })}>{audio[id].text}</button>)}</div><button className="primary" disabled={!state.recognized} onClick={() => event("SUBMIT")}>Responder</button></div>}
