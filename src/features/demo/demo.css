@@ -731,3 +731,15 @@
   .app-shell .entry-grid { grid-template-rows:60px minmax(0,1fr); }
   .app-shell .profile-option { padding:.35rem .6rem; }
 }
+
+/* Approved artwork keeps the complete cups and names visible. */
+.app-shell .scene-art picture { display:block; position:relative; flex:1; min-height:0; }
+.app-shell .scene-art picture img { width:100%; height:100%; object-fit:contain; background:var(--paper); }
+.written-response { margin:.65rem 0; }
+.written-response label { display:block; font-size:.85rem; margin-bottom:.4rem; }
+.written-response input { width:100%; min-height:48px; border:1px solid var(--line); background:white; color:var(--ink); border-radius:8px; padding:.7rem; font:inherit; }
+.recognition-response > p { font-size:.85rem; }
+.app-shell .recognition-response [aria-pressed=true] { border-color:var(--ink); box-shadow:inset 0 0 0 1px var(--ink); background:#e9e3d8; }
+.app-shell .entry-art picture { flex:1; min-height:0; display:block; }
+.app-shell .entry-art picture img { height:100%; width:100%; object-fit:contain; border-radius:12px; }
+.app-shell .practice-summary { font-size:.75rem; color:var(--muted); }

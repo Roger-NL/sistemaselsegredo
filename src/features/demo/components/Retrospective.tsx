@@ -24,7 +24,10 @@ export function Retrospective({ state, onReplay, setView }: { state: DemoState; 
     </article>}
     <nav className="pager" aria-label="Percorrer momentos"><button disabled={moment === 0} onClick={() => setMoment(moment - 1)}>← Anterior</button><span role="status">Momento {moment + 1} de {highlights.length}</span><button disabled={moment >= highlights.length - 1} onClick={() => setMoment(moment + 1)}>Próximo →</button></nav>
     <ConversationHistory state={state} lines={state.transcript} onReplay={onReplay} label="Ver conversa completa" fromStart />
-    <p className="muted">Você participou com apoio. Esta conversa não é uma prova de domínio ou de memorização.</p>
+    <p className="practice-summary">{[
+      ["written", "respostas escritas"], ["recognized", "expressões escolhidas"], ["blocks", "montagens"], ["recombined", "adaptações"], ["supported", "respostas com apoio"],
+    ].map(([kind, label]) => { const count = state.evidence.filter(e => e.kind === kind).length; return count ? `${count} ${label}` : null; }).filter(Boolean).join(" · ")}</p>
+    <p className="muted">Você participou desta conversa em inglês. Esta conversa não é uma prova de domínio ou de memorização.</p>
     <button className="primary" onClick={() => setView("thanks")}>Concluir demo</button>
   </section>;
 }

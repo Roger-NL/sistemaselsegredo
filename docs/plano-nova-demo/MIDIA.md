@@ -1,13 +1,22 @@
-# Biblioteca da cafeteria — estado de produção
+# Biblioteca da cafeteria — integração aprovada em 24/10/2026
 
-Fonte narrativa aprovada: `output/pdf/BasedSpeak_Demo_Experiencia_Visual.pdf`, páginas 47–52. Inventário literal de V01–V09, C01–C30 e U01–U20 em `src/features/demo/content/media.ts`. A [revisão aprovada](REVISAO-EXPERIENCIA-E-AUDIO.md) substitui a produção estática de voz por cache global sob demanda e uma única voz configurada no servidor.
+As 12 imagens aprovadas estão integradas à história de Lucas e BASEDSPEAK. Os originais PNG permanecem intactos em `output/image-tests/cafe/`: piloto aprovado `pilot-04-handmade-comic.png` + sequências 02–12. As primeiras três alternativas de piloto não integram a demo.
 
-- As nove imagens finais continuam pendentes (`ready: false`). As quatro artes locais em `public/demo/cafe/v1/previews/` são referências conceituais identificadas na interface. Texto distingue pedidos #18/#24.
-- Os cinquenta IDs de fala usam `delivery: server-cache`. Não correspondem necessariamente a cinquenta arquivos: textos e parâmetros iguais compartilham uma única chave e um único MP3.
-- Somente clicar em Ouvir solicita áudio. O cliente envia o ID; normalização, parâmetros, coordenação Firestore e geração ElevenLabs ocorrem no servidor. O MP3 é persistido no Blob antes de ser devolvido. Replay e velocidade local reutilizam esse arquivo.
-- Após autorização para habilitar áudio: C01 foi gerado com ElevenLabs e persistido no Blob existente; três replays concorrentes receberam o mesmo arquivo. Firestore registra `ready` e `providerAttemptCount: 1`. Depois, a rodada completa validou tecnicamente todos os 50 IDs/46 MP3s únicos, incluindo decodificação, replays concorrentes e persistência após reinício, sem geração adicional. Ver [VALIDACAO-AUDIO-COMPLETA.md](VALIDACAO-AUDIO-COMPLETA.md). Testes automáticos continuam simulados.
-- Sem configuração ou com falha de áudio, o texto e a história continuam disponíveis. Não há fallback que gere sem persistência nem repetição de tentativa após resultado incerto.
+## Entrega web
 
-Antes da publicação: produzir/revisar as nove cenas finais; concluir a revisão editorial de pronúncia com a voz configurada; repetir os testes visuais e de reprodução. Não apagar registros `speech_audio_cache_v3` ou aplicar TTL: são a proteção durável contra geração duplicada. Não usar o cache órbita como biblioteca final.
+- `public/demo/cafe/v2/images/`: 12 WebPs a 960×640 e 12 variantes móveis a 640×427, qualidade 48/effort 6. Total desktop aproximadamente 907 KiB; mobile 449 KiB. As quatro referências anteriores somavam 3.739 KiB, portanto a sequência completa nova reduz o peso total em cerca de 76% no desktop e 88% no celular.
+- Um `picture` escolhe o arquivo móvel até 760px. As versões já comprimidas são servidas sem nova transformação do Next. A entrada e a conversa não montam todas as 12 imagens simultaneamente.
+- Sem recorte destrutivo: `object-fit: contain` mantém rostos, gestos e copos completos. As pistas também aparecem em texto acessível: seu nome é BASEDSPEAK; o outro copo leva LUCAS.
+- `manifest.json` registra dimensões, bytes, origem e SHA-256 dos originais. `node scripts/optimize-cafe-images.mjs` reproduz a exportação sem geração remota nem alteração de originais. É necessário ter os PNGs locais aprovados para executá-lo.
+- V01 encontro; V02 detalhe LUCAS; V03 desculpa; V04 copo BASEDSPEAK; V05 prova do café; V06 risco; V07 copo salvo; V08 cansaço; V09 convite; V10 mesa; V11 aprendendo inglês; V12 despedida.
+- As quatro referências JPG antigas foram removidas de `public`. Não há referências ativas a SARAH nem a números de pedido na interface/roteiro novo. Os documentos históricos mantêm o registro da versão antiga.
 
-A identidade e o motor estão implementados localmente. A arte final, a escuta editorial e a validação de duração com participantes permanecem pendentes.
+## Áudio preservado
+
+Os 50 IDs e todos os textos em inglês permanecem iguais. Traduções em português foram ajustadas ao personagem masculino. A chave do cache depende do texto inglês e dos parâmetros de síntese: nenhuma nova geração é necessária por trocar imagem, nome visual ou nível. A validação real anterior de 50 IDs/46 MP3s segue documentada em [VALIDACAO-AUDIO-COMPLETA.md](VALIDACAO-AUDIO-COMPLETA.md). Nesta integração não houve geração, upload ou alteração do ledger remoto.
+
+## Verificação
+
+Testes decodificam todas as 24 variantes WebP, verificam dimensões, orçamento total de bytes e alcance das 12 cenas pelo grafo. Verificam também o hash de todos os textos de áudio contra a versão anterior. Os 12 hashes dos PNGs originais foram reconferidos após exportar.
+
+Amostras WebP e uma folha de contato foram inspecionadas localmente; a inspeção interativa do layout no navegador permanece pendente. O bloqueio de permissão da sessão anterior não foi contornado. A duração aproximada de 30 minutos ainda depende de teste com participantes.

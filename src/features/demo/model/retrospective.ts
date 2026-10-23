@@ -11,9 +11,9 @@ export function retrospective(state: DemoState): Highlight[] {
   const transformations: [AudioId[], AudioId, string][] = [
     [["C08", "C09"], "U09", "Você usou esta expressão em outro contexto."],
     [["U01"], "U05", "Você adaptou a resposta para reconhecer seu pedido."],
-    [["C07"], "U12", "Você recombinou uma pergunta com uma peça nova: your job."],
-    [["C07"], "U13", "Você recombinou uma pergunta com uma peça nova: this café."],
-    [["U06", "C09", "C19", "C22"], "U17", "Você usou uma peça disponível para dizer que gosta daqui."],
+    [["C07"], "U12", "Você adaptou uma pergunta para falar de your job."],
+    [["C07"], "U13", "Você adaptou uma pergunta para falar de this café."],
+    [["U06", "C09", "C19", "C22"], "U17", "Você adaptou uma expressão para dizer que gosta daqui."],
   ];
   return transformations.flatMap(([sources, after, description]) => {
     const end = state.transcript.findIndex(line => line.audioId === after && line.role === "you");

@@ -1,0 +1,206 @@
+[
+  {
+    "id": "V01",
+    "source": "pilot-04-handmade-comic.png",
+    "sourceSha256": "3fe1c5ccf08039b7270f01d233b26435b7d9ef94e5c0f8df9afdd3caf6d8f132",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 35154,
+        "path": "public/demo/cafe/v2/images/V01-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 69170,
+        "path": "public/demo/cafe/v2/images/V01-960.webp"
+      }
+    ]
+  },
+  {
+    "id": "V02",
+    "source": "sequence-02-copo-lucas.png",
+    "sourceSha256": "1cf0a25fb9baa9aefa71f49b5ed17541612de4c5c5a2d771b11c61a4a0e2f389",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 30130,
+        "path": "public/demo/cafe/v2/images/V02-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 57712,
+        "path": "public/demo/cafe/v2/images/V02-960.webp"
+      }
+    ]
+  },
+  {
+    "id": "V03",
+    "source": "sequence-03-mal-entendido.png",
+    "sourceSha256": "55cd14f5b0a9d2236a2c34e6ec58322c59cb62179fe8f9f561014058e56c4d36",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 37336,
+        "path": "public/demo/cafe/v2/images/V03-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 76642,
+        "path": "public/demo/cafe/v2/images/V03-960.webp"
+      }
+    ]
+  },
+  {
+    "id": "V04",
+    "source": "sequence-04-chegada-basedspeak.png",
+    "sourceSha256": "ed87b9c732f6e19414cc48739b04695c71b802ff5551e448025d53f75929c776",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 39352,
+        "path": "public/demo/cafe/v2/images/V04-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 79158,
+        "path": "public/demo/cafe/v2/images/V04-960.webp"
+      }
+    ]
+  },
+  {
+    "id": "V05",
+    "source": "sequence-05-provando-cafe.png",
+    "sourceSha256": "4c76fe7451b7bc582284621310278dfb372eeeffadc435440bfe1d241c4a3aa8",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 36624,
+        "path": "public/demo/cafe/v2/images/V05-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 74206,
+        "path": "public/demo/cafe/v2/images/V05-960.webp"
+      }
+    ]
+  },
+  {
+    "id": "V06",
+    "source": "sequence-06-cuidado-copo.png",
+    "sourceSha256": "bc63daecb3c54fd8b405f59efb661a9607cdcd967eaa0b2df196193ae31ca387",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 41096,
+        "path": "public/demo/cafe/v2/images/V06-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 83426,
+        "path": "public/demo/cafe/v2/images/V06-960.webp"
+      }
+    ]
+  },
+  {
+    "id": "V07",
+    "source": "sequence-07-copo-salvo.png",
+    "sourceSha256": "0de02961bc537be6390ba1351d70e0dbe8a4c63e140164fb299c93f953405cfc",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 35438,
+        "path": "public/demo/cafe/v2/images/V07-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 71054,
+        "path": "public/demo/cafe/v2/images/V07-960.webp"
+      }
+    ]
+  },
+  {
+    "id": "V08",
+    "source": "sequence-08-dia-cansativo.png",
+    "sourceSha256": "2c586f572957e7d77bd317699349c75870526dfb3c629a82819cb859c948fbe1",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 37402,
+        "path": "public/demo/cafe/v2/images/V08-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 75700,
+        "path": "public/demo/cafe/v2/images/V08-960.webp"
+      }
+    ]
+  },
+  {
+    "id": "V09",
+    "source": "sequence-09-convite-mesa.png",
+    "sourceSha256": "26e2505b8cc6b442a43c7e4a6129fb600eb903adbc24274d6563b5dacd45ef42",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 39468,
+        "path": "public/demo/cafe/v2/images/V09-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 79246,
+        "path": "public/demo/cafe/v2/images/V09-960.webp"
+      }
+    ]
+  },
+  {
+    "id": "V10",
+    "source": "sequence-10-conversa-mesa.png",
+    "sourceSha256": "02069483acde6e8a0f02d94f298b9d82216f6182f44dc53f9315ca3acb524408",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 44656,
+        "path": "public/demo/cafe/v2/images/V10-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 90514,
+        "path": "public/demo/cafe/v2/images/V10-960.webp"
+      }
+    ]
+  },
+  {
+    "id": "V11",
+    "source": "sequence-11-aprendendo-ingles.png",
+    "sourceSha256": "100690fff69b33f901e62564a05de78f8a72169f9184fcc336b7a8ddcc99b371",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 40856,
+        "path": "public/demo/cafe/v2/images/V11-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 83076,
+        "path": "public/demo/cafe/v2/images/V11-960.webp"
+      }
+    ]
+  },
+  {
+    "id": "V12",
+    "source": "sequence-12-despedida.png",
+    "sourceSha256": "e381f77983a4f8ec687e80d4ba22abfee5e93c6a46144cd517c93b72acee3e37",
+    "files": [
+      {
+        "width": 640,
+        "bytes": 42668,
+        "path": "public/demo/cafe/v2/images/V12-640.webp"
+      },
+      {
+        "width": 960,
+        "bytes": 89092,
+        "path": "public/demo/cafe/v2/images/V12-960.webp"
+      }
+    ]
+  }
+]

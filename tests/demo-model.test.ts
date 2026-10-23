@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { catalog, nodes } from "@/features/demo/content/catalog";
 import { audio, images } from "@/features/demo/content/media";
+import { acceptsAnswer, practice, recognitionOptions } from "@/features/demo/model/practice";
 import { createDemo, transition } from "@/features/demo/model/reducer";
 import { ending, retrospective } from "@/features/demo/model/retrospective";
 import { decodeSnapshot, encodeSnapshot, restoreDemo, saveDemo } from "@/features/demo/session/storage";
@@ -15,12 +16,14 @@ function advance(state: DemoState): DemoState {
   if (state.phase === "present") return dispatch(state, { type: "PREPARE" });
   if (state.phase === "recall") return dispatch(state, { type: "CHECK" });
   if (state.phase === "build") {
-    for (const block of node.answer ?? []) state = transition(state, { at: node.id, type: "BLOCK", block });
+    for (const block of practice(node, state.assistedBlocks ? "some" : state.activityProfile).answer) state = transition(state, { at: node.id, type: "BLOCK", block });
   }
+  if (state.phase === "write") state = transition(state, { at: node.id, type: "TYPE", text: audio[node.response].text });
+  if (state.phase === "select") state = transition(state, { at: node.id, type: "RECOGNIZE", response: node.response });
   return dispatch(state, { type: "SUBMIT" });
 }
-function reach(id: string, choices: Record<string, string> = {}): DemoState {
-  let state = createDemo("some", "test-run-id", 1000);
+function reach(id: string, choices: Record<string, string> = {}, profile: typeof PROFILES[number] = "some"): DemoState {
+  let state = createDemo(profile, "test-run-id", 1000);
   for (let guard = 0; state.nodeId !== id && guard < 200; guard++) {
     const node = catalog[state.nodeId];
     state = node.kind === "choice" ? transition(state, { at: node.id, type: "CHOOSE", choice: choices[node.id] ?? node.choices[0].id }) : advance(state);
@@ -93,18 +96,18 @@ describe("approved café graph", () => {
     expect(state.phase).toBe("recall");
     expect(dispatch(state, { type: "SUBMIT" })).toBe(state);
     const checked = dispatch(state, { type: "CHECK" });
-    expect(checked.phase).toBe("ready");
+    expect(checked.phase).toBe("build");
     expect(checked.transcript).toEqual(state.transcript);
-    expect(dispatch(checked, { type: "SUBMIT" }).evidence.at(-1)?.kind).toBe("supported");
+    expect(advance(checked).evidence.at(-1)?.kind).toBe("supported");
   });
 
   it("uses actual history when an expression is new, encountered or already used", () => {
     const unseen = reach("p7.not", { "p5.opinion": "like", "p7.opinion": "not" });
-    expect(unseen.phase).toBe("ready");
+    expect(unseen.phase).toBe("build");
     const seen = reach("p7.too", { "p3.intent": "okay", "p5.opinion": "like" });
     expect(seen.phase).toBe("recall");
     const unseenToo = reach("p7.too", { "p3.intent": "okay", "p5.opinion": "not" });
-    expect(unseenToo.phase).toBe("ready");
+    expect(unseenToo.phase).toBe("build");
   });
 
   it("preserves open help and current blocks when changing support, including on reload", () => {
@@ -125,9 +128,9 @@ describe("approved café graph", () => {
     expect(transition(state, { at: state.nodeId, type: "BLOCK", block: "job" })).toBe(state);
   });
 
-  it("declares exactly nine illustrations and fifty distinct contextual voices", () => {
+  it("declares exactly twelve illustrations and fifty distinct contextual voices", () => {
     expect(catalog["p1.first"].help).toEqual([]);
-    expect(Object.keys(images)).toHaveLength(9); expect(Object.keys(audio)).toHaveLength(50);
+    expect(Object.keys(images)).toHaveLength(12); expect(Object.keys(audio)).toHaveLength(50);
     expect(audio.C25.text).toBe("Me too."); expect(audio.C30.text).toBe("Me too!");
     expect(audio.U08.meaning).toBe("Cuidado!");
   });
@@ -154,5 +157,68 @@ describe("versioned local recovery", () => {
     const state = createDemo("some", "test-run-id", 1);
     expect(saveDemo(storage, state)).toBe(false);
     expect(advance(state).nodeId).toBe("p2.question");
+  });
+});
+
+
+describe("three approved practice experiences", () => {
+  it("starts the same response with model + pieces, incomplete structure, or writing", () => {
+    const guided = reach("p3.ask", {}, "beginner"); const prompted = reach("p3.ask"); const writing = reach("p3.ask", {}, "less");
+    expect(guided.phase).toBe("present"); expect(prompted.phase).toBe("build"); expect(writing.phase).toBe("write");
+    expect(practice(catalog["p3.ask"] as import("@/features/demo/model/types").ResponseNode, "some").skeleton).toContain("___");
+  });
+  it("limits guided blocks to the answer, retains medium distractors and uses recognition", () => {
+    const node = catalog["p4.mine"] as import("@/features/demo/model/types").ResponseNode;
+    expect(practice(node, "beginner").blocks.some(b => b.id === "negative")).toBe(false);
+    expect(practice(node, "some").blocks.some(b => b.id === "negative")).toBe(true);
+    let state = reach("p3.okay", { "p3.intent": "okay" }, "beginner"); state = advance(state);
+    expect(state.phase).toBe("select");
+    const responseNode = catalog[state.nodeId] as import("@/features/demo/model/types").ResponseNode;
+    const wrong = recognitionOptions(responseNode).find(id => id !== responseNode.response)!;
+    state = transition(state, { at: state.nodeId, type: "RECOGNIZE", response: wrong });
+    const failed = dispatch(state, { type: "SUBMIT" }); expect(failed.nodeId).toBe(state.nodeId); expect(failed.help[state.nodeId]).toBe(1);
+    expect(failed.transcript).toEqual(state.transcript);
+  });
+  it("accepts orthography and equivalent contractions but rejects a change of meaning", () => {
+    for (const text of ["NO, IT'S NOT MINE!", "No, it is not mine", "No, it isn't mine.", "  No,  it’s not mine. "]) expect(acceptsAnswer(text, "U01")).toBe(true);
+    for (const text of ["Yes, it is mine", "No, it is mine", "<script>bad</script>", ""]) expect(acceptsAnswer(text, "U01")).toBe(false);
+  });
+  it("keeps rejected writing, allows recovery through pieces and marks that support", () => {
+    let state = reach("p2.send", {}, "less");
+    state = transition(state, { at: state.nodeId, type: "TYPE", text: "Yes, it is mine" });
+    state = dispatch(state, { type: "SUBMIT" }); expect(state.nodeId).toBe("p2.send"); expect(state.draft).toBe("Yes, it is mine");
+    expect(decodeSnapshot(encodeSnapshot(state))).toEqual(state);
+    state = dispatch(state, { type: "USE_BLOCKS" }); expect(state.draft).toBe("Yes, it is mine");
+    state = dispatch(state, { type: "WRITE_AGAIN" }); expect(state.draft).toBe("Yes, it is mine");
+    expect(state.phase).toBe("write"); expect(decodeSnapshot(encodeSnapshot(state))).toEqual(state);
+    state = dispatch(state, { type: "USE_BLOCKS" }); state = advance(state); expect(state.evidence.at(-1)?.kind).toBe("supported");
+  });
+  it("retains the exact accepted writing and records observable written evidence", () => {
+    let state = reach("p2.send", {}, "less"); state = transition(state, { at: state.nodeId, type: "TYPE", text: "No, it isn't mine!" });
+    state = dispatch(state, { type: "SUBMIT" }); expect(state.transcript.at(-2)?.written).toBe("No, it isn't mine!");
+    expect(state.evidence.at(-1)?.kind).toBe("written");
+  });
+  it("sends the approved model when using support instead of an unaccepted draft", () => {
+    let state = reach("p2.send", {}, "less");
+    state = transition(state, { at: state.nodeId, type: "TYPE", text: "Yes, it is mine" });
+    for (let clue = 0; clue < catalog[state.nodeId].help.length; clue++) state = dispatch(state, { type: "HELP" });
+    state = dispatch(state, { type: "USE_SUPPORT" });
+    expect(state.nodeId).not.toBe("p2.send");
+    expect(state.transcript.find(line => line.nodeId === "p2.send")?.written).toBeUndefined();
+    expect(state.evidence.at(-1)?.kind).toBe("supported");
+  });
+  it("applies a changed profile at the next activity without erasing the active draft", () => {
+    let state = reach("p2.send", {}, "less"); state = transition(state, { at: state.nodeId, type: "TYPE", text: "No, it’s not mine." });
+    state = transition(state, { at: state.nodeId, type: "PROFILE", profile: "beginner" });
+    expect(state.phase).toBe("write"); expect(state.activityProfile).toBe("less"); expect(state.profile).toBe("beginner");
+    expect(decodeSnapshot(encodeSnapshot(state))).toEqual(state);
+    state = dispatch(state, { type: "SUBMIT" }); expect(state.activityProfile).toBe("beginner");
+  });
+  it("keeps Careful visible before use and prevents premature recall submissions for every level", () => {
+    for (const profile of PROFILES) {
+      expect(reach("p6.warn", {}, profile).phase).toBe("ready");
+      const recall = reach("p7.tired", {}, profile); expect(recall.phase).toBe("recall");
+      expect(dispatch(recall, { type: "SUBMIT" })).toBe(recall);
+    }
   });
 });

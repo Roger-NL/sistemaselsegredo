@@ -6,12 +6,12 @@ const character = [
   ["An iced coffee. And you?", "Um café com gelo. E você?"], ["Nice!", "Legal!"],
   ["Oh! This is mine.", "Ah! Este é meu."], ["Oh… it’s sweet.", "Ah… é doce."],
   ["Do you like it?", "Você gosta?"], ["Really? Me too!", "Sério? Eu também!"],
-  ["Really? I like it.", "Sério? Eu gosto."], ["Oh! Thanks!", "Ah! Obrigada!"],
-  ["That was close.", "Foi por pouco."], ["I’m tired.", "Estou cansada."],
+  ["Really? I like it.", "Sério? Eu gosto."], ["Oh! Thanks!", "Ah! Obrigado!"],
+  ["That was close.", "Foi por pouco."], ["I’m tired.", "Estou cansado."],
   ["Yeah. Too much work. And you?", "Sim. Muito trabalho. E você?"],
   ["Yeah… long day.", "É… um dia longo."], ["Lucky you!", "Que sorte a sua!"],
   ["Oh, a table!", "Ah, uma mesa!"], ["Sit with me?", "Senta comigo?"],
-  ["Oh, nice!", "Ah, legal!"], ["Yeah, I like it. But I’m tired.", "Sim, eu gosto. Mas estou cansada."],
+  ["Oh, nice!", "Ah, legal!"], ["Yeah, I like it. But I’m tired.", "Sim, eu gosto. Mas estou cansado."],
   ["Me too. I like English.", "Eu também. Gosto de inglês."], ["Really?", "Sério?"],
   ["Yeah, I like it.", "Sim, eu gosto."], ["I need a break.", "Preciso de uma pausa."],
   ["Do you like this café?", "Você gosta desta cafeteria?"], ["Me too.", "Eu também."],
@@ -36,19 +36,22 @@ export const audio = Object.fromEntries([
   ...you.map(([text, meaning], i) => ({ id: `U${String(i + 1).padStart(2, "0")}` as AudioId, text, meaning, role: "you" as const })),
 ].map(asset => [asset.id, { ...asset, delivery: "server-cache" }])) as Record<AudioId, AudioAsset>;
 
-export type ImageAsset = { id: ImageId; description: string; path: string; preview: string; ready: boolean };
+export type ImageAsset = { id: ImageId; description: string; path: string; mobile: string; ready: true };
 const scenes = [
-  ["Cliente aponta para o copo no balcão de retirada.", "counter"],
-  ["Primeiro copo: SARAH / #18. Seu pedido é #24.", "counter"],
-  ["O mal-entendido acabou. Ela volta à espera.", "counter"],
-  ["Ela volta sua atenção à conversa.", "counter"],
-  ["Chega o pedido #24, seu café com gelo.", "counter"],
-  ["Ambos estão com seus cafés.", "tasting"],
-  ["O copo está inclinado, prestes a cair. A cena espera por você.", "careful"],
-  ["Uma mesa próxima fica livre.", "seated"],
-  ["Vocês estão sentados, com os cafés sobre a mesa.", "seated"],
+ "Lucas e BASEDSPEAK se encontram no balcão da cafeteria.",
+ "Lucas aponta o copo escrito LUCAS; o seu copo leva BASEDSPEAK.",
+ "Lucas pede desculpas pelo mal-entendido.",
+ "Chega o café com o nome BASEDSPEAK. Lucas segura o copo LUCAS.",
+ "Os dois provam seus cafés.",
+ "O copo de Lucas está prestes a cair. A cena espera por você.",
+ "Lucas segura o copo a tempo.",
+ "Lucas conta sobre um dia cansativo.",
+ "Lucas convida BASEDSPEAK para uma mesa livre.",
+ "Lucas e BASEDSPEAK conversam à mesa.",
+ "BASEDSPEAK conta que está aprendendo inglês.",
+ "Lucas e BASEDSPEAK se despedem na cafeteria.",
 ] as const;
-export const images = Object.fromEntries(scenes.map(([description, preview], i) => {
-  const id = `V0${i + 1}` as ImageId;
-  return [id, { id, description, path: `/demo/cafe/v1/images/${id}.webp`, preview: `/demo/cafe/v1/previews/${preview}.jpg`, ready: false }];
+export const images = Object.fromEntries(scenes.map((description, i) => {
+ const id = `V${String(i + 1).padStart(2, "0")}` as ImageId;
+ return [id, { id, description, path: `/demo/cafe/v2/images/${id}-960.webp`, mobile: `/demo/cafe/v2/images/${id}-640.webp`, ready: true }];
 })) as Record<ImageId, ImageAsset>;

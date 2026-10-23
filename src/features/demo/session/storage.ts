@@ -10,6 +10,9 @@ function validEvent(value: unknown): value is DemoEvent {
   if (!isRecord(value) || typeof value.at !== "string" || !catalog[value.at]) return false;
   switch (value.type) {
     case "NEXT": case "PREPARE": case "SUBMIT": case "CHECK": case "HELP": case "USE_SUPPORT": case "CLEAR": case "TOGGLE_MODEL": return true;
+    case "TYPE": return typeof value.text === "string" && value.text.length <= 240;
+    case "RECOGNIZE": return typeof value.response === "string";
+    case "USE_BLOCKS": case "WRITE_AGAIN": return true;
     case "CHOOSE": return typeof value.choice === "string";
     case "UNDERSTAND": return typeof value.correct === "boolean";
     case "BLOCK": return typeof value.block === "string";

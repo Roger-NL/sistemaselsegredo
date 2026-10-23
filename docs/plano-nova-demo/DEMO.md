@@ -4,6 +4,16 @@ Projeto do roteiro aprovado. A revisão de 23/10/2026 em [REVISAO-EXPERIENCIA-E-
 
 Execução: motor e interface locais implementados no Lote 2; fonte literal complementar em `output/pdf/BasedSpeak_Demo_Experiencia_Visual.pdf` (55 páginas). Estado de produção de mídia em [MIDIA.md](MIDIA.md). Coleta remota adiada; a avaliação preserva rascunho e não confirma envio.
 
+## Revisão implementada em 24/10/2026
+
+A versão cafe-v2 integra as 12 imagens aprovadas de Lucas/BASEDSPEAK e substitui as referências antigas dos copos. Os três perfis agora alteram a tarefa: Guiado apresenta modelos antes da primeira construção, reduz distratores e oferece reconhecimento de expressões; Com pistas usa montagem/estruturas parciais e distratores contextuais; Mais autônomo oferece escrita com validação local e opção de recorrer às peças. Careful continua visível e traduzido antes do aviso; Really mantém a oportunidade de tentar antes de consultar.
+
+Mudanças de perfil valem na próxima atividade: o perfil ativo fica fixo durante a tentativa. Escrita, peças e ajuda são preservadas; a escrita pode ser retomada após recorrer às peças. Evidências distinguem escrita, reconhecimento, montagem, adaptação e apoio. A grafia digitada aceita é preservada no transcript; o áudio reproduz o modelo do catálogo, sem sintetizar texto livre. Validação aceita caixa, pontuação, espaços e contrações equivalentes previstas, sem declarar incorreta uma formulação fora do repertório reconhecido.
+
+O roteiro mantém dez partes, 128 combinações narrativas por perfil e três finais equivalentes. Versão de história incrementada para cafe-v2: snapshots anteriores não são reexecutados sob regras novas; a entrada informa incompatibilidade e permite começar outra tentativa. Nenhum dado remoto é migrado ou excluído.
+
+As seções históricas abaixo descrevem a base original. Esta revisão prevalece nos pontos de imagem, nomes dos copos e perfil de atividade.
+
 ## Superfícies e limites
 
 - `/`: título, proposta curta, duração estimada, aviso de microfone dispensável e escolha de apoio sem opção pré-selecionada.

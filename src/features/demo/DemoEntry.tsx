@@ -21,6 +21,6 @@ export function DemoEntry({ onStart }: { onStart: (profile: SupportProfile) => v
       </fieldset>
       <button className="primary" disabled={!profile} onClick={() => profile && onStart(profile)}>Começar a conversa <ArrowUpRight aria-hidden size={18} /></button>
     </div>
-    <figure className="entry-art"><Image width={1536} height={1024} sizes="(max-width: 760px) 100vw, 50vw" priority src="/demo/cafe/v1/previews/counter.jpg" alt="Ilustração conceitual: uma cliente com café no balcão de uma cafeteria." /><figcaption>Uma cafeteria. Um primeiro encontro.<br /><span>Prévia visual conceitual</span></figcaption></figure>
+    <figure className="entry-art"><picture><source media="(max-width: 760px)" srcSet="/demo/cafe/v2/images/V01-640.webp" /><Image width={960} height={640} unoptimized src="/demo/cafe/v2/images/V01-960.webp" alt="Lucas e BASEDSPEAK no balcão da cafeteria, com seus nomes nos copos." /></picture><figcaption>Uma cafeteria. Um primeiro encontro.<br /><span>Lucas e BASEDSPEAK</span></figcaption></figure>
   </section>;
 }

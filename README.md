@@ -10,13 +10,15 @@ Node.js 22 ou superior e npm. Use `npm ci`, `npm run dev` e abra `http://localho
 
 ## Estado da entrega
 
-A conversa, os 128 caminhos narrativos, os três perfis, ajuda, retrospectiva e recuperação local estão implementados. As nove imagens finais ainda estão pendentes. O áudio sob demanda está habilitado localmente e os 50 IDs foram validados tecnicamente com ElevenLabs, Blob e Firestore reais: 46 MP3s únicos, todos decodificados, com reutilização concorrente e após reinício sem nova geração. A escuta editorial permanece separada. As quatro artes de apresentação são referências conceituais explicitamente identificadas. Ver `docs/plano-nova-demo/MIDIA.md`. Ainda não declarar a prévia pronta para publicação.
+A conversa, os 128 caminhos narrativos, os três perfis, ajuda, retrospectiva e recuperação local estão implementados. As 12 imagens aprovadas de Lucas e BASEDSPEAK estão integradas, com variantes WebP de 640 e 960px (449/907 KiB no total por resolução); originais preservados em `output/image-tests/cafe`. O áudio sob demanda está habilitado localmente e os 50 IDs foram validados tecnicamente com ElevenLabs, Blob e Firestore reais: 46 MP3s únicos, todos decodificados, com reutilização concorrente e após reinício sem nova geração. A escuta editorial permanece separada. Os JPGs provisórios anteriores foram substituídos. Ver `docs/plano-nova-demo/MIDIA.md`. A duração e o layout interativo ainda precisam de validação com participantes/navegador.
 
 A sessão e o rascunho de avaliação ficam neste navegador. Storage indisponível não bloqueia a história. Recomeçar pede confirmação e limpa somente as chaves da demo. Não há sincronização entre dispositivos.
 
 Coleta de eventos e envio de avaliação remotos estão desativados, conforme a opção aprovada de teste local + observação humana. O formulário não confirma recebimento. Responsável, contato e retenção devem estar definidos antes de implementar/ativar os endpoints de sessão, eventos e avaliação.
 
 A interface usa a altura disponível da janela, com cena e atividade compactas. Histórico, pistas e retrospectiva são paginados para não acumularem conteúdo abaixo da atividade. O layout final ainda precisa de conferência visual: a permissão salva do navegador bloqueou a inspeção automatizada da aba local.
+
+Os três apoios mudam a atividade: **Guiado** apresenta modelos e usa montagem/reconhecimento; **Com pistas** usa estruturas incompletas e distratores; **Mais autônomo** começa pela escrita e permite recorrer às peças. A troca de perfil começa na próxima atividade e preserva o rascunho atual. A escrita é validada localmente e não é enviada ao TTS. A versão da história agora é cafe-v2; tentativas locais anteriores são identificadas como incompatíveis para evitar reexecutar eventos sob regras diferentes.
 
 ## Áudio no servidor
 

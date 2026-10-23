@@ -21,9 +21,9 @@ export function ConversationHistory({ state, lines, onReplay, label = "Conversa 
     <dialog ref={dialog} className="demo-dialog history-dialog" aria-labelledby={title}>
       <div className="dialog-heading"><h2 id={title}>{label}</h2><button autoFocus onClick={() => dialog.current?.close()} aria-label="Fechar conversa">Fechar ×</button></div>
       <article className={`history-line ${line.role === "you" ? "history-you" : ""}`}>
-        <small>{line.role === "you" ? "Você" : "Personagem"} · Parte {line.part}</small>
-        <p lang="en">{asset.text}</p>
-        <div className="actions"><button onClick={() => onReplay(line.audioId)}>Ouvir</button>
+        <small>{line.role === "you" ? "Você" : "Lucas"} · Parte {line.part}</small>
+        <p lang="en">{line.written ?? asset.text}</p>
+        <div className="actions"><button onClick={() => onReplay(line.audioId)}>{line.written ? "Ouvir modelo" : "Ouvir"}</button>
           {!(line.audioId === "C01" && state.nodeId === "p2.question") && <button aria-expanded={meaning} onClick={() => setMeaning(!meaning)}>{meaning ? "Ocultar significado" : "Ver significado"}</button>}</div>
         {meaning && <p className="meaning">{asset.meaning}</p>}
       </article>
