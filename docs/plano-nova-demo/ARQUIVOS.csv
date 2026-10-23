@@ -1,0 +1,261 @@
+﻿arquivo_atual,acao,local_futuro_ou_destino,motivo,pre_requisito,lote,estado_execucao,evidencia_execucao
+.env.example,ADAPTAR,raiz/configuracoes,Documentar nomes de variáveis sem valores reais; consolidar exemplos.,Nunca incluir secrets,5,PENDENTE,Contrato congelado no Lote 0
+.firebaserc,MANTER/REVISAR,raiz,Preservar Firebase; revisar regras/índices sem ação remota automática.,Revisão específica antes de publicar,5,PENDENTE,Contrato congelado no Lote 0
+.gitignore,MANTER/ADAPTAR,raiz,Manter exclusões de segredos/build; incluir artefatos locais de teste conforme necessário.,,5,PENDENTE,Contrato congelado no Lote 0
+AGENTS.md,MANTER,raiz,Instruções locais de desenvolvimento e Vercel.,,0,PENDENTE,Contrato congelado no Lote 0
+PILAR_1_CONTEUDO_COMPLETO.txt,REMOVER,—,Documentos e saídas antigas não fazem parte da experiência nem do plano futuro.,,4,PENDENTE,Contrato congelado no Lote 0
+README.md,REESCREVER,README.md,"Documentar demo pública, desenvolvimento e integrações preservadas.",,5,PENDENTE,Contrato congelado no Lote 0
+RESUMO_TECNICO.md,REMOVER,—,Documentos e saídas antigas não fazem parte da experiência nem do plano futuro.,,4,PENDENTE,Contrato congelado no Lote 0
+REVISAO_CODIGO.md,REMOVER,—,Documentos e saídas antigas não fazem parte da experiência nem do plano futuro.,,4,PENDENTE,Contrato congelado no Lote 0
+REVISAO_CODIGO.pdf,REMOVER,—,Documentos e saídas antigas não fazem parte da experiência nem do plano futuro.,,4,PENDENTE,Contrato congelado no Lote 0
+build_log.txt,REMOVER,—,Documentos e saídas antigas não fazem parte da experiência nem do plano futuro.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/MASTER_CONFIG.md,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/PILAR_01.md,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/PILAR_02.md,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/PILAR_03.md,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/PILAR_04.md,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/PILAR_05.md,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/PILAR_06.md,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/PILAR_07.md,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/PILAR_08.md,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/PILAR_09.md,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/QA_BETA_TESTERS_CHECKLIST.docx,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/TTS_CONFIG.md,REMOVER,—,Conteúdo curricular/TTS/QA antigo; a narrativa aprovada tem fonte própria nos docs e código novo.,,4,PENDENTE,Contrato congelado no Lote 0
+configuracoes/scheduling.env.example,ADAPTAR,raiz/configuracoes,Documentar nomes de variáveis sem valores reais; consolidar exemplos.,Nunca incluir secrets,5,PENDENTE,Contrato congelado no Lote 0
+eslint.config.mjs,ADAPTAR,raiz,Manter configuração da plataforma e retirar referências obsoletas.,,5,PENDENTE,Contrato congelado no Lote 0
+eslint_output.txt,REMOVER,—,Documentos e saídas antigas não fazem parte da experiência nem do plano futuro.,,4,PENDENTE,Contrato congelado no Lote 0
+estiloig.md,REMOVER,—,Documentos e saídas antigas não fazem parte da experiência nem do plano futuro.,,4,PENDENTE,Contrato congelado no Lote 0
+estilos.txt,REMOVER,—,Documentos e saídas antigas não fazem parte da experiência nem do plano futuro.,,4,PENDENTE,Contrato congelado no Lote 0
+firebase.json,MANTER/REVISAR,raiz,Preservar Firebase; revisar regras/índices sem ação remota automática.,Revisão específica antes de publicar,5,PENDENTE,Contrato congelado no Lote 0
+firestore.indexes.json,MANTER/REVISAR,raiz,Preservar Firebase; revisar regras/índices sem ação remota automática.,Revisão específica antes de publicar,5,PENDENTE,Contrato congelado no Lote 0
+firestore.rules,MANTER/REVISAR,raiz,Preservar Firebase; revisar regras/índices sem ação remota automática.,Revisão específica antes de publicar,5,PENDENTE,Contrato congelado no Lote 0
+fix_env.ps1,REMOVER,—,Scripts mutadores/one-off antigos; não carregar para a base nova.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-landing-desktop-after.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-landing-desktop-final.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-landing-desktop-progressive-r2.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-landing-desktop-progressive.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-landing-desktop.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-landing-mobile-after.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-landing-mobile-final.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-landing-mobile-progressive-r2.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-landing-mobile-progressive.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-landing-mobile.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-mobile-block-auth-google.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+lighthouse-mobile-block-threejs.json,REMOVER,—,Relatórios de performance da landing antiga; medir novamente a demo após implementação.,,4,PENDENTE,Contrato congelado no Lote 0
+next.config.ts,ADAPTAR,raiz,Manter configuração da plataforma e retirar referências obsoletas.,,5,PENDENTE,Contrato congelado no Lote 0
+package-lock.json,ADAPTAR,raiz,Remover dependências órfãs após retirada dos consumidores; manter runtime.,Após lotes 1–4,5,PENDENTE,Contrato congelado no Lote 0
+package.json,ADAPTAR,raiz,Remover dependências órfãs após retirada dos consumidores; manter runtime.,Após lotes 1–4,5,PENDENTE,Contrato congelado no Lote 0
+postcss.config.mjs,ADAPTAR,raiz,Manter configuração da plataforma e retirar referências obsoletas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/assets/hero-chill.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/assets/hero-lifestyle.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/assets/icons/academico.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/assets/icons/entrevista.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/assets/icons/financas.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/assets/icons/negocios.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/assets/icons/tecnologia.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/assets/icons/viagem.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/assets/pilar-01-mindset.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/assets/pilar-02-listening.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/assets/pilar-03-survival.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/basedspeak-tab.png,MANTER/REVISAR,public/,Ícone/favicon a manter se identidade visual final aprovar.,,5,PENDENTE,Contrato congelado no Lote 0
+public/geometric-amber.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+public/geometric-dark.png,REMOVER,—,Assets do site antigo; substituir pelas nove ilustrações aprovadas.,,5,PENDENTE,Contrato congelado no Lote 0
+recent_changes.txt,REMOVER,—,Documentos e saídas antigas não fazem parte da experiência nem do plano futuro.,,4,PENDENTE,Contrato congelado no Lote 0
+recent_utf8.txt,REMOVER,—,Documentos e saídas antigas não fazem parte da experiência nem do plano futuro.,,4,PENDENTE,Contrato congelado no Lote 0
+script_update.py,REMOVER,—,Scripts mutadores/one-off antigos; não carregar para a base nova.,,4,PENDENTE,Contrato congelado no Lote 0
+script_update_m1_only.py,REMOVER,—,Scripts mutadores/one-off antigos; não carregar para a base nova.,,4,PENDENTE,Contrato congelado no Lote 0
+scripts/audit-exam-submission-locks.mjs,REMOVER,—,Auditoria do sistema de prova retirado.,,4,PENDENTE,Contrato congelado no Lote 0
+scripts/audit-payment-integrity.mjs,MANTER/ADAPTAR,scripts/operations/,Ferramenta operacional ligada às integrações preservadas; revisar imports e procedimento.,,1/5,PENDENTE,Contrato congelado no Lote 0
+scripts/generate_beta_qa_doc.py,REMOVER,—,Gerador de documento de QA antigo não acompanha produto novo.,,4,PENDENTE,Contrato congelado no Lote 0
+scripts/scheduling-healthcheck.mjs,MANTER/ADAPTAR,scripts/operations/,Ferramenta operacional ligada às integrações preservadas; revisar imports e procedimento.,,1/5,PENDENTE,Contrato congelado no Lote 0
+scripts/set-admin-claims.mjs,MANTER/ADAPTAR,scripts/operations/,Ferramenta operacional ligada às integrações preservadas; revisar imports e procedimento.,,1/5,PENDENTE,Contrato congelado no Lote 0
+src/app/(admin)/admin/agendamentos/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(admin)/admin/analytics/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(admin)/admin/aprovacoes/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(admin)/admin/codigos/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(admin)/admin/dashboard/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(admin)/admin/usuarios/[id]/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(admin)/admin/usuarios/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(admin)/layout.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(authenticated)/agendamentos/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(authenticated)/boletim/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(authenticated)/configuracoes/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(authenticated)/dashboard/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(authenticated)/especialidades/[id]/modulo/[moduleId]/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(authenticated)/especialidades/[id]/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(authenticated)/especialidades/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(authenticated)/layout.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(authenticated)/obrigado/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(authenticated)/perfil/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(authenticated)/pilar/[id]/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(public)/cadastro/page.tsx,REMOVER,307 → /,Página antiga de autenticação/pagamento; URL preservada em ROTAS.csv.,Aliases após rota pública pronta,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(public)/layout.tsx,REMOVER,307 → /,Página antiga de autenticação/pagamento; URL preservada em ROTAS.csv.,Aliases após rota pública pronta,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(public)/login/page.tsx,REMOVER,307 → /,Página antiga de autenticação/pagamento; URL preservada em ROTAS.csv.,Aliases após rota pública pronta,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(public)/pagamento/PagamentoPageClient.tsx,REMOVER,307 → /,Página antiga de autenticação/pagamento; URL preservada em ROTAS.csv.,Aliases após rota pública pronta,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(public)/pagamento/page.tsx,REMOVER,307 → /,Página antiga de autenticação/pagamento; URL preservada em ROTAS.csv.,Aliases após rota pública pronta,4,PENDENTE,Contrato congelado no Lote 0
+src/app/(public)/privacidade/page.tsx,MANTER/ADAPTAR,src/app/(public)/,Preservar somente páginas legais; remover provider global desnecessário.,,5,PENDENTE,Contrato congelado no Lote 0
+src/app/(public)/termos/page.tsx,MANTER/ADAPTAR,src/app/(public)/,Preservar somente páginas legais; remover provider global desnecessário.,,5,PENDENTE,Contrato congelado no Lote 0
+src/app/AppProviders.tsx,REMOVER,—,Providers globais antigos não entram no shell demo.,Separar sessão client se necessário,4,PENDENTE,Contrato congelado no Lote 0
+src/app/admin/alunos/[id]/page.tsx,REMOVER,307 → /,Página/layout de aluno ou administração; sem preservar modelo visual.,Após APIs desacopladas; alias explícito,4,PENDENTE,Contrato congelado no Lote 0
+src/app/api/admin/exams/decision/route.ts,410 JSON,/api/admin/exams/decision,API curricular aposentada; preservar URL e resposta legível por máquina.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
+src/app/api/admin/invite-codes/route.ts,Preservar,/api/admin/invite-codes,Gestão de convites; manter autenticação e papel admin server-side.,,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/admin/scheduling/day/route.ts,Preservar,/api/admin/scheduling/day,Agenda administrativa; manter guardas server-side.,Desacoplar premium/currículo,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/admin/scheduling/decision/route.ts,Preservar,/api/admin/scheduling/decision,Decisão administrativa de agenda; manter guardas server-side.,Desacoplar premium/currículo,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/admin/scheduling/snapshot/route.ts,Preservar,/api/admin/scheduling/snapshot,Snapshot administrativo de agenda; manter guardas server-side.,Desacoplar premium/currículo,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/auth/invite/route.ts,Preservar,/api/auth/invite,Convites/autenticação; não expor na experiência pública.,,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/auth/session/route.ts,Preservar,/api/auth/session,Cookie de sessão; independente do login visual da demo.,Extrair helper do AuthContext,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/checkout/route.ts,Preservar,/api/checkout,Checkout Asaas; manter JSON e proteções.,Separar entitlement do currículo,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/exams/route.ts,410 JSON,/api/exams,API de prova curricular aposentada.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
+src/app/api/leaderboard/route.ts,410 JSON,/api/leaderboard,Ranking antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
+src/app/api/progress/route.ts,410 JSON,/api/progress,Progresso do curso antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
+src/app/api/scheduling/availability/route.ts,Preservar,/api/scheduling/availability,Disponibilidade de agenda.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/scheduling/cancel/route.ts,Preservar,/api/scheduling/cancel,Cancelamento de agenda.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/scheduling/request/route.ts,Preservar,/api/scheduling/request,Pedido de agendamento.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/scheduling/status/route.ts,Preservar,/api/scheduling/status,Status de agendamento.,Desacoplar entitlement/currículo,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/speech/route.ts,410 JSON,/api/speech,Geração pública aposentada; extrair ferramenta de produção de áudio.,Extrair ElevenLabs do protótipo,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/study/heartbeat/route.ts,410 JSON,/api/study/heartbeat,Heartbeat de estudo antigo aposentado.,Sem redirect HTML,3,PENDENTE,Contrato congelado no Lote 0
+src/app/api/verify-payment/route.ts,Preservar,/api/verify-payment,Verificação/reconciliação Asaas.,Mover payment-mode para contrato puro,1,PENDENTE,Contrato congelado no Lote 0
+src/app/api/webhooks/asaas/route.ts,Preservar,/api/webhooks/asaas,Webhook Asaas; preservar validação e idempotência.,,1,PENDENTE,Contrato congelado no Lote 0
+src/app/error.tsx,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
+src/app/favicon.ico,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
+src/app/global-error.tsx,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
+src/app/globals.css,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/conversation.ts,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/guided-content-types.ts,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/guided-life.ts,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/guided-practice.ts,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/guided-travel.ts,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/guided-work.ts,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/language.ts,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/music-starter.ts,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/page.tsx,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/ui-copy.ts,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/use-typing-sound.ts,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/welcome-experience.tsx,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/inicio-orbita-7k3/welcome.module.css,REMOVER,—,"Protótipo, motor de conteúdo e onboarding antigos.",Extrair ferramenta de voz primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/app/layout.tsx,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
+src/app/manifest.ts,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
+src/app/not-found.tsx,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
+src/app/page.tsx,ADAPTAR,src/app/page.tsx,Reescrever como entrada pública aprovada.,,2,PENDENTE,Contrato congelado no Lote 0
+src/app/robots.ts,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
+src/app/sitemap.ts,ADAPTAR,src/app/,"Shell global mínimo, metadata, erro, legal e descoberta pública.",Remover providers/metadata antigos conforme arquivo,2/5,PENDENTE,Contrato congelado no Lote 0
+src/components/auth/AuthBackground.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/core/ConciergeModal.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/core/DashboardNav.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/core/DevControls.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/core/TheHUD.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/landing/CtaSection.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/landing/DifferentiatorsSection.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/landing/FaqSection.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/landing/HeroSection.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/landing/LandingPage.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/landing/MethodSection.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/landing/RanksSection.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/landing/ResultsSection.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/landing/SpecialtiesSection.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/ui/AudioButton.tsx,AVALIAR/REMOVER,features/demo/components,Não reutilizar sem conferir acessibilidade e dependências da experiência nova.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/ui/FlightCard.tsx,REMOVER,—,Efeitos/componentes visuais antigos sem consumidor na demo.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/ui/GradientButton.tsx,REMOVER,—,Efeitos/componentes visuais antigos sem consumidor na demo.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/ui/TranslatablePhrase.tsx,AVALIAR/REMOVER,features/demo/components,Não reutilizar sem conferir acessibilidade e dependências da experiência nova.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/ui/button.tsx,REESCREVER,src/components/ui/button.tsx,Botão nativo mínimo sem Radix/CVA.,,2/5,PENDENTE,Contrato congelado no Lote 0
+src/components/ui/glowing-effect.tsx,REMOVER,—,Efeitos/componentes visuais antigos sem consumidor na demo.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/ui/modal-shell.tsx,REMOVER,—,Efeitos/componentes visuais antigos sem consumidor na demo.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/ui/neon-flow.tsx,REMOVER,—,Efeitos/componentes visuais antigos sem consumidor na demo.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/ui/neon-tubes-html.ts,REMOVER,—,Efeitos/componentes visuais antigos sem consumidor na demo.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/ui/typewriter.tsx,REMOVER,—,Efeitos/componentes visuais antigos sem consumidor na demo.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/ui/wireframe-dotted-globe.tsx,REMOVER,—,Efeitos/componentes visuais antigos sem consumidor na demo.,,4,PENDENTE,Contrato congelado no Lote 0
+src/components/welcome/VisitorNameSettings.tsx,REMOVER,—,Componentes das telas/modelos antigos; sem cópia legacy.,,4,PENDENTE,Contrato congelado no Lote 0
+src/context/AuthContext.tsx,MOVER/ADAPTAR,src/client/auth/session.ts,Extrair POST/DELETE sessão para helper sem provider; remover estado de currículo.,Antes de excluir provider,1,PENDENTE,Contrato congelado no Lote 0
+src/context/LandingThemeContext.tsx,REMOVER,—,"Providers/utilitários de currículo, tema antigo e tradução não usados pela demo.",,4,PENDENTE,Contrato congelado no Lote 0
+src/context/ProgressContext.tsx,REMOVER,—,"Providers/utilitários de currículo, tema antigo e tradução não usados pela demo.",,4,PENDENTE,Contrato congelado no Lote 0
+src/context/TranslationContext.tsx,REMOVER,—,"Providers/utilitários de currículo, tema antigo e tradução não usados pela demo.",,4,PENDENTE,Contrato congelado no Lote 0
+src/data/curriculum.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/pillars-content.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/pillars/pilar-1.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/pillars/pilar-2.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/pillars/pilar-3.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/pillars/pilar-4.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/pillars/pilar-5.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/pillars/pilar-6.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/pillars/pilar-7.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/pillars/pilar-8.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/pillars/pilar-9.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/quizzes.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/data/specializations-content.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/features/admin/AdminSchedulingPageClient.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/admin/StudentDetailModal.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/admin/StudentDetailPage.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/dashboard/ExamFeedbackPopup.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/dashboard/GlobalStatusPanel.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/dashboard/LeaderboardModal.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/dashboard/RankGuideModal.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/decision/DecisionMatrix.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/decision/SpecializationStudyPage.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/payment/payment-mode.ts,MOVER,src/contracts/payments.ts,Separar tipo usado por verify-payment da UI antiga.,Antes de remover feature,1,PENDENTE,Contrato congelado no Lote 0
+src/features/scheduling/SchedulingPageClient.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/study/PillarOperationalView.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/study/PillarPageClient.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/study/StudyViewer.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/study/exam/PillarExamModal.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/study/exam/PillarExamViewModal.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/features/subscription/PremiumWall.tsx,REMOVER,—,UI/modelo de aluno/admin/curso antigo; sem manter páginas modelo.,Manter apenas contratos de serviço fora de features,4,PENDENTE,Contrato congelado no Lote 0
+src/hooks/useTTS.ts,MOVER/ADAPTAR,scripts/media-production/,Separar produção de mídia do hook antigo; player demo será novo.,Extrair integração antes de apagar protótipo,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/admin/reset-user-course-progress.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/asaas.ts,MOVER/ADAPTAR,src/server/payments/ e src/server/integrations/asaas.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/auth/admin-policy.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/auth/invite-codes.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/auth/post-auth.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/auth/premium-access.ts,MOVER/ADAPTAR,src/server/access/service.ts,Separar entitlement de progresso/currículo.,Antes de apagar progress/data,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/auth/principal.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/auth/request-auth.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/auth/route-guards.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/auth/service.ts,MOVER/ADAPTAR,src/server/auth/service.ts,Separar auth mínima de perfil/progresso/currículo.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/auth/session.ts,MOVER/ADAPTAR,src/server/auth/,"Preservar guards, principal, sessão, convites e política de admin.",,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/exam/server-service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/exam/service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/firebase-admin-firestore.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/firebase-admin.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/firebase.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/firebase/index.ts,MOVER/ADAPTAR,src/server/firebase.ts ou src/client/auth/firebase.ts,Consolidar bootstrap server e isolar SDK browser.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/leaderboard/service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/navigation/safe-client-navigation.ts,REMOVER,—,Navegação antiga; redirects ficam em proxy e links novos.,,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/payments/config.ts,MOVER/ADAPTAR,src/server/payments/ e src/server/integrations/asaas.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/payments/installments.ts,MOVER/ADAPTAR,src/server/payments/ e src/server/integrations/asaas.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/payments/service.ts,MOVER/ADAPTAR,src/server/payments/ e src/server/integrations/asaas.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/payments/types.ts,MOVER/ADAPTAR,src/server/payments/ e src/server/integrations/asaas.ts,Preservar APIs de pagamento e desacoplar do currículo/UI.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/progress/contract.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/progress/index.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/progress/server-service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/progress/service.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/routes.ts,ADAPTAR,src/lib/routes.ts / src/lib/ui/cn.ts,Manter apenas rota/utilidade pura com consumidores reais; remover utilidades órfãs.,,2/5,PENDENTE,Contrato congelado no Lote 0
+src/lib/scheduling/google-calendar.ts,MOVER/ADAPTAR,src/server/scheduling/ e integrations/google-calendar.ts,Preservar agenda/locks desacoplados de currículo.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/scheduling/service.ts,MOVER/ADAPTAR,src/server/scheduling/ e integrations/google-calendar.ts,Preservar agenda/locks desacoplados de currículo.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/scheduling/types.ts,MOVER/ADAPTAR,src/server/scheduling/ e integrations/google-calendar.ts,Preservar agenda/locks desacoplados de currículo.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/server/rate-limit.ts,MOVER/ADAPTAR,src/server/http/,Preservar validação/rate-limit com namespaces isolados.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/server/request.ts,MOVER/ADAPTAR,src/server/http/,Preservar validação/rate-limit com namespaces isolados.,,1,PENDENTE,Contrato congelado no Lote 0
+src/lib/storage/secure-storage.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/study/stats.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/study/use-study-activity-tracker.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/ui/cn.ts,ADAPTAR,src/lib/routes.ts / src/lib/ui/cn.ts,Manter apenas rota/utilidade pura com consumidores reais; remover utilidades órfãs.,,2/5,PENDENTE,Contrato congelado no Lote 0
+src/lib/utils.ts,ADAPTAR,src/lib/routes.ts / src/lib/ui/cn.ts,Manter apenas rota/utilidade pura com consumidores reais; remover utilidades órfãs.,,2/5,PENDENTE,Contrato congelado no Lote 0
+src/lib/welcome/use-learning-language.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/welcome/use-visitor-name.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/lib/welcome/visitor-name.ts,REMOVER,—,Implementação/modelos do curso ou welcome antigos; sem cópia para consulta.,Desacoplar integrações primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/proxy.ts,ADAPTAR,src/proxy.ts,Aliases browser explícitos 307; sem redirect genérico de API nem autoridade de auth.,,3,PENDENTE,Contrato congelado no Lote 0
+src/types/study.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/utils/content-parsers.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/utils/ranks.ts,REMOVER,—,"Dados/modelos do curso, pilares, provas, ranking e especializações antigos.",Desacoplar APIs preservadas primeiro,4,PENDENTE,Contrato congelado no Lote 0
+src/utils/translation.tsx,REMOVER,—,"Providers/utilitários de currículo, tema antigo e tradução não usados pela demo.",,4,PENDENTE,Contrato congelado no Lote 0
+src/utils/ui-sfx.ts,REMOVER,—,Sons de interface antigos; não necessários para a conversa acessível e sem requisito narrativo.,,4,PENDENTE,Contrato congelado no Lote 0
+tests/asaas.test.ts,ADAPTAR/MANTER,tests/,Preservar cobertura dos contratos de integração após mover serviços.,,1/6,PENDENTE,Contrato congelado no Lote 0
+tests/auth-route-guards.test.ts,ADAPTAR/MANTER,tests/,Preservar cobertura dos contratos de integração após mover serviços.,,1/6,PENDENTE,Contrato congelado no Lote 0
+tests/payment-mode.test.ts,ADAPTAR/MANTER,tests/,Preservar cobertura dos contratos de integração após mover serviços.,,1/6,PENDENTE,Contrato congelado no Lote 0
+tests/payments-beta-mode.test.ts,ADAPTAR/MANTER,tests/,Preservar cobertura dos contratos de integração após mover serviços.,,1/6,PENDENTE,Contrato congelado no Lote 0
+tests/progress-contract.test.ts,REMOVER/SUBSTITUIR,tests/,Testes do produto antigo devem sair com o código; criar testes dos invariantes demo.,,4/6,PENDENTE,Contrato congelado no Lote 0
+tests/scheduling-calendar.test.ts,ADAPTAR/MANTER,tests/,Preservar cobertura dos contratos de integração após mover serviços.,,1/6,PENDENTE,Contrato congelado no Lote 0
+tests/speech-route.test.ts,ADAPTAR,tests/,Substituir expectativa de síntese pública por contrato JSON 410 e ferramenta de produção.,,1/6,PENDENTE,Contrato congelado no Lote 0
+tests/visitor-name.test.ts,REMOVER/SUBSTITUIR,tests/,Testes do produto antigo devem sair com o código; criar testes dos invariantes demo.,,4/6,PENDENTE,Contrato congelado no Lote 0
+tests/welcome-conversation.test.ts,REMOVER/SUBSTITUIR,tests/,Testes do produto antigo devem sair com o código; criar testes dos invariantes demo.,,4/6,PENDENTE,Contrato congelado no Lote 0
+tsconfig.json,ADAPTAR,raiz,Manter configuração da plataforma e retirar referências obsoletas.,,5,PENDENTE,Contrato congelado no Lote 0
+update_new_firebase.ps1,REMOVER,—,Scripts mutadores/one-off antigos; não carregar para a base nova.,,4,PENDENTE,Contrato congelado no Lote 0
+vitest.config.ts,ADAPTAR,raiz,Manter configuração da plataforma e retirar referências obsoletas.,,5,PENDENTE,Contrato congelado no Lote 0
