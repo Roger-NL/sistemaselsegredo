@@ -90,6 +90,77 @@ describe("approved café graph", () => {
     for (const removed of ["p2.model", "p2.prepare", "p2.meaning"]) expect(catalog[removed]).toBeUndefined();
   });
 
+  it("waits for the invitation reply, then lets Lucas react while choosing the next topic", () => {
+    expect(catalog["p8.table"].kind === "scene" && catalog["p8.table"].button).toBe("Responder ao convite");
+    for (const profile of PROFILES) {
+      let state = advance(reach("p8.table", {}, profile));
+      expect(state.nodeId).toBe("p8.accept");
+      expect(state.transcript.some(line => line.audioId === "U10")).toBe(false);
+      while (state.nodeId === "p8.accept") state = advance(state);
+      expect(state.nodeId).toBe("p8.topic");
+      expect(state.transcript.slice(-2).map(line => line.audioId)).toEqual(["U10", "C04"]);
+      expect(catalog[state.nodeId].image).toBe("V10");
+      expect(catalog[state.nodeId].kind).toBe("choice");
+    }
+  });
+
+  for (const profile of PROFILES) for (const supported of [false, true]) {
+    it(`advances every reply once with a Lucas reaction: ${profile}, ${supported ? "full support" : "normal submission"}`, () => {
+      const responses = new Set<string>();
+      let paths = 0;
+      function walk(state: DemoState, depth = 0) {
+        expect(depth).toBeLessThan(150);
+        const node = catalog[state.nodeId];
+        if (node.kind === "end") { paths++; return; }
+        if (node.kind === "choice") {
+          for (const choice of node.choices) walk(transition(state, { at: node.id, type: "CHOOSE", choice: choice.id }), depth + 1);
+          return;
+        }
+        if (node.kind !== "response") { walk(advance(state), depth + 1); return; }
+        responses.add(node.id);
+        const before = state;
+        // A model, mental check, help or rejected answer must never count as speech.
+        if (["present", "recall", "build", "write", "select"].includes(state.phase)) {
+          const rejected = dispatch(state, { type: "SUBMIT" });
+          expect(rejected.nodeId).toBe(node.id);
+          expect(rejected.transcript).toEqual(before.transcript);
+          expect(rejected.evidence).toEqual(before.evidence);
+        }
+        if (state.phase === "present" || state.phase === "recall") {
+          state = advance(state);
+          expect(state.nodeId).toBe(node.id);
+          expect(state.transcript).toEqual(before.transcript);
+          expect(state.evidence).toEqual(before.evidence);
+          expect(["present", "recall"]).not.toContain(state.phase);
+        }
+        if (supported) {
+          for (let clue = 0; clue < node.help.length; clue++) state = dispatch(state, { type: "HELP" });
+          expect(state.transcript).toEqual(before.transcript);
+          expect(state.evidence).toEqual(before.evidence);
+        }
+        const sent = supported ? dispatch(state, { type: "USE_SUPPORT" }) : advance(state);
+        const next = catalog[node.next];
+        expect(sent.nodeId).toBe(node.next);
+        expect(sent.transcript.slice(before.transcript.length).map(line => [line.role, line.audioId])).toEqual([
+          ["you", node.response], ...(next.heard ?? []).map(id => ["character", id]),
+        ]);
+        expect(sent.evidence).toHaveLength(before.evidence.length + 1);
+        // The learner's final Bye closes a farewell Lucas has already returned.
+        if (node.id === "p10.bye") {
+          expect(before.transcript.at(-1)?.audioId).toBe("C29");
+          expect(next.kind).toBe("end");
+        } else expect(next.heard?.length, `Missing Lucas reaction after ${node.id}`).toBeGreaterThan(0);
+        for (const type of ["SUBMIT", "USE_SUPPORT", "PREPARE"] as const) {
+          expect(transition(sent, { at: node.id, type })).toBe(sent);
+        }
+        walk(sent, depth + 1);
+      }
+      walk(createDemo(profile, "reply-audit", 1000));
+      expect(paths).toBe(128);
+      expect([...responses].sort()).toEqual(nodes.filter(node => node.kind === "response").map(node => node.id).sort());
+    });
+  }
+
   it("keeps erroneous blocks, supports correction and ignores stale double-clicks", () => {
     let state = reach("p4.mine", { "p3.intent": "okay" });
     for (const block of ["yes", "negative", "mine"]) state = transition(state, { at: state.nodeId, type: "BLOCK", block });

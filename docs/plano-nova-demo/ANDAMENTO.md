@@ -209,3 +209,11 @@ Cinco capturas do responsável evidenciaram sequência modelo → treino com bot
 Removidos três nós redundantes e a propriedade preparationOnly. Compreensão agora entra diretamente na única resposta p2.send; envio aceito grava U01 uma vez e entra na reação C02. Guiado mantém um modelo inicial; Com pistas mantém peças e Mais autônomo escrita. Rótulos agora distinguem Você pode dizer/Tentar responder de Enviar/Enviar com apoio. Imagens e textos ingleses/TTS intactos; nenhuma geração remota.
 
 Versão cafe-v3 e migração local limitada de cafe-v2: envios reais e percursos completos preservados; treino parcial ou completo continua como rascunho, sem submissão implícita. Mudanças de apoio ambíguas nas telas removidas não são inferidas; snapshot original é preservado e entrada informa incompatibilidade. Cinco testes novos de recuperação e regressão do envio único nos três níveis; 110 testes/22 arquivos aprovados, incluindo 384 percursos, ordem das imagens e hash do catálogo de áudio. Lint, TypeScript e build aprovados. Revisão guiada pelas capturas e código; sem afirmar inspeção automatizada do navegador.
+
+## Auditoria da continuidade completa — 24/10/2026
+
+Revisadas as partes 3–10 e todos os ramos. Não havia outro ciclo de montagem preparatória sem envio como no início. Havia uma lacuna na aceitação do convite: U10 entrava em p8.topic sem fala de Lucas. Agora Nice! (C04 existente) responde imediatamente na mesma etapa de escolha do assunto, com V10 à mesa; sem tela extra. Responder ao convite substitui Sim, vamos, distinguindo a navegação para a atividade da resposta de fato.
+
+Sete testes de regressão novos: convite nos três níveis e seis auditorias completas (três perfis × envio normal/com apoio). Cobrem 768 percursos com validações em cada resposta: preparação, conferência, ajuda e erro não enviam; aceitação envia uma fala e avança diretamente para Lucas; clique atrasado não reenvia. Último Bye encerra depois de You too. Bye! já dito por Lucas. Reutilizações em novas situações (por exemplo, Me too. e Not really.) mantidas como prática contextual.
+
+117 testes/22 arquivos, lint, TypeScript e build aprovados. IDs/destinos de etapas, 12 imagens, catálogo de voz, cache e parâmetros de TTS preservados, sem geração remota. Testes de domínio, sem alegar inspeção visual em navegador.

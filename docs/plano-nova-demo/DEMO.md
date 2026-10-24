@@ -6,6 +6,14 @@ Esta revisão prevalece sobre a sequência preparatória descrita nas versões a
 
 Recuperação cafe-v2 filtra telas antigas e mantém envios reais. Quando só havia treino parcial, mantém rascunho/peças sem inventar um envio. Mudanças de apoio em etapas removidas que não possam ser reproduzidas com segurança resultam em incompatibilidade, preservando o snapshot original. Story version cafe-v3 mantém o mesmo catálogo de voz e as 12 imagens.
 
+## Revisão de continuidade nos três níveis — 24/10/2026
+
+Cada envio aceito registra uma única fala sua e entra diretamente na resposta de Lucas, sem outra tela de preparação da mesma resposta. A exceção natural é o último Bye: Lucas já respondeu You too. Bye! e a sua despedida encerra o encontro. Modelos, pistas, conferência mental e respostas não aceitas não são registrados como fala enviada.
+
+No convite para sentar, Responder ao convite abre a atividade; o envio de Yeah, sure. agora recebe Nice! de Lucas na própria escolha do próximo assunto, com os dois já à mesa. Não há tela intermediária adicional. A fala reutiliza C04 e seu áudio persistente existente; IDs de etapas, destinos, textos de voz, regras de nível e imagens permanecem os mesmos.
+
+Regressões percorrem as 128 combinações de história em cada nível, tanto com envio normal quanto com envio por apoio completo (768 percursos). Em cada resposta, conferem a fala única, reação imediata, ausência de envio durante preparação/erro/ajuda e proteção contra cliques atrasados. A repetição contextual de expressões conhecidas continua sendo prática em novas situações, sem repetir a preparação e o envio da mesma ocorrência.
+
 
 Projeto do roteiro aprovado. A revisão de 23/10/2026 em [REVISAO-EXPERIENCIA-E-AUDIO.md](REVISAO-EXPERIENCIA-E-AUDIO.md) define a identidade Orbit, a conversa contínua e o áudio sob demanda; prevalece sobre decisões antigas de voz estática. Este documento não substitui o diálogo completo nem autoriza adicionar cenas.
 
