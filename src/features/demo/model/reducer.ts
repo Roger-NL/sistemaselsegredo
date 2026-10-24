@@ -95,7 +95,7 @@ export function transition(state: DemoState, event: DemoEvent): DemoState {
       if (!supported && state.phase === "build" && JSON.stringify(state.selected) !== JSON.stringify(exercise?.answer)) {
         const mismatch = state.selected.findIndex((id, i) => id !== exercise?.answer[i]);
         next = fail(node.id === "p4.mine" && state.selected.includes("negative")
-          ? "Esse trecho diz ‘não é’. Confira BASEDSPEAK no copo. Sua montagem foi mantida."
+          ? "Esse trecho diz ‘não é’. Confira beezed no copo. Sua montagem foi mantida."
           : state.activityProfile === "some" ? `Confira a peça ${mismatch >= 0 ? mismatch + 1 : state.selected.length + 1} e o sentido da frase. Sua montagem foi mantida.`
           : `${node.help[0] ?? node.context} Sua montagem foi mantida; tente novamente.`); break;
       }

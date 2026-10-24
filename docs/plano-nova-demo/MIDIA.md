@@ -20,3 +20,7 @@ Os 50 IDs e todos os textos em inglês permanecem iguais. Traduções em portugu
 Testes decodificam todas as 24 variantes WebP, verificam dimensões, orçamento total de bytes e alcance das 12 cenas pelo grafo. Verificam também o hash de todos os textos de áudio contra a versão anterior. Os 12 hashes dos PNGs originais foram reconferidos após exportar.
 
 Amostras WebP e uma folha de contato foram inspecionadas localmente; a inspeção interativa do layout no navegador permanece pendente. O bloqueio de permissão da sessão anterior não foi contornado. A duração aproximada de 30 minutos ainda depende de teste com participantes.
+
+## Ajuste posterior da apresentação — 24/10/2026
+
+A pedido do responsável, nome textual agora é beezed em minúsculas; nomes impressos nos PNGs/WebPs não foram alterados. A descrição acessível permanece no alt; a legenda visual sob a imagem foi retirada para evitar dois inícios concorrentes. Situação e título aparecem acima da cena. Pedido aparece como pista textual apenas nas comparações V02/V04. A faixa da arte no celular ganhou largura integral e mais altura.
