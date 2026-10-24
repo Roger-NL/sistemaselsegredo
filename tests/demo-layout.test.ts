@@ -1,27 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { needsScenePages, type SceneSpace } from "@/features/demo/model/layout";
+import { nextSceneDensity, type SceneSpace } from "@/features/demo/model/layout";
 
 const phone: SceneSpace = { available: 600, intro: 90, activity: 260, gap: 8, mobile: true };
-describe("scene space and safe pagination", () => {
-  it("keeps a short phone activity with its large illustration", () => {
-    expect(needsScenePages(phone)).toBe(false);
+describe("single-screen scene density", () => {
+  it("keeps a short activity spacious with the illustration visible", () => {
+    expect(nextSceneDensity("comfortable", phone)).toBe("comfortable");
   });
-  it("separates longer guided/selection/construction content before controls lose space", () => {
-    for (const activity of [350, 420, 560]) expect(needsScenePages({ ...phone, activity })).toBe(true);
+  it("reduces spacing progressively for long content, without creating a separate page", () => {
+    const long = { ...phone, activity: 450 };
+    expect(nextSceneDensity("comfortable", long)).toBe("compact");
+    expect(nextSceneDensity("compact", long)).toBe("tight");
+    expect(nextSceneDensity("tight", long)).toBe("tight");
   });
-  it("adapts to keyboard space without changing the exercise", () => {
-    expect(needsScenePages({ ...phone, available: 300 })).toBe(true);
+  it("retains comfortable spacing on desktop when the complete text fits", () => {
+    expect(nextSceneDensity("comfortable", { ...phone, mobile: false, activity: 450 })).toBe("comfortable");
   });
-  it("keeps a fitting desktop response centered and splits one that exceeds the column", () => {
-    expect(needsScenePages({ ...phone, mobile: false, activity: 450 })).toBe(false);
-    expect(needsScenePages({ ...phone, mobile: false, activity: 550 })).toBe(true);
-  });
-  it("does not flicker between pages at a resize boundary, and reunites after enough growth", () => {
-    expect(needsScenePages({ ...phone, available: 520 }, true)).toBe(true);
-    expect(needsScenePages({ ...phone, available: 560 }, true)).toBe(false);
-  });
-  it("retains the last layout until hidden or initial dimensions can be measured", () => {
-    expect(needsScenePages({ ...phone, available: 0 }, true)).toBe(true);
-    expect(needsScenePages({ ...phone, intro: 0 })).toBe(false);
+  it("does not change density before dimensions are available", () => {
+    expect(nextSceneDensity("compact", { ...phone, available: 0 })).toBe("compact");
+    expect(nextSceneDensity("comfortable", { ...phone, intro: 0 })).toBe("comfortable");
   });
 });

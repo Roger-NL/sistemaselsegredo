@@ -1,33 +1,32 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { needsScenePages } from "../model/layout";
+import { useEffect, useRef, type ReactNode } from "react";
+import { nextSceneDensity, type SceneDensity } from "../model/layout";
 
-/** Presentation only: pagination never submits an answer or changes the story. */
+/** Only spacing changes: the illustration, conversation and actions stay on screen. */
 export function SceneFrame({ intro, artwork, children, activityKey }: { intro: ReactNode; artwork: ReactNode; children: ReactNode; activityKey: string }) {
   const frame = useRef<HTMLDivElement>(null);
   const introduction = useRef<HTMLDivElement>(null);
-  const activity = useRef<HTMLElement>(null);
-  const [paged, setPaged] = useState(false);
-  const [page, setPage] = useState<"scene" | "activity">("scene");
   useEffect(() => {
     const root = frame.current;
     if (!root) return;
-    // Retain measurements while a page is hidden. Observing the unconstrained
-    // content also catches wrapping, error messages and newly selected pieces.
-    const sizes = { intro: 0, content: 0, actions: 0 };
+    root.dataset.density = "comfortable";
     let scheduled = 0;
+    let previousWidth = root.clientWidth;
+    let previousHeight = root.clientHeight;
     const measure = () => {
       scheduled = 0;
-      const nodes = { intro: introduction.current, content: root.querySelector<HTMLElement>(".activity-content"), actions: root.querySelector<HTMLElement>(".activity-actions") };
-      for (const key of Object.keys(nodes) as (keyof typeof sizes)[]) {
-        const element = nodes[key];
-        if (element?.getClientRects().length) sizes[key] = Math.ceil(Math.max(element.scrollHeight, element.getBoundingClientRect().height));
+      if (Math.abs(root.clientWidth - previousWidth) > 16 || Math.abs(root.clientHeight - previousHeight) > 16) {
+        previousWidth = root.clientWidth; previousHeight = root.clientHeight;
+        root.dataset.density = "comfortable";
+        schedule(); return;
       }
-      const gap = parseFloat(getComputedStyle(root).rowGap) || 0;
-      setPaged(previous => needsScenePages({ available: root.clientHeight, intro: sizes.intro,
-        activity: sizes.content + sizes.actions + 12, gap, mobile: matchMedia("(max-width: 760px)").matches }, previous));
-      if (root.contains(document.activeElement) && document.activeElement?.matches("input, textarea")) setPage("activity");
+      const height = (element: HTMLElement | null) => element ? Math.ceil(Math.max(element.scrollHeight, element.getBoundingClientRect().height)) : 0;
+      const current = (root.dataset.density ?? "comfortable") as SceneDensity;
+      const next = nextSceneDensity(current, { available: root.clientHeight, intro: height(introduction.current),
+        activity: height(root.querySelector(".activity-content")) + height(root.querySelector(".activity-actions")) + 12,
+        gap: parseFloat(getComputedStyle(root).rowGap) || 0, mobile: matchMedia("(max-width: 760px)").matches });
+      if (next !== current) { root.dataset.density = next; schedule(); }
     };
     const schedule = () => { if (!scheduled) scheduled = requestAnimationFrame(measure); };
     const observer = new ResizeObserver(schedule);
@@ -38,21 +37,10 @@ export function SceneFrame({ intro, artwork, children, activityKey }: { intro: R
     window.visualViewport?.addEventListener("resize", schedule);
     schedule();
     return () => { observer.disconnect(); cancelAnimationFrame(scheduled); window.removeEventListener("resize", schedule); window.visualViewport?.removeEventListener("resize", schedule); };
-  }, []);
-  useEffect(() => {
-    if (!paged) return;
-    if (page === "activity") {
-      if (!activity.current?.contains(document.activeElement)) activity.current?.focus({ preventScroll: true });
-    } else introduction.current?.querySelector<HTMLElement>("h1")?.focus({ preventScroll: true });
-  }, [page, paged, activityKey]);
-  return <div ref={frame} className="scene-grid" data-paged={paged} data-page={page}>
+  }, [activityKey]);
+  return <div ref={frame} className="scene-grid">
     <div ref={introduction} className="scene-intro-slot">{intro}</div>
     {artwork}
-    <section ref={activity} className="conversation-panel" tabIndex={-1} aria-label="Falas e atividade">{children}</section>
-    {paged && <nav className="scene-pages" aria-label="Cena e atividade">
-      <button disabled={page === "scene"} onClick={() => setPage("scene")}>← Cena</button>
-      <span aria-live="polite">{page === "scene" ? "1" : "2"} de 2</span>
-      <button disabled={page === "activity"} onClick={() => setPage("activity")}>Atividade →</button>
-    </nav>}
+    <section className="conversation-panel" aria-label="Falas e atividade">{children}</section>
   </div>;
 }
