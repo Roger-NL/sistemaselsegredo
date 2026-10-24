@@ -1,8 +1,35 @@
 import { describe, expect, it, vi } from "vitest";
 import { createCatalogAudioClient, requestCatalogAudio } from "@/features/demo/services/audio-client";
+import { createHash } from "node:crypto";
+import { audio } from "@/features/demo/content/media";
+import type { AudioId } from "@/features/demo/model/types";
+import type { PublishedAudioCatalog } from "@/contracts/demo-audio";
 const key = "a".repeat(64);
 const url = `https://test.public.blob.vercel-storage.com/speech-cache/v3/${key}.mp3`;
 describe("catalog audio client", () => {
+  it("resolves all 50 recordings immediately in multiple fresh sessions without any API or preload", async () => {
+    const published = Object.fromEntries(Object.entries(audio).map(([id, asset]) => {
+      const key = createHash("sha256").update(asset.text).digest("hex");
+      return [id, { key, audioUrl: `https://test.public.blob.vercel-storage.com/speech-cache/v3/${key}.mp3` }];
+    })) as PublishedAudioCatalog;
+    const request = vi.fn<typeof fetch>(() => new Promise(() => {}));
+    for (let session = 0; session < 3; session++) {
+      const resolve = createCatalogAudioClient(request, undefined, published);
+      expect(request).not.toHaveBeenCalled();
+      for (const id of Object.keys(audio) as AudioId[]) expect(await resolve(id, new AbortController().signal)).toBe(published[id]!.audioUrl);
+    }
+    expect(request).not.toHaveBeenCalled();
+  }, 500);
+  it("uses the protected API only for a missing indexed file and rejects invalid seeds", async () => {
+    const request = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ key, audioUrl: url }));
+    const resolve = createCatalogAudioClient(request, undefined, { C01: { key, audioUrl: url } });
+    expect(await resolve("C01", new AbortController().signal)).toBe(url);
+    expect(request).not.toHaveBeenCalled();
+    await resolve("C02", new AbortController().signal);
+    expect(request).toHaveBeenCalledOnce();
+    expect(JSON.parse(request.mock.calls[0][1]!.body as string)).toEqual({ audioId: "C02" });
+    expect(() => createCatalogAudioClient(request, undefined, { C01: { key, audioUrl: "https://foreign.example/file.mp3" } })).toThrow();
+  });
   it("reuses an identical phrase across narrative IDs without merging different punctuation", async () => {
     const request = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ key, audioUrl: url }));
     const resolve = createCatalogAudioClient(request);

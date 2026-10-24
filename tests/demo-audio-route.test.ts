@@ -1,12 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ parameters: vi.fn(), read: vi.fn(), resolve: vi.fn(), limit: vi.fn() }));
+const mocks = vi.hoisted(() => ({ parameters: vi.fn(), published: vi.fn(), read: vi.fn(), resolve: vi.fn(), limit: vi.fn() }));
 vi.mock("@/server/speech/runtime", () => ({ speechParameters: mocks.parameters, readCachedSpeech: mocks.read, resolveCachedSpeech: mocks.resolve }));
+vi.mock("@/server/speech/published", () => ({ getPublishedAudioCatalog: mocks.published }));
 vi.mock("@/server/http/rate-limit", async original => ({ ...await original<typeof import("@/server/http/rate-limit")>(), consumeRateLimit: mocks.limit }));
 import { POST } from "@/app/api/demo/audio/route";
 import { SpeechUnavailableError } from "@/server/speech/cache";
 const request = (body: unknown, origin = "http://localhost") => new Request("http://localhost/api/demo/audio", { method: "POST", headers: { origin, "content-type": "application/json" }, body: JSON.stringify(body) });
-beforeEach(() => { vi.clearAllMocks(); mocks.parameters.mockReturnValue({ voiceId: "server-only" }); mocks.read.mockResolvedValue(null); mocks.limit.mockResolvedValue({}); });
+beforeEach(() => { vi.clearAllMocks(); mocks.parameters.mockReturnValue({ voiceId: "server-only" }); mocks.published.mockReturnValue({}); mocks.read.mockResolvedValue(null); mocks.limit.mockResolvedValue({}); });
 describe("public catalog audio API", () => {
+  it("serves an indexed file even if database reads/admission would never resolve", async () => {
+    const reference = { key: "a".repeat(64), audioUrl: `https://test.public.blob.vercel-storage.com/speech-cache/v3/${"a".repeat(64)}.mp3` };
+    mocks.published.mockReturnValue({ C01: reference });
+    mocks.read.mockImplementation(() => new Promise(() => {}));
+    mocks.limit.mockImplementation(() => new Promise(() => {}));
+    const response = await POST(request({ audioId: "C01" }));
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ status: "ready", ...reference });
+    expect(mocks.read).not.toHaveBeenCalled(); expect(mocks.limit).not.toHaveBeenCalled(); expect(mocks.resolve).not.toHaveBeenCalled();
+    mocks.read.mockReset(); mocks.limit.mockReset();
+  }, 500);
   it("accepts an ID and resolves the approved text only on the server", async () => {
     mocks.resolve.mockResolvedValue({ status: "ready", key: "opaque", url: "https://test.public.blob.vercel-storage.com/file.mp3" });
     const response = await POST(request({ audioId: "C01" }));

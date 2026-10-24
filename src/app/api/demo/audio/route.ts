@@ -5,6 +5,7 @@ import { consumeRateLimit, RateLimitError, rateLimitErrorResponse } from "@/serv
 import { readCachedSpeech, resolveCachedSpeech, speechParameters } from "@/server/speech/runtime";
 import { SpeechUnavailableError } from "@/server/speech/cache";
 import type { AudioId } from "@/features/demo/model/types";
+import { getPublishedAudioCatalog } from "@/server/speech/published";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,6 +21,9 @@ export async function POST(req: Request) {
     assertOnlyKeys(payload, ["audioId"]);
     if (typeof payload.audioId !== "string" || !Object.hasOwn(audio, payload.audioId)) throw new RequestPayloadError("UNKNOWN_AUDIO_ID");
     const parameters = speechParameters(); // Fail before any database/provider call when not configured.
+    const published = getPublishedAudioCatalog(parameters)[payload.audioId as AudioId];
+    // Public, already published media has no generation cost and needs no database admission.
+    if (published) return NextResponse.json({ status: "ready", ...published }, { headers });
     const text = audio[payload.audioId as AudioId].text;
     // Only the read-only hit lookup runs alongside admission. Generation must wait for admission.
     const [, cached] = await Promise.all([

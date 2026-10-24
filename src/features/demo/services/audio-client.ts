@@ -1,5 +1,6 @@
 import type { AudioId } from "../model/types";
 import { audio } from "../content/media";
+import { validateAudioReference, type PublishedAudioCatalog } from "../../../contracts/demo-audio";
 
 function waitForRetry(ms: number, signal: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
@@ -12,8 +13,15 @@ function waitForRetry(ms: number, signal: AbortSignal) {
 
 /** A session shortcut for published URLs, in addition to (never instead of) the global server cache. */
 export function createCatalogAudioClient(request: typeof fetch = fetch,
-  wait: (ms: number, signal: AbortSignal) => Promise<void> = waitForRetry) {
+  wait: (ms: number, signal: AbortSignal) => Promise<void> = waitForRetry, published: PublishedAudioCatalog = {}) {
   const ready = new Map<string, string>();
+  for (const [id, value] of Object.entries(published)) {
+    if (!Object.hasOwn(audio, id)) throw new Error("INVALID_AUDIO_RESPONSE");
+    const reference = validateAudioReference(value);
+    const text = audio[id as AudioId].text;
+    if (ready.has(text) && ready.get(text) !== reference.audioUrl) throw new Error("INVALID_AUDIO_RESPONSE");
+    ready.set(text, reference.audioUrl);
+  }
   return async (id: AudioId, signal: AbortSignal) => {
     signal.throwIfAborted();
     // Different narrative roles/IDs can use the exact same approved phrase.
@@ -40,12 +48,7 @@ export async function requestCatalogAudio(id: AudioId, signal: AbortSignal, requ
     }
     if (!response.ok) throw new Error("AUDIO_UNAVAILABLE");
     const payload: unknown = await response.json();
-    if (!payload || typeof payload !== "object" || !("key" in payload) || !("audioUrl" in payload)
-      || typeof payload.key !== "string" || !/^[a-f0-9]{64}$/.test(payload.key) || typeof payload.audioUrl !== "string") throw new Error("INVALID_AUDIO_RESPONSE");
-    const url = new URL(payload.audioUrl);
-    if (url.protocol !== "https:" || !url.hostname.endsWith(".public.blob.vercel-storage.com") || url.username || url.password
-      || url.search || url.pathname !== `/speech-cache/v3/${payload.key}.mp3`) throw new Error("INVALID_AUDIO_RESPONSE");
-    return url.href;
+    return validateAudioReference(payload).audioUrl;
   }
   throw new Error("AUDIO_STILL_PREPARING");
 }

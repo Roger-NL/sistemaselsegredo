@@ -4,6 +4,7 @@ import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { DemoAudioPlayer, type AudioProgress } from "./player";
 import { createCatalogAudioClient } from "../services/audio-client";
 import type { AudioId } from "../model/types";
+import type { PublishedAudioCatalog } from "../../../contracts/demo-audio";
 
 export type Playback = { source: string | null; status: "idle" | AudioProgress["status"]; progress: number };
 export type DemoAudio = {
@@ -16,7 +17,7 @@ export type DemoAudio = {
 const idle: Playback = { source: null, status: "idle", progress: 0 };
 export const DemoAudioContext = createContext<DemoAudio | null>(null);
 
-export function useDemoAudio(activityKey: string): DemoAudio {
+export function useDemoAudio(activityKey: string, publishedAudio: PublishedAudioCatalog = {}): DemoAudio {
   const [state, setState] = useState<Playback & { activityKey: string }>({ ...idle, activityKey });
   const playback = state.activityKey === activityKey ? state : idle;
   const player = useRef<DemoAudioPlayer | null>(null);
@@ -41,11 +42,11 @@ export function useDemoAudio(activityKey: string): DemoAudio {
     const controller = new AbortController(); operation.current.controller = controller;
     operation.current.source = source;
     setState({ activityKey, source, status: "loading", progress: 0 });
-    resolver.current ??= createCatalogAudioClient();
-    player.current ??= new DemoAudioPlayer();
-    player.current.setPlaybackRate(operation.current.rate);
     const ids = Array.isArray(input) ? input : [input];
     try {
+      resolver.current ??= createCatalogAudioClient(undefined, undefined, publishedAudio);
+      player.current ??= new DemoAudioPlayer();
+      player.current.setPlaybackRate(operation.current.rate);
       const ok = await player.current.playSequence(ids.map(id => () => resolver.current!(id, controller.signal)), update => {
         if (version === operation.current.version) setState({ ...update, activityKey, source });
       });

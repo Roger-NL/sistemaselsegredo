@@ -1,5 +1,21 @@
 # Validação completa do áudio da demo
 
+## Retirada do banco da reprodução publicada — 24/10/2026
+
+Para remover a causa do pico observado, a página agora contém um índice de URLs dos arquivos globais já existentes. O índice é produzido após leitura/verificação do ledger e dos MP3s, validado no servidor contra texto + parâmetros ativos e entregue como dados serializáveis. Não contém configuração de voz ou credenciais. A sessão nova resolve a primeira frase localmente e solicita apenas o MP3 ao Blob. A API também devolve itens indexados sem banco/rate limit; geração de item ausente mantém origem, ID permitido, rate limit e lock global. Mudança de texto/configuração invalida a referência anterior.
+
+Verificação real `--indexed`, de 2026-10-24T01:40:57.116Z a 2026-10-24T01:41:03.079Z: transporte da API proibido durante as resoluções. Duas sessões novas, 50/50 IDs cada, 46 MP3s baixados e decodificados, hashes conferidos. **Zero leituras de metadados durante resolução/replay; zero tentativas adicionais de geração.** Snapshots do ledger antes/depois idênticos (inventário de auditoria separado da reprodução).
+
+| Medida | Mediana | P95 | Máximo |
+|---|---:|---:|---:|
+| Resolução inicial dos IDs pelo índice | 0,007ms | 0,015ms | 0,029ms |
+| Outra sessão, IDs em ordem inversa | 0,001ms | 0,003ms | 0,087ms |
+| Primeiro byte dos arquivos no CDN | 60,900ms | 70,360ms | 243,812ms |
+
+Inicializar o catálogo levou 0,227ms/0,157ms nas duas sessões. DTO: 11.751 bytes, 2.172 bytes gzip; não dispara downloads ao abrir/restaurar a demo. São medidas de resolução de URL e transferência, **não uma medição de clique até som em navegador/celular**. A consulta que levou 10,7s deixa de fazer parte deste caminho; condições da rede/CDN ou do dispositivo ainda podem variar.
+
+137 testes/23 arquivos, lint, TypeScript e build aprovados. Regressões incluem três sessões novas com os 50 IDs e transporte bloqueado, resposta da API com banco/admissão indefinidamente pendentes, configuração diferente, índice inválido e fallback de ID ausente preservando o controle de geração. O HTML compilado de /demo contém as 50 referências. Varredura do índice e de 21 arquivos públicos compilados não encontrou os valores das quatro credenciais/configurações server-only verificadas. Nenhuma alteração do ledger, upload, geração ou deploy. Evidência sanitizada em `tmp/audio-indexed-verification/`; JSON versionado contém apenas referências de mídia pública. Referências de arquitetura: [props serializáveis do Next](https://nextjs.org/docs/app/getting-started/server-and-client-components) e [entrega pública do Blob](https://vercel.com/docs/vercel-blob/public-storage).
+
 ## Revalidação de latência e cache — 24/10/2026
 
 Solicitação: testar a melhoria de início, o círculo e o reaproveitamento das frases. Validação nova executada de forma somente leitura no serviço real de cache e no CDN, sem chamar a API HTTP da demo, o rate limit ou o provedor. A aba Chrome existente foi localizada, mas Browser Use recusou a observação por permissão salva/gerenciada. Não houve contorno. **Tempo de clique até som e aparência/reprodução no celular continuam sem validação em navegador/aparelho.**

@@ -1,2 +1,3 @@
 import { DemoHost } from "@/features/demo/DemoHost";
-export default function DemoPage() { return <DemoHost experience />; }
+import { pageAudioCatalog } from "@/server/speech/published";
+export default function DemoPage() { return <DemoHost experience publishedAudio={pageAudioCatalog()} />; }

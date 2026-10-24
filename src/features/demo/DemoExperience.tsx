@@ -17,8 +17,9 @@ import { HelpPanel } from "./components/HelpPanel";
 import { SceneFrame } from "./components/SceneFrame";
 import { ConversationHistory } from "./components/ConversationHistory";
 import type { AudioId, DemoEvent, DemoState } from "./model/types";
+import type { PublishedAudioCatalog } from "@/contracts/demo-audio";
 
-export function DemoExperience({ initial }: { initial: DemoState }) {
+export function DemoExperience({ initial, publishedAudio = {} }: { initial: DemoState; publishedAudio?: PublishedAudioCatalog }) {
   const [state, dispatch] = useReducer(transition, initial);
   const node = catalog[state.nodeId];
   const image = images[node.image];
@@ -27,7 +28,7 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
   const supportMenu = useRef<HTMLDialogElement>(null);
   const audioMenu = useRef<HTMLDialogElement>(null);
   const [draftProfile, setDraftProfile] = useState(initial.profile);
-  const demoAudio = useDemoAudio(`${state.nodeId}:${state.phase}:${state.reviewView}`);
+  const demoAudio = useDemoAudio(`${state.nodeId}:${state.phase}:${state.reviewView}`, publishedAudio);
   const [playbackRate, setPlaybackRate] = useState(1);
   const event = (type: DemoEvent["type"]) => dispatch({ at: node.id, type } as DemoEvent);
   useEffect(() => {

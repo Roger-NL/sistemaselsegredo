@@ -77,7 +77,7 @@ describe("single prepared-audio player", () => {
   });
   it("tracks actual playback, buffering, pause and a complete circle at the end", async () => {
     const element = new FakeAudio(); const progress = vi.fn();
-    const player = new DemoAudioPlayer(() => element);
+    const player = new DemoAudioPlayer(() => element as unknown as HTMLAudioElement);
     const done = player.playSequence(["recording.mp3"], progress);
     expect(progress).toHaveBeenLastCalledWith({ status: "loading", progress: 0 });
     element.duration = 4;
@@ -125,7 +125,7 @@ describe("single prepared-audio player", () => {
   });
   it("reports download failures locally without claiming playback completed", async () => {
     const element = new FakeAudio(); const progress = vi.fn();
-    const player = new DemoAudioPlayer(() => element);
+    const player = new DemoAudioPlayer(() => element as unknown as HTMLAudioElement);
     const done = player.playSequence(["missing.mp3"], progress);
     element.dispatchEvent(new Event("error"));
     expect(await done).toBe(false);
