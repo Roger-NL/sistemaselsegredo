@@ -832,11 +832,13 @@
 /* Shared scene layout: artwork fills the left column; all reading stays right. */
 .app-shell .scene-grid {
   grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  grid-template-rows:auto minmax(0,1fr);
+  /* Equal flexible tracks center the two content rows as a single group.
+     They collapse to zero when content needs the available height. */
+  grid-template-rows:minmax(0,1fr) auto auto minmax(0,1fr);
   column-gap:clamp(1.25rem,3vw,3rem);
   row-gap:.65rem;
 }
-.scene-intro { grid-column:2; grid-row:1; min-width:0; }
+.scene-intro { grid-column:2; grid-row:2; min-width:0; }
 .app-shell .scene-intro h1 { font-size:clamp(1.4rem,2.2vw,2.2rem); margin:.2rem 0 .4rem; }
 .app-shell .scene-intro .context { margin:.3rem 0 0; }
 .app-shell .cup-clue { color:var(--muted); font-size:.8rem; margin:.35rem 0 0; }
@@ -844,7 +846,7 @@
 .app-shell .scene-art { width:100%; height:100%; }
 .app-shell .scene-art picture { overflow:hidden; border-radius:12px; }
 .app-shell .scene-art picture img { position:absolute; inset:0; border:0; border-radius:0; object-fit:cover; object-position:50% 60%; }
-.app-shell .conversation-panel { grid-column:2; grid-row:2; justify-content:flex-start; }
+.app-shell .conversation-panel { grid-column:2; grid-row:3; justify-content:flex-start; }
 .app-shell .conversation-tools:empty { display:none; }
 .heard-line { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
 .heard-line > div { min-width:0; }

@@ -167,3 +167,7 @@ Responsável pediu imagem preenchendo todo o lado esquerdo em computador/tablet 
 No celular, situação → imagem → fala/atividade. As linhas de texto e atividade recebem altura natural; a imagem usa o restante da área disponível em vez de reservar uma altura fixa igual para atividades curtas e longas. Faixa mínima é menor em janelas baixas; foco de escrita continua recolhendo arte. Falas consecutivas de Lucas compartilham um cartão; cada trecho mantém tradução conforme nível e botão de áudio independente. Catálogo, cache e parâmetros intactos.
 
 101 testes, lint, TypeScript e build aprovados. Alterações guiadas pela captura fornecida; ausência de overflow em dimensões reais não foi medida. Preservado fallback acessível de reflow para janelas extremas; nenhuma tentativa de contornar bloqueio do navegador.
+
+## Centralização automática da leitura — 24/10/2026
+
+Responsável pediu centralizar verticalmente o conjunto inteiro da coluna direita quando curto, alinhando ao início quando longo. Grade desktop/tablet agora usa duas linhas automáticas consecutivas para situação/atividade, entre duas faixas flexíveis iguais com mínimo zero. O espaço livre se divide antes/depois do conjunto; quando falta espaço as faixas flexíveis colapsam, preservando acesso ao começo em vez de deslocá-lo para fora da área. Arte continua cobrindo a coluna esquerda inteira. Ordem e grade mobile permanecem intactas. Mudança só de CSS; sem nova geração de áudio ou alteração da história.
