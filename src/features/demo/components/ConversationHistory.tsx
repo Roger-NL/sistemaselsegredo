@@ -17,7 +17,7 @@ export function ConversationHistory({ state, lines, onReplay, label = "Conversa 
   const asset = audio[line.audioId];
   function move(next: number) { setPosition(next); setMeaning(false); }
   return <div className="conversation-history">
-    <button className="text-button" onClick={() => { move(fromStart ? 0 : lines.length - 1); dialog.current?.showModal(); }}>{label}{state.phase === "recall" ? " · consultar com apoio" : ""}</button>
+    <button className="text-button" onClick={() => { move(fromStart ? 0 : lines.length - 1); dialog.current?.showModal(); }}>{label}{state.phase === "recall" ? " · com apoio" : ""}</button>
     <dialog ref={dialog} className="demo-dialog history-dialog" aria-labelledby={title}>
       <div className="dialog-heading"><h2 id={title}>{label}</h2><button autoFocus onClick={() => dialog.current?.close()} aria-label="Fechar conversa">Fechar ×</button></div>
       <article className={`history-line ${line.role === "you" ? "history-you" : ""}`}>

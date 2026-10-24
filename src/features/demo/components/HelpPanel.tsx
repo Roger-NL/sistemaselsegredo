@@ -15,7 +15,7 @@ export function HelpPanel({ node, level, modelHidden, building, onHelp, onToggle
   const last = level === node.help.length;
   const model = node.kind === "response" && page === node.help.length - 1;
   return <aside className="help">
-    <button className="text-button" onClick={() => { if (level === 0) onHelp(); setPage(Math.max(0, level - 1)); dialog.current?.showModal(); }}>{level === 0 ? "Preciso de ajuda" : "Rever ajuda"}</button>
+    <button className="text-button" onClick={() => { if (level === 0) onHelp(); setPage(Math.max(0, level - 1)); dialog.current?.showModal(); }}>{level === 0 ? "Ajuda" : "Rever ajuda"}</button>
     <dialog ref={dialog} className="demo-dialog" aria-labelledby={title}>
       <div className="dialog-heading"><h2 id={title}>Um apoio para continuar</h2><button autoFocus onClick={() => dialog.current?.close()}>Voltar à conversa ×</button></div>
       <p className="help-clue">{model && modelHidden ? "O modelo está oculto para você tentar montar a resposta." : node.help[page]}</p>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { catalog } from "./content/catalog";
 import { audio, images } from "./content/media";
+import { mobileContext } from "./content/mobile-copy";
 import { profiles } from "./content/copy.pt-BR";
 import { practice, recognitionOptions } from "./model/practice";
 import { transition } from "./model/reducer";
@@ -46,20 +47,21 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
       if (notice) notice.textContent = "";
     };
   }, [state.nodeId, state.phase, state.reviewView]);
-  async function replay(id: AudioId) {
+  async function replay(input: AudioId | AudioId[]) {
     const version = ++audioOperation.current.version;
     pendingAudio.current?.abort();
     player.current?.cancel();
     const controller = new AbortController(); pendingAudio.current = controller;
     if (audioNotice.current) audioNotice.current.textContent = "Preparando o áudio… Você pode continuar pelo texto.";
     try {
-      const url = await requestCatalogAudio(id, controller.signal);
+      const ids = Array.isArray(input) ? input : [input];
+      const urls = await Promise.all(ids.map(id => requestCatalogAudio(id, controller.signal)));
       if (version !== audioOperation.current.version) return;
       pendingAudio.current = null;
       player.current ??= new DemoAudioPlayer();
       player.current.setPlaybackRate(audioOperation.current.rate);
       if (audioNotice.current) audioNotice.current.textContent = "Reproduzindo áudio.";
-      const ok = await player.current.playSequence([url]);
+      const ok = await player.current.playSequence(urls);
       if (version === audioOperation.current.version && audioNotice.current) audioNotice.current.textContent = ok ? "" : "Não foi possível tocar o áudio. Você pode continuar pelo texto ou tentar ouvir novamente.";
     } catch {
       if (version === audioOperation.current.version && !controller.signal.aborted && audioNotice.current) audioNotice.current.textContent = "O áudio está indisponível agora. O texto e sua conversa continuam disponíveis.";
@@ -71,7 +73,7 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
   const previous = [...state.transcript].reverse().find(line => line.role === "you");
   const previousNode = previous ? catalog[previous.nodeId] : null;
   const justSent = previousNode && "next" in previousNode && previousNode.next === node.id ? previous : null;
-  const history = state.transcript.filter(line => line.id !== justSent?.id && line.nodeId !== node.id
+  const history = state.transcript.filter(line => line.nodeId !== node.id
     && !(node.kind === "comprehension" && line.audioId === "C01"));
   const heard = node.heard ?? (node.kind === "comprehension" ? ["C01" as AudioId] : []);
   const modelVisible = state.phase === "present" || state.phase === "ready";
@@ -81,7 +83,7 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
     : node.kind === "response" ? <>
       {state.phase === "recall" && <button className="primary" onClick={() => event("CHECK")}>{state.activityProfile === "less" ? "Escrever minha resposta" : "Tentar com opções"}</button>}
       {state.phase === "present" && <button className="primary" onClick={() => event("PREPARE")}>Preparar resposta</button>}
-      {state.phase === "build" && <div className="actions"><button className="primary" onClick={() => event("SUBMIT")}>Responder</button><button disabled={!state.selected.length} onClick={() => event("CLEAR")}>Limpar montagem</button>{state.assistedBlocks && <button onClick={() => event("WRITE_AGAIN")}>Voltar à escrita</button>}</div>}
+      {state.phase === "build" && <div className="actions"><button className="primary" onClick={() => event("SUBMIT")}>Responder</button><button disabled={!state.selected.length} onClick={() => event("CLEAR")} aria-label="Limpar montagem">Limpar</button>{state.assistedBlocks && <button onClick={() => event("WRITE_AGAIN")} aria-label="Voltar à escrita">Escrever</button>}</div>}
       {state.phase === "write" && <div className="actions"><button className="primary" disabled={!state.draft.trim()} type="submit" form="written-response-form">Responder</button><button type="button" onClick={() => event("USE_BLOCKS")}>Tentar com peças</button></div>}
       {state.phase === "select" && <button className="primary" disabled={!state.recognized} onClick={() => event("SUBMIT")}>Responder</button>}
       {state.phase === "ready" && <button className="primary" onClick={() => event("SUBMIT")}>{node.button ?? "Responder"}</button>}
@@ -113,17 +115,17 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
       intro={<header className="scene-intro">
         <h1 ref={heading} tabIndex={-1}>{node.id === "p1.first" ? "Um encontro na cafeteria." : node.kind === "choice" ? node.prompt : node.kind === "comprehension" ? "O que ele está perguntando?" : node.id === "p6.safe" ? "Ele segura o copo a tempo." : node.id === "p2.send" ? "Agora responda a Lucas." : state.phase === "write" ? "Escreva sua resposta." : state.phase === "select" ? "Escolha sua expressão." : state.phase === "build" ? node.kind === "response" && node.mode === "recombine" ? "Complete a resposta." : "Monte a resposta." : "A conversa continua."}</h1>
         {node.id === "p10.contact" && state.decisions["p9.pause"] === "stay" && <p>Depois de mais alguns minutos, chega a hora de se despedir.</p>}
-        <p className="context">{node.context}</p>
-        {(node.image === "V02" || node.image === "V04") && <p className="cup-clue">Seu pedido: based · iced coffee. Copo mostrado: {node.image === "V02" ? "lucas" : "based"}.</p>}
+        <p className="context">{mobileContext[node.id] ? <><span className="desktop-context">{node.context}</span><span className="mobile-context">{mobileContext[node.id]}</span></> : node.context}</p>
+        {(node.image === "V02" || node.image === "V04") && <p className="cup-clue">Seu café: based · iced coffee. Copo: {node.image === "V02" ? "lucas" : "based"}.</p>}
       </header>}
       artwork={<aside className="scene-column"><figure className="scene-art"><picture><source media="(max-width: 760px)" srcSet={image.mobile} /><Image unoptimized width={960} height={640} src={image.path} alt={image.description} /></picture></figure></aside>}>
       <div className="activity-body"><div className="activity-content">
-        <div className="conversation-tools"><ConversationHistory key={`${node.id}:${state.phase}`} state={state} lines={history} onReplay={replay} /><HelpPanel key={node.id} node={node} level={helpLevel} modelHidden={state.modelHidden} building={["build", "write", "select"].includes(state.phase)} onHelp={() => event("HELP")} onToggleModel={() => event("TOGGLE_MODEL")} onUseSupport={() => event("USE_SUPPORT")} onReplay={replay} /></div>
+        <div className="conversation-tools"><ConversationHistory label="Histórico" key={`${node.id}:${state.phase}`} state={state} lines={history} onReplay={replay} /><HelpPanel key={node.id} node={node} level={helpLevel} modelHidden={state.modelHidden} building={["build", "write", "select"].includes(state.phase)} onHelp={() => event("HELP")} onToggleModel={() => event("TOGGLE_MODEL")} onUseSupport={() => event("USE_SUPPORT")} onReplay={replay} /></div>
         {justSent && <article className="speech sent"><small>Você<span className="sent-detail"> · fala enviada</span></small><p lang="en">{justSent.written ?? audio[justSent.audioId].text}</p><button className="text-button" onClick={() => replay(justSent.audioId)}>{justSent.written ? "Ouvir modelo" : "Ouvir resposta"}</button></article>}
-        {heard.length > 0 && <article className="speech heard"><small>Lucas</small>{heard.map(id => <div className="heard-line" key={id}><div><p lang="en">{audio[id].text}</p>{state.activityProfile === "beginner" && node.part > 2 && <p className="meaning">{audio[id].meaning}</p>}</div><button className="text-button" aria-label={`Ouvir: ${audio[id].text}`} onClick={() => replay(id)}>Ouvir</button></div>)}</article>}
+        {heard.length > 0 && <article className="speech heard"><small>Lucas</small><div className="heard-line"><div><p lang="en">{heard.map(id => audio[id].text).join(" ")}</p>{state.activityProfile === "beginner" && node.part > 2 && <p className="meaning">{heard.map(id => audio[id].meaning).join(" ")}</p>}</div><button className="text-button" aria-label="Ouvir fala de Lucas" onClick={() => replay(heard)}>Ouvir</button></div></article>}
         {node.kind === "scene" && (node.id === "p2.meaning" || node.id === "p2.model" && state.activityProfile === "beginner") && <article className="expression"><small>Expressão apresentada · ainda não enviada</small><p lang="en">{audio.U01.text}</p><p>{audio.U01.meaning}</p><button onClick={() => replay("U01")}>Ouvir</button></article>}
         {node.kind === "response" && response && <>
-          {state.phase === "recall" && <div className="recall"><p>{expressionHistory(state, node.response) === "used" ? "Você já usou uma expressão para isso. Tente lembrar antes de conferir." : "Você encontrou uma expressão para isso na conversa. Tente lembrar antes de conferir."}</p></div>}
+          {state.phase === "recall" && <div className="recall"><p>{expressionHistory(state, node.response) === "used" ? "Você já usou esta expressão. Tente lembrar antes de consultar." : "Você já encontrou esta expressão. Tente lembrar antes de consultar."}</p></div>}
           {modelVisible && <article className="expression"><small>Expressão apresentada · ainda não enviada</small><p lang="en">{response.text}</p>{(state.activityProfile !== "less" || node.id === "p6.warn" || helpLevel > 0) && <p>{response.meaning}</p>}<button onClick={() => replay(node.response)}>Ouvir</button></article>}
           {state.phase === "build" && <div className="construction">
             {exercise?.skeleton && <p className="skeleton" lang="en">{exercise.skeleton}</p>}
@@ -134,7 +136,7 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
             <label htmlFor="written-answer">Sua resposta em inglês</label>
             <input id="written-answer" type="text" enterKeyHint="send" lang="en" value={state.draft} maxLength={240} autoComplete="off" spellCheck={false} autoCapitalize="sentences" onChange={event => dispatch({ at: node.id, type: "TYPE", text: event.target.value })} />
           </form>}
-          {state.phase === "select" && <div className="recognition-response"><p>Qual expressão combina com o que você quer dizer?</p><div className="choices">{recognitionOptions(node).map(id => <button key={id} lang="en" aria-pressed={state.recognized === id} onClick={() => dispatch({ at: node.id, type: "RECOGNIZE", response: id })}>{audio[id].text}</button>)}</div></div>}
+          {state.phase === "select" && <div className="recognition-response"><div className="choices" aria-label="Expressões para responder">{recognitionOptions(node).map(id => <button key={id} lang="en" aria-pressed={state.recognized === id} onClick={() => dispatch({ at: node.id, type: "RECOGNIZE", response: id })}>{audio[id].text}</button>)}</div></div>}
         </>}
         <p role="status" className="notice">{state.notice}</p>
 

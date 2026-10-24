@@ -12,12 +12,13 @@ export function SceneFrame({ intro, artwork, children, activityKey }: { intro: R
     if (!root) return;
     root.dataset.density = "comfortable";
     let scheduled = 0;
-    let previousWidth = root.clientWidth;
-    let previousHeight = root.clientHeight;
+    let previousWidth = window.innerWidth;
+    let previousHeight = window.visualViewport?.height ?? window.innerHeight;
     const measure = () => {
       scheduled = 0;
-      if (Math.abs(root.clientWidth - previousWidth) > 16 || Math.abs(root.clientHeight - previousHeight) > 16) {
-        previousWidth = root.clientWidth; previousHeight = root.clientHeight;
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      if (Math.abs(window.innerWidth - previousWidth) > 16 || Math.abs(viewportHeight - previousHeight) > 16) {
+        previousWidth = window.innerWidth; previousHeight = viewportHeight;
         root.dataset.density = "comfortable";
         schedule(); return;
       }
