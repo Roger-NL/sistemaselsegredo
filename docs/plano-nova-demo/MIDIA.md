@@ -6,7 +6,7 @@ As 12 imagens aprovadas estão integradas à história de Lucas e BASEDSPEAK. Os
 
 - `public/demo/cafe/v2/images/`: 12 WebPs a 960×640 e 12 variantes móveis a 640×427, qualidade 48/effort 6. Total desktop aproximadamente 907 KiB; mobile 449 KiB. As quatro referências anteriores somavam 3.739 KiB, portanto a sequência completa nova reduz o peso total em cerca de 76% no desktop e 88% no celular.
 - Um `picture` escolhe o arquivo móvel até 760px. As versões já comprimidas são servidas sem nova transformação do Next. A entrada e a conversa não montam todas as 12 imagens simultaneamente.
-- Sem recorte destrutivo: `object-fit: contain` mantém rostos, gestos e copos completos. As pistas também aparecem em texto acessível: seu nome é BASEDSPEAK; o outro copo leva LUCAS.
+- Preenchimento proporcional com `object-fit: cover`: a imagem ocupa a coluna esquerda inteira em computador/tablet, sem faixas vazias nem deformação. O enquadramento pode recortar bordas para preencher a área; os arquivos originais permanecem intactos. As pistas também aparecem em texto acessível: seu nome é based; o outro copo leva LUCAS.
 - `manifest.json` registra dimensões, bytes, origem e SHA-256 dos originais. `node scripts/optimize-cafe-images.mjs` reproduz a exportação sem geração remota nem alteração de originais. É necessário ter os PNGs locais aprovados para executá-lo.
 - V01 encontro; V02 detalhe LUCAS; V03 desculpa; V04 copo BASEDSPEAK; V05 prova do café; V06 risco; V07 copo salvo; V08 cansaço; V09 convite; V10 mesa; V11 aprendendo inglês; V12 despedida.
 - As quatro referências JPG antigas foram removidas de `public`. Não há referências ativas a SARAH nem a números de pedido na interface/roteiro novo. Os documentos históricos mantêm o registro da versão antiga.

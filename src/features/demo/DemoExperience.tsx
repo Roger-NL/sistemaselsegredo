@@ -72,6 +72,7 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
   const justSent = previousNode && "next" in previousNode && previousNode.next === node.id ? previous : null;
   const history = state.transcript.filter(line => line.id !== justSent?.id && line.nodeId !== node.id
     && !(node.kind === "comprehension" && line.audioId === "C01"));
+  const heard = node.heard ?? (node.kind === "comprehension" ? ["C01" as AudioId] : []);
   const modelVisible = state.phase === "present" || state.phase === "ready";
   return <div className="experience">
     <div className="experience-bar"><span>Parte {node.part} de 10</span><progress max={10} value={node.part} aria-label="Parte da conversa" />
@@ -107,7 +108,7 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
       <section className="conversation-panel">
         <div className="conversation-tools"><ConversationHistory key={`${node.id}:${state.phase}`} state={state} lines={history} onReplay={replay} /><HelpPanel key={node.id} node={node} level={helpLevel} modelHidden={state.modelHidden} building={["build", "write", "select"].includes(state.phase)} onHelp={() => event("HELP")} onToggleModel={() => event("TOGGLE_MODEL")} onUseSupport={() => event("USE_SUPPORT")} onReplay={replay} /></div>
         {justSent && <article className="speech sent"><small>Você · fala enviada</small><p lang="en">{justSent.written ?? audio[justSent.audioId].text}</p><button className="text-button" onClick={() => replay(justSent.audioId)}>{justSent.written ? "Ouvir modelo" : "Ouvir resposta"}</button></article>}
-        {(node.heard ?? (node.kind === "comprehension" ? ["C01" as AudioId] : [])).map(id => <article className="speech" key={id}><small>Lucas</small><p lang="en">{audio[id].text}</p>{state.activityProfile === "beginner" && node.part > 2 && <p className="meaning">{audio[id].meaning}</p>}<button className="text-button" onClick={() => replay(id)}>Ouvir fala</button></article>)}
+        {heard.length > 0 && <article className="speech heard"><small>Lucas</small>{heard.map(id => <div className="heard-line" key={id}><div><p lang="en">{audio[id].text}</p>{state.activityProfile === "beginner" && node.part > 2 && <p className="meaning">{audio[id].meaning}</p>}</div><button className="text-button" aria-label={`Ouvir: ${audio[id].text}`} onClick={() => replay(id)}>Ouvir</button></div>)}</article>}
         {node.kind === "scene" && (node.id === "p2.meaning" || node.id === "p2.model" && state.activityProfile === "beginner") && <article className="expression"><small>Expressão apresentada · ainda não enviada</small><p lang="en">{audio.U01.text}</p><p>{audio.U01.meaning}</p><button onClick={() => replay("U01")}>Ouvir</button></article>}
         {node.kind === "scene" && <button className="primary" onClick={() => event("NEXT")}>{node.button}</button>}
         {node.kind === "comprehension" && <div className="choices"><button onClick={() => dispatch({ at: node.id, type: "UNDERSTAND", correct: true })}>Esse café é seu?</button><button onClick={() => dispatch({ at: node.id, type: "UNDERSTAND", correct: false })}>Você quer um café?</button></div>}
