@@ -38,18 +38,18 @@ export const audio = Object.fromEntries([
 
 export type ImageAsset = { id: ImageId; description: string; path: string; mobile: string; ready: true };
 const scenes = [
- "Lucas e beezed se encontram no balcão da cafeteria.",
- "Lucas aponta o copo escrito LUCAS; o seu copo leva beezed.",
+ "Lucas e based se encontram no balcão da cafeteria.",
+ "Lucas aponta o copo escrito LUCAS; o seu copo leva based.",
  "Lucas pede desculpas pelo mal-entendido.",
- "Chega o café com o nome beezed. Lucas segura o copo LUCAS.",
+ "Chega o café com o nome based. Lucas segura o copo LUCAS.",
  "Os dois provam seus cafés.",
  "O copo de Lucas está prestes a cair. A cena espera por você.",
  "Lucas segura o copo a tempo.",
  "Lucas conta sobre um dia cansativo.",
- "Lucas convida beezed para uma mesa livre.",
- "Lucas e beezed conversam à mesa.",
- "beezed conta que está aprendendo inglês.",
- "Lucas e beezed se despedem na cafeteria.",
+ "Lucas convida based para uma mesa livre.",
+ "Lucas e based conversam à mesa.",
+ "based conta que está aprendendo inglês.",
+ "Lucas e based se despedem na cafeteria.",
 ] as const;
 export const images = Object.fromEntries(scenes.map((description, i) => {
  const id = `V${String(i + 1).padStart(2, "0")}` as ImageId;

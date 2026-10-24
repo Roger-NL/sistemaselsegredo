@@ -40,7 +40,7 @@ describe("approved lightweight café media", () => {
   it("removes retired visual cues and preview assets from the product", () => {
     const copy = JSON.stringify([nodes, images, Object.values(audio).map(a => a.meaning)]);
     expect(copy).not.toMatch(/#18|#24|SARAH|cansada|Obrigada/);
-    expect(images.V02.description).toContain("LUCAS"); expect(images.V04.description).toContain("beezed");
+    expect(images.V02.description).toContain("LUCAS"); expect(images.V04.description).toContain("based");
     expect(existsSync("public/demo/cafe/v1/previews/counter.jpg")).toBe(false);
   });
   it("preserves every English speech text and ID, so no audio key needs to change", () => {

@@ -101,7 +101,7 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
         <h1 ref={heading} tabIndex={-1}>{node.id === "p1.first" ? "Um encontro na cafeteria." : node.kind === "choice" ? node.prompt : node.kind === "comprehension" ? "O que ele está perguntando?" : node.id === "p6.safe" ? "Ele segura o copo a tempo." : node.id === "p2.send" ? "Agora responda a Lucas." : state.phase === "write" ? "Escreva sua resposta." : state.phase === "select" ? "Escolha sua expressão." : state.phase === "build" ? node.kind === "response" && node.mode === "recombine" ? "Complete a resposta." : "Monte a resposta." : "A conversa continua."}</h1>
         {node.id === "p10.contact" && state.decisions["p9.pause"] === "stay" && <p>Depois de mais alguns minutos, chega a hora de se despedir.</p>}
         <p className="context">{node.context}</p>
-        {(node.image === "V02" || node.image === "V04") && <p className="cup-clue">Seu pedido: beezed · iced coffee. Copo mostrado: {node.image === "V02" ? "lucas" : "beezed"}.</p>}
+        {(node.image === "V02" || node.image === "V04") && <p className="cup-clue">Seu pedido: based · iced coffee. Copo mostrado: {node.image === "V02" ? "lucas" : "based"}.</p>}
       </header>
       <aside className="scene-column"><figure className="scene-art"><picture><source media="(max-width: 760px)" srcSet={image.mobile} /><Image unoptimized width={960} height={640} src={image.path} alt={image.description} /></picture></figure></aside>
       <section className="conversation-panel">

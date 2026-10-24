@@ -23,4 +23,4 @@ Amostras WebP e uma folha de contato foram inspecionadas localmente; a inspeçã
 
 ## Ajuste posterior da apresentação — 24/10/2026
 
-A pedido do responsável, nome textual agora é beezed em minúsculas; nomes impressos nos PNGs/WebPs não foram alterados. A descrição acessível permanece no alt; a legenda visual sob a imagem foi retirada para evitar dois inícios concorrentes. Situação e título aparecem acima da cena. Pedido aparece como pista textual apenas nas comparações V02/V04. A faixa da arte no celular ganhou largura integral e mais altura.
+A pedido do responsável, nome textual agora é based em minúsculas; nomes impressos nos PNGs/WebPs não foram alterados. A descrição acessível permanece no alt; a legenda visual sob a imagem foi retirada para evitar dois inícios concorrentes. Situação e título aparecem acima da cena. Pedido aparece como pista textual apenas nas comparações V02/V04. A faixa da arte no celular ganhou largura integral e mais altura.
