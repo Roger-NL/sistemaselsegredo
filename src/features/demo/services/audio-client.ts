@@ -1,4 +1,5 @@
 import type { AudioId } from "../model/types";
+import { audio } from "../content/media";
 
 function waitForRetry(ms: number, signal: AbortSignal) {
   return new Promise<void>((resolve, reject) => {
@@ -12,14 +13,16 @@ function waitForRetry(ms: number, signal: AbortSignal) {
 /** A session shortcut for published URLs, in addition to (never instead of) the global server cache. */
 export function createCatalogAudioClient(request: typeof fetch = fetch,
   wait: (ms: number, signal: AbortSignal) => Promise<void> = waitForRetry) {
-  const ready = new Map<AudioId, string>();
+  const ready = new Map<string, string>();
   return async (id: AudioId, signal: AbortSignal) => {
     signal.throwIfAborted();
-    const cached = ready.get(id);
+    // Different narrative roles/IDs can use the exact same approved phrase.
+    const text = audio[id].text;
+    const cached = ready.get(text);
     if (cached) return cached;
     const url = await requestCatalogAudio(id, signal, request, wait);
     signal.throwIfAborted();
-    ready.set(id, url);
+    ready.set(text, url);
     return url;
   };
 }

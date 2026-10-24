@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { DemoAudioPlayer } from "@/features/demo/audio/player";
+import { nodes } from "@/features/demo/content/catalog";
+import { audio } from "@/features/demo/content/media";
 
 class FakeAudio extends EventTarget {
   preload = ""; src = "test";
@@ -8,6 +10,43 @@ class FakeAudio extends EventTarget {
   play = vi.fn(async () => {}); pause = vi.fn();
 }
 describe("single prepared-audio player", () => {
+  it("finishes every stage's single phrases and grouped lines once, with monotonic finite progress", async () => {
+    const played = new Set<string>();
+    for (const node of nodes) {
+      const groups = [...(node.heard?.length ? [node.heard] : []), ...(node.kind === "response" ? [[node.response]] : [])];
+      for (const group of groups) {
+        const progress = vi.fn();
+        const create = vi.fn((id: string) => {
+          played.add(id);
+          const element = new FakeAudio();
+          // Vary clip lengths to exercise short words and longer sentences.
+          element.duration = audio[id as keyof typeof audio].text.length / 10;
+          element.play.mockImplementation(async () => {
+            queueMicrotask(() => {
+              element.dispatchEvent(new Event("playing"));
+              for (const fraction of [0, .25, .5, .75]) {
+                element.currentTime = element.duration * fraction;
+                element.dispatchEvent(new Event("timeupdate"));
+              }
+              element.currentTime = element.duration;
+              element.dispatchEvent(new Event("ended"));
+            });
+          });
+          return element as unknown as HTMLAudioElement;
+        });
+        expect(await new DemoAudioPlayer(create).playSequence(group, progress), node.id).toBe(true);
+        const updates = progress.mock.calls.map(([update]) => update);
+        expect(updates.at(-1), node.id).toEqual({ status: "ended", progress: 1 });
+        expect(updates.filter(update => update.status === "ended"), node.id).toHaveLength(1);
+        for (let index = 0; index < updates.length; index++) {
+          expect(Number.isFinite(updates[index].progress), node.id).toBe(true);
+          expect(updates[index].progress, node.id).toBeGreaterThanOrEqual(index ? updates[index - 1].progress : 0);
+          expect(updates[index].progress, node.id).toBeLessThanOrEqual(1);
+        }
+      }
+    }
+    expect([...played].sort()).toEqual(Object.keys(audio).sort());
+  });
   it("changes playback rate and resumes the same file without creating another resource", async () => {
     const element = new FakeAudio(); const create = vi.fn().mockReturnValue(element);
     const player = new DemoAudioPlayer(create);

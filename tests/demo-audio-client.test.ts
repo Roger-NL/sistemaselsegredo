@@ -3,6 +3,19 @@ import { createCatalogAudioClient, requestCatalogAudio } from "@/features/demo/s
 const key = "a".repeat(64);
 const url = `https://test.public.blob.vercel-storage.com/speech-cache/v3/${key}.mp3`;
 describe("catalog audio client", () => {
+  it("reuses an identical phrase across narrative IDs without merging different punctuation", async () => {
+    const request = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ key, audioUrl: url }));
+    const resolve = createCatalogAudioClient(request);
+    const signal = new AbortController().signal;
+    for (const [first, second] of [["C21", "U09"], ["C22", "U14"], ["C24", "U13"], ["C25", "U04"]] as const) {
+      const before = request.mock.calls.length;
+      expect(await resolve(first, signal)).toBe(url);
+      expect(await resolve(second, signal)).toBe(url);
+      expect(request).toHaveBeenCalledTimes(before + 1);
+    }
+    await resolve("C30", signal); // Me too! remains distinct from Me too.
+    expect(request).toHaveBeenCalledTimes(5);
+  });
   it("replays a known recording without another API lookup, but a new session still consults the global cache", async () => {
     const request = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ key, audioUrl: url }));
     const resolve = createCatalogAudioClient(request);
