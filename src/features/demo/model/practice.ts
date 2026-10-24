@@ -18,7 +18,7 @@ export function practice(node: ResponseNode, profile: SupportProfile) {
 export function responsePhase(state: DemoState, node: ResponseNode, introducing = true): DemoState["phase"] {
   if (node.id === "p6.warn") return "ready";
   if (introducing && node.mode === "recall" && expressionHistory(state, node.response) !== "new") return "recall";
-  if (introducing && state.activityProfile === "beginner" && node.id !== "p2.prepare" && expressionHistory(state, node.response) === "new") return "present";
+  if (introducing && state.activityProfile === "beginner" && expressionHistory(state, node.response) === "new") return "present";
   const mode: "send" | "write" | "select" | "build" = practice(node, state.activityProfile).mode;
   return mode === "send" ? "ready" : mode;
 }

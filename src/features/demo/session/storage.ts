@@ -6,8 +6,9 @@ export const STORAGE_KEY = "basedspeak.demo.cafe.v1";
 type StoragePort = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 export type RestoreResult = { status: "ok"; state: DemoState } | { status: "empty" | "unavailable" | "invalid" };
 const isRecord = (x: unknown): x is Record<string, unknown> => Boolean(x && typeof x === "object" && !Array.isArray(x));
-function validEvent(value: unknown): value is DemoEvent {
-  if (!isRecord(value) || typeof value.at !== "string" || !catalog[value.at]) return false;
+const removedPreparation = new Set(["p2.model", "p2.prepare", "p2.meaning"]);
+function validEvent(value: unknown, legacy = false): value is DemoEvent {
+  if (!isRecord(value) || typeof value.at !== "string" || (!catalog[value.at] && !(legacy && removedPreparation.has(value.at)))) return false;
   switch (value.type) {
     case "NEXT": case "PREPARE": case "SUBMIT": case "CHECK": case "HELP": case "USE_SUPPORT": case "CLEAR": case "TOGGLE_MODEL": return true;
     case "TYPE": return typeof value.text === "string" && value.text.length <= 240;
@@ -26,16 +27,40 @@ export function decodeSnapshot(raw: string): DemoState | null {
   try {
     if (raw.length > 1_000_000) return null;
     const data: unknown = JSON.parse(raw);
-    if (!isRecord(data) || data.schemaVersion !== SCHEMA_VERSION || data.storyVersion !== STORY_VERSION
+    if (!isRecord(data) || data.schemaVersion !== SCHEMA_VERSION || (data.storyVersion !== STORY_VERSION && data.storyVersion !== "cafe-v2")
       || typeof data.runId !== "string" || !/^[\w-]{8,100}$/.test(data.runId)
       || typeof data.startedAt !== "number" || !Number.isFinite(data.startedAt)
       || !PROFILES.includes(data.initialProfile as SupportProfile) || !Array.isArray(data.journal) || data.journal.length > 4_000) return null;
-    let state = createDemo(data.initialProfile as SupportProfile, data.runId, data.startedAt);
+    const legacy = data.storyVersion === "cafe-v2";
+    const journal: DemoEvent[] = [];
     for (const event of data.journal) {
-      if (!validEvent(event)) return null;
+      if (!validEvent(event, legacy)) return null;
+      journal.push(event);
+    }
+    const hadActualResponse = journal.some(event => event.at === "p2.send");
+    // A support switch inside removed activities cannot be replayed unambiguously.
+    // Keep the original snapshot intact and report incompatibility in that case.
+    if (legacy && hadActualResponse && journal.some(event => removedPreparation.has(event.at) && event.type === "PROFILE")) return null;
+    let state = createDemo(data.initialProfile as SupportProfile, data.runId, data.startedAt);
+    const apply = (event: DemoEvent): boolean => {
       const next = transition(state, event);
-      if (next === state) return null;
-      state = next;
+      if (next === state) return false;
+      state = next; return true;
+    };
+    for (const original of journal) {
+      let event = original;
+      if (legacy && removedPreparation.has(event.at)) {
+        // Removed screens never sent a reply. Do not turn a practice submission
+        // into an actual send when restoring the shorter flow.
+        if (hadActualResponse || event.type === "NEXT" || event.type === "SUBMIT" || event.type === "USE_SUPPORT") continue;
+        if (event.at !== "p2.prepare" && event.type !== "PROFILE") return null;
+        event = { ...event, at: "p2.send" };
+        if (state.nodeId !== "p2.send") return null;
+        if (state.phase === "present" && ["BLOCK", "TYPE", "REMOVE_BLOCK", "CLEAR", "USE_BLOCKS", "WRITE_AGAIN"].includes(event.type)) {
+          if (!apply({ at: "p2.send", type: "PREPARE" })) return null;
+        }
+      }
+      if (!apply(event)) return null;
     }
     return state;
   } catch { return null; }

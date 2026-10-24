@@ -1,5 +1,12 @@
 # Projeto técnico da demo pública
 
+## Correção do início — cafe-v3, 24/10/2026
+
+Esta revisão prevalece sobre a sequência preparatória descrita nas versões anteriores. Depois de `p2.question`, o roteiro vai diretamente para `p2.send`: Guiado apresenta o modelo uma vez e permite montar; Com pistas começa na montagem; Mais autônomo começa na escrita. Um envio correto passa diretamente a `p2.reaction` (Oh! Sorry!), com U01 registrado uma única vez. Não existem telas separadas p2.model/p2.prepare/p2.meaning nem montagem preparationOnly. O rótulo do modelo é Você pode dizer; Tentar responder abre o exercício e Enviar envia de fato. Ajuda completa oferece Enviar com apoio.
+
+Recuperação cafe-v2 filtra telas antigas e mantém envios reais. Quando só havia treino parcial, mantém rascunho/peças sem inventar um envio. Mudanças de apoio em etapas removidas que não possam ser reproduzidas com segurança resultam em incompatibilidade, preservando o snapshot original. Story version cafe-v3 mantém o mesmo catálogo de voz e as 12 imagens.
+
+
 Projeto do roteiro aprovado. A revisão de 23/10/2026 em [REVISAO-EXPERIENCIA-E-AUDIO.md](REVISAO-EXPERIENCIA-E-AUDIO.md) define a identidade Orbit, a conversa contínua e o áudio sob demanda; prevalece sobre decisões antigas de voz estática. Este documento não substitui o diálogo completo nem autoriza adicionar cenas.
 
 Execução: motor e interface locais implementados no Lote 2; fonte literal complementar em `output/pdf/BasedSpeak_Demo_Experiencia_Visual.pdf` (55 páginas). Estado de produção de mídia em [MIDIA.md](MIDIA.md). Coleta remota adiada; a avaliação preserva rascunho e não confirma envio.

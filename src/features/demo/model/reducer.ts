@@ -105,7 +105,6 @@ export function transition(state: DemoState, event: DemoEvent): DemoState {
       if (!supported && state.phase === "select" && state.recognized !== node.response) {
         next = fail(`${node.context} Escolha a expressão que combina com essa intenção.`); break;
       }
-      if (node.preparationOnly) { next = enter(state, node.next); break; }
       const transcript = [...state.transcript, { id: `${node.id}:${node.response}`, nodeId: node.id, part: node.part, audioId: node.response, role: "you" as const, ...(!supported && state.phase === "write" ? { written: state.draft } : {}) }];
       next = enter({ ...state, transcript, evidence: [...state.evidence, {
         nodeId: node.id, response: node.response,

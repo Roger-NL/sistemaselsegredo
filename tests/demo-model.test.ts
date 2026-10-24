@@ -70,18 +70,24 @@ describe("approved café graph", () => {
     expect(visited.size).toBe(nodes.length);
   });
 
-  it("separates preparation, model review and actual response in part 2", () => {
-    let state = reach("p2.prepare");
-    const initialTranscript = state.transcript;
-    state = advance(state);
-    expect(state.nodeId).toBe("p2.meaning");
-    expect(state.transcript).toEqual(initialTranscript);
-    state = advance(state);
-    expect(state.nodeId).toBe("p2.send");
-    expect(state.selected).toEqual([]);
-    state = advance(state);
-    expect(state.nodeId).toBe("p2.reaction");
-    expect(state.transcript.slice(-2).map(l => l.audioId)).toEqual(["U01", "C02"]);
+  it("uses one actual reply in part 2 and immediately shows Lucas's reaction for every level", () => {
+    for (const profile of PROFILES) {
+      let state = reach("p2.question", {}, profile);
+      state = transition(state, { at: state.nodeId, type: "UNDERSTAND", correct: true });
+      expect(state.nodeId).toBe("p2.send");
+      expect(state.phase).toBe(profile === "beginner" ? "present" : profile === "some" ? "build" : "write");
+      if (state.phase === "present") {
+        expect(dispatch(state, { type: "SUBMIT" })).toBe(state);
+        state = advance(state); expect(state.nodeId).toBe("p2.send"); expect(state.phase).toBe("build");
+      }
+      state = advance(state);
+      expect(state.nodeId).toBe("p2.reaction");
+      expect(state.transcript.slice(-2).map(line => line.audioId)).toEqual(["U01", "C02"]);
+      expect(state.evidence.filter(item => item.response === "U01")).toHaveLength(1);
+      expect(transition(state, { at: "p2.send", type: "SUBMIT" })).toBe(state);
+      expect(advance(state).nodeId).toBe("p3.intent");
+    }
+    for (const removed of ["p2.model", "p2.prepare", "p2.meaning"]) expect(catalog[removed]).toBeUndefined();
   });
 
   it("keeps erroneous blocks, supports correction and ignores stale double-clicks", () => {
@@ -227,5 +233,51 @@ describe("three approved practice experiences", () => {
       const recall = reach("p7.tired", {}, profile); expect(recall.phase).toBe("recall");
       expect(dispatch(recall, { type: "SUBMIT" })).toBe(recall);
     }
+  });
+});
+
+describe("local recovery of the shorter opening", () => {
+  const legacyStart: DemoEvent[] = [
+    { at: "p1.first", type: "NEXT" }, { at: "p2.question", type: "UNDERSTAND", correct: true },
+    { at: "p2.model", type: "NEXT" },
+  ];
+  const preparation: DemoEvent[] = ["no", "negative", "mine"].map(block => ({ at: "p2.prepare", type: "BLOCK", block }));
+  function legacy(profile: typeof PROFILES[number], journal: DemoEvent[]) {
+    return JSON.stringify({ schemaVersion: 1, storyVersion: "cafe-v2", runId: "test-run-id", startedAt: 1000, initialProfile: profile, journal });
+  }
+  it("preserves a completed conversation in all three profiles without sending anything twice", () => {
+    for (const profile of PROFILES) {
+      const current = reach("end", {}, profile);
+      const index = current.journal.findIndex(event => event.at === "p2.send");
+      const practiceEvents: DemoEvent[] = profile === "less" ? [{ at: "p2.prepare", type: "TYPE", text: audio.U01.text }] : preparation;
+      const journal = [...current.journal.slice(0, index), { at: "p2.model", type: "NEXT" } as DemoEvent,
+        ...practiceEvents, { at: "p2.prepare", type: "SUBMIT" } as DemoEvent,
+        { at: "p2.meaning", type: "NEXT" } as DemoEvent, ...current.journal.slice(index)];
+      expect(decodeSnapshot(legacy(profile, journal))).toEqual(current);
+    }
+  });
+  it("retains a partial practice draft without claiming it was sent", () => {
+    const state = decodeSnapshot(legacy("beginner", [...legacyStart, ...preparation.slice(0, 2)]))!;
+    expect(state.nodeId).toBe("p2.send"); expect(state.phase).toBe("build");
+    expect(state.selected).toEqual(["no", "negative"]);
+    expect(state.transcript.some(line => line.audioId === "U01")).toBe(false);
+    expect(decodeSnapshot(encodeSnapshot(state))).toEqual(state);
+  });
+  it("turns a completed practice into a ready draft, not an automatic submission", () => {
+    const state = decodeSnapshot(legacy("beginner", [...legacyStart, ...preparation, { at: "p2.prepare", type: "SUBMIT" }]))!;
+    expect(state.selected).toEqual(["no", "negative", "mine"]);
+    expect(state.transcript.some(line => line.audioId === "U01")).toBe(false);
+    const sent = dispatch(state, { type: "SUBMIT" });
+    expect(sent.nodeId).toBe("p2.reaction");
+    expect(sent.transcript.filter(line => line.audioId === "U01")).toHaveLength(1);
+  });
+  it("preserves typed preparation as an unsent draft", () => {
+    const state = decodeSnapshot(legacy("less", [...legacyStart, { at: "p2.prepare", type: "TYPE", text: "No, it isn't mine!" }]))!;
+    expect(state.phase).toBe("write"); expect(state.draft).toBe("No, it isn't mine!");
+    expect(state.transcript.some(line => line.audioId === "U01")).toBe(false);
+  });
+  it("rejects unknown stages and ambiguous legacy support changes", () => {
+    expect(decodeSnapshot(legacy("some", [...legacyStart, { at: "p2.unknown", type: "NEXT" }]))).toBeNull();
+    expect(decodeSnapshot(legacy("some", [...legacyStart, { at: "p2.prepare", type: "PROFILE", profile: "less" }, { at: "p2.send", type: "TYPE", text: audio.U01.text }]))).toBeNull();
   });
 });

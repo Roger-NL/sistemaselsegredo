@@ -1,4 +1,4 @@
-export const STORY_VERSION = "cafe-v2";
+export const STORY_VERSION = "cafe-v3";
 export const SCHEMA_VERSION = 1;
 export const PROFILES = ["beginner", "some", "less"] as const;
 export type SupportProfile = typeof PROFILES[number];
@@ -18,7 +18,7 @@ export type ResponseNode = BaseNode & {
   kind: "response"; next: string; response: AudioId;
   mode: "blocks" | "whole" | "recall" | "recombine";
   blocks?: Block[]; answer?: string[]; skeleton?: string;
-  teach?: boolean; preparationOnly?: boolean; button?: string;
+  teach?: boolean; button?: string;
 };
 export type EndNode = BaseNode & { kind: "end" };
 export type DemoNode = SceneNode | ChoiceNode | ComprehensionNode | ResponseNode | EndNode;
