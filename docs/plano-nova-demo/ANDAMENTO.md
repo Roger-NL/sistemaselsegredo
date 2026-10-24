@@ -195,3 +195,9 @@ Quadro compartilhado mantém imagem/conversa simultâneas. Piso da arte móvel e
 Falas consecutivas usam um cartão e reprodução em sequência dos mesmos IDs canônicos, sem sintetizar texto concatenado. Em densidades compactas, a resposta anterior sai apenas do cartão móvel e permanece no Histórico; a fala/reação atual continua visível. Aumento da área livre pela remoção do rodapé compacto não reinicia a densidade, prevenindo oscilação; apenas mudança real da viewport/fase reavalia do modo confortável.
 
 105 testes/22 arquivos aprovados, incluindo 384 percursos e hash inglês preservado; lint, TypeScript e build aprovados. Fonte/imagens/áudio originais preservados, sem geração remota. Encaixe visual final em aparelhos continua pendente da permissão de observação; não é declarado como medido por estes testes de domínio e CSS.
+
+## Entrada mobile com foto maior e CTA próximo — 24/10/2026
+
+Captura do responsável mostrou a entrada com foto contida no centro de uma faixa estreita e um grande espaço vazio entre os níveis e Começar. Causa no CSS: altura curta fixa da arte + contain; entry-copy com height:100% e entry-reading flex:1 empurravam o CTA ao rodapé. Correção da entrada móvel: primeira linha flexível recebe a altura livre; segunda linha usa altura natural do texto/opções/botão. Arte usa cover proporcional na largura inteira. Removido crescimento artificial da área de texto; botão passa a ficar imediatamente após os níveis.
+
+Texto de entrada mais conciso e descrições móveis específicas para os três perfis, mantendo descrições completas no desktop e no diálogo de apoio. Tipos: corpo/títulos de opção 16px e descrições 14px; alvos de 48–60px. Variantes para janelas baixas compactam espaçamento. Originais e WebPs intactos; regras de nível, histórico e voz intactos. Alteração guiada pela captura, sem afirmar inspeção automática do navegador. 105 testes, lint, TypeScript e build aprovados.

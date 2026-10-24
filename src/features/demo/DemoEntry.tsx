@@ -11,12 +11,12 @@ export function DemoEntry({ onStart }: { onStart: (profile: SupportProfile) => v
   return <section className="entry-grid">
     <div className="entry-copy"><div className="entry-reading">
       <h1>Do primeiro café<br />à despedida.</h1>
-      <p className="lead">Participe de uma conversa em inglês e construa respostas com ajuda.</p>
+      <p className="lead">Uma conversa em inglês, com ajuda no seu ritmo.</p>
       <p className="entry-details">Gratuita · Cerca de 30 minutos · Sem microfone</p>
       <fieldset className="profile-options"><legend>Como você prefere começar?</legend>
         {profiles.map(option => <label key={option.id} className={`profile-option ${profile === option.id ? "selected" : ""}`}>
           <input type="radio" name="support" value={option.id} checked={profile === option.id} onChange={() => setProfile(option.id)} />
-          <span><strong>{option.label}</strong><small>{option.description}</small></span>
+          <span><strong>{option.label}</strong><small><span className="desktop-context">{option.description}</span><span className="mobile-context">{option.mobileDescription}</span></small></span>
         </label>)}
       </fieldset>
       </div>

@@ -996,3 +996,35 @@
   .app-shell .scene-grid[data-density=compact] .speech.sent,.app-shell .scene-grid[data-density=tight] .speech.sent { display:none; }
   .app-shell:has(.scene-grid[data-density=compact]) > footer,.app-shell:has(.scene-grid[data-density=tight]) > footer { display:none; }
 }
+
+/* Entry: give spare height to the photograph, never to a gap above the CTA. */
+@media(max-width:760px) {
+  .app-shell .entry-stage .entry-grid {
+    grid-template-rows:minmax(160px,1fr) auto;
+    align-items:stretch;
+    min-height:0;
+    gap:clamp(.65rem,1.5dvh,1rem);
+    padding:.6rem 0;
+  }
+  .app-shell .entry-art { height:100%; width:100%; min-height:0; }
+  .app-shell .entry-art picture { position:relative; overflow:hidden; border-radius:14px; }
+  .app-shell .entry-art picture img { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; object-position:50% 60%; border:0; border-radius:0; }
+  .app-shell .entry-copy { height:auto; max-height:none; align-self:start; }
+  .app-shell .entry-reading { flex:0 0 auto; overflow:visible; }
+  .app-shell .entry-reading h1 { font-size:clamp(1.75rem,7vw,2.25rem); margin:0 0 .4rem; }
+  .app-shell .entry-reading .lead { font-size:16px; line-height:1.35; margin:.35rem 0; }
+  .app-shell .entry-reading .entry-details { font-size:14px; line-height:1.35; margin:.4rem 0 .65rem; }
+  .app-shell .entry-reading .profile-options { margin:.5rem 0 0; }
+  .app-shell .entry-reading .profile-options legend { font-size:16px; margin-bottom:.3rem; }
+  .app-shell .entry-reading .profile-option { padding:.6rem .7rem; margin:.35rem 0; min-height:60px; gap:.65rem; }
+  .app-shell .entry-reading .profile-option strong { font-size:16px; line-height:1.2; }
+  .app-shell .entry-reading .profile-option small { font-size:14px; line-height:1.3; margin-top:.2rem; }
+  .app-shell .entry-copy > .primary { margin-top:.65rem; min-height:48px; font-size:16px; }
+}
+@media(max-width:760px) and (max-height:700px) {
+  .app-shell .entry-stage .entry-grid { grid-template-rows:minmax(128px,1fr) auto; gap:.5rem; padding:.35rem 0; }
+  .app-shell .entry-reading h1 { font-size:1.75rem; }
+  .app-shell .entry-reading .entry-details { margin:.3rem 0 .4rem; }
+  .app-shell .entry-reading .profile-option { padding:.4rem .6rem; min-height:56px; }
+  .app-shell .entry-copy > .primary { margin-top:.4rem; }
+}
