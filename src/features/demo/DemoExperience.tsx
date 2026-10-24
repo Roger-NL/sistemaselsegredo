@@ -13,6 +13,7 @@ import { DemoAudioPlayer } from "./audio/player";
 import { Retrospective } from "./components/Retrospective";
 import { requestCatalogAudio } from "./services/audio-client";
 import { HelpPanel } from "./components/HelpPanel";
+import { SceneFrame } from "./components/SceneFrame";
 import { ConversationHistory } from "./components/ConversationHistory";
 import type { AudioId, DemoEvent, DemoState } from "./model/types";
 
@@ -74,6 +75,17 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
     && !(node.kind === "comprehension" && line.audioId === "C01"));
   const heard = node.heard ?? (node.kind === "comprehension" ? ["C01" as AudioId] : []);
   const modelVisible = state.phase === "present" || state.phase === "ready";
+  const activityActions = node.kind === "scene" ? <button className="primary" onClick={() => event("NEXT")}>{node.button}</button>
+    : node.kind === "comprehension" ? <div className="choices"><button onClick={() => dispatch({ at: node.id, type: "UNDERSTAND", correct: true })}>Esse café é seu?</button><button onClick={() => dispatch({ at: node.id, type: "UNDERSTAND", correct: false })}>Você quer um café?</button></div>
+    : node.kind === "choice" ? <div className="choices">{node.choices.map(choice => <button key={choice.id} onClick={() => dispatch({ at: node.id, type: "CHOOSE", choice: choice.id })}>{choice.label}<span aria-hidden>↗</span></button>)}</div>
+    : node.kind === "response" ? <>
+      {state.phase === "recall" && <button className="primary" onClick={() => event("CHECK")}>{state.activityProfile === "less" ? "Escrever minha resposta" : "Tentar com opções"}</button>}
+      {state.phase === "present" && <button className="primary" onClick={() => event("PREPARE")}>Preparar resposta</button>}
+      {state.phase === "build" && <div className="actions"><button className="primary" onClick={() => event("SUBMIT")}>Responder</button><button disabled={!state.selected.length} onClick={() => event("CLEAR")}>Limpar montagem</button>{state.assistedBlocks && <button onClick={() => event("WRITE_AGAIN")}>Voltar à escrita</button>}</div>}
+      {state.phase === "write" && <div className="actions"><button className="primary" disabled={!state.draft.trim()} type="submit" form="written-response-form">Responder</button><button type="button" onClick={() => event("USE_BLOCKS")}>Tentar com peças</button></div>}
+      {state.phase === "select" && <button className="primary" disabled={!state.recognized} onClick={() => event("SUBMIT")}>Responder</button>}
+      {state.phase === "ready" && <button className="primary" onClick={() => event("SUBMIT")}>{node.button ?? "Responder"}</button>}
+    </> : null;
   return <div className="experience">
     <div className="experience-bar"><span>Parte {node.part} de 10</span><progress max={10} value={node.part} aria-label="Parte da conversa" />
       <button className="text-button" aria-haspopup="dialog" onClick={() => audioMenu.current?.showModal()}>Áudio</button>
@@ -97,42 +109,37 @@ export function DemoExperience({ initial }: { initial: DemoState }) {
     </div>
     <div className="session-notices"><p ref={storageNotice} className="notice" role="status" />
     <p ref={audioNotice} className="notice" role="status" /></div>
-    {node.kind === "end" ? <Retrospective state={state} onReplay={replay} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <div className="scene-grid">
-      <header className="scene-intro">
+    {node.kind === "end" ? <Retrospective state={state} onReplay={replay} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <SceneFrame key={node.id} activityKey={state.phase}
+      intro={<header className="scene-intro">
         <h1 ref={heading} tabIndex={-1}>{node.id === "p1.first" ? "Um encontro na cafeteria." : node.kind === "choice" ? node.prompt : node.kind === "comprehension" ? "O que ele está perguntando?" : node.id === "p6.safe" ? "Ele segura o copo a tempo." : node.id === "p2.send" ? "Agora responda a Lucas." : state.phase === "write" ? "Escreva sua resposta." : state.phase === "select" ? "Escolha sua expressão." : state.phase === "build" ? node.kind === "response" && node.mode === "recombine" ? "Complete a resposta." : "Monte a resposta." : "A conversa continua."}</h1>
         {node.id === "p10.contact" && state.decisions["p9.pause"] === "stay" && <p>Depois de mais alguns minutos, chega a hora de se despedir.</p>}
         <p className="context">{node.context}</p>
         {(node.image === "V02" || node.image === "V04") && <p className="cup-clue">Seu pedido: based · iced coffee. Copo mostrado: {node.image === "V02" ? "lucas" : "based"}.</p>}
-      </header>
-      <aside className="scene-column"><figure className="scene-art"><picture><source media="(max-width: 760px)" srcSet={image.mobile} /><Image unoptimized width={960} height={640} src={image.path} alt={image.description} /></picture></figure></aside>
-      <section className="conversation-panel">
+      </header>}
+      artwork={<aside className="scene-column"><figure className="scene-art"><picture><source media="(max-width: 760px)" srcSet={image.mobile} /><Image unoptimized width={960} height={640} src={image.path} alt={image.description} /></picture></figure></aside>}>
+      <div className="activity-body"><div className="activity-content">
         <div className="conversation-tools"><ConversationHistory key={`${node.id}:${state.phase}`} state={state} lines={history} onReplay={replay} /><HelpPanel key={node.id} node={node} level={helpLevel} modelHidden={state.modelHidden} building={["build", "write", "select"].includes(state.phase)} onHelp={() => event("HELP")} onToggleModel={() => event("TOGGLE_MODEL")} onUseSupport={() => event("USE_SUPPORT")} onReplay={replay} /></div>
         {justSent && <article className="speech sent"><small>Você · fala enviada</small><p lang="en">{justSent.written ?? audio[justSent.audioId].text}</p><button className="text-button" onClick={() => replay(justSent.audioId)}>{justSent.written ? "Ouvir modelo" : "Ouvir resposta"}</button></article>}
         {heard.length > 0 && <article className="speech heard"><small>Lucas</small>{heard.map(id => <div className="heard-line" key={id}><div><p lang="en">{audio[id].text}</p>{state.activityProfile === "beginner" && node.part > 2 && <p className="meaning">{audio[id].meaning}</p>}</div><button className="text-button" aria-label={`Ouvir: ${audio[id].text}`} onClick={() => replay(id)}>Ouvir</button></div>)}</article>}
         {node.kind === "scene" && (node.id === "p2.meaning" || node.id === "p2.model" && state.activityProfile === "beginner") && <article className="expression"><small>Expressão apresentada · ainda não enviada</small><p lang="en">{audio.U01.text}</p><p>{audio.U01.meaning}</p><button onClick={() => replay("U01")}>Ouvir</button></article>}
-        {node.kind === "scene" && <button className="primary" onClick={() => event("NEXT")}>{node.button}</button>}
-        {node.kind === "comprehension" && <div className="choices"><button onClick={() => dispatch({ at: node.id, type: "UNDERSTAND", correct: true })}>Esse café é seu?</button><button onClick={() => dispatch({ at: node.id, type: "UNDERSTAND", correct: false })}>Você quer um café?</button></div>}
-        {node.kind === "choice" && <div className="choices">{node.choices.map(choice => <button key={choice.id} onClick={() => dispatch({ at: node.id, type: "CHOOSE", choice: choice.id })}>{choice.label}<span aria-hidden>↗</span></button>)}</div>}
         {node.kind === "response" && response && <>
-          {state.phase === "recall" && <div className="recall"><p>{expressionHistory(state, node.response) === "used" ? "Você já usou uma expressão para isso. Tente lembrar antes de conferir." : "Você encontrou uma expressão para isso na conversa. Tente lembrar antes de conferir."}</p><button className="primary" onClick={() => event("CHECK")}>{state.activityProfile === "less" ? "Escrever minha resposta" : "Tentar com opções"}</button></div>}
+          {state.phase === "recall" && <div className="recall"><p>{expressionHistory(state, node.response) === "used" ? "Você já usou uma expressão para isso. Tente lembrar antes de conferir." : "Você encontrou uma expressão para isso na conversa. Tente lembrar antes de conferir."}</p></div>}
           {modelVisible && <article className="expression"><small>Expressão apresentada · ainda não enviada</small><p lang="en">{response.text}</p>{(state.activityProfile !== "less" || node.id === "p6.warn" || helpLevel > 0) && <p>{response.meaning}</p>}<button onClick={() => replay(node.response)}>Ouvir</button></article>}
-          {state.phase === "present" && <button className="primary" onClick={() => event("PREPARE")}>Preparar resposta</button>}
           {state.phase === "build" && <div className="construction">
             {exercise?.skeleton && <p className="skeleton" lang="en">{exercise.skeleton}</p>}
             <div className="answer" aria-label="Sua resposta"><ol>{state.selected.map((id, index) => <li key={id}><button onClick={() => dispatch({ at: node.id, type: "REMOVE_BLOCK", index })} aria-label={`Retirar ${exercise?.blocks.find(b => b.id === id)?.text}`}><span lang="en">{exercise?.blocks.find(b => b.id === id)?.text}</span> <span aria-hidden>×</span></button></li>)}</ol>{!state.selected.length && <span className="muted">Sua resposta aparece aqui</span>}</div>
             <div className="blocks" aria-label="Blocos disponíveis">{exercise?.blocks.map(block => <button lang="en" key={block.id} disabled={state.selected.includes(block.id)} onClick={() => dispatch({ at: node.id, type: "BLOCK", block: block.id })}>{block.text}</button>)}</div>
-            <div className="actions"><button className="primary" onClick={() => event("SUBMIT")}>Responder</button><button disabled={!state.selected.length} onClick={() => event("CLEAR")}>Limpar montagem</button>{state.assistedBlocks && <button onClick={() => event("WRITE_AGAIN")}>Voltar à escrita</button>}</div>
           </div>}
-          {state.phase === "write" && <form className="written-response" onSubmit={event => { event.preventDefault(); dispatch({ at: node.id, type: "SUBMIT" }); }}>
+          {state.phase === "write" && <form id="written-response-form" className="written-response" onSubmit={event => { event.preventDefault(); dispatch({ at: node.id, type: "SUBMIT" }); }}>
             <label htmlFor="written-answer">Sua resposta em inglês</label>
             <input id="written-answer" type="text" enterKeyHint="send" lang="en" value={state.draft} maxLength={240} autoComplete="off" spellCheck={false} autoCapitalize="sentences" onChange={event => dispatch({ at: node.id, type: "TYPE", text: event.target.value })} />
-            <div className="actions"><button className="primary" disabled={!state.draft.trim()} type="submit">Responder</button><button type="button" onClick={() => event("USE_BLOCKS")}>Tentar com peças</button></div>
           </form>}
-          {state.phase === "select" && <div className="recognition-response"><p>Qual expressão combina com o que você quer dizer?</p><div className="choices">{recognitionOptions(node).map(id => <button key={id} lang="en" aria-pressed={state.recognized === id} onClick={() => dispatch({ at: node.id, type: "RECOGNIZE", response: id })}>{audio[id].text}</button>)}</div><button className="primary" disabled={!state.recognized} onClick={() => event("SUBMIT")}>Responder</button></div>}
-          {state.phase === "ready" && <button className="primary" onClick={() => event("SUBMIT")}>{node.button ?? "Responder"}</button>}
+          {state.phase === "select" && <div className="recognition-response"><p>Qual expressão combina com o que você quer dizer?</p><div className="choices">{recognitionOptions(node).map(id => <button key={id} lang="en" aria-pressed={state.recognized === id} onClick={() => dispatch({ at: node.id, type: "RECOGNIZE", response: id })}>{audio[id].text}</button>)}</div></div>}
         </>}
         <p role="status" className="notice">{state.notice}</p>
-      </section>
-    </div>}
+
+      </div></div>
+      <div className="activity-actions">{activityActions}</div>
+    </SceneFrame>}
   </div>;
 }
