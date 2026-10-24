@@ -1,17 +1,33 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ parameters: vi.fn(), resolve: vi.fn(), limit: vi.fn() }));
-vi.mock("@/server/speech/runtime", () => ({ speechParameters: mocks.parameters, resolveCachedSpeech: mocks.resolve }));
+const mocks = vi.hoisted(() => ({ parameters: vi.fn(), read: vi.fn(), resolve: vi.fn(), limit: vi.fn() }));
+vi.mock("@/server/speech/runtime", () => ({ speechParameters: mocks.parameters, readCachedSpeech: mocks.read, resolveCachedSpeech: mocks.resolve }));
 vi.mock("@/server/http/rate-limit", async original => ({ ...await original<typeof import("@/server/http/rate-limit")>(), consumeRateLimit: mocks.limit }));
 import { POST } from "@/app/api/demo/audio/route";
 import { SpeechUnavailableError } from "@/server/speech/cache";
 const request = (body: unknown, origin = "http://localhost") => new Request("http://localhost/api/demo/audio", { method: "POST", headers: { origin, "content-type": "application/json" }, body: JSON.stringify(body) });
-beforeEach(() => { vi.clearAllMocks(); mocks.parameters.mockReturnValue({ voiceId: "server-only" }); mocks.limit.mockResolvedValue({}); });
+beforeEach(() => { vi.clearAllMocks(); mocks.parameters.mockReturnValue({ voiceId: "server-only" }); mocks.read.mockResolvedValue(null); mocks.limit.mockResolvedValue({}); });
 describe("public catalog audio API", () => {
   it("accepts an ID and resolves the approved text only on the server", async () => {
     mocks.resolve.mockResolvedValue({ status: "ready", key: "opaque", url: "https://test.public.blob.vercel-storage.com/file.mp3" });
     const response = await POST(request({ audioId: "C01" }));
     expect(response.status).toBe(200); expect(mocks.resolve).toHaveBeenCalledWith("Is this yours?", { voiceId: "server-only" });
     expect(await response.json()).toEqual({ status: "ready", key: "opaque", audioUrl: "https://test.public.blob.vercel-storage.com/file.mp3" });
+  });
+  it("reads published metadata alongside admission and skips the generation resolver on a hit", async () => {
+    let allow!: () => void;
+    mocks.limit.mockReturnValue(new Promise<void>(resolve => { allow = resolve; }));
+    mocks.read.mockResolvedValue({ status: "ready", key: "opaque", url: "https://test.public.blob.vercel-storage.com/file.mp3" });
+    const pending = POST(request({ audioId: "C01" }));
+    await vi.waitFor(() => expect(mocks.read).toHaveBeenCalledWith("Is this yours?", { voiceId: "server-only" }));
+    expect(mocks.resolve).not.toHaveBeenCalled();
+    allow();
+    expect((await pending).status).toBe(200);
+    expect(mocks.resolve).not.toHaveBeenCalled();
+  });
+  it("never enters generation if admission is denied, even on a cache miss", async () => {
+    mocks.limit.mockRejectedValueOnce(new Error("admission unavailable"));
+    expect((await POST(request({ audioId: "C01" }))).status).toBe(503);
+    expect(mocks.resolve).not.toHaveBeenCalled();
   });
   it("rejects text, parameter overrides and unknown IDs before touching services", async () => {
     for (const body of [{ text: "anything" }, { audioId: "C01", speed: 1 }, { audioId: "C99" }, { audioId: "__proto__" }]) expect((await POST(request(body))).status).toBe(400);

@@ -9,7 +9,8 @@ function deferred<T>() { let resolve!: (value: T) => void; const promise = new P
 function infrastructure() {
   const records = new Map<string, SpeechRecord>(); const blobs = new Map<string, StoredAudio>();
   let queue = Promise.resolve(); let clock = 1_000;
-  const store: SpeechStore = { update(key, decide) {
+  const read = vi.fn(async (key: string) => records.has(key) ? structuredClone(records.get(key)!) : null);
+  const store: SpeechStore = { read, update(key, decide) {
     const task = queue.then(() => {
       const decision = decide(records.has(key) ? structuredClone(records.get(key)!) : null);
       if (decision.record) records.set(key, structuredClone(decision.record));
@@ -23,7 +24,7 @@ function infrastructure() {
     blobs.set(pathname, audio); return audio;
   });
   const ports = { store, generate, find, save, now: () => clock };
-  return { records, blobs, ports, generate, find, save, advance: (ms: number) => { clock += ms; } };
+  return { records, blobs, ports, read, generate, find, save, advance: (ms: number) => { clock += ms; } };
 }
 let infra: ReturnType<typeof infrastructure>;
 beforeEach(() => { infra = infrastructure(); });
@@ -95,10 +96,34 @@ describe("global persistent speech cache", () => {
     expect(infra.generate).not.toHaveBeenCalled();
   });
 
-  it("does not regenerate a ready recording whose blob was deleted", async () => {
+  it("serves ready metadata across instances without Blob HEAD or another write", async () => {
+    const service = createSpeechCache(infra.ports);
+    const ready = await service("Hello.", parameters);
+    const records = structuredClone(infra.records);
+    infra.find.mockClear(); infra.read.mockClear();
+    infra.advance(500_000);
+    expect(await createSpeechCache(infra.ports)("Hello.", parameters)).toEqual(ready);
+    expect(infra.read).toHaveBeenCalledTimes(1);
+    expect(infra.find).not.toHaveBeenCalled();
+    expect(infra.records).toEqual(records);
+    expect(infra.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not generate again if a published file disappears; playback can report its download error", async () => {
     const service = createSpeechCache(infra.ports); await service("Hello.", parameters);
     infra.blobs.clear(); infra.advance(500_000);
-    await expect(createSpeechCache(infra.ports)("Hello.", parameters)).rejects.toThrow("SPEECH_GENERATION_BLOCKED");
+    expect(await createSpeechCache(infra.ports)("Hello.", parameters)).toMatchObject({ status: "ready" });
+    expect(infra.generate).toHaveBeenCalledTimes(1);
+    expect([...infra.records.values()][0].providerAttemptCount).toBe(1);
+  });
+
+  it("fails closed on unreadable or corrupt published metadata instead of trusting it or generating again", async () => {
+    const service = createSpeechCache(infra.ports); await service("Hello.", parameters);
+    const record = [...infra.records.values()][0];
+    record.audio!.url = "https://foreign.example/audio.mp3";
+    await expect(service("Hello.", parameters)).rejects.toThrow("INVALID_STORED_AUDIO");
+    infra.read.mockRejectedValue(new Error("metadata unavailable"));
+    await expect(service("Hello.", parameters)).rejects.toThrow("SPEECH_UNAVAILABLE");
     expect(infra.generate).toHaveBeenCalledTimes(1);
   });
 

@@ -9,6 +9,21 @@ function waitForRetry(ms: number, signal: AbortSignal) {
   });
 }
 
+/** A session shortcut for published URLs, in addition to (never instead of) the global server cache. */
+export function createCatalogAudioClient(request: typeof fetch = fetch,
+  wait: (ms: number, signal: AbortSignal) => Promise<void> = waitForRetry) {
+  const ready = new Map<AudioId, string>();
+  return async (id: AudioId, signal: AbortSignal) => {
+    signal.throwIfAborted();
+    const cached = ready.get(id);
+    if (cached) return cached;
+    const url = await requestCatalogAudio(id, signal, request, wait);
+    signal.throwIfAborted();
+    ready.set(id, url);
+    return url;
+  };
+}
+
 /** IDs only. Voice/provider parameters and secrets never cross this boundary. */
 export async function requestCatalogAudio(id: AudioId, signal: AbortSignal, request: typeof fetch = fetch,
   wait: (ms: number, signal: AbortSignal) => Promise<void> = waitForRetry): Promise<string> {

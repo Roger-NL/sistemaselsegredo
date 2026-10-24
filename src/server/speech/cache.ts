@@ -14,6 +14,7 @@ export type SpeechRecord = {
   audio?: StoredAudio; lastErrorCode?: string;
 };
 export interface SpeechStore {
+  read(key: string): Promise<SpeechRecord | null>;
   update<T>(key: string, decide: (current: SpeechRecord | null) => { record?: SpeechRecord; result: T }): Promise<T>;
 }
 export type SpeechPorts = {
@@ -46,6 +47,16 @@ function validAudio(audio: StoredAudio, pathname: string) {
   } catch { return false; }
 }
 
+/** Published immutable files need a durable metadata read, not a new Blob HEAD/write cycle. */
+export async function readPublishedSpeech(store: SpeechStore, text: string, parameters: SpeechParameters): Promise<SpeechResult | null> {
+  const { key, pathname } = speechIdentity(text, parameters);
+  const record = await store.read(key);
+  if (!record || record.status !== "ready") return null;
+  if (record.schemaVersion !== 3 || record.key !== key || record.paramsHash !== key || record.providerAttemptCount !== 1
+    || !record.audio || !validAudio(record.audio, pathname)) throw new SpeechUnavailableError("INVALID_STORED_AUDIO");
+  return { status: "ready", key, url: record.audio.url };
+}
+
 /** Global coordination is durable. No provider call is made inside a retryable transaction. */
 export function createSpeechCache(ports: SpeechPorts) {
   const now = ports.now ?? Date.now;
@@ -64,6 +75,8 @@ export function createSpeechCache(ports: SpeechPorts) {
       return { status: "ready", key, url: found.url };
     }
     try {
+      const published = await readPublishedSpeech(ports.store, text, parameters);
+      if (published) return published;
       const existing = await ports.find(pathname);
       if (existing) return await reconcile(existing);
       const ownerToken = token();

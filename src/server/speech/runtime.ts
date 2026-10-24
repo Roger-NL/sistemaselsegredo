@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { BlobNotFoundError, head, put } from "@vercel/blob";
 import { getAdminDb } from "../firebase";
 import { generatePreparedSpeech } from "../integrations/elevenlabs";
-import { createSpeechCache, SpeechUnavailableError, type SpeechParameters, type SpeechRecord, type SpeechStore } from "./cache";
+import { createSpeechCache, readPublishedSpeech, SpeechUnavailableError, type SpeechParameters, type SpeechRecord, type SpeechStore } from "./cache";
 
 export function speechParameters(): SpeechParameters {
   const voiceId = process.env.ELEVENLABS_VOICE_ID?.trim();
@@ -12,6 +12,10 @@ export function speechParameters(): SpeechParameters {
 }
 
 const store: SpeechStore = {
+  async read(key) {
+    const snapshot = await getAdminDb().collection("speech_audio_cache_v3").doc(key).get();
+    return snapshot.exists ? snapshot.data() as SpeechRecord : null;
+  },
   async update(key, decide) {
     const reference = getAdminDb().collection("speech_audio_cache_v3").doc(key);
     return getAdminDb().runTransaction(async transaction => {
@@ -22,6 +26,7 @@ const store: SpeechStore = {
     });
   },
 };
+export const readCachedSpeech = (text: string, parameters: SpeechParameters) => readPublishedSpeech(store, text, parameters);
 export const resolveCachedSpeech = createSpeechCache({
   store,
   async find(pathname) {

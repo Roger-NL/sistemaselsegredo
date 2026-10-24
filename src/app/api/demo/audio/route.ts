@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { audio } from "@/features/demo/content/media";
 import { assertOnlyKeys, getRequestIp, readJsonObject, RequestPayloadError, requestPayloadErrorResponse } from "@/server/http/request";
 import { consumeRateLimit, RateLimitError, rateLimitErrorResponse } from "@/server/http/rate-limit";
-import { resolveCachedSpeech, speechParameters } from "@/server/speech/runtime";
+import { readCachedSpeech, resolveCachedSpeech, speechParameters } from "@/server/speech/runtime";
 import { SpeechUnavailableError } from "@/server/speech/cache";
 import type { AudioId } from "@/features/demo/model/types";
 
@@ -20,8 +20,13 @@ export async function POST(req: Request) {
     assertOnlyKeys(payload, ["audioId"]);
     if (typeof payload.audioId !== "string" || !Object.hasOwn(audio, payload.audioId)) throw new RequestPayloadError("UNKNOWN_AUDIO_ID");
     const parameters = speechParameters(); // Fail before any database/provider call when not configured.
-    await consumeRateLimit({ namespace: "demo-audio-ip", identifier: getRequestIp(req), limit: 120, windowMs: 60_000 });
-    const result = await resolveCachedSpeech(audio[payload.audioId as AudioId].text, parameters);
+    const text = audio[payload.audioId as AudioId].text;
+    // Only the read-only hit lookup runs alongside admission. Generation must wait for admission.
+    const [, cached] = await Promise.all([
+      consumeRateLimit({ namespace: "demo-audio-ip", identifier: getRequestIp(req), limit: 120, windowMs: 60_000 }),
+      readCachedSpeech(text, parameters),
+    ]);
+    const result = cached ?? await resolveCachedSpeech(text, parameters);
     if (result.status === "pending") return NextResponse.json(result, { status: 202, headers: { ...headers, "Retry-After": String(result.retryAfter) } });
     return NextResponse.json({ status: "ready", key: result.key, audioUrl: result.url }, { headers });
   } catch (error) {

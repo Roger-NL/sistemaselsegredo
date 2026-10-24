@@ -2,10 +2,11 @@
 
 import { useId, useRef, useState } from "react";
 import { audio } from "../content/media";
+import { AudioButton } from "./AudioButton";
 import type { DemoState, TranscriptLine } from "../model/types";
 
-export function ConversationHistory({ state, lines, onReplay, label = "Conversa até aqui", fromStart = false }: {
-  state: DemoState; lines: TranscriptLine[]; onReplay: (id: TranscriptLine["audioId"]) => void; label?: string; fromStart?: boolean;
+export function ConversationHistory({ state, lines, label = "Conversa até aqui", fromStart = false }: {
+  state: DemoState; lines: TranscriptLine[]; label?: string; fromStart?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const title = useId();
@@ -23,7 +24,7 @@ export function ConversationHistory({ state, lines, onReplay, label = "Conversa 
       <article className={`history-line ${line.role === "you" ? "history-you" : ""}`}>
         <small>{line.role === "you" ? "Você" : "Lucas"} · Parte {line.part}</small>
         <p lang="en">{line.written ?? asset.text}</p>
-        <div className="actions"><button onClick={() => onReplay(line.audioId)}>{line.written ? "Ouvir modelo" : "Ouvir"}</button>
+        <div className="actions"><AudioButton key={line.id} audio={line.audioId}>{line.written ? "Ouvir modelo" : "Ouvir"}</AudioButton>
           {!(line.audioId === "C01" && state.nodeId === "p2.question") && <button aria-expanded={meaning} onClick={() => setMeaning(!meaning)}>{meaning ? "Ocultar significado" : "Ver significado"}</button>}</div>
         {meaning && <p className="meaning">{asset.meaning}</p>}
       </article>

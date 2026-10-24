@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { audio } from "../content/media";
 import { ConversationHistory } from "./ConversationHistory";
 import { ending, retrospective } from "../model/retrospective";
-import type { AudioId, DemoState, ReviewView } from "../model/types";
+import type { DemoState, ReviewView } from "../model/types";
 import { Feedback } from "./Feedback";
+import { AudioButton } from "./AudioButton";
 
-export function Retrospective({ state, onReplay, setView }: { state: DemoState; onReplay: (id: AudioId) => void; setView: (view: ReviewView) => void }) {
+export function Retrospective({ state, setView }: { state: DemoState; setView: (view: ReviewView) => void }) {
   const view = state.reviewView;
   const [moment, setMoment] = useState(0);
   const section = useRef<HTMLElement>(null);
@@ -20,10 +21,10 @@ export function Retrospective({ state, onReplay, setView }: { state: DemoState; 
   const item = highlights[Math.min(moment, highlights.length - 1)];
   return <section ref={section} className="review-stage"><p className="eyebrow">Sua conversa</p><h1 tabIndex={-1}>Veja o caminho que você fez.</h1>
     {item && <article className="moment-card">
-      <small>{item.beforeRole === "you" ? "Você disse" : "Você encontrou na conversa"}</small><p lang="en">{audio[item.before].text}</p><span aria-hidden>↓</span><small>Você disse</small><p lang="en">{audio[item.after].text}</p><p>{item.description}</p><button onClick={() => onReplay(item.after)}>Ouvir trecho</button>
+      <small>{item.beforeRole === "you" ? "Você disse" : "Você encontrou na conversa"}</small><p lang="en">{audio[item.before].text}</p><span aria-hidden>↓</span><small>Você disse</small><p lang="en">{audio[item.after].text}</p><p>{item.description}</p><AudioButton key={moment} audio={item.after}>Ouvir trecho</AudioButton>
     </article>}
     <nav className="pager" aria-label="Percorrer momentos"><button disabled={moment === 0} onClick={() => setMoment(moment - 1)}>← Anterior</button><span role="status">Momento {moment + 1} de {highlights.length}</span><button disabled={moment >= highlights.length - 1} onClick={() => setMoment(moment + 1)}>Próximo →</button></nav>
-    <ConversationHistory state={state} lines={state.transcript} onReplay={onReplay} label="Ver conversa completa" fromStart />
+    <ConversationHistory state={state} lines={state.transcript} label="Ver conversa completa" fromStart />
     <p className="practice-summary">{[
       ["written", "respostas escritas"], ["recognized", "expressões escolhidas"], ["blocks", "montagens"], ["recombined", "adaptações"], ["supported", "respostas com apoio"],
     ].map(([kind, label]) => { const count = state.evidence.filter(e => e.kind === kind).length; return count ? `${count} ${label}` : null; }).filter(Boolean).join(" · ")}</p>
