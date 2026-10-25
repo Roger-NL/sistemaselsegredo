@@ -263,3 +263,11 @@ Captura recebida mostra cabeçalho, Apoio e cartão ultrapassando a borda direit
 Imagem móvel usa contain para mostrar personagens/copos completos; desktop mantém cover à esquerda. SceneFrame deixa de remontar a cada nó: a mesma ilustração permanece montada nas trocas entre título/contexto/fala, e a medição reinicia por nodeId+fase. Corrigido o cálculo de densidade para intro=0 intencional dos cartões; piso da imagem agora acompanha confortável/compacto/justo também na abertura. Ordem, níveis, Voltar, respostas e áudio preservados.
 
 45 testes de layout/abertura/modelo aprovados, além de lint, TypeScript e build. Correção orientada pela captura e código; não se declara medição visual em dispositivo. Nenhum acesso remoto, geração de mídia ou deploy.
+
+## Revisão após persistência do corte móvel — 25/10/2026
+
+Nova captura confirma que a alteração anterior não resolveu o corte. Tentativa de observar a aba Chrome existente foi rejeitada pelo Browser Use por permissão salva/política gerenciada na origem localhost:3100. Não houve contorno nem captura automatizada alternativa.
+
+O shell agora tem border-box explícito e largura limitada pelo menor valor entre o contêiner e a viewport visual, acompanhando resize/scroll da VisualViewport. O layout móvel crítico consulta a largura do próprio app; cabeçalho pode quebrar de linha em vez de ocultar Recomeçar. A imagem usa altura calculada pela proporção original 3:2, limitada pelo espaço necessário à orientação, conversa e ações. Removida a faixa flexível que criava grandes áreas vazias acima/abaixo da foto; cartão e CTA seguem próximos à cena. Mesmos componentes para os três níveis; história, mídias e cache de áudio preservados.
+
+51 testes de layout/abertura/modelo, lint, TypeScript e build aprovados. Incluídas regressões para viewport visual mais estreita, arredondamento, ausência da API e dimensionamento da arte conforme conteúdo. Servidor local reiniciado com o build novo. Validação visual e medição real de overflow continuam pendentes; não se declara confirmação de todas as telas/dispositivos.

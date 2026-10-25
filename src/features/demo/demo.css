@@ -569,7 +569,9 @@
 
 /* App frame: the current interaction stays in the viewport; long reviews use pages. */
 .app-shell {
-  width:100%;
+  width:min(100%,var(--app-width,100dvw));
+  max-width:100%;
+  box-sizing:border-box;
   min-width:0;
   height:100dvh;
   min-height:0;
@@ -578,6 +580,7 @@
   grid-template-rows:auto minmax(0,1fr) auto;
   padding-inline:clamp(1rem,3vw,3rem);
   line-height:1.4;
+  container:demo-app / inline-size;
 }
 .app-shell > * { min-width:0; }
 .app-shell .site-header { padding:.65rem 0; min-height:58px; }
@@ -1096,18 +1099,37 @@
   .app-shell .scene-grid[data-density] .opening-instructions .context { color:var(--ink); font-size:16px; }
 }
 
-/* Mobile tracks must shrink to the viewport, including native controls and grid children. */
+/* Bound every reading region by the app, rather than the image's intrinsic width. */
 .app-shell .scene-grid > *,.app-shell .opening-card,.app-shell .profile-options { min-inline-size:0; max-inline-size:100%; }
 .app-shell .activity-content,.app-shell .activity-actions { max-inline-size:100%; }
-@media(max-width:760px) {
-  .app-shell .site-header { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:.5rem; }
-  .app-shell .site-header .brand { min-width:0; font-size:clamp(17px,4.8vw,19px); white-space:nowrap; }
+/* Use the app's actual width, including narrow visual viewports inside a wider layout. */
+@container demo-app (max-width:760px) {
+  .app-shell .site-header { display:flex; flex-wrap:wrap; gap:0 .5rem; }
+  .app-shell .site-header .brand { flex:0 0 auto; max-width:100%; font-size:19px; white-space:nowrap; }
   .app-shell .brand-mark { flex-shrink:0; margin-right:7px; }
-  .app-shell .site-header nav { min-width:0; gap:.5rem; }
+  .app-shell .site-header nav { min-width:0; max-width:100%; flex-wrap:wrap; margin-inline-start:auto; gap:.5rem; }
+  .app-shell .site-header .public-label { display:none; }
   .app-shell .site-header nav button { min-width:44px; white-space:nowrap; }
   .app-shell .experience-bar { display:grid; grid-template-columns:auto minmax(24px,1fr) auto auto; gap:.5rem; width:100%; }
   .app-shell .experience-bar progress { width:100%; min-width:0; }
+  .app-shell .scene-grid,.app-shell .scene-grid[data-density] {
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto var(--scene-art-height,min(36dvh,18rem)) auto;
+    align-content:start;
+    row-gap:.65rem;
+  }
+  .app-shell .scene-intro-slot { grid-column:1; grid-row:1; }
+  .app-shell .scene-grid .scene-column { grid-column:1; grid-row:2; }
+  .app-shell .scene-grid .conversation-panel { grid-column:1; grid-row:3; }
+  .app-shell .scene-grid.opening-scene,.app-shell .scene-grid.opening-scene[data-density] { grid-template-rows:var(--scene-art-height,min(36dvh,18rem)) auto; }
+  .app-shell .scene-grid.opening-scene .scene-column { grid-row:1; }
+  .app-shell .scene-grid.opening-scene .conversation-panel { grid-row:2; }
+  .app-shell .activity-body { margin-top:0; }
+  .app-shell .activity-actions { margin-bottom:0; }
   .app-shell .scene-art,.app-shell .scene-art picture { min-width:0; max-width:100%; }
-  /* Preserve both people and the cups instead of zooming into a portrait-shaped crop. */
+  /* A 3:2 frame removes the tall empty bands while preserving both men and cups. */
   .app-shell .scene-art picture img { object-fit:contain; object-position:center; }
+  .app-shell .opening-card { padding:1.2rem; border-radius:16px; }
+  .app-shell .opening-card h1 { font-size:clamp(1.85rem,8.3cqi,2.7rem); }
+  .app-shell .opening-card[data-presentation=context] h1 { font-size:clamp(1.25rem,5.4cqi,1.55rem); line-height:1.35; }
 }

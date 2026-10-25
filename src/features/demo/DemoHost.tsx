@@ -8,6 +8,7 @@ import { Brand } from "@/components/ui/Brand";
 import { DemoEntry } from "./DemoEntry";
 import { DemoExperience, type DemoNavigation } from "./DemoExperience";
 import { createDemo } from "./model/reducer";
+import { visibleAppSize } from "./model/layout";
 import { getBrowserSnapshot, getServerSnapshot, remember, restart, subscribe } from "./session/browser";
 import type { PublishedAudioCatalog } from "@/contracts/demo-audio";
 
@@ -20,14 +21,16 @@ export function DemoHost({ experience = false, publishedAudio = {} }: { experien
   useEffect(() => {
     const viewport = window.visualViewport;
     const update = () => {
-      const height = viewport?.height ?? window.innerHeight;
+      const { width, height } = visibleAppSize({ width: document.documentElement.clientWidth || window.innerWidth, height: window.innerHeight }, viewport);
+      shell.current?.style.setProperty("--app-width", `${width}px`);
       shell.current?.style.setProperty("--app-height", `${Math.floor(height)}px`);
       if (shell.current) shell.current.dataset.shortViewport = String(height < 540);
     };
     update();
     viewport?.addEventListener("resize", update);
+    viewport?.addEventListener("scroll", update);
     window.addEventListener("resize", update);
-    return () => { viewport?.removeEventListener("resize", update); window.removeEventListener("resize", update); };
+    return () => { viewport?.removeEventListener("resize", update); viewport?.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
   }, []);
   function reset() {
     if (snapshot.state && !window.confirm("Recomeçar descarta esta tentativa e a avaliação guardada neste dispositivo. Deseja continuar?")) return;

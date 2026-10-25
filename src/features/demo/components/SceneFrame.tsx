@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { nextSceneDensity, type SceneDensity } from "../model/layout";
+import { mobileArtworkHeight, nextSceneDensity, type SceneDensity } from "../model/layout";
 
 /** Only spacing changes: the illustration, conversation and actions stay on screen. */
 export function SceneFrame({ intro, artwork, children, activityKey, opening = false }: { intro: ReactNode; artwork: ReactNode; children: ReactNode; activityKey: string; opening?: boolean }) {
@@ -24,9 +24,12 @@ export function SceneFrame({ intro, artwork, children, activityKey, opening = fa
       }
       const height = (element: HTMLElement | null) => element ? Math.ceil(Math.max(element.scrollHeight, element.getBoundingClientRect().height)) : 0;
       const current = (root.dataset.density ?? "comfortable") as SceneDensity;
-      const next = nextSceneDensity(current, { available: root.clientHeight, intro: height(introduction.current),
+      const styles = getComputedStyle(root);
+      const space = { available: root.clientHeight - (parseFloat(styles.paddingTop) || 0) - (parseFloat(styles.paddingBottom) || 0), intro: height(introduction.current),
         activity: height(root.querySelector(".activity-content")) + height(root.querySelector(".activity-actions")) + 12,
-        gap: parseFloat(getComputedStyle(root).rowGap) || 0, mobile: matchMedia("(max-width: 760px)").matches });
+        gap: parseFloat(styles.rowGap) || 0, mobile: root.clientWidth <= 760 };
+      const next = nextSceneDensity(current, space);
+      if (space.mobile) root.style.setProperty("--scene-art-height", `${mobileArtworkHeight(root.clientWidth, space)}px`);
       if (next !== current) { root.dataset.density = next; schedule(); }
     };
     const schedule = () => { if (!scheduled) scheduled = requestAnimationFrame(measure); };
