@@ -771,6 +771,7 @@
     padding-bottom:env(safe-area-inset-bottom);
   }
   .app-shell .site-header { min-height:48px; }
+  .app-shell .site-header nav { gap:.65rem; }
   .app-shell .site-header button { min-height:44px; }
   .app-shell .preview-notice { display:none; }
   .app-shell { grid-template-rows:auto minmax(0,1fr) auto; }

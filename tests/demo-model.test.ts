@@ -33,6 +33,57 @@ function reach(id: string, choices: Record<string, string> = {}, profile: typeof
 }
 
 describe("approved café graph", () => {
+  it("returns one screen per click all the way to the start in every level, including after reload", () => {
+    for (const profile of PROFILES) {
+      let state = reach("end", {}, profile);
+      state = transition(state, { at: "end", type: "REVIEW", view: "moments" });
+      const moments = state;
+      state = transition(state, { at: "end", type: "REVIEW", view: "feedback" });
+      expect(dispatch(state, { type: "BACK" })).toEqual(moments);
+      let steps = 0;
+      while (state.nodeId !== "p1.first") {
+        const previous = dispatch(state, { type: "BACK" });
+        expect(previous.journal.length).toBeLessThan(state.journal.length);
+        expect(decodeSnapshot(encodeSnapshot(previous))).toEqual(previous);
+        state = previous;
+        expect(++steps).toBeLessThan(150);
+      }
+      expect(steps).toBeGreaterThan(10);
+      expect(state).toEqual(createDemo(profile, "test-run-id", 1000));
+      expect(dispatch(state, { type: "BACK" })).toBe(state);
+    }
+  });
+  it("rewinds an actual send to its filled response without duplicating the next send", () => {
+    for (const profile of PROFILES) {
+      const sent = reach("p2.reaction", {}, profile);
+      const previous = dispatch(sent, { type: "BACK" });
+      expect(previous.nodeId).toBe("p2.send");
+      expect(previous.phase).toBe(profile === "less" ? "write" : "build");
+      expect(previous.transcript.some(line => line.audioId === "U01" || line.audioId === "C02")).toBe(false);
+      const resent = dispatch(previous, { type: "SUBMIT" });
+      expect(resent).toEqual(sent);
+    }
+  });
+  it("skips local edits/help and returns to the previous presentation phase", () => {
+    const presented = reach("p2.send", {}, "beginner");
+    let state = advance(presented);
+    state = transition(state, { at: state.nodeId, type: "BLOCK", block: "no" });
+    state = dispatch(state, { type: "HELP" });
+    expect(dispatch(state, { type: "BACK" })).toEqual(presented);
+    expect(dispatch(presented, { type: "BACK" }).nodeId).toBe("p2.question");
+  });
+  it("allows changing a previous choice and discards the abandoned future", () => {
+    const asked = reach("p4.order");
+    let state = dispatch(asked, { type: "BACK" });
+    expect(state.nodeId).toBe("p3.ask");
+    state = dispatch(state, { type: "BACK" });
+    expect(state.nodeId).toBe("p3.intent");
+    state = transition(state, { at: state.nodeId, type: "CHOOSE", choice: "okay" });
+    expect(state.nodeId).toBe("p3.okay");
+    expect(state.decisions["p3.intent"]).toBe("okay");
+    expect(state.transcript.some(line => line.audioId === "U02" || line.audioId === "C03")).toBe(false);
+    expect(decodeSnapshot(encodeSnapshot(state))).toEqual(state);
+  });
   it("has 128 narrative paths and all three equivalent endings for every support profile", () => {
     const visited = new Set<string>();
     for (const profile of PROFILES) {

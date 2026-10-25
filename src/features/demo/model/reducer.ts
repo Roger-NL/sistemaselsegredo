@@ -22,9 +22,22 @@ export function createDemo(profile: SupportProfile, runId: string, startedAt: nu
   }, "p1.first");
 }
 
+/** Rewind one screen advance, not one keystroke/piece/help click. The future is discarded. */
+function previousStep(state: DemoState): DemoState {
+  let cursor = createDemo(state.initialProfile, state.runId, state.startedAt);
+  let previous: DemoState | null = null;
+  for (const event of state.journal) {
+    const next = transition(cursor, event);
+    if (next.nodeId !== cursor.nodeId || next.phase !== cursor.phase || next.reviewView !== cursor.reviewView) previous = cursor;
+    cursor = next;
+  }
+  return previous ?? state;
+}
+
 /** Pure domain transitions. Stale/double-click events carry their originating node and are ignored. */
 export function transition(state: DemoState, event: DemoEvent): DemoState {
   if (event.at !== state.nodeId) return state;
+  if (event.type === "BACK") return previousStep(state);
   const node = catalog[state.nodeId];
   const exercise = node.kind === "response" ? practice(node, state.assistedBlocks ? "some" : state.activityProfile) : null;
   const fail = (notice: string): DemoState => ({ ...state, notice,

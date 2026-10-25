@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useReducer, useRef, useState, type Ref } from "react";
 import { catalog } from "./content/catalog";
 import { audio, images } from "./content/media";
 import { mobileContext } from "./content/mobile-copy";
@@ -19,7 +19,10 @@ import { ConversationHistory } from "./components/ConversationHistory";
 import type { AudioId, DemoEvent, DemoState } from "./model/types";
 import type { PublishedAudioCatalog } from "@/contracts/demo-audio";
 
-export function DemoExperience({ initial, publishedAudio = {} }: { initial: DemoState; publishedAudio?: PublishedAudioCatalog }) {
+export type DemoNavigation = { back: () => void };
+export function DemoExperience({ initial, publishedAudio = {}, navigationRef, onBackAvailabilityChange }: {
+  initial: DemoState; publishedAudio?: PublishedAudioCatalog; navigationRef?: Ref<DemoNavigation>; onBackAvailabilityChange?: (available: boolean) => void;
+}) {
   const [state, dispatch] = useReducer(transition, initial);
   const node = catalog[state.nodeId];
   const image = images[node.image];
@@ -31,6 +34,8 @@ export function DemoExperience({ initial, publishedAudio = {} }: { initial: Demo
   const demoAudio = useDemoAudio(`${state.nodeId}:${state.phase}:${state.reviewView}`, publishedAudio);
   const [playbackRate, setPlaybackRate] = useState(1);
   const event = (type: DemoEvent["type"]) => dispatch({ at: node.id, type } as DemoEvent);
+  useImperativeHandle(navigationRef, () => ({ back: () => dispatch({ at: node.id, type: "BACK" }) }), [node.id]);
+  useEffect(() => { onBackAvailabilityChange?.(node.id !== "p1.first"); }, [node.id, onBackAvailabilityChange]);
   useEffect(() => {
     if (!remember(state) && storageNotice.current) storageNotice.current.textContent = "O navegador não está guardando esta tentativa. Você pode concluir, mas sair desta página pode perder a retomada.";
   }, [state]);
