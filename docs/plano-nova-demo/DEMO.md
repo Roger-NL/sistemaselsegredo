@@ -1,5 +1,13 @@
 # Projeto técnico da demo pública
 
+## Abertura por foco de leitura — cafe-v4, 25/10/2026
+
+Revisão solicitada pelo responsável para as partes 1–3. Um alvo de leitura por cartão: p1.first mostra apenas Um encontro na cafeteria. e Avançar; p1.context apresenta o encontro e o gesto em texto grande, com Começar a história; p1.lucas mostra Lucas/Is this yours?, Ouvir e Entender a pergunta; p2.prompt mostra O que ele está perguntando? antes de revelar a fala e as opções em p2.question. Depois da resposta e da reação, p3.prompt apresenta a intenção antes das escolhas de p3.intent. A fotografia permanece junto ao cartão, sem abas de Cena/Atividade. Partes 4–10 mantêm a apresentação anterior.
+
+Títulos com peso/contraste maiores, contexto tratado como mensagem principal e cartões claros com borda superior escura. Nos cartões de orientação não são renderizados fala inglesa, alternativas, histórico ou pistas concorrentes. As alternativas só entram após clique explícito; resposta aceita mantém reação imediata e não reintroduz montagem preparatória duplicada. Voltar percorre cada cartão. Sem nova fala inglesa, imagem ou geração de áudio.
+
+Snapshots v3/v2 são migrados por replay inserindo somente os avanços de apresentação omitidos na versão antiga. Mantém posição real, rascunho, respostas, escolhas e revisão; os novos cartões ficam disponíveis ao voltar. C01 é registrado na entrada de p1.lucas. Testes cobrem ausência efetiva da fala/opções no HTML de orientação, todos os níveis e migração de tentativas parciais/completas. A revisão prevalece sobre as descrições históricas abaixo.
+
 ## Correção do início — cafe-v3, 24/10/2026
 
 Esta revisão prevalece sobre a sequência preparatória descrita nas versões anteriores. Depois de `p2.question`, o roteiro vai diretamente para `p2.send`: Guiado apresenta o modelo uma vez e permite montar; Com pistas começa na montagem; Mais autônomo começa na escrita. Um envio correto passa diretamente a `p2.reaction` (Oh! Sorry!), com U01 registrado uma única vez. Não existem telas separadas p2.model/p2.prepare/p2.meaning nem montagem preparationOnly. O rótulo do modelo é Você pode dizer; Tentar responder abre o exercício e Enviar envia de fato. Ajuda completa oferece Enviar com apoio.

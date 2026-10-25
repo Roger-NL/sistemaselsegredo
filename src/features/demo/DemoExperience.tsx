@@ -12,6 +12,7 @@ import { expressionHistory } from "./model/history";
 import { remember } from "./session/browser";
 import { DemoAudioContext, useDemoAudio } from "./audio/use-demo-audio";
 import { AudioButton } from "./components/AudioButton";
+import { OpeningCard } from "./components/OpeningCard";
 import { Retrospective } from "./components/Retrospective";
 import { HelpPanel } from "./components/HelpPanel";
 import { SceneFrame } from "./components/SceneFrame";
@@ -25,6 +26,7 @@ export function DemoExperience({ initial, publishedAudio = {}, navigationRef, on
 }) {
   const [state, dispatch] = useReducer(transition, initial);
   const node = catalog[state.nodeId];
+  const openingNode = node.kind === "scene" && node.presentation ? node : null;
   const image = images[node.image];
   const heading = useRef<HTMLHeadingElement>(null);
   const storageNotice = useRef<HTMLParagraphElement>(null);
@@ -85,15 +87,16 @@ export function DemoExperience({ initial, publishedAudio = {}, navigationRef, on
       </dialog>
     </div>
     <div className="session-notices"><p ref={storageNotice} className="notice" role="status" /></div>
-    {node.kind === "end" ? <Retrospective state={state} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <SceneFrame key={node.id} activityKey={state.phase}
-      intro={<header className="scene-intro">
-        <h1 ref={heading} tabIndex={-1}>{node.id === "p1.first" ? "Um encontro na cafeteria." : node.kind === "choice" ? node.prompt : node.kind === "comprehension" ? "O que ele está perguntando?" : node.id === "p6.safe" ? "Ele segura o copo a tempo." : node.id === "p2.send" ? "Agora responda a Lucas." : state.phase === "write" ? "Escreva sua resposta." : state.phase === "select" ? "Escolha sua expressão." : state.phase === "build" ? node.kind === "response" && node.mode === "recombine" ? "Complete a resposta." : "Monte a resposta." : "A conversa continua."}</h1>
+    {node.kind === "end" ? <Retrospective state={state} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <SceneFrame key={node.id} activityKey={state.phase} opening={Boolean(openingNode)}
+      intro={openingNode ? null : <header className={`scene-intro${node.part <= 3 ? " opening-instructions" : ""}`}>
+        <h1 ref={heading} tabIndex={-1}>{node.id === "p2.question" ? "Escolha o significado." : node.id === "p3.intent" ? "Escolha o que dizer." : node.kind === "choice" ? node.prompt : node.id === "p6.safe" ? "Ele segura o copo a tempo." : node.id === "p2.send" ? "Agora responda a Lucas." : state.phase === "write" ? "Escreva sua resposta." : state.phase === "select" ? "Escolha sua expressão." : state.phase === "build" ? node.kind === "response" && node.mode === "recombine" ? "Complete a resposta." : "Monte a resposta." : "A conversa continua."}</h1>
         {node.id === "p10.contact" && state.decisions["p9.pause"] === "stay" && <p>Depois de mais alguns minutos, chega a hora de se despedir.</p>}
         <p className="context">{mobileContext[node.id] ? <><span className="desktop-context">{node.context}</span><span className="mobile-context">{mobileContext[node.id]}</span></> : node.context}</p>
         {(node.image === "V02" || node.image === "V04") && <p className="cup-clue">Seu café: based · iced coffee. Copo: {node.image === "V02" ? "lucas" : "based"}.</p>}
       </header>}
       artwork={<aside className="scene-column"><figure className="scene-art"><picture><source media="(max-width: 760px)" srcSet={image.mobile} /><Image unoptimized width={960} height={640} src={image.path} alt={image.description} /></picture></figure></aside>}>
       <div className="activity-body"><div className="activity-content">
+        {openingNode ? <OpeningCard node={openingNode} headingRef={heading} /> : <>
         <div className="conversation-tools"><ConversationHistory label="Histórico" key={`${node.id}:${state.phase}`} state={state} lines={history} /><HelpPanel key={node.id} node={node} level={helpLevel} modelHidden={state.modelHidden} building={["build", "write", "select"].includes(state.phase)} onHelp={() => event("HELP")} onToggleModel={() => event("TOGGLE_MODEL")} onUseSupport={() => event("USE_SUPPORT")} /></div>
         {justSent && <article className="speech sent"><small>Você<span className="sent-detail"> · fala enviada</span></small><p lang="en">{justSent.written ?? audio[justSent.audioId].text}</p><AudioButton key={justSent.id} audio={justSent.audioId}>{justSent.written ? "Ouvir modelo" : "Ouvir resposta"}</AudioButton></article>}
         {heard.length > 0 && <article className="speech heard"><small>Lucas</small><div className="heard-line"><div><p lang="en">{heard.map(id => audio[id].text).join(" ")}</p>{state.activityProfile === "beginner" && node.part > 2 && <p className="meaning">{heard.map(id => audio[id].meaning).join(" ")}</p>}</div><AudioButton audio={heard} label="Ouvir fala de Lucas" /></div></article>}
@@ -112,7 +115,7 @@ export function DemoExperience({ initial, publishedAudio = {}, navigationRef, on
           {state.phase === "select" && <div className="recognition-response"><div className="choices" aria-label="Expressões para responder">{recognitionOptions(node).map(id => <button key={id} lang="en" aria-pressed={state.recognized === id} onClick={() => dispatch({ at: node.id, type: "RECOGNIZE", response: id })}>{audio[id].text}</button>)}</div></div>}
         </>}
         <p role="status" className="notice">{state.notice}</p>
-
+        </>}
       </div></div>
       <div className="activity-actions">{activityActions}</div>
     </SceneFrame>}

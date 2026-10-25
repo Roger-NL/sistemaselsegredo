@@ -1,5 +1,7 @@
-import { choice, response } from "../builders";
-export const part03 = [
+import { choice, response, scene } from "../builders";
+import type { DemoNode } from "../../model/types";
+export const part03: DemoNode[] = [
+  { ...scene("p3.prompt", 3, "V03", "Como você quer continuar a conversa?", [], "p3.intent", "Ver minhas opções"), presentation: "prompt" },
   choice("p3.intent", 3, "V03", "O mal-entendido terminou.", "O que você quer fazer?", [
     { id: "ask", label: "Perguntar o que ele pediu", next: "p3.ask" },
     { id: "okay", label: "Dizer que está tudo bem", next: "p3.okay" },

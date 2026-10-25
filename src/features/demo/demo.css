@@ -1050,3 +1050,43 @@
   .audio-trigger[data-audio-status=loading] .audio-ring { animation:none; }
   .audio-ring-fill { transition:none; }
 }
+
+/* Opening: one prominent reading card before the dialogue or choices are revealed. */
+.opening-scene .scene-intro-slot:empty { display:none; }
+.app-shell .opening-card {
+  background:#fffdf9;
+  color:var(--ink);
+  border:1px solid var(--line);
+  border-top:4px solid var(--ink);
+  border-radius:20px;
+  padding:clamp(1.25rem,3vw,2.75rem);
+  box-shadow:0 12px 36px #19191908;
+}
+.app-shell .opening-card h1 {
+  font-size:clamp(2.5rem,4.3vw,4.6rem);
+  font-weight:650;
+  line-height:1.08;
+  letter-spacing:-.045em;
+  margin:0;
+  text-wrap:balance;
+}
+.app-shell .opening-card[data-presentation=context] h1 {
+  font-size:clamp(1.5rem,2.6vw,2.35rem);
+  line-height:1.35;
+  letter-spacing:-.025em;
+  font-weight:500;
+  text-wrap:pretty;
+}
+.app-shell .opening-card .opening-speaker { margin:0 0 .8rem; font-size:16px; font-weight:650; }
+.app-shell .opening-card .audio-trigger { margin-top:.85rem; }
+.app-shell .opening-scene .activity-actions { padding-top:.9rem; }
+.app-shell .opening-instructions .context { color:var(--ink); font-size:1.1rem; line-height:1.4; }
+@media(max-width:760px) {
+  .app-shell .scene-grid.opening-scene { grid-template-rows:minmax(176px,1fr) auto; }
+  .app-shell .scene-grid.opening-scene .scene-column { grid-row:1; }
+  .app-shell .scene-grid.opening-scene .conversation-panel { grid-row:2; }
+  .app-shell .opening-card { padding:1.2rem; border-radius:16px; }
+  .app-shell .opening-card h1 { font-size:clamp(1.85rem,8.3vw,2.7rem); }
+  .app-shell .opening-card[data-presentation=context] h1 { font-size:clamp(1.25rem,5.4vw,1.55rem); line-height:1.35; }
+  .app-shell .scene-grid[data-density] .opening-instructions .context { color:var(--ink); font-size:16px; }
+}

@@ -33,6 +33,24 @@ function reach(id: string, choices: Record<string, string> = {}, profile: typeof
 }
 
 describe("approved café graph", () => {
+  it("introduces title, context and speech before the standalone question and its options", () => {
+    for (const profile of PROFILES) {
+      let state = createDemo(profile, "opening-test", 1000);
+      for (const [id, presentation] of [["p1.first", "title"], ["p1.context", "context"], ["p1.lucas", "dialogue"], ["p2.prompt", "prompt"]]) {
+        expect(state.nodeId).toBe(id);
+        const node = catalog[id];
+        expect(node.kind === "scene" && node.presentation).toBe(presentation);
+        expect(transition(state, { at: id, type: "UNDERSTAND", correct: true })).toBe(state);
+        if (id === "p1.first" || id === "p1.context") expect(state.transcript).toEqual([]);
+        const next = advance(state);
+        expect(dispatch(next, { type: "BACK" })).toEqual(state);
+        state = next;
+      }
+      expect(state.nodeId).toBe("p2.question");
+      expect(state.transcript.map(line => line.audioId)).toEqual(["C01"]);
+      expect(decodeSnapshot(encodeSnapshot(state))).toEqual(state);
+    }
+  });
   it("returns one screen per click all the way to the start in every level, including after reload", () => {
     for (const profile of PROFILES) {
       let state = reach("end", {}, profile);
@@ -136,7 +154,8 @@ describe("approved café graph", () => {
       expect(state.transcript.slice(-2).map(line => line.audioId)).toEqual(["U01", "C02"]);
       expect(state.evidence.filter(item => item.response === "U01")).toHaveLength(1);
       expect(transition(state, { at: "p2.send", type: "SUBMIT" })).toBe(state);
-      expect(advance(state).nodeId).toBe("p3.intent");
+      expect(advance(state).nodeId).toBe("p3.prompt");
+      expect(advance(advance(state)).nodeId).toBe("p3.intent");
     }
     for (const removed of ["p2.model", "p2.prepare", "p2.meaning"]) expect(catalog[removed]).toBeUndefined();
   });
@@ -291,7 +310,7 @@ describe("versioned local recovery", () => {
     expect(restoreDemo(storage).status).toBe("unavailable");
     const state = createDemo("some", "test-run-id", 1);
     expect(saveDemo(storage, state)).toBe(false);
-    expect(advance(state).nodeId).toBe("p2.question");
+    expect(advance(state).nodeId).toBe("p1.context");
   });
 });
 
@@ -359,6 +378,16 @@ describe("three approved practice experiences", () => {
 });
 
 describe("local recovery of the shorter opening", () => {
+  it("migrates v3 progress and drafts without making the learner restart or send twice", () => {
+    for (const profile of PROFILES) for (const id of ["p2.send", "p3.ask", "end"]) {
+      let current = reach(id, {}, profile);
+      if (id === "p2.send" && profile === "less") current = transition(current, { at: id, type: "TYPE", text: "No, it isn't mine!" });
+      const data = JSON.parse(encodeSnapshot(current));
+      data.storyVersion = "cafe-v3";
+      data.journal = data.journal.filter((event: DemoEvent) => !["p1.context", "p1.lucas", "p2.prompt", "p3.prompt"].includes(event.at));
+      expect(decodeSnapshot(JSON.stringify(data))).toEqual(current);
+    }
+  });
   const legacyStart: DemoEvent[] = [
     { at: "p1.first", type: "NEXT" }, { at: "p2.question", type: "UNDERSTAND", correct: true },
     { at: "p2.model", type: "NEXT" },
@@ -370,11 +399,12 @@ describe("local recovery of the shorter opening", () => {
   it("preserves a completed conversation in all three profiles without sending anything twice", () => {
     for (const profile of PROFILES) {
       const current = reach("end", {}, profile);
-      const index = current.journal.findIndex(event => event.at === "p2.send");
+      const previousJournal = current.journal.filter(event => !["p1.context", "p1.lucas", "p2.prompt", "p3.prompt"].includes(event.at));
+      const index = previousJournal.findIndex(event => event.at === "p2.send");
       const practiceEvents: DemoEvent[] = profile === "less" ? [{ at: "p2.prepare", type: "TYPE", text: audio.U01.text }] : preparation;
-      const journal = [...current.journal.slice(0, index), { at: "p2.model", type: "NEXT" } as DemoEvent,
+      const journal = [...previousJournal.slice(0, index), { at: "p2.model", type: "NEXT" } as DemoEvent,
         ...practiceEvents, { at: "p2.prepare", type: "SUBMIT" } as DemoEvent,
-        { at: "p2.meaning", type: "NEXT" } as DemoEvent, ...current.journal.slice(index)];
+        { at: "p2.meaning", type: "NEXT" } as DemoEvent, ...previousJournal.slice(index)];
       expect(decodeSnapshot(legacy(profile, journal))).toEqual(current);
     }
   });

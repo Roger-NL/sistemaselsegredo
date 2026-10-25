@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { nextSceneDensity, type SceneDensity } from "../model/layout";
 
 /** Only spacing changes: the illustration, conversation and actions stay on screen. */
-export function SceneFrame({ intro, artwork, children, activityKey }: { intro: ReactNode; artwork: ReactNode; children: ReactNode; activityKey: string }) {
+export function SceneFrame({ intro, artwork, children, activityKey, opening = false }: { intro: ReactNode; artwork: ReactNode; children: ReactNode; activityKey: string; opening?: boolean }) {
   const frame = useRef<HTMLDivElement>(null);
   const introduction = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -39,7 +39,7 @@ export function SceneFrame({ intro, artwork, children, activityKey }: { intro: R
     schedule();
     return () => { observer.disconnect(); cancelAnimationFrame(scheduled); window.removeEventListener("resize", schedule); window.visualViewport?.removeEventListener("resize", schedule); };
   }, [activityKey]);
-  return <div ref={frame} className="scene-grid">
+  return <div ref={frame} className={`scene-grid${opening ? " opening-scene" : ""}`}>
     <div ref={introduction} className="scene-intro-slot">{intro}</div>
     {artwork}
     <section className="conversation-panel" aria-label="Falas e atividade">{children}</section>

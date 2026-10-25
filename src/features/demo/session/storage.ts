@@ -27,11 +27,12 @@ export function decodeSnapshot(raw: string): DemoState | null {
   try {
     if (raw.length > 1_000_000) return null;
     const data: unknown = JSON.parse(raw);
-    if (!isRecord(data) || data.schemaVersion !== SCHEMA_VERSION || (data.storyVersion !== STORY_VERSION && data.storyVersion !== "cafe-v2")
+    if (!isRecord(data) || data.schemaVersion !== SCHEMA_VERSION || ![STORY_VERSION, "cafe-v3", "cafe-v2"].includes(data.storyVersion as string)
       || typeof data.runId !== "string" || !/^[\w-]{8,100}$/.test(data.runId)
       || typeof data.startedAt !== "number" || !Number.isFinite(data.startedAt)
       || !PROFILES.includes(data.initialProfile as SupportProfile) || !Array.isArray(data.journal) || data.journal.length > 4_000) return null;
     const legacy = data.storyVersion === "cafe-v2";
+    const previousOpening = data.storyVersion !== STORY_VERSION;
     const journal: DemoEvent[] = [];
     for (const event of data.journal) {
       if (!validEvent(event, legacy)) return null;
@@ -49,6 +50,14 @@ export function decodeSnapshot(raw: string): DemoState | null {
     };
     for (const original of journal) {
       let event = original;
+      // Preserve old attempts at their actual activity, without replaying a send.
+      // The added reading cards remain reachable through Back after migration.
+      if (previousOpening && event.type === "NEXT" && (event.at === "p1.first" || event.at === "p2.reaction")) {
+        if (!apply(event)) return null;
+        const inserted = event.at === "p1.first" ? ["p1.context", "p1.lucas", "p2.prompt"] : ["p3.prompt"];
+        for (const at of inserted) if (!apply({ at, type: "NEXT" })) return null;
+        continue;
+      }
       if (legacy && removedPreparation.has(event.at)) {
         // Removed screens never sent a reply. Do not turn a practice submission
         // into an actual send when restoring the shorter flow.
