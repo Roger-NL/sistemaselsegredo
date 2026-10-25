@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { catalog, nodes } from "@/features/demo/content/catalog";
+import { presentationCards } from "@/features/demo/content/presentation";
 import { audio, images } from "@/features/demo/content/media";
 import { acceptsAnswer, practice, recognitionOptions } from "@/features/demo/model/practice";
 import { createDemo, transition } from "@/features/demo/model/reducer";
@@ -368,7 +369,7 @@ describe("three approved practice experiences", () => {
     expect(decodeSnapshot(encodeSnapshot(state))).toEqual(state);
     state = dispatch(state, { type: "SUBMIT" }); expect(state.activityProfile).toBe("beginner");
   });
-  it("keeps Careful visible before use and prevents premature recall submissions for every level", () => {
+  it("keeps the Careful listening stage before use and prevents premature recall submissions for every level", () => {
     for (const profile of PROFILES) {
       expect(reach("p6.warn", {}, profile).phase).toBe("ready");
       const recall = reach("p7.tired", {}, profile); expect(recall.phase).toBe("recall");
@@ -378,6 +379,7 @@ describe("three approved practice experiences", () => {
 });
 
 describe("local recovery of the shorter opening", () => {
+  const withoutAudioAccess = (state: DemoState | null) => state && ({ ...state, audioAccess: {}, journal: state.journal.filter(e => e.type !== "AUDIO_ACCESS") });
   it("migrates v3 progress and drafts without making the learner restart or send twice", () => {
     for (const profile of PROFILES) for (const id of ["p2.send", "p3.ask", "end"]) {
       let current = reach(id, {}, profile);
@@ -385,7 +387,9 @@ describe("local recovery of the shorter opening", () => {
       const data = JSON.parse(encodeSnapshot(current));
       data.storyVersion = "cafe-v3";
       data.journal = data.journal.filter((event: DemoEvent) => !["p1.context", "p1.lucas", "p2.prompt", "p3.prompt"].includes(event.at));
-      expect(decodeSnapshot(JSON.stringify(data))).toEqual(current);
+      while (current.presentationStep < presentationCards(catalog[current.nodeId]).length) current = transition(current, { at: current.nodeId, type: "ADVANCE_PRESENTATION" });
+      expect(withoutAudioAccess(decodeSnapshot(JSON.stringify(data)))).toEqual(withoutAudioAccess(current));
+      expect(Object.values(decodeSnapshot(JSON.stringify(data))!.audioAccess).every(mode => mode === "text")).toBe(true);
     }
   });
   const legacyStart: DemoEvent[] = [
@@ -405,7 +409,7 @@ describe("local recovery of the shorter opening", () => {
       const journal = [...previousJournal.slice(0, index), { at: "p2.model", type: "NEXT" } as DemoEvent,
         ...practiceEvents, { at: "p2.prepare", type: "SUBMIT" } as DemoEvent,
         { at: "p2.meaning", type: "NEXT" } as DemoEvent, ...previousJournal.slice(index)];
-      expect(decodeSnapshot(legacy(profile, journal))).toEqual(current);
+      expect(withoutAudioAccess(decodeSnapshot(legacy(profile, journal)))).toEqual(withoutAudioAccess(current));
     }
   });
   it("retains a partial practice draft without claiming it was sent", () => {

@@ -1040,7 +1040,9 @@
 
 /* Local audio feedback reserves its space; playback never creates a top banner. */
 .audio-trigger { display:inline-flex; align-items:center; flex-wrap:wrap; gap:.25rem; max-width:100%; vertical-align:middle; }
-.app-shell .audio-trigger .audio-button { display:inline-flex; align-items:center; gap:.4rem; min-height:44px; }
+.app-shell .audio-trigger .audio-button { position:relative; display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:10px 40px; border:1px solid #d8d0c3; border-radius:999px; background:#f5f0e7; font-size:16px; font-weight:550; line-height:1.3; text-align:center; text-decoration:none; }
+.app-shell .audio-trigger .audio-button:hover { background:#eae3d7; border-color:#aaa08f; }
+.app-shell .audio-trigger .audio-button .audio-ring { position:absolute; right:12px; top:50%; margin-top:-9px; pointer-events:none; }
 .audio-ring { width:18px; height:18px; flex:0 0 18px; overflow:visible; visibility:hidden; transform:rotate(-90deg); }
 .audio-ring circle { fill:none; stroke:currentColor; stroke-width:2; }
 .audio-ring-track { opacity:.18; }
@@ -1059,47 +1061,56 @@
   .audio-ring-fill { transition:none; }
 }
 
-/* Opening: one prominent reading card before the dialogue or choices are revealed. */
+/* One reading target, with a scale appropriate to its role in the story. */
 .opening-scene .scene-intro-slot:empty { display:none; }
 .app-shell .opening-card {
-  background:#fffdf9;
-  color:var(--ink);
-  border:1px solid var(--line);
-  border-top:4px solid var(--ink);
-  border-radius:20px;
-  padding:clamp(1.25rem,3vw,2.75rem);
-  box-shadow:0 12px 36px #19191908;
+  background:#fffdf9; color:var(--ink); border:1px solid #e3ddd2;
+  border-radius:20px; padding:clamp(1.5rem,2.5vw,2rem);
+  box-shadow:0 8px 28px #19191906;
 }
 .app-shell .opening-card h1 {
-  font-size:clamp(2.5rem,4.3vw,4.6rem);
-  font-weight:650;
-  line-height:1.08;
-  letter-spacing:-.045em;
-  margin:0;
-  text-wrap:balance;
+  font-size:clamp(2rem,3vw,2.75rem); font-weight:600; line-height:1.15;
+  letter-spacing:-.035em; margin:0; text-wrap:balance;
 }
-.app-shell .opening-card[data-presentation=context] h1 {
-  font-size:clamp(1.5rem,2.6vw,2.35rem);
-  line-height:1.35;
-  letter-spacing:-.025em;
-  font-weight:500;
-  text-wrap:pretty;
+.app-shell .opening-card[data-presentation=dialogue] h1 {
+  font-size:clamp(1.75rem,2.6vw,2.5rem); font-weight:550; line-height:1.25; letter-spacing:-.025em;
 }
-.app-shell .opening-card .opening-speaker { margin:0 0 .8rem; font-size:16px; font-weight:650; }
-.app-shell .opening-card .audio-trigger { margin-top:.85rem; }
-.app-shell .opening-scene .activity-actions { padding-top:.9rem; }
+.app-shell .opening-card[data-presentation=context] h1,
+.app-shell .opening-card[data-presentation=prompt] h1 {
+  font-size:clamp(1.25rem,1.8vw,1.5625rem); font-weight:450; line-height:1.4;
+  letter-spacing:-.02em; text-wrap:pretty;
+}
+.app-shell .opening-card .opening-speaker { margin:0 0 .6rem; font-size:15px; font-weight:550; color:var(--muted); }
+.app-shell .opening-card .audio-trigger {
+  display:inline-flex; margin-top:1rem; padding:0; border:0; background:transparent;
+}
+.app-shell .opening-card .audio-button { min-width:132px; min-height:52px; font-size:18px; }
+.app-shell h1[tabindex="-1"]:focus,.app-shell h2[tabindex="-1"]:focus { outline:none; }
+.app-shell .opening-scene .activity-actions { padding-top:.75rem; }
 .app-shell .opening-instructions .context { color:var(--ink); font-size:1.1rem; line-height:1.4; }
-@media(max-width:760px) {
-  .app-shell .scene-grid.opening-scene { grid-template-rows:minmax(var(--scene-art-min,176px),1fr) auto; }
-  .app-shell .scene-grid.opening-scene .scene-column { grid-row:1; }
-  .app-shell .scene-grid.opening-scene .conversation-panel { grid-row:2; }
-  .app-shell .opening-card { padding:1.2rem; border-radius:16px; }
-  .app-shell .opening-card h1 { font-size:clamp(1.85rem,8.3vw,2.7rem); }
-  .app-shell .opening-card[data-presentation=context] h1 { font-size:clamp(1.25rem,5.4vw,1.55rem); line-height:1.35; }
-  .app-shell .scene-grid[data-density] .opening-instructions .context { color:var(--ink); font-size:16px; }
+.app-shell .experience { max-width:1200px; }
+.app-shell .activity-actions button { min-height:48px; font-size:16px; }
+.app-shell .activity-actions > .primary { width:auto; min-width:min(100%,220px); }
+.app-shell .scene-column { align-self:center; height:auto; }
+.app-shell .scene-art { height:auto; }
+.app-shell .scene-art picture { flex:none; width:100%; aspect-ratio:3/2; }
+.app-shell .expression { padding:1.25rem; border:1px solid #e3ddd2; border-radius:18px; background:#fffdf9; }
+.app-shell .expression p[lang=en] { font-size:clamp(1.375rem,1.8vw,1.625rem); }
+@container demo-app (max-width:760px) {
+  .app-shell .opening-card { padding:1.25rem; border-radius:18px; }
+  .app-shell .opening-card h1 { font-size:clamp(1.875rem,7.4vw,2.125rem); }
+  .app-shell .opening-card[data-presentation=dialogue] h1 { font-size:clamp(1.625rem,6.5vw,1.875rem); }
+  .app-shell .opening-card[data-presentation=context] h1,
+  .app-shell .opening-card[data-presentation=prompt] h1 { font-size:clamp(1.25rem,5.6vw,1.5625rem); }
+  .app-shell .scene-grid .scene-column { height:100%; align-self:stretch; }
+  .app-shell .scene-art,.app-shell .scene-art picture { height:100%; }
+  .app-shell .scene-art picture { flex:1; aspect-ratio:auto; }
+  .app-shell .activity-actions > .primary { width:100%; }
+  .app-shell .scene-grid[data-density] .expression { padding:1rem; }
+  .app-shell .scene-grid[data-density] .expression p[lang=en] { font-size:22px; }
 }
 
-/* Bound every reading region by the app, rather than the image's intrinsic width. */
+/* Width containment is shared by all scenes and support levels. */
 .app-shell .scene-grid > *,.app-shell .opening-card,.app-shell .profile-options { min-inline-size:0; max-inline-size:100%; }
 .app-shell .activity-content,.app-shell .activity-actions { max-inline-size:100%; }
 /* Use the app's actual width, including narrow visual viewports inside a wider layout. */
@@ -1115,7 +1126,7 @@
   .app-shell .scene-grid,.app-shell .scene-grid[data-density] {
     grid-template-columns:minmax(0,1fr);
     grid-template-rows:auto var(--scene-art-height,min(36dvh,18rem)) auto;
-    align-content:start;
+    align-content:safe center;
     row-gap:.65rem;
   }
   .app-shell .scene-intro-slot { grid-column:1; grid-row:1; }
@@ -1129,7 +1140,121 @@
   .app-shell .scene-art,.app-shell .scene-art picture { min-width:0; max-width:100%; }
   /* A 3:2 frame removes the tall empty bands while preserving both men and cups. */
   .app-shell .scene-art picture img { object-fit:contain; object-position:center; }
-  .app-shell .opening-card { padding:1.2rem; border-radius:16px; }
-  .app-shell .opening-card h1 { font-size:clamp(1.85rem,8.3cqi,2.7rem); }
-  .app-shell .opening-card[data-presentation=context] h1 { font-size:clamp(1.25rem,5.4cqi,1.55rem); line-height:1.35; }
 }
+
+/* Reading cards and activities have independent, natural heights. Never let
+   the action row shrink the content box and cover the last piece or feedback. */
+.app-shell .activity-body { flex:0 0 auto; }
+.app-shell .review-stage { display:flex; flex-direction:column; overflow:visible; }
+.app-shell .review-reading { min-height:0; overflow-y:auto; overscroll-behavior:contain; }
+.app-shell .review-actions { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding-top:.5rem; background:var(--paper); }
+.app-shell .review-actions .conversation-history { margin:0; }
+.app-shell .review-actions > button { min-height:44px; }
+@container demo-app (max-width:760px) {
+  .app-shell .review-stage { padding:.25rem 0; gap:.25rem; }
+  .app-shell .review-stage h1 { font-size:1.5rem; line-height:1.15; margin:.25rem 0 .5rem; }
+  .app-shell .review-stage p { margin:.125rem 0; }
+  .app-shell .moment-card { padding:.35rem .75rem; line-height:1.25; }
+  .app-shell .moment-card p[lang=en] { font-size:18px; }
+  .app-shell .moment-card > p:not([lang]) { font-size:15px; }
+  .app-shell .review-stage .pager { margin:.25rem 0; }
+  .app-shell .review-stage .muted { font-size:14px; line-height:1.3; }
+  .app-shell .review-actions .text-button { min-height:44px; font-size:14px; }
+  .app-shell .feedback-options { grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; }
+  .app-shell .feedback-options legend { grid-column:1/-1; }
+  .app-shell .feedback-options label { align-items:flex-start; font-size:14px; line-height:1.3; padding:.4rem 0; }
+  .app-shell .feedback-options input { flex-shrink:0; }
+}
+@container demo-app (max-width:760px) {
+  .app-shell .support-dialog label { margin:.35rem 0; padding:.5rem; gap:.5rem; }
+  .app-shell .support-dialog small { font-size:14px; line-height:1.3; }
+  .app-shell .support-dialog .actions { display:flex; flex-wrap:wrap; gap:.5rem; }
+  .app-shell .support-dialog .actions button { flex:1 1 auto; min-height:44px; }
+}
+
+/* Entry selection: separate the welcome from the decision on desktop. */
+.app-shell .entry-mobile-welcome { display:none; }
+.app-shell .profile-indicator { width:22px; height:22px; border:1px solid #b9b0a2; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.app-shell .selected .profile-indicator { color:#fffdf9; background:#403a31; border-color:#403a31; }
+.app-shell .entry-reading .profile-option { position:relative; align-items:center; }
+.app-shell .entry-reading .profile-option input { position:absolute; opacity:0; width:1px; height:1px; margin:0; }
+.app-shell .entry-reading .profile-option-copy { flex:1; }
+.app-shell .entry-reading .profile-option:has(input:focus-visible) { outline:3px solid var(--ink); outline-offset:4px; }
+.app-shell .entry-start-actions { display:flex; margin-top:1rem; }
+.app-shell .entry-start-actions > .primary { min-height:50px; font-size:16px; border-radius:12px; justify-content:space-between; }
+@media(min-width:761px) {
+  .app-shell .entry-stage .entry-grid { max-width:1160px; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(3rem,7vw,6rem); align-items:center; padding:2rem 0; }
+  .app-shell .entry-intro { min-width:0; display:flex; flex-direction:column; gap:1.75rem; }
+  .app-shell .entry-welcome h1 { font-size:clamp(2rem,3.5vw,3rem); line-height:1.12; margin:0 0 1rem; }
+  .app-shell .entry-welcome .lead { font-size:17px; line-height:1.5; margin:0 0 .75rem; max-width:28rem; }
+  .app-shell .entry-welcome .entry-details { font-size:13px; font-weight:450; color:var(--muted); margin:0; }
+  .app-shell .entry-intro .entry-art { width:100%; height:auto; }
+  .app-shell .entry-intro .entry-art picture { position:static; aspect-ratio:3/2; flex:none; }
+  .app-shell .entry-intro .entry-art picture img { position:static; height:auto; aspect-ratio:3/2; object-fit:contain; border:0; border-radius:16px; }
+  .app-shell .entry-grid .entry-copy { grid-column:2; grid-row:1; height:auto; max-height:none; }
+  .app-shell .entry-grid .entry-reading { overflow:visible; flex:none; }
+  .app-shell .entry-reading .profile-options { margin:0; }
+  .app-shell .entry-reading .profile-options legend { font-size:26px; font-weight:500; line-height:1.2; letter-spacing:-.03em; padding:0; margin:0 0 .75rem; }
+  .app-shell .profile-options > p { font-size:14px; color:var(--muted); margin:0 0 1.75rem; line-height:1.4; }
+  .app-shell .profile-list { display:grid; gap:14px; }
+  .app-shell .entry-reading .profile-option { display:flex; gap:1rem; margin:0; padding:22px; min-height:100px; border-radius:16px; background:#faf7f1; border:1px solid #dcd5c9; transition:background .18s,border-color .18s,box-shadow .18s; }
+  .app-shell .entry-reading .profile-option:hover { background:#fffdf9; border-color:#a59b8a; }
+  .app-shell .entry-reading .profile-option.selected { background:#fffdf9; border-color:#554f45; box-shadow:0 3px 14px #30291c0a; }
+  .app-shell .entry-reading .profile-option strong { font-size:18px; font-weight:550; line-height:1.3; }
+  .app-shell .entry-reading .profile-option small { font-size:14px; line-height:1.5; margin-top:6px; color:#716c64; }
+  .app-shell .entry-start-actions { margin-top:1.75rem; }
+  .app-shell .entry-start-actions > .primary { min-width:230px; padding:12px 20px; }
+  .app-shell .entry-start-actions > .primary:disabled { opacity:1; background:#e5dfd4; border-color:#e5dfd4; color:#797166; }
+  .app-shell .opening-card .audio-trigger,.app-shell .expression > .audio-trigger { display:flex; justify-content:center; }
+  .app-shell .expression .audio-button { font-size:18px; min-height:52px; }
+  .app-shell .conversation-panel .activity-actions { display:flex; flex-direction:column; align-items:stretch; }
+  .app-shell .activity-actions > .actions { justify-content:center; }
+  .app-shell .activity-actions > .primary { align-self:center; justify-content:center; text-align:center; }
+}
+@media(max-width:760px) {
+  .app-shell .entry-intro { display:contents; }
+  .app-shell .entry-intro .entry-welcome { display:none; }
+  .app-shell .entry-mobile-welcome { display:block; }
+  .app-shell .profile-options > p { display:none; }
+  .app-shell .entry-start-actions { margin-top:.65rem; flex-shrink:0; }
+  .app-shell .entry-start-actions > .primary { width:100%; }
+}
+
+/* Listen before revealing the phrase; controls keep one clear target. */
+.app-shell .listening-prompt > p { font-size:16px; line-height:1.4; color:var(--muted); margin:1rem 0 0; }
+.app-shell .listening-prompt .audio-trigger { display:flex; justify-content:center; margin-top:1.25rem; }
+.app-shell .listening-prompt .audio-button { min-height:52px; font-size:18px; }
+.app-shell .listening-prompt .listening-text-alternative { display:block; margin:1rem auto 0; text-align:center; font-size:14px; }
+.app-shell .help .listening-prompt { padding:1rem; }
+.app-shell .help .listening-prompt h3 { margin:0; font-size:22px; line-height:1.25; }
+
+/* The response intention stays in Portuguese; the model is audio-only. */
+.app-shell .response-cue small { display:block; color:var(--muted); font-size:14px; margin-bottom:.65rem; }
+.app-shell .response-cue > p { color:var(--muted); font-size:16px; line-height:1.4; margin:1rem 0 0; }
+.app-shell .response-cue .audio-trigger { display:flex; justify-content:center; margin-top:1.25rem; }
+.app-shell .response-cue .audio-button { font-size:18px; min-height:52px; }
+.app-shell .activity-intent { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:.3rem 0 .8rem; }
+.app-shell .activity-intent p { font-size:20px; font-weight:500; line-height:1.3; margin:0; }
+.app-shell .activity-intent .audio-trigger { flex-shrink:0; }
+.app-shell .response-tools { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; }
+.app-shell .response-tools .conversation-history { justify-self:start; }
+.app-shell .response-tools > .audio-trigger { justify-self:center; }
+.app-shell .response-tools > .help { justify-self:end; }
+.app-shell .response-tools .audio-button { font-size:18px; min-height:52px; }
+.app-shell .help-solution { font-size:26px; line-height:1.3; }
+.app-shell .piece-returned.return-0 { animation:piece-return-a .22s ease-out; }
+.app-shell .piece-returned.return-1 { animation:piece-return-b .22s ease-out; }
+@keyframes piece-return-a { from { transform:translateY(-7px); } to { transform:translateY(0); } }
+@keyframes piece-return-b { from { transform:translateY(-7px); } to { transform:translateY(0); } }
+@container demo-app (max-width:760px) {
+  .app-shell .activity-intent { gap:.65rem; margin:0 0 .5rem; }
+  .app-shell .activity-intent p { font-size:17px; }
+  .app-shell .response-tools .audio-button { min-height:44px; font-size:15px; padding:.5rem 2rem; }
+  .app-shell .scene-grid[data-density=tight] .blocks button { padding:.5rem .4rem; min-height:44px; }
+  .app-shell .scene-grid[data-density=tight] .answer button { padding:.35rem .4rem; min-height:44px; }
+  .app-shell .scene-grid[data-density=tight] .blocks:has(> button:nth-child(3)):not(:has(> button:nth-child(4))) { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .app-shell .recognition-response .choices { grid-template-columns:repeat(2,minmax(0,1fr)); gap:.35rem; }
+  .app-shell .recognition-response .choices button { justify-content:center; text-align:center; min-height:44px; padding:.5rem; }
+  .app-shell .recognition-response .choices button:last-child:nth-child(odd) { grid-column:1/-1; }
+}
+@media(prefers-reduced-motion:reduce) { .app-shell .piece-returned.return-0,.app-shell .piece-returned.return-1 { animation:none; } }

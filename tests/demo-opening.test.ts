@@ -3,10 +3,15 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { DemoExperience } from "@/features/demo/DemoExperience";
 import { createDemo, transition } from "@/features/demo/model/reducer";
+import { listeningTarget } from "@/features/demo/model/listening";
 import type { DemoState } from "@/features/demo/model/types";
 
 const render = (state: DemoState) => renderToStaticMarkup(createElement(DemoExperience, { initial: state }));
-const next = (state: DemoState) => transition(state, { at: state.nodeId, type: "NEXT" });
+const listen = (state: DemoState) => {
+  const target = listeningTarget(state);
+  return target ? transition(state, { at: state.nodeId, type: "AUDIO_ACCESS", key: target.key, mode: "heard" }) : state;
+};
+const next = (state: DemoState) => transition(listen(state), { at: state.nodeId, type: "NEXT" });
 
 describe("opening reading order", () => {
   it("separates the title, story context and Lucas's first line into distinct cards", () => {
@@ -21,6 +26,10 @@ describe("opening reading order", () => {
     expect(html).toContain("Começar a história");
     expect(html).not.toContain("Is this yours?");
     state = next(state); html = render(state);
+    expect(html).toContain("Escute Lucas.");
+    expect(html).not.toContain("Is this yours?");
+    expect(html).not.toContain("Entender a pergunta");
+    state = listen(state); html = render(state);
     expect(html).toContain("Is this yours?");
     expect(html).toContain("Entender a pergunta");
     expect(html).not.toContain("Ele aponta para um copo");
