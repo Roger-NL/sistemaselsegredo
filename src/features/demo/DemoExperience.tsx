@@ -87,7 +87,7 @@ export function DemoExperience({ initial, publishedAudio = {}, navigationRef, on
       </dialog>
     </div>
     <div className="session-notices"><p ref={storageNotice} className="notice" role="status" /></div>
-    {node.kind === "end" ? <Retrospective state={state} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <SceneFrame key={node.id} activityKey={state.phase} opening={Boolean(openingNode)}
+    {node.kind === "end" ? <Retrospective state={state} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <SceneFrame activityKey={`${node.id}:${state.phase}`} opening={Boolean(openingNode)}
       intro={openingNode ? null : <header className={`scene-intro${node.part <= 3 ? " opening-instructions" : ""}`}>
         <h1 ref={heading} tabIndex={-1}>{node.id === "p2.question" ? "Escolha o significado." : node.id === "p3.intent" ? "Escolha o que dizer." : node.kind === "choice" ? node.prompt : node.id === "p6.safe" ? "Ele segura o copo a tempo." : node.id === "p2.send" ? "Agora responda a Lucas." : state.phase === "write" ? "Escreva sua resposta." : state.phase === "select" ? "Escolha sua expressão." : state.phase === "build" ? node.kind === "response" && node.mode === "recombine" ? "Complete a resposta." : "Monte a resposta." : "A conversa continua."}</h1>
         {node.id === "p10.contact" && state.decisions["p9.pause"] === "stay" && <p>Depois de mais alguns minutos, chega a hora de se despedir.</p>}

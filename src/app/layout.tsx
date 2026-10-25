@@ -40,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="scroll-smooth" data-scroll-behavior="smooth">
       <body
-        className={`${geist.variable} antialiased overflow-x-hidden`}
+        className={`${geist.variable} antialiased`}
       >
         {children}
       </body>
