@@ -53,6 +53,24 @@ export function transition(state: DemoState, event: DemoEvent): DemoState {
   };
   let next = state;
   switch (event.type) {
+    // Temporary test navigation: no fabricated answer, score or completed listening.
+    case "TEST_FORWARD": {
+      const target = listeningTarget(state);
+      if (target && !state.audioAccess[target.key]) {
+        next = { ...state, audioAccess: { ...state.audioAccess, [target.key]: "text" } };
+      } else if (state.presentationStep < presentationCards(node).length) {
+        next = { ...state, presentationStep: state.presentationStep + 1 };
+      } else if (node.kind === "choice") {
+        const choice = node.choices[0];
+        if (!choice) return state;
+        next = enter({ ...state, decisions: { ...state.decisions, [node.id]: choice.id } }, choice.next);
+      } else if (node.kind === "response" && ["present", "recall"].includes(state.phase)) {
+        next = { ...state, phase: responsePhase(state, node, false) };
+      } else if (node.kind !== "end") {
+        next = enter(state, node.next);
+      }
+      break;
+    }
     case "AUDIO_ACCESS":
       if (!["heard", "text"].includes(event.mode) || !acceptsAudioAccess(state, event.key) || state.audioAccess[event.key]) return state;
       next = { ...state, audioAccess: { ...state.audioAccess, [event.key]: event.mode } }; break;

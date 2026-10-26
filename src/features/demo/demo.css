@@ -1258,3 +1258,13 @@
   .app-shell .recognition-response .choices button:last-child:nth-child(odd) { grid-column:1/-1; }
 }
 @media(prefers-reduced-motion:reduce) { .app-shell .piece-returned.return-0,.app-shell .piece-returned.return-1 { animation:none; } }
+
+/* Keep temporary test navigation on one mobile header row. */
+.restart-icon { display:none; }
+@container demo-app (max-width:760px) {
+  .app-shell .site-header { column-gap:.25rem; }
+  .app-shell .site-header .brand { font-size:17px; }
+  .app-shell .site-header nav { gap:.25rem; flex-wrap:nowrap; }
+  .app-shell .site-header .restart-label { display:none; }
+  .app-shell .site-header .restart-icon { display:inline; font-size:24px; }
+}

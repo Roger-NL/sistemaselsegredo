@@ -12,7 +12,7 @@ const removedPreparation = new Set(["p2.model", "p2.prepare", "p2.meaning"]);
 function validEvent(value: unknown, legacy = false): value is DemoEvent {
   if (!isRecord(value) || typeof value.at !== "string" || (!catalog[value.at] && !(legacy && removedPreparation.has(value.at)))) return false;
   switch (value.type) {
-    case "SEND_RESPONSE": case "REVEAL_MODEL": case "ADVANCE_PRESENTATION": case "NEXT": case "PREPARE": case "SUBMIT": case "CHECK": case "HELP": case "USE_SUPPORT": case "CLEAR": case "TOGGLE_MODEL": return true;
+    case "TEST_FORWARD": case "SEND_RESPONSE": case "REVEAL_MODEL": case "ADVANCE_PRESENTATION": case "NEXT": case "PREPARE": case "SUBMIT": case "CHECK": case "HELP": case "USE_SUPPORT": case "CLEAR": case "TOGGLE_MODEL": return true;
     case "AUDIO_ACCESS": return typeof value.key === "string" && value.key.length <= 160 && ["heard", "text"].includes(value.mode as string);
     case "TYPE": return typeof value.text === "string" && value.text.length <= 240;
     case "RECOGNIZE": return typeof value.response === "string";

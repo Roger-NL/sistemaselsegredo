@@ -24,9 +24,9 @@ import { ConversationHistory } from "./components/ConversationHistory";
 import type { AudioId, DemoEvent, DemoState, SceneNode } from "./model/types";
 import type { PublishedAudioCatalog } from "@/contracts/demo-audio";
 
-export type DemoNavigation = { back: () => void };
-export function DemoExperience({ initial, publishedAudio = {}, navigationRef, onBackAvailabilityChange }: {
-  initial: DemoState; publishedAudio?: PublishedAudioCatalog; navigationRef?: Ref<DemoNavigation>; onBackAvailabilityChange?: (available: boolean) => void;
+export type DemoNavigation = { back: () => void; forward: () => void };
+export function DemoExperience({ initial, publishedAudio = {}, navigationRef, onBackAvailabilityChange, onForwardAvailabilityChange }: {
+  initial: DemoState; publishedAudio?: PublishedAudioCatalog; navigationRef?: Ref<DemoNavigation>; onBackAvailabilityChange?: (available: boolean) => void; onForwardAvailabilityChange?: (available: boolean) => void;
 }) {
   const [state, dispatch] = useReducer(transition, initial);
   const node = catalog[state.nodeId];
@@ -48,8 +48,9 @@ export function DemoExperience({ initial, publishedAudio = {}, navigationRef, on
   const demoAudio = useDemoAudio(`${state.nodeId}:${state.presentationStep}:${state.phase}:${state.reviewView}`, publishedAudio);
   const [playbackRate, setPlaybackRate] = useState(1);
   const event = (type: DemoEvent["type"]) => dispatch({ at: node.id, type } as DemoEvent);
-  useImperativeHandle(navigationRef, () => ({ back: () => dispatch({ at: node.id, type: "BACK" }) }), [node.id]);
-  useEffect(() => { onBackAvailabilityChange?.(node.id !== "p1.first"); }, [node.id, onBackAvailabilityChange]);
+  useImperativeHandle(navigationRef, () => ({ back: () => dispatch({ at: node.id, type: "BACK" }), forward: () => dispatch({ at: node.id, type: "TEST_FORWARD" }) }), [node.id]);
+  useEffect(() => { onBackAvailabilityChange?.(state.journal.length > 0); }, [state.journal.length, onBackAvailabilityChange]);
+  useEffect(() => { onForwardAvailabilityChange?.(node.kind !== "end"); }, [node.kind, onForwardAvailabilityChange]);
   useEffect(() => {
     if (!remember(state) && storageNotice.current) storageNotice.current.textContent = "O navegador não está guardando esta tentativa. Você pode concluir, mas sair desta página pode perder a retomada.";
   }, [state]);

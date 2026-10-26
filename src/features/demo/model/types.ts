@@ -27,7 +27,7 @@ export type Evidence = { nodeId: string; response: AudioId; kind: "blocks" | "re
 export const REVIEW_VIEWS = ["end", "moments", "thanks", "feedback", "done"] as const;
 export type ReviewView = typeof REVIEW_VIEWS[number];
 export type DemoEvent = { at: string } & (
-  | { type: "SEND_RESPONSE" | "REVEAL_MODEL" | "BACK" | "NEXT" | "ADVANCE_PRESENTATION" | "PREPARE" | "SUBMIT" | "CHECK" | "HELP" | "USE_SUPPORT" | "CLEAR" | "TOGGLE_MODEL" }
+  | { type: "TEST_FORWARD" | "SEND_RESPONSE" | "REVEAL_MODEL" | "BACK" | "NEXT" | "ADVANCE_PRESENTATION" | "PREPARE" | "SUBMIT" | "CHECK" | "HELP" | "USE_SUPPORT" | "CLEAR" | "TOGGLE_MODEL" }
   | { type: "AUDIO_ACCESS"; key: string; mode: "heard" | "text" }
   | { type: "CHOOSE"; choice: string }
   | { type: "TYPE"; text: string }
