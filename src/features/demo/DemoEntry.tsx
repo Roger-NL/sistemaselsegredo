@@ -8,7 +8,7 @@ import type { SupportProfile } from "./model/types";
 
 export function DemoEntry({ onStart }: { onStart: (profile: SupportProfile) => void }) {
   const [profile, setProfile] = useState<SupportProfile | null>(null);
-  const welcome = <><h1>Do primeiro café<br />à despedida.</h1><p className="lead">Uma conversa em inglês, com ajuda no seu ritmo.</p><p className="entry-details">Gratuita · Cerca de 30 minutos · Sem microfone</p></>;
+  const welcome = <><h1>Do primeiro café<br />à despedida.</h1><p className="lead">Uma conversa em inglês, com ajuda no seu ritmo.</p><p className="entry-details">Gratuita · Cerca de 20 minutos · Sem microfone</p></>;
   return <section className="entry-grid">
     <div className="entry-intro">
       <header className="entry-welcome">{welcome}</header>
