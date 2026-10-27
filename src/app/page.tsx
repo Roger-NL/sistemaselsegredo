@@ -4,6 +4,7 @@ import { ArrowUpRight, Check, MicOff } from "lucide-react";
 import { Brand } from "@/components/ui/Brand";
 import { ConversationPreview } from "@/features/landing/ConversationPreview";
 import { MoreInformation } from "@/features/landing/MoreInformation";
+import { ViewportFrame } from "@/features/landing/ViewportFrame";
 import "@/features/landing/landing.css";
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  return <div className="landing">
+  return <ViewportFrame className="landing">
     <a className="landing-skip" href="#conteudo">Pular para o conteúdo</a>
     <header className="landing-header landing-wrap">
       <Brand />
@@ -38,5 +39,5 @@ export default function HomePage() {
       <ConversationPreview />
     </main>
     <footer className="landing-footer landing-wrap"><span>Um encontro de cada vez.</span><nav aria-label="Informações legais"><Link href="/privacidade">Privacidade</Link><Link href="/termos">Termos</Link></nav></footer>
-  </div>;
+  </ViewportFrame>;
 }

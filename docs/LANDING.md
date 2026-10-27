@@ -27,4 +27,14 @@ Landing, cadastro e login foram conferidos no Chrome com viewport de 320×568, 3
 
 Exemplos medidos: em 1280×654, o cartão de login ocupa cerca de 463 px; em 320×568, cadastro e login ocupam aproximadamente 441 e 414 px. Os 175 testes passaram, assim como lint e build de produção. Essas verificações usam o navegador com dimensões móveis; não substituem testes em aparelhos físicos.
 
+### Correção do corte com zoom no Chrome
+
+A captura posterior de Roger revelou um caso que a matriz anterior não cobria: o layout do Chrome tinha 440×956 px, mas a área realmente visível era aproximadamente 348,83×757,91 px, com escala de 1,261. As regras baseadas apenas na largura da janela e em `100svh` deixavam ações e rodapé fora dessa área. O corte foi confirmado na aba afetada, sem alterar seu zoom antes da verificação.
+
+Landing e entrada agora compartilham `ViewportFrame`, que acompanha tamanho e deslocamento de `VisualViewport`. Os pontos de adaptação e a tipografia usam o tamanho desse frame por container queries, incluindo a altura. O painel de informações também se limita à área visível. O zoom continua permitido; não foi adicionado limite de escala ao navegador.
+
+A correção foi conferida na própria aba com a diferença de tamanho acima: o frame passou a medir 348×757 px e os controles ficaram visíveis. Foram adicionados três testes para a regressão de dimensões, redução da altura e fallback. Os 178 testes, lint e build passaram. As verificações de layout agora comparam os controles com os limites de `VisualViewport`, em vez de verificar somente a largura/altura do documento.
+
+A matriz passou a incluir 348×757 e 440×956, além das oito dimensões anteriores, cobrindo landing, cadastro e login. Também verifica links do cabeçalho e rodapé. Essa conferência encontrou e corrigiu o alvo de “Voltar” ultrapassando em 2 px o cabeçalho na horizontal de 568×320. O painel de informações foi aberto e fechado por teclado no cenário com zoom.
+
 A pesquisa e propostas iniciais estão em `research-landing.md`, `landing-visual-direction.md` e `landing-ux.md`. As recomendações iniciais de imagem da cafeteria e seções foram substituídas pelas instruções finais acima.
