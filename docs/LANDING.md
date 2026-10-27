@@ -44,3 +44,9 @@ Roger solicitou que “LET’S TALK” também ficasse inteiro e centralizado. O
 Conferência de geometria e captura em 320×480, 320×568, 348×757, 360×740, 375×667, 390×844, 440×956, 820×1180, 1280×654, 1440×900, 844×390 e 568×320. Em todas, título e cartão ficam inteiros e separados; o centro horizontal do título coincide com o do quadro (diferença inferior a 0,01 px de arredondamento). A checagem compara o título com o cartão, além de conferir os limites visíveis, para detectar sobreposições internas que a matriz anterior não verificava.
 
 A pesquisa e propostas iniciais estão em `research-landing.md`, `landing-visual-direction.md` e `landing-ux.md`. As recomendações iniciais de imagem da cafeteria e seções foram substituídas pelas instruções finais acima.
+
+### Retorno do estilo de colagem
+
+Roger preferiu recuperar a personalidade da composição anterior. “LET’S TALK” voltou a ter inclinação, a etiqueta “YOUR TURN” ocupa seu próprio espaço à direita e o cartão tem uma rotação suave. O conjunto permanece centralizado, com título e exercício em linhas separadas e folgas para as rotações. A etiqueta participa do fluxo; não cobre a tipografia. Em áreas baixas, o título passa a uma linha para preservar sua legibilidade.
+
+A composição restaurada foi medida nos mesmos 12 tamanhos acima: título, etiqueta e cartão ficaram dentro do quadro, sem interseção entre título e etiqueta ou entre título e cartão, e os controles ficaram dentro da área visível. Depois dessa medição, foi acrescentada uma regra que aplica a versão em uma linha quando a área do título tem até 120 px de altura. O Chrome deixou de responder antes da conferência visual dessa última regra e da gravação das novas capturas. Os 178 testes, lint e build passaram com a regra final.

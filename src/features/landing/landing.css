@@ -108,18 +108,19 @@ html:has(.landing){overflow:hidden;overscroll-behavior:none}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.landing *,.start-page *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
 /* Each part owns a grid row: the poster can never sit behind the practice card. */
-.language-stage{height:100%;max-height:650px;min-width:0;min-height:0;position:relative;isolation:isolate;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:10px;padding:16px 20px 8px;border-radius:8px;background:#191919;color:#f4f0e8;background-image:radial-gradient(#ffffff17 .7px,transparent .7px);background-size:18px 18px;container:language-stage / size}
+.language-stage{height:100%;max-height:650px;min-width:0;min-height:0;position:relative;isolation:isolate;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:16px;padding:16px 20px 8px;border-radius:8px;background:#191919;color:#f4f0e8;background-image:radial-gradient(#ffffff17 .7px,transparent .7px);background-size:18px 18px;container:language-stage / size}
 .language-stage>*{min-width:0;min-height:0}
 .language-stage-top,.language-stage-bottom{position:relative;display:flex;align-items:center;justify-content:center;text-align:center;font-size:9px;letter-spacing:.1em;color:#c7c0b4}
 .language-stage-top{grid-row:1;min-height:24px;padding-inline:24px}
 .language-stage-top>span:last-child{position:absolute;right:0;font-size:24px;line-height:1}
 .language-stage-bottom{grid-row:4;min-height:36px;padding-inline:35px;font-size:8px}
-.language-heading{grid-row:2;display:grid;place-items:center;container:language-heading / size}
-.language-poster{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;max-width:100%;font-size:min(26cqw,43cqh);font-weight:630;letter-spacing:-.07em;line-height:1;text-align:center}
+.language-heading{grid-row:2;display:flex;align-items:center;justify-content:center;gap:clamp(12px,3cqw,24px);container:language-heading / size}
+.language-poster{display:flex;flex:none;flex-direction:column;align-items:center;justify-content:center;gap:0;max-width:100%;font-size:min(25cqw,39cqh);font-weight:630;letter-spacing:-.07em;line-height:.92;text-align:center;transform:rotate(-5deg)}
 .language-poster>span{display:block;white-space:nowrap}
 .language-poster>span:last-child{font-weight:350}
+.language-sticker{flex:none;display:flex;flex-direction:column;justify-content:center;width:clamp(44px,14cqw,76px);padding:12px 7px;background:#f4f0e8;color:#191919;border:1px solid #d5cec1;box-shadow:4px 5px 0 #ffffff26;font-size:clamp(10px,2.8cqw,17px);font-weight:750;line-height:1.05;letter-spacing:-.04em;text-align:left;transform:translateY(-35%) rotate(9deg)}
 .language-star{display:inline-flex;align-items:center;justify-content:center;width:1em;height:1em;margin-left:.16em;font-size:.5em;vertical-align:middle;animation:language-turn 24s linear infinite}
-.language-paper{grid-row:3;position:relative;justify-self:center;width:100%;max-width:480px;padding:16px;border:1px solid #d5cec1;border-radius:4px;background:#f4f0e8;color:#191919;box-shadow:5px 5px 0 #ffffff1a;text-align:center}
+.language-paper{grid-row:3;position:relative;justify-self:center;width:calc(100% - 12px);max-width:468px;padding:16px;border:1px solid #d5cec1;border-radius:4px;background:#f4f0e8;color:#191919;box-shadow:5px 5px 0 #ffffff1a;text-align:center;transform:rotate(1deg)}
 .language-paper-heading{position:absolute;top:0;right:0}
 .language-paper-heading>span{display:none}
 .language-reset{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:0;color:#716c64;background:transparent;border-radius:4px}
@@ -139,9 +140,10 @@ html:has(.landing){overflow:hidden;overscroll-behavior:none}
 .language-stage.is-complete .language-paper{box-shadow:5px 5px 0 #ffffff38}
 @keyframes language-turn{to{transform:rotate(360deg)}}
 @container public-viewport (max-width:760px){
-  .language-stage{gap:8px;padding:10px 14px 6px;border-radius:6px}
+  .language-stage{gap:12px;padding:10px 14px 6px;border-radius:6px}
   .language-stage-top{font-size:8px;min-height:20px}
-  .language-poster{flex-direction:row;gap:.18em;font-size:min(14cqw,78cqh)}
+  .language-poster{font-size:min(25cqw,38cqh)}
+  .language-sticker{padding:8px 5px}
   .language-paper{padding:12px}
   .language-intention{font-size:14px;margin-bottom:8px}
   .language-answer{font-size:17px;min-height:28px;margin-bottom:8px}
@@ -152,7 +154,8 @@ html:has(.landing){overflow:hidden;overscroll-behavior:none}
 }
 @container language-stage (max-height:280px){
   .language-stage-top,.language-stage-bottom{display:none}
-  .language-poster{flex-direction:row;gap:.18em;font-size:min(14cqw,72cqh)}
+  .language-poster{flex-direction:row;gap:.18em;font-size:min(10cqw,58cqh);line-height:1}
+  .language-sticker{width:min(54px,17cqw);font-size:min(12px,20cqh);padding:min(8px,10cqh) 4px;transform:rotate(9deg)}
   .language-paper{padding:7px 10px}
   .language-reset{width:32px;height:32px}
   .language-intention{font-size:12px;line-height:1.25;margin-bottom:4px;padding-inline:20px}
@@ -173,6 +176,10 @@ html:has(.landing){overflow:hidden;overscroll-behavior:none}
   .landing .landing-cta{min-height:40px;font-size:10px}.landing-more{min-height:28px;font-size:10px!important}
   .landing-assurance{font-size:9px;margin-top:8px;gap:12px}
   .language-stage{grid-template-rows:minmax(0,1fr) auto;gap:8px;padding:8px}.language-stage-top,.language-stage-bottom{display:none}.language-heading{grid-row:1}.language-paper{grid-row:2}
-  .language-poster{flex-direction:row;gap:.18em;font-size:min(14cqw,72cqh)}.language-star{animation:none}
+  .language-poster{flex-direction:row;gap:.18em;font-size:min(10cqw,58cqh);line-height:1}.language-star{animation:none}
+}
+@container language-heading (max-height:120px){
+  .language-poster{flex-direction:row;gap:.18em;font-size:min(10cqw,58cqh);line-height:1}
+  .language-sticker{width:min(54px,17cqw);font-size:min(12px,20cqh);padding:min(8px,10cqh) 4px;transform:rotate(9deg)}
 }
 @media(prefers-reduced-motion:reduce){.language-star{animation:none}.language-motion-toggle{visibility:hidden}}

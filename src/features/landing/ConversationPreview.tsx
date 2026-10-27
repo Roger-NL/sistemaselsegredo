@@ -24,7 +24,10 @@ export function ConversationPreview() {
 
   return <section className={`language-stage ${complete ? "is-complete" : ""}`} data-motion={motion ? "on" : "off"} aria-label="Uma amostra interativa do método">
     <div className="language-stage-top"><span>DO PENSAMENTO À CONVERSA</span><span aria-hidden="true">↗</span></div>
-    <div className="language-heading" aria-hidden="true"><div className="language-poster"><span>LET’S</span><span>TALK<span className="language-star">✳</span></span></div></div>
+    <div className="language-heading" aria-hidden="true">
+      <div className="language-poster"><span>LET’S</span><span>TALK<span className="language-star">✳</span></span></div>
+      <div className="language-sticker"><span>YOUR</span><span>TURN ↘</span></div>
+    </div>
     <div className="language-paper">
       <div className="language-paper-heading"><span>UMA FRASE SUA.</span><button type="button" className="language-reset" onClick={() => { setSelected([]); setNotice(""); }} aria-label="Recomeçar a amostra" disabled={selected.length === 0 && !notice}><RotateCcw size={15} aria-hidden="true" /></button></div>
       <p className="language-intention">“Estou aprendendo inglês.”</p>
