@@ -9,16 +9,19 @@ import { AppHeader } from "@/components/navigation/AppHeader";
 import { useJourneyTransition } from "@/components/navigation/JourneyTransition";
 import { displayAccountName, type DashboardAccount } from "@/contracts/dashboard";
 import { getBrowserSnapshot, getServerSnapshot, subscribe } from "@/features/demo/session/browser";
+import { conversationPosition } from "@/features/demo/session/position";
 import { visibleViewportSize } from "@/lib/ui/viewport";
 import { StudentSections } from "./StudentSections";
 import { useStudentWorkspace } from "./use-student-workspace";
 import { studentWorkspace } from "./workspace-store";
+import { useDashboardSection } from "./use-dashboard-section";
 import { getMotionPreference, getServerPreference, saveMotionPreference, subscribePreferences } from "./preferences";
 
 type Panel = "account" | "settings" | "help";
 
 export function Dashboard({ account }: { account: DashboardAccount }) {
   const workspaceState = useStudentWorkspace();
+  useDashboardSection(workspaceState.status);
   const workspace = workspaceState.workspace;
   const canPractice = workspaceState.status === "ready" && workspace?.account.status === "active";
   const router = useRouter();
@@ -39,6 +42,7 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
   const firstName = displayAccountName(workspace?.account.name ?? name).split(/\s+/, 1)[0];
   const completed = snapshot.state?.nodeId === "end";
   const started = Boolean(snapshot.state);
+  const position = conversationPosition(workspace?.learning.demoSnapshot ?? null);
   const action = completed ? "Rever." : started ? "Continuar." : "Começar.";
   const actionLabel = completed ? "Rever minha conversa" : started ? "Continuar a história" : "Acessar minha história";
 
@@ -138,7 +142,7 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
         <header className="dashboard-card-header"><h2 id="journey-title"><Route size={18} aria-hidden="true" />Sua jornada</h2><span className="dashboard-availability">{!workspace ? "Carregando seu percurso" : !canPractice ? "Acesso à prática em verificação" : completed ? "Fim do percurso" : started ? "Você já começou" : "Pronta para começar"}</span></header>
         <div className="dashboard-card-body"><div className="dashboard-access-area">
           <button type="button" className="dashboard-access" onClick={openStory} disabled={!canPractice} aria-label={actionLabel} aria-haspopup="dialog"><span className="dashboard-access-word">{action}</span><span className="dashboard-access-arrow"><ArrowUpRight size={25} aria-hidden="true" /></span></button>
-          <p className="dashboard-access-copy"><strong>{completed ? "Sua conversa está aqui." : started ? "Vamos continuar sua história?" : "Sua primeira história está aqui."}</strong><br />{started ? "Conversa guardada na sua conta." : "O primeiro encontro com o inglês está aqui."}</p>
+          <p className="dashboard-access-copy"><strong>{completed ? "Sua conversa está aqui." : started ? "Vamos continuar sua história?" : "Sua primeira história está aqui."}</strong><br />{position && !position.completed ? `Retome da parte ${position.part} de 10, com o apoio que você escolheu.` : started ? "Conversa guardada na sua conta." : "O primeiro encontro com o inglês está aqui."}</p>
         </div><div className="dashboard-path" aria-hidden="true"><span className="dashboard-path-line" /><span className="dashboard-path-dot" /><span className="dashboard-path-number">01</span><span className="dashboard-path-label">O seu primeiro encontro</span></div></div>
         <footer className="dashboard-card-footer"><span><Sparkles size={14} aria-hidden="true" />Primeira história · A cafeteria</span><span>No seu ritmo. Com apoio.</span></footer>
       </article>

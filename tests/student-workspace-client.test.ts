@@ -18,6 +18,85 @@ const setup = () => {
 afterEach(() => { vi.useRealTimers(); });
 
 describe("student workspace synchronization", () => {
+  it("keeps the connected workspace visible while navigation refreshes its activity", async () => {
+    const { store, fetcher } = setup();
+    const data = workspace();
+    let finish!: (response: Response) => void;
+    fetcher.mockResolvedValueOnce(json(data)).mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    await store.load();
+    const generation = store.getSnapshot().generation;
+    const updating = store.refresh();
+    expect(store.getSnapshot().status).toBe("ready");
+    expect(store.getSnapshot().workspace).toEqual(data);
+    const fresh = { ...data, activities:[{ id:"saved-activity", kind:"learning", title:"Conversa iniciada", at:"2026-10-27T12:00:00Z" }] };
+    finish(json(fresh)); await updating;
+    expect(store.getSnapshot().workspace?.activities).toEqual(fresh.activities);
+    expect(store.getSnapshot().generation).toBe(generation);
+  });
+
+  it("never rolls back a conversation when an older navigation read arrives after a save", async () => {
+    const { store, fetcher } = setup();
+    const data = workspace();
+    let finish!: (response: Response) => void;
+    fetcher.mockResolvedValueOnce(json(data)).mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }))
+      .mockResolvedValueOnce(json(data)).mockResolvedValueOnce(saved(data, { demoSnapshot:"part-three" }));
+    await store.load();
+    const generation = store.getSnapshot().generation;
+    const updating = store.refresh();
+    expect(store.stage("demoSnapshot", "part-three", generation)).toBe(true);
+    await store.flush();
+    finish(json(data)); await updating;
+    expect(store.getSnapshot().workspace?.learning.demoSnapshot).toBe("part-three");
+    expect(store.getSnapshot().generation).toBe(generation);
+    expect(store.hasPendingChanges()).toBe(false);
+  });
+
+  it("finishes pending progress before reading the activity shown on returning to the panel", async () => {
+    const { store, fetcher } = setup();
+    const data = workspace();
+    const fresh = { ...data, learning:{ ...data.learning, demoSnapshot:"part-three" }, activities:[{ id:"activity", kind:"learning", title:"Conversa iniciada", at:"2026-10-27T12:00:00Z" }] };
+    fetcher.mockResolvedValueOnce(json(data)).mockResolvedValueOnce(json(data))
+      .mockResolvedValueOnce(saved(data, { demoSnapshot:"part-three" })).mockResolvedValueOnce(json(fresh));
+    await store.load();
+    store.stage("demoSnapshot", "part-three", store.getSnapshot().generation);
+    const updating = store.refresh();
+    expect(store.getSnapshot().status).toBe("ready");
+    await updating;
+    expect(store.getSnapshot().workspace?.activities).toEqual(fresh.activities);
+    expect(store.getSnapshot().workspace?.learning.demoSnapshot).toBe("part-three");
+  });
+
+  it("still replaces a changed account during a background navigation refresh", async () => {
+    const { store, fetcher } = setup();
+    let finish!: (response: Response) => void;
+    fetcher.mockResolvedValueOnce(json(workspace())).mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    await store.load();
+    const generation = store.getSnapshot().generation;
+    const updating = store.refresh();
+    store.stage("demoSnapshot", "private-work", generation);
+    finish(json(workspace("student-b"))); await updating;
+    expect(store.getSnapshot().workspace?.account.id).toBe("student-b");
+    expect(store.getSnapshot().workspace?.learning.demoSnapshot).toBeNull();
+    expect(store.stage("demoSnapshot", "old callback", generation)).toBe(false);
+    expect(store.hasPendingChanges()).toBe(false);
+  });
+
+  it("discards pending practice if access is suspended during a navigation refresh", async () => {
+    const { store, fetcher } = setup();
+    let finish!: (response: Response) => void;
+    fetcher.mockResolvedValueOnce(json(workspace())).mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+    await store.load();
+    const generation = store.getSnapshot().generation;
+    const updating = store.refresh();
+    store.stage("demoSnapshot", "unsent", generation);
+    const suspended = workspace(); suspended.account.status = "suspended";
+    finish(json(suspended)); await updating;
+    expect(store.getSnapshot().workspace?.account.status).toBe("suspended");
+    expect(store.getSnapshot().workspace?.learning.demoSnapshot).toBeNull();
+    expect(store.hasPendingChanges()).toBe(false);
+    expect(store.stage("demoSnapshot", "old callback", generation)).toBe(false);
+  });
+
   it("does not accept anonymous work or read/import any legacy browser snapshot", async () => {
     const { store, fetcher, storage } = setup();
     expect(store.stage("demoSnapshot", "anonymous", 0)).toBe(false);

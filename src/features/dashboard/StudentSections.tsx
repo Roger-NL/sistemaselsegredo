@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowUpRight, BookOpen, Check, MessageCircle, Send } from "lucide-react";
 import type { StudentWorkspace, TeacherConversation } from "@/contracts/workspace";
 import { studentWorkspace } from "./workspace-store";
+import { conversationPosition } from "@/features/demo/session/position";
 
 export function formatStudentDate(value: string) {
   const date = new Date(value);
@@ -13,16 +14,17 @@ export function formatStudentDate(value: string) {
 
 export function StudentSections({ workspace, disabled }: { workspace: StudentWorkspace; disabled: boolean }) {
   const { learning, account } = workspace;
+  const position = conversationPosition(learning.demoSnapshot);
   return <>
     <section className="student-section" id="avanco" aria-labelledby="student-progress-title">
-      <div className="student-section-heading"><div><p className="dashboard-overline">Um passo de cada vez</p><h2 id="student-progress-title">Meu avanço.</h2></div><span>{learning.updatedAt ? `Atualizado em ${formatStudentDate(learning.updatedAt)}` : "Seu percurso começa aqui"}</span></div>
+      <div className="student-section-heading"><div><p className="dashboard-overline">Um passo de cada vez</p><h2 id="student-progress-title" tabIndex={-1}>Meu avanço.</h2></div><span>{learning.updatedAt ? `Atualizado em ${formatStudentDate(learning.updatedAt)}` : "Seu percurso começa aqui"}</span></div>
       <div className="student-progress-grid">
-        <article className="student-progress-card"><span>Conversa da cafeteria</span><strong>{learning.demoPercent}%</strong><progress value={learning.demoPercent} max={100} aria-label="Avanço na conversa da cafeteria" /><p>{learning.demoSnapshot ? "Seu ponto de retorno está guardado na sua conta." : "Ainda não há progresso desta história salvo na sua conta."}</p></article>
+        <article className="student-progress-card"><span>Conversa da cafeteria</span><strong>{learning.demoPercent}%</strong><progress value={learning.demoPercent} max={100} aria-label="Avanço na conversa da cafeteria" /><p>{position ? position.completed ? "Você chegou ao fim da conversa." : `Parte ${position.part} de 10. Seu ponto de retorno está guardado.` : "Ainda não há progresso desta história salvo na sua conta."}</p>{position && account.status === "active" && <Link href="/demo" prefetch={true}>{position.completed ? "Rever conversa" : "Retomar conversa"}<ArrowUpRight size={16} aria-hidden="true" /></Link>}</article>
         <article className="student-progress-card"><span>Estudo guiado</span><strong>{learning.studyCompleted}<small> / {learning.studyTotal}</small></strong><progress value={learning.studyCompleted} max={learning.studyTotal || 1} aria-label="Práticas de estudo concluídas" /><p>Práticas concluídas. Você pode revisitar os blocos quando quiser.</p>{account.status === "active" && <Link href="/demo/estudo" prefetch={false}>Ir para meu estudo<ArrowUpRight size={16} aria-hidden="true" /></Link>}</article>
       </div>
     </section>
     <section className="student-section" id="atividades" aria-labelledby="student-activities-title">
-      <div className="student-section-heading"><div><p className="dashboard-overline">O que você já fez</p><h2 id="student-activities-title">Minhas atividades.</h2></div></div>
+      <div className="student-section-heading"><div><p className="dashboard-overline">O que você já fez</p><h2 id="student-activities-title" tabIndex={-1}>Minhas atividades.</h2></div></div>
       {workspace.activities.length ? <ol className="student-activities">{workspace.activities.map(activity => <li key={activity.id}><span className="student-activity-icon"><BookOpen size={17} aria-hidden="true" /></span><div><strong>{activity.title}</strong><time dateTime={activity.at}>{formatStudentDate(activity.at)}</time></div></li>)}</ol> : <div className="student-empty"><BookOpen size={24} strokeWidth={1.4} aria-hidden="true" /><p>Ainda não há atividades registradas.</p><span>Ao praticar, seus registros aparecerão aqui.</span></div>}
     </section>
     <TeacherContact key={account.id} conversations={workspace.conversations} disabled={disabled} />
@@ -57,7 +59,7 @@ export function TeacherContact({ conversations, disabled }: { conversations: Tea
   }
 
   return <section className="student-section" id="contato" aria-labelledby="student-contact-title">
-    <div className="student-section-heading"><div><p className="dashboard-overline">Vamos conversar</p><h2 id="student-contact-title">Fale com o professor.</h2></div><MessageCircle size={24} strokeWidth={1.4} aria-hidden="true" /></div>
+    <div className="student-section-heading"><div><p className="dashboard-overline">Vamos conversar</p><h2 id="student-contact-title" tabIndex={-1}>Fale com o professor.</h2></div><MessageCircle size={24} strokeWidth={1.4} aria-hidden="true" /></div>
     <p className="student-contact-intro">Envie uma dúvida ou conte como está sendo seu estudo. As respostas ficam nesta área; use “Atualizar painel” para conferir novas mensagens.</p>
     <div className="student-contact-grid">
       <aside className="student-conversations" aria-label="Minhas conversas com o professor"><button className="student-new-conversation" type="button" onClick={() => choose(null)} disabled={sending} aria-pressed={!current}>Nova conversa<Send size={15} aria-hidden="true" /></button>

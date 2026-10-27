@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode, type MouseEvent } from "react";
 import { ArrowUpRight, BookOpen, LayoutDashboard, Menu, MessageCircle, Settings2, TrendingUp, UserRound } from "lucide-react";
 import { Brand } from "@/components/ui/Brand";
 import { useJourneyTransition } from "./JourneyTransition";
+import { DASHBOARD_SECTION_EVENT } from "@/features/dashboard/use-dashboard-section";
+import { studentWorkspace } from "@/features/dashboard/workspace-store";
 
 export function AppHeader({ current, name, tone = "paper", onAccount, onSettings, onNavigate, children }: {
   current: "dashboard" | "demo" | "study"; name?: string; tone?: "paper" | "immersive"; onAccount?: () => void; onSettings?: () => void; onNavigate?: () => void; children?: ReactNode;
@@ -12,7 +14,12 @@ export function AppHeader({ current, name, tone = "paper", onAccount, onSettings
   const { headerTone, reducedMotion } = useJourneyTransition();
   const menu = useRef<HTMLDetailsElement>(null);
   const close = () => { if (menu.current) menu.current.open = false; };
-  const navigate = () => { close(); onNavigate?.(); };
+  const navigate = (event: MouseEvent<HTMLAnchorElement>) => {
+    close(); onNavigate?.();
+    void studentWorkspace.flush();
+    const hash = event.currentTarget.hash.slice(1);
+    if (hash && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) window.dispatchEvent(new CustomEvent(DASHBOARD_SECTION_EVENT, { detail:hash }));
+  };
   useEffect(() => {
     const outside = (event: PointerEvent) => { if (menu.current && !menu.current.contains(event.target as Node)) menu.current.open = false; };
     document.addEventListener("pointerdown", outside);
@@ -20,21 +27,21 @@ export function AppHeader({ current, name, tone = "paper", onAccount, onSettings
   }, []);
   return <header className="app-header" data-tone={headerTone === "immersive" ? headerTone : tone} data-reduced-motion={reducedMotion}>
     <Brand href="/dashboard" onClick={navigate} />
-    <Link href="/dashboard" prefetch={false} className="app-header-panel" aria-current={current === "dashboard" ? "page" : undefined} onClick={navigate}><LayoutDashboard size={15} aria-hidden="true" />Meu painel</Link>
+    <Link href="/dashboard" prefetch={true} className="app-header-panel" aria-current={current === "dashboard" ? "page" : undefined} onClick={navigate}><LayoutDashboard size={15} aria-hidden="true" />Meu painel</Link>
     <div className="app-header-tools">{name && <span className="app-header-name">{name}</span>}
       <details ref={menu} className="app-header-menu" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) close(); }} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); close(); menu.current?.querySelector("summary")?.focus(); } }}>
         <summary aria-label="Menu de navegação"><Menu size={18} aria-hidden="true" /><span>Menu</span></summary>
         <nav className="app-menu-panel" aria-label="Menu do BasedSpeak">
           <p>Seu espaço no BasedSpeak</p>
-          <Link href="/dashboard" prefetch={false} onClick={navigate}><LayoutDashboard size={17} aria-hidden="true" />Meu painel<ArrowUpRight size={14} aria-hidden="true" /></Link>
-          <Link href="/dashboard#atividades" prefetch={false} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Minhas atividades<ArrowUpRight size={14} aria-hidden="true" /></Link>
-          <Link href="/dashboard#avanco" prefetch={false} onClick={navigate}><TrendingUp size={17} aria-hidden="true" />Meu avanço<ArrowUpRight size={14} aria-hidden="true" /></Link>
-          <Link href="/dashboard#contato" prefetch={false} onClick={navigate}><MessageCircle size={17} aria-hidden="true" />Falar com o professor<ArrowUpRight size={14} aria-hidden="true" /></Link>
-          <Link href="/demo" prefetch={false} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Conversa da cafeteria<ArrowUpRight size={14} aria-hidden="true" /></Link>
-          <Link href="/demo/estudo" prefetch={false} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Área de estudo<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/dashboard" prefetch={true} onClick={navigate}><LayoutDashboard size={17} aria-hidden="true" />Meu painel<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/dashboard#atividades" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Minhas atividades<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/dashboard#avanco" prefetch={true} onClick={navigate}><TrendingUp size={17} aria-hidden="true" />Meu avanço<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/dashboard#contato" prefetch={true} onClick={navigate}><MessageCircle size={17} aria-hidden="true" />Falar com o professor<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/demo" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Conversa da cafeteria<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/demo/estudo" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Área de estudo<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <div className="app-menu-divider" />
-          {onAccount ? <button className="app-menu-action" type="button" onClick={() => { close(); onAccount(); }}><UserRound size={17} aria-hidden="true" />Minha conta</button> : <Link href="/dashboard?painel=conta" prefetch={false} onClick={navigate}><UserRound size={17} aria-hidden="true" />Minha conta</Link>}
-          {onSettings ? <button className="app-menu-action" type="button" onClick={() => { close(); onSettings(); }}><Settings2 size={17} aria-hidden="true" />Configurações</button> : <Link href="/dashboard?painel=configuracoes" prefetch={false} onClick={navigate}><Settings2 size={17} aria-hidden="true" />Configurações</Link>}
+          {onAccount ? <button className="app-menu-action" type="button" onClick={() => { close(); onAccount(); }}><UserRound size={17} aria-hidden="true" />Minha conta</button> : <Link href="/dashboard?painel=conta" prefetch={true} onClick={navigate}><UserRound size={17} aria-hidden="true" />Minha conta</Link>}
+          {onSettings ? <button className="app-menu-action" type="button" onClick={() => { close(); onSettings(); }}><Settings2 size={17} aria-hidden="true" />Configurações</button> : <Link href="/dashboard?painel=configuracoes" prefetch={true} onClick={navigate}><Settings2 size={17} aria-hidden="true" />Configurações</Link>}
           {children && <div className="app-menu-story"><p>Controles da história</p>{children}</div>}
         </nav>
       </details>

@@ -27,6 +27,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => Pick<Stor
   let pending: Partial<Pick<SaveLearningInput, SnapshotKey>> = {};
   let timer: ReturnType<typeof setTimeout> | undefined;
   let ticket = 0;
+  let edits = 0;
   const listeners = new Set<() => void>();
   const emit = (patch: Partial<WorkspaceState>) => { state = { ...state, ...patch }; listeners.forEach(listener => listener()); };
   const clearCache = (workspace: StudentWorkspace | null) => {
@@ -36,10 +37,10 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => Pick<Stor
   const forgetPending = () => { clearTimeout(timer); pending = {}; clearCache(state.workspace); };
   const replace = (workspace: StudentWorkspace, notice = "") => {
     const previous = state.workspace;
-    const changed = previous?.account.id !== workspace.account.id || previous.learning.revision !== workspace.learning.revision;
+    const changed = previous?.account.id !== workspace.account.id || previous.learning.revision !== workspace.learning.revision || previous.account.status !== workspace.account.status;
     const contentChanged = previous?.learning.demoSnapshot !== workspace.learning.demoSnapshot || previous?.learning.studySnapshot !== workspace.learning.studySnapshot;
     if (changed) { forgetPending(); ticket++; }
-    emit({ workspace, status: "ready", saving: false, error: "", notice: notice || (previous && changed ? "Seu progresso foi atualizado pelo professor. O estado atual já está carregado." : state.notice), generation: state.generation + (changed || contentChanged ? 1 : 0) });
+    emit({ workspace, status: "ready", saving: false, error: "", notice: notice || (previous && changed ? "Seu acesso ou progresso foi atualizado. O estado atual já está carregado." : state.notice), generation: state.generation + (changed || contentChanged ? 1 : 0) });
   };
   const read = () => fetcher("/api/student/workspace", { credentials: "same-origin", cache: "no-store" });
   const deny = (response: Response) => {
@@ -49,24 +50,38 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => Pick<Stor
     return true;
   };
 
-  async function load() {
+  async function load(background = false) {
     if (loadPromise) return loadPromise;
     if (writePromise) { await writePromise; if (state.status !== "ready") return; }
     // Never replace unsent work with an older GET. flush validates its owner/revision first.
     if (Object.keys(pending).length) return flush();
     const currentTicket = ticket;
-    emit({ status: "loading", error: "" });
+    const currentEdits = edits;
+    if (!background || state.status !== "ready") emit({ status: "loading", error: "" });
     loadPromise = (async () => {
       try {
         const response = await read();
         if (currentTicket !== ticket || deny(response)) return;
         const workspace = await payload(response) as StudentWorkspace;
-        if (currentTicket === ticket) replace(workspace);
+        if (currentTicket === ticket) {
+          // A navigation refresh may overlap editing or saving. An older GET
+          // cannot replace newer work from this same account and revision.
+          if (workspace.account.status === "active" && state.workspace?.account.id === workspace.account.id && state.workspace.learning.revision === workspace.learning.revision
+            && (edits !== currentEdits || Object.keys(pending).length || writePromise)) workspace.learning = state.workspace.learning;
+          replace(workspace);
+          if (currentTicket === ticket && (Object.keys(pending).length || writePromise)) emit({ saving:true });
+        }
       } catch (error) {
         if (currentTicket === ticket) emit({ status: "error", saving: false, error: error instanceof Error ? error.message : "Não foi possível carregar seu espaço." });
       } finally { loadPromise = null; }
     })();
     return loadPromise;
+  }
+
+  async function refresh() {
+    if (loadPromise) await loadPromise;
+    if (Object.keys(pending).length || writePromise) await flush();
+    if (state.status === "ready") await load(true);
   }
 
   async function flush() {
@@ -111,6 +126,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => Pick<Stor
         const result = await payload(response) as { learning: LearningProgress };
         if (currentTicket !== ticket || !state.workspace) return;
         const workspace = { ...verified, learning: { ...result.learning, ...pending } };
+        edits++;
         emit({ workspace, status: "ready", saving: false, error: "" });
         clearCache(owner);
       } catch (error) {
@@ -127,6 +143,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => Pick<Stor
     const workspace = state.workspace;
     if (state.status !== "ready" || !workspace || workspace.account.status !== "active" || state.generation !== generation) return false;
     if (workspace.learning[key] === value) return true;
+    edits++;
     pending[key] = value;
     const learning = { ...workspace.learning, [key]: value };
     emit({ workspace: { ...workspace, learning }, saving: true, error: "", notice: "" });
@@ -161,7 +178,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => Pick<Stor
     forgetPending(); ticket++; loadPromise = null;
     emit({ ...initialState, generation: state.generation + 1 });
   }
-  return { subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; }, getSnapshot: () => state, getServerSnapshot: () => initialState, hasPendingChanges: () => state.saving || Object.keys(pending).length > 0, load, flush, stage, sendMessage, reset };
+  return { subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; }, getSnapshot: () => state, getServerSnapshot: () => initialState, hasPendingChanges: () => state.saving || Object.keys(pending).length > 0, load, refresh, flush, stage, sendMessage, reset };
 }
 
 export const studentWorkspace = createWorkspaceStore((input, init) => fetch(input, init), () => window.localStorage);
