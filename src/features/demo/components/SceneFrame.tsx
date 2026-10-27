@@ -1,12 +1,43 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import { getMotionPreference, subscribePreferences } from "@/features/dashboard/preferences";
 import { mobileArtworkHeight, nextSceneDensity, type SceneDensity } from "../model/layout";
 
 /** Only spacing changes: the illustration, conversation and actions stay on screen. */
 export function SceneFrame({ intro, artwork, children, activityKey, opening = false }: { intro: ReactNode; artwork: ReactNode; children: ReactNode; activityKey: string; opening?: boolean }) {
   const frame = useRef<HTMLDivElement>(null);
   const introduction = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const root = frame.current;
+    if (!root) return;
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const animations: Animation[] = [];
+    const cancel = () => animations.forEach(animation => animation.cancel());
+    const respectPreference = () => {
+      if (preference.matches || getMotionPreference()) cancel();
+    };
+    if (!preference.matches && !getMotionPreference()) {
+      const reveal = (element: Element | null, distance: number, duration: number, delay = 0) => {
+        if (!element?.animate) return;
+        animations.push(element.animate([
+          { opacity: 0, transform: `translateY(${-distance}px)` },
+          { opacity: 1, transform: "translateY(0)" },
+        ], { duration, delay, easing: "cubic-bezier(.22,1,.36,1)", fill: "backwards" }));
+      };
+      // Enter from above so a bottom-aligned mobile action never moves offscreen.
+      // Keep the art, audio and inputs mounted throughout the transition.
+      reveal(introduction.current, 8, 280);
+      reveal(root.querySelector(".activity-content"), 8, 280);
+      reveal(root.querySelector(".activity-actions"), 5, 220, 55);
+      root.querySelectorAll(".choices > button, .blocks > button").forEach((button, index) => {
+        reveal(button, 4, 180, Math.min(index, 4) * 25);
+      });
+    }
+    preference.addEventListener("change", respectPreference);
+    const unsubscribe = subscribePreferences(respectPreference);
+    return () => { cancel(); unsubscribe(); preference.removeEventListener("change", respectPreference); };
+  }, [activityKey]);
   useEffect(() => {
     const root = frame.current;
     if (!root) return;
