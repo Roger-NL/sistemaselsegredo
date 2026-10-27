@@ -17,8 +17,18 @@ export function AppHeader({ current, name, tone = "paper", onAccount, onSettings
   const navigate = (event: MouseEvent<HTMLAnchorElement>) => {
     close(); onNavigate?.();
     void studentWorkspace.flush();
-    const hash = event.currentTarget.hash.slice(1);
-    if (hash && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) window.dispatchEvent(new CustomEvent(DASHBOARD_SECTION_EVENT, { detail:hash }));
+    const target = event.currentTarget;
+    const hash = target.hash.slice(1);
+    const plainClick = event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+    if (hash && plainClick) {
+      // These are sections of the current panel, not another server page.
+      // Replace the previous fragment and scroll after closing the dialog/menu.
+      if (target.pathname === window.location.pathname) {
+        event.preventDefault();
+        window.history.pushState(null, "", target.href);
+      }
+      window.dispatchEvent(new CustomEvent(DASHBOARD_SECTION_EVENT, { detail:hash }));
+    }
   };
   useEffect(() => {
     const outside = (event: PointerEvent) => { if (menu.current && !menu.current.contains(event.target as Node)) menu.current.open = false; };
