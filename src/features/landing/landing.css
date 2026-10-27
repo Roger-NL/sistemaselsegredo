@@ -108,19 +108,20 @@ html:has(.landing){overflow:hidden;overscroll-behavior:none}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.landing *,.start-page *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
 /* Each part owns a grid row: the poster can never sit behind the practice card. */
-.language-stage{height:100%;max-height:650px;min-width:0;min-height:0;position:relative;isolation:isolate;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:16px;padding:16px 20px 8px;border-radius:8px;background:#191919;color:#f4f0e8;background-image:radial-gradient(#ffffff17 .7px,transparent .7px);background-size:18px 18px;container:language-stage / size}
-.language-stage>*{min-width:0;min-height:0}
+.language-stage{height:100%;max-height:650px;min-width:0;min-height:0;position:relative;isolation:isolate;display:grid;grid-template-rows:max-content minmax(0,1fr) max-content max-content;gap:16px;padding:16px 20px 8px;border-radius:8px;background:#191919;color:#f4f0e8;background-image:radial-gradient(#ffffff17 .7px,transparent .7px);background-size:18px 18px;container:language-stage / size}
+.language-stage>*{min-width:0}
 .language-stage-top,.language-stage-bottom{position:relative;display:flex;align-items:center;justify-content:center;text-align:center;font-size:9px;letter-spacing:.1em;color:#c7c0b4}
 .language-stage-top{grid-row:1;min-height:24px;padding-inline:24px}
 .language-stage-top>span:last-child{position:absolute;right:0;font-size:24px;line-height:1}
 .language-stage-bottom{grid-row:4;min-height:36px;padding-inline:35px;font-size:8px}
-.language-heading{grid-row:2;display:flex;align-items:center;justify-content:center;gap:clamp(12px,3cqw,24px);container:language-heading / size}
+.language-heading{grid-row:2;min-height:0;display:flex;align-items:center;justify-content:center;gap:clamp(12px,3cqw,24px);container:language-heading / size}
 .language-poster{display:flex;flex:none;flex-direction:column;align-items:center;justify-content:center;gap:0;max-width:100%;font-size:min(25cqw,39cqh);font-weight:630;letter-spacing:-.07em;line-height:.92;text-align:center;transform:rotate(-5deg)}
 .language-poster>span{display:block;white-space:nowrap}
 .language-poster>span:last-child{font-weight:350}
 .language-sticker{flex:none;display:flex;flex-direction:column;justify-content:center;width:clamp(44px,14cqw,76px);padding:12px 7px;background:#f4f0e8;color:#191919;border:1px solid #d5cec1;box-shadow:4px 5px 0 #ffffff26;font-size:clamp(10px,2.8cqw,17px);font-weight:750;line-height:1.05;letter-spacing:-.04em;text-align:left;transform:translateY(-35%) rotate(9deg)}
 .language-star{display:inline-flex;align-items:center;justify-content:center;width:1em;height:1em;margin-left:.16em;font-size:.5em;vertical-align:middle;animation:language-turn 24s linear infinite}
-.language-paper{grid-row:3;position:relative;justify-self:center;width:calc(100% - 12px);max-width:468px;padding:16px;border:1px solid #d5cec1;border-radius:4px;background:#f4f0e8;color:#191919;box-shadow:5px 5px 0 #ffffff1a;text-align:center;transform:rotate(1deg)}
+/* Reserve the full exercise height, including wrapped hints, before sizing the poster. */
+.language-paper{grid-row:3;position:relative;justify-self:center;align-self:end;display:grid;grid-auto-rows:max-content;height:max-content;min-height:max-content;width:calc(100% - 12px);max-width:468px;padding:16px;border:1px solid #d5cec1;border-radius:4px;background:#f4f0e8;color:#191919;box-shadow:5px 5px 0 #ffffff1a;text-align:center;transform:rotate(1deg)}
 .language-paper-heading{position:absolute;top:0;right:0}
 .language-paper-heading>span{display:none}
 .language-reset{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:0;color:#716c64;background:transparent;border-radius:4px}
@@ -165,7 +166,7 @@ html:has(.landing){overflow:hidden;overscroll-behavior:none}
   .language-notice{font-size:9px;min-height:14px;margin-top:4px}
   .language-star{animation:none}
 }
-@container public-viewport (max-width:760px) and (max-height:680px){.language-stage{grid-template-rows:minmax(0,1fr) auto;gap:8px;padding:8px}.language-stage-top,.language-stage-bottom{display:none}.language-star{animation:none}}
+@container public-viewport (max-width:760px) and (max-height:680px){.language-stage{grid-template-rows:minmax(0,1fr) max-content;gap:8px;padding:8px}.language-stage-top,.language-stage-bottom{display:none}.language-star{animation:none}}
 @container public-viewport (max-width:760px) and (max-height:680px){.language-heading{grid-row:1}.language-paper{grid-row:2}}
 @container public-viewport (max-width:760px) and (max-height:560px){.landing-header{height:52px}.landing-main{padding-block:8px;gap:8px}.landing-hero-copy>.landing-eyebrow{display:none}.landing-hero-copy h1{font-size:36px;margin-bottom:10px}.landing-lead{margin-bottom:10px}.landing-assurance{margin-top:8px}}
 @container public-viewport (min-width:500px) and (max-height:480px){
@@ -175,7 +176,7 @@ html:has(.landing){overflow:hidden;overscroll-behavior:none}
   .landing-lead{font-size:12px;line-height:1.55;margin-bottom:8px}.landing-hero-actions{flex-wrap:wrap;gap:4px 8px}
   .landing .landing-cta{min-height:40px;font-size:10px}.landing-more{min-height:28px;font-size:10px!important}
   .landing-assurance{font-size:9px;margin-top:8px;gap:12px}
-  .language-stage{grid-template-rows:minmax(0,1fr) auto;gap:8px;padding:8px}.language-stage-top,.language-stage-bottom{display:none}.language-heading{grid-row:1}.language-paper{grid-row:2}
+  .language-stage{grid-template-rows:minmax(0,1fr) max-content;gap:8px;padding:8px}.language-stage-top,.language-stage-bottom{display:none}.language-heading{grid-row:1}.language-paper{grid-row:2}
   .language-poster{flex-direction:row;gap:.18em;font-size:min(10cqw,58cqh);line-height:1}.language-star{animation:none}
 }
 @container language-heading (max-height:120px){
