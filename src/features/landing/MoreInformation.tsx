@@ -19,7 +19,7 @@ export function MoreInformation() {
         <h2 id="landing-info-title">Você entende<br />fazendo.</h2>
         <p className="landing-info-lead">Uma história para viver o inglês, com apoio para participar.</p>
         <ol className="landing-info-steps">
-          <li><span>01</span><div><h3>Crie sua conta.</h3><p>Com e-mail e senha. A demo é gratuita e não pede cartão.</p></div></li>
+          <li><span>01</span><div><h3>Crie sua conta.</h3><p>Com Google ou e-mail. A demo é gratuita e não pede cartão.</p></div></li>
           <li><span>02</span><div><h3>Entre na conversa.</h3><p>Escute, escolha e construa suas respostas. Sem usar o microfone.</p></div></li>
           <li><span>03</span><div><h3>Veja o que construiu.</h3><p>No final, revisite a conversa e as escolhas que você fez.</p></div></li>
         </ol>

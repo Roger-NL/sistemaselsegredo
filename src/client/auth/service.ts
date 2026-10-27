@@ -7,6 +7,8 @@ import { createSessionSynchronizer } from "./session";
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
     signOut,
     updateProfile as firebaseUpdateProfile,
     updateEmail,
@@ -155,6 +157,18 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User> {
         };
     }
     return fallbackUser;
+}
+
+/** Real Google integration retained for when authenticated access is re-enabled. */
+export async function loginWithGoogle(): Promise<AuthResult> {
+    try {
+        const result = await signInWithPopup(auth, new GoogleAuthProvider());
+        const user = await mapFirebaseUser(result.user);
+        return { success: true, user };
+    } catch (error: unknown) {
+        console.error("Google Login Error:", error);
+        return { success: false, error: "Erro ao entrar com Google." };
+    }
 }
 
 /**

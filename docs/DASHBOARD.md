@@ -6,7 +6,7 @@
 
 `/` → `/comecar` → `/dashboard` → abertura da cafeteria → `/demo`.
 
-**Estado para publicação na principal — 27/10/2026:** cadastro e login reais por e-mail e senha, sem opção Google, conforme a solicitação posterior de Roger. `/dashboard` exige cookie verificado com revogação no servidor; sem sessão válida segue para `/comecar?modo=entrar`. `VisualAccessForm`, a configuração de bypass e a conta ilustrativa foram removidos. Salvar nome usa a API autenticada; sair limpa o cookie e a sessão Firebase sem apagar demo ou estudo. A principal existente é `master`; os registros de validação abaixo descrevem as rodadas anteriores à consolidação.
+**Estado vigente — correção de Roger em 27/10/2026:** acesso visual livre. Google e e-mail/senha permanecem na interface; ambos abrem o painel sem exigir conta, preencher campos ou chamar Firebase. O painel usa a conta ilustrativa, salvar nome altera somente a prévia em memória e sair retorna à entrada visual sem apagar demo ou estudo. Autenticação real permanece implementada, mas não participa desta entrada de teste. As APIs reais continuam protegidas. A principal é `master`.
 
 **Histórico anterior à etapa 6:** Roger havia solicitado acesso visual para acelerar os testes. A função `isVisualAccessMode()` retornava `true`; os botões abriam o painel sem autenticar, com nome/e-mail ilustrativos. Salvar nome alterava somente a prévia em memória e sair voltava à entrada visual. Esse comportamento foi encerrado no checkout local. A landing não foi alterada.
 
@@ -30,7 +30,7 @@ Em telefones na horizontal e com pouca altura, a abertura e a primeira cena usam
 
 Validação desta navegação: 202 testes, lint, TypeScript e build padrão passaram. No Chrome, foram percorridos início com escolha de apoio, retomada da tentativa existente, retorno ao painel, menu de estudo e configurações; a barra também permaneceu no topo ao rolar o estudo. Foram comparadas as posições da barra em 320×568, 390×844, 440×956, 1024×768, 1440×900, 568×320 e 844×390. O corte encontrado na abertura horizontal foi corrigido; imagem e ação da primeira cena também ficaram dentro da janela nessa orientação. A atividade fica temporariamente inerte sob a cobertura, mantendo o menu acessível, e recupera o foco na chegada. Evidências: `output/navigation-qa/`. A tentativa original foi preservada; a primeira entrada foi testada em uma origem local separada. Sem publicação de produção.
 
-## Identidade e dados no acesso real
+## Identidade e dados no acesso real (reservado durante a prévia)
 
 - `/dashboard` verifica o cookie Firebase no servidor, incluindo revogação; sem sessão válida, redireciona para `/comecar?modo=entrar`.
 - O browser recebe somente nome e e-mail. Falha na leitura do perfil mantém a identidade verificada, usando o nome do provedor quando disponível.
@@ -54,7 +54,7 @@ Evidências em `output/stage6-qa/`, ignorado pelo Git: `acesso-real.json`, `entr
 
 ## Escopo dos arquivos compartilhados
 
-Solicitação posterior à etapa 6: remover a opção de conta Google e publicar a versão consolidada na principal. Foram retirados o botão, a função de login com popup e os estilos exclusivos, e o modal da landing passou a informar “Com e-mail e senha”. Recuperação de senha preservada. Provedor remoto, contas existentes e integrações reservadas do Calendar não foram alterados. A regressão atual tem 289 testes em 44 arquivos; os números anteriores documentam as versões testadas na ocasião.
+Orientação vigente, corrigida por Roger após a primeira publicação: Google deve permanecer, assim como e-mail/senha. A prévia permite entrada por qualquer um dos botões sem validar credenciais, abrir popup, criar conta ou enviar recuperação de senha. Formulário, estilos e integração Google foram restaurados; a flag de acesso visual está ativa. Essa correção substitui a interpretação anterior de publicar somente e-mail/senha reais.
 
 Landing (`src/app/page.tsx`, composição, estilos e modal de informações) preservada. Na tela de cadastro/login, mudam somente destino de sucesso e textos que anunciavam entrada direta na demo. Sessões válidas em `/comecar` também passam a seguir para `/dashboard`.
 

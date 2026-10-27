@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import { ArrowUpRight, Eye, EyeOff, LoaderCircle } from "lucide-react";
-import { login, register, resetPassword, type AuthResult } from "@/client/auth/service";
+import { login, loginWithGoogle, register, resetPassword, type AuthResult } from "@/client/auth/service";
 
 type Mode = "signup" | "login" | "reset";
 
@@ -55,6 +55,7 @@ export function SignupForm({ initialMode }: { initialMode: "signup" | "login" })
     <p className="landing-eyebrow">{reset ? "VAMOS RECUPERAR SEU ACESSO" : "SEU ESPAÇO NO BASEDSPEAK"}</p>
     <h1 id="signup-title">{reset ? "Esqueceu a senha?" : signup ? "Comece por aqui." : "Bom te ver de volta."}</h1>
     <p className="signup-intro">{reset ? "Informe seu e-mail para receber um link de recuperação." : signup ? "Crie sua conta e comece sua jornada." : "Entre na sua conta para acessar seu painel."}</p>
+    {!reset && <><button className="signup-google" type="button" disabled={busy} onClick={() => void authenticate(loginWithGoogle)}><span className="signup-google-mark" aria-hidden="true">G</span>Continuar com Google</button><div className="signup-divider"><span>ou com e-mail</span></div></>}
     <form onSubmit={submit}>
       <fieldset disabled={busy}>
         <legend className="signup-sr">{reset ? "Recuperação de senha" : signup ? "Criar conta por e-mail" : "Entrar por e-mail"}</legend>
