@@ -20,6 +20,7 @@ import { OpeningCard } from "./components/OpeningCard";
 import { Retrospective } from "./components/Retrospective";
 import { HelpPanel } from "./components/HelpPanel";
 import { SceneFrame } from "./components/SceneFrame";
+import { useConversationMotion } from "./components/use-conversation-motion";
 import { ConversationHistory } from "./components/ConversationHistory";
 import type { AudioId, DemoEvent, DemoState, SceneNode } from "./model/types";
 import type { PublishedAudioCatalog } from "@/contracts/demo-audio";
@@ -28,7 +29,8 @@ export type DemoNavigation = { back: () => void };
 export function DemoExperience({ initial, generation = -1, publishedAudio = {}, navigationRef, onBackAvailabilityChange }: {
   initial: DemoState; generation?: number; publishedAudio?: PublishedAudioCatalog; navigationRef?: Ref<DemoNavigation>; onBackAvailabilityChange?: (available: boolean) => void;
 }) {
-  const [state, dispatch] = useReducer(transition, initial);
+  const [state, commit] = useReducer(transition, initial);
+  const dispatch = useConversationMotion(state, commit);
   const node = catalog[state.nodeId];
   const openingNode = node.kind === "scene" && node.presentation ? node : null;
   const sequenced = (node.part >= 3 && !openingNode) || node.kind === "response";
@@ -48,7 +50,7 @@ export function DemoExperience({ initial, generation = -1, publishedAudio = {}, 
   const demoAudio = useDemoAudio(`${state.nodeId}:${state.presentationStep}:${state.phase}:${state.reviewView}`, publishedAudio);
   const [playbackRate, setPlaybackRate] = useState(1);
   const event = (type: DemoEvent["type"]) => dispatch({ at: node.id, type } as DemoEvent);
-  useImperativeHandle(navigationRef, () => ({ back: () => dispatch({ at: node.id, type: "BACK" }) }), [node.id]);
+  useImperativeHandle(navigationRef, () => ({ back: () => dispatch({ at: node.id, type: "BACK" }) }), [node.id, dispatch]);
   useEffect(() => { onBackAvailabilityChange?.(state.journal.length > 0); }, [state.journal.length, onBackAvailabilityChange]);
   useEffect(() => {
     if (!remember(state, generation) && storageNotice.current) storageNotice.current.textContent = "Não foi possível sincronizar. Atualize seu painel antes de continuar.";

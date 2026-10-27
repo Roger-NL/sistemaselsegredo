@@ -21,17 +21,21 @@ export function SceneFrame({ intro, artwork, children, activityKey, opening = fa
       const reveal = (element: Element | null, distance: number, duration: number, delay = 0) => {
         if (!element?.animate) return;
         animations.push(element.animate([
-          { opacity: 0, transform: `translateY(${-distance}px)` },
+          { opacity: 0, transform: `translateY(${-distance}px) scale(.985)` },
           { opacity: 1, transform: "translateY(0)" },
-        ], { duration, delay, easing: "cubic-bezier(.22,1,.36,1)", fill: "backwards" }));
+        ], { duration, delay, easing: "cubic-bezier(.25,.65,.3,1)", fill: "backwards" }));
       };
-      // Enter from above so a bottom-aligned mobile action never moves offscreen.
-      // Keep the art, audio and inputs mounted throughout the transition.
-      reveal(introduction.current, 8, 280);
-      reveal(root.querySelector(".activity-content"), 8, 280);
-      reveal(root.querySelector(".activity-actions"), 5, 220, 55);
+      // Native snapshots contain only text. Real controls stay live and animate
+      // separately, so a visible button remains clickable during the transition.
+      if (document.documentElement.dataset.demoTransition) {
+        root.querySelectorAll(".opening-card .audio-trigger, .conversation-tools, .construction, .recognition-response, .written-response, .recall").forEach(element => reveal(element, 6, 340, 70));
+      } else {
+        reveal(introduction.current, 12, 380);
+        reveal(root.querySelector(".activity-content"), 12, 380);
+      }
+      reveal(root.querySelector(".activity-actions"), 6, 300, 90);
       root.querySelectorAll(".choices > button, .blocks > button").forEach((button, index) => {
-        reveal(button, 4, 180, Math.min(index, 4) * 25);
+        reveal(button, 4, 240, Math.min(index, 4) * 40);
       });
     }
     preference.addEventListener("change", respectPreference);

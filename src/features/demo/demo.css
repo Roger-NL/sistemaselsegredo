@@ -1289,3 +1289,31 @@
   .app-shell .site-header .restart-label { display:none; }
   .app-shell .site-header .restart-icon { display:inline; font-size:24px; }
 }
+
+
+/* Capture messages only; real audio/activity controls stay directly clickable. */
+html[data-demo-transition] { view-transition-name:none; }
+html[data-demo-transition] .opening-card h1,
+html[data-demo-transition] .scene-intro h1 { view-transition-name:demo-copy; }
+html[data-demo-transition] .activity-intent p,
+html[data-demo-transition] .speech.heard p[lang=en] { view-transition-name:demo-line; }
+html[data-demo-transition]::view-transition,
+html[data-demo-transition]::view-transition-group(*),
+html[data-demo-transition]::view-transition-image-pair(*),
+html[data-demo-transition]::view-transition-old(*),
+html[data-demo-transition]::view-transition-new(*) { pointer-events:none; }
+html[data-demo-transition]::view-transition-group(*) { animation-duration:460ms; animation-timing-function:cubic-bezier(.25,.65,.3,1); }
+html[data-demo-transition]::view-transition-image-pair(*) { height:100%; overflow:clip; }
+html[data-demo-transition]::view-transition-old(*),
+html[data-demo-transition]::view-transition-new(*) { height:100%; object-fit:contain; object-position:center; mix-blend-mode:normal; }
+html[data-demo-transition]::view-transition-old(demo-copy),
+html[data-demo-transition]::view-transition-old(demo-line) { animation:demo-message-leave 140ms ease-in both; }
+html[data-demo-transition]::view-transition-new(demo-copy),
+html[data-demo-transition]::view-transition-new(demo-line) { animation:demo-message-arrive 380ms cubic-bezier(.25,.65,.3,1) 70ms both; }
+@keyframes demo-message-leave { to { opacity:0; transform:translateY(-8px) scale(.985); } }
+@keyframes demo-message-arrive { from { opacity:0; transform:translateY(-12px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+@media(prefers-reduced-motion:reduce) {
+  html[data-demo-transition]::view-transition-group(*),
+  html[data-demo-transition]::view-transition-old(*),
+  html[data-demo-transition]::view-transition-new(*) { animation:none!important; }
+}
