@@ -7,6 +7,11 @@ import { ending, retrospective } from "../model/retrospective";
 import type { DemoState, ReviewView } from "../model/types";
 import { Feedback } from "./Feedback";
 import { AudioButton } from "./AudioButton";
+import Link from "next/link";
+
+function StudyInvitation() {
+  return <aside className="study-invitation"><p>O inglês por trás da conversa</p><h2>Agora, entenda as peças.</h2><p>Explore as palavras e as estruturas da cafeteria, com explicações simples e pequenas práticas.</p><Link className="primary button-link" href="/demo/estudo">Entender minha conversa →</Link></aside>;
+}
 
 export function Retrospective({ state, setView }: { state: DemoState; setView: (view: ReviewView) => void }) {
   const view = state.reviewView;
@@ -14,9 +19,9 @@ export function Retrospective({ state, setView }: { state: DemoState; setView: (
   const section = useRef<HTMLElement>(null);
   useEffect(() => { section.current?.querySelector("h1")?.focus({ preventScroll: true }); }, [view]);
   const highlights = retrospective(state);
-  if (view === "done") return <section ref={section} className="ending"><p className="eyebrow">Até a próxima conversa</p><h1 tabIndex={-1}>Obrigado por experimentar<br />o BasedSpeak.</h1><p>Sua conversa continua disponível neste dispositivo.</p><button onClick={() => setView("moments")}>Rever minha conversa</button></section>;
+  if (view === "done") return <section ref={section} className="ending"><p className="eyebrow">Até a próxima conversa</p><h1 tabIndex={-1}>Obrigado por experimentar<br />o BasedSpeak.</h1><p>Sua conversa continua disponível neste dispositivo.</p><StudyInvitation /><button onClick={() => setView("moments")}>Rever minha conversa</button></section>;
   if (view === "feedback") return <Feedback runId={state.runId} onFinish={() => setView("done")} />;
-  if (view === "thanks") return <section ref={section} className="ending"><p className="eyebrow">Demo concluída</p><h1 tabIndex={-1}>Obrigado por experimentar<br />o BasedSpeak.</h1><p>Se quiser, conte como foi para você.</p><div className="actions"><button className="primary" onClick={() => setView("feedback")}>Avaliar a experiência</button><button onClick={() => setView("done")}>Terminar sem avaliar</button></div></section>;
+  if (view === "thanks") return <section ref={section} className="ending"><p className="eyebrow">Demo concluída</p><h1 tabIndex={-1}>Obrigado por experimentar<br />o BasedSpeak.</h1><StudyInvitation /><p>Se quiser, conte como foi para você.</p><div className="actions"><button onClick={() => setView("feedback")}>Avaliar a experiência</button><button onClick={() => setView("done")}>Terminar sem avaliar</button></div></section>;
   if (view === "end") return <section ref={section} className="ending"><p className="eyebrow">Um encontro, do começo ao fim</p><h1 tabIndex={-1}>Você participou desta<br />conversa em inglês.</h1><p className="lead">{ending(state)}</p><button className="primary" onClick={() => setView("moments")}>Ver minha conversa</button></section>;
   const item = highlights[Math.min(moment, highlights.length - 1)];
   return <section ref={section} className="review-stage"><div className="review-reading"><p className="eyebrow">Sua conversa</p><h1 tabIndex={-1}>O caminho que você fez.</h1>
