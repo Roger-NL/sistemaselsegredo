@@ -34,7 +34,7 @@ export function SignupForm({ initialMode }: { initialMode: "signup" | "login" })
       } else if (recovery) {
         setMessage("Se houver uma conta com este e-mail, você receberá um link para criar uma nova senha. Confira também o spam.");
       } else {
-        router.replace("/demo"); router.refresh();
+        router.replace("/dashboard"); router.refresh();
       }
     } catch {
       setError("Não foi possível conectar. Confira sua conexão e tente novamente.");
@@ -52,9 +52,9 @@ export function SignupForm({ initialMode }: { initialMode: "signup" | "login" })
   }
 
   return <section className="signup-card" data-mode={mode} aria-labelledby="signup-title" aria-busy={busy}>
-    <p className="landing-eyebrow">{reset ? "VAMOS RECUPERAR SEU ACESSO" : "PRÓXIMO PASSO: A DEMO"}</p>
+    <p className="landing-eyebrow">{reset ? "VAMOS RECUPERAR SEU ACESSO" : "SEU ESPAÇO NO BASEDSPEAK"}</p>
     <h1 id="signup-title">{reset ? "Esqueceu a senha?" : signup ? "Comece por aqui." : "Bom te ver de volta."}</h1>
-    <p className="signup-intro">{reset ? "Informe seu e-mail para receber um link de recuperação." : signup ? "Crie sua conta para entrar na demo." : "Entre na sua conta para ir à demo."}</p>
+    <p className="signup-intro">{reset ? "Informe seu e-mail para receber um link de recuperação." : signup ? "Crie sua conta e comece sua jornada." : "Entre na sua conta para acessar seu painel."}</p>
     {!reset && <><button className="signup-google" type="button" disabled={busy} onClick={() => void authenticate(loginWithGoogle)}><span className="signup-google-mark" aria-hidden="true">G</span>Continuar com Google</button><div className="signup-divider"><span>ou com e-mail</span></div></>}
     <form onSubmit={submit}>
       <fieldset disabled={busy}>
@@ -64,7 +64,7 @@ export function SignupForm({ initialMode }: { initialMode: "signup" | "login" })
         {mode === "login" && <button type="button" className="signup-forgot" onClick={() => changeMode("reset")}>Esqueci minha senha</button>}
         {error && <p className="signup-error" role="alert" tabIndex={-1} ref={errorElement}>{error}</p>}
         {message && <p className="signup-message" role="status">{message}</p>}
-        <button type="submit" className="landing-cta signup-submit">{busy ? <><LoaderCircle size={17} className="signup-spinner" aria-hidden="true" />Aguarde…</> : <>{reset ? "Enviar link de recuperação" : signup ? "Criar conta e ir à demo" : "Entrar e ir à demo"}<ArrowUpRight size={18} aria-hidden="true" /></>}</button>
+        <button type="submit" className="landing-cta signup-submit">{busy ? <><LoaderCircle size={17} className="signup-spinner" aria-hidden="true" />Aguarde…</> : <>{reset ? "Enviar link de recuperação" : signup ? "Criar conta e continuar" : "Entrar no meu painel"}<ArrowUpRight size={18} aria-hidden="true" /></>}</button>
       </fieldset>
     </form>
     {signup && <p className="signup-legal">Ao continuar, você concorda com os <Link href="/termos">Termos</Link> e a <Link href="/privacidade">Política de Privacidade</Link>.</p>}

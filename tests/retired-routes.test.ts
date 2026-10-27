@@ -9,9 +9,9 @@ import * as progress from "@/app/api/progress/route";
 import * as heartbeat from "@/app/api/study/heartbeat/route";
 import * as speech from "@/app/api/speech/route";
 
-const pages = ["/login", "/cadastro", "/pagamento", "/obrigado", "/agendamentos", "/boletim", "/configuracoes", "/dashboard", "/especialidades", "/especialidades/test", "/especialidades/test/modulo/test", "/perfil", "/pilar/2", "/admin/dashboard", "/admin/analytics", "/admin/aprovacoes", "/admin/codigos", "/admin/usuarios", "/admin/usuarios/test", "/admin/agendamentos", "/admin/alunos/test", "/inicio-orbita-7k3"];
+const pages = ["/login", "/cadastro", "/pagamento", "/obrigado", "/agendamentos", "/boletim", "/configuracoes", "/especialidades", "/especialidades/test", "/especialidades/test/modulo/test", "/perfil", "/pilar/2", "/admin/dashboard", "/admin/analytics", "/admin/aprovacoes", "/admin/codigos", "/admin/usuarios", "/admin/usuarios/test", "/admin/agendamentos", "/admin/alunos/test", "/inicio-orbita-7k3"];
 describe("explicit retired page destinations", () => {
-  it("covers all 22 aliases as 307 and discards sensitive queries", () => {
+  it("covers the 21 remaining aliases as 307 and discards sensitive queries", () => {
     expect(retiredPagePatterns).toHaveLength(pages.length);
     for (const page of pages) {
       const response = proxy(new NextRequest(`http://localhost${page}?callbackUrl=/admin&paymentId=test&token=test`));
@@ -20,7 +20,7 @@ describe("explicit retired page destinations", () => {
     }
   });
   it("allows public pages, assets, all APIs and unknown paths through without redirecting", () => {
-    for (const path of ["/", "/demo", "/termos", "/privacidade", "/manifest.webmanifest", "/robots.txt", "/sitemap.xml", "/favicon.ico", "/demo/cafe/v1/audio/C01.mp3", "/api/checkout", "/api/admin/scheduling/day", "/api/unknown", "/dashboard-public", "/admin/unknown", "/unknown", "/especialidades/test/unknown"]) {
+    for (const path of ["/", "/dashboard", "/demo", "/termos", "/privacidade", "/manifest.webmanifest", "/robots.txt", "/sitemap.xml", "/favicon.ico", "/demo/cafe/v1/audio/C01.mp3", "/api/checkout", "/api/admin/scheduling/day", "/api/unknown", "/dashboard-public", "/admin/unknown", "/unknown", "/especialidades/test/unknown"]) {
       const response = proxy(new NextRequest(`http://localhost${path}`));
       expect(response.headers.get("location")).toBeNull();
       expect(response.headers.get("x-middleware-next")).toBe("1");

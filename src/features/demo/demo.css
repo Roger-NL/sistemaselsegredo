@@ -578,7 +578,7 @@
   display:grid;
   grid-template-columns:minmax(0,1fr);
   grid-template-rows:auto minmax(0,1fr) auto;
-  padding-inline:clamp(1rem,3vw,3rem);
+  padding-inline:var(--site-gutter,clamp(1rem,3vw,3rem));
   line-height:1.4;
   container:demo-app / inline-size;
 }
@@ -1258,6 +1258,21 @@
   .app-shell .recognition-response .choices button:last-child:nth-child(odd) { grid-column:1/-1; }
 }
 @media(prefers-reduced-motion:reduce) { .app-shell .piece-returned.return-0,.app-shell .piece-returned.return-1 { animation:none; } }
+
+/* Keep the common header, scene and action together on phones held sideways. */
+@media(min-width:480px) and (max-width:760px) and (max-height:500px) {
+  .app-shell .experience .scene-grid { min-height:0; }
+  .app-shell .scene-grid,.app-shell .scene-grid[data-density],.app-shell .scene-grid.opening-scene,.app-shell .scene-grid.opening-scene[data-density] {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr);
+    align-content:stretch; gap:12px; padding-block:8px;
+  }
+  .app-shell .scene-grid .scene-intro-slot { grid-column:2; grid-row:1; }
+  .app-shell .scene-grid .scene-column,.app-shell .scene-grid.opening-scene .scene-column { grid-column:1; grid-row:1 / -1; }
+  .app-shell .scene-grid .conversation-panel,.app-shell .scene-grid.opening-scene .conversation-panel { grid-column:2; grid-row:2; justify-content:center; }
+  .app-shell .scene-grid .scene-art,.app-shell .scene-grid .scene-art picture { height:100%; }
+  .app-shell .opening-card { padding:16px; }
+  .app-shell .opening-card h1 { font-size:25px; }
+}
 
 /* Keep temporary test navigation on one mobile header row. */
 .restart-icon { display:none; }

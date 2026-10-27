@@ -7,7 +7,6 @@ export const retiredPagePatterns = [
   /^\/agendamentos$/,
   /^\/boletim$/,
   /^\/configuracoes$/,
-  /^\/dashboard$/,
   /^\/especialidades$/,
   /^\/especialidades\/[^\/]+$/,
   /^\/especialidades\/[^\/]+\/modulo\/[^\/]+$/,

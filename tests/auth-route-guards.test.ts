@@ -14,7 +14,8 @@ describe("reserved admin guard and future navigation", () => {
     await expect(requireAdminPrincipal(request)).resolves.toMatchObject({ uid: "admin" });
   });
   it("does not send future authentication back to retired screens or unsafe callbacks", () => {
-    for (const callbackUrl of [null, "/dashboard", "/login?callbackUrl=test", "//example.com", "/\\example.com", "/api/checkout", "/\nunsafe"]) expect(resolvePostAuthTarget({ mode: "login", callbackUrl })).toBe("/");
+    for (const callbackUrl of [null, "/login?callbackUrl=test", "//example.com", "/\\example.com", "/api/checkout", "/\nunsafe"]) expect(resolvePostAuthTarget({ mode: "login", callbackUrl })).toBe("/");
+    expect(resolvePostAuthTarget({ mode: "login", callbackUrl: "/dashboard" })).toBe("/dashboard");
     expect(resolvePostAuthTarget({ mode: "login", callbackUrl: "/demo" })).toBe("/demo");
   });
 });

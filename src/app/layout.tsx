@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import "@/features/demo/demo.css";
+import "@/components/navigation/navigation.css";
+import { JourneyTransitionProvider } from "@/components/navigation/JourneyTransition";
 
 // Reuse the local Geist bundled with the pinned Next dependency; no font download at build time.
 const geist = localFont({ src: "../../node_modules/next/dist/next-devtools/server/font/geist-latin.woff2", variable: "--font-geist-sans", weight: "100 900", style: "normal", display: "swap" });
@@ -42,7 +44,7 @@ export default function RootLayout({
       <body
         className={`${geist.variable} antialiased`}
       >
-        {children}
+        <JourneyTransitionProvider>{children}</JourneyTransitionProvider>
       </body>
     </html>
   );
