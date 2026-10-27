@@ -37,4 +37,10 @@ A correção foi conferida na própria aba com a diferença de tamanho acima: o 
 
 A matriz passou a incluir 348×757 e 440×956, além das oito dimensões anteriores, cobrindo landing, cadastro e login. Também verifica links do cabeçalho e rodapé. Essa conferência encontrou e corrigiu o alvo de “Voltar” ultrapassando em 2 px o cabeçalho na horizontal de 568×320. O painel de informações foi aberto e fechado por teclado no cenário com zoom.
 
+### Composição sem sobreposição
+
+Roger solicitou que “LET’S TALK” também ficasse inteiro e centralizado. O título e o cartão agora ocupam linhas separadas de uma grade, com tamanho da tipografia limitado ao espaço disponível para o título. O cartão permanece no fluxo e não usa rotação ou posicionamento absoluto. A decoração “YOUR TURN” foi retirada. Em telas compactas, “LET’S TALK” ocupa uma única linha; na horizontal, a proposta e a amostra dividem a tela sem esconder a amostra.
+
+Conferência de geometria e captura em 320×480, 320×568, 348×757, 360×740, 375×667, 390×844, 440×956, 820×1180, 1280×654, 1440×900, 844×390 e 568×320. Em todas, título e cartão ficam inteiros e separados; o centro horizontal do título coincide com o do quadro (diferença inferior a 0,01 px de arredondamento). A checagem compara o título com o cartão, além de conferir os limites visíveis, para detectar sobreposições internas que a matriz anterior não verificava.
+
 A pesquisa e propostas iniciais estão em `research-landing.md`, `landing-visual-direction.md` e `landing-ux.md`. As recomendações iniciais de imagem da cafeteria e seções foram substituídas pelas instruções finais acima.
