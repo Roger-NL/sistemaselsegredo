@@ -66,16 +66,19 @@ export async function GET(req: Request) {
   });
 
   if (!principal) {
-    const response = NextResponse.json({ authenticated: false }, { status: 401 });
+    const response = NextResponse.json({ authenticated: false }, { status: 401, headers: { "Cache-Control": "private, no-store" } });
     clearSessionCookie(response);
     clearLegacyCookies(response);
     return response;
   }
 
-  return NextResponse.json({ authenticated: true, principal });
+  return NextResponse.json({ authenticated: true, principal }, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 export async function POST(req: Request) {
+  if (req.headers.get("origin") !== new URL(req.url).origin) {
+    return NextResponse.json({ error: "Origem da solicitação inválida." }, { status: 403 });
+  }
   try {
     const idToken = await resolveIdToken(req);
 
@@ -84,11 +87,14 @@ export async function POST(req: Request) {
     }
 
     const decodedToken = await getAdminAuth().verifyIdToken(idToken, true);
-    await recordVerifiedLogin(decodedToken);
+    if (!Number.isFinite(decodedToken.auth_time) || Date.now() / 1000 - decodedToken.auth_time > 5 * 60) {
+      throw new Error("RECENT_SIGN_IN_REQUIRED");
+    }
 
     const sessionCookie = await getAdminAuth().createSessionCookie(idToken, {
       expiresIn: AUTH_SESSION_MAX_AGE_SECONDS * 1000,
     });
+    await recordVerifiedLogin(decodedToken);
 
     const response = NextResponse.json({
       success: true,
@@ -99,7 +105,7 @@ export async function POST(req: Request) {
     clearLegacyCookies(response);
     return response;
   } catch (error) {
-    console.error("[api/auth/session] create session error", error);
+    console.error("[api/auth/session] create session failed", error instanceof Error ? error.name : "UnknownError");
     const response = NextResponse.json({ error: "Failed to create server session." }, { status: 401 });
     clearSessionCookie(response);
     clearLegacyCookies(response);
@@ -107,7 +113,10 @@ export async function POST(req: Request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(req: Request) {
+  if (req.headers.get("origin") !== new URL(req.url).origin) {
+    return NextResponse.json({ error: "Origem da solicitação inválida." }, { status: 403 });
+  }
   const response = NextResponse.json({ success: true });
   clearSessionCookie(response);
   clearLegacyCookies(response);

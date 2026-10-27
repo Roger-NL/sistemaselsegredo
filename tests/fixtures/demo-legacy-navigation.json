@@ -1,0 +1,1703 @@
+{
+  "sourceCommit": "5d80bf1ca652e66cd38caceed8e98410ad7568ee",
+  "skipped": {
+    "schemaVersion": 1,
+    "storyVersion": "cafe-v7",
+    "runId": "legacy-skipped-run",
+    "startedAt": 1793079900000,
+    "initialProfile": "beginner",
+    "profile": "beginner",
+    "activityProfile": "beginner",
+    "nodeId": "end",
+    "phase": "scene",
+    "presentationStep": 0,
+    "audioAccess": {
+      "lucas:p1.lucas": "text",
+      "model:p2.send": "text",
+      "lucas:p2.reaction": "text",
+      "model:p3.ask": "text",
+      "lucas:p4.order": "text",
+      "model:p4.same": "text",
+      "lucas:p4.nice-a": "text",
+      "lucas:p4.arrival-a": "text",
+      "lucas:p5.taste": "text",
+      "lucas:p5.opinion": "text",
+      "model:p5.like": "text",
+      "lucas:p5.reaction-like": "text",
+      "model:p6.warn": "text",
+      "lucas:p6.safe": "text",
+      "lucas:p7.tired": "text",
+      "lucas:p7.work": "text",
+      "lucas:p7.long-day": "text",
+      "lucas:p8.table": "text",
+      "model:p8.accept": "text",
+      "lucas:p8.topic": "text",
+      "model:p8.english": "text",
+      "lucas:p8.nice": "text",
+      "lucas:p9.english-opinion": "text",
+      "model:p9.english-like": "text",
+      "lucas:p9.english-positive": "text",
+      "model:p9.cafe": "text",
+      "lucas:p9.cafe-reaction": "text",
+      "model:p9.stay": "text",
+      "lucas:p9.stay-reaction": "text",
+      "lucas:p10.quiet": "text",
+      "model:p10.here": "text",
+      "lucas:p10.here-reaction": "text",
+      "model:p10.farewell": "text",
+      "lucas:p10.bye": "text",
+      "model:p10.bye": "text"
+    },
+    "assemblyMistakes": 0,
+    "returnedBlocks": [],
+    "returnSerial": 0,
+    "selected": [],
+    "draft": "",
+    "recognized": null,
+    "assistedBlocks": false,
+    "help": {},
+    "checked": [],
+    "decisions": {
+      "p3.intent": "ask",
+      "p5.opinion": "like",
+      "p7.opinion": "too",
+      "p8.topic": "english",
+      "p9.english-opinion": "like",
+      "p9.pause": "stay",
+      "p10.contact": "bye"
+    },
+    "transcript": [
+      {
+        "id": "p1.lucas:C01",
+        "nodeId": "p1.lucas",
+        "audioId": "C01",
+        "part": 1,
+        "role": "character"
+      },
+      {
+        "id": "p2.reaction:C02",
+        "nodeId": "p2.reaction",
+        "audioId": "C02",
+        "part": 2,
+        "role": "character"
+      },
+      {
+        "id": "p4.order:C03",
+        "nodeId": "p4.order",
+        "audioId": "C03",
+        "part": 4,
+        "role": "character"
+      },
+      {
+        "id": "p4.nice-a:C04",
+        "nodeId": "p4.nice-a",
+        "audioId": "C04",
+        "part": 4,
+        "role": "character"
+      },
+      {
+        "id": "p4.arrival-a:C05",
+        "nodeId": "p4.arrival-a",
+        "audioId": "C05",
+        "part": 4,
+        "role": "character"
+      },
+      {
+        "id": "p5.taste:C06",
+        "nodeId": "p5.taste",
+        "audioId": "C06",
+        "part": 5,
+        "role": "character"
+      },
+      {
+        "id": "p5.opinion:C07",
+        "nodeId": "p5.opinion",
+        "audioId": "C07",
+        "part": 5,
+        "role": "character"
+      },
+      {
+        "id": "p5.reaction-like:C08",
+        "nodeId": "p5.reaction-like",
+        "audioId": "C08",
+        "part": 5,
+        "role": "character"
+      },
+      {
+        "id": "p6.safe:C10",
+        "nodeId": "p6.safe",
+        "audioId": "C10",
+        "part": 6,
+        "role": "character"
+      },
+      {
+        "id": "p6.safe:C11",
+        "nodeId": "p6.safe",
+        "audioId": "C11",
+        "part": 6,
+        "role": "character"
+      },
+      {
+        "id": "p7.tired:C12",
+        "nodeId": "p7.tired",
+        "audioId": "C12",
+        "part": 7,
+        "role": "character"
+      },
+      {
+        "id": "p7.work:C13",
+        "nodeId": "p7.work",
+        "audioId": "C13",
+        "part": 7,
+        "role": "character"
+      },
+      {
+        "id": "p7.long-day:C14",
+        "nodeId": "p7.long-day",
+        "audioId": "C14",
+        "part": 7,
+        "role": "character"
+      },
+      {
+        "id": "p8.table:C16",
+        "nodeId": "p8.table",
+        "audioId": "C16",
+        "part": 8,
+        "role": "character"
+      },
+      {
+        "id": "p8.table:C17",
+        "nodeId": "p8.table",
+        "audioId": "C17",
+        "part": 8,
+        "role": "character"
+      },
+      {
+        "id": "p8.topic:C04",
+        "nodeId": "p8.topic",
+        "audioId": "C04",
+        "part": 8,
+        "role": "character"
+      },
+      {
+        "id": "p8.nice:C18",
+        "nodeId": "p8.nice",
+        "audioId": "C18",
+        "part": 8,
+        "role": "character"
+      },
+      {
+        "id": "p9.english-opinion:C07",
+        "nodeId": "p9.english-opinion",
+        "audioId": "C07",
+        "part": 9,
+        "role": "character"
+      },
+      {
+        "id": "p9.english-positive:C20",
+        "nodeId": "p9.english-positive",
+        "audioId": "C20",
+        "part": 9,
+        "role": "character"
+      },
+      {
+        "id": "p9.cafe-reaction:C22",
+        "nodeId": "p9.cafe-reaction",
+        "audioId": "C22",
+        "part": 9,
+        "role": "character"
+      },
+      {
+        "id": "p9.stay-reaction:C30",
+        "nodeId": "p9.stay-reaction",
+        "audioId": "C30",
+        "part": 9,
+        "role": "character"
+      },
+      {
+        "id": "p10.quiet:C27",
+        "nodeId": "p10.quiet",
+        "audioId": "C27",
+        "part": 10,
+        "role": "character"
+      },
+      {
+        "id": "p10.here-reaction:C25",
+        "nodeId": "p10.here-reaction",
+        "audioId": "C25",
+        "part": 10,
+        "role": "character"
+      },
+      {
+        "id": "p10.bye:C29",
+        "nodeId": "p10.bye",
+        "audioId": "C29",
+        "part": 10,
+        "role": "character"
+      }
+    ],
+    "evidence": [],
+    "journal": [
+      {
+        "at": "p1.first",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p1.context",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p1.lucas",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p1.lucas",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p2.prompt",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p2.question",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p2.send",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p2.send",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p2.send",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p2.reaction",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p2.reaction",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p3.prompt",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p3.intent",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p3.ask",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p3.ask",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p3.ask",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.order",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.order",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.same",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.same",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.same",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.same",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.nice-a",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.nice-a",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.arrival-a",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.arrival-a",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.arrival-a",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p4.arrival-a",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.taste",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.taste",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.taste",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.taste",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.opinion",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.opinion",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.opinion",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.opinion",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.like",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.like",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.like",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.reaction-like",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p5.reaction-like",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p6.warn",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p6.warn",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p6.warn",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p6.warn",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p6.warn",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p6.safe",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p6.safe",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.tired",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.tired",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.tired",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.tired",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.tired",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.tired",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.tired",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.work",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.work",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.opinion",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.opinion",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.too",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.too",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.long-day",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p7.long-day",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.table",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.table",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.table",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.table",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.accept",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.accept",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.accept",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.accept",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.topic",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.topic",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.topic",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.topic",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.english",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.english",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.english",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.nice",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p8.nice",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.english-opinion",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.english-opinion",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.english-opinion",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.english-opinion",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.english-opinion",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.english-like",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.english-like",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.english-like",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.english-positive",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.english-positive",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.cafe",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.cafe",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.cafe",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.cafe",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.cafe-reaction",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.cafe-reaction",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.pause",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.pause",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.pause",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.stay",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.stay",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.stay",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.stay",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.stay-reaction",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p9.stay-reaction",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.quiet",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.quiet",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.here",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.here",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.here",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.here",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.here-reaction",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.here-reaction",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.contact",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.contact",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.contact",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.farewell",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.farewell",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.farewell",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.farewell",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.bye",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.bye",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.bye",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.bye",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.bye",
+        "type": "TEST_FORWARD"
+      },
+      {
+        "at": "p10.bye",
+        "type": "TEST_FORWARD"
+      }
+    ],
+    "notice": "",
+    "reviewView": "end",
+    "modelHidden": false
+  },
+  "beginner": {
+    "beforeSend": {
+      "schemaVersion": 1,
+      "storyVersion": "cafe-v7",
+      "runId": "legacy-mixed-beginner",
+      "startedAt": 1793079900000,
+      "initialProfile": "beginner",
+      "profile": "beginner",
+      "activityProfile": "beginner",
+      "nodeId": "p2.send",
+      "phase": "build",
+      "presentationStep": 0,
+      "audioAccess": {
+        "lucas:p1.lucas": "text",
+        "model:p2.send": "text"
+      },
+      "assemblyMistakes": 0,
+      "returnedBlocks": [],
+      "returnSerial": 0,
+      "selected": [
+        "no",
+        "negative",
+        "mine"
+      ],
+      "draft": "",
+      "recognized": null,
+      "assistedBlocks": false,
+      "help": {},
+      "checked": [],
+      "decisions": {},
+      "transcript": [
+        {
+          "id": "p1.lucas:C01",
+          "nodeId": "p1.lucas",
+          "audioId": "C01",
+          "part": 1,
+          "role": "character"
+        }
+      ],
+      "evidence": [],
+      "journal": [
+        {
+          "at": "p1.first",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.context",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.question",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "no"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "negative"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "mine"
+        }
+      ],
+      "notice": "",
+      "reviewView": "end",
+      "modelHidden": false
+    },
+    "afterSend": {
+      "schemaVersion": 1,
+      "storyVersion": "cafe-v7",
+      "runId": "legacy-mixed-beginner",
+      "startedAt": 1793079900000,
+      "initialProfile": "beginner",
+      "profile": "beginner",
+      "activityProfile": "beginner",
+      "nodeId": "p2.reaction",
+      "phase": "scene",
+      "presentationStep": 0,
+      "audioAccess": {
+        "lucas:p1.lucas": "text",
+        "model:p2.send": "text"
+      },
+      "assemblyMistakes": 0,
+      "returnedBlocks": [],
+      "returnSerial": 0,
+      "selected": [],
+      "draft": "",
+      "recognized": null,
+      "assistedBlocks": false,
+      "help": {},
+      "checked": [],
+      "decisions": {},
+      "transcript": [
+        {
+          "id": "p1.lucas:C01",
+          "nodeId": "p1.lucas",
+          "audioId": "C01",
+          "part": 1,
+          "role": "character"
+        },
+        {
+          "id": "p2.send:U01",
+          "nodeId": "p2.send",
+          "part": 2,
+          "audioId": "U01",
+          "role": "you"
+        },
+        {
+          "id": "p2.reaction:C02",
+          "nodeId": "p2.reaction",
+          "audioId": "C02",
+          "part": 2,
+          "role": "character"
+        }
+      ],
+      "evidence": [
+        {
+          "nodeId": "p2.send",
+          "response": "U01",
+          "kind": "blocks"
+        }
+      ],
+      "journal": [
+        {
+          "at": "p1.first",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.context",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.question",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "no"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "negative"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "mine"
+        },
+        {
+          "at": "p2.send",
+          "type": "SEND_RESPONSE"
+        }
+      ],
+      "notice": "",
+      "reviewView": "end",
+      "modelHidden": false
+    },
+    "resumed": {
+      "schemaVersion": 1,
+      "storyVersion": "cafe-v7",
+      "runId": "legacy-mixed-beginner",
+      "startedAt": 1793079900000,
+      "initialProfile": "beginner",
+      "profile": "beginner",
+      "activityProfile": "beginner",
+      "nodeId": "p3.ask",
+      "phase": "build",
+      "presentationStep": 0,
+      "audioAccess": {
+        "lucas:p1.lucas": "text",
+        "model:p2.send": "text",
+        "lucas:p2.reaction": "text",
+        "model:p3.ask": "text"
+      },
+      "assemblyMistakes": 0,
+      "returnedBlocks": [],
+      "returnSerial": 0,
+      "selected": [
+        "what"
+      ],
+      "draft": "",
+      "recognized": null,
+      "assistedBlocks": false,
+      "help": {},
+      "checked": [],
+      "decisions": {
+        "p3.intent": "ask"
+      },
+      "transcript": [
+        {
+          "id": "p1.lucas:C01",
+          "nodeId": "p1.lucas",
+          "audioId": "C01",
+          "part": 1,
+          "role": "character"
+        },
+        {
+          "id": "p2.send:U01",
+          "nodeId": "p2.send",
+          "part": 2,
+          "audioId": "U01",
+          "role": "you"
+        },
+        {
+          "id": "p2.reaction:C02",
+          "nodeId": "p2.reaction",
+          "audioId": "C02",
+          "part": 2,
+          "role": "character"
+        }
+      ],
+      "evidence": [
+        {
+          "nodeId": "p2.send",
+          "response": "U01",
+          "kind": "blocks"
+        }
+      ],
+      "journal": [
+        {
+          "at": "p1.first",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.context",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.question",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "no"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "negative"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "mine"
+        },
+        {
+          "at": "p2.send",
+          "type": "SEND_RESPONSE"
+        },
+        {
+          "at": "p2.reaction",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.reaction",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p3.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p3.intent",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p3.ask",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p3.ask",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p3.ask",
+          "type": "PLACE_BLOCK",
+          "block": "what"
+        }
+      ],
+      "notice": "",
+      "reviewView": "end",
+      "modelHidden": false
+    }
+  },
+  "some": {
+    "beforeSend": {
+      "schemaVersion": 1,
+      "storyVersion": "cafe-v7",
+      "runId": "legacy-mixed-some",
+      "startedAt": 1793079900000,
+      "initialProfile": "some",
+      "profile": "some",
+      "activityProfile": "some",
+      "nodeId": "p2.send",
+      "phase": "build",
+      "presentationStep": 0,
+      "audioAccess": {
+        "lucas:p1.lucas": "text"
+      },
+      "assemblyMistakes": 0,
+      "returnedBlocks": [],
+      "returnSerial": 0,
+      "selected": [
+        "no",
+        "negative",
+        "mine"
+      ],
+      "draft": "",
+      "recognized": null,
+      "assistedBlocks": false,
+      "help": {},
+      "checked": [],
+      "decisions": {},
+      "transcript": [
+        {
+          "id": "p1.lucas:C01",
+          "nodeId": "p1.lucas",
+          "audioId": "C01",
+          "part": 1,
+          "role": "character"
+        }
+      ],
+      "evidence": [],
+      "journal": [
+        {
+          "at": "p1.first",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.context",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.question",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "no"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "negative"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "mine"
+        }
+      ],
+      "notice": "",
+      "reviewView": "end",
+      "modelHidden": false
+    },
+    "afterSend": {
+      "schemaVersion": 1,
+      "storyVersion": "cafe-v7",
+      "runId": "legacy-mixed-some",
+      "startedAt": 1793079900000,
+      "initialProfile": "some",
+      "profile": "some",
+      "activityProfile": "some",
+      "nodeId": "p2.reaction",
+      "phase": "scene",
+      "presentationStep": 0,
+      "audioAccess": {
+        "lucas:p1.lucas": "text"
+      },
+      "assemblyMistakes": 0,
+      "returnedBlocks": [],
+      "returnSerial": 0,
+      "selected": [],
+      "draft": "",
+      "recognized": null,
+      "assistedBlocks": false,
+      "help": {},
+      "checked": [],
+      "decisions": {},
+      "transcript": [
+        {
+          "id": "p1.lucas:C01",
+          "nodeId": "p1.lucas",
+          "audioId": "C01",
+          "part": 1,
+          "role": "character"
+        },
+        {
+          "id": "p2.send:U01",
+          "nodeId": "p2.send",
+          "part": 2,
+          "audioId": "U01",
+          "role": "you"
+        },
+        {
+          "id": "p2.reaction:C02",
+          "nodeId": "p2.reaction",
+          "audioId": "C02",
+          "part": 2,
+          "role": "character"
+        }
+      ],
+      "evidence": [
+        {
+          "nodeId": "p2.send",
+          "response": "U01",
+          "kind": "blocks"
+        }
+      ],
+      "journal": [
+        {
+          "at": "p1.first",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.context",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.question",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "no"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "negative"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "mine"
+        },
+        {
+          "at": "p2.send",
+          "type": "SEND_RESPONSE"
+        }
+      ],
+      "notice": "",
+      "reviewView": "end",
+      "modelHidden": false
+    },
+    "resumed": {
+      "schemaVersion": 1,
+      "storyVersion": "cafe-v7",
+      "runId": "legacy-mixed-some",
+      "startedAt": 1793079900000,
+      "initialProfile": "some",
+      "profile": "some",
+      "activityProfile": "some",
+      "nodeId": "p3.ask",
+      "phase": "build",
+      "presentationStep": 0,
+      "audioAccess": {
+        "lucas:p1.lucas": "text",
+        "lucas:p2.reaction": "text"
+      },
+      "assemblyMistakes": 0,
+      "returnedBlocks": [],
+      "returnSerial": 0,
+      "selected": [
+        "what"
+      ],
+      "draft": "",
+      "recognized": null,
+      "assistedBlocks": false,
+      "help": {},
+      "checked": [],
+      "decisions": {
+        "p3.intent": "ask"
+      },
+      "transcript": [
+        {
+          "id": "p1.lucas:C01",
+          "nodeId": "p1.lucas",
+          "audioId": "C01",
+          "part": 1,
+          "role": "character"
+        },
+        {
+          "id": "p2.send:U01",
+          "nodeId": "p2.send",
+          "part": 2,
+          "audioId": "U01",
+          "role": "you"
+        },
+        {
+          "id": "p2.reaction:C02",
+          "nodeId": "p2.reaction",
+          "audioId": "C02",
+          "part": 2,
+          "role": "character"
+        }
+      ],
+      "evidence": [
+        {
+          "nodeId": "p2.send",
+          "response": "U01",
+          "kind": "blocks"
+        }
+      ],
+      "journal": [
+        {
+          "at": "p1.first",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.context",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.question",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "no"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "negative"
+        },
+        {
+          "at": "p2.send",
+          "type": "PLACE_BLOCK",
+          "block": "mine"
+        },
+        {
+          "at": "p2.send",
+          "type": "SEND_RESPONSE"
+        },
+        {
+          "at": "p2.reaction",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.reaction",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p3.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p3.intent",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p3.ask",
+          "type": "PLACE_BLOCK",
+          "block": "what"
+        }
+      ],
+      "notice": "",
+      "reviewView": "end",
+      "modelHidden": false
+    }
+  },
+  "less": {
+    "beforeSend": {
+      "schemaVersion": 1,
+      "storyVersion": "cafe-v7",
+      "runId": "legacy-mixed-less",
+      "startedAt": 1793079900000,
+      "initialProfile": "less",
+      "profile": "less",
+      "activityProfile": "less",
+      "nodeId": "p2.send",
+      "phase": "write",
+      "presentationStep": 0,
+      "audioAccess": {
+        "lucas:p1.lucas": "text"
+      },
+      "assemblyMistakes": 0,
+      "returnedBlocks": [],
+      "returnSerial": 0,
+      "selected": [],
+      "draft": "No, it isn't mine!",
+      "recognized": null,
+      "assistedBlocks": false,
+      "help": {},
+      "checked": [],
+      "decisions": {},
+      "transcript": [
+        {
+          "id": "p1.lucas:C01",
+          "nodeId": "p1.lucas",
+          "audioId": "C01",
+          "part": 1,
+          "role": "character"
+        }
+      ],
+      "evidence": [],
+      "journal": [
+        {
+          "at": "p1.first",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.context",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.question",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "TYPE",
+          "text": "No, it isn't mine!"
+        }
+      ],
+      "notice": "",
+      "reviewView": "end",
+      "modelHidden": false
+    },
+    "afterSend": {
+      "schemaVersion": 1,
+      "storyVersion": "cafe-v7",
+      "runId": "legacy-mixed-less",
+      "startedAt": 1793079900000,
+      "initialProfile": "less",
+      "profile": "less",
+      "activityProfile": "less",
+      "nodeId": "p2.reaction",
+      "phase": "scene",
+      "presentationStep": 0,
+      "audioAccess": {
+        "lucas:p1.lucas": "text"
+      },
+      "assemblyMistakes": 0,
+      "returnedBlocks": [],
+      "returnSerial": 0,
+      "selected": [],
+      "draft": "",
+      "recognized": null,
+      "assistedBlocks": false,
+      "help": {},
+      "checked": [],
+      "decisions": {},
+      "transcript": [
+        {
+          "id": "p1.lucas:C01",
+          "nodeId": "p1.lucas",
+          "audioId": "C01",
+          "part": 1,
+          "role": "character"
+        },
+        {
+          "id": "p2.send:U01",
+          "nodeId": "p2.send",
+          "part": 2,
+          "audioId": "U01",
+          "role": "you",
+          "written": "No, it isn't mine!"
+        },
+        {
+          "id": "p2.reaction:C02",
+          "nodeId": "p2.reaction",
+          "audioId": "C02",
+          "part": 2,
+          "role": "character"
+        }
+      ],
+      "evidence": [
+        {
+          "nodeId": "p2.send",
+          "response": "U01",
+          "kind": "written"
+        }
+      ],
+      "journal": [
+        {
+          "at": "p1.first",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.context",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.question",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "TYPE",
+          "text": "No, it isn't mine!"
+        },
+        {
+          "at": "p2.send",
+          "type": "SEND_RESPONSE"
+        }
+      ],
+      "notice": "",
+      "reviewView": "end",
+      "modelHidden": false
+    },
+    "resumed": {
+      "schemaVersion": 1,
+      "storyVersion": "cafe-v7",
+      "runId": "legacy-mixed-less",
+      "startedAt": 1793079900000,
+      "initialProfile": "less",
+      "profile": "less",
+      "activityProfile": "less",
+      "nodeId": "p3.ask",
+      "phase": "write",
+      "presentationStep": 0,
+      "audioAccess": {
+        "lucas:p1.lucas": "text",
+        "lucas:p2.reaction": "text"
+      },
+      "assemblyMistakes": 0,
+      "returnedBlocks": [],
+      "returnSerial": 0,
+      "selected": [],
+      "draft": "What did",
+      "recognized": null,
+      "assistedBlocks": false,
+      "help": {},
+      "checked": [],
+      "decisions": {
+        "p3.intent": "ask"
+      },
+      "transcript": [
+        {
+          "id": "p1.lucas:C01",
+          "nodeId": "p1.lucas",
+          "audioId": "C01",
+          "part": 1,
+          "role": "character"
+        },
+        {
+          "id": "p2.send:U01",
+          "nodeId": "p2.send",
+          "part": 2,
+          "audioId": "U01",
+          "role": "you",
+          "written": "No, it isn't mine!"
+        },
+        {
+          "id": "p2.reaction:C02",
+          "nodeId": "p2.reaction",
+          "audioId": "C02",
+          "part": 2,
+          "role": "character"
+        }
+      ],
+      "evidence": [
+        {
+          "nodeId": "p2.send",
+          "response": "U01",
+          "kind": "written"
+        }
+      ],
+      "journal": [
+        {
+          "at": "p1.first",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.context",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p1.lucas",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.question",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.send",
+          "type": "TYPE",
+          "text": "No, it isn't mine!"
+        },
+        {
+          "at": "p2.send",
+          "type": "SEND_RESPONSE"
+        },
+        {
+          "at": "p2.reaction",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p2.reaction",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p3.prompt",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p3.intent",
+          "type": "TEST_FORWARD"
+        },
+        {
+          "at": "p3.ask",
+          "type": "TYPE",
+          "text": "What did"
+        }
+      ],
+      "notice": "",
+      "reviewView": "end",
+      "modelHidden": false
+    }
+  }
+}

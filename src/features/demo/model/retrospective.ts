@@ -1,4 +1,4 @@
-import type { AudioId, DemoState } from "./types";
+import type { AudioId, DemoState, Evidence, TranscriptLine } from "./types";
 
 export function ending(state: DemoState) {
   if (state.decisions["p10.contact"] === "contact") return "Vocês se despediram com a possibilidade de conversar novamente.";
@@ -6,7 +6,16 @@ export function ending(state: DemoState) {
     ? "Vocês compartilharam mais um pouco do café e depois se despediram."
     : "Vocês se despediram depois de uma conversa agradável.";
 }
-export type Highlight = { before: AudioId; after: AudioId; beforeRole: "you" | "character"; description: string };
+export type Highlight = {
+  before: AudioId; after: AudioId; beforeRole: "you" | "character"; description: string;
+  beforeWritten?: string; afterWritten?: string;
+  beforeEvidenceKind: Evidence["kind"] | null; afterEvidenceKind: Evidence["kind"] | null;
+};
+function evidenceKind(state: DemoState, line: TranscriptLine): Evidence["kind"] | null {
+  return line.role === "you"
+    ? state.evidence.find(item => item.nodeId === line.nodeId && item.response === line.audioId)?.kind ?? null
+    : null;
+}
 export function retrospective(state: DemoState): Highlight[] {
   const transformations: [AudioId[], AudioId, string][] = [
     [["C08", "C09"], "U09", "Você usou esta expressão em outro contexto."],
@@ -18,7 +27,13 @@ export function retrospective(state: DemoState): Highlight[] {
   return transformations.flatMap(([sources, after, description]) => {
     const end = state.transcript.findIndex(line => line.audioId === after && line.role === "you");
     if (end < 0) return [];
+    const reply = state.transcript[end];
     const before = state.transcript.slice(0, end).find(line => sources.includes(line.audioId));
-    return before ? [{ before: before.audioId, beforeRole: before.role, after, description }] : [];
+    return before ? [{
+      before: before.audioId, beforeRole: before.role, after, description,
+      ...(before.written === undefined ? {} : { beforeWritten: before.written }),
+      ...(reply.written === undefined ? {} : { afterWritten: reply.written }),
+      beforeEvidenceKind: evidenceKind(state, before), afterEvidenceKind: evidenceKind(state, reply),
+    }] : [];
   });
 }

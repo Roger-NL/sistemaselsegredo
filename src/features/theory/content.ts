@@ -115,7 +115,7 @@ export const lessons: Lesson[] = [
         id: "im-tired", title: "Como você está", phrase: "I'm tired.", meaning: "Estou cansado ou cansada.",
         body: "I'm tired. descreve como você está se sentindo. I'm junta I e am; tired significa ‘cansado’ ou ‘cansada’, sem mudar de forma. Am faz a ligação entre você e esse estado. Não se diz I tired. Na história, But I'm tired. acrescenta um contraste: a pessoa gosta de algo, mas está cansada. But significa ‘mas’, ligando as duas ideias.",
         detail: "Be pode corresponder a ser ou estar, dependendo da frase. Aqui, I am tired. e I'm tired. têm o mesmo sentido. Tired descreve um estado; não é uma ação em andamento. Por isso, a presença de I'm, sozinha, não significa que a frase esteja no presente contínuo.",
-        practice: { kind: "write", prompt: "Complete com a contração de I am: ___ tired.", answers: ["I'm", "I’m"], hint: "São I e am unidos por um apóstrofo.", explanation: "I'm é a contração de I am. A frase completa é I'm tired." },
+        practice: { kind: "write", prompt: "Complete para dizer ‘Estou cansado’: ___ tired.", answers: ["I'm", "I’m"], hint: "Uma opção curta une I e am por um apóstrofo.", explanation: "I'm é a contração de I am. As duas formas funcionam aqui: I'm tired. ou I am tired." },
       },
       {
         id: "learning", title: "Algo que está em andamento", phrase: "I'm learning English.", meaning: "Estou aprendendo inglês.",

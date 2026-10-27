@@ -7,8 +7,6 @@ import { createSessionSynchronizer } from "./session";
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    signInWithPopup,
-    GoogleAuthProvider,
     signOut,
     updateProfile as firebaseUpdateProfile,
     updateEmail,
@@ -110,12 +108,22 @@ export function isFirestorePermissionError(error: unknown): boolean {
 /**
  * Convert Firebase User + Firestore Data to App User
  */
-async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
-    if (!(await createSessionSynchronizer()(fbUser, true))) throw new Error("SERVER_SESSION_FAILED");
+async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User> {
+    if (!(await createSessionSynchronizer()(fbUser, true))) {
+        await signOut(auth).catch(() => undefined);
+        throw new Error("SERVER_SESSION_FAILED");
+    }
     const tokenResult = await fbUser.getIdTokenResult();
     const isAdmin = tokenResult.claims.admin === true;
+    const fallbackUser = { ...buildFallbackUserFromAuth(fbUser), isAdmin };
     const userDocRef = doc(db, "users", fbUser.uid);
-    const userDoc = await getDoc(userDocRef);
+    let userDoc;
+    try { userDoc = await getDoc(userDocRef); }
+    catch {
+        // The server has already verified the identity and stored the profile.
+        // Browser profile availability must not invalidate that server session.
+        return fallbackUser;
+    }
 
     if (userDoc.exists()) {
         const data = userDoc.data() as FirestoreUserData;
@@ -146,28 +154,7 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User | null> {
             isAdmin,
         };
     }
-    return null;
-}
-
-/**
- * Login with Google
- */
-export async function loginWithGoogle(): Promise<AuthResult> {
-    try {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        const fbUser = result.user;
-        const fallbackUser = buildFallbackUserFromAuth(fbUser);
-        fallbackUser.isAdmin = (await fbUser.getIdTokenResult()).claims.admin === true;
-
-        const user = (await mapFirebaseUser(fbUser)) ?? fallbackUser;
-
-        return { success: true, user };
-
-    } catch (error: unknown) {
-        console.error("Google Login Error:", error);
-        return { success: false, error: "Erro ao entrar com Google." };
-    }
+    return fallbackUser;
 }
 
 /**
@@ -178,27 +165,7 @@ export async function login(identifier: string, password: string): Promise<AuthR
         // Firebase Login
         const userCredential = await signInWithEmailAndPassword(auth, identifier, password);
         const fbUser = userCredential.user;
-        const fallbackUser = buildFallbackUserFromAuth(fbUser);
-        fallbackUser.isAdmin = (await fbUser.getIdTokenResult()).claims.admin === true;
-
-        let user = fallbackUser;
-
-        try {
-            const firestoreUser = await mapFirebaseUser(fbUser);
-
-            if (!firestoreUser) {
-                return { success: false, error: 'Dados de usuário não encontrados.' };
-            }
-
-            user = firestoreUser;
-
-        } catch (firestoreError) {
-            if (!isFirestorePermissionError(firestoreError)) {
-                throw firestoreError;
-            }
-
-            console.warn("Email login succeeded, but Firestore profile access was denied. Using auth fallback user.", firestoreError);
-        }
+        const user = await mapFirebaseUser(fbUser);
 
         return { success: true, user };
 
@@ -234,7 +201,7 @@ export async function register(
         const fbUser = userCredential.user;
 
         await firebaseUpdateProfile(fbUser, { displayName: name });
-        const newUser = (await mapFirebaseUser(fbUser)) ?? buildFallbackUserFromAuth(fbUser);
+        const newUser = await mapFirebaseUser(fbUser);
 
         return { success: true, user: newUser };
 

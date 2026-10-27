@@ -35,4 +35,14 @@ describe("client server-session synchronization", () => {
     expect(await sync(null)).toBe(false);
     expect(await sync({ getIdToken: async () => { throw new Error("expired"); } })).toBe(false);
   });
+
+  it("tries to clear an earlier cookie after token or transport failure", async () => {
+    const request = vi.fn<typeof fetch>().mockResolvedValue(new Response(null));
+    const sync = createSessionSynchronizer(request);
+    expect(await sync({ getIdToken: async () => { throw new Error("expired"); } })).toBe(false);
+    expect(request).toHaveBeenLastCalledWith("/api/auth/session", { method: "DELETE", credentials: "include" });
+    request.mockRejectedValueOnce(new Error("offline"));
+    expect(await sync({ getIdToken: async () => "new-token" })).toBe(false);
+    expect(request).toHaveBeenLastCalledWith("/api/auth/session", { method: "DELETE", credentials: "include" });
+  });
 });

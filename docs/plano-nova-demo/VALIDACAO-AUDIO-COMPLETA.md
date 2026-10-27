@@ -120,3 +120,82 @@ Pontuação é preservada: “Me too.” e “Me too!” são textos diferentes 
 A validação técnica cobre o catálogo de áudio das dez partes e sua entrega/cache. Não equivale a uma escuta editorial de pronúncia nem a uma inspeção visual de todas as etapas no navegador. O acesso automatizado ao navegador local permanece bloqueado pela permissão salva; não houve contorno desse bloqueio.
 
 Evidência detalhada sanitizada, snapshots antes/depois, hashes e MP3s locais em `tmp/audio-full-verification/` (ignorado pelo Git). Nenhuma chave/voz de ambiente foi incluída no relatório. Nenhum deploy, alteração de regras/índices ou limpeza de cache foi realizado.
+
+## Etapa 5 — revalidação técnica e revisão auditiva pendente — 27/10/2026
+
+Roger escolheu explicitamente **“Deixar a aprovação auditiva pendente”**. Nesta rodada, os 46 arquivos existentes estão aprovados tecnicamente nos critérios abaixo; nenhuma referência recebeu aprovação de pronúncia, naturalidade, entonação, volume percebido, cortes audíveis ou correspondência entre o som e o texto. A ferramenta disponível não ofereceu entrada de áudio compatível para essa percepção. A pré-visualização do material de escuta no navegador foi recusada pela permissão salva; não houve contorno nem alegação de inspeção visual ou auditiva por esse caminho.
+
+A revalidação dos serviços existentes ocorreu de **2026-10-27T16:19:45.929Z a 2026-10-27T16:19:55.176Z**, em UTC. Foram resolvidos os **50 IDs**, com **46 MP3s únicos** baixados e integralmente decodificados. A identidade declarada de texto + parâmetros foi recalculada. Os tamanhos coincidiram com os metadados persistentes; os SHA-256 dos bytes coincidiram com os arquivos originais da validação de 23/10 e com os hashes da rodada de 25/10. **O ledger atual não contém checksum nos 46 registros**, portanto o comparador condicional do script não fornece uma comparação com hash persistido. Os 46 registros auditados continuam `ready`, com uma única tentativa de provedor por chave.
+
+Os snapshots dos campos auditados — `status`, `providerAttemptCount`, `providerStartedAt`, `completedAt`, `updatedAt` e `bytes` — permaneceram idênticos antes/depois desta rodada e em relação à conferência anterior de 25/10. Isso delimita a comparação aos campos registrados, sem afirmar uma auditoria de todos os dados remotos. Houve **zero tentativas adicionais de geração, zero leituras de metadados no caminho de reprodução indexada e nenhuma gravação remota**. Foram preservados os 239 arquivos locais de evidência anterior; os relatórios e materiais locais desta rodada foram acrescentados separadamente. Catálogo, parâmetros, cache global e ledger não foram alterados.
+
+As regressões dirigidas passaram em **44 testes de sete arquivos**, com provedores simulados nos testes. A leitura real de arquivos/cache acima é evidência separada desses mocks. Não foi necessário novo build: esta etapa não alterou a aplicação. Não houve commit ou deploy nesta rodada.
+
+### Correspondência declarada e contextos
+
+O inventário de leitura encontrou os 50 IDs tanto em `media.ts` quanto no índice publicado, sem entradas ausentes ou excedentes, chaves inválidas ou URLs cujo caminho divergisse da chave. Todos são usados na história. Os quatro pares compartilham texto exato e arquivo: **C21/U09**, **C22/U14**, **C24/U13** e **C25/U04**. `Me too.` e `Me too!` continuam com arquivos distintos; o agrupamento textual dessas expressões no estudo não altera a identidade no cache de voz.
+
+A revisão textual mapeou também as reutilizações de pergunta, reação e modelo entre nós e papéis. Esse mapa orienta a escuta: por exemplo, C01 atende às duas situações dos copos, C07 retoma café ou aprendizado, U07 aparece em quatro contextos e os pares compartilhados servem a Lucas e ao modelo de resposta do participante. Não foi encontrado erro bloqueador de texto ou atribuição na leitura. A adequação audível de um mesmo arquivo a cada contexto permanece pendente.
+
+No estudo, **18 dos 24 passos** possuem player por correspondência da expressão inteira normalizada. `iced-coffee`, `sorry-okay`, `careful-close`, `work-job` e `break-quiet` usam fragmentos ou combinações sem um arquivo correspondente à expressão completa; `can-sit` é um exemplo novo. Esses seis passos não geram nem compõem áudio. O glossário reúne 45 expressões normalizadas; a redução além dos quatro aliases decorre de `Me too.` / `Me too!`. Na retrospectiva e no histórico, o arquivo canônico continua sendo um modelo quando a pessoa escreveu uma variante, não uma gravação da resposta dela.
+
+### Limites da análise de sinal
+
+Todos os 46 arquivos têm duração positiva, sinal não silencioso e decodificação completa. As durações variam de **0,835918 a 3,056327 segundos**; a soma dos arquivos únicos é **66,977964 segundos**, sem representar o tempo da conversa ou do estudo. A análise mediu RMS entre **−25,664 e −19,162 dBFS**, picos entre **−8,945 e −1,413 dBFS** e zero amostras no máximo digital. Os maiores trechos de borda abaixo do limiar de −45 dBFS foram 0,09 segundo no início e 0,3502 segundo no fim.
+
+Essas medidas descrevem o sinal decodificado. Não estabelecem igualdade de volume percebido, ausência de cortes perceptíveis, clareza da fala, pronúncia correta ou naturalidade das pausas. A identidade do cache relaciona texto e configuração; o SHA-256 dos bytes confirma que o arquivo é o mesmo. Nenhum dos dois comprova sozinho que a fala audível corresponde ao texto declarado. A aprovação editorial exige ouvir os arquivos nos contextos indicados, incluindo as sequências C10 → C11 e C16 → C17 e a despedida U19 → C29 → U20.
+
+### Matriz dos 46 arquivos existentes
+
+Cada linha agrupa os IDs que apontam ao mesmo MP3. “Técnica aprovada” significa resolução, identidade declarada, integridade dos bytes e decodificação aprovadas nesta rodada. **O texto é o declarado no catálogo; a escuta editorial permanece pendente em todas as linhas.**
+
+| IDs | Texto exato declarado | Duração decodificada | Bytes | Técnica | Escuta editorial |
+| --- | --- | ---: | ---: | --- | --- |
+| C01 | Is this yours? | 1.253878 s | 20106 | Aprovada | Pendente |
+| C02 | Oh! Sorry! | 1.280000 s | 20524 | Aprovada | Pendente |
+| C03 | An iced coffee. And you? | 2.115918 s | 33898 | Aprovada | Pendente |
+| C04 | Nice! | 0.914286 s | 14672 | Aprovada | Pendente |
+| C05 | Oh! This is mine. | 1.750204 s | 28047 | Aprovada | Pendente |
+| C06 | Oh… it’s sweet. | 1.854694 s | 29719 | Aprovada | Pendente |
+| C07 | Do you like it? | 1.280000 s | 20524 | Aprovada | Pendente |
+| C08 | Really? Me too! | 1.697959 s | 27211 | Aprovada | Pendente |
+| C09 | Really? I like it. | 1.697959 s | 27211 | Aprovada | Pendente |
+| C10 | Oh! Thanks! | 1.332245 s | 21359 | Aprovada | Pendente |
+| C11 | That was close. | 1.332245 s | 21359 | Aprovada | Pendente |
+| C12 | I’m tired. | 1.201633 s | 19270 | Aprovada | Pendente |
+| C13 | Yeah. Too much work. And you? | 3.056327 s | 48945 | Aprovada | Pendente |
+| C14 | Yeah… long day. | 1.619592 s | 25957 | Aprovada | Pendente |
+| C15 | Lucky you! | 1.201633 s | 19270 | Aprovada | Pendente |
+| C16 | Oh, a table! | 1.201633 s | 19270 | Aprovada | Pendente |
+| C17 | Sit with me? | 1.071020 s | 17180 | Aprovada | Pendente |
+| C18 | Oh, nice! | 1.149388 s | 18434 | Aprovada | Pendente |
+| C19 | Yeah, I like it. But I’m tired. | 2.533878 s | 40586 | Aprovada | Pendente |
+| C20 | Me too. I like English. | 2.220408 s | 35570 | Aprovada | Pendente |
+| C21, U09 | Really? | 0.862041 s | 13836 | Aprovada | Pendente |
+| C22, U14 | Yeah, I like it. | 1.488980 s | 23867 | Aprovada | Pendente |
+| C23 | I need a break. | 1.280000 s | 20524 | Aprovada | Pendente |
+| C24, U13 | Do you like this café? | 1.802449 s | 28883 | Aprovada | Pendente |
+| C25, U04 | Me too. | 1.018776 s | 16344 | Aprovada | Pendente |
+| C26 | Oh, okay. | 1.384490 s | 22195 | Aprovada | Pendente |
+| C27 | It’s quiet here. | 1.436735 s | 23031 | Aprovada | Pendente |
+| C28 | Sure! | 0.914286 s | 14672 | Aprovada | Pendente |
+| C29 | You too. Bye! | 1.384490 s | 22195 | Aprovada | Pendente |
+| C30 | Me too! | 1.149388 s | 18434 | Aprovada | Pendente |
+| U01 | No, it’s not mine. | 1.697959 s | 27211 | Aprovada | Pendente |
+| U02 | What did you order? | 1.488980 s | 23867 | Aprovada | Pendente |
+| U03 | It’s okay. | 1.201633 s | 19270 | Aprovada | Pendente |
+| U05 | Yes, it’s mine. | 1.619592 s | 25957 | Aprovada | Pendente |
+| U06 | I like it. | 1.071020 s | 17180 | Aprovada | Pendente |
+| U07 | Not really. | 1.071020 s | 17180 | Aprovada | Pendente |
+| U08 | Careful! | 0.966531 s | 15508 | Aprovada | Pendente |
+| U10 | Yeah, sure. | 1.280000 s | 20524 | Aprovada | Pendente |
+| U11 | I’m learning English. | 1.567347 s | 25121 | Aprovada | Pendente |
+| U12 | Do you like your job? | 1.671837 s | 26793 | Aprovada | Pendente |
+| U15 | I can stay a little longer. | 1.933061 s | 30973 | Aprovada | Pendente |
+| U16 | I have to go. | 1.097143 s | 17598 | Aprovada | Pendente |
+| U17 | I like it here. | 1.384490 s | 22195 | Aprovada | Pendente |
+| U18 | Can we keep in touch? | 1.750204 s | 28047 | Aprovada | Pendente |
+| U19 | Nice talking to you. | 1.854694 s | 29719 | Aprovada | Pendente |
+| U20 | Bye! | 0.835918 s | 13418 | Aprovada | Pendente |
+
+Evidência local desta rodada, ignorada pelo Git: `output/stage5-qa/validacao-etapa5.json` reúne os resultados e a decisão de Roger; `analise-sinal.json` contém as medidas; `arquivos-46.json` agrupa arquivos, hashes e contextos; `inventario-correspondencia.json` registra os 50 IDs e seus usos. O material `escuta-46-mp3s.html` e a planilha `matriz-50-ids.csv` foram preparados para a aprovação humana posterior. A presença e a estrutura desses materiais não equivalem à execução de seus players nem à escuta dos arquivos.

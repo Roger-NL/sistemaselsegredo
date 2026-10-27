@@ -1,4 +1,4 @@
-/** Cookie synchronization for a future authenticated UI. No React or SDK initialization. */
+/** Synchronize the verified server cookie without touching local story or study progress. */
 export type SessionIdentity = { getIdToken(forceRefresh?: boolean): Promise<string> };
 
 export function createSessionSynchronizer(request: typeof fetch = fetch) {
@@ -28,6 +28,7 @@ export function createSessionSynchronizer(request: typeof fetch = fetch) {
       return true;
     } catch {
       lastToken = null;
+      await clear().catch(() => undefined);
       return false;
     }
   };

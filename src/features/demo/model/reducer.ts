@@ -29,15 +29,21 @@ function previousStep(state: DemoState): DemoState {
   let cursor = createDemo(state.initialProfile, state.runId, state.startedAt);
   let previous: DemoState | null = null;
   for (const event of state.journal) {
-    const next = transition(cursor, event);
+    const next = replayEvent(cursor, event);
     if (next.nodeId !== cursor.nodeId || next.phase !== cursor.phase || next.reviewView !== cursor.reviewView || next.presentationStep !== cursor.presentationStep || next.audioAccess !== cursor.audioAccess) previous = cursor;
     cursor = next;
   }
   return previous ?? state;
 }
 
-/** Pure domain transitions. Stale/double-click events carry their originating node and are ignored. */
+/** Current user actions cannot invoke the retired test shortcut. */
 export function transition(state: DemoState, event: DemoEvent): DemoState {
+  if (event.type === "TEST_FORWARD") return state;
+  return replayEvent(state, event);
+}
+
+/** Persisted journal replay only. Preserve legacy skips without inventing learner evidence. */
+export function replayEvent(state: DemoState, event: DemoEvent): DemoState {
   if (event.at !== state.nodeId) return state;
   if (event.type === "BACK") return previousStep(state);
   const node = catalog[state.nodeId];
@@ -53,7 +59,7 @@ export function transition(state: DemoState, event: DemoEvent): DemoState {
   };
   let next = state;
   switch (event.type) {
-    // Temporary test navigation: no fabricated answer, score or completed listening.
+    // Retired navigation retained only to reconstruct saved attempts and Back.
     case "TEST_FORWARD": {
       const target = listeningTarget(state);
       if (target && !state.audioAccess[target.key]) {

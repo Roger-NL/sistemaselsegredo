@@ -14,7 +14,7 @@ import { getMotionPreference, getServerPreference, saveMotionPreference, subscri
 
 type Panel = "account" | "settings" | "help";
 
-export function Dashboard({ account, visual = false }: { account: DashboardAccount; visual?: boolean }) {
+export function Dashboard({ account }: { account: DashboardAccount }) {
   const router = useRouter();
   const journey = useJourneyTransition();
   const shell = useRef<HTMLDivElement>(null);
@@ -80,12 +80,6 @@ export function Dashboard({ account, visual = false }: { account: DashboardAccou
   async function saveName(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy) return;
-    if (visual) {
-      const nextName = draftName.trim();
-      if (!nextName) return;
-      setName(nextName); setDraftName(nextName); setError(""); setMessage("Nome atualizado nesta prévia.");
-      return;
-    }
     setBusy("save"); setError(""); setMessage("");
     try {
       const response = await fetch("/api/account/profile", {
@@ -103,11 +97,6 @@ export function Dashboard({ account, visual = false }: { account: DashboardAccou
 
   async function signOut() {
     if (busy) return;
-    if (visual) {
-      accountDialog.current?.close();
-      router.push("/comecar?modo=entrar");
-      return;
-    }
     setBusy("logout"); setError(""); setMessage("");
     try {
       const response = await fetch("/api/auth/session", { method: "DELETE", credentials: "same-origin" });
@@ -129,7 +118,7 @@ export function Dashboard({ account, visual = false }: { account: DashboardAccou
     <main id="meu-painel" className="dashboard-main dashboard-wrap">
       <div className="dashboard-welcome"><div><p className="dashboard-overline">{firstName ? `Olá, ${firstName}.` : "Bom ter você por aqui."}</p><h1>Seu espaço.</h1><p className="dashboard-subtitle">Um encontro de cada vez.</p></div><span className="dashboard-aside">Inglês por histórias.</span></div>
       <article className="dashboard-journey" aria-labelledby="journey-title">
-        <header className="dashboard-card-header"><h2 id="journey-title"><Route size={18} aria-hidden="true" />Sua jornada</h2><span className="dashboard-availability">{completed ? "Demo concluída" : started ? "Você já começou" : "Pronta para começar"}</span></header>
+        <header className="dashboard-card-header"><h2 id="journey-title"><Route size={18} aria-hidden="true" />Sua jornada</h2><span className="dashboard-availability">{completed ? "Fim do percurso" : started ? "Você já começou" : "Pronta para começar"}</span></header>
         <div className="dashboard-card-body"><div className="dashboard-access-area">
           <button type="button" className="dashboard-access" onClick={openStory} aria-label={actionLabel} aria-haspopup="dialog"><span className="dashboard-access-word">{action}</span><span className="dashboard-access-arrow"><ArrowUpRight size={25} aria-hidden="true" /></span></button>
           <p className="dashboard-access-copy"><strong>{completed ? "Sua conversa está aqui." : started ? "Vamos continuar sua história?" : "Acesse sua demo."}</strong><br />{started ? "Tentativa guardada neste navegador." : "O primeiro encontro com o inglês está aqui."}</p>
@@ -144,14 +133,14 @@ export function Dashboard({ account, visual = false }: { account: DashboardAccou
 
     <dialog ref={accountDialog} className="dashboard-dialog" aria-labelledby="dashboard-account-title" aria-busy={Boolean(busy)}>
       <div className="dashboard-dialog-heading"><h2 id="dashboard-account-title">Minha conta.</h2><button className="dashboard-icon-button" type="button" onClick={() => accountDialog.current?.close()} aria-label="Fechar conta"><X size={19} aria-hidden="true" /></button></div>
-      <form onSubmit={saveName}><fieldset disabled={Boolean(busy)}><legend className="dashboard-sr-only">Dados da conta</legend><label className="dashboard-field">Como quer ser chamado?<input name="name" autoComplete="given-name" value={draftName} onChange={event => setDraftName(event.target.value)} maxLength={120} required /></label><label className="dashboard-field">E-mail<input type="email" value={account.email} readOnly aria-describedby="dashboard-email-note" /></label><p className="dashboard-dialog-note" id="dashboard-email-note">{visual ? "Dados ilustrativos para testar. Nenhuma conta real é criada." : "E-mail usado para entrar na sua conta."}</p><button type="submit" className="dashboard-primary">{busy === "save" ? <><LoaderCircle size={16} className="dashboard-spinner" aria-hidden="true" />Salvando…</> : "Salvar nome"}</button></fieldset></form>
+      <form onSubmit={saveName}><fieldset disabled={Boolean(busy)}><legend className="dashboard-sr-only">Dados da conta</legend><label className="dashboard-field">Como quer ser chamado?<input name="name" autoComplete="given-name" value={draftName} onChange={event => setDraftName(event.target.value)} maxLength={120} required /></label><label className="dashboard-field">E-mail<input type="email" value={account.email} readOnly aria-describedby="dashboard-email-note" /></label><p className="dashboard-dialog-note" id="dashboard-email-note">E-mail usado para entrar na sua conta.</p><button type="submit" className="dashboard-primary">{busy === "save" ? <><LoaderCircle size={16} className="dashboard-spinner" aria-hidden="true" />Salvando…</> : "Salvar nome"}</button></fieldset></form>
       {error && <p className="dashboard-form-error" role="alert">{error}</p>}{message && <p className="dashboard-dialog-note" role="status">{message}</p>}
       <button className="dashboard-signout" type="button" disabled={Boolean(busy)} onClick={() => void signOut()}><LogOut size={16} aria-hidden="true" />{busy === "logout" ? "Saindo…" : "Sair da conta"}</button>
     </dialog>
 
     <dialog ref={settingsDialog} className="dashboard-dialog" aria-labelledby="dashboard-settings-title"><div className="dashboard-dialog-heading"><h2 id="dashboard-settings-title">Do seu jeito.</h2><button className="dashboard-icon-button" type="button" onClick={() => settingsDialog.current?.close()} aria-label="Fechar configurações"><X size={19} aria-hidden="true" /></button></div><label className="dashboard-toggle"><span>Reduzir animações</span><input type="checkbox" checked={reduced} onChange={event => saveMotionPreference(event.target.checked)} /></label><p className="dashboard-dialog-note">Deixa a entrada da história mais discreta. A preferência fica neste navegador. As configurações de movimento do seu dispositivo também são respeitadas.</p></dialog>
 
-    <dialog ref={helpDialog} className="dashboard-dialog" aria-labelledby="dashboard-help-title"><div className="dashboard-dialog-heading"><h2 id="dashboard-help-title">Um passo por vez.</h2><button className="dashboard-icon-button" type="button" onClick={() => helpDialog.current?.close()} aria-label="Fechar explicação"><X size={19} aria-hidden="true" /></button></div><p className="dashboard-help-copy">Sua jornada começa com uma história. Na demo, você participa de uma conversa em inglês e escolhe o apoio que prefere.</p><p className="dashboard-help-copy">O aprofundamento e as próximas histórias estão em preparação.</p><p className="dashboard-dialog-note">{visual ? "A tentativa fica neste navegador. Não é preciso ter uma conta para testar." : "A tentativa fica neste navegador. Sua conta ainda não sincroniza o progresso entre dispositivos."}</p></dialog>
+    <dialog ref={helpDialog} className="dashboard-dialog" aria-labelledby="dashboard-help-title"><div className="dashboard-dialog-heading"><h2 id="dashboard-help-title">Um passo por vez.</h2><button className="dashboard-icon-button" type="button" onClick={() => helpDialog.current?.close()} aria-label="Fechar explicação"><X size={19} aria-hidden="true" /></button></div><p className="dashboard-help-copy">Sua jornada começa com uma história. Na demo, você participa de uma conversa em inglês e escolhe o apoio que prefere.</p><p className="dashboard-help-copy">O aprofundamento e as próximas histórias estão em preparação.</p><p className="dashboard-dialog-note">A tentativa fica neste navegador. Sua conta ainda não sincroniza o progresso entre dispositivos.</p></dialog>
 
     <dialog ref={introDialog} className="dashboard-intro" aria-label="Entrada da história da cafeteria" data-animating={animating} onClose={() => setAnimating(false)} onCancel={journey.cancel}>
       <AppHeader current="dashboard" tone="immersive" name={firstName} onNavigate={() => introDialog.current?.close()} onAccount={() => { introDialog.current?.close(); openPanel("account"); }} onSettings={() => { introDialog.current?.close(); openPanel("settings"); }} />

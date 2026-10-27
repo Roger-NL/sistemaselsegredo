@@ -1,7 +1,7 @@
 import { catalog } from "../content/catalog";
 import { listeningTarget } from "../model/listening";
 import { presentationCards } from "../content/presentation";
-import { createDemo, transition } from "../model/reducer";
+import { createDemo, replayEvent } from "../model/reducer";
 import { PROFILES, REVIEW_VIEWS, SCHEMA_VERSION, STORY_VERSION, type DemoEvent, type DemoState, type SupportProfile, type ReviewView } from "../model/types";
 
 export const STORAGE_KEY = "basedspeak.demo.cafe.v1";
@@ -51,9 +51,9 @@ export function decodeSnapshot(raw: string): DemoState | null {
       // that distinction and their position without pretending audio was heard.
       const target = listeningTarget(state);
       if (data.storyVersion !== STORY_VERSION && target && !state.audioAccess[target.key] && ["NEXT", "ADVANCE_PRESENTATION", "PREPARE", "UNDERSTAND", "SUBMIT"].includes(event.type)) {
-        state = transition(state, { at: state.nodeId, type: "AUDIO_ACCESS", key: target.key, mode: "text" });
+        state = replayEvent(state, { at: state.nodeId, type: "AUDIO_ACCESS", key: target.key, mode: "text" });
       }
-      const next = transition(state, event);
+      const next = replayEvent(state, event);
       if (next === state) return false;
       state = next; return true;
     };

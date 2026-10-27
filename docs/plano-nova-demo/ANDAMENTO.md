@@ -333,3 +333,194 @@ Roteiro e evidências mantidos em tmp/demo-visual-review/full-sweep (ignorado pe
 Adicionado Avançar ao lado de Voltar no cabeçalho, liberado antes de responder ou ouvir conforme pedido. Percorre cada cartão/escuta/atividade; nas decisões sem escolha usa a primeira alternativa (as opções normais continuam disponíveis). Pular uma resposta não cria fala do aluno nem evidência de acerto; pular áudio registra acesso por texto, nunca escuta. No encerramento, Avançar fica desabilitado. Voltar restaura o estado anterior, incluindo rascunho. Evento TEST_FORWARD isolado da navegação normal para posterior retirada da liberação de teste; a restrição futura por conclusão ainda não está ativa.
 
 171 testes/28 arquivos, lint e build aprovados. Teste novo percorre as dez partes nos três perfis sem respostas, verificando persistência e retorno em cada avanço e ausência de respostas/escutas fictícias. Chrome: avanço/retorno de atividade sem enviar; cabeçalho conferido em 1440×900 e 320×568, sem overflow, com alvos de 44 px. No mobile Recomeçar usa ícone com nome acessível, mantendo Voltar e Avançar legíveis. Áudios e mídias preservados.
+
+## Etapa 2 do lançamento: encerrar o atalho de teste — 27/10/2026
+
+**Estado: concluída com evidência local. Sem commit ou deploy.** Base revisada: `5d80bf1ca652e66cd38caceed8e98410ad7568ee`, branch `codex/nova-demo-cafe`. Alterações pré-existentes em `docs/VISAO-GERAL-DO-PRODUTO.md` e os dois registros de `docs/historico/` preservados.
+
+Retirados o botão de avanço sem responder do menu e o método imperativo `forward`. Os avanços normais dos cartões e das atividades permanecem. `transition`, usado pela interface, recusa `TEST_FORWARD` sem alterar o estado. O evento continua no formato persistido e em `replayEvent`, usado exclusivamente pela restauração e reconstrução de Voltar. Não há migração que apague pulos, envie respostas, transforme leitura em escuta ou acrescente evidências.
+
+Regra de revisão preservada: Voltar recua um avanço, incluindo cartões e acesso à fala, restaura escrita/montagem antes do envio e descarta a continuação posterior do journal. A pessoa pode mudar de ramo e reenviar sem duplicar a resposta. Retomada conserva decisões e rascunhos antigos. Falha de áudio continua permitindo a alternativa textual; somente reprodução terminada pode registrar `heard`.
+
+Uma tentativa antiga feita só com pulos pode estar no fim sem respostas registradas. A retrospectiva agora explica esse estado, conserva histórico, estudo e avaliação opcional, sem inventar destaques nem mostrar “Momento 1 de 0”. Painel e encerramento usam “Fim do percurso”, descrevendo a posição final sem presumir que todas as atividades foram realizadas. Tentativas com respostas reais mantêm suas contagens e destaques correspondentes.
+
+### Evidências
+
+- Fixtures congeladas **antes da alteração**, pelo reducer de `5d80bf1`, em `tests/fixtures/demo-legacy-navigation.json`: tentativa integralmente pulada e estados antes/depois de envio real e com rascunho posterior nos três apoios. Restauração comparada integralmente com os estados antigos, sem gerar os resultados esperados pelo reducer novo.
+- 14 regressões em `tests/demo-test-navigation.test.ts`: recusa do atalho atual; restauração e round-trip; prefixos antigos, retorno até o início, rascunhos, reenvio único e continuação normal até o final nos três apoios, sem novas escutas ou pulos fictícios.
+- 7 regressões em `tests/demo-navigation-ui.test.ts`: menu real sem atalho, cartões normais preservados, retrospectiva vazia/mista e painel sem conclusão enganosa.
+- **220 testes em 37 arquivos, `npm run lint`, `npx tsc --noEmit --incremental false` e `npm run build` aprovados.** O build padrão foi executado numa cópia temporária com os mesmos arquivos de aplicação, preservando o servidor e o progresso de `localhost:3100`. Nenhum script operacional de mídia, pagamentos, agenda ou administração foi executado.
+- Chrome, build de produção local em `127.0.0.1:3402`: tentativa nova Guiado, cartões normais, menu sem atalho, erro de compreensão sem avanço, acesso textual após indisponibilidade de Lucas/modelo, montagem parcial após reload, envio, Voltar com peças preenchidas e reenvio. Snapshot real reconstruído: uma resposta, uma evidência, dois acessos `text`, nenhum `heard` ou `TEST_FORWARD`.
+- Na mesma origem isolada: fixture antiga Mais autônomo retomou “What did”, preservou após reload, recusou envio incompleto e continuou após resposta válida. Snapshot reconstruído conserva a resposta antiga exata e registra somente a resposta nova efetivamente enviada, sem escuta inventada. Tentativa antiga inteiramente pulada abriu retrospectiva e painel honestos.
+- Viewport 320×568: retrospectiva vazia e menu com Voltar/Recomeçar acessíveis; largura do documento de 320 px. Isso é emulação, não teste em aparelho físico.
+
+Capturas e snapshots locais em `output/stage2-qa/` (ignorado pelo Git), incluindo `menu-sem-atalho.png`, `rascunho-antigo.png`, `retrospectiva-antiga-sem-respostas.png`, `painel-fim-percurso.png`, versões móveis e `estados-reconstruidos.json`. O helper para carregar fixtures existe somente na cópia temporária de QA, não na aplicação do repositório. Esse ambiente não recebeu arquivos `.env`: a indisponibilidade de áudio foi usada para exercitar o caminho textual, sem gerar mídia. Não constitui aprovação editorial dos MP3s, autenticação real, teste físico ou validação do domínio publicado; essas evidências continuam nas etapas próprias. A conferência integrada da etapa 3 está registrada a seguir.
+
+## Etapa 3 do lançamento: história, apoios e retrospectiva integrados — 27/10/2026
+
+**Estado: concluída com evidência local. Sem commit ou deploy.** Base Git continua `5d80bf1ca652e66cd38caceed8e98410ad7568ee`, com as alterações não commitadas da etapa 2. A inspeção inicial foi registrada em `output/stage3-qa/base-etapa3.json`. Preservados o trabalho anterior, a visão geral do produto e os registros históricos; nenhum reset, stash, troca de branch ou alteração remota foi realizado.
+
+### Correção encontrada
+
+O histórico completo já preservava `TranscriptLine.written`, mas os destaques da retrospectiva exibiam a frase canônica do catálogo sob “Você disse”. Isso substituía na apresentação formas válidas realmente digitadas, como “No, it isn't mine!” e “Yes, it is mine!”. Os destaques agora conservam os literais de origem e resposta, sem alterar o transcript ou os journals. A reprodução da resposta escrita chama-se “Ouvir modelo”, pois usa o MP3 canônico existente.
+
+O destaque também identifica “Você disse com apoio” somente quando a evidência correspondente ao mesmo nó e áudio registra `supported`. Não se deduz autonomia pela ausência desse registro. Contagens agora concordam no singular/plural; a ressalva de que a conversa não comprova domínio ou memorização permanece. Finais antigos sem respostas continuam explícitos e sem momentos inventados. Roteiro, fases, respostas aceitas, mídias, regras do motor e retomada não foram alterados nesta etapa.
+
+### Matriz de conferência dirigida
+
+| Requisito | Evidência atual | Resultado |
+| --- | --- | --- |
+| Dez partes e três apoios | Novo `tests/demo-integrated-paths.test.ts`: seis percursos principais completos, dois por apoio; seis continuações das variantes de opinião restantes; 68 nós e 16 arestas de escolha cobertos em cada apoio. Testes existentes do grafo e cartões mantêm 128 combinações por apoio, 384 no total. | Nenhum caminho sem saída nos percursos validados. As combinações automáticas não são percursos visuais independentes. |
+| Intenção, acesso à fala e atividade | Eventos atuais da interface: `ANSWER_MEANING`, `PLACE_BLOCK`, `SEND_RESPONSE`, cartões e acesso `heard`/`text` explícitos. Testes existentes de intenção em português e não revelação prematura do inglês aprovados; player real exercitado nos três percursos de navegador abaixo. | Ordem e distinção dos apoios preservadas. Texto não é convertido em escuta. |
+| Erros e Ajuda voluntária | Compreensão incorreta, montagem/terceiro erro, escrita inválida e reconhecimento incorreto; sem respostas/evidências novas ou dicas automáticas em falhas. No Chrome: terceiro erro em Guiado e abertura voluntária de Ajuda em Com pistas. | Montagem retorna conforme a regra; ajuda só quando solicitada; envio válido leva diretamente à reação de Lucas. |
+| Voltar, retomada e mudança de ramo | Testes voltam de tentativas encerradas, recarregam e trocam inglês por trabalho, descartando somente a continuação abandonada. Troca de apoio preserva o rascunho e vale na próxima atividade. | Sem duplicatas ou destaques do ramo descartado. Compatibilidade da etapa 2 mantida. |
+| Falas reais e apoio na retrospectiva | Sete testes novos em `demo-retrospective.test.ts`, incluindo contrações, pontuação, espaços, fontes/respostas com apoio, ausência de evidência, rascunho não enviado e legado vazio. Capturas e reprodução do modelo no Chrome. | Texto digitado permanece literal; apoio associado à fala correta; sem declaração de proficiência. |
+| Painel, estudo e retorno | Sete testes novos em `demo-study-journey.test.ts`; início, Continuar e Rever no Chrome; estudo acessado nos três percursos sem enviar avaliação; snapshot bruto comparado antes/depois do estudo. | Narrativa idêntica após consultar estudo e retornar. |
+| Contexto do catálogo do estudo | As 45 expressões exibidas foram comparadas ao transcript de cada uma das três tentativas de navegador. Testes também cobrem alternativa textual e tentativa antiga sem respostas. | “Na sua conversa” marca somente expressões presentes; não significa ouvido, aprendido ou dominado. |
+
+### Percursos no Chrome, em build de produção local
+
+| Apoio | Caminho observado até o final | Respostas / etapas de áudio terminadas pelo player |
+| --- | --- | --- |
+| Guiado | Acolher desculpa → gostar do café → também cansado → aprendendo inglês/opinião positiva → ficar → manter contato. Inclui montagem com terceiro erro. | 16 respostas reais; 36 acessos `heard`. |
+| Com pistas | Perguntar pedido → não gostar muito do café → não muito cansado → trabalho/opinião negativa da cafeteria → sair → despedida sem contato. Inclui consulta voluntária à Ajuda. | 13 respostas reais; 21 acessos `heard`. |
+| Mais autônomo | Acolher desculpa → não gostar muito do café → também cansado → trabalho/opinião positiva da cafeteria → ficar → despedida sem contato. Inclui contrações, pontuação e “REALLY?!”. | 14 respostas reais; 23 acessos `heard`. |
+
+As 80 etapas de áudio são acessos do player, não 80 arquivos diferentes nem uma aprovação editorial do catálogo. Os snapshots reais foram decodificados e comparados aos nós finais, perfis, decisões, transcript, evidências e acessos previstos das atividades realizadas. Nenhum `TEST_FORWARD` foi emitido. Três encerramentos diferentes confirmados.
+
+No percurso Mais autônomo, o rascunho “No, it” passou por painel → estudo → retorno → reload e permaneceu exato, sem resposta enviada. Após completar a resposta, o percurso continuou normalmente. Retrospectiva → estudo → retorno preservou o snapshot bruto nos três apoios. “Terminar sem avaliar” e revisão pelo painel também foram conferidos no build final.
+
+Em 320×568, os textos escritos, modelo e ações da retrospectiva permanecem acessíveis, sem overflow horizontal. A área de leitura é rolável quando necessário: no segundo destaque, 10 px de rolagem tornaram o aviso inteiro visível, mantendo Histórico e Concluir acessíveis. Isso foi distinguido de perda de conteúdo. É viewport emulado no Chrome, não aparelho físico.
+
+### Checks, artefatos e limites
+
+**237 testes em 40 arquivos, `npm run lint`, `npx tsc --noEmit --incremental false`, `npm run build` e `git diff --check` aprovados no código final.** Dezessete regressões novas nesta etapa. Após o ajuste final de concordância das contagens, a retrospectiva, revisão pelo painel, saída sem avaliação e reprodução do modelo foram reconferidas no novo build; a lógica dos percursos completos permaneceu igual.
+
+QA isolado em `127.0.0.1:3403`, sem alterar o servidor de `localhost:3100`. O build usou somente a configuração necessária para resolver as 50 referências existentes do catálogo e sentinelas sem credenciais reais de geração/gravação. Esse arquivo temporário foi removido antes do runtime, iniciado sem as variáveis de mídia; os MP3s vieram diretamente das URLs publicadas. Nenhum script de produção de mídia, escrita em ledger/cache, migração ou publicação foi executado. Código da aplicação do build final comparado byte a byte com o checkout.
+
+Evidências em `output/stage3-qa/` (ignorado pelo Git): `percursos.json` (modelo; áudio simulado explicitamente), `navegador-log.json`, snapshots dos três apoios, `validacao-navegador.json`, catálogos de expressões conferidos, `terceiro-erro-guiado.png`, `ajuda-voluntaria.png`, `retomada-painel-estudo.png`, `retrospectiva-escrita-real.png` e `retrospectiva-escrita-mobile-320.png`. Planos e helpers de QA não fazem parte da aplicação pública.
+
+Esta etapa não aprova os 46 MP3s editorialmente, contas reais, aparelhos físicos, duração com iniciantes, envio de avaliação ou o deployment ativo. Mantém o modo visual deliberado até a etapa 6. A revisão das 24 práticas estava pendente ao encerrar a etapa 3 e está registrada na etapa 4 a seguir; o texto antigo de aprofundamento “em preparação” no painel continua no alinhamento já previsto para a etapa 10.
+
+## Etapa 4 do lançamento: oito blocos e 24 práticas — 27/10/2026
+
+**Estado: concluída com evidência local. Sem commit ou deploy.** HEAD preservado em `5d80bf1ca652e66cd38caceed8e98410ad7568ee`, branch `codex/nova-demo-cafe`. Base e hashes iniciais em `output/stage4-qa/base-etapa4.json`. A matriz editorial das 24 práticas está em [TEORIA-PEDAGOGIA.md](../TEORIA-PEDAGOGIA.md#etapa-4--revisão-das-24-práticas--27102026).
+
+### Ajustes encontrados e realizados
+
+- **Tentativas após consultar o modelo:** “Tentar outra vez” limpava resposta e peças, mas conservava a flag de consulta na memória do cartão. Um acerto posterior no mesmo cartão permanecia marcado como apoiado. Agora a nova tentativa reinicia essa flag e fecha a pista. A conclusão anterior com modelo fica no progresso até um novo acerto; erros posteriores não apagam essa evidência. Nenhuma conclusão equivale a comprovação de autonomia ou domínio.
+- **Instrução compatível com a aceitação:** `im-tired` exigia a contração embora `I am` já fosse corretamente aceito pela normalização. Enunciado, pista e feedback agora admitem as duas formas, sem estreitar respostas válidas ou mudar o validador.
+- **Conclusão factual:** “Você concluiu este percurso.” para 24/24; “Seu percurso até aqui.” para conclusão parcial. Mantidas as contagens reais e as consultas ao modelo, sem presumir ganho de compreensão.
+
+Somente `TheoryExperience.tsx` e esse trecho de `content.ts` mudaram na aplicação nesta etapa. Não foram alterados motor narrativo, falas, IDs, respostas aceitas, normalizador, parâmetros de voz, imagens ou catálogo publicado.
+
+### Matriz de requisitos e evidências
+
+| Requisito | Evidência | Resultado / limite |
+| --- | --- | --- |
+| Conteúdo dos oito blocos e 24 práticas | Revisão editorial integral: inglês, traduções, intenção, forma, uso, aprofundamento, opções e feedback; matriz por ID em TEORIA-PEDAGOGIA. | Coerentes após o ajuste de enunciado. Exemplos novos identificados; combinações de falas não são atribuídas a toda tentativa. Sem validação de eficácia com iniciantes. |
+| Respostas aceitas e limites da tarefa | 30 regressões novas em `tests/theory-study-validation.test.ts`, com alvos e erros escritos independentemente do catálogo; distratores de todas as escolhas e peças ausentes/extras. | 24 alvos conferidos; aceitas caixa, espaços, pontuação usual e equivalências previstas. Cloze exige o trecho pedido; não é correção de produção livre. `I am` aceito no navegador. |
+| Feedback e continuidade | Chrome: resposta incorreta e correta em cada uma das 24 práticas, aprofundamento aberto em todos os passos. | Primeiro erro não concluiu nenhum passo; feedback explica o alvo; acerto libera Continuar. Montagem por clique e uma montagem por teclado, sem arrastar. |
+| Consulta ao modelo e tentativa seguinte | Seis práticas dos três tipos: erro → modelo → nova tentativa → erro → acerto. Quatro outras terminadas com modelo após conferir acerto. | Marcação anterior preservada durante erro e retirada após novo acerto sem nova consulta. Pista e resposta limpas. Encerramento 24/24, quatro com modelo; revisão de uma delas reduziu para três sem duplicação. |
+| Conclusão total/parcial | Posição final sem práticas anteriores: último acerto → 1/24 → título parcial → primeiro pendente. Percurso integral → título total e contagem 24/24. | Posição não fabrica conclusão de outros passos; nenhuma alegação de proficiência. Revisitar começa na primeira prática com modelo ou pendente. |
+| Retomada, Anterior e separação da narrativa | Reload após 12 práticas retoma passo 13; Anterior e reload final preservam posição/contagens. Snapshot bruto da narrativa comparado antes/depois de todo o estudo. | Narrativa idêntica byte a byte, incluindo transcript, escutas e respostas anteriores. Somente a chave do estudo é atualizada pela aplicação. |
+| Expressões e áudio existente | Busca por inglês, português e termo sem resultado; 45 marcações conferidas com transcript; um MP3 terminou no player nativo sem erro. | Todas as marcações corretas. Áudio por URL publicada com `preload="none"`; nenhum uso do endpoint de geração. Não é aprovação editorial dos 46 MP3s. |
+| Leitura e controles em tela estreita | Passos 13–24 e conclusão em 320×568, escrita, escolhas e montagens exercitadas; estados medidos sem overflow horizontal. | Rolagem natural preserva acesso ao conteúdo. Emulação no Chrome; aparelhos físicos, teclado virtual e auditoria completa de acessibilidade continuam pendentes. |
+
+### Checks, preservação e artefatos
+
+**267 testes em 41 arquivos, `npm run lint`, `npx tsc --noEmit --incremental false`, `npm run build` e `git diff --check` aprovados.** Trinta regressões acrescentadas nesta etapa. Nenhum aviso ou erro capturado no console do tab de QA. Checks e navegação em build de produção local não validam o deployment ativo.
+
+O build padrão e o servidor de QA usaram uma cópia em `/private/tmp/basedspeak-stage4-kiyn0d_t`, origem `127.0.0.1:3404`; não foi reconstruído o `.next` do checkout principal. Código, recursos e configurações do build comparados ao checkout: **174 arquivos iguais**. Para resolver as 50 referências existentes no build, foi usada a configuração compatível do catálogo e sentinelas sem credenciais reais de geração ou gravação. O arquivo temporário foi removido antes do runtime, iniciado sem variáveis de mídia; o MP3 veio diretamente do Blob publicado. Helper de fixtures somente na cópia temporária, fora da aplicação pública. Nenhum script operacional, migração, chamada de síntese, alteração de credenciais ou publicação foi executado.
+
+Preservadas as alterações das etapas 2/3 e o trabalho pré-existente em `docs/VISAO-GERAL-DO-PRODUTO.md` e `docs/historico/`, sem reset, stash ou troca de branch. Hashes iniciais/finais e diferenças permitidas em `output/stage4-qa/preservacao.json`; mídia e índice publicado conservados. Índice Git sem novos arquivos staged.
+
+Evidências em `output/stage4-qa/` (ignorado pelo Git): `plano-navegador.json`, `navegador-log.json` (24 práticas reais), `validacao.json`, `estudo-24.json`, `retomada-12.json`, `glossario.json`, `conversa-depois.json`, `fluxos-complementares.json` e `console.json`. Capturas: `conclusao-parcial.png`, `escrita-I-am-mobile-320.png`, `exemplo-novo-mobile-320.png`, `conclusao-mobile-320.png`, `conclusao-24-desktop.png` e `consulta-expressoes.png`.
+
+Permanecem para suas etapas próprias: escuta editorial integral das mídias, conta real, aparelhos físicos, envio de avaliação, alinhamento do painel e publicação. Hipóteses pedagógicas sobre duração, clareza para iniciantes e retenção posterior requerem observação com pessoas. A etapa 4 não remove essas pendências nem autoriza commit/deploy.
+
+## Etapa 5 do lançamento: áudio existente e aprovação auditiva pendente — 27/10/2026
+
+**Estado: validação técnica concluída; aprovação auditiva pendente por decisão de Roger. Sem geração, commit ou deploy.** HEAD continua `5d80bf1ca652e66cd38caceed8e98410ad7568ee`, branch `codex/nova-demo-cafe`. Baseline de 242 arquivos em `output/stage5-qa/base-etapa5.json`. Nenhum código de aplicação, teste, mídia, catálogo, parâmetro de voz ou script operacional foi alterado nesta etapa.
+
+O canal desta sessão não suporta entrada de áudio. A tentativa de ler um MP3 existente retornou que o conteúdo de áudio não é suportado; não houve percepção auditiva. Roger escolheu explicitamente **“Deixar a aprovação auditiva pendente”**. Portanto não se declara que os arquivos tenham sido ouvidos ou aprovados quanto a pronúncia, naturalidade, entonação, cortes audíveis ou correspondência do que é falado. A matriz conserva esses campos pendentes, sem inferi-los de metadados, hashes ou sinal.
+
+### Matriz de conferência
+
+| Requisito | Evidência atual | Resultado / limite |
+| --- | --- | --- |
+| 50 IDs e inventário declarado | Catálogo atual, dez partes, estudo e retrospectiva inspecionados; `inventario-correspondencia.json` registra texto, sentido, papel, nós e referência por ID. | 30 IDs de Lucas + 20 de modelos do participante; nenhum ID ausente, extra, sem uso narrativo ou URL incoerente. Correspondência declarada, sem afirmar transcrição do MP3. |
+| 46 MP3s e quatro pares compartilhados | `C21/U09`, `C22/U14`, `C24/U13`, `C25/U04`; identidade de texto/configuração recalculada para os 50 IDs pelo verificador original. | Mesma referência nos pares de texto idêntico. `Me too.` e `Me too!` mantêm arquivos diferentes; a normalização de consulta do estudo não altera o cache. |
+| Download, integridade e decodificação atuais | Rodada somente leitura em **27/10/2026, 16:19:45.929–16:19:55.176 UTC**: 50 IDs, 46 downloads únicos com resposta bem-sucedida e MIME `audio/mpeg`, decodificação integral por AudioToolbox. | Tamanhos iguais aos metadados persistidos; SHA-256 dos 46 downloads iguais aos MP3s originais de 23/10 e aos hashes da rodada de 25/10. O ledger atual não armazena checksum nesses registros; não houve comparação de hash persistido. Nenhum arquivo substituído. |
+| Cache e retomada em sessão nova | Script original `verify-cached-audio.mjs --indexed`, sem `--publish`, com transporte de API proibido; duas sessões novas, segunda em ordem inversa, e replay na sessão. | 50/50 em ambas; zero chamadas à API de reprodução e zero leituras de metadados durante resolução. Inventário Firestore feito separadamente antes/depois. |
+| Preservação dos registros globais | Snapshots sanitizados dos 46 registros antes/depois iguais byte a byte: `status`, `providerAttemptCount`, `providerStartedAt`, `completedAt`, `updatedAt` e `bytes`. Comparação adicional com a rodada de 25/10. | Todos `ready`, uma tentativa por registro; campos auditados idênticos também à rodada anterior. O script não fornece porta de escrita ou geração. Não é uma afirmação de auditoria de todos os campos possíveis do banco. |
+| Sinal e duração | `analise-sinal.json`: PCM integral de 46 arquivos, duração 0,836–3,056 s, total 66,978 s, sinal não silencioso em todos. RMS −25,664 a −19,162 dBFS; pico −8,945 a −1,413 dBFS; zero amostras em escala máxima. | Medidas descritivas. Não aprovam volume percebido, qualidade linguística, ausência de distorção audível, pausas naturais ou integridade fonética dos extremos. |
+| Pronúncia, naturalidade e fala audível | Critérios e 46 arquivos organizados em `escuta-46-mp3s.html`; matriz de 50 IDs com campos separados em `matriz-50-ids.csv`. | **Pendente de escuta humana em todos os arquivos/contextos**, por escolha do responsável. Inclui adequação nos dois papéis dos quatro pares e reutilizações de um ID em mais de um nó. |
+| Testes de áudio e cache | `published-audio`, `demo-audio-client`, `demo-audio`, `speech-cache`, `speech-configuration`, `demo-audio-route` e `speech-route`. | **44 testes em sete arquivos aprovados.** Provedores e eventos do player simulados nesses testes; não são escuta editorial. |
+
+O inventário do estudo encontrou 18/24 passos com player para a expressão inteira; os seis restantes usam fragmentos, combinações de falas ou o exemplo novo `Can I sit here?`. A consulta contém 45 expressões normalizadas. Isso não significa que faltem MP3s no inventário aprovado nem autoriza gerar combinações ou exemplos novos.
+
+### Execução, artefatos e preservação
+
+Executado o script existente por caminho absoluto, com configuração carregada apenas em memória e `cwd` exclusivo em `output/stage5-qa/leitura-0ku1b_pb`. O script resolve imports e índice a partir do repositório e grava resultados somente nesse diretório. Não foi usado `--publish`; nenhuma credencial foi copiada para o pacote. As credenciais de provedor e de gravação no Blob foram substituídas por sentinelas no processo de verificação. O script usa somente leitura Firestore, URLs públicas e decodificação local, sem chamar o endpoint da demo, rate limit ou integração de síntese.
+
+Os **239 arquivos das evidências anteriores** em `tmp/audio-full-verification`, `tmp/audio-startup-verification` e `tmp/audio-indexed-verification` conservaram seus hashes. O relatório anterior mais recente é de 25/10; a documentação histórica também contém rodadas distintas de 23/10 e 24/10, que não foram substituídas pela nova medição. Preservados todos os trabalhos das etapas anteriores e o índice Git sem novos arquivos staged. Comparação final em `output/stage5-qa/preservacao.json`.
+
+Evidências novas em `output/stage5-qa/`: `validacao-etapa5.json`, `inventario-correspondencia.json`, `analise-sinal.json`, `arquivos-46.json`, `matriz-50-ids.csv`, `escuta-46-mp3s.html`, `validacao-lista-local.json` e snapshots/MP3s/WAVs/relatório no subdiretório da execução. A lista HTML possui 46 players nativos, sem autoplay, com `preload="none"`; todos os links locais e hashes foram conferidos estruturalmente. O navegador recusou a permissão da origem local de prévia; não houve contorno nem declaração de revisão visual. O servidor temporário de arquivos foi encerrado.
+
+`git diff --check` aprovado. Não houve mudança de aplicação que exigisse novo build; os checks completos da etapa 4 permanecem evidência daquela versão, sem serem apresentados como uma nova execução. A validação técnica desta etapa está encerrada; a escuta humana de pronúncia, naturalidade, entonação e correspondência audível continua aberta. Nenhuma correção ou regeneração foi presumida ou executada.
+
+## Etapa 6 do lançamento: acesso real, sessão e painel — 27/10/2026
+
+**Estado: implementada e validada por testes, SDK Firebase real e HTTP no build local; navegação visual e OAuth Google completo não executados. Sem commit ou deploy.** HEAD permanece `5d80bf1ca652e66cd38caceed8e98410ad7568ee`, branch `codex/nova-demo-cafe`. Baseline de 243 arquivos em `output/stage6-qa/base-etapa6.json`.
+
+### Mudanças realizadas
+
+Retirados `src/config/access.ts`, `VisualAccessForm` e todos os ramos visuais da entrada e do painel. `/comecar` sempre usa o formulário real; uma sessão já verificada segue ao painel. `/dashboard` exige a identidade do cookie verificada pelo servidor, incluindo revogação. Não existe mais conta ilustrativa ou caminho para abrir o painel com campos decorativos. A demo pública e o estudo continuam acessíveis diretamente; seu armazenamento não passa a ser sincronizado por conta. A demo também deixou de receber o nome ilustrativo no cabeçalho.
+
+Salvar nome e sair usam as integrações reais existentes. Falha de token ou transporte na confirmação de sessão tenta limpar o cookie anterior; falha de confirmação encerra também a identidade Firebase local. Uma leitura opcional indisponível do perfil no SDK browser não invalida uma sessão já confirmada pelo servidor. O perfil mínimo continua sendo criado pela transação do servidor; perfis existentes conservam nome, permissões e entitlement, recebendo somente as datas de login previstas.
+
+`POST` e `DELETE /api/auth/session` agora exigem origem igual à da requisição. A criação verifica token e revogação e exige login recente, até cinco minutos; o refresh de um token antigo não substitui reautenticação. O cookie só é entregue depois da criação pelo Firebase e da transação do perfil. Falhas não produzem resposta de sucesso e limpam cookies de sessão/legados. O cookie continua HTTP-only, `SameSite=Lax`, `Secure` em produção e com duração de sete dias. `GET /api/auth/session` responde com `Cache-Control: private, no-store` em sucesso e recusa. Referência para CSRF, login recente e verificação com revogação: [Firebase — Manage Session Cookies](https://firebase.google.com/docs/auth/admin/manage-cookies).
+
+### Matriz de requisitos e evidências
+
+| Requisito | Evidência | Resultado / limite |
+| --- | --- | --- |
+| Encerrar o bypass visual | Arquivos de prévia removidos, imports e ramos retirados; testes de entrada/painel atualizados sem mocks de modo visual. Formulário real renderizado em testes. | E-mail e senha obrigatórios; ação Google real mantida; painel anônimo não recebe conta ilustrativa. Não houve alteração da composição da landing. |
+| Cadastro e login por e-mail reais | Serviço client atual com SDK Firebase real e API do build local, **27/10/2026, 19:11:00.227–19:11:17.561 UTC**. | Conta de QA criada, identidade `password` confirmada e perfil mínimo persistido. Senha incorreta recusada; logout e novo login aprovados. Não se automatizou aceitação de termos pela interface. |
+| Sessão no servidor | Troca real de ID token por cookie; `GET /api/auth/session` comparado ao UID recém-criado; `GET /dashboard` com e sem cookie. | Cookie com `HttpOnly`, `Secure`, `SameSite=Lax` e sete dias confirmado na resposta. Painel 200 autenticado; anônimo 307 para entrar. `/comecar` autenticado 307 para painel. É HTTP, sem verificar a aceitação do cookie pelo navegador. |
+| Revogação, expiração e falhas | Revogação real de refresh tokens somente da conta QA; recusa do cookie anterior no painel e na API; login novo em seguida. Testes de token inválido/revogado, login antigo, cookie inválido/expirado e falhas de serviço. | Revogação real recusada e login novo aceito. Expiração é coberta pelos testes simulados, sem aguardar sete dias. Token antigo não altera perfil; falha de cookie não registra login. |
+| Origem e perfil | Requisições HTTP reais de origem externa a POST/DELETE de sessão e PATCH de perfil; salvamento real do nome da conta QA. Testes de campos/UID proibidos já existentes. | Externas 403; nome próprio salvo e confirmado no Firestore. Sem troca de UID ou concessão de papel/plano pelo cliente. |
+| Preservar tentativa local e estudo | Nova regressão em `client-auth-entry.test.ts`: fixture congelada de tentativa antiga com retomada, mais chave própria de estudo, passam por cadastro, login Google/e-mail e logout; comparação dos bytes e estado decodificado. Motor, storage e fixtures anteriores permanecem iguais ao início da etapa. | Duas chaves idênticas; sem reinício, envio, escuta ou migração inventados. Usa storage e provedores simulados; não foi observada a persistência no navegador real nesta etapa. As origens/tabs do usuário não foram manipuladas. |
+| Provedores habilitados | Leitura de configuração do projeto e Google por API administrativa: e-mail/senha e Google habilitados; localhost e domínio de produção autorizados; projeto Admin igual ao browser. | Nenhuma configuração ou domínio alterado. Google testado com mocks, incluindo cancelamento e falha de sessão; **OAuth completo com conta Google real permanece sem evidência nesta rodada**. Nenhum e-mail de recuperação enviado. |
+| Painel e identidade mínima | Cookie real abriu o painel com e-mail da conta QA, sem e-mail ilustrativo. Testes de fallback do perfil e projeção de somente nome/e-mail. | Nome salvo na própria conta; perfil mínimo contém apenas os sete campos previstos. Conta, sessão e tentativa local continuam conceitos distintos. |
+
+As **18 verificações reais** estão detalhadas em `output/stage6-qa/acesso-real.json`. A conta QA foi criada exclusivamente para esta rodada, recebeu um e-mail de teste sob `example.invalid` e foi removida ao final, junto de seu documento de perfil. A remoção de ambos foi confirmada e as credenciais temporárias foram excluídas. Nenhuma conta existente foi usada ou alterada. Não houve aceitação automática de termos, alteração de credenciais de uma pessoa ou envio de mensagens.
+
+Depois do ajuste final de cache no `GET` da sessão, oito checks HTTP somente leitura reconferiram o novo build: cadastro/login sem sessão retornam 200, entrada com cookie inválido permite novo login, painel com cookie inválido redireciona, consulta de sessão ausente/inválida retorna 401 com `private, no-store`, e demo/estudo continuam 200 públicos. Entradas e painel retornam cache privado sem armazenamento. A consulta autenticada recebe o mesmo header por teste da rota. O fluxo autenticado das 18 verificações reais não mudou com esse ajuste de headers.
+
+### Checks, preservação e limites
+
+**291 testes em 44 arquivos, `npm run lint`, `npx tsc --noEmit --incremental false`, `npm run build` e `git diff --check` aprovados.** Três arquivos novos de testes cobrem fronteira da sessão, comportamento do serviço de autenticação e formulário real. As regressões antigas de painel, entrada, estudo e retrospectiva continuam aprovadas; somente as expectativas da prévia visual foram retiradas. O roteiro CommonJS da rodada real foi arquivado como texto em `output/stage6-qa/verificar-acesso-real.cjs.txt`, sem entrar no código executável da aplicação.
+
+Build padrão e servidor em cópia temporária `/private/tmp/basedspeak-stage6-pb90x9kj`, origem `http://localhost:3416`, sem reconstruir o `.next` principal. **172 arquivos de aplicação, recursos e configurações do build comparados byte a byte com o checkout.** `/comecar` e `/dashboard` ficaram dinâmicos; demo e estudo continuam pré-renderizados. Referências de áudio existentes resolvidas no build com configuração compatível e sentinelas sem credenciais reais de síntese/gravação. O arquivo temporário foi removido; o runtime recebeu a credencial Admin somente em memória e nenhuma credencial de mídia. Nenhuma síntese, script operacional de pagamento/agenda/mídia, escrita no cache global ou publicação foi executada. O servidor de QA foi encerrado.
+
+O navegador recusou a permissão para abrir a origem local desta etapa; não houve tentativa por outro navegador, porta ou automação alternativa. Portanto não há captura ou percurso visual de cadastro/login real, popup Google, teclado virtual ou painel responsivo desta versão. Os resultados do SDK/HTTP não são apresentados como cliques de usuário no navegador. Essa limitação não foi contornada e nenhuma nova confirmação foi solicitada após a orientação de Roger.
+
+Preservados o trabalho anterior, `docs/VISAO-GERAL-DO-PRODUTO.md`, os registros históricos, o motor narrativo, as 24 práticas, mídias, índice publicado e fixtures antigas. Comparação final em `output/stage6-qa/preservacao.json`; índice Git sem novos arquivos staged. Documentação de entrada/painel e comentários do `.env.example` atualizados sem incluir segredos.
+
+Evidências locais: `base-etapa6.json`, `configuracao-provedores.json`, `acesso-real.json`, `entrada-http.json`, `validacao-etapa6.json` e `preservacao.json` em `output/stage6-qa/` (ignorado pelo Git). O helper de rascunho existe somente na cópia temporária e não foi usado no navegador. As alterações permanecem locais; não se declara que o domínio publicado já ofereça esta versão. A aprovação auditiva da etapa 5 continua pendente conforme decisão anterior.
+
+## Consolidação para a principal, sem conta Google — 27/10/2026
+
+Roger autorizou commit e envio diretamente à principal do repositório original e pediu a versão funcionando para continuar os testes. A principal confirmada no GitHub é `master`; `origin/master` é ancestral do histórico atual, permitindo avanço sem sobrescrever commits remotos. O projeto Vercel existente, `novoessite`, está ligado a esse repositório com `productionBranch: master`, e mantém `www.basedspeak.com` como domínio original.
+
+Cadastro e login ficam por e-mail e senha. Retirados botão Google, função de autenticação com popup e CSS exclusivo; o modal de informações agora descreve e-mail e senha. Recuperação de senha, sessão verificada, perfil real e isolamento do progresso local foram preservados. Nenhum provedor remoto foi desabilitado e nenhuma conta existente foi modificada.
+
+Validação anterior ao envio: **289 testes em 44 arquivos**, lint e TypeScript aprovados. Build de produção aprovado em cópia temporária com a configuração compatível dos 50 IDs publicados e sentinelas sem credenciais reais de síntese ou gravação. Não houve geração de áudio ou escrita no cache. Os arquivos elegíveis foram examinados para segredos antes do envio; `.env` real, credenciais e evidências temporárias continuam ignorados pelo Git.
+
+A criação simultânea de `/adm`, iniciada em outro chat depois do baseline desta publicação, permanece no checkout e fica fora deste lote. Não se publica trabalho administrativo ainda em desenvolvimento. A cópia validada contém apenas o conjunto revisado; as mudanças das etapas anteriores e os documentos de visão do produto foram preservados.
+
+Evidências desta rodada em `output/publicacao-principal/`, ignorado pelo Git: baseline e patch anteriores, manifesto revisado, configuração do projeto/domínios e nomes das variáveis de ambiente, build e conferência posterior do deployment. O histórico de cada etapa mantém seus resultados originais; “sem commit ou deploy” nas seções anteriores refere-se ao encerramento daquelas rodadas.
+
+Próximos testes recomendados: percurso visual completo no domínio publicado, cadastro/login/saída e retomada no mesmo navegador; recuperação de senha com e-mail próprio e reentrada; aparelho físico com teclado, áudio e falha de rede; escuta editorial dos 46 MP3s; observação com iniciantes para clareza e duração. A tentativa continua local e não sincroniza entre dispositivos. O texto antigo de aprofundamento “em preparação” no painel/modal ainda precisa do alinhamento editorial previsto. Essas pendências não são apresentadas como testes já executados.

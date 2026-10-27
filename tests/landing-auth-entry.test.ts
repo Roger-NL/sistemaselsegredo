@@ -2,28 +2,17 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ visual: false, cookie: undefined as string | undefined, verify: vi.fn() }));
-vi.mock("@/config/access", () => ({ isVisualAccessMode: () => mocks.visual }));
+const mocks = vi.hoisted(() => ({ cookie: undefined as string | undefined, verify: vi.fn() }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => mocks.cookie ? { value: mocks.cookie } : undefined }) }));
 vi.mock("next/navigation", () => ({ redirect: (target: string) => { throw new Error(`REDIRECT:${target}`); } }));
 vi.mock("@/server/firebase", () => ({ getAdminAuth: () => ({ verifySessionCookie: mocks.verify }) }));
 vi.mock("@/features/landing/SignupForm", () => ({ SignupForm: ({ initialMode }: { initialMode: string }) => createElement("div", { "data-mode": initialMode }) }));
-vi.mock("@/features/landing/VisualAccessForm", () => ({ VisualAccessForm: ({ initialMode }: { initialMode: string }) => createElement("div", { "data-mode": initialMode, "data-visual": true }) }));
 
 import StartPage from "@/app/comecar/page";
 
-beforeEach(() => { mocks.cookie = undefined; mocks.visual = false; vi.clearAllMocks(); });
+beforeEach(() => { mocks.cookie = undefined; vi.clearAllMocks(); });
 
 describe("landing account entry", () => {
-  it("keeps sign-in and signup visual even when a real session cookie exists", async () => {
-    mocks.visual = true; mocks.cookie = "existing-real-session";
-    for (const modo of [undefined, "entrar"]) {
-      const html = renderToStaticMarkup(await StartPage({ searchParams: Promise.resolve({ modo }) }));
-      expect(html).toContain('data-visual="true"');
-      expect(html).toContain(`data-mode="${modo ? "login" : "signup"}"`);
-    }
-    expect(mocks.verify).not.toHaveBeenCalled();
-  });
   it("offers registration without contacting Firebase when no session is present", async () => {
     const html = renderToStaticMarkup(await StartPage({ searchParams: Promise.resolve({}) }));
     expect(html).toContain('data-mode="signup"');
