@@ -25,7 +25,7 @@ export function MoreInformation() {
         </ol>
         <h3 className="landing-info-support-title">O apoio muda. A conversa continua.</h3>
         <SupportPreview />
-        <details className="landing-info-next"><summary>E depois da demo?<Plus size={16} aria-hidden="true" /></summary><p>A proposta do curso é aprofundar o inglês dessa história e seguir para novas conversas. Essa próxima etapa ainda está em preparação.</p></details>
+        <details className="landing-info-next"><summary>E depois da demo?<Plus size={16} aria-hidden="true" /></summary><p>O estudo da cafeteria já está disponível, com oito blocos e 24 práticas para explorar o inglês da conversa. As próximas histórias do curso estão em preparação.</p></details>
         <Link href="/comecar" prefetch={false} className="landing-cta">Criar conta e experimentar<ArrowUpRight size={18} aria-hidden="true" /></Link>
       </div>
     </dialog>
