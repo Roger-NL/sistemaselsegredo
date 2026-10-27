@@ -53,3 +53,11 @@ Os 189 testes, lint sem avisos, TypeScript e build de produção passaram. No se
 Conferência visual do componente real com conta ilustrativa em servidor de QA separado, fora das rotas da aplicação: 320×568, 348×757, 390×844, 820×1180, 1024×768, 1440×900, 568×320 e 844×390. A conferência encontrou o acesso da abertura abaixo da área visível em 568×320; a abertura foi reorganizada em duas colunas nessa orientação. A matriz final ficou sem overflow horizontal e com acesso à demo visível em todas as dimensões. Também foram conferidos abertura animada, movimento reduzido, retorno de foco por Escape, escolha de apoio no motor existente e retorno ao painel com “Continuar.” sem apagar a tentativa. Login remoto e gravação real do nome não foram exercitados com conta de usuário. Capturas, matrizes e o código do servidor de QA arquivado ficam em `output/dashboard-qa/`, ignorado pelo Git; o servidor de QA foi encerrado.
 
 As mudanças desta entrega estão no checkout local. Não houve publicação de produção, alteração da landing publicada, novas regras Firebase, migração de dados ou geração de áudio.
+
+## Publicação no domínio original
+
+Após Roger esclarecer que esperava a atualização no site original, a versão foi publicada em `https://www.basedspeak.com`, deployment `dpl_6K7rkmH2xZ5yAUfoe18M8C1uP5TA`, com código de `b797784`. O push anterior para a branch de trabalho não havia atualizado produção. Não foi criada outra branch.
+
+A conferência identificou que o estudo já estava publicado, apesar de seus arquivos ainda não estarem registrados no Git. Esses arquivos foram preservados e versionados; a diferença na experiência de estudo é somente a adoção do cabeçalho compartilhado. A landing publicada foi comparada com a cópia do deployment anterior: página inicial e CSS permanecem iguais.
+
+Build remoto concluído e domínio associado. No Chrome, entrada visual sem preencher campos → dashboard → abertura escura → seleção de apoio na demo; estudo também respondeu com a página e o menu compartilhado. Cabeçalho da abertura confirmado escuro e sem overflow horizontal. Os 202 testes passaram antes da publicação. Evidência: `output/navigation-qa/menu-publicado.png`.
