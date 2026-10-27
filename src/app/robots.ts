@@ -1,4 +1,4 @@
 import type { MetadataRoute } from "next";
 export default function robots(): MetadataRoute.Robots {
-  return { rules: { userAgent: "*", allow: ["/", "/demo", "/termos", "/privacidade"], disallow: ["/api/"] }, sitemap: "https://basedspeak.com/sitemap.xml" };
+  return { rules: { userAgent: "*", allow: ["/", "/demo", "/termos", "/privacidade"], disallow: ["/api/", "/adm"] }, sitemap: "https://basedspeak.com/sitemap.xml" };
 }

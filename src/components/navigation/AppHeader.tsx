@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
-import { ArrowUpRight, BookOpen, LayoutDashboard, Menu, Settings2, UserRound } from "lucide-react";
+import { ArrowUpRight, BookOpen, LayoutDashboard, Menu, MessageCircle, Settings2, TrendingUp, UserRound } from "lucide-react";
 import { Brand } from "@/components/ui/Brand";
 import { useJourneyTransition } from "./JourneyTransition";
 
@@ -27,6 +27,9 @@ export function AppHeader({ current, name, tone = "paper", onAccount, onSettings
         <nav className="app-menu-panel" aria-label="Menu do BasedSpeak">
           <p>Seu espaço no BasedSpeak</p>
           <Link href="/dashboard" prefetch={false} onClick={navigate}><LayoutDashboard size={17} aria-hidden="true" />Meu painel<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/dashboard#atividades" prefetch={false} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Minhas atividades<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/dashboard#avanco" prefetch={false} onClick={navigate}><TrendingUp size={17} aria-hidden="true" />Meu avanço<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/dashboard#contato" prefetch={false} onClick={navigate}><MessageCircle size={17} aria-hidden="true" />Falar com o professor<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <Link href="/demo" prefetch={false} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Conversa da cafeteria<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <Link href="/demo/estudo" prefetch={false} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Área de estudo<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <div className="app-menu-divider" />

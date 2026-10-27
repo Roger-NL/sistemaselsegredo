@@ -2,8 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ visual: false, cookie: undefined as string | undefined, verify: vi.fn() }));
-vi.mock("@/config/access", () => ({ isVisualAccessMode: () => mocks.visual }));
+const mocks = vi.hoisted(() => ({ cookie: undefined as string | undefined, verify: vi.fn() }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => mocks.cookie ? { value: mocks.cookie } : undefined }) }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), redirect: (target: string) => { throw new Error(`REDIRECT:${target}`); } }));
 vi.mock("@/server/firebase", () => ({ getAdminAuth: () => ({ verifySessionCookie: mocks.verify }) }));
@@ -11,21 +10,9 @@ vi.mock("@/features/landing/SignupForm", () => ({ SignupForm: ({ initialMode }: 
 
 import StartPage from "@/app/comecar/page";
 
-beforeEach(() => { mocks.visual = false; mocks.cookie = undefined; vi.clearAllMocks(); });
+beforeEach(() => { mocks.cookie = undefined; vi.clearAllMocks(); });
 
 describe("landing account entry", () => {
-  it("shows Google and optional email/password for test access, ignoring real session cookies", async () => {
-    mocks.visual = true;
-    mocks.cookie = "ignored-existing-cookie";
-    for (const modo of [undefined, "entrar"]) {
-      const html = renderToStaticMarkup(await StartPage({ searchParams: Promise.resolve({ modo }) }));
-      expect(html).toContain("Continuar com Google");
-      expect(html).toContain("Pode continuar sem preencher e-mail ou senha.");
-      expect(html).not.toContain('required=""');
-      expect(html).toContain('noValidate=""');
-    }
-    expect(mocks.verify).not.toHaveBeenCalled();
-  });
   it("offers registration without contacting Firebase when no session is present", async () => {
     const html = renderToStaticMarkup(await StartPage({ searchParams: Promise.resolve({}) }));
     expect(html).toContain('data-mode="signup"');

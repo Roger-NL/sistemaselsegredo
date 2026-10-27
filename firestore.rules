@@ -13,35 +13,6 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function initialUserFields() {
-      return [
-        "id",
-        "name",
-        "email",
-        "phone",
-        "createdAt",
-        "currentStreak",
-        "lastLoginDate",
-        "subscriptionStatus",
-        "approvedPillar"
-      ];
-    }
-
-    function ownerCanCreateUser(userId) {
-      return isOwner(userId) &&
-        request.resource.data.id == userId &&
-        request.resource.data.email == request.auth.token.email &&
-        request.resource.data.subscriptionStatus == "free" &&
-        request.resource.data.approvedPillar == 1 &&
-        request.resource.data.currentStreak == 1 &&
-        request.resource.data.name is string &&
-        request.resource.data.name.size() > 0 &&
-        request.resource.data.name.size() <= 120 &&
-        request.resource.data.createdAt is string &&
-        request.resource.data.lastLoginDate is string &&
-        request.resource.data.keys().hasOnly(initialUserFields());
-    }
-
     function ownerCanUpdateUser() {
       let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
       return affectedKeys.hasOnly([
@@ -56,7 +27,8 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      allow create: if ownerCanCreateUser(userId) || isAdmin();
+      // Profiles and approval state are created by the verified server session.
+      allow create: if isAdmin();
       allow update: if (isOwner(userId) && ownerCanUpdateUser()) || isAdmin();
       allow delete: if isAdmin();
     }

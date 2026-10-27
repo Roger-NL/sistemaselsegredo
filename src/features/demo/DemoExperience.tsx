@@ -25,8 +25,8 @@ import type { AudioId, DemoEvent, DemoState, SceneNode } from "./model/types";
 import type { PublishedAudioCatalog } from "@/contracts/demo-audio";
 
 export type DemoNavigation = { back: () => void };
-export function DemoExperience({ initial, publishedAudio = {}, navigationRef, onBackAvailabilityChange }: {
-  initial: DemoState; publishedAudio?: PublishedAudioCatalog; navigationRef?: Ref<DemoNavigation>; onBackAvailabilityChange?: (available: boolean) => void;
+export function DemoExperience({ initial, generation = -1, publishedAudio = {}, navigationRef, onBackAvailabilityChange }: {
+  initial: DemoState; generation?: number; publishedAudio?: PublishedAudioCatalog; navigationRef?: Ref<DemoNavigation>; onBackAvailabilityChange?: (available: boolean) => void;
 }) {
   const [state, dispatch] = useReducer(transition, initial);
   const node = catalog[state.nodeId];
@@ -51,8 +51,8 @@ export function DemoExperience({ initial, publishedAudio = {}, navigationRef, on
   useImperativeHandle(navigationRef, () => ({ back: () => dispatch({ at: node.id, type: "BACK" }) }), [node.id]);
   useEffect(() => { onBackAvailabilityChange?.(state.journal.length > 0); }, [state.journal.length, onBackAvailabilityChange]);
   useEffect(() => {
-    if (!remember(state) && storageNotice.current) storageNotice.current.textContent = "O navegador não está guardando esta tentativa. Você pode concluir, mas sair desta página pode perder a retomada.";
-  }, [state]);
+    if (!remember(state, generation) && storageNotice.current) storageNotice.current.textContent = "Não foi possível sincronizar. Atualize seu painel antes de continuar.";
+  }, [state, generation]);
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
   }, [state.nodeId, state.presentationStep, state.phase, state.reviewView, pendingListening?.key]);

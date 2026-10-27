@@ -1,5 +1,16 @@
 # Painel BasedSpeak
 
+## Estado vigente — gestão e aluno conectados
+
+Desde a integração de 27/10/2026, o painel exige autenticação real, reúne **Minha história, Meu avanço, Minhas atividades e Professor**, e usa os contratos de `src/contracts/workspace.ts`. Conversa e estudo são persistidos por UID no Firestore. Contas novas aguardam aprovação, com contato disponível; contas antigas com perfil mantêm seu acesso. O ADM lê esse mesmo progresso, decide acessos e responde às conversas do aluno.
+
+O modo visual foi removido da entrada, do dashboard e da história. Não se usam conta ilustrativa, dados de exemplo ou sucesso simulado. Cache anônimo antigo não é associado automaticamente a contas. Mutações de aluno exigem sessão, mesma origem, UID correspondente e revisão válida; resets recebidos descartam tentativas antigas. Os detalhes atuais, incluindo APIs, frequência de atualização e medidas de avanço, estão em [ADMINISTRACAO.md](ADMINISTRACAO.md).
+
+## Histórico das etapas anteriores
+
+Os registros abaixo documentam entregas anteriores e seus limites à época. As descrições de prévia visual, progresso exclusivamente local e integrações reservadas foram substituídas pelo estado vigente acima.
+
+
 27/10/2026. Implementação da prévia “Sua jornada” aprovada por Roger na conversa **dashboard**. Rota escolhida por ele: `/dashboard`; nomes na interface: “Meu painel” e “Seu espaço”. Este chat centraliza futuras mudanças no painel.
 
 ## Fluxo e apresentação

@@ -6,7 +6,7 @@ vi.mock("@/client/auth/service", () => ({ login: vi.fn(), register: vi.fn(), res
 import { SignupForm } from "@/features/landing/SignupForm";
 import { MoreInformation } from "@/features/landing/MoreInformation";
 
-describe("real form remains available for a future authenticated mode", () => {
+describe("real student account entry", () => {
   it("requires email and password for registration while retaining the Google option", () => {
     const html = renderToStaticMarkup(createElement(SignupForm, { initialMode: "signup" }));
     expect(html).toContain('type="email"');

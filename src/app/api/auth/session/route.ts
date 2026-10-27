@@ -3,6 +3,7 @@ import { getAdminAuth } from "@/server/firebase";
 import { recordVerifiedLogin } from "@/server/auth/service";
 import { getRequestPrincipal } from "@/server/auth/principal";
 import { AUTH_SESSION_COOKIE_NAME, AUTH_SESSION_MAX_AGE_SECONDS, getAuthSessionCookieOptions } from "@/server/auth/session-cookie";
+import { hasSameOrigin } from "@/server/http/request";
 
 export const dynamic = "force-dynamic";
 
@@ -76,7 +77,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (req.headers.get("origin") !== new URL(req.url).origin) {
+  if (!hasSameOrigin(req)) {
     return NextResponse.json({ error: "Origem da solicitação inválida." }, { status: 403 });
   }
   try {
@@ -114,7 +115,7 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  if (req.headers.get("origin") !== new URL(req.url).origin) {
+  if (!hasSameOrigin(req)) {
     return NextResponse.json({ error: "Origem da solicitação inválida." }, { status: 403 });
   }
   const response = NextResponse.json({ success: true });

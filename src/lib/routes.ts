@@ -1,5 +1,5 @@
 import { isRetiredPage } from "./page-aliases";
-export const ROUTES = { home: "/", start: "/comecar", dashboard: "/dashboard", demo: "/demo", terms: "/termos", privacy: "/privacidade" } as const;
+export const ROUTES = { home: "/", start: "/comecar", dashboard: "/dashboard", admin: "/adm", demo: "/demo", terms: "/termos", privacy: "/privacidade" } as const;
 
 /** Only active internal pages can be used as authentication callbacks. */
 export function isSafeInternalCallbackPath(path: string) {

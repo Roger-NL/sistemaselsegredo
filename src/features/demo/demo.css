@@ -592,6 +592,7 @@
 .app-shell .preview-notice { padding:.15rem 0; font-size:.65rem; }
 .app-shell > footer { padding:.4rem 0; font-size:.65rem; align-items:center; }
 .app-shell > footer nav { gap:1rem; }
+.app-shell .demo-sync-status { display:block; color:var(--muted); margin-top:3px; }
 .app-shell p { margin:.45rem 0; }
 .app-shell h1 { font-size:clamp(2rem,3.5vw,3.6rem); margin:.4rem 0 .7rem; }
 .app-shell button,.app-shell .button-link { padding:.55rem .85rem; font-size:.9rem; }

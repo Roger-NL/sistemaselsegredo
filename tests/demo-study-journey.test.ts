@@ -24,6 +24,10 @@ vi.mock("react", async importOriginal => {
   };
 });
 
+vi.mock("@/features/dashboard/use-student-workspace", () => ({
+  useStudentWorkspace: () => ({ status: "ready", generation: 1, saving: false, error: "", notice: "", refresh: vi.fn(), workspace: { account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [] } }),
+}));
+
 import { Dashboard } from "@/features/dashboard/Dashboard";
 import { DemoHost } from "@/features/demo/DemoHost";
 import { Retrospective } from "@/features/demo/components/Retrospective";
@@ -99,7 +103,7 @@ beforeEach(() => { mocks.snapshot = { status: "empty", state: null }; mocks.stud
 
 describe("narrative, panel and study journey", () => {
   it("offers a first conversation and direct study without creating narrative evidence", () => {
-    expect(panel()).toContain('aria-label="Acessar sua demo"');
+    expect(panel()).toContain('aria-label="Acessar minha história"');
     const entry = renderToStaticMarkup(createElement(DemoHost, { experience: true }));
     expect(entry).toContain("Como você prefere começar?");
     expect(entry).toContain('href="/demo/estudo"');
@@ -115,7 +119,7 @@ describe("narrative, panel and study journey", () => {
     expect(panel()).toContain('aria-label="Continuar a história"');
     const study = completeStep(emptyProgress, studySteps[0].step.id, true);
     store.setItem(THEORY_KEY, JSON.stringify(study));
-    expect(theory()).toContain("Seu avanço fica neste navegador.");
+    expect(theory()).toContain("Seu avanço fica salvo na sua conta.");
     expect(store.getItem(STORAGE_KEY)).toBe(narrativeBeforeStudy);
     const restored = restoreDemo(store);
     expect(restored.status).toBe("ok");

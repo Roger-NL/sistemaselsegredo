@@ -16,6 +16,10 @@ vi.mock("@/features/demo/session/browser", () => ({
   restart: vi.fn(),
 }));
 
+vi.mock("@/features/dashboard/use-student-workspace", () => ({
+  useStudentWorkspace: () => ({ status: "ready", generation: 1, saving: false, error: "", notice: "", refresh: vi.fn(), workspace: { account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [] } }),
+}));
+
 import { DemoHost } from "@/features/demo/DemoHost";
 import { Dashboard } from "@/features/dashboard/Dashboard";
 import { DemoAudioContext, type DemoAudio } from "@/features/demo/audio/use-demo-audio";

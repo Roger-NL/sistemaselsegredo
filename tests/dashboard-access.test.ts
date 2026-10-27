@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ visual: false, cookie: undefined as string | undefined, verify: vi.fn(), get: vi.fn(), doc: vi.fn() }));
-vi.mock("@/config/access", () => ({ isVisualAccessMode: () => mocks.visual, VISUAL_ACCOUNT: { name: "Roger", email: "roger@example.com" } }));
+const mocks = vi.hoisted(() => ({ cookie: undefined as string | undefined, verify: vi.fn(), get: vi.fn(), doc: vi.fn() }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => mocks.cookie ? { value: mocks.cookie } : undefined }) }));
 vi.mock("@/server/firebase", () => ({
   getAdminAuth: () => ({ verifySessionCookie: mocks.verify }),
@@ -14,18 +13,14 @@ import { getDashboardAccount } from "@/server/dashboard/account";
 import DashboardPage from "@/app/dashboard/page";
 
 beforeEach(() => {
-  vi.clearAllMocks(); mocks.cookie = undefined; mocks.visual = false;
+  vi.clearAllMocks(); mocks.cookie = undefined;
   mocks.doc.mockReturnValue({ get: mocks.get });
 });
 
 describe("dashboard server access", () => {
-  it("opens the test dashboard without a real account or a Firebase request", async () => {
-    mocks.visual = true;
-    mocks.cookie = "ignored-existing-cookie";
-    const page = await DashboardPage();
-    expect(page.props).toEqual({ account: { name: "Roger", email: "roger@example.com" }, visual: true });
+  it("never grants dashboard access through visual preview mode", async () => {
+    await expect(DashboardPage()).rejects.toThrow("REDIRECT:/comecar?modo=entrar");
     expect(mocks.verify).not.toHaveBeenCalled();
-    expect(mocks.doc).not.toHaveBeenCalled();
   });
   it("redirects anonymous visitors to sign-in without accessing Firebase", async () => {
     await expect(DashboardPage()).rejects.toThrow("REDIRECT:/comecar?modo=entrar");

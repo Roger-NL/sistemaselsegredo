@@ -13,7 +13,7 @@ export async function recordVerifiedLogin(identity: { uid: string; email?: strin
       transaction.create(reference, {
         id: identity.uid, email: identity.email ?? "",
         name: typeof identity.name === "string" && identity.name.trim() ? identity.name.trim().slice(0, 120) : "Usuário",
-        subscriptionStatus: "free", createdAt: now, lastLoginDate: now, updatedAt: now,
+        subscriptionStatus: "free", accountStatus: "pending", createdAt: now, lastLoginDate: now, updatedAt: now,
       });
     }
   });

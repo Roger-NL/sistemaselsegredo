@@ -12,9 +12,13 @@ import { createDemo } from "./model/reducer";
 import { visibleAppSize } from "./model/layout";
 import { getBrowserSnapshot, getServerSnapshot, remember, restart, subscribe } from "./session/browser";
 import type { PublishedAudioCatalog } from "@/contracts/demo-audio";
+import { useStudentWorkspace } from "@/features/dashboard/use-student-workspace";
+import { PracticeAccess } from "@/features/dashboard/PracticeAccess";
 
 export function DemoHost({ experience = false, publishedAudio = {}, accountName }: { experience?: boolean; publishedAudio?: PublishedAudioCatalog; accountName?: string }) {
   const snapshot = useSyncExternalStore(subscribe, getBrowserSnapshot, getServerSnapshot);
+  const workspaceState = useStudentWorkspace();
+  const allowed = workspaceState.status === "ready" && workspaceState.workspace?.account.status === "active";
   const router = useRouter();
   const { ready, start, cancel, pending } = useJourneyTransition();
   const shell = useRef<HTMLElement>(null);
@@ -39,15 +43,15 @@ export function DemoHost({ experience = false, publishedAudio = {}, accountName 
     return () => { viewport?.removeEventListener("resize", update); viewport?.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
   }, []);
   function reset() {
-    if (snapshot.state && !window.confirm("Recomeçar descarta esta tentativa e a avaliação guardada neste dispositivo. Deseja continuar?")) return;
-    restart(); router.push("/demo");
+    if (snapshot.state && !window.confirm("Recomeçar substitui a tentativa atual da história na sua conta. Deseja continuar?")) return;
+    restart(workspaceState.generation); router.push("/demo");
   }
   return <main ref={shell} className="demo-shell app-shell">
-    <AppHeader current="demo" name={accountName} onNavigate={cancel}>{snapshot.state && <>{experience && <button disabled={pending || !canGoBack} onClick={() => navigation.current?.back()}>Voltar</button>}<button disabled={pending} aria-label="Recomeçar" onClick={reset}>Recomeçar</button></>}</AppHeader>
-    {snapshot.status === "loading" ? <p role="status">Preparando a conversa…</p>
-      : snapshot.state && experience ? <DemoExperience key={snapshot.state.runId} initial={snapshot.state} publishedAudio={publishedAudio} navigationRef={navigation} onBackAvailabilityChange={setCanGoBack} />
+    <AppHeader current="demo" name={workspaceState.workspace?.account.name || accountName} onNavigate={cancel}>{allowed && snapshot.state && <>{experience && <button disabled={pending || !canGoBack} onClick={() => navigation.current?.back()}>Voltar</button>}<button disabled={pending} aria-label="Recomeçar" onClick={reset}>Recomeçar</button></>}</AppHeader>
+    {!allowed ? <PracticeAccess state={workspaceState} retry={workspaceState.refresh} />
+      : snapshot.state && experience ? <DemoExperience key={`${workspaceState.generation}:${snapshot.state.runId}`} generation={workspaceState.generation} initial={snapshot.state} publishedAudio={publishedAudio} navigationRef={navigation} onBackAvailabilityChange={setCanGoBack} />
       : snapshot.state ? <section className="resume"><p className="eyebrow">Sua conversa está aqui</p><h1>Vamos continuar?</h1><p>Você pode retomar do ponto em que parou, sem repetir as falas já enviadas.</p><div className="actions"><Link className="primary button-link" href="/demo">Retomar conversa</Link><button onClick={reset}>Começar de novo</button></div></section>
-      : <div className="entry-stage">{snapshot.status === "invalid" && <p role="status">Não foi possível retomar a tentativa anterior. Comece uma nova conversa.</p>}{snapshot.status === "unavailable" && <p role="status">O armazenamento está indisponível. Você pode fazer a demo, mas talvez não consiga retomá-la depois de sair.</p>}<DemoEntry onStart={profile => start({ prepare:() => remember(createDemo(profile, crypto.randomUUID(), Date.now()), true) })} /></div>}
-    <footer><span>BasedSpeak · Um encontro de cada vez.</span><nav aria-label="Informações legais"><Link href="/privacidade">Privacidade</Link><Link href="/termos">Termos</Link></nav></footer>
+      : <div className="entry-stage">{snapshot.status === "invalid" && <p role="status">Não foi possível retomar a tentativa anterior. Comece uma nova conversa.</p>}<DemoEntry onStart={profile => { const generation = workspaceState.generation; start({ prepare:() => remember(createDemo(profile, crypto.randomUUID(), Date.now()), generation) }); }} /></div>}
+    <footer><span>BasedSpeak · Um encontro de cada vez.<span className="demo-sync-status" role="status">{workspaceState.notice || (allowed ? workspaceState.saving ? "Salvando sua conversa…" : snapshot.state ? "Conversa sincronizada com sua conta." : "Sua conta está conectada." : "")}</span></span><nav aria-label="Informações legais"><Link href="/privacidade">Privacidade</Link><Link href="/termos">Termos</Link></nav></footer>
   </main>;
 }

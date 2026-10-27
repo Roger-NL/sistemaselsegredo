@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
 import { getDashboardIdentity } from "@/server/dashboard/account";
 import { getAdminDb } from "@/server/firebase";
-import { assertOnlyKeys, readJsonObject, RequestPayloadError } from "@/server/http/request";
+import { assertOnlyKeys, readJsonObject, RequestPayloadError, hasSameOrigin } from "@/server/http/request";
 
 export async function PATCH(request: Request) {
-  if (request.headers.get("origin") !== new URL(request.url).origin) {
+  if (!hasSameOrigin(request)) {
     return NextResponse.json({ error: "Origem da solicitação inválida." }, { status: 403 });
   }
   const identity = await getDashboardIdentity();
   if (!identity) return NextResponse.json({ error: "Entre novamente para salvar seu nome." }, { status: 401 });
+  const expectedUid = request.headers.get("x-workspace-uid");
+  if (expectedUid && expectedUid !== identity.uid) return NextResponse.json({ error: "A conta conectada mudou. Atualize o painel." }, { status: 409 });
 
   try {
     const body = await readJsonObject(request, 2048);

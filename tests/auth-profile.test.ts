@@ -12,7 +12,8 @@ describe("minimal profile after verified login", () => {
     await recordVerifiedLogin({ uid: "test-user", email: "test@example.com", name: "Test" });
     const profile = mocks.create.mock.calls[0][1];
     expect(profile).toMatchObject({ id: "test-user", subscriptionStatus: "free", name: "Test" });
-    expect(Object.keys(profile).sort()).toEqual(["id", "email", "name", "subscriptionStatus", "createdAt", "lastLoginDate", "updatedAt"].sort());
+    expect(profile.accountStatus).toBe("pending");
+    expect(Object.keys(profile).sort()).toEqual(["id", "email", "name", "subscriptionStatus", "accountStatus", "createdAt", "lastLoginDate", "updatedAt"].sort());
   });
   it("updates timestamps without replacing historical documents or entitlements", async () => {
     mocks.get.mockResolvedValue({ exists: true });

@@ -16,6 +16,20 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+/** Use the incoming Host: Next may normalize request.url to localhost behind a proxy. */
+export function hasSameOrigin(request: Request) {
+  const origin = request.headers.get("origin");
+  if (!origin || origin === "null") return false;
+  try {
+    const url = new URL(request.url);
+    const host = request.headers.get("host") || url.host;
+    const protocol = request.headers.get("x-forwarded-proto")?.split(",", 1)[0]?.trim() || url.protocol.replace(":", "");
+    if (!/^[a-z\d.[\]:-]+$/i.test(host) || (protocol !== "https" && protocol !== "http")) return false;
+    // Never trust x-forwarded-host or the supplied Origin to choose the target host.
+    return origin === new URL(`${protocol}://${host}`).origin;
+  } catch { return false; }
+}
+
 export function assertOnlyKeys(value: Record<string, unknown>, allowedKeys: readonly string[]) {
   const allowed = new Set(allowedKeys);
   if (Object.keys(value).some((key) => !allowed.has(key))) {

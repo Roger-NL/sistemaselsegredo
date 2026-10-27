@@ -3,6 +3,8 @@ import "server-only";
 import { cookies } from "next/headers";
 import { getAdminAuth, getAdminDb } from "@/server/firebase";
 import { AUTH_SESSION_COOKIE_NAME } from "@/server/auth/session-cookie";
+import { accountStatus } from "@/server/workspace/validation";
+import type { AccountStatus } from "@/contracts/workspace";
 
 const USERS_COLLECTION = "users";
 
@@ -16,6 +18,7 @@ export interface RequestPrincipal {
   role: RequestPrincipalRole;
   subscriptionStatus: RequestPrincipalSubscriptionStatus;
   source: RequestPrincipalSource;
+  accountStatus?: AccountStatus;
 }
 
 export interface RequestPrincipalOptions {
@@ -83,14 +86,23 @@ async function resolveProfile(
 ): Promise<RequestPrincipal> {
   const snapshot = await getAdminDb().collection(USERS_COLLECTION).doc(uid).get();
   const data = snapshot.exists ? snapshot.data() : null;
+  const status = snapshot.exists ? accountStatus(data?.accountStatus) : "pending";
+  if (status === "suspended" || status === "rejected") throw new Error("ACCOUNT_INACTIVE");
+  // Claims cached in a valid cookie must not retain manager access after demotion.
+  let currentAdminClaim = adminClaim;
+  if (adminClaim === true) {
+    const currentIdentity = await getAdminAuth().getUser(uid);
+    currentAdminClaim = !currentIdentity.disabled && currentIdentity.customClaims?.admin === true;
+  }
 
   return {
     uid,
     // Only verified Firebase identity claims may grant administrative access.
     email,
-    role: normalizeRole(adminClaim),
+    role: normalizeRole(currentAdminClaim),
     subscriptionStatus: normalizeSubscriptionStatus(data?.subscriptionStatus),
     source,
+    accountStatus: status,
   };
 }
 
@@ -100,7 +112,7 @@ async function resolveFromBearer(req: Request): Promise<RequestPrincipal | null>
     return null;
   }
 
-  const decodedToken = await getAdminAuth().verifyIdToken(token);
+  const decodedToken = await getAdminAuth().verifyIdToken(token, true);
   return resolveProfile(decodedToken.uid, decodedToken.email ?? null, decodedToken.admin, "bearer_token");
 }
 
