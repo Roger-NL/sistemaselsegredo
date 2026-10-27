@@ -1,6 +1,10 @@
 # BasedSpeak
 
-Demo pública de uma conversa em uma cafeteria. Sem login, conta, pagamento ou microfone. A pessoa escolhe seu apoio, participa de dez partes, percorre escolhas e recebe uma retrospectiva da conversa que realmente aconteceu.
+Visão de evolução do produto: [curso por histórias e aprofundamento após a demo](docs/VISAO-GERAL-DO-PRODUTO.md). É uma direção em discussão; as etapas futuras ainda não estão implementadas.
+
+Landing de inglês por histórias e demo pública de uma conversa em uma cafeteria. O fluxo principal é `/` → `/comecar` (conta gratuita com Google ou e-mail) → `/demo`. A conversa também permanece acessível diretamente, sem pagamento ou microfone. A pessoa escolhe seu apoio, participa de dez partes, percorre escolhas e recebe uma retrospectiva da conversa que realmente aconteceu.
+
+A landing ocupa uma única tela, sem rolagem ou imagens da demo. Preserva a marca creme/preto, com composição tipográfica animada e amostra interativa isolada da tentativa real. “Dê uma espiada” abre um painel modal com mais informações e os três apoios; arrastar a página não revela novas seções. Animações podem ser pausadas e respeitam movimento reduzido. Fonte local, nenhuma mídia externa e ilhas pequenas de interação; o Firebase do navegador é carregado apenas na tela de conta. `/comecar` verifica uma sessão existente no servidor antes de abrir a demo. A autenticação reutiliza Firebase Auth e a API de sessão preservada, sem reativar `/login` ou `/cadastro`. Cadastro não sincroniza o estado local da conversa. Pesquisa e decisões: `docs/research-landing.md`, `docs/landing-visual-direction.md` e `docs/landing-ux.md`.
 
 ## Desenvolvimento local
 

@@ -35,7 +35,7 @@ export function DemoHost({ experience = false, publishedAudio = {} }: { experien
   }, []);
   function reset() {
     if (snapshot.state && !window.confirm("Recomeçar descarta esta tentativa e a avaliação guardada neste dispositivo. Deseja continuar?")) return;
-    restart(); router.push("/");
+    restart(); router.push("/demo");
   }
   return <main ref={shell} className="demo-shell app-shell">
     <header className="site-header"><Brand /><nav aria-label="Navegação principal"><span className="public-label">Uma conversa em inglês</span>{snapshot.state && <>{experience && <><button className="text-button" disabled={!canGoBack} onClick={() => navigation.current?.back()}>Voltar</button><button className="text-button" disabled={!canGoForward} title="Avançar sem responder — navegação temporária de teste" onClick={() => navigation.current?.forward()}>Avançar</button></>}<button className="text-button restart-button" aria-label="Recomeçar" title="Recomeçar" onClick={reset}><span className="restart-label">Recomeçar</span><span className="restart-icon" aria-hidden="true">↻</span></button></>}</nav></header>
