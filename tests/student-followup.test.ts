@@ -12,11 +12,11 @@ const booking = { id: "student", userId: "student", status: "confirmed", start: 
 const user = (data: Record<string, unknown> = {}, status = "active", lesson: LiveClassBooking | null = null) => managementUser(identity, { accountStatus: status }, data, lesson);
 
 describe("student follow-up grounded in saved account data", () => {
-  it("only labels a student ready to book from valid completed practices and active access", () => {
+  it("only labels a student ready to book from valid completed practices and an available account", () => {
     expect(journeyStage(user({ studyCompleted: 24, demoPercent: 100 }))).toBe("not_started");
     expect(user({ studyCompleted: 24 }).canBookLiveClass).toBe(false);
     expect(journeyStage(user({ studySnapshot: fullStudy }))).toBe("ready");
-    expect(journeyStage(user({ studySnapshot: fullStudy }, "pending"))).toBe("pending");
+    expect(journeyStage(user({ studySnapshot: fullStudy }, "pending"))).toBe("ready");
     expect(journeyStage(user({ studySnapshot: fullStudy }, "suspended"))).toBe("inactive");
   });
   it("separates conversation position from the branch-dependent activity percentage", () => {

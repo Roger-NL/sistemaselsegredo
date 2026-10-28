@@ -13,6 +13,8 @@ import { completeStep, decodeProgress, isCorrect, normalizeAnswer, studySteps, t
 import { useStudentWorkspace } from "@/features/dashboard/use-student-workspace";
 import { studentWorkspace, type WorkspaceState } from "@/features/dashboard/workspace-store";
 import { PracticeAccess } from "@/features/dashboard/PracticeAccess";
+import { canPractice, practiceLearning } from "@/features/dashboard/practice-access";
+import { GuestProgressImport } from "@/features/dashboard/GuestProgressImport";
 
 const phrases = Object.values(audio).filter((phrase, index, all) => all.findIndex(other => normalizeAnswer(other.text) === normalizeAnswer(phrase.text)) === index);
 
@@ -24,15 +26,16 @@ function CachedAudio({ phrase, publishedAudio }: { phrase: string; publishedAudi
 
 export function TheoryExperience({ publishedAudio }: { publishedAudio: PublishedAudioCatalog }) {
   const workspaceState = useStudentWorkspace();
-  const allowed = workspaceState.status === "ready" && workspaceState.workspace?.account.status === "active";
+  const allowed = canPractice(workspaceState);
   return <>
-    {workspaceState.workspace?.account.status === "active" && <div hidden={!allowed}><ConnectedTheory key={workspaceState.generation} publishedAudio={publishedAudio} workspaceState={workspaceState} /></div>}
+    {allowed && <ConnectedTheory key={workspaceState.generation} publishedAudio={publishedAudio} workspaceState={workspaceState} />}
     {!allowed && <main className="study-shell"><AppHeader current="study" /><PracticeAccess state={workspaceState} retry={workspaceState.refresh} /></main>}
   </>;
 }
 
 function ConnectedTheory({ publishedAudio, workspaceState }: { publishedAudio: PublishedAudioCatalog; workspaceState: WorkspaceState }) {
-  const progress = decodeProgress(workspaceState.workspace?.learning.studySnapshot ?? null);
+  const progress = decodeProgress(practiceLearning(workspaceState)?.studySnapshot ?? null);
+  const guest = !workspaceState.workspace;
   const ready = true;
   const [view, setView] = useState<"overview" | "study" | "phrases" | "finished">("overview");
   const [search, setSearch] = useState("");
@@ -58,15 +61,16 @@ function ConnectedTheory({ publishedAudio, workspaceState }: { publishedAudio: P
   const filtered = phrases.filter(item => `${item.text} ${item.meaning}`.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR")));
 
   return <main className="study-shell">
-    <AppHeader current="study" />
+    <AppHeader current="study" guest={guest} />
+    <GuestProgressImport state={workspaceState} />
     <nav className="study-breadcrumb" aria-label="Etapas da experiência"><Link href="/demo">A conversa</Link><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">O inglês por trás dela</span></nav>
-    <p className="study-notice" role="status">{workspaceState.saving ? "Salvando seu estudo…" : "Estudo sincronizado com sua conta."}</p>{workspaceState.notice && <p className="study-notice" role="status">{workspaceState.notice}</p>}
-    {allDone && (view === "overview" || view === "finished") && <section className="study-completion" aria-label="Do estudo à aula ao vivo"><Check size={23} aria-hidden="true" /><div><h2>Seu estudo está concluído.</h2><p>{workspaceState.workspace?.liveClass && workspaceState.workspace.liveClass.status !== "cancelled" ? "Consulte o pedido, a confirmação ou o registro da sua aula gratuita no painel." : "Você já fez todas as práticas. O próximo encontro é uma aula gratuita com o professor."}</p></div>{workspaceState.saving ? <button className="study-primary" disabled>Confirmando seu progresso…</button> : <Link className="study-primary" prefetch={false} href="/dashboard#aula-ao-vivo">{workspaceState.workspace?.liveClass && workspaceState.workspace.liveClass.status !== "cancelled" ? "Ver minha aula ao vivo" : "Agendar minha aula gratuita"}<ArrowRight size={17} aria-hidden="true" /></Link>}</section>}
+    <p className="study-notice" role="status">{guest ? "Demo livre. Seu avanço fica salvo neste navegador." : workspaceState.saving ? "Salvando seu estudo…" : "Estudo sincronizado com sua conta."}</p>{workspaceState.notice && <p className="study-notice" role="status">{workspaceState.notice}</p>}
+    {allDone && (view === "overview" || view === "finished") && <section className="study-completion" aria-label="Do estudo à aula ao vivo"><Check size={23} aria-hidden="true" /><div><h2>Seu estudo está concluído.</h2><p>{guest ? "Para pedir sua aula gratuita, crie uma conta ou entre. Depois, escolha salvar este percurso na conta para continuar sem refazer as práticas." : workspaceState.workspace?.liveClass && workspaceState.workspace.liveClass.status !== "cancelled" ? "Consulte o pedido, a confirmação ou o registro da sua aula gratuita no painel." : "Você já fez todas as práticas. O próximo encontro é uma aula gratuita com o professor."}</p></div>{workspaceState.saving ? <button className="study-primary" disabled>Confirmando seu progresso…</button> : <Link className="study-primary" prefetch={false} href={guest ? "/comecar" : "/dashboard#aula-ao-vivo"}>{guest ? "Criar minha conta para a aula" : workspaceState.workspace?.liveClass && workspaceState.workspace.liveClass.status !== "cancelled" ? "Ver minha aula ao vivo" : "Agendar minha aula gratuita"}<ArrowRight size={17} aria-hidden="true" /></Link>}{guest && <Link href="/comecar?modo=entrar">Já tenho conta</Link>}</section>}
     {view === "overview" && <>
       <section className="study-intro"><div><p className="study-eyebrow">Depois da cafeteria · estudo guiado</p><h1 ref={heading} tabIndex={-1}>Uma conversa.<br />Muito para descobrir.</h1><p className="study-lead">Entenda as palavras, as expressões e o jeito de construir as frases. Um pequeno passo de cada vez.</p><div className="study-intro-actions"><button className="study-primary" disabled={!ready} onClick={() => open(progress.position)}>{allDone ? "Revisitar meu estudo" : completedCount ? "Continuar meu estudo" : "Começar a descobrir"}<ArrowRight size={18} aria-hidden="true" /></button><button className="study-text-button" onClick={() => setView("phrases")}>Consultar as expressões</button></div></div><aside className="study-intro-note"><BookOpen size={26} strokeWidth={1.3} aria-hidden="true" /><p>Primeiro, o sentido.<br />Depois, as peças.<br /><strong>Agora, do seu jeito.</strong></p><span>8 blocos · 24 pequenas práticas<br />Sem cronômetro. No seu ritmo.</span></aside></section>
       <section className="study-path" aria-labelledby="path-title"><div className="study-section-heading"><h2 id="path-title">Entenda sua primeira conversa</h2><span>{completedCount} de {studySteps.length} práticas concluídas</span></div><progress max={studySteps.length} value={completedCount} aria-label="Práticas concluídas" />
         <ol>{lessons.map((lesson, i) => { const done = lesson.steps.filter(step => progress.completed.includes(step.id)).length; return <li key={lesson.id}><button disabled={!ready} onClick={() => open(studySteps.findIndex(item => item.lesson.id === lesson.id && !progress.completed.includes(item.step.id)) < 0 ? studySteps.findIndex(item => item.lesson.id === lesson.id) : studySteps.findIndex(item => item.lesson.id === lesson.id && !progress.completed.includes(item.step.id)))}><span className="study-number">{done === lesson.steps.length ? <Check size={22} aria-label="Concluído" /> : String(i + 1).padStart(2, "0")}</span><span className="study-path-copy"><strong>{lesson.title}</strong><span>{lesson.description}</span></span><span className="study-path-count">{done}/{lesson.steps.length}</span><ArrowRight size={20} aria-hidden="true" /></button></li>; })}</ol>
-        <p className="study-small">Seu avanço fica salvo na sua conta. Concluir as práticas não é uma avaliação de nível.</p>
+        <p className="study-small">{guest ? "Seu avanço fica salvo neste navegador. Uma conta permite continuar em outros dispositivos." : "Seu avanço fica salvo na sua conta."} Concluir as práticas não é uma avaliação de nível.</p>
       </section>
     </>}
     {view === "study" && <div className="study-workspace"><aside className="study-sidebar"><button className="study-text-button" onClick={() => setView("overview")}><ArrowLeft size={16} aria-hidden="true" />Todos os blocos</button><p className="study-eyebrow">Seu percurso</p><ol>{lessons.map((lesson, index) => <li key={lesson.id}><button aria-current={current.lesson.id === lesson.id ? "step" : undefined} onClick={() => open(studySteps.findIndex(item => item.lesson.id === lesson.id))}><span>{String(index + 1).padStart(2, "0")}</span>{lesson.title}</button></li>)}</ol><p className="study-small">Uma pausa também faz parte.<br />Seu ponto de retorno fica salvo.</p></aside>

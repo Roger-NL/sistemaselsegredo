@@ -19,14 +19,14 @@ export function MoreInformation() {
         <h2 id="landing-info-title">Você entende<br />fazendo.</h2>
         <p className="landing-info-lead">Uma história para viver o inglês, com apoio para participar.</p>
         <ol className="landing-info-steps">
-          <li><span>01</span><div><h3>Crie sua conta.</h3><p>Com Google ou e-mail, sem cartão. O professor aprova o cadastro antes de liberar a conversa e o estudo. Enquanto isso, você pode falar com ele pelo painel.</p></div></li>
+          <li><span>01</span><div><h3>Comece agora.</h3><p>A conversa e o estudo são gratuitos. Abra e participe, sem cadastro e sem aprovação.</p></div></li>
           <li><span>02</span><div><h3>Entre na conversa.</h3><p>Conheça Lucas na cafeteria. Escute, escolha e construa suas respostas com três opções de apoio. Sem usar o microfone.</p></div></li>
           <li><span>03</span><div><h3>Veja o que construiu.</h3><p>Revisite suas escolhas e explore o inglês da cafeteria em oito blocos e 24 práticas do estudo guiado.</p></div></li>
         </ol>
         <h3 className="landing-info-support-title">O apoio muda. A conversa continua.</h3>
         <SupportPreview />
         <details className="landing-info-next"><summary>E depois da demo?<Plus size={16} aria-hidden="true" /></summary><p>Concluir 100% do estudo libera o agendamento de uma aula gratuita de 1 hora com professor, uma por conta. No Meu painel, acompanhe seu avanço, o pedido e a confirmação da aula, e fale com o professor. As próximas histórias estão em preparação.</p></details>
-        <Link href="/comecar" prefetch={false} className="landing-cta">Criar conta e experimentar<ArrowUpRight size={18} aria-hidden="true" /></Link>
+        <Link href="/demo" prefetch={false} className="landing-cta">Começar a conversa<ArrowUpRight size={18} aria-hidden="true" /></Link>
       </div>
     </dialog>
   </>;

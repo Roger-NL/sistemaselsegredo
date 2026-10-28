@@ -2,7 +2,11 @@
 
 ## Estado vigente — gestão e aluno conectados
 
-### Cadastro, aprovação e primeiro acesso — 28/10/2026
+### Acesso gratuito vigente — 28/10/2026
+
+Por orientação de Roger, a demo e o estudo agora são livres por link, sem cadastro ou aprovação. O painel continua exigindo conta, com apresentação no primeiro acesso. A conta nova pode praticar e salvar o avanço imediatamente; o status pendente na gestão representa apenas revisão cadastral. A aula exige conta e 24/24 práticas salvas. Um percurso anônimo pode ser associado explicitamente a uma conta vazia, sem substituir dados existentes. Consulte `ALUNO-INTEGRACAO.md` para o fluxo e suas proteções. A seção seguinte registra o fluxo anterior, substituído por esta orientação.
+
+### Histórico: cadastro, aprovação e primeiro acesso — 28/10/2026
 
 A entrada informa que o cadastro precisa de aprovação do professor. A conta nova continua recebendo somente identidade, acesso gratuito e status pendente no servidor; nome adicional, pagamento e cartão não são exigidos. No painel, **Seu primeiro acesso** mostra conta criada, aprovação e primeira conversa. Antes da aprovação, oferece contato e **Conferir aprovação**. Depois da liberação, orienta a escolher o apoio da cafeteria. O guia deixa de aparecer quando a prática começa.
 

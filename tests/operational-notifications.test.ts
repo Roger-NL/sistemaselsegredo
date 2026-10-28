@@ -109,7 +109,7 @@ describe("safe delivery and manager configuration", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const request = fetchMock.mock.calls[0][1];
     expect(request.headers["Idempotency-Key"]).toBe(`basedspeak-operational/${path.split("/")[1]}`);
-    expect(JSON.parse(request.body)).toMatchObject({ to: ["raugerac@gmail.com"], subject: "[BasedSpeak] Novo cadastro aguardando aprovação" });
+    expect(JSON.parse(request.body)).toMatchObject({ to: ["raugerac@gmail.com"], subject: "[BasedSpeak] Novo cadastro" });
     expect(memory.docs.get(path)).toMatchObject({ status: "sent", attempts: 1, providerId: "provider-accepted-id" });
     await processOperationalNotifications(); expect(fetchMock).toHaveBeenCalledTimes(1);
   });

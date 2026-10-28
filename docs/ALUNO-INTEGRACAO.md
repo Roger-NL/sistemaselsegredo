@@ -1,6 +1,16 @@
 # Integração da experiência do aluno
 
-Implementação cliente concluída nesta conversa. Não houve commit/push, troca de branch, criação de contas ou alterações em backend, contratos ou `/adm`. O backend e a integração final continuam sob responsabilidade da conversa principal.
+Registro da integração do aluno. As etapas históricas e seus testes estão preservados abaixo; o fluxo vigente de acesso gratuito foi atualizado em 28/10/2026.
+
+## Demo livre e continuidade na conta — 28/10/2026
+
+`/demo` e `/demo/estudo` abrem sem cadastro ou aprovação. O avanço anônimo fica no cache separado `basedspeak.learning.guest.v1`, sem ler caches antigos ou dados privados de contas. A interface informa que esse avanço está neste navegador. Contas `pending` e `active` também podem praticar e sincronizar; suspensão e rejeição continuam impedindo a prática naquela conta. Painel, mensagens, agenda e ADM mantêm autenticação e validação de identidade.
+
+Ao entrar numa conta vazia, a pessoa pode escolher **Salvar este percurso na minha conta**, com confirmação que identifica a conta. Não há associação automática. O endpoint `/api/student/learning/import` valida origem, UID e snapshots, e recusa atomicamente contas com revisão posterior a zero, qualquer snapshot salvo ou agendamento. O cache anônimo é removido somente após confirmação do servidor. Leituras concorrentes são serializadas durante a importação; uma leitura anterior não pode apagar o percurso recém-salvo. Progresso existente em qualquer dispositivo é preservado.
+
+O agendamento continua liberado apenas com as **24 práticas salvas** e exige conta; não exige aprovação da demo. Quem conclui sem entrar pode criar a conta, confirmar a associação do percurso e pedir a aula sem refazer o estudo. As aprovações administrativas permanecem como revisão cadastral, sem travar a experiência gratuita.
+
+Validação real no Chrome: visitante iniciou a cafeteria, retomou após recarregar, concluiu a primeira prática do estudo e manteve 1/24 após reload. Ao entrar numa conta QA vazia, confirmou a associação na própria página; a conversa e o estudo passaram a aparecer nessa conta, inclusive pela API de produção. Nove verificações HTTP confirmaram persistência, recusa de importação sobre progresso existente, identidade protegida, ADM privada e agenda ainda bloqueada em 1/24. A QA foi removida ao final, preservando as 15 contas originais, estudo e agendamento do proprietário. Evidências em `output/reception-qa/public-integration.json` e capturas `public-*`/`guest-import-*`.
 
 ## Integrações já implementadas
 
@@ -8,7 +18,7 @@ Implementação cliente concluída nesta conversa. Não houve commit/push, troca
 - Conversa e estudo usam `GET /api/student/workspace` e `PUT /api/student/learning`, com snapshots completos e `learning.revision`.
 - Cache novo tem namespace por uid + revisão; nunca se leem/importam caches antigos anônimos, nem se vinculam automaticamente a uma conta.
 - Toda gravação valida novamente o uid/status/revisão por GET; `409` descarta pendências, remove cache obsoleto, invalida componentes antigos e recarrega GET. Resposta tardia após logout é ignorada.
-- `pending` pode ver painel/contato e enviar mensagens reais; conversa/estudo ficam bloqueados até status active.
+- `pending` pode usar painel, contato, conversa e estudo; o requisito da aula é concluir as 24 práticas.
 - Nova conversa/resposta via APIs do contrato, confirmação somente após persistência, rascunho mantido em memória em falha, respostas do professor disponíveis em Atualizar painel e ao voltar à aba.
 - A avaliação final da história agora envia conversa real ao professor (assunto Avaliação da conversa da cafeteria); removidos texto de prévia e rascunho compartilhado em storage.
 

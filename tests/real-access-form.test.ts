@@ -28,10 +28,11 @@ describe("real student account entry", () => {
     expect(html).not.toContain("PRÉVIA VISUAL");
     expect(html).toContain("Continuar com Google");
   });
-  it("preserves Google and email in the landing account explanation", () => {
+  it("offers the free demo directly without registration or approval", () => {
     const html = renderToStaticMarkup(createElement(MoreInformation));
-    expect(html).toContain("Com Google ou e-mail, sem cartão.");
-    expect(html).toContain("O professor aprova o cadastro antes de liberar a conversa e o estudo.");
+    expect(html).toContain("sem cadastro e sem aprovação");
+    expect(html).toContain('href="/demo"');
+    expect(html).not.toContain("O professor aprova");
     expect(html).toContain("oito blocos e 24 práticas");
     expect(html).toContain("uma aula gratuita de 1 hora com professor, uma por conta");
     expect(html).toContain("No Meu painel");

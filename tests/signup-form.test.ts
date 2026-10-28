@@ -6,10 +6,10 @@ vi.mock("@/client/auth/service", () => ({ register: vi.fn(), login: vi.fn(), log
 import { SignupForm } from "@/features/landing/SignupForm";
 
 describe("new student account entry", () => {
-  it("explains teacher approval before registration without an extra required profile step", () => {
+  it("explains the public demo and account benefits without an approval gate or extra required profile step", () => {
     const html = renderToStaticMarkup(createElement(SignupForm, { initialMode: "signup" }));
-    expect(html).toContain("professor aprova seu acesso");
-    expect(html).toContain("aguarde a aprovação do professor no seu painel");
+    expect(html).toContain("sem cadastro nem aprovação");
+    expect(html).toContain("pedir sua aula gratuita após o estudo");
     expect(html).toContain("Continuar com Google");
     expect(html).toContain("Criar conta e continuar");
     expect(html).not.toContain('name="name"');

@@ -26,6 +26,7 @@ export type SaveLearningInput = { revision: number; demoSnapshot?: string | null
 // and X-Workspace-Uid matching the verified account (prevents cross-tab login races).
 // GET /api/student/workspace -> StudentWorkspace
 // PUT /api/student/learning (SaveLearningInput) -> { learning: LearningProgress }
+// POST /api/student/learning/import (revision 0 + explicit public journey) -> { learning: LearningProgress }; only empty accounts
 // POST /api/student/conversations { subject, body } -> { conversation: TeacherConversation }
 // POST /api/student/conversations/[id]/messages { body } -> { conversation: TeacherConversation }
 // Errors: { error: string }; 401 unauthenticated, 403 inactive account,

@@ -12,11 +12,11 @@ export function journeyStage(user: AdminUser): JourneyStage {
   if (user.liveClass?.status === "pending") return "requested";
   if (user.liveClass?.status === "confirmed") return "scheduled";
   if (user.liveClass?.status === "completed") return "completed";
-  if (user.status === "pending") return "pending";
-  if (user.status !== "active") return "inactive";
+  if (user.status === "suspended" || user.status === "rejected") return "inactive";
   if (user.canBookLiveClass) return "ready";
   if (user.studyCompleted > 0 || user.conversation?.completed) return "study";
   if (user.conversation) return "conversation";
+  if (user.status === "pending") return "pending";
   return "not_started";
 }
 export function journeyCounts(users: AdminUser[]) {

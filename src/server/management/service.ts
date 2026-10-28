@@ -35,7 +35,7 @@ export function managementUser(identity: UserRecord, savedProfile?: Record<strin
     progress: Math.round((learning.demoPercent + (learning.studyTotal ? studyCompleted / learning.studyTotal * 100 : 0)) / 2),
     demoPercent: learning.demoPercent, studyCompleted, studyTotal: learning.studyTotal,
     conversation: conversationPosition(learning.demoSnapshot), lastLearningAt: learning.updatedAt, liveClass: booking,
-    canBookLiveClass: status === "active" && studyCompleted === learning.studyTotal && (!booking || booking.status === "cancelled"),
+    canBookLiveClass: ["active", "pending"].includes(status) && studyCompleted === learning.studyTotal && (!booking || booking.status === "cancelled"),
     loginResetAt: iso(profile.loginResetAt), notes: typeof profile.managementNotes === "string" ? profile.managementNotes : "",
   };
 }

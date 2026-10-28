@@ -4,17 +4,21 @@ Este documento e o chat **Apresentação** são a referência para mudanças nes
 
 ## Experiência
 
-Entre a entrada autenticada e a primeira exibição completa do Meu painel, a conta vê cinco passos com navegação manual:
+Orientação vigente de Roger em 28/10/2026: conversa e estudo da demo devem abrir diretamente por link, sem cadastro nem aprovação. Autenticação permanece para recursos da conta e agendamento. A apresentação não deve anunciar espera por liberação do professor. A integração transversal desse acesso público é coordenada pelo chat principal; os arquivos deste chat alteram o conteúdo e a entrada do modal da landing.
 
-1. Boas-vindas e aprovação: o professor aprova novos cadastros antes de liberar conversa/estudo; painel e contato permanecem disponíveis enquanto pendentes.
+No percurso da conta, entre a entrada autenticada e a primeira exibição completa do Meu painel, a conta vê cinco passos com navegação manual:
+
+1. Boas-vindas após cadastro: a conta já está pronta; convite para começar a conversa e o estudo, sem espera por aprovação.
 2. Cafeteria com Lucas: escuta e construção das respostas, três apoios e nenhum microfone.
-3. Estudo guiado: oito blocos, 24 práticas e retomada após salvamento na conta.
+3. Estudo guiado: oito blocos e 24 práticas, um pequeno passo por vez.
 4. Aula gratuita: concluir 100% das 24 práticas libera o pedido de uma aula de 1 hora com professor, uma por conta; horário depende de disponibilidade e confirmação.
 5. Meu painel: conversa, avanço, estudo, aula e contato com professor no mesmo lugar.
 
-Avançar, voltar, selecionar uma etapa e pular são ações explícitas; não há autoplay. Pular e concluir registram a mesma confirmação. Não há inferência de aprovação, conclusão de estudo ou aprendizagem a partir da apresentação. A apresentação não inicia a conversa nem solicita/reserva aula.
+A revisão visual solicitada por Roger em 28/10 substitui o layout inicial de ilustração e parágrafos por uma abertura preta cinematográfica. Os cinco capítulos têm nove momentos curtos (2 + 2 + 2 + 2 + 1): cada clique revela uma ideia. Marca animada com órbitas, cafeteria com cartões de apoio, oito blocos com três práticas cada, anel de 100% que se transforma no benefício de 1h e representação gráfica do painel. Título em duas linhas e uma frase curta por momento; sobrancelha, linhas e descrição entram em sequência, em aproximadamente dois segundos. Os efeitos são finitos e nunca condicionam a disponibilidade dos controles.
 
-O layout usa creme/preto, Geist existente e composição responsiva. A arte da cafeteria reutiliza `/demo/cafe/v2/images/V01-960.webp`. Os demais quadros usam texto, CSS e ícones existentes. Nenhuma imagem ou áudio é gerado; nenhum áudio é reproduzido ou pré-carregado.
+Avançar e voltar percorrem os nove momentos; selecionar uma etapa abre o primeiro momento daquele capítulo. São ações explícitas; não há autoplay. Pular e concluir registram a mesma confirmação. Não há inferência de aprovação, conclusão de estudo ou aprendizagem a partir da apresentação. A apresentação não inicia a conversa nem solicita/reserva aula.
+
+O layout usa fundo preto, tipografia creme, acentos quentes, Geist existente e composição responsiva. O estado de carregamento também usa fundo preto, evitando a troca brusca de fundo ao abrir a apresentação. A arte da cafeteria reutiliza `/demo/cafe/v2/images/V01-960.webp`. Os demais quadros usam texto, CSS e ícones existentes. Nenhuma imagem ou áudio é gerado; nenhum áudio é reproduzido ou pré-carregado.
 
 ## Integração e persistência
 
@@ -40,11 +44,19 @@ Controles nativos com foco visível, títulos focáveis a cada passo, indicaçã
 - `src/features/onboarding/Presentation.tsx`, `content.ts`, `presentation.css`: passos, navegação e composição visual.
 - `src/server/presentation/service.ts` e `src/app/api/student/presentation/route.ts`: persistência exclusiva da conta.
 - `src/features/dashboard/Dashboard.tsx`: gate e atalho de revisão.
-- `src/features/landing/MoreInformation.tsx`: informação pública alinhada à aprovação, estudo e benefício.
+- `src/features/landing/MoreInformation.tsx`: informação pública alinhada à demo sem cadastro, estudo e benefício, com CTA direto para `/demo`.
 - `tests/student-presentation-*.test.ts`: proteção de API, persistência e conteúdo inicial. Os testes existentes de dashboard/navegação mockam somente o gate para continuar cobrindo o painel após a conclusão.
 
 ## Validação e limites
 
-45 testes passaram em oito arquivos direcionados: apresentação, painel do aluno, próximo passo, entrada/cadastro da landing, percurso de estudo e navegação da conversa. Lint direcionado sem avisos e TypeScript (`--noEmit --incremental false`) aprovados. Provedores Firebase são simulados; nenhuma conta real, reserva, progresso, mídia ou credencial foi alterada. Nenhum build, restart do servidor compartilhado, commit, push ou deploy foi executado por este chat.
+35 testes passaram em cinco arquivos direcionados nesta revisão: apresentação, persistência, painel do aluno, percurso de estudo e navegação da conversa. Lint direcionado sem avisos, TypeScript (`--noEmit --incremental false`) e diff sem erros aprovados. Provedores Firebase são simulados; nenhuma conta real, reserva, progresso, mídia ou credencial foi alterada. Nenhum build, restart do servidor compartilhado, commit, push ou deploy foi executado por este chat.
 
-Não houve QA visual nesta rodada do chat Apresentação. A conferência interativa de layout em 320×568, 390×844 e desktop, teclado e gravação real em conta temporária será feita pelo chat principal na validação conjunta. Não apresentar testes estáticos como evidência dessa conferência.
+A prévia local isolada em `http://127.0.0.1:3217/apresentacao` foi regenerada a partir do componente real para mostrar os nove momentos sem autenticação ou gravações. O helper está em `/private/tmp/basedspeak-presentation-preview.cjs`; o HTML e as evidências ficam em `output/presentation-preview/`, ignorado pelo Git. Não há rota de prévia no produto. Foram conferidas a abertura, a passagem entre os momentos de boas-vindas e a cafeteria com os apoios no navegador interno, na dimensão corrente do painel. Essa prévia não substitui a validação React/autenticada descrita abaixo. A evidência visual anterior à revisão descreve o layout antigo.
+
+Na revisão de acesso livre, o segundo momento usava “É só chegar. E participar.”. Roger corrigiu esse texto por se tratar de uma apresentação exibida após o cadastro. O texto vigente é “Tudo pronto. A conversa é sua.” / “Sua conta está pronta. Comece a conversa e o estudo no seu ritmo.”, com ligação gráfica entre conversa e estudo. Isso não muda a disponibilidade pública da demo: apenas mantém a mensagem da apresentação coerente com a conta já criada. Foi removida a promessa genérica de salvamento na conta para quem visita a demo anônima. A landing informa o acesso sem cadastro e seu CTA abre `/demo`. Os 12 testes direcionados de conteúdo/apresentação, formulário e entrada da landing passaram, assim como lint direcionado. O gate/API próprios da conta não foram alterados; a autorização do agendamento continua sob responsabilidade do chat principal.
+
+### Validação integrada pelo chat principal
+
+Os nove momentos foram percorridos na aplicação React com conta QA e em telas de 390×844 e 320×568, com foco no título e sem rolagem horizontal. O último CTA passou a ser **Abrir meu painel**, com espaço compacto entre controles para manter o botão dentro da tela de 320×568. A confirmação do primeiro acesso é persistida pela API e não altera aprovação, estudo ou agendamento. Evidências em `output/reception-qa/presentation-react-mobile.json`, `presentation-react-small-mobile.json` e `presentation-small-final.png`.
+
+Ajuste pontual solicitado por Roger: a foto de Lucas aparece somente no primeiro momento da cafeteria. O segundo momento, sobre os três apoios, usa três cartões gráficos com ícones e entrada escalonada; não repete a foto. O estilo, texto e navegação permanecem iguais.

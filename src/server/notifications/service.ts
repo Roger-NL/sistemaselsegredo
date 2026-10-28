@@ -10,7 +10,7 @@ const settingsRef = () => getAdminDb().collection("settings").doc("operational_n
 const distantFuture = "9999-12-31T23:59:59.999Z";
 const retryWindowMs = 23 * 60 * 60 * 1000;
 const labels = {
-  new_signup: "Novo cadastro aguardando aprovação",
+  new_signup: "Novo cadastro",
   conversation_completed: "Conversa da cafeteria concluída",
   study_completed: "Estudo guiado concluído — aula gratuita liberada",
   live_class_requested: "Novo pedido de aula gratuita",

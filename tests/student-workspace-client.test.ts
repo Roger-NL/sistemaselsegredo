@@ -18,12 +18,11 @@ const setup = () => {
 afterEach(() => { vi.useRealTimers(); });
 
 describe("student workspace synchronization", () => {
-  it("unlocks the same pending account after real approval and announces it without a new sign-in", async () => {
+  it("reports a registration review without requiring another sign-in", async () => {
     const { store, fetcher } = setup();
     const pending = workspace(); pending.account.status = "pending";
     fetcher.mockResolvedValueOnce(json(pending)).mockResolvedValueOnce(json(workspace()));
     await store.load(); const generation = store.getSnapshot().generation;
-    expect(store.stage("demoSnapshot", "forbidden", generation)).toBe(false);
     await store.load(true);
     expect(store.getSnapshot()).toMatchObject({ status: "ready", notice: expect.stringContaining("cadastro foi aprovado"), workspace: { account: { id: "student-a", status: "active" } } });
     expect(store.getSnapshot().generation).toBeGreaterThan(generation);
@@ -250,8 +249,8 @@ describe("student workspace synchronization", () => {
     expect(store.getSnapshot().workspace).toBeNull();
   });
 
-  it("never permits inactive accounts to stage practice", async () => {
-    for (const status of ["pending", "suspended", "rejected"] as const) {
+  it("never permits suspended or rejected accounts to stage practice", async () => {
+    for (const status of ["suspended", "rejected"] as const) {
       const { store, fetcher } = setup();
       const data = workspace(); data.account.status = status;
       fetcher.mockResolvedValueOnce(json(data)); await store.load();

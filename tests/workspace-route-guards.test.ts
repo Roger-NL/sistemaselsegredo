@@ -4,6 +4,7 @@ vi.mock("@/server/auth/principal", () => ({ getRequestPrincipal: mocks.principal
 vi.mock("@/server/firebase", () => ({ getAdminDb: mocks.db, getAdminAuth: vi.fn() }));
 import * as student from "@/app/api/student/workspace/route";
 import * as learning from "@/app/api/student/learning/route";
+import * as importing from "@/app/api/student/learning/import/route";
 import * as conversations from "@/app/api/student/conversations/route";
 import * as messages from "@/app/api/student/conversations/[id]/messages/route";
 import * as management from "@/app/api/admin/workspace/route";
@@ -14,6 +15,7 @@ const params = { params: Promise.resolve({ id: "conversation" }) };
 const request = (method: string, source = origin, body: unknown = {}) => new Request(`${origin}/api/test`, { method, headers: { origin: source, "content-type": "application/json" }, ...(method === "GET" ? {} : { body: JSON.stringify(body) }) });
 const routes = [
   ["GET", (req: Request) => student.GET(req)], ["PUT", (req: Request) => learning.PUT(req)],
+  ["POST", (req: Request) => importing.POST(req)],
   ["POST", (req: Request) => conversations.POST(req)], ["POST", (req: Request) => messages.POST(req, params)],
   ["GET", (req: Request) => management.GET(req)], ["POST", (req: Request) => users.POST(req)], ["POST", (req: Request) => replies.POST(req, params)],
 ] as const;

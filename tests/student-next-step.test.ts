@@ -31,7 +31,9 @@ describe("the student's next useful step", () => {
   it("respects unavailable access and rejects another account's booking", () => {
     const data = { ...workspace(), liveClass: { ...booking, userId: "someone-else" } };
     expect(studentNextStep(data).kind).toBe("conversation");
-    for (const status of ["pending", "suspended", "rejected"] as const) {
+    data.account.status = "pending"; data.learning.studyCompleted = 24;
+    expect(studentNextStep(data).kind).toBe("booking");
+    for (const status of ["suspended", "rejected"] as const) {
       data.account.status = status; data.learning.studyCompleted = 24;
       expect(studentNextStep(data).kind).toBe("access");
       expect(studentNextStep(data).href).toBeUndefined();

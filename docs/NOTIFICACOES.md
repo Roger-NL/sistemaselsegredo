@@ -4,7 +4,7 @@ O destinatário responsável escolhido é **raugerac@gmail.com**. A ADM permite 
 
 ## Eventos conectados
 
-- Novo perfil após um cadastro autenticado: uma vez por aluno, aguardando aprovação.
+- Novo perfil após um cadastro autenticado: uma vez por aluno. A demo e o estudo são livres; a revisão cadastral na ADM não bloqueia essa experiência gratuita.
 - Conclusão da conversa da cafeteria: uma vez por aluno, com um percurso salvo e replayável até o fim. Atalhos antigos `TEST_FORWARD` não contam. As ramificações não escolhidas não impedem o aviso.
 - Conclusão de todas as 24 práticas do estudo guiado: uma vez por aluno. Contadores antigos sem atividades salvas não comprovam conclusão.
 - Pedido de aula gratuita: um aviso por pedido real; tentativas repetidas do mesmo agendamento não duplicam o aviso. Uma nova solicitação após cancelamento é um novo evento.
@@ -25,6 +25,12 @@ Configure exclusivamente no ambiente de servidor da Vercel:
 A ausência de remetente ou chave mantém os avisos pendentes, sem tentativas externas. A ADM informa que falta conectar o serviço. Informar o destinatário não comprova que o domínio remetente ou o serviço de entrega já estejam configurados. O estado “aceito pelo serviço de e-mail” comprova a resposta da API; não comprova chegada à caixa de entrada ou leitura.
 
 Após configurar as variáveis e publicar, valide o remetente no Resend e o envio de um evento autorizado. Contas técnicas usadas para QA e seus registros de outbox devem ser removidos antes da ativação para evitar avisos de teste na caixa do responsável. Não remova avisos legítimos de alunos.
+
+### Ativação concluída — 28/10/2026
+
+O domínio `notify.basedspeak.com` foi verificado no Resend, região Irlanda, com recebimento desativado. Foram adicionados apenas o TXT DKIM e os dois CNAMEs de envio; os 14 registros anteriores da zona Amen foram preservados. O remetente é `avisos@notify.basedspeak.com`. A chave criada possui somente permissão de envio e está nas variáveis privadas da Vercel e no ambiente local ignorado pelo Git. O plano pago não foi contratado: a integração nativa da Vercel recusou o plano Free, então foi usada a conta direta existente do Resend.
+
+Um cadastro QA pelo serviço real em produção gerou o evento às **16:53:18 UTC**, e o Gmail de `raugerac@gmail.com` recebeu o aviso às **16:53:20 UTC**, na caixa de entrada. Os cabeçalhos confirmaram **SPF e DKIM aprovados** para o domínio configurado. A ADM mostrou envio ativo, um evento aceito e fila vazia. Esse teste comprova o cadastro e a entrega desse aviso; os demais eventos têm cobertura automatizada dos seus gatilhos, deduplicação e fila. Evidências sanitizadas: `output/reception-qa/notification-delivery.json`, `resend-domain-verified.png` e `notifications-active.png`.
 
 ## Entrega e recuperação
 

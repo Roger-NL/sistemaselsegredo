@@ -33,15 +33,16 @@ export async function getStudentWorkspace(principal: RequestPrincipal): Promise<
   };
 }
 
-export async function saveLearning(principal: RequestPrincipal, body: Record<string, unknown>): Promise<{ learning: LearningProgress }> {
+export async function saveLearning(principal: RequestPrincipal, body: Record<string, unknown>, options: { requireEmpty?: boolean } = {}): Promise<{ learning: LearningProgress }> {
   assertOnlyKeys(body, ["revision", "demoSnapshot", "studySnapshot"]);
   if (!Number.isSafeInteger(body.revision) || Number(body.revision) < 0 || !("demoSnapshot" in body || "studySnapshot" in body)) throw new RequestPayloadError("Informe uma revisão e um progresso válidos.");
   await consumeRateLimit({ namespace: "learning-save", identifier: principal.uid, limit: 120, windowMs: 60_000 });
   const patch: Partial<LearningProgress> = { ...("demoSnapshot" in body ? parseDemoSnapshot(body.demoSnapshot) : {}), ...("studySnapshot" in body ? parseStudySnapshot(body.studySnapshot) : {}) };
   const result = await getAdminDb().runTransaction(async tx => {
-    const [stored, profile] = await Promise.all([tx.get(learningRef(principal.uid)), tx.get(userRef(principal.uid))]);
-    if (!profile.exists || accountStatus(profile.data()?.accountStatus) !== "active") throw new RequestAuthError("Seu acesso à prática aguarda aprovação da gestão.", 403);
+    const [stored, profile, booking] = await Promise.all([tx.get(learningRef(principal.uid)), tx.get(userRef(principal.uid)), options.requireEmpty ? tx.get(getAdminDb().collection("demo_live_classes").doc(principal.uid)) : Promise.resolve(null)]);
+    if (!profile.exists || !["active", "pending"].includes(accountStatus(profile.data()?.accountStatus))) throw new RequestAuthError("Seu acesso à prática está indisponível. Fale com o professor.", 403);
     const previous = learningFromData(stored.data());
+    if (options.requireEmpty && (previous.revision !== 0 || previous.demoSnapshot !== null || previous.studySnapshot !== null || booking?.exists)) throw new RequestAuthError("Esta conta já tem um percurso. Seu progresso atual foi preservado; o percurso deste navegador não foi importado.", 409);
     if (previous.revision !== body.revision) throw new RequestAuthError("Seu progresso foi reiniciado. Atualize o painel antes de continuar.", 409);
     if ((!("demoSnapshot" in patch) || patch.demoSnapshot === previous.demoSnapshot) && (!("studySnapshot" in patch) || patch.studySnapshot === previous.studySnapshot)) return { learning: previous, notificationIds: [] };
     const at = new Date().toISOString();
@@ -62,6 +63,13 @@ export async function saveLearning(principal: RequestPrincipal, body: Record<str
   });
   scheduleOperationalNotifications(result.notificationIds);
   return { learning: result.learning };
+}
+
+/** Explicit guest continuation, guarded atomically against overwriting any saved account journey. */
+export async function importGuestLearning(principal: RequestPrincipal, body: Record<string, unknown>) {
+  if (body.revision !== 0 || (!body.demoSnapshot && !body.studySnapshot)) throw new RequestPayloadError("Escolha um percurso válido deste navegador para salvar na sua conta.");
+  await consumeRateLimit({ namespace: "guest-learning-import", identifier: principal.uid, limit: 5, windowMs: 3_600_000 });
+  return saveLearning(principal, body, { requireEmpty: true });
 }
 
 export async function createConversation(principal: RequestPrincipal, body: Record<string, unknown>) {

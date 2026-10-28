@@ -44,7 +44,7 @@ const memory = vi.hoisted(() => {
 vi.mock("@/server/firebase", () => ({ getAdminDb: () => memory.db, getAdminAuth: () => memory.auth }));
 vi.mock("@/server/http/rate-limit", () => ({ consumeRateLimit: vi.fn(async () => undefined) }));
 import { getManagementSnapshot, mutateManagement } from "@/server/management/service";
-import { appendConversationMessage, createConversation, getStudentWorkspace, saveLearning } from "@/server/workspace/service";
+import { appendConversationMessage, createConversation, getStudentWorkspace, importGuestLearning, saveLearning } from "@/server/workspace/service";
 const manager: RequestPrincipal = { uid: "manager", email: "manager@example.com", role: "admin", source: "session_cookie", subscriptionStatus: "free" };
 const student: RequestPrincipal = { ...manager, uid: "student", email: "student@example.com", role: "student" };
 const study = JSON.stringify({ ...emptyProgress, completed: [studySteps[0].step.id] });
@@ -123,11 +123,32 @@ describe("connected student and manager services", () => {
     expect(workspace.learning).toMatchObject({ revision: 1, studyCompleted: 0, studySnapshot: null });
     expect(workspace.activities.some(item => item.kind === "reset")).toBe(true);
   });
-  it("allows pending students to contact the professor but prevents practice writes", async () => {
+  it("lets a pending student practice, synchronize progress and contact the professor without approval", async () => {
     memory.docs.set("users/student", { name: "Student", accountStatus: "pending" });
-    await expect(saveLearning(student, { revision: 0, studySnapshot: study })).rejects.toMatchObject({ status: 403 });
+    expect((await saveLearning(student, { revision: 0, studySnapshot: study })).learning.studyCompleted).toBe(1);
     const result = await createConversation(student, { subject: "Dúvida", body: "Como continuar?" });
     expect(result.conversation.status).toBe("open");
+  });
+  it("imports a public journey into an empty pending account once and exposes it to the real management workspace", async () => {
+    memory.docs.set("users/student", { name: "Student", accountStatus: "pending" });
+    const full = JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) });
+    expect((await importGuestLearning(student, { revision: 0, demoSnapshot: null, studySnapshot: full })).learning.studyCompleted).toBe(24);
+    expect((await getManagementSnapshot(manager)).users.find(user => user.id === student.uid)).toMatchObject({ status: "pending", studyCompleted: 24, canBookLiveClass: true });
+    await expect(importGuestLearning(student, { revision: 0, studySnapshot: study })).rejects.toMatchObject({ status: 409 });
+    expect((await getStudentWorkspace(student)).learning.studyCompleted).toBe(24);
+  });
+  it("never imports over saved story/study, a reset epoch, or an existing booking; rejects suspended accounts and invalid progress", async () => {
+    for (const existing of [{ studySnapshot: study }, { demoSnapshot: "saved-story" }, { revision: 1 }]) {
+      memory.docs.set("learning_states/student", existing);
+      await expect(importGuestLearning(student, { revision: 0, studySnapshot: study })).rejects.toMatchObject({ status: 409 });
+      expect(memory.docs.get("learning_states/student")).toEqual(existing);
+    }
+    memory.docs.delete("learning_states/student"); memory.docs.set("demo_live_classes/student", { userId: student.uid, status: "confirmed" });
+    await expect(importGuestLearning(student, { revision: 0, studySnapshot: study })).rejects.toMatchObject({ status: 409 });
+    memory.docs.delete("demo_live_classes/student"); memory.docs.set("users/student", { accountStatus: "suspended" });
+    await expect(importGuestLearning(student, { revision: 0, studySnapshot: study })).rejects.toMatchObject({ status: 403 });
+    await expect(importGuestLearning(student, { revision: 0, studySnapshot: "forged" })).rejects.toThrow();
+    expect(memory.docs.has("learning_states/student")).toBe(false);
   });
   it("connects a real student message and manager reply with both panels and activity history", async () => {
     const { conversation } = await createConversation(student, { subject: "Minha dúvida", body: "Uma pergunta" });

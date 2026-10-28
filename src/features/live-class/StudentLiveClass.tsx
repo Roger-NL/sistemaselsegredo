@@ -6,6 +6,7 @@ import type { StudentWorkspace } from "@/contracts/workspace";
 import { LIVE_CLASS_LABELS, liveClassDate, type LiveClassAvailability } from "@/contracts/live-class";
 import { calendarDays, offsetMonth } from "./calendar";
 import { studentWorkspace } from "@/features/dashboard/workspace-store";
+import { accountCanPractice } from "@/features/dashboard/practice-access";
 
 export function StudentLiveClass({ workspace, disabled }: { workspace: StudentWorkspace; disabled: boolean }) {
   const [data, setData] = useState<LiveClassAvailability | null>(null);
@@ -40,7 +41,7 @@ export function StudentLiveClass({ workspace, disabled }: { workspace: StudentWo
     return () => { sequenceRef.current++; clearInterval(interval); window.removeEventListener("focus", refresh); };
   }, [load, workspace]);
   const booking = data?.booking;
-  const available = Boolean(data?.eligible && (!booking || booking.status === "cancelled") && workspace.account.status === "active");
+  const available = Boolean(data?.eligible && (!booking || booking.status === "cancelled") && accountCanPractice(workspace.account.status));
   const currentMonth = data ? new Intl.DateTimeFormat("sv-SE", { timeZone: data.timezone, year: "numeric", month: "2-digit" }).format(new Date()) : "";
   const activeDay = day.startsWith(data?.month || "_") ? day : data?.slots[0]?.day || "";
   const times = data?.slots.filter(slot => slot.day === activeDay) || [];
@@ -68,7 +69,7 @@ export function StudentLiveClass({ workspace, disabled }: { workspace: StudentWo
     <p>Uma aula gratuita com o professor, depois do estudo da cafeteria.</p>
     {booking && <div className="live-class-booking"><time dateTime={booking.start}>{liveClassDate(booking.start, booking.timezone)}</time><small>1 hora · {booking.timezone}</small>{booking.reason && <p>{booking.reason}</p>}{booking.status === "confirmed" && (booking.meetingUrl ? <a href={booking.meetingUrl} target="_blank" rel="noreferrer">Entrar na aula ↗</a> : <p>O professor enviará as orientações de acesso pelo contato do painel.</p>)}{booking.status === "pending" && <p>O professor recebeu seu pedido. O horário será confirmado nesta área.</p>}</div>}
     {booking && ["pending", "confirmed"].includes(booking.status) && <a href="#contato">Falar com o professor ↗</a>}
-    {!booking && !available && !loading && <p className="live-class-lock"><LockKeyhole size={16} aria-hidden="true" />{workspace.account.status !== "active" ? "Aguardando aprovação do seu acesso." : `Conclua 100% do estudo guiado para liberar a agenda. ${data?.completed ?? workspace.learning.studyCompleted} de ${workspace.learning.studyTotal} práticas concluídas.`}</p>}
+    {!booking && !available && !loading && <p className="live-class-lock"><LockKeyhole size={16} aria-hidden="true" />{!accountCanPractice(workspace.account.status) ? "Seu acesso à aula está indisponível. Fale com o professor." : `Conclua 100% do estudo guiado para liberar a agenda. ${data?.completed ?? workspace.learning.studyCompleted} de ${workspace.learning.studyTotal} práticas concluídas.`}</p>}
     <button type="button" className="dashboard-primary" disabled={!available || disabled || loading} onClick={() => { setNotice(""); dialog.current?.showModal(); void load(); }}><CalendarDays size={16} aria-hidden="true" />{booking?.status === "cancelled" ? "Escolher outro horário" : booking?.status === "pending" ? "Pedido enviado" : booking?.status === "confirmed" ? "Aula agendada" : booking?.status === "completed" ? "Aula concluída" : "Agendar minha aula"}</button>
     {notice && <p role="status" className="student-sent"><Check size={16} />{notice}</p>}
     {error && <div role="alert" className="dashboard-form-error"><p>{error}</p><button type="button" onClick={() => void load()}>Tentar novamente</button></div>}

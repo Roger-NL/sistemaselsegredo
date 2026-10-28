@@ -45,10 +45,20 @@ describe("free lesson entitlement and real booking lifecycle", () => {
     expect(result.eligible).toBe(true); expect(result.slots.length).toBeGreaterThan(24);
     expect(new Set(result.slots.map(s => s.day))).toContain("2026-10-18");
   });
-  it("keeps pending accounts locked even with completed study", async () => {
+  it("allows a signed-in pending account with all saved practices to request its free lesson without prior approval", async () => {
     complete(); memory.docs.set("users/student", { accountStatus: "pending" });
-    expect((await getLiveClass(student, null)).eligible).toBe(false);
-    await expect(bookLiveClass(student, { start })).rejects.toMatchObject({ status: 403 });
+    expect((await getLiveClass(student, null)).eligible).toBe(true);
+    expect((await bookLiveClass(student, { start })).booking).toMatchObject({ userId: student.uid, status: "pending" });
+    await decideLiveClass(manager, { id: student.uid, revision: 1, decision: "confirm" });
+    expect((await getLiveClass(student, null)).booking?.status).toBe("confirmed");
+  });
+  it("keeps suspended and rejected accounts locked even with completed study", async () => {
+    complete();
+    for (const status of ["suspended", "rejected"]) {
+      memory.docs.set("users/student", { accountStatus: status });
+      expect((await getLiveClass(student, null)).eligible).toBe(false);
+      await expect(bookLiveClass(student, { start })).rejects.toMatchObject({ status: 403 });
+    }
   });
   it("persists one booking, makes retries idempotent, and shows the same request to ADM", async () => {
     complete(); const first = await bookLiveClass(student, { start });

@@ -10,16 +10,16 @@ let previousStatus: string | undefined;
 export const subscribe = studentWorkspace.subscribe;
 export const getServerSnapshot = () => serverSnapshot;
 export function getBrowserSnapshot(): BrowserSession {
-  const { workspace, status } = studentWorkspace.getSnapshot();
-  const raw = workspace?.learning.demoSnapshot ?? null;
+  const { workspace, status, guestLearning } = studentWorkspace.getSnapshot();
+  const raw = (workspace?.learning || guestLearning)?.demoSnapshot ?? null;
   if (raw !== previousRaw || status !== previousStatus) {
     previousRaw = raw; previousStatus = status;
     const restored = raw ? decodeSnapshot(raw) : null;
-    snapshot = status !== "ready" ? serverSnapshot : { status: raw ? restored ? "ok" : "invalid" : "empty", state: restored };
+    snapshot = status !== "ready" && !(status === "unauthenticated" && guestLearning) ? serverSnapshot : { status: raw ? restored ? "ok" : "invalid" : "empty", state: restored };
   }
   return snapshot;
 }
-/** The generation belongs to the mounted practice, never to an anonymous cache. */
+/** Generations prevent a mounted practice from writing after the account changes. */
 export function remember(state: DemoState, generation: number) {
   return studentWorkspace.stage("demoSnapshot", encodeSnapshot(state), generation);
 }

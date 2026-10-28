@@ -16,6 +16,9 @@ import { TeacherContact, TeacherThread } from "@/features/dashboard/StudentSecti
 import { PracticeAccess } from "@/features/dashboard/PracticeAccess";
 import { TheoryExperience } from "@/features/theory/TheoryExperience";
 import { emptyProgress, studySteps } from "@/features/theory/progress";
+import { canPractice } from "@/features/dashboard/practice-access";
+import { emptyGuestLearning } from "@/features/dashboard/guest-learning";
+import { DemoHost } from "@/features/demo/DemoHost";
 
 beforeEach(() => {
   mocks.state = { status: "ready", generation: 1, saving: false, error: "", notice: "", workspace: { account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [], liveClass: null } };
@@ -37,17 +40,16 @@ describe("student dashboard", () => {
     }
   });
 
-  it("keeps contact available while a pending student's story button is disabled", () => {
+  it("lets a pending student begin immediately and contact the teacher without approval", () => {
     mocks.state!.workspace!.account.status = "pending";
     const html = render();
-    expect(html).toContain("Sua conta está aguardando aprovação.");
-    expect(html).toMatch(/class="dashboard-access"[^>]*disabled=""/);
+    expect(html).toContain("sem esperar aprovação");
+    expect(html).not.toMatch(/class="dashboard-access"[^>]*disabled=""/);
     expect(html).toContain('name="body"');
     expect(html).toContain("Enviar mensagem");
-    expect(html).toContain("Conferir aprovação");
     expect(html).toContain("Conta criada");
-    expect(html).toContain("Disponível após a aprovação.");
-    expect(html).not.toContain("Tudo pronto para começar.");
+    expect(html).toContain("Tudo pronto para começar.");
+    expect(html).toContain("Libera ao concluir 100% do estudo guiado.");
   });
   it("guides the first approved visit and stops showing onboarding after practice begins", () => {
     expect(render()).toContain("Tudo pronto para começar.");
@@ -55,12 +57,12 @@ describe("student dashboard", () => {
     mocks.state!.workspace!.learning.studyCompleted = 1;
     expect(render()).not.toContain("Tudo pronto para começar.");
   });
-  it("lets a pending learner recheck access from a blocked practice page", () => {
+  it("opens the connected study for pending accounts instead of rendering an approval barrier", () => {
     mocks.state!.workspace!.account.status = "pending";
-    const html = renderToStaticMarkup(createElement(PracticeAccess, { state: mocks.state!, retry: async () => {} }));
-    expect(html).toContain("Conferir aprovação");
-    expect(html).toContain("automaticamente");
-    expect(html).not.toContain("Tudo pronto");
+    const html = renderToStaticMarkup(createElement(TheoryExperience, { publishedAudio: {} }));
+    expect(canPractice(mocks.state!)).toBe(true);
+    expect(html).toContain("Começar a descobrir");
+    expect(html).not.toContain("Aguardando aprovação");
   });
 
   it("shows actual activity titles and confirmed teacher replies, escaping message markup", () => {
@@ -91,12 +93,12 @@ describe("student dashboard", () => {
     expect(render()).not.toContain('aria-label="Percurso da conversa da cafeteria"');
   });
 
-  it("offers explicit sign-in after expiration instead of opening practice", () => {
+  it("keeps the public demo available without a sign-in requirement", () => {
     const state = { ...mocks.state!, status: "unauthenticated" as const, workspace: null };
     const html = renderToStaticMarkup(createElement(PracticeAccess, { state, retry: async () => {} }));
-    expect(html).toContain("Entre para continuar.");
-    expect(html).toContain('href="/comecar?modo=entrar"');
-    expect(html).not.toContain("Começar a história");
+    expect(html).toContain("sem cadastro");
+    expect(html).not.toContain('href="/comecar?modo=entrar"');
+    expect(canPractice({ ...state, guestLearning: emptyGuestLearning() })).toBe(true);
   });
 
   it("connects saved study completion to booking, waiting for persistence and respecting an existing booking", () => {
@@ -114,5 +116,14 @@ describe("student dashboard", () => {
     data.liveClass = { id: "student", userId: "student", status: "confirmed" } as NonNullable<typeof data.liveClass>;
     expect(theory()).toContain("Ver minha aula ao vivo");
     expect(theory()).not.toContain("Agendar minha aula gratuita");
+  });
+  it("lets anonymous visitors start the story and study; requires a deliberate account continuation for the free lesson", () => {
+    mocks.state = { ...mocks.state!, status: "unauthenticated", workspace: null, guestLearning: { ...emptyGuestLearning(), studySnapshot: JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) }), studyCompleted: 24 } };
+    const story = renderToStaticMarkup(createElement(DemoHost, { experience: true }));
+    expect(story).toContain("Começar a conversa");
+    expect(story).toContain("Demo livre"); expect(story).not.toContain("Entre para continuar");
+    const study = renderToStaticMarkup(createElement(TheoryExperience, { publishedAudio: {} }));
+    expect(study).toContain("Criar minha conta para a aula"); expect(study).toContain("sem refazer as práticas");
+    expect(study).toContain('href="/comecar?modo=entrar"'); expect(study).not.toContain('href="/dashboard#aula-ao-vivo"');
   });
 });

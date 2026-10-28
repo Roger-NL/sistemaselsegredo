@@ -20,7 +20,7 @@ const profile = (uid: string) => getAdminDb().collection("users").doc(uid);
 export const liveClassTimezone = () => process.env.LIVE_CLASS_TIMEZONE || process.env.GOOGLE_CALENDAR_TIMEZONE || "Europe/Lisbon";
 const lockId = (start: string) => createHash("sha256").update(start).digest("hex");
 function active(exists: boolean, data: Record<string, unknown> = {}) {
-  if (!exists || accountStatus(data.accountStatus) !== "active") throw new RequestAuthError("Seu acesso aguarda aprovação da gestão.", 403);
+  if (!exists || !["active", "pending"].includes(accountStatus(data.accountStatus))) throw new RequestAuthError("Seu acesso à aula está indisponível. Fale com o professor.", 403);
 }
 function checkedMonth(value: string | null, timezone: string, now = new Date()) {
   const current = monthKey(now, timezone), month = value || current;
@@ -31,7 +31,7 @@ export async function getLiveClass(principal: RequestPrincipal, requestedMonth: 
   const timezone = liveClassTimezone(), month = checkedMonth(requestedMonth, timezone);
   const [user, saved, existing] = await Promise.all([profile(principal.uid).get(), learning(principal.uid).get(), bookings().doc(principal.uid).get()]);
   const completed = savedStudyCompleted(saved.data()), total = studySteps.length;
-  const eligible = user.exists && accountStatus(user.data()?.accountStatus) === "active" && completed === total;
+  const eligible = user.exists && ["active", "pending"].includes(accountStatus(user.data()?.accountStatus)) && completed === total;
   const booking = existing.exists ? existing.data() as LiveClassBooking : null;
   let slots = eligible && (!booking || booking.status === "cancelled") ? monthSlots(month, timezone) : [];
   if (slots.length) {
