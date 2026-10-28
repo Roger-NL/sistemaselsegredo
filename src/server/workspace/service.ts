@@ -1,11 +1,12 @@
 import "server-only";
 import { getAdminAuth, getAdminDb } from "@/server/firebase";
 import type { RequestPrincipal } from "@/server/auth/principal";
+import type { LiveClassBooking } from "@/contracts/live-class";
 import type { LearningProgress, StudentWorkspace, TeacherConversation, TeacherMessage } from "@/contracts/workspace";
 import { RequestAuthError } from "@/server/auth/request-auth";
 import { RequestPayloadError, assertOnlyKeys } from "@/server/http/request";
 import { consumeRateLimit } from "@/server/http/rate-limit";
-import { accountStatus, conversationFromData, learningFromData, parseDemoSnapshot, parseStudySnapshot, textField } from "./validation";
+import { accountStatus, conversationFromData, learningFromData, parseDemoSnapshot, parseStudySnapshot, savedStudyCompleted, textField } from "./validation";
 
 export const userRef = (uid: string) => getAdminDb().collection("users").doc(uid);
 export const studentActivityRef = (uid: string) => userRef(uid).collection("student_activity");
@@ -13,15 +14,17 @@ export const learningRef = (uid: string) => getAdminDb().collection("learning_st
 export const conversationsRef = () => getAdminDb().collection("teacher_conversations");
 
 export async function getStudentWorkspace(principal: RequestPrincipal): Promise<StudentWorkspace> {
-  const [identity, profile, learning, activity, conversations] = await Promise.all([
+  const [identity, profile, learning, activity, conversations, liveClass] = await Promise.all([
     getAdminAuth().getUser(principal.uid), userRef(principal.uid).get(), learningRef(principal.uid).get(),
     studentActivityRef(principal.uid).orderBy("at", "desc").limit(100).get(),
     conversationsRef().where("userId", "==", principal.uid).get(),
+    getAdminDb().collection("demo_live_classes").doc(principal.uid).get(),
   ]);
   const data = profile.data() || {};
   return {
     account: { id: principal.uid, name: typeof data.name === "string" ? data.name : identity.displayName || "", email: identity.email || "", status: profile.exists ? accountStatus(data.accountStatus) : "pending", role: identity.customClaims?.admin === true ? "manager" : "student" },
-    learning: learningFromData(learning.data()),
+    learning: { ...learningFromData(learning.data()), studyCompleted: savedStudyCompleted(learning.data()) },
+    liveClass: liveClass.data()?.userId === principal.uid ? liveClass.data() as LiveClassBooking : null,
     activities: activity.docs.map(doc => ({ id: doc.id, ...doc.data() })) as StudentWorkspace["activities"],
     conversations: conversations.docs.map(doc => conversationFromData(doc.id, doc.data())).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
   };

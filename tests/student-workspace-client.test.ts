@@ -5,7 +5,7 @@ import { createWorkspaceStore } from "@/features/dashboard/workspace-store";
 const workspace = (uid = "student-a", revision = 0): StudentWorkspace => ({
   account: { id: uid, name: "", email: "", status: "active", role: "student" },
   learning: { revision, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null },
-  activities: [], conversations: [],
+  activities: [], conversations: [], liveClass: null,
 });
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 const saved = (data: StudentWorkspace, patch: object) => json({ learning: { ...data.learning, ...patch, updatedAt: "2026-10-27T12:00:00Z" } });
@@ -255,6 +255,28 @@ describe("student workspace synchronization", () => {
 
 describe("real teacher conversations", () => {
   const conversation: TeacherConversation = { id: "conversation-1", userId: "student-a", userName: "", userEmail: "", subject: "Dúvida", status: "open", createdAt: "2026-10-27T12:00:00Z", updatedAt: "2026-10-27T12:00:00Z", messages: [] };
+  it("keeps a confirmed send when an older background poll finishes afterwards", async () => {
+    const { store, fetcher } = setup();
+    let finish!: (response: Response) => void;
+    fetcher.mockResolvedValueOnce(json(workspace())).mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }))
+      .mockResolvedValueOnce(json(workspace())).mockResolvedValueOnce(json({ conversation }));
+    await store.load();
+    const generation = store.getSnapshot().generation;
+    const polling = store.load(true);
+    await store.sendMessage("Dúvida", "Texto");
+    finish(json(workspace())); await polling;
+    expect(store.getSnapshot().workspace?.conversations).toEqual([conversation]);
+    expect(store.getSnapshot().status).toBe("ready");
+    expect(store.getSnapshot().generation).toBe(generation);
+  });
+  it("receives replies and lesson decisions in the background without replacing the mounted session", async () => {
+    const { store, fetcher } = setup();
+    const fresh = { ...workspace(), conversations: [{ ...conversation, status: "answered" }], liveClass: { userId: "student-a", status: "confirmed" } };
+    fetcher.mockResolvedValueOnce(json(workspace())).mockResolvedValueOnce(json(fresh));
+    await store.load(); const generation = store.getSnapshot().generation;
+    await store.load(true);
+    expect(store.getSnapshot()).toMatchObject({ status: "ready", generation, workspace: { conversations: fresh.conversations, liveClass: fresh.liveClass } });
+  });
   it("persists a pending student's message through the API before confirming it", async () => {
     const { store, fetcher } = setup();
     const pending = workspace(); pending.account.status = "pending";

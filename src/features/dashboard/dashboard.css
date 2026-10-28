@@ -37,7 +37,7 @@
 .dashboard-card-body { display:grid; grid-template-columns:minmax(0,1fr) 245px; gap:32px; align-items:center; padding:22px 38px 46px; }
 .dashboard-access-area { min-width:0; }
 .dashboard-access { display:flex; align-items:center; gap:23px; max-width:100%; padding:0; border:0; background:transparent; color:var(--ink); text-align:left; }
-.dashboard-access-word { font-size:clamp(52px,8.2vw,94px); line-height:1.08; letter-spacing:-.08em; font-weight:400; }
+.dashboard-access-word { min-width:0; overflow-wrap:anywhere; font-size:clamp(52px,8.2vw,94px); line-height:1.08; letter-spacing:-.08em; font-weight:400; }
 .dashboard-access-arrow { width:51px; height:51px; margin-top:12px; display:grid; place-items:center; border:1px solid #a79e8e; border-radius:50%; flex-shrink:0; transition:background .2s,color .2s,transform .2s; }
 .dashboard-access:hover .dashboard-access-arrow { background:var(--ink); color:var(--paper); transform:translate(3px,-3px); }
 .dashboard-access-copy { font-size:13px; color:var(--muted); line-height:1.7; max-width:340px; margin-top:20px!important; }
@@ -50,6 +50,8 @@
 .dashboard-path-label { position:absolute; bottom:0; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); background:var(--dashboard-card); padding:4px 8px; }
 .dashboard-card-footer { margin:0 30px; padding:17px 0 19px; border-top:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:15px; font-size:11px; color:var(--muted); }
 .dashboard-card-footer span { display:flex; align-items:center; gap:7px; }
+.dashboard-card-footer button { display:flex; align-items:center; gap:7px; background:transparent; color:inherit; border:0; min-height:36px; padding:0; font-size:11px; }
+.dashboard-card-footer button:hover { text-decoration:underline; text-underline-offset:4px; }
 .dashboard-after { padding-top:24px; display:flex; justify-content:space-between; align-items:center; gap:20px; font-size:12px; color:var(--muted); }
 .dashboard-after p,.dashboard-after button { display:flex; align-items:center; gap:8px; }
 .dashboard-after button { border:0; background:transparent; color:inherit; padding:8px 0; min-height:44px; font-size:12px; }
@@ -276,6 +278,13 @@
 .dashboard .student-messages time { font-size:10px; color:var(--muted); }
 .dashboard .student-messages p { margin-top:8px; font-size:13px; white-space:pre-wrap; overflow-wrap:anywhere; }
 .dashboard .student-sync { margin-top:28px; font-size:11px; color:var(--muted); }
+.dashboard .student-conversation-position { font-size:clamp(22px,2.5vw,31px); letter-spacing:-.045em; line-height:1.2; }
+.student-reply-notice { display:flex; align-items:center; flex-wrap:wrap; gap:15px; padding:18px 22px; margin-bottom:20px; background:#e8ecdf; border:1px solid #ccd2c0; border-radius:8px; }
+.student-reply-notice>svg { flex:none; }
+.student-reply-notice>div { flex:1; min-width:180px; }
+.student-reply-notice strong { font-size:13px; font-weight:500; }
+.student-reply-notice p { font-size:12px; color:#59614f; margin-top:4px; overflow-wrap:anywhere; }
+.student-reply-notice>a { display:flex; align-items:center; gap:8px; min-height:44px; font-size:12px; text-decoration:underline; text-underline-offset:4px; }
 @media (max-width:700px) {
   .dashboard .student-nav { gap:5px 18px; font-size:11px; }
   .dashboard .student-nav button { margin-left:0; }

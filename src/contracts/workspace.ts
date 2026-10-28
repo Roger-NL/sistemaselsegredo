@@ -1,3 +1,5 @@
+import type { LiveClassBooking } from "./live-class";
+
 export type AccountStatus = "active" | "pending" | "rejected" | "suspended";
 export type AccountRole = "student" | "manager";
 export type WorkspaceAccount = { id: string; name: string; email: string; status: AccountStatus; role: AccountRole };
@@ -17,7 +19,7 @@ export type TeacherConversation = {
   subject: string; status: "open" | "answered" | "closed";
   createdAt: string; updatedAt: string; messages: TeacherMessage[];
 };
-export type StudentWorkspace = { account: WorkspaceAccount; learning: LearningProgress; activities: StudentActivity[]; conversations: TeacherConversation[] };
+export type StudentWorkspace = { account: WorkspaceAccount; learning: LearningProgress; activities: StudentActivity[]; conversations: TeacherConversation[]; liveClass: LiveClassBooking | null };
 export type SaveLearningInput = { revision: number; demoSnapshot?: string | null; studySnapshot?: string | null };
 
 // All routes require a verified server session. Mutations require same-origin JSON

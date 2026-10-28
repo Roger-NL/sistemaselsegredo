@@ -25,7 +25,7 @@ vi.mock("react", async importOriginal => {
 });
 
 vi.mock("@/features/dashboard/use-student-workspace", () => ({
-  useStudentWorkspace: () => ({ status: "ready", generation: 1, saving: false, error: "", notice: "", refresh: vi.fn(), workspace: { account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [] } }),
+  useStudentWorkspace: () => ({ status: "ready", generation: 1, saving: false, error: "", notice: "", refresh: vi.fn(), workspace: { account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: mocks.snapshot.state ? encodeSnapshot(mocks.snapshot.state) : null, studySnapshot: null, demoPercent: mocks.snapshot.state ? 62 : 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [], liveClass: null } }),
 }));
 
 import { Dashboard } from "@/features/dashboard/Dashboard";
@@ -37,7 +37,7 @@ import { presentationCards } from "@/features/demo/content/presentation";
 import { listeningTarget } from "@/features/demo/model/listening";
 import { practice } from "@/features/demo/model/practice";
 import { createDemo, transition } from "@/features/demo/model/reducer";
-import { STORAGE_KEY, clearDemo, restoreDemo, saveDemo } from "@/features/demo/session/storage";
+import { STORAGE_KEY, clearDemo, encodeSnapshot, restoreDemo, saveDemo } from "@/features/demo/session/storage";
 import { TheoryExperience } from "@/features/theory/TheoryExperience";
 import { THEORY_KEY, completeStep, emptyProgress, normalizeAnswer, studySteps } from "@/features/theory/progress";
 import legacy from "./fixtures/demo-legacy-navigation.json";
@@ -102,6 +102,14 @@ const glossary = (html: string) => [...html.matchAll(/<summary><span lang="en">(
 beforeEach(() => { mocks.snapshot = { status: "empty", state: null }; mocks.studyView = "overview"; });
 
 describe("narrative, panel and study journey", () => {
+  it("directs a finished branching conversation to study without showing an incomplete percentage", () => {
+    roundTrip(walk("some"));
+    const html = panel();
+    expect(html).toContain("Concluída");
+    expect(html).toContain('aria-label="Começar meu estudo guiado"');
+    expect(html).not.toContain("62%");
+    expect(html).toContain("Rever minha conversa");
+  });
   it("offers a first conversation and direct study without creating narrative evidence", () => {
     expect(panel()).toContain('aria-label="Acessar minha história"');
     const entry = renderToStaticMarkup(createElement(DemoHost, { experience: true }));

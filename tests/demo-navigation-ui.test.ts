@@ -17,7 +17,7 @@ vi.mock("@/features/demo/session/browser", () => ({
 }));
 
 vi.mock("@/features/dashboard/use-student-workspace", () => ({
-  useStudentWorkspace: () => ({ status: "ready", generation: 1, saving: false, error: "", notice: "", refresh: vi.fn(), workspace: { account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [] } }),
+  useStudentWorkspace: () => ({ status: "ready", generation: 1, saving: false, error: "", notice: "", refresh: vi.fn(), workspace: { account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: mocks.snapshot ? encodeSnapshot(mocks.snapshot.state) : null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [], liveClass: null } }),
 }));
 
 import { DemoHost } from "@/features/demo/DemoHost";
@@ -25,7 +25,7 @@ import { Dashboard } from "@/features/dashboard/Dashboard";
 import { DemoAudioContext, type DemoAudio } from "@/features/demo/audio/use-demo-audio";
 import { Retrospective } from "@/features/demo/components/Retrospective";
 import { createDemo, transition } from "@/features/demo/model/reducer";
-import { decodeSnapshot } from "@/features/demo/session/storage";
+import { decodeSnapshot, encodeSnapshot } from "@/features/demo/session/storage";
 import legacy from "./fixtures/demo-legacy-navigation.json";
 
 const audioController: DemoAudio = {
@@ -86,9 +86,9 @@ describe("honest review of saved test attempts", () => {
     for (const state of [restore(legacy.skipped), mixedLegacyEnding()]) {
       mocks.snapshot = { status: "ok", state };
       const html = renderToStaticMarkup(createElement(Dashboard, { account: { name: "", email: "" } }));
-      expect(html).toContain("Fim do percurso");
+      expect(html).toContain("Conversa concluída");
       expect(html).toContain('aria-label="Rever minha conversa"');
-      expect(html).toContain("Rever.");
+      expect(html).toContain('aria-label="Começar meu estudo guiado"');
       expect(html).not.toContain("Demo concluída");
     }
   });

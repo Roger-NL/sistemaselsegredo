@@ -28,6 +28,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => Pick<Stor
   let timer: ReturnType<typeof setTimeout> | undefined;
   let ticket = 0;
   let edits = 0;
+  let contactEdits = 0;
   const listeners = new Set<() => void>();
   const emit = (patch: Partial<WorkspaceState>) => { state = { ...state, ...patch }; listeners.forEach(listener => listener()); };
   const clearCache = (workspace: StudentWorkspace | null) => {
@@ -57,6 +58,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => Pick<Stor
     if (Object.keys(pending).length) return flush();
     const currentTicket = ticket;
     const currentEdits = edits;
+    const currentContactEdits = contactEdits;
     if (!background || state.status !== "ready") emit({ status: "loading", error: "" });
     loadPromise = (async () => {
       try {
@@ -68,6 +70,8 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => Pick<Stor
           // cannot replace newer work from this same account and revision.
           if (workspace.account.status === "active" && state.workspace?.account.id === workspace.account.id && state.workspace.learning.revision === workspace.learning.revision
             && (edits !== currentEdits || Object.keys(pending).length || writePromise)) workspace.learning = state.workspace.learning;
+          // A background read started before a confirmed send must not erase it.
+          if (state.workspace?.account.id === workspace.account.id && contactEdits !== currentContactEdits) workspace.conversations = state.workspace.conversations;
           replace(workspace);
           if (currentTicket === ticket && (Object.keys(pending).length || writePromise)) emit({ saving:true });
         }
@@ -170,6 +174,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => Pick<Stor
     const result = await payload(response) as { conversation: TeacherConversation };
     if (generation !== state.generation || state.workspace?.account.id !== owner.account.id) throw new Error("A conta conectada mudou. Atualize para conferir o envio.");
     const conversations = [result.conversation, ...state.workspace.conversations.filter(item => item.id !== result.conversation.id)];
+    contactEdits++;
     emit({ workspace: { ...state.workspace, conversations } });
     return result.conversation;
   }

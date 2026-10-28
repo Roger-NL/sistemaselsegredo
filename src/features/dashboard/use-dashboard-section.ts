@@ -17,7 +17,8 @@ export function useDashboardSection(status: string) {
         const target = document.getElementById(requested);
         if (!target || target.closest("[hidden]")) return;
         target.scrollIntoView({ block:"start", behavior:"instant" });
-        target.querySelector<HTMLElement>("h2")?.focus({ preventScroll:true });
+        const focusTarget = target.hasAttribute("tabindex") ? target : target.querySelector<HTMLElement>("h2");
+        focusTarget?.focus({ preventScroll:true });
       });
     };
     reveal();

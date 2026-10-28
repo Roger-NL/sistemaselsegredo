@@ -58,15 +58,16 @@ export function StudentLiveClass({ workspace, disabled }: { workspace: StudentWo
       setData(previous => previous ? { ...previous, booking: result.booking, slots: [] } : previous);
       setNotice("Pedido enviado ao professor. Acompanhe a confirmação aqui.");
       dialog.current?.close(); setSelected("");
-      void studentWorkspace.load(true);
+      void studentWorkspace.refresh();
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível agendar. Tente novamente."); }
     finally { setBusy(false); }
   }
-  return <article className="student-progress-card live-class-card" id="aula-ao-vivo">
+  return <article className="student-progress-card live-class-card" id="aula-ao-vivo" tabIndex={-1} aria-label="Minha aula ao vivo">
     <span><CalendarDays size={17} aria-hidden="true" />Minha aula ao vivo</span>
     <strong className="live-class-title">{booking ? LIVE_CLASS_LABELS[booking.status] : loading ? "Carregando…" : available ? "Sua vez de conversar." : "Um próximo encontro."}</strong>
     <p>Uma aula gratuita com o professor, depois do estudo da cafeteria.</p>
     {booking && <div className="live-class-booking"><time dateTime={booking.start}>{liveClassDate(booking.start, booking.timezone)}</time><small>1 hora · {booking.timezone}</small>{booking.reason && <p>{booking.reason}</p>}{booking.status === "confirmed" && (booking.meetingUrl ? <a href={booking.meetingUrl} target="_blank" rel="noreferrer">Entrar na aula ↗</a> : <p>O professor enviará as orientações de acesso pelo contato do painel.</p>)}{booking.status === "pending" && <p>O professor recebeu seu pedido. O horário será confirmado nesta área.</p>}</div>}
+    {booking && ["pending", "confirmed"].includes(booking.status) && <a href="#contato">Falar com o professor ↗</a>}
     {!booking && !available && !loading && <p className="live-class-lock"><LockKeyhole size={16} aria-hidden="true" />{workspace.account.status !== "active" ? "Aguardando aprovação do seu acesso." : `Conclua 100% do estudo guiado para liberar a agenda. ${data?.completed ?? workspace.learning.studyCompleted} de ${workspace.learning.studyTotal} práticas concluídas.`}</p>}
     <button type="button" className="dashboard-primary" disabled={!available || disabled || loading} onClick={() => { setNotice(""); dialog.current?.showModal(); void load(); }}><CalendarDays size={16} aria-hidden="true" />{booking?.status === "cancelled" ? "Escolher outro horário" : booking?.status === "pending" ? "Pedido enviado" : booking?.status === "confirmed" ? "Aula agendada" : booking?.status === "completed" ? "Aula concluída" : "Agendar minha aula"}</button>
     {notice && <p role="status" className="student-sent"><Check size={16} />{notice}</p>}

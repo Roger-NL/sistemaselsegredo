@@ -2,9 +2,23 @@
 
 ## Estado vigente — gestão e aluno conectados
 
-Desde a integração de 27/10/2026, o painel exige autenticação real, reúne **Minha história, Meu avanço, Minhas atividades e Professor**, e usa os contratos de `src/contracts/workspace.ts`. Conversa e estudo são persistidos por UID no Firestore. Contas novas aguardam aprovação, com contato disponível; contas antigas com perfil mantêm seu acesso. O ADM lê esse mesmo progresso, decide acessos e responde às conversas do aluno.
+Desde a integração de 27/10/2026, o painel exige autenticação real, reúne **Meu percurso, Meu avanço, Minhas atividades, Minha aula ao vivo e Professor**, e usa os contratos de `src/contracts/workspace.ts`. Conversa e estudo são persistidos por UID no Firestore. Contas novas aguardam aprovação, com contato disponível; contas antigas com perfil mantêm seu acesso. O ADM lê esse mesmo progresso, decide acessos e responde às conversas do aluno.
 
 O modo visual foi removido da entrada, do dashboard e da história. Não se usam conta ilustrativa, dados de exemplo ou sucesso simulado. Cache anônimo antigo não é associado automaticamente a contas. Mutações de aluno exigem sessão, mesma origem, UID correspondente e revisão válida; resets recebidos descartam tentativas antigas. Os detalhes atuais, incluindo APIs, frequência de atualização e medidas de avanço, estão em [ADMINISTRACAO.md](ADMINISTRACAO.md).
+
+### Próximo passo e respostas — 28/10/2026
+
+A ação principal acompanha os dados salvos da conta: começar/retomar a conversa, ir ao estudo, escolher um horário após todas as práticas ou acompanhar a aula solicitada/confirmada. Cancelamento permite nova escolha conforme a elegibilidade; uma aula realizada leva à revisão, sem oferecer outro benefício. Uma reserva existente permanece visível após reset de progresso. Acesso pendente ou indisponível mantém a prática bloqueada e oferece contato.
+
+Ao completar o estudo, a visão geral e a tela final oferecem acesso direto à aula no painel. Durante o salvamento da última prática, o atalho aguarda a confirmação; quando já existe um pedido ou aula, leva ao acompanhamento. A ação de estudo concluído passa a se chamar **Revisitar meu estudo**.
+
+O avanço da conversa agora mostra a parte recuperável ou **Concluída**, com a explicação de que a pessoa chegou ao fim. O percentual de atividades de todos os ramos não aparece como medida de conclusão do percurso; ele podia ficar em 62% mesmo no fim de uma conversa válida. O estudo continua contando somente os IDs válidos das práticas salvas, com a mesma regra usada pela agenda e pela ADM.
+
+O `GET /api/student/workspace` também retorna `liveClass`, lida pelo UID da sessão e conferida contra o proprietário da reserva. No painel visível, as leituras em segundo plano ocorrem a cada 30 segundos e ao retomar/reconectar. Na conversa e no estudo, não há polling periódico. A atualização não oculta a composição da mensagem nem remonta a sessão quando apenas respostas/agendamentos mudam. Um GET iniciado antes de um envio confirmado não apaga aquela mensagem.
+
+Respostas reais do professor ficam destacadas no início do painel. **Ver resposta** seleciona a conversa correspondente e leva à área de contato. O destaque significa que existe resposta disponível, sem alegar quantidade de mensagens não lidas nem marcar leitura. Conversas encerradas também podem ser consultadas. O atalho principal da aula rola e posiciona o foco no cartão; o cartão oferece contato direto com o professor. A abertura original da história permanece no acesso secundário **Rever minha conversa**.
+
+Verificação: 390 testes em 57 arquivos, lint, TypeScript e build aprovados. Os testes incluem percursos reais até o fim nos três apoios, a transição ao estudo, 23/24 versus 24/24 práticas, estados de agendamento, isolamento de conta, polling visível e a corrida entre envio e leitura. No Chrome, a conta existente foi usada para conferir respostas, estudo concluído, aula confirmada, atalhos e preservação de rascunho em computador e celular. Nenhuma mensagem foi enviada nem reserva alterada nesta entrega.
 
 ## Histórico das etapas anteriores
 

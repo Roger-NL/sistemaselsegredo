@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { studentWorkspace } from "./workspace-store";
+import { subscribeWorkspaceRefresh } from "./workspace-refresh";
 
 /** One validated session shared by the panel, conversation and study. */
 export function StudentWorkspaceSession() {
@@ -15,25 +16,20 @@ export function StudentWorkspaceSession() {
 
   useEffect(() => {
     if (!learning) return;
-    void studentWorkspace.load();
-    const refresh = () => { if (document.visibilityState !== "hidden") void studentWorkspace.load(); };
+    void studentWorkspace.load(true);
+    const stopRefresh = subscribeWorkspaceRefresh(() => { void studentWorkspace.load(true); }, pathname === "/dashboard");
     const flush = () => { void studentWorkspace.flush(); };
     const beforeUnload = (event: BeforeUnloadEvent) => {
       if (studentWorkspace.hasPendingChanges()) { event.preventDefault(); event.returnValue = ""; }
     };
-    window.addEventListener("focus", refresh);
-    window.addEventListener("online", refresh);
-    document.addEventListener("visibilitychange", refresh);
     window.addEventListener("pagehide", flush);
     window.addEventListener("beforeunload", beforeUnload);
     return () => {
-      window.removeEventListener("focus", refresh);
-      window.removeEventListener("online", refresh);
-      document.removeEventListener("visibilitychange", refresh);
+      stopRefresh();
       window.removeEventListener("pagehide", flush);
       window.removeEventListener("beforeunload", beforeUnload);
     };
-  }, [learning]);
+  }, [learning, pathname]);
 
   useEffect(() => {
     const wasLearning = ["/dashboard", "/demo", "/demo/estudo"].includes(previous.current);

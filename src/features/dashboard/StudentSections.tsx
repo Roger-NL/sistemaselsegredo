@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { StudentLiveClass } from "@/features/live-class/StudentLiveClass";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { ArrowUpRight, BookOpen, Check, MessageCircle, Send } from "lucide-react";
 import type { StudentWorkspace, TeacherConversation } from "@/contracts/workspace";
 import { studentWorkspace } from "./workspace-store";
 import { conversationPosition } from "@/features/demo/session/position";
+import { OPEN_TEACHER_CONVERSATION_EVENT } from "./next-step";
 
 export function formatStudentDate(value: string) {
   const date = new Date(value);
@@ -20,7 +21,7 @@ export function StudentSections({ workspace, disabled }: { workspace: StudentWor
     <section className="student-section" id="avanco" aria-labelledby="student-progress-title">
       <div className="student-section-heading"><div><p className="dashboard-overline">Um passo de cada vez</p><h2 id="student-progress-title" tabIndex={-1}>Meu avanço.</h2></div><span>{learning.updatedAt ? `Atualizado em ${formatStudentDate(learning.updatedAt)}` : "Seu percurso começa aqui"}</span></div>
       <div className="student-progress-grid">
-        <article className="student-progress-card"><span>Conversa da cafeteria</span><strong>{learning.demoPercent}%</strong><progress value={learning.demoPercent} max={100} aria-label="Avanço na conversa da cafeteria" /><p>{position ? position.completed ? "Você chegou ao fim da conversa." : `Parte ${position.part} de 10. Seu ponto de retorno está guardado.` : "Ainda não há progresso desta história salvo na sua conta."}</p>{position && account.status === "active" && <Link href="/demo" prefetch={true}>{position.completed ? "Rever conversa" : "Retomar conversa"}<ArrowUpRight size={16} aria-hidden="true" /></Link>}</article>
+        <article className="student-progress-card"><span>Conversa da cafeteria</span><strong className="student-conversation-position">{position ? position.completed ? "Concluída" : `Parte ${position.part} de 10` : "Ainda não começou"}</strong><progress value={position?.completed ? 10 : position ? position.part - 1 : 0} max={10} aria-label="Percurso da conversa da cafeteria" /><p>{position ? position.completed ? "Você chegou ao fim da conversa. Seu percurso está salvo." : "Seu ponto de retorno está guardado na sua conta." : "Ainda não há progresso desta história salvo na sua conta."}</p>{position && account.status === "active" && <Link href="/demo" prefetch={true}>{position.completed ? "Rever conversa" : "Retomar conversa"}<ArrowUpRight size={16} aria-hidden="true" /></Link>}</article>
         <article className="student-progress-card"><span>Estudo guiado</span><strong>{learning.studyCompleted}<small> / {learning.studyTotal}</small></strong><progress value={learning.studyCompleted} max={learning.studyTotal || 1} aria-label="Práticas de estudo concluídas" /><p>Práticas concluídas. Você pode revisitar os blocos quando quiser.</p>{account.status === "active" && <Link href="/demo/estudo" prefetch={false}>Ir para meu estudo<ArrowUpRight size={16} aria-hidden="true" /></Link>}</article>
         <StudentLiveClass key={account.id} workspace={workspace} disabled={disabled} />
       </div>
@@ -45,6 +46,16 @@ export function TeacherContact({ conversations, disabled }: { conversations: Tea
   const labels = { open: "Aguardando resposta", answered: "Professor respondeu", closed: "Conversa encerrada" };
   const sorted = [...conversations].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
+  useEffect(() => {
+    const reveal = (event: Event) => {
+      const id = (event as CustomEvent<unknown>).detail;
+      if (sending || typeof id !== "string" || !conversations.some(item => item.id === id)) return;
+      setSelected(id); setBody(""); setSubject(""); setError(""); setNotice("");
+    };
+    window.addEventListener(OPEN_TEACHER_CONVERSATION_EVENT, reveal);
+    return () => window.removeEventListener(OPEN_TEACHER_CONVERSATION_EVENT, reveal);
+  }, [conversations, sending]);
+
   function choose(id: string | null) {
     if (sending) return;
     setSelected(id); setBody(""); setSubject(""); setError(""); setNotice("");
@@ -62,7 +73,7 @@ export function TeacherContact({ conversations, disabled }: { conversations: Tea
 
   return <section className="student-section" id="contato" aria-labelledby="student-contact-title">
     <div className="student-section-heading"><div><p className="dashboard-overline">Vamos conversar</p><h2 id="student-contact-title" tabIndex={-1}>Fale com o professor.</h2></div><MessageCircle size={24} strokeWidth={1.4} aria-hidden="true" /></div>
-    <p className="student-contact-intro">Envie uma dúvida ou conte como está sendo seu estudo. As respostas ficam nesta área; use “Atualizar painel” para conferir novas mensagens.</p>
+    <p className="student-contact-intro">Envie uma dúvida ou conte como está sendo seu estudo. As respostas aparecem aqui e o painel confere atualizações automaticamente enquanto está aberto.</p>
     <div className="student-contact-grid">
       <aside className="student-conversations" aria-label="Minhas conversas com o professor"><button className="student-new-conversation" type="button" onClick={() => choose(null)} disabled={sending} aria-pressed={!current}>Nova conversa<Send size={15} aria-hidden="true" /></button>
         {sorted.length ? <ul>{sorted.map(conversation => <li key={conversation.id}><button type="button" disabled={sending} aria-pressed={selected === conversation.id} onClick={() => choose(conversation.id)}><strong>{conversation.subject}</strong><span>{labels[conversation.status]}</span><time dateTime={conversation.updatedAt}>{formatStudentDate(conversation.updatedAt)}</time></button></li>)}</ul> : <p className="student-small">Você ainda não enviou mensagens. Comece uma nova conversa para falar com o professor.</p>}

@@ -57,6 +57,17 @@ beforeEach(() => {
 });
 
 describe("connected student and manager services", () => {
+  it("gives the student only their own live class and counts valid saved practices", async () => {
+    const booking = { id: student.uid, userId: student.uid, status: "confirmed", start: "2026-11-01T13:00:00Z", timezone: "Europe/Lisbon" };
+    memory.docs.set("demo_live_classes/manager", { ...booking, id: "manager", userId: "manager" });
+    memory.docs.set("learning_states/student", { studyCompleted: 24 });
+    expect(await getStudentWorkspace(student)).toMatchObject({ liveClass: null, learning: { studyCompleted: 0 } });
+    memory.docs.set("demo_live_classes/student", booking);
+    await saveLearning(student, { revision: 0, studySnapshot: study });
+    expect(await getStudentWorkspace(student)).toMatchObject({ liveClass: booking, learning: { studyCompleted: 1 } });
+    memory.docs.set("demo_live_classes/student", { ...booking, userId: "manager" });
+    expect((await getStudentWorkspace(student)).liveClass).toBeNull();
+  });
   it("counts actual Auth accounts, excluding orphan profiles and ignoring fictional legacy progress", async () => {
     memory.docs.set("users/orphan", { name: "orphan", progress: 100 });
     const data = await getManagementSnapshot(manager);

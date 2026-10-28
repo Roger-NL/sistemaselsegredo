@@ -12,9 +12,11 @@ vi.mock("@/features/demo/session/browser", () => ({ subscribe: () => () => {}, g
 import { Dashboard } from "@/features/dashboard/Dashboard";
 import { TeacherContact, TeacherThread } from "@/features/dashboard/StudentSections";
 import { PracticeAccess } from "@/features/dashboard/PracticeAccess";
+import { TheoryExperience } from "@/features/theory/TheoryExperience";
+import { emptyProgress, studySteps } from "@/features/theory/progress";
 
 beforeEach(() => {
-  mocks.state = { status: "ready", generation: 1, saving: false, error: "", notice: "", workspace: { account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [] } };
+  mocks.state = { status: "ready", generation: 1, saving: false, error: "", notice: "", workspace: { account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [], liveClass: null } };
 });
 const render = () => renderToStaticMarkup(createElement(Dashboard, { account: { name: "", email: "" } }));
 
@@ -23,7 +25,8 @@ describe("student dashboard", () => {
     const html = render();
     for (const label of ["Minhas atividades.", "Meu avanço.", "Fale com o professor.", "Ainda não há atividades registradas.", "Você ainda não enviou mensagens."]) expect(html).toContain(label);
     for (const id of ["jornada", "atividades", "avanco", "contato"]) expect(html).toContain(`id="${id}"`);
-    expect(html).toContain("0%");
+    expect(html).toContain("Ainda não começou");
+    expect(html).toContain("Seu próximo passo");
     expect(html).not.toMatch(/whatsapp|wa\.me|exemplo|ilustrativ|prévia|modo demonstração|roger@example/i);
     // Optional static visual harness, outside the app and without adding a product preview route.
     if (process.env.ALUNO_VISUAL_HTML) {
@@ -66,7 +69,7 @@ describe("student dashboard", () => {
     mocks.state = { ...mocks.state, status: "error", error: "Não foi possível conectar" };
     expect(render()).toContain("Tentar novamente");
     expect(render()).toContain("Não foi possível conectar");
-    expect(render()).not.toContain("0%");
+    expect(render()).not.toContain('aria-label="Percurso da conversa da cafeteria"');
   });
 
   it("offers explicit sign-in after expiration instead of opening practice", () => {
@@ -75,5 +78,22 @@ describe("student dashboard", () => {
     expect(html).toContain("Entre para continuar.");
     expect(html).toContain('href="/comecar?modo=entrar"');
     expect(html).not.toContain("Começar a história");
+  });
+
+  it("connects saved study completion to booking, waiting for persistence and respecting an existing booking", () => {
+    const theory = () => renderToStaticMarkup(createElement(TheoryExperience, { publishedAudio: {} }));
+    const data = mocks.state!.workspace!;
+    data.learning.studySnapshot = JSON.stringify({ ...emptyProgress, completed: studySteps.slice(0, 23).map(item => item.step.id) });
+    expect(theory()).not.toContain('class="study-completion"');
+    data.learning.studySnapshot = JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) });
+    mocks.state!.saving = true;
+    expect(theory()).toContain('disabled="">Confirmando seu progresso');
+    expect(theory()).not.toContain("Agendar minha aula gratuita");
+    mocks.state!.saving = false;
+    expect(theory()).toContain('href="/dashboard#aula-ao-vivo"');
+    expect(theory()).toContain("Agendar minha aula gratuita");
+    data.liveClass = { id: "student", userId: "student", status: "confirmed" } as NonNullable<typeof data.liveClass>;
+    expect(theory()).toContain("Ver minha aula ao vivo");
+    expect(theory()).not.toContain("Agendar minha aula gratuita");
   });
 });

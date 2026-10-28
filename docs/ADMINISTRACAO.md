@@ -25,7 +25,7 @@ Mutações de uma mesma conta são serializadas por uma trava no Firestore, com 
 
 O cliente não importa tentativas anônimas antigas para uma conta. Revalida identidade/status/revisão antes de gravar; o header `X-Workspace-Uid` também precisa corresponder à sessão na própria mutação para impedir corridas entre abas com contas diferentes. A prática fica bloqueada para pendentes, mas painel e contato continuam disponíveis.
 
-Mensagens de alunos são persistidas em `teacher_conversations` e aparecem em **Mensagens** no ADM. A resposta do professor volta à mesma conversa e gera atividade no aluno. O manager pode responder e encerrar uma conversa; o aluno pode responder enquanto aberta ou iniciar outra. Cada conversa admite até 100 mensagens, corpo até 4.000 caracteres e documento até 750 KB. Não há contato fictício, e-mail externo ou WhatsApp inventado. O painel administrativo consulta novamente a cada 30 segundos, ao retomar a janela e pelo botão Atualizar; o aluno atualiza ao retomar a aba ou por Atualizar painel.
+Mensagens de alunos são persistidas em `teacher_conversations` e aparecem em **Mensagens** no ADM. A resposta do professor volta à mesma conversa e gera atividade no aluno. O manager pode responder e encerrar uma conversa; o aluno pode responder enquanto aberta ou iniciar outra. Cada conversa admite até 100 mensagens, corpo até 4.000 caracteres e documento até 750 KB. Não há contato fictício, e-mail externo ou WhatsApp inventado. Os painéis administrativo e do aluno consultam novamente a cada 30 segundos enquanto visíveis, ao retomar a janela e pelo botão Atualizar. O painel do aluno destaca respostas disponíveis e abre a conversa correspondente, sem contagem fictícia de não lidas.
 
 ## Acompanhamento dos alunos
 
