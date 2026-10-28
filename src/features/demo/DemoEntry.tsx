@@ -19,7 +19,7 @@ export function DemoEntry({ onStart }: { onStart: (profile: SupportProfile) => v
         <p id="entry-support-note">Você pode mudar o apoio depois.</p>
         <div className="profile-list">{profiles.map(option => <label key={option.id} className={`profile-option ${profile === option.id ? "selected" : ""}`}>
           <input type="radio" name="support" value={option.id} checked={profile === option.id} onChange={() => setProfile(option.id)} />
-          <span className="profile-option-copy"><strong><span className="desktop-context">{option.label}</span><span className="mobile-context">{option.mobileLabel}</span></strong><small><span className="desktop-context">{option.description}</span><span className="mobile-context">{option.mobileDescription}</span></small></span>
+          <span className="profile-option-copy"><strong><span className="desktop-context">{option.label}</span><span className="mobile-context">{option.mobileLabel}</span></strong><small><span className="desktop-context">{option.description}</span><span className="mobile-context">{option.mobileEntryDescription}</span></small></span>
           <span className="profile-indicator" aria-hidden="true">{profile === option.id && <Check size={14} strokeWidth={2.5} />}</span>
         </label>)}</div>
       </fieldset>
