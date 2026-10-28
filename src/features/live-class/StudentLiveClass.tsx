@@ -30,6 +30,7 @@ export function StudentLiveClass({ workspace, disabled }: { workspace: StudentWo
     } catch (cause) { if (ticket === sequence.current) setError(cause instanceof Error ? cause.message : "Não foi possível carregar sua aula."); }
     finally { if (ticket === sequence.current) setLoading(false); }
   }, [month, uid]);
+  // A panel refresh must also reload the booking when study progress is unchanged.
   useEffect(() => {
     const sequenceRef = sequence;
     void load();
@@ -37,7 +38,7 @@ export function StudentLiveClass({ workspace, disabled }: { workspace: StudentWo
     const interval = setInterval(refresh, 30_000);
     window.addEventListener("focus", refresh);
     return () => { sequenceRef.current++; clearInterval(interval); window.removeEventListener("focus", refresh); };
-  }, [load, workspace.learning.studyCompleted, workspace.account.status]);
+  }, [load, workspace]);
   const booking = data?.booking;
   const available = Boolean(data?.eligible && (!booking || booking.status === "cancelled") && workspace.account.status === "active");
   const currentMonth = data ? new Intl.DateTimeFormat("sv-SE", { timeZone: data.timezone, year: "numeric", month: "2-digit" }).format(new Date()) : "";
