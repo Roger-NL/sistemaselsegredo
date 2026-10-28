@@ -5,7 +5,7 @@ import { Brand } from "@/components/ui/Brand";
 import { ArrowLeft, ArrowRight, BookOpen, Check, Coffee, LockKeyhole, MessageCircle, MicOff, MoveUpRight, Puzzle, Lightbulb, PenLine, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { getMotionPreference, getServerPreference, subscribePreferences } from "@/features/dashboard/preferences";
-import { presentationFrames, presentationSceneStart, presentationSteps } from "./content";
+import { canVisitPresentationScene, presentationFrames, presentationSceneStart, presentationSteps } from "./content";
 import "./presentation.css";
 
 type Props = { review?: boolean; busy?: boolean; error?: string; onFinish: () => void };
@@ -40,6 +40,7 @@ function Scene({ visual, frame }: { visual: string; frame: number }) {
 export function Presentation({ review = false, busy = false, error = "", onFinish }: Props) {
   const reduced = useSyncExternalStore(subscribePreferences, getMotionPreference, getServerPreference);
   const [cursor, setCursor] = useState(0);
+  const [furthestFrame, setFurthestFrame] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
   const frame = presentationFrames[cursor];
   const step = presentationSteps[frame.stepIndex];
@@ -49,8 +50,13 @@ export function Presentation({ review = false, busy = false, error = "", onFinis
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [cursor]);
 
+  function moveTo(next: number) {
+    setCursor(next);
+    setFurthestFrame(previous => Math.max(previous, next));
+  }
+
   return <main className="presentation" data-scene={frame.visual} data-reduced-motion={reduced} aria-label={review ? "Rever apresentação do BasedSpeak" : "Apresentação do BasedSpeak"} aria-busy={busy}>
-    <header className="presentation-header"><Brand /><button type="button" disabled={busy} onClick={onFinish}>{review ? "Voltar ao painel" : "Pular apresentação"}<ArrowRight size={15} aria-hidden="true" /></button></header>
+    <header className="presentation-header"><Brand href="/dashboard" />{review && <button type="button" disabled={busy} onClick={onFinish}>Voltar ao painel<ArrowRight size={15} aria-hidden="true" /></button>}</header>
     <div className="presentation-stage" key={cursor}>
       <div className="presentation-art" aria-hidden="true"><Scene visual={frame.visual} frame={frame.frameIndex} /></div>
       <section className="presentation-copy">
@@ -60,8 +66,8 @@ export function Presentation({ review = false, busy = false, error = "", onFinis
       </section>
     </div>
     <footer className="presentation-footer">
-      <div className="presentation-progress"><p aria-live="polite" aria-atomic="true">{String(frame.stepIndex + 1).padStart(2, "0")} / 05 <span>{step.label}</span><span className="presentation-frame-count">{frame.frameIndex + 1}/{step.frames.length}</span></p><nav aria-label="Etapas da apresentação">{presentationSteps.map((item, i) => <button key={item.label} type="button" aria-label={`Etapa ${i + 1}: ${item.label}`} aria-current={frame.stepIndex === i ? "step" : undefined} disabled={busy} onClick={() => setCursor(presentationSceneStart(i))}><span /></button>)}</nav></div>
-      <div className="presentation-actions"><button type="button" className="presentation-back" aria-label="Voltar" disabled={cursor === 0 || busy} onClick={() => setCursor(cursor - 1)}><ArrowLeft size={17} aria-hidden="true" /><span>Voltar</span></button><button type="button" className="presentation-next" disabled={busy} onClick={() => last ? onFinish() : setCursor(cursor + 1)}>{busy ? "Salvando…" : last ? review ? "Voltar ao painel" : "Abrir meu painel" : "Continuar"}<ArrowRight size={17} aria-hidden="true" /></button></div>
+      <div className="presentation-progress"><p aria-live="polite" aria-atomic="true">{String(frame.stepIndex + 1).padStart(2, "0")} / 05 <span>{step.label}</span><span className="presentation-frame-count">{frame.frameIndex + 1}/{step.frames.length}</span></p><nav aria-label="Etapas da apresentação">{presentationSteps.map((item, i) => <button key={item.label} type="button" aria-label={`Etapa ${i + 1}: ${item.label}`} aria-current={frame.stepIndex === i ? "step" : undefined} disabled={busy || !canVisitPresentationScene(i, furthestFrame, review)} onClick={() => moveTo(presentationSceneStart(i))}><span /></button>)}</nav></div>
+      <div className="presentation-actions"><button type="button" className="presentation-back" aria-label="Voltar" disabled={cursor === 0 || busy} onClick={() => moveTo(cursor - 1)}><ArrowLeft size={17} aria-hidden="true" /><span>Voltar</span></button><button type="button" className="presentation-next" disabled={busy} onClick={() => last ? onFinish() : moveTo(cursor + 1)}>{busy ? "Salvando…" : last ? review ? "Voltar ao painel" : "Abrir meu painel" : "Continuar"}<ArrowRight size={17} aria-hidden="true" /></button></div>
       {error && <p className="presentation-error" role="alert">{error}</p>}
     </footer>
   </main>;

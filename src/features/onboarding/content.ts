@@ -38,3 +38,9 @@ export const presentationSteps = [
 
 export const presentationFrames = presentationSteps.flatMap((step, stepIndex) => step.frames.map((frame, frameIndex) => ({ ...frame, stepIndex, frameIndex, visual: step.visual })));
 export const presentationSceneStart = (stepIndex: number) => presentationFrames.findIndex(frame => frame.stepIndex === stepIndex);
+
+/** First viewing follows the frames in order; review can jump freely. */
+export function canVisitPresentationScene(stepIndex: number, furthestFrame: number, review: boolean) {
+  const start = presentationSceneStart(stepIndex);
+  return start >= 0 && (review || start <= furthestFrame);
+}

@@ -22,6 +22,19 @@ describe("student presentation persistence", () => {
     expect(mocks.doc).toHaveBeenCalledWith("student-a");
     expect(mocks.principal).toHaveBeenCalledWith(expect.any(Request), { allowBearer: false });
   });
+  it("shows once for both older and newly created accounts, regardless of existing learning progress", async () => {
+    for (const createdAt of ["2020-01-01T00:00:00Z", "2026-10-28T12:00:00Z"]) {
+      mocks.get.mockResolvedValueOnce({ exists: true, data: () => ({ createdAt, studyCompleted: 24, accountStatus: "active" }) });
+      expect(await (await GET(new Request("https://based.test/api/student/presentation"))).json()).toEqual({ uid: "student-a", completed: false });
+    }
+    expect(mocks.update).not.toHaveBeenCalled();
+  });
+  it("does not carry one account's presentation completion into another account", async () => {
+    mocks.doc.mockImplementation(uid => ({ get: async () => ({ exists: true, data: () => uid === "student-a" ? { presentationCompletedAt: "2026-10-28T12:00:00Z" } : {} }) }));
+    expect(await (await GET(new Request("https://based.test/api/student/presentation"))).json()).toEqual({ uid: "student-a", completed: true });
+    mocks.principal.mockResolvedValueOnce({ uid: "student-b" });
+    expect(await (await GET(new Request("https://based.test/api/student/presentation"))).json()).toEqual({ uid: "student-b", completed: false });
+  });
   it("writes exactly one private presentation field without granting access or changing progress", async () => {
     const response = await POST(request());
     expect(response.status).toBe(200); expect(await response.json()).toEqual({ uid: "student-a", completed: true });
