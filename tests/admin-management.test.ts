@@ -36,7 +36,7 @@ describe("real management data validation", () => {
     expect(managementUser(identity, { accountStatus: "pending" }).status).toBe("pending");
   });
   it("combines actual conversation and study progress and supports accent-insensitive filters", () => {
-    const user = managementUser(identity, {}, { demoPercent: 100, studyCompleted: studySteps.length });
+    const user = managementUser(identity, {}, { demoPercent: 100, studySnapshot: JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) }) });
     expect(user.progress).toBe(100);
     expect(filterUsers([user], "julia", "active", "student")).toEqual([user]);
     expect(filterUsers([user], "example.com", "pending", "all")).toEqual([]);

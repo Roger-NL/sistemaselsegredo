@@ -5,7 +5,7 @@ import type { RequestPrincipal } from "@/server/auth/principal";
 import { RequestAuthError } from "@/server/auth/request-auth";
 import { assertOnlyKeys, RequestPayloadError } from "@/server/http/request";
 import { consumeRateLimit } from "@/server/http/rate-limit";
-import { accountStatus, parseStudySnapshot } from "@/server/workspace/validation";
+import { accountStatus, savedStudyCompleted } from "@/server/workspace/validation";
 import { studySteps } from "@/features/theory/progress";
 import { monthKey, monthSlots, offsetMonth } from "@/features/live-class/calendar";
 import type { LiveClassAvailability, LiveClassBooking } from "@/contracts/live-class";
@@ -17,10 +17,6 @@ const learning = (uid: string) => getAdminDb().collection("learning_states").doc
 const profile = (uid: string) => getAdminDb().collection("users").doc(uid);
 export const liveClassTimezone = () => process.env.LIVE_CLASS_TIMEZONE || process.env.GOOGLE_CALENDAR_TIMEZONE || "Europe/Lisbon";
 const lockId = (start: string) => createHash("sha256").update(start).digest("hex");
-function progress(data: Record<string, unknown> = {}) {
-  // Derive eligibility from the saved practices, never a submitted percentage.
-  try { return parseStudySnapshot(data.studySnapshot ?? null).studyCompleted; } catch { return 0; }
-}
 function active(exists: boolean, data: Record<string, unknown> = {}) {
   if (!exists || accountStatus(data.accountStatus) !== "active") throw new RequestAuthError("Seu acesso aguarda aprovação da gestão.", 403);
 }
@@ -32,7 +28,7 @@ function checkedMonth(value: string | null, timezone: string, now = new Date()) 
 export async function getLiveClass(principal: RequestPrincipal, requestedMonth: string | null): Promise<LiveClassAvailability> {
   const timezone = liveClassTimezone(), month = checkedMonth(requestedMonth, timezone);
   const [user, saved, existing] = await Promise.all([profile(principal.uid).get(), learning(principal.uid).get(), bookings().doc(principal.uid).get()]);
-  const completed = progress(saved.data()), total = studySteps.length;
+  const completed = savedStudyCompleted(saved.data()), total = studySteps.length;
   const eligible = user.exists && accountStatus(user.data()?.accountStatus) === "active" && completed === total;
   const booking = existing.exists ? existing.data() as LiveClassBooking : null;
   let slots = eligible && (!booking || booking.status === "cancelled") ? monthSlots(month, timezone) : [];
@@ -55,7 +51,7 @@ export async function bookLiveClass(principal: RequestPrincipal, body: Record<st
   return getAdminDb().runTransaction(async tx => {
     const [user, saved, previous, held] = await Promise.all([tx.get(profile(principal.uid)), tx.get(learning(principal.uid)), tx.get(ref), tx.get(lock)]);
     active(user.exists, user.data());
-    if (progress(saved.data()) !== studySteps.length) throw new RequestAuthError("Conclua 100% do estudo guiado para agendar sua aula gratuita.", 403);
+    if (savedStudyCompleted(saved.data()) !== studySteps.length) throw new RequestAuthError("Conclua 100% do estudo guiado para agendar sua aula gratuita.", 403);
     const current = previous.exists ? previous.data() as LiveClassBooking : null;
     if (current && current.status !== "cancelled") {
       if (current.start === slot.start && ["pending", "confirmed"].includes(current.status)) return { booking: current };

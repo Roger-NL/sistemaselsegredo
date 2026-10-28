@@ -63,6 +63,17 @@ describe("connected student and manager services", () => {
     expect(data.users).toHaveLength(2); expect(data.users.every(user => user.progress === 0)).toBe(true);
     expect(data.conversations).toEqual([]);
   });
+  it("joins the same saved practices and live booking into follow-up, ignoring orphan booking records", async () => {
+    await saveLearning(student, { revision: 0, studySnapshot: JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) }) });
+    let snapshot = await getManagementSnapshot(manager);
+    expect(snapshot.users.find(user => user.id === student.uid)).toMatchObject({ canBookLiveClass: true, studyCompleted: 24, liveClass: null });
+    const booking = { id: student.uid, userId: student.uid, status: "confirmed", start: "2026-11-01T13:00:00Z", timezone: "Europe/Lisbon" };
+    memory.docs.set(`demo_live_classes/${student.uid}`, booking);
+    memory.docs.set("demo_live_classes/orphan", { ...booking, id: "orphan", userId: "orphan" });
+    snapshot = await getManagementSnapshot(manager);
+    expect(snapshot.users).toHaveLength(2);
+    expect(snapshot.users.find(user => user.id === student.uid)).toMatchObject({ canBookLiveClass: false, studyCompleted: 24, liveClass: booking });
+  });
   it("creates a real Auth login pending approval, with an actionable password link", async () => {
     const result = await mutateManagement(manager, { type: "create", draft: { name: "New", email: "new@example.com", role: "student", notes: "" } });
     expect(result.resetLink).toContain("resetPassword");

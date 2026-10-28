@@ -1,12 +1,14 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
+import type { LiveClassBooking } from "@/contracts/live-class";
+import { conversationPosition } from "@/features/demo/session/position";
 import type { UserRecord } from "firebase-admin/auth";
 import { getAdminAuth, getAdminDb } from "@/server/firebase";
 import type { RequestPrincipal } from "@/server/auth/principal";
 import { RequestAuthError } from "@/server/auth/request-auth";
 import { consumeRateLimit } from "@/server/http/rate-limit";
 import type { Activity, AdminAction, AdminState, AdminUser, ManagementMutationResult } from "@/contracts/management";
-import { accountStatus, conversationFromData, iso, learningFromData } from "@/server/workspace/validation";
+import { accountStatus, conversationFromData, iso, learningFromData, savedStudyCompleted } from "@/server/workspace/validation";
 import { conversationsRef, learningRef, studentActivityRef, userRef } from "@/server/workspace/service";
 
 const auditRef = () => getAdminDb().collection("management_activity");
@@ -18,28 +20,34 @@ async function allAuthUsers() {
   do { const page = await getAdminAuth().listUsers(1000, token); users.push(...page.users); token = page.pageToken; } while (token);
   return users;
 }
-export function managementUser(identity: UserRecord, savedProfile?: Record<string, unknown>, rawLearning: Record<string, unknown> = {}): AdminUser {
+export function managementUser(identity: UserRecord, savedProfile?: Record<string, unknown>, rawLearning: Record<string, unknown> = {}, liveClass: LiveClassBooking | null = null): AdminUser {
   const learning = learningFromData(rawLearning);
   const profile = savedProfile || {};
   const recordedStatus = savedProfile ? accountStatus(profile.accountStatus) : "pending";
+  const status = identity.disabled ? recordedStatus === "rejected" ? "rejected" : "suspended" : recordedStatus;
+  const studyCompleted = savedStudyCompleted(rawLearning);
+  const booking = liveClass?.userId === identity.uid ? liveClass : null;
   return {
     id: identity.uid, name: typeof profile.name === "string" && profile.name.trim() ? profile.name : identity.displayName || identity.email || "Sem nome",
     email: identity.email || "", role: identity.customClaims?.admin === true ? "manager" : "student",
-    status: identity.disabled ? recordedStatus === "rejected" ? "rejected" : "suspended" : recordedStatus,
+    status,
     createdAt: iso(identity.metadata.creationTime), lastLoginAt: iso(profile.lastLoginDate) || iso(identity.metadata.lastSignInTime),
-    progress: Math.round((learning.demoPercent + (learning.studyTotal ? learning.studyCompleted / learning.studyTotal * 100 : 0)) / 2),
-    demoPercent: learning.demoPercent, studyCompleted: learning.studyCompleted, studyTotal: learning.studyTotal,
+    progress: Math.round((learning.demoPercent + (learning.studyTotal ? studyCompleted / learning.studyTotal * 100 : 0)) / 2),
+    demoPercent: learning.demoPercent, studyCompleted, studyTotal: learning.studyTotal,
+    conversation: conversationPosition(learning.demoSnapshot), lastLearningAt: learning.updatedAt, liveClass: booking,
+    canBookLiveClass: status === "active" && studyCompleted === learning.studyTotal && (!booking || booking.status === "cancelled"),
     loginResetAt: iso(profile.loginResetAt), notes: typeof profile.managementNotes === "string" ? profile.managementNotes : "",
   };
 }
 export async function getManagementSnapshot(principal: RequestPrincipal): Promise<AdminState> {
-  const [identities, profiles, learning, activity, conversations] = await Promise.all([
+  const [identities, profiles, learning, activity, conversations, liveClasses] = await Promise.all([
     allAuthUsers(), getAdminDb().collection("users").get(), getAdminDb().collection("learning_states").get(),
-    auditRef().orderBy("at", "desc").limit(150).get(), conversationsRef().get(),
+    auditRef().orderBy("at", "desc").limit(150).get(), conversationsRef().get(), getAdminDb().collection("demo_live_classes").get(),
   ]);
   const profilesById = new Map(profiles.docs.map(doc => [doc.id, doc.data()]));
   const learningById = new Map(learning.docs.map(doc => [doc.id, doc.data()]));
-  const users = identities.map(identity => managementUser(identity, profilesById.get(identity.uid), learningById.get(identity.uid))).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+  const liveClassesById = new Map(liveClasses.docs.map(doc => [doc.id, doc.data() as LiveClassBooking]));
+  const users = identities.map(identity => managementUser(identity, profilesById.get(identity.uid), learningById.get(identity.uid), liveClassesById.get(identity.uid) || null)).sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
   const current = users.find(user => user.id === principal.uid);
   return { users, activity: activity.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Activity[], conversations: conversations.docs.map(doc => conversationFromData(doc.id, doc.data())).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)), currentAccount: { id: principal.uid, name: current?.name || principal.email || "Manager", email: principal.email || "" }, updatedAt: new Date().toISOString() };
 }

@@ -54,3 +54,8 @@ export function parseStudySnapshot(value: unknown) {
 export function conversationFromData(id: string, data: Record<string, unknown>): TeacherConversation {
   return { id, userId: String(data.userId), userName: String(data.userName || ""), userEmail: String(data.userEmail || ""), subject: String(data.subject || ""), status: data.status === "closed" || data.status === "answered" ? data.status : "open", createdAt: iso(data.createdAt) || "", updatedAt: iso(data.updatedAt) || "", messages: Array.isArray(data.messages) ? data.messages : [] };
 }
+
+/** Same saved-practice check for both booking eligibility and management. */
+export function savedStudyCompleted(data: Record<string, unknown> = {}): number {
+  try { return parseStudySnapshot(data.studySnapshot ?? null).studyCompleted; } catch { return 0; }
+}
