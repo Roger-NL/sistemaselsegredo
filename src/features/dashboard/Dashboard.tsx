@@ -12,6 +12,7 @@ import { getBrowserSnapshot, getServerSnapshot, subscribe } from "@/features/dem
 import { conversationPosition } from "@/features/demo/session/position";
 import { visibleViewportSize } from "@/lib/ui/viewport";
 import { StudentSections } from "./StudentSections";
+import { StudentAccess } from "./StudentAccess";
 import { useStudentWorkspace } from "./use-student-workspace";
 import { studentWorkspace } from "./workspace-store";
 import { OPEN_TEACHER_CONVERSATION_EVENT, studentNextStep, teacherReplies } from "./next-step";
@@ -140,7 +141,7 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
       {workspaceState.status === "loading" && <p className="student-status" role="status">Carregando seu espaço…</p>}
       {workspaceState.error && <div className="student-status" role="alert"><p>{workspaceState.error}</p>{workspaceState.status === "unauthenticated" ? <Link href="/comecar?modo=entrar">Entrar novamente</Link> : <button type="button" onClick={() => void workspaceState.refresh()}>Tentar novamente</button>}</div>}
       {workspaceState.notice && <p className="student-status" role="status">{workspaceState.notice}</p>}
-      {workspace && workspace.account.status !== "active" && <div className="student-status" role="status"><strong>{workspace.account.status === "pending" ? "Sua conta está aguardando aprovação." : "Seu acesso à prática está indisponível."}</strong><p>Você pode acompanhar seu painel e falar com o professor enquanto aguarda a liberação.</p><a href="#contato">Falar com o professor<ArrowUpRight size={14} aria-hidden="true" /></a></div>}
+      <StudentAccess state={workspaceState} refresh={workspaceState.refresh} />
       {!!replies.length && <aside className="student-reply-notice" aria-label="Respostas do professor"><MessageCircle size={21} aria-hidden="true" /><div><strong>O professor respondeu.</strong><p>{replies.length === 1 ? `Sua conversa “${replies[0].subject}” tem uma resposta.` : `${replies.length} conversas têm resposta do professor.`}</p></div><a href="#contato" onClick={() => window.dispatchEvent(new CustomEvent(OPEN_TEACHER_CONVERSATION_EVENT, { detail: replies[0].id }))}>Ver resposta<ArrowUpRight size={16} aria-hidden="true" /></a></aside>}
       <article id="jornada" className="dashboard-journey" aria-labelledby="journey-title">
         <header className="dashboard-card-header"><h2 id="journey-title" tabIndex={-1}><Route size={18} aria-hidden="true" />Seu próximo passo</h2><span className="dashboard-availability">{!workspace ? "Carregando seu percurso" : workspaceState.status !== "ready" ? "Atualizando seu percurso" : next?.status}</span></header>

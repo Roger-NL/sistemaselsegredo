@@ -18,6 +18,24 @@ const setup = () => {
 afterEach(() => { vi.useRealTimers(); });
 
 describe("student workspace synchronization", () => {
+  it("unlocks the same pending account after real approval and announces it without a new sign-in", async () => {
+    const { store, fetcher } = setup();
+    const pending = workspace(); pending.account.status = "pending";
+    fetcher.mockResolvedValueOnce(json(pending)).mockResolvedValueOnce(json(workspace()));
+    await store.load(); const generation = store.getSnapshot().generation;
+    expect(store.stage("demoSnapshot", "forbidden", generation)).toBe(false);
+    await store.load(true);
+    expect(store.getSnapshot()).toMatchObject({ status: "ready", notice: expect.stringContaining("cadastro foi aprovado"), workspace: { account: { id: "student-a", status: "active" } } });
+    expect(store.getSnapshot().generation).toBeGreaterThan(generation);
+    expect(store.getSnapshot().workspace?.learning.demoSnapshot).toBeNull();
+  });
+  it("never calls another account's active access the approval of a pending account", async () => {
+    const { store, fetcher } = setup();
+    const pending = workspace(); pending.account.status = "pending";
+    fetcher.mockResolvedValueOnce(json(pending)).mockResolvedValueOnce(json(workspace("other-student")));
+    await store.load(); await store.load(true);
+    expect(store.getSnapshot().notice).not.toContain("cadastro foi aprovado");
+  });
   it("keeps the connected workspace visible while navigation refreshes its activity", async () => {
     const { store, fetcher } = setup();
     const data = workspace();

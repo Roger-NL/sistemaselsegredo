@@ -42,6 +42,23 @@ describe("student dashboard", () => {
     expect(html).toMatch(/class="dashboard-access"[^>]*disabled=""/);
     expect(html).toContain('name="body"');
     expect(html).toContain("Enviar mensagem");
+    expect(html).toContain("Conferir aprovação");
+    expect(html).toContain("Conta criada");
+    expect(html).toContain("Disponível após a aprovação.");
+    expect(html).not.toContain("Tudo pronto para começar.");
+  });
+  it("guides the first approved visit and stops showing onboarding after practice begins", () => {
+    expect(render()).toContain("Tudo pronto para começar.");
+    expect(render()).toContain('aria-label="Acessar minha história"');
+    mocks.state!.workspace!.learning.studyCompleted = 1;
+    expect(render()).not.toContain("Tudo pronto para começar.");
+  });
+  it("lets a pending learner recheck access from a blocked practice page", () => {
+    mocks.state!.workspace!.account.status = "pending";
+    const html = renderToStaticMarkup(createElement(PracticeAccess, { state: mocks.state!, retry: async () => {} }));
+    expect(html).toContain("Conferir aprovação");
+    expect(html).toContain("automaticamente");
+    expect(html).not.toContain("Tudo pronto");
   });
 
   it("shows actual activity titles and confirmed teacher replies, escaping message markup", () => {

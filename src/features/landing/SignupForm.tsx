@@ -29,6 +29,7 @@ export function SignupForm({ initialMode }: { initialMode: "signup" | "login" })
     try {
       const result = await action();
       if (!result.success) {
+        if (result.accountCreated) { setMode("login"); setShowPassword(false); }
         setError(result.error || "Não foi possível continuar. Tente novamente.");
         requestAnimationFrame(() => errorElement.current?.focus());
       } else if (recovery) {
@@ -54,7 +55,8 @@ export function SignupForm({ initialMode }: { initialMode: "signup" | "login" })
   return <section className="signup-card" data-mode={mode} aria-labelledby="signup-title" aria-busy={busy}>
     <p className="landing-eyebrow">{reset ? "VAMOS RECUPERAR SEU ACESSO" : "SEU ESPAÇO NO BASEDSPEAK"}</p>
     <h1 id="signup-title">{reset ? "Esqueceu a senha?" : signup ? "Comece por aqui." : "Bom te ver de volta."}</h1>
-    <p className="signup-intro">{reset ? "Informe seu e-mail para receber um link de recuperação." : signup ? "Crie sua conta e comece sua jornada." : "Entre na sua conta para acessar seu painel."}</p>
+    <p className="signup-intro">{reset ? "Informe seu e-mail para receber um link de recuperação." : signup ? "Crie sua conta. O professor aprova seu acesso à demo pelo painel de gestão." : "Entre na sua conta para acessar seu painel."}</p>
+    {signup && <p className="signup-approval-note">Após o cadastro, aguarde a aprovação do professor no seu painel. Você já poderá falar com ele.</p>}
     {!reset && <><button className="signup-google" type="button" disabled={busy} onClick={() => void authenticate(loginWithGoogle)}><span className="signup-google-mark" aria-hidden="true">G</span>Continuar com Google</button><div className="signup-divider"><span>ou com e-mail</span></div></>}
     <form onSubmit={submit}>
       <fieldset disabled={busy}>

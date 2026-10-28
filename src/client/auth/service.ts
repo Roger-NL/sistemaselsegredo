@@ -55,6 +55,7 @@ export interface AuthResult {
     success: boolean;
     user?: User;
     error?: string;
+    accountCreated?: boolean;
 }
 
 type FirestoreUserData = Partial<Omit<User, "id">> & {
@@ -209,10 +210,12 @@ export async function register(
         return { success: false, error: 'Senhas não coincidem' };
     }
 
+    let accountCreated = false;
     try {
         // Create Authentication
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const fbUser = userCredential.user;
+        accountCreated = true;
 
         await firebaseUpdateProfile(fbUser, { displayName: name });
         const newUser = await mapFirebaseUser(fbUser);
@@ -221,10 +224,20 @@ export async function register(
 
     } catch (error: unknown) {
         console.error("Register Error:", error);
+        if (accountCreated) {
+            // Auth may have succeeded before profile/session confirmation failed.
+            // Keep the account and give its owner a way back in; never retry signup.
+            await createSessionSynchronizer()(null);
+            await signOut(auth).catch(() => undefined);
+            return { success: false, accountCreated: true, error: "Sua conta foi criada, mas não foi possível concluir a entrada. Entre com o mesmo e-mail e senha para continuar." };
+        }
         let msg = "Erro ao criar conta.";
         const errorCode = getFirebaseErrorCode(error);
         if (errorCode === 'auth/email-already-in-use') msg = "Este e-mail já está em uso.";
         if (errorCode === 'auth/weak-password') msg = "A senha é muito fraca.";
+        if (errorCode === 'auth/invalid-email') msg = "Confira o formato do e-mail.";
+        if (errorCode === 'auth/network-request-failed') msg = "Não foi possível conectar. Confira sua conexão e tente novamente.";
+        if (errorCode === 'auth/too-many-requests') msg = "Muitas tentativas. Aguarde um pouco antes de tentar novamente.";
 
         return { success: false, error: msg };
     }

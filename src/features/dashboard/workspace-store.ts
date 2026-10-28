@@ -40,8 +40,9 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => Pick<Stor
     const previous = state.workspace;
     const changed = previous?.account.id !== workspace.account.id || previous.learning.revision !== workspace.learning.revision || previous.account.status !== workspace.account.status;
     const contentChanged = previous?.learning.demoSnapshot !== workspace.learning.demoSnapshot || previous?.learning.studySnapshot !== workspace.learning.studySnapshot;
+    const approved = previous?.account.id === workspace.account.id && previous.account.status === "pending" && workspace.account.status === "active";
     if (changed) { forgetPending(); ticket++; }
-    emit({ workspace, status: "ready", saving: false, error: "", notice: notice || (previous && changed ? "Seu acesso ou progresso foi atualizado. O estado atual já está carregado." : state.notice), generation: state.generation + (changed || contentChanged ? 1 : 0) });
+    emit({ workspace, status: "ready", saving: false, error: "", notice: notice || (approved ? "Seu cadastro foi aprovado. Sua conversa e seu estudo já estão liberados." : previous && changed ? "Seu acesso ou progresso foi atualizado. O estado atual já está carregado." : state.notice), generation: state.generation + (changed || contentChanged ? 1 : 0) });
   };
   const read = () => fetcher("/api/student/workspace", { credentials: "same-origin", cache: "no-store" });
   const deny = (response: Response) => {

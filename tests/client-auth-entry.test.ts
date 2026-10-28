@@ -37,6 +37,35 @@ describe("reactivated account entry", () => {
     expect((await register("Usuário", "qa@example.test", "one", "another")).success).toBe(false);
     expect(mocks.signup).not.toHaveBeenCalled(); expect(mocks.request).not.toHaveBeenCalled();
   });
+  it("offers login to an account already created when server confirmation fails, without creating it twice", async () => {
+    mocks.request.mockResolvedValueOnce(new Response(null, { status: 503 }));
+    const result = await register("Usuário", "qa@example.test", "test-password", "test-password");
+    expect(result).toMatchObject({ success: false, accountCreated: true });
+    expect(result.error).toContain("mesmo e-mail e senha");
+    expect(mocks.signup).toHaveBeenCalledTimes(1);
+    expect(mocks.signOut).toHaveBeenCalled();
+    expect(mocks.getDoc).not.toHaveBeenCalled();
+  });
+  it("recovers a partially finished signup with the same credentials through login", async () => {
+    mocks.request.mockResolvedValueOnce(new Response(null, { status: 503 }));
+    expect((await register("Usuário", "qa@example.test", "test-password", "test-password")).accountCreated).toBe(true);
+    expect((await login("qa@example.test", "test-password")).success).toBe(true);
+    expect(mocks.signup).toHaveBeenCalledTimes(1);
+    expect(mocks.login).toHaveBeenCalledWith({}, "qa@example.test", "test-password");
+  });
+  it("preserves a created Auth identity if its display-name update fails and clears any previous session", async () => {
+    mocks.update.mockRejectedValueOnce({ code: "auth/network-request-failed" });
+    expect(await register("Usuário", "qa@example.test", "test-password", "test-password")).toMatchObject({ success: false, accountCreated: true });
+    expect(mocks.request).toHaveBeenCalledWith("/api/auth/session", expect.objectContaining({ method: "DELETE" }));
+    expect(mocks.signup).toHaveBeenCalledTimes(1);
+  });
+  it("does not claim an account exists when signup itself fails on the network", async () => {
+    mocks.signup.mockRejectedValueOnce({ code: "auth/network-request-failed" });
+    const result = await register("Usuário", "qa@example.test", "test-password", "test-password");
+    expect(result).toMatchObject({ success: false, error: expect.stringContaining("conexão") });
+    expect(result.accountCreated).toBeUndefined();
+    expect(mocks.request).not.toHaveBeenCalled();
+  });
   it("keeps failed credentials outside the server session", async () => {
     mocks.login.mockRejectedValueOnce({ code: "auth/invalid-credential" });
     expect(await login("qa@example.test", "wrong")).toEqual({ success: false, error: "E-mail ou senha incorretos." });

@@ -1,8 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { subscribeWorkspaceRefresh } from "@/features/dashboard/workspace-refresh";
+import { shouldPollWorkspace, subscribeWorkspaceRefresh } from "@/features/dashboard/workspace-refresh";
 
 afterEach(() => vi.useRealTimers());
 describe("visible student workspace updates", () => {
+  it("checks approval on pending practice pages but avoids polling active practice or public entry", () => {
+    for (const pathname of ["/demo", "/demo/estudo"]) {
+      expect(shouldPollWorkspace(pathname, "pending")).toBe(true);
+      expect(shouldPollWorkspace(pathname, "active")).toBe(false);
+    }
+    expect(shouldPollWorkspace("/dashboard", "active")).toBe(true);
+    expect(shouldPollWorkspace("/comecar", "pending")).toBe(false);
+    expect(shouldPollWorkspace("/adm", "pending")).toBe(false);
+  });
   it("polls the panel, pauses when hidden and cleans up on navigation", () => {
     vi.useFakeTimers();
     const browser = new EventTarget(), page = Object.assign(new EventTarget(), { visibilityState: "visible" });

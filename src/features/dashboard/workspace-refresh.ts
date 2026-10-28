@@ -1,4 +1,8 @@
-/** Refresh quietly while visible; polling is reserved for the dashboard. */
+export function shouldPollWorkspace(pathname: string, accountStatus?: string) {
+  return pathname === "/dashboard" || ((pathname === "/demo" || pathname === "/demo/estudo") && accountStatus === "pending");
+}
+
+/** Refresh quietly while visible; active practice does not poll. */
 export function subscribeWorkspaceRefresh(refresh: () => void, poll: boolean, browser: EventTarget = window, page: EventTarget & { visibilityState: string } = document) {
   const visible = () => { if (page.visibilityState !== "hidden") refresh(); };
   browser.addEventListener("focus", visible);

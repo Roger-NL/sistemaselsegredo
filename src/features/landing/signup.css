@@ -103,3 +103,9 @@
   .signup-card[data-mode=reset]{display:block;max-width:420px}
   .start-footer{height:24px;font-size:8px}.start-footer a{min-height:24px}
 }
+
+.signup-approval-note{font-size:11px;line-height:1.6;color:var(--muted);margin:0 0 16px;padding:10px 12px;border:1px solid var(--line);border-radius:5px;text-align:left}
+@container public-viewport (max-height:620px){.signup-approval-note{font-size:10px;padding:7px 9px;margin-bottom:10px}}
+@container public-viewport (max-height:360px){.signup-approval-note{grid-column:1/-1;grid-row:5;margin-top:8px;margin-bottom:0}}
+
+.start-main{overflow-y:auto;overscroll-behavior:contain;align-items:safe center}

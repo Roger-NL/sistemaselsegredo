@@ -285,6 +285,23 @@
 .student-reply-notice strong { font-size:13px; font-weight:500; }
 .student-reply-notice p { font-size:12px; color:#59614f; margin-top:4px; overflow-wrap:anywhere; }
 .student-reply-notice>a { display:flex; align-items:center; gap:8px; min-height:44px; font-size:12px; text-decoration:underline; text-underline-offset:4px; }
+.student-access-guide { border:1px solid var(--line); border-radius:8px; background:var(--dashboard-card); margin-bottom:22px; padding:24px; }
+.student-access-guide h2 { font-size:24px; font-weight:500; letter-spacing:-.04em; line-height:1.25; margin-top:9px; }
+.student-access-guide header>p:last-child { max-width:750px; margin-top:12px; font-size:13px; color:var(--muted); line-height:1.7; }
+.student-access-guide ol { list-style:none; padding:0; margin:23px 0 0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.student-access-guide li { display:flex; align-items:start; gap:10px; padding:16px; border:1px solid var(--line); border-radius:6px; min-width:0; }
+.student-access-guide li[data-step=done] { background:#edf1e5; border-color:#ccd4bd; }
+.student-access-guide li[data-step=current] { border-color:#7a806d; }
+.student-access-guide li[data-step=locked] { color:var(--muted); }
+.student-access-guide li svg { flex:none; margin-top:2px; }
+.student-access-guide li strong,.student-access-guide li span { display:block; font-size:12px; font-weight:500; overflow-wrap:anywhere; }
+.student-access-guide li span { margin-top:5px; color:var(--muted); font-size:11px; font-weight:400; }
+.student-access-guide footer { border-top:1px solid var(--line); margin-top:20px; padding-top:16px; }
+.student-access-guide footer>p { font-size:12px; color:var(--muted); }
+.student-access-guide footer>div { display:flex; align-items:center; flex-wrap:wrap; gap:16px; margin-top:12px; }
+.student-access-guide footer .dashboard-primary { margin:0; width:auto; }
+.student-access-guide footer a { display:inline-flex; align-items:center; min-height:44px; font-size:12px; text-decoration:underline; text-underline-offset:4px; }
+@media(max-width:700px) { .student-access-guide { padding:20px; } .student-access-guide ol { grid-template-columns:1fr; gap:10px; } .student-access-guide li { padding:13px; } .student-access-guide h2 { font-size:23px; } }
 @media (max-width:700px) {
   .dashboard .student-nav { gap:5px 18px; font-size:11px; }
   .dashboard .student-nav button { margin-left:0; }
