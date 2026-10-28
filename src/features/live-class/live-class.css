@@ -1,0 +1,59 @@
+.live-class-card { scroll-margin-top:100px; }
+.live-class-card>span { display:flex; align-items:center; gap:8px; }
+.live-class-card .live-class-title { font-size:clamp(22px,2.2vw,31px); line-height:1.15; letter-spacing:-.04em; margin-block:22px 12px; }
+.live-class-card>button { margin-top:16px; width:100%; justify-content:center; }
+.live-class-card button:disabled { opacity:.5; cursor:not-allowed; }
+.live-class-lock { display:flex; gap:9px; align-items:flex-start; }
+.live-class-lock svg { flex-shrink:0; margin-top:3px; }
+.live-class-booking { margin-top:18px; padding-top:15px; border-top:1px solid #d8d3c8; }
+.live-class-booking time,.live-class-booking small { display:block; }
+.live-class-booking time { font-weight:600; font-size:16px; }
+.live-class-booking small { margin-top:6px; font-size:11px; }
+.live-class-dialog { width:min(560px,calc(100vw - 24px)); max-height:calc(100dvh - 24px); overflow:auto; border:1px solid #cbc5b9; border-radius:18px; background:#f4f0e8; color:#191919; padding:28px; box-sizing:border-box; }
+.live-class-dialog::backdrop { background:#19191999; backdrop-filter:blur(4px); }
+.live-class-dialog>header { display:flex; justify-content:space-between; align-items:flex-start; gap:15px; }
+.live-class-dialog h2 { font-size:36px; letter-spacing:-.06em; margin:10px 0 18px; }
+.live-class-dialog>p { font-size:14px; line-height:1.6; }
+.live-class-timezone { font-size:12px!important; color:#5b574f; }
+.live-class-month { display:flex; align-items:center; justify-content:space-between; margin-block:22px 14px; text-transform:capitalize; }
+.live-class-month button { display:grid; place-items:center; width:40px; height:40px; border:1px solid #c8c2b7; border-radius:50%; }
+.live-class-days { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
+.live-class-days button,.live-class-times button { min-height:42px; border:1px solid #c8c2b7; border-radius:8px; background:transparent; color:inherit; font:inherit; font-size:14px; }
+.live-class-days button[aria-pressed=true],.live-class-times button[aria-pressed=true] { color:#f4f0e8; background:#191919; border-color:#191919; }
+.live-class-dialog h3 { font-size:15px; margin:22px 0 12px; }
+.live-class-times { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
+.live-class-choice { padding:12px; border-radius:8px; background:#e8e3d8; }
+.live-class-dialog footer { display:grid; gap:12px; margin-top:22px; }
+.live-class-dialog footer>button { justify-content:center; min-height:46px; }
+.live-class-dialog footer small { font-size:11px; line-height:1.5; }
+.live-class-admin { margin-bottom:30px; }
+.live-class-admin h2 { display:flex; align-items:center; gap:10px; }
+.live-class-admin-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:15px; padding:20px; border-bottom:1px solid var(--admin-line); }
+.live-class-admin-toolbar label,.live-class-admin-decision label { display:grid; gap:8px; font-size:12px; }
+.live-class-admin select,.live-class-admin input,.live-class-admin textarea { max-width:100%; background:#faf8f3; color:#191919; border:1px solid #ccc6ba; border-radius:8px; padding:12px; font:inherit; font-size:16px; }
+.live-class-admin-toolbar p { font-size:12px; }
+.live-class-admin-list { padding:0 20px; }
+.live-class-admin-item { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:22px 0; border-bottom:1px solid var(--admin-line); }
+.live-class-admin-item:last-child { border-bottom:0; }
+.live-class-admin-item>div { min-width:0; }
+.live-class-admin-item h3 { margin:13px 0 7px; font-size:18px; }
+.live-class-admin-item p { font-size:12px; line-height:1.5; overflow-wrap:anywhere; margin-block:8px; }
+.live-class-admin-item strong { display:block; margin-top:15px; font-size:14px; }
+.live-class-admin-item a { display:inline-block; margin-top:10px; font-size:12px; }
+.live-class-admin-actions { display:flex; flex-wrap:wrap; gap:8px; max-width:330px; }
+.live-class-admin-decision { border-top:1px solid var(--admin-line); padding:22px; background:#f0ece3; }
+.live-class-admin-decision h3 { font-size:18px; margin:0 0 12px; }
+.live-class-admin-decision p { font-size:13px; margin-bottom:20px; }
+.live-class-admin-decision fieldset { border:0; margin:0; padding:0; display:grid; gap:18px; }
+.live-class-admin-decision fieldset>div { display:flex; flex-wrap:wrap; gap:10px; }
+.live-class-admin-decision small { font-size:11px; line-height:1.6; }
+@media(min-width:900px) { .student-progress-grid { grid-template-columns:repeat(3,minmax(0,1fr))!important; } }
+@media(max-width:640px) { .admin-sidebar nav { grid-template-columns:repeat(3,minmax(0,1fr))!important; } .live-class-admin-item { align-items:flex-start; flex-direction:column; } .live-class-admin .admin-card-heading { flex-direction:column; align-items:flex-start; } .live-class-dialog { padding:20px; } .live-class-dialog h2 { font-size:30px; } }
+.live-class-days>span { text-align:center; font-size:11px; color:#686157; padding-block:4px; }
+.dashboard .live-class-card>.live-class-title { font-size:clamp(22px,2.2vw,31px); line-height:1.15; }
+.dashboard .student-progress-card .live-class-booking small { font-size:11px; }
+.dashboard .student-progress-card .live-class-dialog>p { font-size:14px; line-height:1.6; }
+.dashboard .live-class-dialog { position:fixed; inset:0; margin:auto; height:fit-content; }
+.dashboard .student-progress-card .live-class-dialog footer small { font-size:11px; line-height:1.5; }
+.live-class-dialog footer { position:sticky; bottom:-28px; background:#f4f0e8; padding-block:14px; }
+@media(max-width:640px) { .live-class-dialog footer { bottom:-20px; } }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, type ReactNode, type MouseEvent } from "react";
-import { ArrowUpRight, BookOpen, LayoutDashboard, Menu, MessageCircle, Settings2, TrendingUp, UserRound } from "lucide-react";
+import { ArrowUpRight, CalendarDays, BookOpen, LayoutDashboard, Menu, MessageCircle, Settings2, TrendingUp, UserRound } from "lucide-react";
 import { Brand } from "@/components/ui/Brand";
 import { useJourneyTransition } from "./JourneyTransition";
 import { DASHBOARD_SECTION_EVENT } from "@/features/dashboard/use-dashboard-section";
@@ -49,6 +49,7 @@ export function AppHeader({ current, name, tone = "paper", onAccount, onSettings
           <Link href="/dashboard#contato" prefetch={true} onClick={navigate}><MessageCircle size={17} aria-hidden="true" />Falar com o professor<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <Link href="/demo" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Conversa da cafeteria<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <Link href="/demo/estudo" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Área de estudo<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/dashboard#aula-ao-vivo" prefetch={true} onClick={navigate}><CalendarDays size={17} aria-hidden="true" />Minha aula ao vivo<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <div className="app-menu-divider" />
           {onAccount ? <button className="app-menu-action" type="button" onClick={() => { close(); onAccount(); }}><UserRound size={17} aria-hidden="true" />Minha conta</button> : <Link href="/dashboard?painel=conta" prefetch={true} onClick={navigate}><UserRound size={17} aria-hidden="true" />Minha conta</Link>}
           {onSettings ? <button className="app-menu-action" type="button" onClick={() => { close(); onSettings(); }}><Settings2 size={17} aria-hidden="true" />Configurações</button> : <Link href="/dashboard?painel=configuracoes" prefetch={true} onClick={navigate}><Settings2 size={17} aria-hidden="true" />Configurações</Link>}

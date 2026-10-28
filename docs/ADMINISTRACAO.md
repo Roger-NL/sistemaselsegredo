@@ -27,6 +27,10 @@ O cliente não importa tentativas anônimas antigas para uma conta. Revalida ide
 
 Mensagens de alunos são persistidas em `teacher_conversations` e aparecem em **Mensagens** no ADM. A resposta do professor volta à mesma conversa e gera atividade no aluno. O manager pode responder e encerrar uma conversa; o aluno pode responder enquanto aberta ou iniciar outra. Cada conversa admite até 100 mensagens, corpo até 4.000 caracteres e documento até 750 KB. Não há contato fictício, e-mail externo ou WhatsApp inventado. O painel administrativo consulta novamente a cada 30 segundos, ao retomar a janela e pelo botão Atualizar; o aluno atualiza ao retomar a aba ou por Atualizar painel.
 
+## Agenda da aula gratuita
+
+A aba **Agenda** recebe pedidos reais da aula gratuita liberada após as 24 práticas do estudo. Permite confirmar, fornecer/editar link da aula, cancelar com motivo e registrar realização. Estado e link ficam disponíveis no painel do aluno, com histórico nos dois lados. O benefício não exige Premium. Contratos, limites da disponibilidade inicial e validação estão em [Aula ao vivo](AULA-AO-VIVO.md).
+
 ## API e persistência
 
 Contratos em `src/contracts/workspace.ts` e `src/contracts/management.ts`. Serviços em `src/server/workspace` e `src/server/management`; interfaces em `src/features/dashboard` e `src/features/admin`.

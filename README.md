@@ -10,6 +10,8 @@ A área administrativa está em `/adm`, com login separado em `/adm/entrar` e cl
 
 A landing preserva sua composição tipográfica e o painel de informações. As credenciais passam pelo SDK Firebase e pela confirmação da sessão no servidor; progresso antigo anônimo não é importado silenciosamente para contas. A avaliação final da conversa pode ser enviada ao professor pelo contato persistido.
 
+A aula gratuita da cafeteria aparece em **Minha aula ao vivo** no painel: concluir as 24 práticas do estudo libera a agenda. Pedidos e confirmações são persistidos e acompanhados em **ADM → Agenda**, com uma aula por conta e proteção contra reservas concorrentes. Funcionamento e limites: [Aula ao vivo](docs/AULA-AO-VIVO.md).
+
 ## Desenvolvimento local
 
 Node.js 22 ou superior e npm. Use `npm ci`, `npm run dev` e abra `http://localhost:3000`. As rotas autenticadas exigem a configuração Firebase válida; o motor puro da história continua testável sem credenciais. Os exemplos de integração estão em `.env.example`; não copie valores reais para o Git.

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { StudentLiveClass } from "@/features/live-class/StudentLiveClass";
 import { useState, type FormEvent } from "react";
 import { ArrowUpRight, BookOpen, Check, MessageCircle, Send } from "lucide-react";
 import type { StudentWorkspace, TeacherConversation } from "@/contracts/workspace";
@@ -21,6 +22,7 @@ export function StudentSections({ workspace, disabled }: { workspace: StudentWor
       <div className="student-progress-grid">
         <article className="student-progress-card"><span>Conversa da cafeteria</span><strong>{learning.demoPercent}%</strong><progress value={learning.demoPercent} max={100} aria-label="Avanço na conversa da cafeteria" /><p>{position ? position.completed ? "Você chegou ao fim da conversa." : `Parte ${position.part} de 10. Seu ponto de retorno está guardado.` : "Ainda não há progresso desta história salvo na sua conta."}</p>{position && account.status === "active" && <Link href="/demo" prefetch={true}>{position.completed ? "Rever conversa" : "Retomar conversa"}<ArrowUpRight size={16} aria-hidden="true" /></Link>}</article>
         <article className="student-progress-card"><span>Estudo guiado</span><strong>{learning.studyCompleted}<small> / {learning.studyTotal}</small></strong><progress value={learning.studyCompleted} max={learning.studyTotal || 1} aria-label="Práticas de estudo concluídas" /><p>Práticas concluídas. Você pode revisitar os blocos quando quiser.</p>{account.status === "active" && <Link href="/demo/estudo" prefetch={false}>Ir para meu estudo<ArrowUpRight size={16} aria-hidden="true" /></Link>}</article>
+        <StudentLiveClass key={account.id} workspace={workspace} disabled={disabled} />
       </div>
     </section>
     <section className="student-section" id="atividades" aria-labelledby="student-activities-title">

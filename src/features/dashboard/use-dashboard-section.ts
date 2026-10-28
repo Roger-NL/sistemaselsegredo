@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 export const DASHBOARD_SECTION_EVENT = "basedspeak:dashboard-section";
-const sections = new Set(["jornada", "avanco", "atividades", "contato"]);
+const sections = new Set(["jornada", "avanco", "atividades", "contato", "aula-ao-vivo"]);
 
 /** Retry deep links after account data renders, including same-route links. */
 export function useDashboardSection(status: string) {
