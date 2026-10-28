@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ signup: vi.fn(), login: vi.fn(), signOut: vi.fn(), update: vi.fn(), getDoc: vi.fn(), request: vi.fn() }));
+const mocks = vi.hoisted(() => ({ signup: vi.fn(), login: vi.fn(), google: vi.fn(), reset: vi.fn(), signOut: vi.fn(), update: vi.fn(), getDoc: vi.fn(), request: vi.fn() }));
 vi.mock("@/client/auth/firebase", () => ({ auth: {}, db: {} }));
 vi.mock("firebase/auth", () => ({
   createUserWithEmailAndPassword: mocks.signup, signInWithEmailAndPassword: mocks.login,
   signOut: mocks.signOut, updateProfile: mocks.update,
-  updateEmail: vi.fn(), updatePassword: vi.fn(), sendPasswordResetEmail: vi.fn(),
+  updateEmail: vi.fn(), updatePassword: vi.fn(), sendPasswordResetEmail: mocks.reset,
+  signInWithPopup: mocks.google, GoogleAuthProvider: class {},
 }));
 vi.mock("firebase/firestore", () => ({ doc: vi.fn(), getDoc: mocks.getDoc, updateDoc: vi.fn(), deleteField: vi.fn() }));
-import { register, login, logout } from "@/client/auth/service";
+import { register, login, loginWithGoogle, resetPassword, logout } from "@/client/auth/service";
+import { auth } from "@/client/auth/firebase";
 import legacy from "./fixtures/demo-legacy-navigation.json";
 import { decodeSnapshot, STORAGE_KEY } from "@/features/demo/session/storage";
 import { THEORY_KEY } from "@/features/theory/progress";
@@ -16,16 +18,57 @@ import { THEORY_KEY } from "@/features/theory/progress";
 const user = { uid: "new-account", email: "qa@example.test", displayName: "QA", metadata: { creationTime: "2026-10-27" }, getIdToken: vi.fn(async () => "verified-token"), getIdTokenResult: vi.fn(async () => ({ claims: {} })) };
 beforeEach(() => {
   vi.clearAllMocks();
+  Reflect.deleteProperty(auth, "languageCode");
   vi.spyOn(console, "error").mockImplementation(() => {});
   vi.stubGlobal("fetch", mocks.request);
   mocks.request.mockResolvedValue(new Response(null, { status: 200 }));
   mocks.getDoc.mockResolvedValue({ exists: () => true, data: () => ({ name: "Saved QA", subscriptionStatus: "free" }) });
-  for (const action of [mocks.signup, mocks.login]) action.mockResolvedValue({ user });
+  for (const action of [mocks.signup, mocks.login, mocks.google]) action.mockResolvedValue({ user });
+  mocks.reset.mockResolvedValue(undefined);
   mocks.signOut.mockResolvedValue(undefined);
   mocks.update.mockResolvedValue(undefined);
 });
 
 describe("reactivated account entry", () => {
+  it("confirms Google identity on the server before reporting success", async () => {
+    expect((await loginWithGoogle()).success).toBe(true);
+    expect(mocks.google).toHaveBeenCalledTimes(1);
+    expect(mocks.request).toHaveBeenCalledWith("/api/auth/session", expect.objectContaining({ method: "POST" }));
+  });
+  it.each([
+    ["auth/popup-closed-by-user", "cancelada"],
+    ["auth/cancelled-popup-request", "Outra janela"],
+    ["auth/popup-blocked", "Permita popups"],
+    ["auth/unauthorized-domain", "neste endereço"],
+    ["auth/operation-not-allowed", "indisponível"],
+    ["auth/account-exists-with-different-credential", "método original"],
+    ["auth/network-request-failed", "conexão"],
+    ["auth/user-disabled", "suspenso"],
+  ])("explains Google failure %s without opening a server session", async (code, message) => {
+    mocks.google.mockRejectedValueOnce({ code });
+    expect(await loginWithGoogle()).toMatchObject({ success: false, error: expect.stringContaining(message) });
+    expect(mocks.request).not.toHaveBeenCalled();
+  });
+  it("keeps recovery hosted by Firebase and returns only to the fixed production login", async () => {
+    expect(await resetPassword(" qa@example.test ")).toEqual({ success: true });
+    expect(mocks.reset).toHaveBeenCalledWith(expect.objectContaining({ languageCode: "pt" }), "qa@example.test", {
+      url: "https://www.basedspeak.com/comecar?modo=entrar", handleCodeInApp: false,
+    });
+    expect(mocks.request).not.toHaveBeenCalled();
+  });
+  it("acknowledges unknown recovery addresses without revealing account existence", async () => {
+    mocks.reset.mockRejectedValueOnce({ code: "auth/user-not-found" });
+    expect(await resetPassword("unknown@example.test")).toEqual({ success: true });
+  });
+  it.each([
+    ["auth/invalid-email", "inválido"],
+    ["auth/network-request-failed", "conexão"],
+    ["auth/too-many-requests", "Muitas tentativas"],
+    ["auth/unauthorized-continue-uri", "Não foi possível solicitar"],
+  ])("does not claim recovery was requested after %s", async (code, message) => {
+    mocks.reset.mockRejectedValueOnce({ code });
+    expect(await resetPassword("qa@example.test")).toMatchObject({ success: false, error: expect.stringContaining(message) });
+  });
   it("creates the Firebase account and confirms the server session before reporting success", async () => {
     const result = await register("Usuário", "qa@example.test", "test-password", "test-password");
     expect(result.success).toBe(true);
@@ -72,6 +115,7 @@ describe("reactivated account entry", () => {
     expect(mocks.request).not.toHaveBeenCalled(); expect(mocks.getDoc).not.toHaveBeenCalled();
   });
   for (const [name, action] of [
+    ["Google login", () => loginWithGoogle()],
     ["email login", () => login("qa@example.test", "test-password")],
     ["signup", () => register("Usuário", "qa@example.test", "test-password", "test-password")],
   ] as const) {

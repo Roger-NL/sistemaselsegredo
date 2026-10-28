@@ -36,7 +36,7 @@ export function AdminLogin() {
     try {
       const result = await (await import("@/client/auth/service")).resetPassword(email.trim());
       if (!result.success) throw new Error(result.error || "Não foi possível solicitar a recuperação.");
-      setNotice("Solicitação recebida. Confira o e-mail de recuperação da sua conta.");
+      setNotice("Se houver uma conta com este e-mail, você receberá um link para criar uma nova senha. Confira também o spam.");
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível recuperar a senha."); }
     finally { setBusy(false); }
   }

@@ -21,6 +21,8 @@ vi.mock("@/features/dashboard/use-student-workspace", () => ({
 }));
 
 import { DemoHost } from "@/features/demo/DemoHost";
+vi.mock("@/features/onboarding/PresentationGate", () => ({ PresentationGate: ({ children }: { children: (review: () => void) => unknown }) => children(() => {}) }));
+
 import { Dashboard } from "@/features/dashboard/Dashboard";
 import { DemoAudioContext, type DemoAudio } from "@/features/demo/audio/use-demo-audio";
 import { Retrospective } from "@/features/demo/components/Retrospective";

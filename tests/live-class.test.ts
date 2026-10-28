@@ -55,7 +55,8 @@ describe("free lesson entitlement and real booking lifecycle", () => {
     expect(await bookLiveClass(student, { start })).toEqual(first);
     expect((await getLiveClass(student, null)).booking).toEqual(first.booking);
     expect((await listLiveClasses()).bookings).toEqual([first.booking]);
-    expect(memory.docs.size).toBe(6); // profile, study, booking, lock and two activity entries
+    expect(memory.docs.size).toBe(7); // profile, study, booking, lock, two activities and the durable notification
+    expect([...memory.docs.entries()].filter(([path]) => path.startsWith("operational_notifications/"))).toHaveLength(1);
     await expect(bookLiveClass(student, { start: monthSlots("2026-10", "Europe/Lisbon", now)[1].start })).rejects.toMatchObject({ status: 409 });
   });
   it("prevents another student from reserving a taken slot and hides it from availability", async () => {

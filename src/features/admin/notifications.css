@@ -1,0 +1,29 @@
+.admin-notifications{display:grid;gap:20px;max-width:1100px}
+.admin-notification-config,.admin-notification-events,.admin-notification-history{padding:26px}
+.admin-notifications .admin-card-heading h2{display:flex;align-items:center;gap:10px}
+.admin-notification-status{display:flex;align-items:flex-start;gap:12px;background:#faf3e7;border:1px solid #e8d9bb;border-radius:12px;padding:18px;margin:20px 0;color:#675027}
+.admin-notification-status[data-ready=true]{background:#eff3e9;border-color:#d9e2cf;color:#3d5133}
+.admin-notification-status>svg{flex:none;margin-top:2px}
+.admin-notification-status p{font-size:13px;line-height:1.6;margin:6px 0 0}
+.admin-notification-config form{max-width:560px}
+.admin-notification-config fieldset{border:0;margin:0;padding:0;min-width:0}
+.admin-notification-config .admin-button{justify-self:start}
+.admin-notification-toggle{display:flex!important;align-items:center;gap:10px!important;cursor:pointer}
+.admin-notification-toggle input{width:18px!important;height:18px;flex:none;accent-color:#30372c}
+.admin-notification-setup{margin-top:24px;border-top:1px solid var(--admin-line,#e6e5e0);padding-top:18px;font-size:13px;line-height:1.7}
+.admin-notification-setup summary{cursor:pointer;font-weight:600}
+.admin-notification-setup a{display:inline-block;color:inherit;font-weight:600;text-underline-offset:4px}
+.admin-notification-events ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;list-style:none;padding:0;margin:22px 0}
+.admin-notification-events li{display:flex;gap:9px;align-items:center;font-size:14px}
+.admin-notification-events li svg{flex:none;color:#5f7152}
+.admin-notification-events>p,.admin-notification-note{font-size:12px;line-height:1.7;color:#73766e;margin:18px 0 0}
+.admin-notification-actions{display:flex;flex-wrap:wrap;gap:8px}
+.admin-notification-history .admin-card-heading{flex-wrap:wrap;gap:18px}
+.admin-notification-history ol{padding:0;margin:16px 0 0;list-style:none}
+.admin-notification-history li{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:18px 0;border-bottom:1px solid var(--admin-line,#e6e5e0);font-size:13px}
+.admin-notification-history li div{display:grid;gap:7px;min-width:0;overflow-wrap:anywhere}
+.admin-notification-history li div>span,.admin-notification-history li small{color:#73766e;font-size:12px}
+.admin-notification-history .admin-status{white-space:normal;flex:none;max-width:190px;text-align:center}
+.admin-notification-history [data-status=sent]{background:#eff3e9;color:#3d5133}
+.admin-notification-history [data-status=failed],.admin-notification-history [data-status=needs_review]{background:#faf3e7;color:#675027}
+@media(max-width:600px){.admin-notification-config,.admin-notification-events,.admin-notification-history{padding:18px}.admin-notification-events ul{grid-template-columns:1fr}.admin-notification-history li{flex-direction:column;gap:12px}.admin-notification-actions{width:100%}.admin-notification-actions button{flex:1;white-space:normal}.admin-notifications .admin-card-heading h2{font-size:19px;align-items:flex-start}}

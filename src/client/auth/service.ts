@@ -160,15 +160,36 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User> {
     return fallbackUser;
 }
 
-/** Real Google integration retained for when authenticated access is re-enabled. */
+function entryError(error: unknown, fallback: string): string {
+    if (error instanceof Error && error.message === "SERVER_SESSION_FAILED") {
+        return "Sua identidade foi confirmada, mas não foi possível abrir a sessão. Tente entrar novamente.";
+    }
+    switch (getFirebaseErrorCode(error)) {
+        case "auth/network-request-failed": return "Não foi possível conectar. Confira sua conexão e tente novamente.";
+        case "auth/too-many-requests": return "Muitas tentativas. Tente mais tarde.";
+        case "auth/user-disabled": return "O acesso desta conta está suspenso. Fale com o professor.";
+        case "auth/invalid-email": return "Confira o formato do e-mail.";
+        default: return fallback;
+    }
+}
+
+/** Google identity must also be confirmed by the server before entering the app. */
 export async function loginWithGoogle(): Promise<AuthResult> {
     try {
         const result = await signInWithPopup(auth, new GoogleAuthProvider());
         const user = await mapFirebaseUser(result.user);
         return { success: true, user };
     } catch (error: unknown) {
-        console.error("Google Login Error:", error);
-        return { success: false, error: "Erro ao entrar com Google." };
+        const messages: Record<string, string> = {
+            "auth/popup-closed-by-user": "Entrada com Google cancelada. Você pode tentar novamente ou entrar com e-mail e senha.",
+            "auth/cancelled-popup-request": "Outra janela de entrada foi aberta. Conclua a entrada por ela ou tente novamente.",
+            "auth/popup-blocked": "Seu navegador bloqueou a janela do Google. Permita popups para este site e tente novamente, ou entre com e-mail e senha.",
+            "auth/unauthorized-domain": "A entrada com Google não está disponível neste endereço. Entre com e-mail e senha e avise o professor.",
+            "auth/operation-not-allowed": "A entrada com Google está indisponível. Entre com e-mail e senha e avise o professor.",
+            "auth/account-exists-with-different-credential": "Este e-mail já usa outra forma de entrada. Use o método original para acessar sua conta.",
+            "auth/operation-not-supported-in-this-environment": "Abra este site no navegador para entrar com Google, ou use e-mail e senha.",
+        };
+        return { success: false, error: messages[getFirebaseErrorCode(error) || ""] || entryError(error, "Não foi possível entrar com Google. Tente novamente ou entre com e-mail e senha.") };
     }
 }
 
@@ -185,12 +206,10 @@ export async function login(identifier: string, password: string): Promise<AuthR
         return { success: true, user };
 
     } catch (error: unknown) {
-        console.error("Login Error:", error);
-        let msg = "Erro ao fazer login.";
+        let msg = entryError(error, "Erro ao fazer login.");
         const errorCode = getFirebaseErrorCode(error);
         if (errorCode === 'auth/invalid-credential') msg = "E-mail ou senha incorretos.";
-        if (errorCode === 'auth/user-not-found') msg = "Usuário não encontrado.";
-        if (errorCode === 'auth/wrong-password') msg = "Senha incorreta.";
+        if (errorCode === 'auth/user-not-found' || errorCode === 'auth/wrong-password') msg = "E-mail ou senha incorretos.";
         if (errorCode === 'auth/too-many-requests') msg = "Muitas tentativas. Tente mais tarde.";
 
         return { success: false, error: msg };
@@ -325,18 +344,23 @@ export async function changePassword(newPassword: string): Promise<AuthResult> {
  */
 export async function resetPassword(email: string): Promise<AuthResult> {
     try {
-        await sendPasswordResetEmail(auth, email);
+        auth.languageCode = "pt";
+        // Keep the hosted Firebase handler; never accept a callback from the URL/form.
+        await sendPasswordResetEmail(auth, email.trim(), {
+            url: "https://www.basedspeak.com/comecar?modo=entrar",
+            handleCodeInApp: false,
+        });
         return { success: true };
     } catch (error: unknown) {
-        console.error("Reset Password Error:", error);
         const errorCode = getFirebaseErrorCode(error);
         if (errorCode === 'auth/user-not-found') {
-            return { success: false, error: 'Não há usuário cadastrado com este e-mail.' };
+            // Same acknowledgement with or without Firebase enumeration protection.
+            return { success: true };
         }
         if (errorCode === 'auth/invalid-email') {
             return { success: false, error: 'Formato de e-mail inválido.' };
         }
-        return { success: false, error: 'Erro ao enviar e-mail de recuperação.' };
+        return { success: false, error: entryError(error, 'Não foi possível solicitar a recuperação. Tente novamente mais tarde.') };
     }
 }
 

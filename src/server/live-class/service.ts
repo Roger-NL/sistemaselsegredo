@@ -9,6 +9,8 @@ import { accountStatus, savedStudyCompleted } from "@/server/workspace/validatio
 import { studySteps } from "@/features/theory/progress";
 import { monthKey, monthSlots, offsetMonth } from "@/features/live-class/calendar";
 import type { LiveClassAvailability, LiveClassBooking } from "@/contracts/live-class";
+import { writeOperationalNotifications } from "@/server/notifications/outbox";
+import { scheduleOperationalNotifications } from "@/server/notifications/background";
 
 // Separate from legacy paid sessions: no Premium entitlement or purchase waiting period.
 const bookings = () => getAdminDb().collection("demo_live_classes");
@@ -48,13 +50,13 @@ export async function bookLiveClass(principal: RequestPrincipal, body: Record<st
   const slot = monthSlots(month, timezone, now).find(slot => slot.start === body.start);
   if (!slot) throw new RequestPayloadError("Esse horário não está mais disponível. Escolha outro.", 409);
   const ref = bookings().doc(principal.uid), lock = locks().doc(lockId(slot.start));
-  return getAdminDb().runTransaction(async tx => {
+  const result = await getAdminDb().runTransaction(async tx => {
     const [user, saved, previous, held] = await Promise.all([tx.get(profile(principal.uid)), tx.get(learning(principal.uid)), tx.get(ref), tx.get(lock)]);
     active(user.exists, user.data());
     if (savedStudyCompleted(saved.data()) !== studySteps.length) throw new RequestAuthError("Conclua 100% do estudo guiado para agendar sua aula gratuita.", 403);
     const current = previous.exists ? previous.data() as LiveClassBooking : null;
     if (current && current.status !== "cancelled") {
-      if (current.start === slot.start && ["pending", "confirmed"].includes(current.status)) return { booking: current };
+      if (current.start === slot.start && ["pending", "confirmed"].includes(current.status)) return { booking: current, notificationIds: [] };
       throw new RequestPayloadError("Você já tem uma aula gratuita registrada. Confira seu agendamento.", 409);
     }
     if (held.exists) throw new RequestPayloadError("Esse horário acabou de ser reservado. Escolha outro.", 409);
@@ -64,8 +66,11 @@ export async function bookLiveClass(principal: RequestPrincipal, body: Record<st
     tx.set(ref, booking);
     tx.create(profile(principal.uid).collection("student_activity").doc(), { kind: "scheduling", title: "Aula gratuita solicitada; aguardando confirmação do professor", at });
     tx.create(getAdminDb().collection("management_activity").doc(), { userId: principal.uid, name: booking.studentName, actorId: principal.uid, actorName: booking.studentName, description: "Aluno solicitou a aula gratuita", at });
-    return { booking };
+    const notificationIds = writeOperationalNotifications(tx, [{ kind: "live_class_requested", userId: principal.uid, userName: booking.studentName, userEmail: booking.studentEmail, occurredAt: at, entityId: String(booking.revision), details: `Horário solicitado: ${booking.start} a ${booking.end} (${booking.timezone}). Aguarda sua confirmação na ADM.` }]);
+    return { booking, notificationIds };
   });
+  scheduleOperationalNotifications(result.notificationIds);
+  return { booking: result.booking };
 }
 export async function listLiveClasses() {
   const snapshot = await bookings().get();

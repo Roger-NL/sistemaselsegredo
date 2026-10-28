@@ -11,6 +11,7 @@ import { displayAccountName, type DashboardAccount } from "@/contracts/dashboard
 import { getBrowserSnapshot, getServerSnapshot, subscribe } from "@/features/demo/session/browser";
 import { conversationPosition } from "@/features/demo/session/position";
 import { visibleViewportSize } from "@/lib/ui/viewport";
+import { PresentationGate } from "@/features/onboarding/PresentationGate";
 import { StudentSections } from "./StudentSections";
 import { StudentAccess } from "./StudentAccess";
 import { useStudentWorkspace } from "./use-student-workspace";
@@ -22,6 +23,10 @@ import { getMotionPreference, getServerPreference, saveMotionPreference, subscri
 type Panel = "account" | "settings" | "help";
 
 export function Dashboard({ account }: { account: DashboardAccount }) {
+  return <PresentationGate>{review => <DashboardContent account={account} onReviewPresentation={review} />}</PresentationGate>;
+}
+
+function DashboardContent({ account, onReviewPresentation }: { account: DashboardAccount; onReviewPresentation: () => void }) {
   const workspaceState = useStudentWorkspace();
   useDashboardSection(workspaceState.status);
   const workspace = workspaceState.workspace;
@@ -136,7 +141,7 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
     <AppHeader current="dashboard" name={firstName} onAccount={() => openPanel("account")} onSettings={() => openPanel("settings")} onNavigate={journey.cancel} />
 
     <main id="meu-painel" className="dashboard-main dashboard-wrap">
-      <div className="dashboard-welcome"><div><p className="dashboard-overline">{firstName ? `Olá, ${firstName}.` : "Bom ter você por aqui."}</p><h1>Seu espaço.</h1><p className="dashboard-subtitle">Um encontro de cada vez.</p></div><span className="dashboard-aside">Inglês por histórias.</span></div>
+      <div className="dashboard-welcome"><div><p className="dashboard-overline">{firstName ? `Olá, ${firstName}.` : "Bom ter você por aqui."}</p><h1 tabIndex={-1}>Seu espaço.</h1><p className="dashboard-subtitle">Um encontro de cada vez.</p></div><span className="dashboard-aside">Inglês por histórias.</span></div>
       <nav className="student-nav" aria-label="Área do aluno"><a href="#jornada">Meu percurso</a><a href="#avanco">Meu avanço</a><a href="#atividades">Minhas atividades</a><a href="#aula-ao-vivo">Minha aula ao vivo</a><a href="#contato">Professor</a><button type="button" disabled={workspaceState.status === "loading" || workspaceState.saving} onClick={() => void workspaceState.refresh()}>{workspaceState.status === "loading" ? "Atualizando…" : "Atualizar painel"}</button></nav>
       {workspaceState.status === "loading" && <p className="student-status" role="status">Carregando seu espaço…</p>}
       {workspaceState.error && <div className="student-status" role="alert"><p>{workspaceState.error}</p>{workspaceState.status === "unauthenticated" ? <Link href="/comecar?modo=entrar">Entrar novamente</Link> : <button type="button" onClick={() => void workspaceState.refresh()}>Tentar novamente</button>}</div>}
@@ -155,7 +160,7 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
         </div><div className="dashboard-path" aria-hidden="true"><span className="dashboard-path-line" /><span className="dashboard-path-dot" /><span className="dashboard-path-number">{next?.number ?? "01"}</span><span className="dashboard-path-label">{next?.path ?? "O seu primeiro encontro"}</span></div></div>
         <footer className="dashboard-card-footer"><span><Sparkles size={14} aria-hidden="true" />Primeira história · A cafeteria</span>{next && next.kind !== "conversation" && next.kind !== "access" ? <button type="button" disabled={!canPractice} aria-label={completed ? "Rever minha conversa" : "Voltar à conversa"} onClick={openStory}>{completed ? "Rever minha conversa" : "Voltar à conversa"}<ArrowUpRight size={14} aria-hidden="true" /></button> : <span>No seu ritmo. Com apoio.</span>}</footer>
       </article>
-      <div className="dashboard-after"><p><Headphones size={15} aria-hidden="true" />Você pode ouvir, tentar e pedir ajuda.</p><button type="button" onClick={() => openPanel("help")}>Como funciona minha jornada?<ArrowUpRight size={14} aria-hidden="true" /></button></div>
+      <div className="dashboard-after"><p><Headphones size={15} aria-hidden="true" />Você pode ouvir, tentar e pedir ajuda.</p><button type="button" onClick={onReviewPresentation}>Rever apresentação<ArrowUpRight size={14} aria-hidden="true" /></button><button type="button" onClick={() => openPanel("help")}>Como funciona minha jornada?<ArrowUpRight size={14} aria-hidden="true" /></button></div>
       {workspace && <div hidden={workspaceState.status === "loading"}><StudentSections workspace={workspace} disabled={workspaceState.status !== "ready"} /></div>}
       {workspaceState.status === "ready" && <p className="student-sync" role="status">{workspaceState.saving ? "Salvando seu progresso…" : "Seu painel está sincronizado com sua conta."}</p>}
       {snapshot.status === "invalid" && <p className="dashboard-storage-note" role="status">Não foi possível retomar a tentativa anterior. Você pode começar uma nova conversa.</p>}

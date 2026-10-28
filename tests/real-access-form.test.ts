@@ -30,6 +30,10 @@ describe("real student account entry", () => {
   });
   it("preserves Google and email in the landing account explanation", () => {
     const html = renderToStaticMarkup(createElement(MoreInformation));
-    expect(html).toContain("Com Google ou e-mail.");
+    expect(html).toContain("Com Google ou e-mail, sem cartão.");
+    expect(html).toContain("O professor aprova o cadastro antes de liberar a conversa e o estudo.");
+    expect(html).toContain("oito blocos e 24 práticas");
+    expect(html).toContain("uma aula gratuita de 1 hora com professor, uma por conta");
+    expect(html).toContain("No Meu painel");
   });
 });

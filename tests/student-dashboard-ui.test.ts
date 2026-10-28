@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync, writeFileSync } from "node:fs";
 import type { WorkspaceState } from "@/features/dashboard/workspace-store";
 
+vi.mock("@/features/onboarding/PresentationGate", () => ({ PresentationGate: ({ children }: { children: (review: () => void) => unknown }) => children(() => {}) }));
+
 const mocks = vi.hoisted(() => ({ state: null as WorkspaceState | null }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }) }));
 vi.mock("@/features/dashboard/use-student-workspace", () => ({ useStudentWorkspace: () => ({ ...mocks.state, refresh: vi.fn() }) }));

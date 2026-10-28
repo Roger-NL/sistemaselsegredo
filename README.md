@@ -6,11 +6,15 @@ Depois da retrospectiva, “Entender minha conversa” abre oito blocos com 24 p
 
 O fluxo principal é `/` → `/comecar` → `/dashboard` → `/demo`. Cadastro, Google, e-mail/senha e recuperação usam autenticação real. Contas novas ficam pendentes até aprovação; o painel e o contato com professor permanecem disponíveis. O dashboard reúne história, avanço, atividades e conversas com professor, com dados da própria conta. A história da cafeteria mantém os três apoios e os caminhos existentes. Detalhes: [dashboard](docs/DASHBOARD.md).
 
+Antes da primeira exibição do painel, uma apresentação em cinco passos explica a conversa, o estudo de 24 práticas e a aula gratuita de uma hora. A conclusão fica na própria conta; é possível pular ou rever pelo painel. A apresentação não aprova o cadastro nem altera o progresso. Funcionamento: [Apresentação](docs/APRESENTACAO.md).
+
 A área administrativa está em `/adm`, com login separado em `/adm/entrar` e claim de manager validada no servidor. Lista e métricas usam contas reais de Firebase Auth; criação, edição, aprovação, suspensão, resets, histórico e respostas ao aluno usam a mesma base do dashboard. Não há modo visual nem dados de exemplo no produto. A aba **Alunos** reúne a etapa de cada pessoa, as práticas concluídas e a aula, com filtros e atalhos para conta, mensagens e agendamento. Contratos, medidas de progresso e funcionamento: [Administração](docs/ADMINISTRACAO.md).
 
 A landing preserva sua composição tipográfica e o painel de informações. As credenciais passam pelo SDK Firebase e pela confirmação da sessão no servidor; progresso antigo anônimo não é importado silenciosamente para contas. A avaliação final da conversa pode ser enviada ao professor pelo contato persistido.
 
 A aula gratuita da cafeteria aparece em **Minha aula ao vivo** no painel: concluir as 24 práticas do estudo libera a agenda. Pedidos e confirmações são persistidos e acompanhados em **ADM → Agenda**, com uma aula por conta e proteção contra reservas concorrentes. Funcionamento e limites: [Aula ao vivo](docs/AULA-AO-VIVO.md).
+
+**ADM → Avisos** permite escolher o e-mail responsável e acompanhar os avisos de cadastro, primeiras conclusões, pedidos de aula e mensagens. Os eventos são registrados em uma fila persistente; a entrega exige credencial e remetente configurados no servidor. Falhas no envio não interrompem cadastro ou estudo. Configuração e limites: [Notificações](docs/NOTIFICACOES.md). A matriz de entrada Google e recuperação, com distinção entre testes reais e simulados, está em [Autenticação](docs/AUTENTICACAO.md).
 
 ## Desenvolvimento local
 

@@ -7,6 +7,9 @@ import { RequestAuthError } from "@/server/auth/request-auth";
 import { RequestPayloadError, assertOnlyKeys } from "@/server/http/request";
 import { consumeRateLimit } from "@/server/http/rate-limit";
 import { accountStatus, conversationFromData, learningFromData, parseDemoSnapshot, parseStudySnapshot, savedStudyCompleted, textField } from "./validation";
+import { prepareOperationalNotifications, writeOperationalNotifications, type OperationalEvent } from "@/server/notifications/outbox";
+import { scheduleOperationalNotifications } from "@/server/notifications/background";
+import { completedConversation } from "@/server/notifications/events";
 
 export const userRef = (uid: string) => getAdminDb().collection("users").doc(uid);
 export const studentActivityRef = (uid: string) => userRef(uid).collection("student_activity");
@@ -35,22 +38,30 @@ export async function saveLearning(principal: RequestPrincipal, body: Record<str
   if (!Number.isSafeInteger(body.revision) || Number(body.revision) < 0 || !("demoSnapshot" in body || "studySnapshot" in body)) throw new RequestPayloadError("Informe uma revisão e um progresso válidos.");
   await consumeRateLimit({ namespace: "learning-save", identifier: principal.uid, limit: 120, windowMs: 60_000 });
   const patch: Partial<LearningProgress> = { ...("demoSnapshot" in body ? parseDemoSnapshot(body.demoSnapshot) : {}), ...("studySnapshot" in body ? parseStudySnapshot(body.studySnapshot) : {}) };
-  return getAdminDb().runTransaction(async tx => {
+  const result = await getAdminDb().runTransaction(async tx => {
     const [stored, profile] = await Promise.all([tx.get(learningRef(principal.uid)), tx.get(userRef(principal.uid))]);
     if (!profile.exists || accountStatus(profile.data()?.accountStatus) !== "active") throw new RequestAuthError("Seu acesso à prática aguarda aprovação da gestão.", 403);
     const previous = learningFromData(stored.data());
     if (previous.revision !== body.revision) throw new RequestAuthError("Seu progresso foi reiniciado. Atualize o painel antes de continuar.", 409);
-    if ((!("demoSnapshot" in patch) || patch.demoSnapshot === previous.demoSnapshot) && (!("studySnapshot" in patch) || patch.studySnapshot === previous.studySnapshot)) return { learning: previous };
+    if ((!("demoSnapshot" in patch) || patch.demoSnapshot === previous.demoSnapshot) && (!("studySnapshot" in patch) || patch.studySnapshot === previous.studySnapshot)) return { learning: previous, notificationIds: [] };
     const at = new Date().toISOString();
     const next: LearningProgress = { ...previous, ...patch, updatedAt: at };
+    const notifications: OperationalEvent[] = [];
+    const identity = { userId: principal.uid, userName: String(profile.data()?.name || "Aluno"), userEmail: principal.email || "", occurredAt: at };
+    const conversationCompleted = "demoSnapshot" in patch && completedConversation(next.demoSnapshot) && !completedConversation(previous.demoSnapshot);
+    if (conversationCompleted) notifications.push({ ...identity, kind: "conversation_completed" });
+    if ("studySnapshot" in patch && next.studyCompleted === next.studyTotal && savedStudyCompleted(stored.data()) < next.studyTotal) notifications.push({ ...identity, kind: "study_completed" });
+    const enqueue = await prepareOperationalNotifications(tx, notifications);
     tx.set(learningRef(principal.uid), next);
     const events: string[] = [];
     if (next.demoSnapshot && !previous.demoSnapshot) events.push("Conversa da cafeteria iniciada");
-    if (next.demoPercent === 100 && previous.demoPercent < 100) events.push("Atividades da conversa da cafeteria concluídas");
+    if (conversationCompleted) events.push("Atividades da conversa da cafeteria concluídas");
     if (next.studyCompleted > previous.studyCompleted) events.push(`Estudo: ${next.studyCompleted} de ${next.studyTotal} atividades concluídas`);
     for (const title of events) tx.create(studentActivityRef(principal.uid).doc(), { kind: "learning", title, at });
-    return { learning: next };
+    return { learning: next, notificationIds: enqueue() };
   });
+  scheduleOperationalNotifications(result.notificationIds);
+  return { learning: result.learning };
 }
 
 export async function createConversation(principal: RequestPrincipal, body: Record<string, unknown>) {
@@ -65,7 +76,9 @@ export async function createConversation(principal: RequestPrincipal, body: Reco
   const batch = getAdminDb().batch();
   batch.create(ref, conversation);
   batch.create(studentActivityRef(principal.uid).doc(), { kind: "contact", title: `Mensagem enviada ao professor: ${subject}`, at });
+  const notificationIds = writeOperationalNotifications(batch, [{ kind: "student_message", userId: principal.uid, userName: name, userEmail: principal.email || "", occurredAt: at, entityId: ref.id }]);
   await batch.commit();
+  scheduleOperationalNotifications(notificationIds);
   return { conversation: { id: ref.id, ...conversation } };
 }
 
@@ -77,7 +90,7 @@ export async function appendConversationMessage(principal: RequestPrincipal, id:
   await consumeRateLimit({ namespace: "teacher-messages", identifier: principal.uid, limit: 60, windowMs: 60 * 60 * 1000 });
   const profile = (await userRef(principal.uid).get()).data() || {};
   const name = typeof profile.name === "string" ? profile.name : principal.email || (manager ? "Professor" : "Aluno");
-  return getAdminDb().runTransaction(async tx => {
+  const result = await getAdminDb().runTransaction(async tx => {
     const ref = conversationsRef().doc(id), stored = await tx.get(ref);
     if (!stored.exists) throw new RequestAuthError("Conversa não encontrada.", 404);
     const previous = conversationFromData(stored.id, stored.data()!);
@@ -91,6 +104,9 @@ export async function appendConversationMessage(principal: RequestPrincipal, id:
     tx.update(ref, { messages: next.messages, status: next.status, updatedAt: at });
     tx.create(studentActivityRef(previous.userId).doc(), { kind: "contact", title: manager ? `Professor respondeu: ${previous.subject}` : `Mensagem enviada: ${previous.subject}`, at });
     if (manager) tx.create(getAdminDb().collection("management_activity").doc(), { userId: previous.userId, name: previous.userName, actorId: principal.uid, actorName: name, description: `Resposta ao aluno: ${previous.subject}`, at });
-    return { conversation: next };
+    const notificationIds = manager ? [] : writeOperationalNotifications(tx, [{ kind: "student_message", userId: principal.uid, userName: name, userEmail: principal.email || "", occurredAt: at, entityId: `${id}:${message.id}` }]);
+    return { conversation: next, notificationIds };
   });
+  scheduleOperationalNotifications(result.notificationIds);
+  return { conversation: result.conversation };
 }

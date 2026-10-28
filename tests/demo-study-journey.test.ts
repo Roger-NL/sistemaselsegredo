@@ -28,6 +28,8 @@ vi.mock("@/features/dashboard/use-student-workspace", () => ({
   useStudentWorkspace: () => ({ status: "ready", generation: 1, saving: false, error: "", notice: "", refresh: vi.fn(), workspace: { account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: mocks.snapshot.state ? encodeSnapshot(mocks.snapshot.state) : null, studySnapshot: null, demoPercent: mocks.snapshot.state ? 62 : 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [], liveClass: null } }),
 }));
 
+vi.mock("@/features/onboarding/PresentationGate", () => ({ PresentationGate: ({ children }: { children: (review: () => void) => unknown }) => children(() => {}) }));
+
 import { Dashboard } from "@/features/dashboard/Dashboard";
 import { DemoHost } from "@/features/demo/DemoHost";
 import { Retrospective } from "@/features/demo/components/Retrospective";
