@@ -21,7 +21,7 @@ const controller: DemoAudio = {
 };
 function render(state: DemoState, view: ReviewView = "moments") {
   return renderToStaticMarkup(createElement(DemoAudioContext.Provider, { value: controller },
-    createElement(Retrospective, { state: { ...state, reviewView: view }, setView: () => {} })));
+    createElement(Retrospective, { state: { ...state, reviewView: view }, setView: () => {}, replaying: false, onReplayChange: () => {} })));
 }
 function moment(state: DemoState) {
   const card = render(state).match(/<article class="moment-card">[\s\S]*?<\/article>/)?.[0];

@@ -152,7 +152,7 @@ describe("narrative, panel and study journey", () => {
       expect(panel()).toContain('aria-label="Rever minha conversa"');
       for (const reviewView of ["thanks", "done"] as const) {
         const reviewState = transition(state, { at: "end", type: "REVIEW", view: reviewView });
-        const html = renderToStaticMarkup(createElement(Retrospective, { state: reviewState, setView: () => {} }));
+        const html = renderToStaticMarkup(createElement(Retrospective, { state: reviewState, setView: () => {}, replaying: false, onReplayChange: () => {} }));
         expect(html).toContain('href="/demo/estudo"');
         if (reviewView === "thanks") expect(html).toContain("Terminar sem avaliar");
       }

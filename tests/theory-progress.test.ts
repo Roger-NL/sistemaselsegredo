@@ -10,7 +10,7 @@ describe("cafeteria study", () => {
   it("offers study after the retrospective without requiring feedback submission", () => {
     for (const reviewView of ["thanks", "done"] as const) {
       const state = { ...createDemo("beginner", "study-bridge", 0), nodeId: "end", reviewView };
-      const markup = renderToStaticMarkup(createElement(Retrospective, { state, setView: () => {} }));
+      const markup = renderToStaticMarkup(createElement(Retrospective, { state, setView: () => {}, replaying: false, onReplayChange: () => {} }));
       expect(markup).toContain('href="/demo/estudo"');
       expect(markup).toContain("Entender minha conversa");
     }
