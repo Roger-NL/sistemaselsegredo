@@ -8,8 +8,8 @@
 .replay-bar strong { font-size:15px; font-weight:550; }
 .replay-bar span { color:var(--muted); font-size:12px; margin-top:3px; }
 .app-shell .replay-bar button { min-height:44px; flex-shrink:0; }
-.app-shell .replay-pager { display:flex; flex-direction:row; justify-content:space-between; gap:12px; }
-.app-shell .replay-pager > button { min-height:44px; text-align:center; justify-content:center; }
+.app-shell .conversation-replay .activity-actions.replay-pager { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; }
+.app-shell .conversation-replay .replay-pager > button { min-width:0; width:auto; min-height:48px; text-align:center; justify-content:center; align-self:stretch; }
 .app-shell .replay-meaning { margin-top:12px; }
 .app-shell .replay-meaning p,.app-shell .replay-model-note { font-size:15px; line-height:1.4; color:var(--muted); }
 .app-shell .review-actions:has(.replay-start) { display:grid; grid-template-columns:1fr auto; }
@@ -17,9 +17,15 @@
 .app-shell .ending .replay-entry-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:16px; }
 @media(max-width:760px) {
   .app-shell .replay-bar button { font-size:13px; padding:8px 10px; }
-  .app-shell .replay-pager > button { font-size:14px; }
+  .app-shell .conversation-replay .replay-pager > button { font-size:14px; padding-inline:6px; }
+  .app-shell .conversation-replay .opening-card { padding:16px; }
   .app-shell .replay-meaning { margin-top:4px; }
   .app-shell .replay-meaning p,.app-shell .replay-model-note { font-size:14px; }
   .app-shell .ending .replay-entry-actions { flex-direction:column; }
   .app-shell .ending .replay-entry-actions button { justify-content:center; }
+}
+
+@media(max-width:760px) and (max-height:700px) {
+  .app-shell .conversation-replay .scene-grid.opening-scene[data-density] { grid-template-rows:clamp(72px,17dvh,110px) auto; }
+  .app-shell .conversation-replay .opening-card[data-presentation=dialogue] h1 { font-size:24px; }
 }
