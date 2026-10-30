@@ -16,12 +16,12 @@ export function localTestingAvailable() {
 }
 export function localTestingActive() {
   if (!localTestingAvailable()) return false;
-  try { return window.localStorage.getItem(MODE_KEY) === "1"; } catch { return false; }
+  try { return window.sessionStorage.getItem(MODE_KEY) === "1"; } catch { return false; }
 }
 export function setLocalTesting(active: boolean) {
   if (!localTestingAvailable()) throw new Error("Os testes só estão disponíveis no servidor local de desenvolvimento.");
-  if (active) window.localStorage.setItem(MODE_KEY, "1");
-  else window.localStorage.removeItem(MODE_KEY);
+  if (active) window.sessionStorage.setItem(MODE_KEY, "1");
+  else window.sessionStorage.removeItem(MODE_KEY);
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 /** Account caches and ordinary guest progress are never read or written in the sandbox. */

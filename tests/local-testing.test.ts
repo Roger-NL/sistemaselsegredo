@@ -33,7 +33,7 @@ describe("local-only development boundary", () => {
   });
   it("blocks workspace requests locally, including writes, but cannot activate the sandbox in production", async () => {
     const port = storage(); const fetcher = vi.fn(async () => new Response("{}"));
-    vi.stubGlobal("window", { location: { hostname: "localhost" }, localStorage: port, dispatchEvent: vi.fn() }); vi.stubGlobal("fetch", fetcher);
+    vi.stubGlobal("window", { location: { hostname: "localhost" }, localStorage: port, sessionStorage: storage(), dispatchEvent: vi.fn() }); vi.stubGlobal("fetch", fetcher);
     vi.stubEnv("NODE_ENV", "development"); setLocalTesting(true);
     expect((await workspaceFetch("/api/student/workspace")).status).toBe(401);
     expect((await workspaceFetch("/api/student/learning", { method: "PUT" })).status).toBe(401);
