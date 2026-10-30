@@ -46,11 +46,12 @@ export function DemoExperience({ initial, generation = -1, publishedAudio = {}, 
   const storageNotice = useRef<HTMLParagraphElement>(null);
   const supportMenu = useRef<HTMLDialogElement>(null);
   const audioMenu = useRef<HTMLDialogElement>(null);
+  const [replaying, setReplaying] = useState(false);
   const [draftProfile, setDraftProfile] = useState(initial.profile);
-  const demoAudio = useDemoAudio(`${state.nodeId}:${state.presentationStep}:${state.phase}:${state.reviewView}`, publishedAudio);
+  const demoAudio = useDemoAudio(`${state.nodeId}:${state.presentationStep}:${state.phase}:${state.reviewView}:${replaying}`, publishedAudio);
   const [playbackRate, setPlaybackRate] = useState(1);
   const event = (type: DemoEvent["type"]) => dispatch({ at: node.id, type } as DemoEvent);
-  useImperativeHandle(navigationRef, () => ({ back: () => dispatch({ at: node.id, type: "BACK" }) }), [node.id, dispatch]);
+  useImperativeHandle(navigationRef, () => ({ back: () => replaying ? setReplaying(false) : dispatch({ at: node.id, type: "BACK" }) }), [node.id, dispatch, replaying]);
   useEffect(() => { onBackAvailabilityChange?.(state.journal.length > 0); }, [state.journal.length, onBackAvailabilityChange]);
   useEffect(() => {
     if (!remember(state, generation) && storageNotice.current) storageNotice.current.textContent = "Não foi possível sincronizar. Atualize seu painel antes de continuar.";
@@ -101,7 +102,7 @@ export function DemoExperience({ initial, generation = -1, publishedAudio = {}, 
       </dialog>
     </div>
     <div className="session-notices"><p ref={storageNotice} className="notice" role="status" /></div>
-    {node.kind === "end" ? <Retrospective state={state} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <SceneFrame activityKey={`${node.id}:${state.presentationStep}:${state.phase}:${pendingListening?.key ?? "read"}`} opening={Boolean(readingNode) || sequenced || Boolean(pendingListening) || Boolean(modelCue)}
+    {node.kind === "end" ? <Retrospective state={state} replaying={replaying} onReplayChange={setReplaying} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <SceneFrame activityKey={`${node.id}:${state.presentationStep}:${state.phase}:${pendingListening?.key ?? "read"}`} opening={Boolean(readingNode) || sequenced || Boolean(pendingListening) || Boolean(modelCue)}
       intro={modelCue || pendingListening || readingNode || sequenced ? null : <header className={`scene-intro${node.part <= 3 ? " opening-instructions" : ""}`}>
         <h1 ref={heading} tabIndex={-1}>{node.kind === "comprehension" ? "Escolha o significado." : "A conversa continua."}</h1>
         {node.id === "p10.contact" && state.decisions["p9.pause"] === "stay" && <p>Depois de mais alguns minutos, chega a hora de se despedir.</p>}
