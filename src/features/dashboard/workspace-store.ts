@@ -1,3 +1,4 @@
+import { workspaceFetch, workspaceStorage } from "@/features/local-testing/sandbox";
 import type { LearningProgress, SaveLearningInput, StudentWorkspace, TeacherConversation } from "@/contracts/workspace";
 import { canImportGuestLearning, GUEST_LEARNING_KEY, hasGuestLearning, readGuestLearning, writeGuestLearning, type GuestStorage } from "./guest-learning";
 import { decodeProgress } from "@/features/theory/progress";
@@ -233,4 +234,4 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
   return { subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; }, getSnapshot: () => state, getServerSnapshot: () => initialState, hasPendingChanges: () => state.saving || Object.keys(pending).length > 0, load, refresh, flush, stage, importGuestProgress, sendMessage, reset };
 }
 
-export const studentWorkspace = createWorkspaceStore((input, init) => fetch(input, init), () => window.localStorage);
+export const studentWorkspace = createWorkspaceStore(workspaceFetch, workspaceStorage);

@@ -4,6 +4,7 @@ import "./globals.css";
 import "@/features/demo/demo.css";
 import "@/components/navigation/navigation.css";
 import { JourneyTransitionProvider } from "@/components/navigation/JourneyTransition";
+import { LocalTestLauncher } from "@/features/local-testing/LocalTestLauncher";
 import { StudentWorkspaceSession } from "@/features/dashboard/StudentWorkspaceSession";
 
 // Reuse the local Geist bundled with the pinned Next dependency; no font download at build time.
@@ -45,7 +46,7 @@ export default function RootLayout({
       <body
         className={`${geist.variable} antialiased`}
       >
-        <JourneyTransitionProvider><StudentWorkspaceSession />{children}</JourneyTransitionProvider>
+        <JourneyTransitionProvider><StudentWorkspaceSession />{children}{process.env.NODE_ENV === "development" && <LocalTestLauncher />}</JourneyTransitionProvider>
       </body>
     </html>
   );
