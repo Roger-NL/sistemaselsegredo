@@ -46,7 +46,7 @@ function renderHost(state: DemoState) {
 }
 function renderReview(state: DemoState, view: ReviewView) {
   return renderToStaticMarkup(createElement(DemoAudioContext.Provider, { value: audioController },
-    createElement(Retrospective, { state: { ...state, reviewView: view }, setView: () => {} })));
+    createElement(Retrospective, { state: { ...state, reviewView: view }, setView: () => {}, replaying: false, onReplayChange: () => {} })));
 }
 function mixedLegacyEnding() {
   // Join two frozen journals at the same reaction: one real send, then the old test skips.
@@ -102,7 +102,8 @@ describe("honest review of saved test attempts", () => {
     const html = renderReview(state, "end");
     expect(html).toContain("Você chegou ao fim");
     expect(html).toContain("Esta tentativa não tem respostas suas registradas.");
-    expect(html).toContain("Ver minha conversa");
+    expect(html).toContain("Rever cenas e áudios");
+    expect(html).toContain("Ver resumo da conversa");
     expect(html).not.toContain("Você participou");
     expect(html).not.toContain("Você disse");
   });
@@ -110,7 +111,8 @@ describe("honest review of saved test attempts", () => {
   it("offers history and completion without invented moments or practice counts", () => {
     const html = renderReview(restore(legacy.skipped), "moments");
     expect(html).toContain("Esta tentativa não tem respostas suas registradas.");
-    expect(html).toContain("Ver conversa completa");
+    expect(html).toContain("Rever cenas e áudios");
+    expect(html).toContain("Ver histórico em texto");
     expect(html).toContain("Concluir demo");
     expect(html).toContain("Esta conversa não comprova domínio ou memorização.");
     expect(html).not.toContain("Percorrer momentos");
@@ -133,7 +135,8 @@ describe("honest review of saved test attempts", () => {
     expect(feedback).toContain("Terminar sem enviar");
     const done = renderReview(state, "done");
     expect(done).toContain('href="/demo/estudo"');
-    expect(done).toContain("Rever minha conversa");
+    expect(done).toContain("Rever cenas e áudios");
+    expect(done).toContain("Ver resumo da conversa");
   });
 
   it("counts only the real response in a legacy attempt mixed with test skips", () => {
