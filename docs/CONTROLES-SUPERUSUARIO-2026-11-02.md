@@ -56,3 +56,9 @@ Não há troca de identidade, alteração de papéis ou assinatura, remoção de
 ## Simplificação do menu
 
 A engrenagem abre todas as áreas em um único menu. “Apagar tudo” e “Completar tudo” ficam no início. Há atalhos visíveis para painel, conversa, estudo, cenas/áudios quando disponíveis, aula e ADM quando a conta é manager. Todos os comandos existentes permanecem disponíveis, organizados em cartões curtos, em duas colunas no computador e uma coluna no celular. Cabeçalho e retorno do comando ficam visíveis enquanto o conteúdo rola.
+
+## Retorno ao começo e ao ponto salvo
+
+Depois de “Apagar tudo” ou “Começar do zero, sem simulação”, o painel fecha e abre `/dashboard` sem fragmentos antigos como `#aula-ao-vivo`. A introdução é carregada novamente a partir do estado reiniciado no banco. A reserva existente continua preservada em sua seção, mas não toma a prioridade do novo percurso: em uma revisão reiniciada, o cartão principal oferece começar/continuar a conversa, depois o estudo. Conclusões simuladas não mostram agenda liberada.
+
+Os cartões inteiros de conversa e estudo são links acessíveis por mouse, toque e teclado, inclusive quando ainda não há conversa iniciada. O cartão da conversa abre `/demo` com a tentativa salva; o estudo abre a prática selecionada. Testes cobrem início vazio e parte 2 com reserva confirmada preservada, avanço para estudo, conclusão simulada, destino limpo de reset e os links dos cartões.

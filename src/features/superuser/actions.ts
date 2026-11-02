@@ -63,3 +63,8 @@ export function applyTestAction(previous: LearningProgress, input: TestAction): 
   next.demoSnapshot = encodeSnapshot(state);
   return next;
 }
+
+/** Full resets return to a fresh account introduction, clearing old dashboard fragments. */
+export function testActionDestination(action: TestAction["action"]) {
+  return action === "reset-all" || action === "reset-real" ? "/dashboard" : null;
+}

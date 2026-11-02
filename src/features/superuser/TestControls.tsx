@@ -8,7 +8,7 @@ import { nodes, catalog } from "@/features/demo/content/catalog";
 import { decodeSnapshot } from "@/features/demo/session/storage";
 import { decodeProgress, studySteps } from "@/features/theory/progress";
 import type { SupportProfile } from "@/features/demo/model/types";
-import type { TestAction } from "./actions";
+import { testActionDestination, type TestAction } from "./actions";
 import "./test-controls.css";
 export function TestControls() {
   const { workspace, status } = useStudentWorkspace();
@@ -32,7 +32,7 @@ function TestPanel({onClose}:{onClose:()=>void}) {
   const study=decodeProgress(learning.studySnapshot);
   async function run(input:TestAction) {
     setBusy(true);setNotice("");
-    try {await studentWorkspace.applyTestControl(input);setNotice("Pronto. Progresso atualizado.");}
+    try {await studentWorkspace.applyTestControl(input);const destination=testActionDestination(input.action);if(destination){onClose();window.location.assign(destination);return;}setNotice("Pronto. Progresso atualizado.");}
     catch(error) {setNotice(error instanceof Error?error.message:"Não foi possível aplicar o comando.");}
     finally {setBusy(false);}
   }

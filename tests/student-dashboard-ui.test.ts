@@ -11,6 +11,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), replace: 
 vi.mock("@/features/dashboard/use-student-workspace", () => ({ useStudentWorkspace: () => ({ ...mocks.state, refresh: vi.fn() }) }));
 vi.mock("@/features/demo/session/browser", () => ({ subscribe: () => () => {}, getBrowserSnapshot: () => ({ status: "empty", state: null }), getServerSnapshot: () => ({ status: "empty", state: null }) }));
 
+import { applyTestAction } from "@/features/superuser/actions";
 import { Dashboard } from "@/features/dashboard/Dashboard";
 import { TeacherContact, TeacherThread } from "@/features/dashboard/StudentSections";
 import { PracticeAccess } from "@/features/dashboard/PracticeAccess";
@@ -26,6 +27,13 @@ beforeEach(() => {
 const render = () => renderToStaticMarkup(createElement(Dashboard, { account: { name: "", email: "" } }));
 
 describe("student dashboard", () => {
+  it("makes the entire saved conversation and study cards direct return links",()=>{
+    mocks.state!.workspace!.learning={...applyTestAction(emptyGuestLearning(),{action:"jump-part",part:2}),revision:2};
+    const html=render();
+    expect(html).toMatch(/<a\b(?=[^>]*class="student-progress-card student-progress-link")(?=[^>]*href="\/demo")(?=[^>]*aria-label="Retomar conversa")[^>]*>/);
+    expect(html).toMatch(/<a\b(?=[^>]*class="student-progress-card student-progress-link")(?=[^>]*href="\/demo\/estudo\?practice=1")[^>]*>/);
+    expect(html).toContain("Parte 2 de 10");
+  });
   it("renders real empty sections, account-bound progress and direct navigation", () => {
     const html = render();
     for (const label of ["Minhas atividades.", "Meu avanço.", "Fale com o professor.", "Ainda não há atividades registradas.", "Você ainda não enviou mensagens."]) expect(html).toContain(label);

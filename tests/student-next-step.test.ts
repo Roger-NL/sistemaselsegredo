@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { StudentWorkspace, TeacherConversation } from "@/contracts/workspace";
 import type { LiveClassBooking } from "@/contracts/live-class";
+import { applyTestAction } from "@/features/superuser/actions";
 import { studentNextStep, teacherReplies } from "@/features/dashboard/next-step";
 
 const workspace = (): StudentWorkspace => ({ account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [], liveClass: null });
@@ -15,7 +16,7 @@ describe("the student's next useful step", () => {
     data.learning.studyCompleted = 24;
     expect(studentNextStep(data)).toMatchObject({ kind: "booking", href: "#aula-ao-vivo" });
   });
-  it("keeps the reservation after progress reset and never offers a second completed free lesson", () => {
+  it("preserves existing reservation outside a restarted journey and never offers a second completed free lesson", () => {
     const data = { ...workspace(), liveClass: booking };
     expect(studentNextStep(data)).toMatchObject({ kind: "requested", href: "#aula-ao-vivo" });
     data.liveClass = { ...booking, status: "confirmed" };
@@ -27,6 +28,20 @@ describe("the student's next useful step", () => {
     expect(studentNextStep(data).kind).toBe("booking");
     data.learning.studyCompleted = 0;
     expect(studentNextStep(data).kind).toBe("conversation");
+  });
+  it("returns to the beginning after a reset even with an existing confirmed lesson",()=>{
+    const data={...workspace(),liveClass:{...booking,status:"confirmed" as const}};
+    data.learning.revision=1;
+    const before=structuredClone(data);
+    expect(studentNextStep(data)).toMatchObject({kind:"conversation",word:"Começar.",href:"/demo"});
+    expect(data).toEqual(before);
+    data.learning={...applyTestAction(data.learning,{action:"jump-part",part:2}),revision:2};
+    expect(studentNextStep(data)).toMatchObject({kind:"conversation",word:"Continuar.",href:"/demo",description:expect.stringContaining("parte 2")});
+    data.learning={...applyTestAction(data.learning,{action:"complete-demo"}),revision:3};
+    expect(studentNextStep(data)).toMatchObject({kind:"study",href:"/demo/estudo"});
+    data.learning={...applyTestAction(data.learning,{action:"complete-all"}),revision:4};
+    expect(studentNextStep(data)).toMatchObject({kind:"study",status:"Conclusão simulada"});
+    expect(data.liveClass).toEqual(before.liveClass);
   });
   it("respects unavailable access and rejects another account's booking", () => {
     const data = { ...workspace(), liveClass: { ...booking, userId: "someone-else" } };

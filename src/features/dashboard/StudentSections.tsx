@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { StudentLiveClass } from "@/features/live-class/StudentLiveClass";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { ArrowUpRight, BookOpen, Check, MessageCircle, Send } from "lucide-react";
 import type { StudentWorkspace, TeacherConversation } from "@/contracts/workspace";
 import { studentWorkspace } from "./workspace-store";
@@ -22,8 +22,12 @@ export function StudentSections({ workspace, disabled }: { workspace: StudentWor
     <section className="student-section" id="avanco" aria-labelledby="student-progress-title">
       <div className="student-section-heading"><div><p className="dashboard-overline">Um passo de cada vez</p><h2 id="student-progress-title" tabIndex={-1}>Meu avanço.</h2></div><span>{learning.updatedAt ? `Atualizado em ${formatStudentDate(learning.updatedAt)}` : "Seu percurso começa aqui"}</span></div>
       <div className="student-progress-grid">
-        <article className="student-progress-card"><span>Conversa da cafeteria</span><strong className="student-conversation-position">{position ? position.completed ? "Concluída" : `Parte ${position.part} de 10` : "Ainda não começou"}</strong><progress value={position?.completed ? 10 : position ? position.part - 1 : 0} max={10} aria-label="Percurso da conversa da cafeteria" /><p>{position ? position.completed ? "Você chegou ao fim da conversa. Seu percurso está salvo." : "Seu ponto de retorno está guardado na sua conta." : "Ainda não há progresso desta história salvo na sua conta."}</p>{position && accountCanPractice(account.status) && <Link href="/demo" prefetch={true}>{position.completed ? "Rever conversa" : "Retomar conversa"}<ArrowUpRight size={16} aria-hidden="true" /></Link>}</article>
-        <article className="student-progress-card"><span>Estudo guiado</span><strong>{learning.studyCompleted}<small> / {learning.studyTotal}</small></strong><progress value={learning.studyCompleted} max={learning.studyTotal || 1} aria-label="Práticas de estudo concluídas" /><p>Práticas concluídas. Você pode revisitar os blocos quando quiser.</p>{accountCanPractice(account.status) && <Link href="/demo/estudo" prefetch={false}>Ir para meu estudo<ArrowUpRight size={16} aria-hidden="true" /></Link>}</article>
+        <ProgressCard href="/demo" disabled={disabled || !accountCanPractice(account.status)} label={position?.completed ? "Rever conversa" : position ? "Retomar conversa" : "Começar conversa"}>
+          <span>Conversa da cafeteria</span><strong className="student-conversation-position">{position ? position.completed ? "Concluída" : `Parte ${position.part} de 10` : "Ainda não começou"}</strong><progress value={position?.completed ? 10 : position ? position.part - 1 : 0} max={10} aria-label="Percurso da conversa da cafeteria" /><p>{position ? position.completed ? "Você chegou ao fim da conversa. Seu percurso está salvo." : "Seu ponto de retorno está guardado na sua conta." : "Ainda não há progresso desta história salvo na sua conta."}</p>
+        </ProgressCard>
+        <ProgressCard href="/demo/estudo?practice=1" disabled={disabled || !accountCanPractice(account.status)} label="Ir para meu estudo">
+          <span>Estudo guiado</span><strong>{learning.studyCompleted}<small> / {learning.studyTotal}</small></strong><progress value={learning.studyCompleted} max={learning.studyTotal || 1} aria-label="Práticas de estudo concluídas" /><p>Práticas concluídas. Você pode revisitar os blocos quando quiser.</p>
+        </ProgressCard>
         <StudentLiveClass key={account.id} workspace={workspace} disabled={disabled} />
       </div>
     </section>
@@ -33,6 +37,11 @@ export function StudentSections({ workspace, disabled }: { workspace: StudentWor
     </section>
     <TeacherContact key={account.id} conversations={workspace.conversations} disabled={disabled} />
   </>;
+}
+
+function ProgressCard({href,disabled,label,children}:{href:string;disabled:boolean;label:string;children:ReactNode}) {
+  if(disabled) return <article className="student-progress-card">{children}</article>;
+  return <Link href={href} prefetch={false} className="student-progress-card student-progress-link" aria-label={label}>{children}<span className="student-progress-cta">{label}<ArrowUpRight size={16} aria-hidden="true" /></span></Link>;
 }
 
 export function TeacherContact({ conversations, disabled }: { conversations: TeacherConversation[]; disabled: boolean }) {

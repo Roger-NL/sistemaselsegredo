@@ -28,7 +28,7 @@ import { isTestOwner } from "@/server/superuser/policy";
 import { mutateTestProgress,validateTestAction } from "@/server/superuser/service";
 import { completePresentation } from "@/server/presentation/service";
 import { saveLearning,createConversation } from "@/server/workspace/service";
-import { applyTestAction } from "@/features/superuser/actions";
+import { testActionDestination, applyTestAction } from "@/features/superuser/actions";
 import { emptyGuestLearning } from "@/features/dashboard/guest-learning";
 import { decodeSnapshot } from "@/features/demo/session/storage";
 import { decodeProgress,studySteps } from "@/features/theory/progress";
@@ -113,6 +113,11 @@ describe("transactional persisted progress controls",()=>{
   });
 });
 describe("coherent controls for every support, part and branch",()=>{
+  it("full resets return to a clean dashboard URL instead of retaining the old lesson fragment",()=>{
+    expect(testActionDestination("reset-all")).toBe("/dashboard");
+    expect(testActionDestination("reset-real")).toBe("/dashboard");
+    expect(testActionDestination("forward")).toBeNull();
+  });
   for(const profile of ["beginner","some","less"] as const) it(`covers all parts, nodes, back/forward and review for ${profile}`,()=>{
     for(let part=1;part<=10;part++) {
       const started=applyTestAction(emptyGuestLearning(),{action:"jump-part",part,profile});const state=decodeSnapshot(started.demoSnapshot!)!;expect(catalog[state.nodeId].part).toBe(part);expect(state.profile).toBe(profile);
