@@ -40,6 +40,13 @@ describe("free lesson entitlement and real booking lifecycle", () => {
     await expect(bookLiveClass(student, { start })).rejects.toMatchObject({ status: 403 });
     expect((await listLiveClasses()).bookings).toEqual([]);
   });
+  it("never unlocks real booking from synthetic completion and preserves an existing booking", async () => {
+    complete(); memory.docs.set("learning_states/student",{...memory.docs.get("learning_states/student"),testMode:true});
+    const existing={id:student.uid,userId:student.uid,status:"confirmed",start}; memory.docs.set("demo_live_classes/student",existing);
+    expect(await getLiveClass(student,null)).toMatchObject({eligible:false,slots:[],booking:existing});
+    await expect(bookLiveClass(student,{start})).rejects.toMatchObject({status:403});
+    expect(memory.docs.get("demo_live_classes/student")).toEqual(existing);
+  });
   it("unlocks for a free account only after all 24 saved practices, including supported practices", async () => {
     complete(); const result = await getLiveClass(student, null);
     expect(result.eligible).toBe(true); expect(result.slots.length).toBeGreaterThan(24);

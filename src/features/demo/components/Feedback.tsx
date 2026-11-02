@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useStudentWorkspace } from "@/features/dashboard/use-student-workspace";
 import { studentWorkspace } from "@/features/dashboard/workspace-store";
 
 const options = ["Gostei", "Mais ou menos", "Não gostei"] as const;
@@ -11,6 +12,7 @@ export function Feedback({ onFinish }: { runId: string; onFinish: () => void }) 
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const testing = useStudentWorkspace().workspace?.learning.testMode;
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { heading.current?.focus({ preventScroll: true }); }, []);
   async function submit(event: React.FormEvent) {
@@ -23,6 +25,7 @@ export function Feedback({ onFinish }: { runId: string; onFinish: () => void }) 
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível enviar sua avaliação. Tente novamente."); }
     finally { setSending(false); }
   }
+  if (testing) return <section><h2>Avaliação desativada no percurso de teste</h2><p>Esta simulação não envia avaliações ao professor.</p><button onClick={onFinish}>Terminar teste</button></section>;
   return <form className="feedback-form" onSubmit={submit} aria-busy={sending}>
     <h2 ref={heading} tabIndex={-1}>Como foi a experiência para você?</h2>
     <p>Avaliar é opcional. Sua avaliação será enviada ao professor e ficará no seu painel.</p>

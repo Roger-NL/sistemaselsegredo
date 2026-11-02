@@ -43,8 +43,9 @@ function ConnectedTheory({ publishedAudio, workspaceState }: { publishedAudio: P
   const progress = decodeProgress(practiceLearning(workspaceState)?.studySnapshot ?? null);
   const guest = !workspaceState.workspace;
   const ready = true;
-  const [view, setView] = useState<"overview" | "study" | "phrases" | "finished">("overview");
+  const [view, setView] = useState<"overview" | "study" | "phrases" | "finished">(()=>typeof window !== "undefined" && new URLSearchParams(window.location.search).get("practice") === "1" ? "study" : "overview");
   const [search, setSearch] = useState("");
+
   const heading = useRef<HTMLHeadingElement>(null);
   const session = useSyncExternalStore(subscribe, getBrowserSnapshot, getServerSnapshot);
   const current = studySteps[progress.position];

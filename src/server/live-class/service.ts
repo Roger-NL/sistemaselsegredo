@@ -31,7 +31,7 @@ export async function getLiveClass(principal: RequestPrincipal, requestedMonth: 
   const timezone = liveClassTimezone(), month = checkedMonth(requestedMonth, timezone);
   const [user, saved, existing] = await Promise.all([profile(principal.uid).get(), learning(principal.uid).get(), bookings().doc(principal.uid).get()]);
   const completed = savedStudyCompleted(saved.data()), total = studySteps.length;
-  const eligible = user.exists && ["active", "pending"].includes(accountStatus(user.data()?.accountStatus)) && completed === total;
+  const eligible = saved.data()?.testMode !== true && user.exists && ["active", "pending"].includes(accountStatus(user.data()?.accountStatus)) && completed === total;
   const booking = existing.exists ? existing.data() as LiveClassBooking : null;
   let slots = eligible && (!booking || booking.status === "cancelled") ? monthSlots(month, timezone) : [];
   if (slots.length) {
@@ -53,6 +53,7 @@ export async function bookLiveClass(principal: RequestPrincipal, body: Record<st
   const result = await getAdminDb().runTransaction(async tx => {
     const [user, saved, previous, held] = await Promise.all([tx.get(profile(principal.uid)), tx.get(learning(principal.uid)), tx.get(ref), tx.get(lock)]);
     active(user.exists, user.data());
+    if (saved.data()?.testMode === true) throw new RequestAuthError("Progresso de teste não libera novas reservas. Reinicie como percurso normal para participar.", 403);
     if (savedStudyCompleted(saved.data()) !== studySteps.length) throw new RequestAuthError("Conclua 100% do estudo guiado para agendar sua aula gratuita.", 403);
     const current = previous.exists ? previous.data() as LiveClassBooking : null;
     if (current && current.status !== "cancelled") {

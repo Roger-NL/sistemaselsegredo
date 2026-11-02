@@ -94,3 +94,7 @@ Os scripts `scheduling:health`, `payments:audit` e `auth:admins` são operaciona
 `docs/plano-nova-demo/ANDAMENTO.md` registra commits/lotes e verificações; `ARQUIVOS.csv` e `ROTAS.csv` mantêm o inventário-base e o resultado de execução. A base anterior é o commit `b881b3e`, com tag local `basedspeak-pre-demo-b881b3e`.
 
 A solicitação de 27/10/2026 autoriza consolidar as etapas na branch principal existente, `master`, e publicar no projeto Vercel original. Os registros anteriores de “sem commit ou deploy” descrevem o encerramento de cada etapa antes dessa autorização. A integração atual publicou as regras de acesso e configurou a claim de manager do titular indicado. Credenciais não entram no Git; dados financeiros, índices existentes e cache de áudio permanecem preservados.
+
+## Controles exclusivos de teste
+
+A conta de teste autorizada tem uma engrenagem no topo para ajustar o próprio progresso persistido, com revisão contra abas antigas e confirmação dos resets. Consulte o [estudo, ações e limites](docs/CONTROLES-SUPERUSUARIO-2026-11-02.md). O painel local isolado continua separado desses controles reais.

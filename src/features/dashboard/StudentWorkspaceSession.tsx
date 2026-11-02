@@ -1,5 +1,6 @@
 "use client";
 
+import { TestControlsOverlay } from "@/features/superuser/TestControls";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { studentWorkspace } from "./workspace-store";
@@ -11,7 +12,7 @@ export function StudentWorkspaceSession() {
   const pathname = usePathname();
   const { workspace } = useStudentWorkspace();
   const poll = shouldPollWorkspace(pathname, workspace?.account.status);
-  const learning = pathname === "/dashboard" || pathname === "/demo" || pathname === "/demo/estudo";
+  const learning = pathname === "/dashboard" || pathname === "/demo" || pathname === "/demo/estudo" || pathname === "/adm";
   const authentication = pathname === "/comecar" || pathname === "/adm/entrar";
   const previous = useRef("");
 
@@ -38,9 +39,19 @@ export function StudentWorkspaceSession() {
   }, [learning, poll]);
 
   useEffect(() => {
+    const changed = (event:StorageEvent) => {
+      if (event.key !== "basedspeak.test-progress.changed") return;
+      // This signal is only a refresh hint; identity and revision come from the server.
+      studentWorkspace.reset(); void studentWorkspace.load();
+    };
+    window.addEventListener("storage",changed);
+    return ()=>window.removeEventListener("storage",changed);
+  },[]);
+
+  useEffect(() => {
     const wasLearning = ["/dashboard", "/demo", "/demo/estudo"].includes(previous.current);
     previous.current = pathname;
     if (learning && wasLearning) void studentWorkspace.refresh();
   }, [pathname, learning]);
-  return null;
+  return <TestControlsOverlay />;
 }

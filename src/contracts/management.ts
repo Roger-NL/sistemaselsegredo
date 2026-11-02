@@ -6,6 +6,7 @@ export type UserRole = AccountRole;
 export type AdminUser = {
   id: string; name: string; email: string; role: UserRole; status: UserStatus;
   createdAt: string | null; lastLoginAt: string | null; progress: number;
+  testMode?: boolean;
   demoPercent: number; studyCompleted: number; studyTotal: number;
   loginResetAt: string | null; notes: string;
   conversation: { part: number; completed: boolean } | null;

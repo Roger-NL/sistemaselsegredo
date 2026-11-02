@@ -12,11 +12,11 @@ import { completeStep, decodeProgress, studySteps } from "@/features/theory/prog
 const cardsForState: (node: DemoNode, state?: DemoState) => ReturnType<typeof presentationCards> = presentationCards;
 
 /** Synthetic test responses pass the same reducer and snapshot validation as the UI. */
-export function advanceTestDemo(initial: DemoState, targetPart = 11): DemoState {
+export function advanceTestDemo(initial: DemoState, targetPart = 11, options: { oneNode?: boolean; targetNode?: string; choices?: Record<string, string> } = {}): DemoState {
   let state = initial;
   for (let guard = 0; guard < 1000; guard++) {
     const node = catalog[state.nodeId];
-    if (node.kind === "end" || node.part >= targetPart) return state;
+    if (node.kind === "end" || node.part >= targetPart || node.id === options.targetNode || (options.oneNode && node.id !== initial.nodeId)) return state;
     const target = listeningTarget(state);
     let event: DemoEvent;
     const at = node.id;
@@ -24,7 +24,7 @@ export function advanceTestDemo(initial: DemoState, targetPart = 11): DemoState 
     else if (state.presentationStep < cardsForState(node, state).length) event = { at, type: "ADVANCE_PRESENTATION" };
     else if (node.kind === "scene") event = { at, type: "NEXT" };
     else if (node.kind === "comprehension") event = { at, type: "ANSWER_MEANING", correct: true };
-    else if (node.kind === "choice") event = { at, type: "CHOOSE", choice: node.choices[0].id };
+    else if (node.kind === "choice") event = { at, type: "CHOOSE", choice: options.choices?.[node.id] ?? node.choices[0].id };
     else if (node.kind === "response") {
       if (state.phase === "present") event = { at, type: "PREPARE" };
       else if (state.phase === "recall") event = { at, type: "CHECK" };

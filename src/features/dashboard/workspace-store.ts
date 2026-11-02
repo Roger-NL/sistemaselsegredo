@@ -35,6 +35,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
   let edits = 0;
   let contactEdits = 0;
   let importing = false;
+  let tweaking = false;
   const listeners = new Set<() => void>();
   const guest = () => { try { return readGuestLearning(storage?.()); } catch { return readGuestLearning(); } };
   const permitted = (status: string) => status === "active" || status === "pending";
@@ -158,7 +159,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
   }
 
   function stage(key: SnapshotKey, value: string | null, generation: number) {
-    if (importing || state.generation !== generation) return false;
+    if (tweaking || importing || state.generation !== generation) return false;
     const workspace = state.workspace;
     if (state.status === "unauthenticated" && !workspace && state.guestLearning) {
       const learning = { ...state.guestLearning, [key]: value, updatedAt: new Date().toISOString() };
@@ -216,7 +217,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     }
     const response = await fetcher(conversationId ? `/api/student/conversations/${encodeURIComponent(conversationId)}/messages` : "/api/student/conversations", {
       method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Workspace-Uid": owner.account.id },
-      body: JSON.stringify(conversationId ? { body } : { subject, body }),
+      body: JSON.stringify(conversationId ? { body } : { subject, body, ...(subject === "Avaliação da conversa da cafeteria" ? {learningRevision:owner.learning.revision}:{}) }),
     });
     if (deny(response)) throw new Error("Entre novamente para enviar sua mensagem.");
     const result = await payload(response) as { conversation: TeacherConversation };
@@ -227,11 +228,30 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     return result.conversation;
   }
 
+  async function applyTestControl(input: Record<string, unknown>) {
+    const owner = state.workspace;
+    if (tweaking || importing || !owner?.account.canTest || state.status !== "ready") throw new Error("Atualize a conta de testes antes de continuar.");
+    tweaking = true; forgetPending(); ticket++;
+    emit({ saving:true, generation:state.generation+1 });
+    try {
+      if (writePromise) await writePromise;
+      const response = await fetcher("/api/student/test-controls", { method:"POST", credentials:"same-origin", headers:{"Content-Type":"application/json","X-Workspace-Uid":owner.account.id}, body:JSON.stringify({...input,revision:owner.learning.revision}) });
+      const result = await payload(response) as { learning:LearningProgress };
+      if (state.workspace?.account.id !== owner.account.id) throw new Error("A conta mudou. Atualize o painel.");
+      replace({...state.workspace,learning:result.learning},"Controle aplicado no banco de dados da sua conta.");
+      if (typeof window !== "undefined" && ["reset-all","reset-real","reset-presentation","complete-presentation","complete-all"].includes(String(input.action))) window.dispatchEvent(new Event("basedspeak.presentation.changed"));
+      try { window.localStorage.setItem("basedspeak.test-progress.changed",JSON.stringify({uid:owner.account.id,revision:result.learning.revision,at:Date.now()})); } catch { /* Server revision remains authoritative. */ }
+    } catch (error) {
+      reset(); await load();
+      throw error;
+    } finally { tweaking=false; emit({saving:false}); }
+  }
+
   function reset() {
     forgetPending(); ticket++; loadPromise = null;
     emit({ ...initialState, generation: state.generation + 1 });
   }
-  return { subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; }, getSnapshot: () => state, getServerSnapshot: () => initialState, hasPendingChanges: () => state.saving || Object.keys(pending).length > 0, load, refresh, flush, stage, importGuestProgress, sendMessage, reset };
+  return { subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; }, getSnapshot: () => state, getServerSnapshot: () => initialState, hasPendingChanges: () => state.saving || Object.keys(pending).length > 0, load, refresh, flush, stage, importGuestProgress, sendMessage, applyTestControl, reset };
 }
 
 export const studentWorkspace = createWorkspaceStore(workspaceFetch, workspaceStorage);

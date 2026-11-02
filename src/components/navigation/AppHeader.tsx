@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { TestControls } from "@/features/superuser/TestControls";
 import { useEffect, useRef, type ReactNode, type MouseEvent } from "react";
 import { ArrowUpRight, CalendarDays, BookOpen, LayoutDashboard, Menu, MessageCircle, Settings2, TrendingUp, UserRound } from "lucide-react";
 import { LocalTestLauncher, LocalTestStatus } from "@/features/local-testing/LocalTestLauncher";
@@ -40,6 +41,7 @@ export function AppHeader({ current, name, tone = "paper", guest = false, onAcco
     <Brand href={guest ? "/" : "/dashboard"} onClick={navigate} />
     <Link href={guest ? "/comecar?modo=entrar" : "/dashboard"} prefetch={true} className="app-header-panel" aria-current={current === "dashboard" ? "page" : undefined} onClick={navigate}><LayoutDashboard size={15} aria-hidden="true" />{guest ? "Entrar" : "Meu painel"}</Link>
     <div className="app-header-tools">{name && <span className="app-header-name">{name}</span>}
+      <TestControls />
       {process.env.NODE_ENV === "development" && <LocalTestStatus />}
       <details ref={menu} className="app-header-menu" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) close(); }} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); close(); menu.current?.querySelector("summary")?.focus(); } }}>
         <summary aria-label="Menu de navegação"><Menu size={18} aria-hidden="true" /><span>Menu</span></summary>

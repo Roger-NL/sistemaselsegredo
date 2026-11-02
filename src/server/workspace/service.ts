@@ -1,4 +1,5 @@
 import "server-only";
+import { isTestOwner } from "@/server/superuser/policy";
 import { getAdminAuth, getAdminDb } from "@/server/firebase";
 import type { RequestPrincipal } from "@/server/auth/principal";
 import type { LiveClassBooking } from "@/contracts/live-class";
@@ -25,7 +26,7 @@ export async function getStudentWorkspace(principal: RequestPrincipal): Promise<
   ]);
   const data = profile.data() || {};
   return {
-    account: { id: principal.uid, name: typeof data.name === "string" ? data.name : identity.displayName || "", email: identity.email || "", status: profile.exists ? accountStatus(data.accountStatus) : "pending", role: identity.customClaims?.admin === true ? "manager" : "student" },
+    account: { id: principal.uid, name: typeof data.name === "string" ? data.name : identity.displayName || "", email: identity.email || "", status: profile.exists ? accountStatus(data.accountStatus) : "pending", role: identity.customClaims?.admin === true ? "manager" : "student", ...(isTestOwner(identity) ? { canTest: true } : {}) },
     learning: { ...learningFromData(learning.data()), studyCompleted: savedStudyCompleted(learning.data()) },
     liveClass: liveClass.data()?.userId === principal.uid ? liveClass.data() as LiveClassBooking : null,
     activities: activity.docs.map(doc => ({ id: doc.id, ...doc.data() })) as StudentWorkspace["activities"],
@@ -50,15 +51,15 @@ export async function saveLearning(principal: RequestPrincipal, body: Record<str
     const notifications: OperationalEvent[] = [];
     const identity = { userId: principal.uid, userName: String(profile.data()?.name || "Aluno"), userEmail: principal.email || "", occurredAt: at };
     const conversationCompleted = "demoSnapshot" in patch && completedConversation(next.demoSnapshot) && !completedConversation(previous.demoSnapshot);
-    if (conversationCompleted) notifications.push({ ...identity, kind: "conversation_completed" });
-    if ("studySnapshot" in patch && next.studyCompleted === next.studyTotal && savedStudyCompleted(stored.data()) < next.studyTotal) notifications.push({ ...identity, kind: "study_completed" });
+    if (!previous.testMode && conversationCompleted) notifications.push({ ...identity, kind: "conversation_completed" });
+    if (!previous.testMode && "studySnapshot" in patch && next.studyCompleted === next.studyTotal && savedStudyCompleted(stored.data()) < next.studyTotal) notifications.push({ ...identity, kind: "study_completed" });
     const enqueue = await prepareOperationalNotifications(tx, notifications);
     tx.set(learningRef(principal.uid), next);
     const events: string[] = [];
     if (next.demoSnapshot && !previous.demoSnapshot) events.push("Conversa da cafeteria iniciada");
     if (conversationCompleted) events.push("Atividades da conversa da cafeteria concluídas");
     if (next.studyCompleted > previous.studyCompleted) events.push(`Estudo: ${next.studyCompleted} de ${next.studyTotal} atividades concluídas`);
-    for (const title of events) tx.create(studentActivityRef(principal.uid).doc(), { kind: "learning", title, at });
+    for (const title of previous.testMode ? [] : events) tx.create(studentActivityRef(principal.uid).doc(), { kind: "learning", title, at });
     return { learning: next, notificationIds: enqueue() };
   });
   scheduleOperationalNotifications(result.notificationIds);
@@ -73,19 +74,27 @@ export async function importGuestLearning(principal: RequestPrincipal, body: Rec
 }
 
 export async function createConversation(principal: RequestPrincipal, body: Record<string, unknown>) {
-  assertOnlyKeys(body, ["subject", "body"]);
+  assertOnlyKeys(body, ["subject", "body", "learningRevision"]);
   const subject = textField(body.subject, "Assunto", 160);
   const message = textField(body.body, "Mensagem", 4000);
+  const evaluation = subject === "Avaliação da conversa da cafeteria";
+  if (evaluation && (!Number.isSafeInteger(body.learningRevision) || Number(body.learningRevision)<0)) throw new RequestPayloadError("Atualize a conversa antes de avaliar.");
   await consumeRateLimit({ namespace: "teacher-contact", identifier: principal.uid, limit: 20, windowMs: 60 * 60 * 1000 });
   const profile = (await userRef(principal.uid).get()).data() || {};
   const at = new Date().toISOString(), ref = conversationsRef().doc();
   const name = typeof profile.name === "string" ? profile.name : principal.email || "Aluno";
   const conversation: Omit<TeacherConversation, "id"> = { userId: principal.uid, userName: name, userEmail: principal.email || "", subject, status: "open", createdAt: at, updatedAt: at, messages: [{ id: ref.id, authorId: principal.uid, authorName: name, role: "student", body: message, at }] };
-  const batch = getAdminDb().batch();
-  batch.create(ref, conversation);
-  batch.create(studentActivityRef(principal.uid).doc(), { kind: "contact", title: `Mensagem enviada ao professor: ${subject}`, at });
-  const notificationIds = writeOperationalNotifications(batch, [{ kind: "student_message", userId: principal.uid, userName: name, userEmail: principal.email || "", occurredAt: at, entityId: ref.id }]);
-  await batch.commit();
+  const write = (batch: FirebaseFirestore.WriteBatch | FirebaseFirestore.Transaction) => {
+    batch.create(ref, conversation);
+    batch.create(studentActivityRef(principal.uid).doc(), { kind: "contact", title: `Mensagem enviada ao professor: ${subject}`, at });
+    return writeOperationalNotifications(batch, [{ kind: "student_message", userId: principal.uid, userName: name, userEmail: principal.email || "", occurredAt: at, entityId: ref.id }]);
+  };
+  const notificationIds = evaluation ? await getAdminDb().runTransaction(async tx=>{
+    const saved = await tx.get(learningRef(principal.uid));
+    const learning = learningFromData(saved.data());
+    if (learning.testMode || learning.revision !== body.learningRevision) throw new RequestAuthError("Percurso de teste ou conversa alterada: avaliação não enviada.",409);
+    return write(tx);
+  }) : await (async()=>{const batch=getAdminDb().batch();const ids=write(batch);await batch.commit();return ids;})();
   scheduleOperationalNotifications(notificationIds);
   return { conversation: { id: ref.id, ...conversation } };
 }

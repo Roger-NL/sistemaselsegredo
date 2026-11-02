@@ -2,8 +2,9 @@ import type { LiveClassBooking } from "./live-class";
 
 export type AccountStatus = "active" | "pending" | "rejected" | "suspended";
 export type AccountRole = "student" | "manager";
-export type WorkspaceAccount = { id: string; name: string; email: string; status: AccountStatus; role: AccountRole };
+export type WorkspaceAccount = { id: string; name: string; email: string; status: AccountStatus; role: AccountRole; canTest?: boolean };
 export type LearningProgress = {
+  testMode?: boolean;
   revision: number;
   demoSnapshot: string | null;
   studySnapshot: string | null;

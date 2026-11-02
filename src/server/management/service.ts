@@ -25,17 +25,17 @@ export function managementUser(identity: UserRecord, savedProfile?: Record<strin
   const profile = savedProfile || {};
   const recordedStatus = savedProfile ? accountStatus(profile.accountStatus) : "pending";
   const status = identity.disabled ? recordedStatus === "rejected" ? "rejected" : "suspended" : recordedStatus;
-  const studyCompleted = savedStudyCompleted(rawLearning);
+  const studyCompleted = learning.testMode ? 0 : savedStudyCompleted(rawLearning);
   const booking = liveClass?.userId === identity.uid ? liveClass : null;
   return {
     id: identity.uid, name: typeof profile.name === "string" && profile.name.trim() ? profile.name : identity.displayName || identity.email || "Sem nome",
     email: identity.email || "", role: identity.customClaims?.admin === true ? "manager" : "student",
     status,
     createdAt: iso(identity.metadata.creationTime), lastLoginAt: iso(profile.lastLoginDate) || iso(identity.metadata.lastSignInTime),
-    progress: Math.round((learning.demoPercent + (learning.studyTotal ? studyCompleted / learning.studyTotal * 100 : 0)) / 2),
-    demoPercent: learning.demoPercent, studyCompleted, studyTotal: learning.studyTotal,
-    conversation: conversationPosition(learning.demoSnapshot), lastLearningAt: learning.updatedAt, liveClass: booking,
-    canBookLiveClass: ["active", "pending"].includes(status) && studyCompleted === learning.studyTotal && (!booking || booking.status === "cancelled"),
+    progress: learning.testMode ? 0 : Math.round((learning.demoPercent + (learning.studyTotal ? studyCompleted / learning.studyTotal * 100 : 0)) / 2),
+    testMode: learning.testMode === true, demoPercent: learning.testMode ? 0 : learning.demoPercent, studyCompleted, studyTotal: learning.studyTotal,
+    conversation: learning.testMode ? null : conversationPosition(learning.demoSnapshot), lastLearningAt: learning.updatedAt, liveClass: booking,
+    canBookLiveClass: !learning.testMode && ["active", "pending"].includes(status) && studyCompleted === learning.studyTotal && (!booking || booking.status === "cancelled"),
     loginResetAt: iso(profile.loginResetAt), notes: typeof profile.managementNotes === "string" ? profile.managementNotes : "",
   };
 }

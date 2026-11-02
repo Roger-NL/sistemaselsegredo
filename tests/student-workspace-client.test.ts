@@ -334,3 +334,25 @@ describe("real teacher conversations", () => {
     expect(JSON.parse(fetcher.mock.calls[3][1]!.body as string)).toEqual({ body: "Obrigada" });
   });
 });
+
+
+describe("persistent test controls synchronization",()=>{
+  it("invalidates mounted generations and queued snapshots before replacing server progress",async()=>{
+    const {store,fetcher}=setup();const data=workspace();data.account.canTest=true;
+    fetcher.mockResolvedValueOnce(json(data)).mockResolvedValueOnce(saved(data,{revision:1,testMode:true,studyCompleted:24}));
+    await store.load();const generation=store.getSnapshot().generation;
+    store.stage("demoSnapshot","queued-old-screen",generation);
+    await store.applyTestControl({action:"complete-study"});
+    expect(fetcher.mock.calls.filter(([url])=>url==="/api/student/learning")).toHaveLength(0);
+    expect(store.getSnapshot().workspace?.learning).toMatchObject({revision:1,testMode:true,studyCompleted:24});
+    expect(store.stage("demoSnapshot","stale",generation)).toBe(false);
+    expect(JSON.parse(fetcher.mock.calls[1][1]!.body as string)).toEqual({action:"complete-study",revision:0});
+  });
+  it("reloads a conflict instead of keeping an old epoch, and rejects ordinary account controls",async()=>{
+    const {store,fetcher}=setup();const ordinary=workspace();fetcher.mockResolvedValueOnce(json(ordinary));await store.load();
+    await expect(store.applyTestControl({action:"complete-all"})).rejects.toThrow();expect(fetcher).toHaveBeenCalledTimes(1);
+    const data=workspace();data.account.canTest=true;fetcher.mockResolvedValueOnce(json(data));await store.load(true);
+    fetcher.mockResolvedValueOnce(json({error:"changed"},409)).mockResolvedValueOnce(json({...data,learning:{...data.learning,revision:5}}));
+    await expect(store.applyTestControl({action:"forward"})).rejects.toThrow("changed");expect(store.getSnapshot().workspace?.learning.revision).toBe(5);
+  });
+});

@@ -15,8 +15,8 @@ async function handle(request: Request, write: boolean) {
     if (write) {
       if (request.headers.get("x-presentation-uid") !== principal.uid) throw new RequestAuthError("A conta conectada mudou. Entre novamente para continuar.", 409);
       const body = await readJsonObject(request, 128);
-      if (Object.keys(body).length !== 1 || body.completed !== true) throw new RequestPayloadError("INVALID_PRESENTATION_COMPLETION");
-      return json(await completePresentation(principal.uid));
+      if (Object.keys(body).some(k=>!["completed","revision"].includes(k)) || body.completed !== true || (body.revision !== undefined && (!Number.isSafeInteger(body.revision) || Number(body.revision)<0))) throw new RequestPayloadError("INVALID_PRESENTATION_COMPLETION");
+      return json(await completePresentation(principal.uid,Number(body.revision)||0));
     }
     return json(await getPresentation(principal.uid));
   } catch (error) {

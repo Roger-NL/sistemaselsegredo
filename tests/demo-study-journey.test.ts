@@ -20,7 +20,7 @@ vi.mock("react", async importOriginal => {
   return {
     ...react,
     // Select the normal glossary view for SSR. Click/navigation behavior is browser QA.
-    useState: (initial: unknown) => react.useState(initial === "overview" ? mocks.studyView : initial),
+    useState: (initial: unknown) => { const value = typeof initial === "function" ? initial() : initial; return react.useState(value === "overview" ? mocks.studyView : value); },
   };
 });
 

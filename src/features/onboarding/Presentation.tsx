@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { TestControls } from "@/features/superuser/TestControls";
 import { Brand } from "@/components/ui/Brand";
 import { ArrowLeft, ArrowRight, BookOpen, Check, Coffee, LockKeyhole, MessageCircle, MicOff, MoveUpRight, Puzzle, Lightbulb, PenLine, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -56,7 +57,7 @@ export function Presentation({ review = false, busy = false, error = "", onFinis
   }
 
   return <main className="presentation" data-scene={frame.visual} data-reduced-motion={reduced} aria-label={review ? "Rever apresentação do BasedSpeak" : "Apresentação do BasedSpeak"} aria-busy={busy}>
-    <header className="presentation-header"><Brand href="/dashboard" />{review && <button type="button" disabled={busy} onClick={onFinish}>Voltar ao painel<ArrowRight size={15} aria-hidden="true" /></button>}</header>
+    <header className="presentation-header"><Brand href="/dashboard" /><TestControls />{review && <button type="button" disabled={busy} onClick={onFinish}>Voltar ao painel<ArrowRight size={15} aria-hidden="true" /></button>}</header>
     <div className="presentation-stage" key={cursor}>
       <div className="presentation-art" aria-hidden="true"><Scene visual={frame.visual} frame={frame.frameIndex} /></div>
       <section className="presentation-copy">

@@ -46,7 +46,7 @@ export function DemoExperience({ initial, generation = -1, publishedAudio = {}, 
   const storageNotice = useRef<HTMLParagraphElement>(null);
   const supportMenu = useRef<HTMLDialogElement>(null);
   const audioMenu = useRef<HTMLDialogElement>(null);
-  const [replaying, setReplaying] = useState(false);
+  const [replaying, setReplaying] = useState(()=>initial.nodeId === "end" && typeof window !== "undefined" && new URLSearchParams(window.location.search).get("replay") === "1");
   const [draftProfile, setDraftProfile] = useState(initial.profile);
   const demoAudio = useDemoAudio(`${state.nodeId}:${state.presentationStep}:${state.phase}:${state.reviewView}:${replaying}`, publishedAudio);
   const [playbackRate, setPlaybackRate] = useState(1);

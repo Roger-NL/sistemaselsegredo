@@ -1,0 +1,20 @@
+.test-controls-trigger { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:44px; min-height:44px; border:1px solid #d9d3c7; border-radius:10px; background:transparent; color:inherit; cursor:pointer; }
+.test-controls-trigger span { font-size:11px; }
+.test-controls-dialog { width:min(900px,calc(100vw - 24px)); max-width:none; max-height:calc(100dvh - 24px); padding:0; border:1px solid #d9d3c7; border-radius:20px; background:#f5f1e9; color:#191919; box-sizing:border-box; font:15px/1.5 Arial,sans-serif; }
+.test-controls-dialog::backdrop { background:#151b1a99; backdrop-filter:blur(4px); }
+.test-controls-dialog > header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; border-bottom:1px solid #ddd6ca; }
+.test-controls-dialog h2 { margin:4px 0 0; font-size:26px; letter-spacing:-.03em; }
+.test-controls-dialog small { font-size:10px; letter-spacing:.12em; }
+.test-controls-scroll { max-height:calc(100dvh - 150px); overflow:auto; overscroll-behavior:contain; padding:8px 24px 24px; }
+.test-controls-dialog aside,.test-controls-dialog section { padding:18px; border:1px solid #ded6c9; border-radius:12px; margin:18px 0; background:#fffdf8; }
+.test-controls-dialog h3 { font-size:18px; margin:0 0 10px; }
+.test-controls-dialog p { margin:8px 0 16px; }
+.test-controls-dialog fieldset { min-width:0; padding:0; margin:0; border:0; }
+.test-controls-dialog label { display:flex; flex-direction:column; gap:6px; }
+.test-controls-dialog select,.test-controls-dialog input { width:100%; min-width:0; box-sizing:border-box; padding:10px; font:inherit; border:1px solid #c8beae; border-radius:8px; background:#fff; color:#191919; }
+.test-controls-dialog button { min-height:44px; padding:10px 14px; border:1px solid #bfb5a6; border-radius:8px; font:inherit; background:#f1ece2; color:#191919; cursor:pointer; white-space:normal; }
+.test-controls-dialog button:disabled { opacity:.45; cursor:default; }
+.test-control-actions,.test-controls-dialog nav { display:flex; flex-wrap:wrap; gap:10px; margin:14px 0; }
+.test-controls-dialog a { color:inherit; text-underline-offset:3px; padding:8px 0; }
+.test-reset-confirm { border:2px solid #635744!important; }
+@media(max-width:600px) { .test-controls-dialog > header { padding:14px; } .test-controls-dialog h2 { font-size:22px; } .test-controls-scroll { padding:8px 12px 18px; } .test-controls-dialog section { padding:12px; } .test-control-actions { display:grid; grid-template-columns:1fr; } }
