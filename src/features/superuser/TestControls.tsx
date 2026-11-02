@@ -24,45 +24,38 @@ export function TestControlsOverlay() {
 function TestPanel({onClose}:{onClose:()=>void}) {
   const {workspace} = useStudentWorkspace();
   const dialog = useRef<HTMLDialogElement>(null);
-  const confirmBox = useRef<HTMLElement>(null);
   const [profile,setProfile] = useState<SupportProfile>("beginner");
   const [part,setPart] = useState(1), [node,setNode] = useState("p1.first"), [step,setStep] = useState(0);
   const [busy,setBusy] = useState(false), [notice,setNotice] = useState("");
-  const [confirmation,setConfirmation] = useState<TestAction|null>(null);
-  const [typed,setTyped] = useState("");
   useEffect(()=>{const element=dialog.current;element?.showModal();return ()=>element?.close();},[]);
-  useEffect(()=>{if(confirmation){confirmBox.current?.scrollIntoView({block:"nearest"});confirmBox.current?.querySelector("input")?.focus({preventScroll:true});}},[confirmation]);
   const learning=workspace!.learning, demo=learning.demoSnapshot ? decodeSnapshot(learning.demoSnapshot):null;
   const study=decodeProgress(learning.studySnapshot);
-  async function run(input:TestAction,confirmed=false) {
-    if (input.action.startsWith("reset-") && !confirmed) {setConfirmation(input);setTyped("");setNotice("");return;}
+  async function run(input:TestAction) {
     setBusy(true);setNotice("");
-    try {await studentWorkspace.applyTestControl({...input,...(confirmed?{confirmation:"APAGAR PROGRESSO"}:{})});setConfirmation(null);setNotice("Salvo no banco. As páginas da sua conta já usam o novo progresso.");}
-    catch(error) {setNotice(error instanceof Error?error.message:"Não foi possível aplicar o controle.");}
+    try {await studentWorkspace.applyTestControl(input);setNotice("Pronto. Progresso atualizado.");}
+    catch(error) {setNotice(error instanceof Error?error.message:"Não foi possível aplicar o comando.");}
     finally {setBusy(false);}
   }
-  const action=(text:string,input:TestAction)=><button type="button" onClick={()=>void run(input)}>{text}</button>;
+  const action=(text:string,input:TestAction)=><button type="button" data-test-action={input.action} onClick={()=>void run(input)}>{text}</button>;
   return <dialog className="test-controls-dialog" ref={dialog} aria-labelledby="test-controls-title" onCancel={e=>{e.preventDefault();if(!busy)onClose();}}>
-    <header><div><small>EXCLUSIVO DA SUA CONTA</small><h2 id="test-controls-title">Controles de teste</h2></div><button type="button" disabled={busy} onClick={onClose}>Fechar ×</button></header>
+    <header><div><small>SUA CONTA DE TESTE</small><h2 id="test-controls-title">O que você quer fazer?</h2></div><button type="button" disabled={busy} onClick={onClose}>Fechar ×</button></header>
     <div className="test-controls-scroll">
-      <p>Estes controles alteram o progresso <strong>no banco de dados</strong>, em local e produção. Não são a simulação isolada do localhost.</p>
-      <aside><strong>{learning.testMode?"Percurso de teste ativo":"Percurso normal"} · revisão {learning.revision}</strong><p>Ao aplicar um ajuste, as respostas passam a ser simuladas. Não geram avisos de conclusão, avaliações nem novas reservas. Conta, pagamentos, mensagens, reservas existentes e mídias são preservados.</p></aside>
-      <p role="status">Conversa: {demo?`parte ${catalog[demo.nodeId].part} · ${demo.nodeId}`:"não iniciada"}. Estudo: {study.completed.length}/{studySteps.length}.</p>
-      <fieldset disabled={busy || confirmation!==null}>
-        <section><h3>Apresentação da conta</h3><p>Controle se o painel apresenta novamente a introdução inicial do BasedSpeak. O reset também invalida telas antigas da apresentação.</p><div className="test-control-actions">{action("Reexibir introdução",{action:"reset-presentation"})}{action("Marcar introdução vista",{action:"complete-presentation"})}</div></section>
-        <section><h3>Entrada e conversa</h3><p>Ir a uma parte ou momento substitui a conversa por um caminho coerente até esse ponto. Completar uma parte inclui os pré-requisitos; não cria uma conclusão solta.</p>
-          <label>Apoio para testar<select value={profile} onChange={e=>setProfile(e.target.value as SupportProfile)}><option value="beginner">Iniciante</option><option value="some">Com pistas</option><option value="less">Menos apoio</option></select></label>
-          <div className="test-control-actions">{action("Mostrar apresentação",{action:"reset-demo"})}{action("Iniciar conversa",{action:"start-demo",profile})}{action("Aplicar apoio",{action:"profile",profile})}{action("Recuar uma tela",{action:"back"})}{action("Avançar um momento",{action:"forward"})}{action("Avançar uma parte",{action:"next-part"})}</div>
-          <label>Parte<select value={part} onChange={e=>setPart(Number(e.target.value))}>{Array.from({length:10},(_,i)=><option key={i} value={i+1}>Parte {i+1}</option>)}</select></label>
-          <div className="test-control-actions">{action("Ir para esta parte",{action:"jump-part",part,profile})}{action("Completar esta parte",{action:"complete-part",part,profile})}</div>
-          <label>Momento da conversa<select value={node} onChange={e=>setNode(e.target.value)}>{nodes.map(n=><option value={n.id} key={n.id}>{n.part} · {n.id} · {n.context.slice(0,65)}</option>)}</select></label><div className="test-control-actions">{action("Ir para este momento",{action:"jump-node",node,profile})}{action("Completar conversa",{action:"complete-demo"})}</div>
-        </section>
-        <section><h3>Estudo: 24 práticas</h3><p>Concluir uma prática marca apenas a prática escolhida como teste com apoio. A posição não altera as demais conclusões.</p><label>Prática<select value={step} onChange={e=>setStep(Number(e.target.value))}>{studySteps.map(({step:s},i)=><option key={s.id} value={i}>{i+1} · {s.title}</option>)}</select></label><div className="test-control-actions">{action("Posicionar nesta prática",{action:"study-position",step})}{action("Marcar como concluída",{action:"study-complete",step})}{action("Marcar como pendente",{action:"study-uncomplete",step})}{action("Completar estudo",{action:"complete-study"})}{action("Zerar estudo",{action:"reset-study"})}</div></section>
-        <section><h3>Retrospectiva e replay</h3><p>Preparar uma tela completa a conversa simulada. Abrir o replay apenas consulta as cenas já gravadas.</p><div className="test-control-actions">{action("Preparar final",{action:"review",view:"end"})}{action("Preparar resumo",{action:"review",view:"moments"})}{action("Preparar despedida",{action:"review",view:"thanks"})}{action("Preparar conclusão",{action:"review",view:"done"})}</div><nav><Link href="/demo" onClick={onClose}>Abrir conversa</Link>{demo?.nodeId === "end" && <Link href="/demo?replay=1" onClick={onClose}>Rever cenas e áudios</Link>}<Link href="/demo/estudo?practice=1" onClick={onClose}>Abrir prática selecionada</Link><Link href="/dashboard#aula-ao-vivo" onClick={onClose}>Consultar acesso à aula</Link></nav></section>
-        <section><h3>Recomeçar ou concluir o processo</h3><p>Zerar tudo remove a conclusão da introdução, conversa, práticas e eventos de aprendizagem da sua conta. O registro técnico das ações de teste permanece. Para voltar a um percurso normal, é necessário recomeçar sem conclusões simuladas.</p><div className="test-control-actions">{action("Completar tudo para teste",{action:"complete-all"})}{action("Zerar todo o progresso",{action:"reset-all"})}{action("Recomeçar como percurso normal",{action:"reset-real"})}</div></section>
+      <div className="test-control-summary"><span>{learning.testMode?"Modo de teste":"Percurso normal"}</span><span>{demo?`Conversa · parte ${catalog[demo.nodeId].part}/10`:"Conversa não iniciada"}</span><span>Estudo · {study.completed.length}/24</span></div>
+      <fieldset disabled={busy}>
+        <div className="test-quick-actions">{action("Apagar tudo",{action:"reset-all"})}{action("Completar tudo",{action:"complete-all"})}{action("Começar do zero, sem simulação",{action:"reset-real"})}</div>
+        <nav className="test-page-links" aria-label="Páginas do curso">
+          <Link href="/dashboard" onClick={onClose}>Meu painel ↗</Link><Link href="/demo" onClick={onClose}>Conversa ↗</Link><Link href="/demo/estudo?practice=1" onClick={onClose}>Estudo ↗</Link>{demo?.nodeId === "end" && <Link href="/demo?replay=1" onClick={onClose}>Cenas e áudios ↗</Link>}<Link href="/dashboard#aula-ao-vivo" onClick={onClose}>Minha aula ↗</Link>{workspace!.account.role === "manager" && <Link href="/adm" onClick={onClose}>ADM ↗</Link>}
+        </nav>
+        <div className="test-control-grid">
+          <section><h3>Introdução</h3><div className="test-control-actions">{action("Mostrar de novo",{action:"reset-presentation"})}{action("Pular introdução",{action:"complete-presentation"})}</div></section>
+          <section><h3>Conversa</h3><div className="test-control-actions">{action("Voltar uma tela",{action:"back"})}{action("Avançar um momento",{action:"forward"})}{action("Próxima parte",{action:"next-part"})}{action("Completar conversa",{action:"complete-demo"})}{action("Apagar conversa",{action:"reset-demo"})}{action("Iniciar conversa",{action:"start-demo",profile})}</div></section>
+          <section><h3>Apoio e partes</h3><label>Nível de apoio<select value={profile} onChange={e=>setProfile(e.target.value as SupportProfile)}><option value="beginner">Iniciante</option><option value="some">Com pistas</option><option value="less">Menos apoio</option></select></label><div className="test-control-actions">{action("Usar este apoio",{action:"profile",profile})}</div><label>Parte da conversa<select value={part} onChange={e=>setPart(Number(e.target.value))}>{Array.from({length:10},(_,i)=><option key={i} value={i+1}>Parte {i+1}</option>)}</select></label><div className="test-control-actions">{action("Ir para esta parte",{action:"jump-part",part,profile})}{action("Completar esta parte",{action:"complete-part",part,profile})}</div><label>Momento específico<select value={node} onChange={e=>setNode(e.target.value)}>{nodes.map((n,i)=><option value={n.id} key={n.id}>{i+1}. Parte {n.part} · {n.context.slice(0,65)}</option>)}</select></label><div className="test-control-actions">{action("Ir para este momento",{action:"jump-node",node,profile})}</div></section>
+          <section><h3>Estudo</h3><label>Prática<select value={step} onChange={e=>setStep(Number(e.target.value))}>{studySteps.map(({step:s},i)=><option key={s.id} value={i}>{i+1} · {s.title}</option>)}</select></label><div className="test-control-actions">{action("Ir para esta prática",{action:"study-position",step})}{action("Concluir esta prática",{action:"study-complete",step})}{action("Refazer esta prática",{action:"study-uncomplete",step})}{action("Completar estudo",{action:"complete-study"})}{action("Apagar estudo",{action:"reset-study"})}</div><Link href="/demo/estudo?practice=1" onClick={onClose}>Abrir prática selecionada ↗</Link></section>
+          <section className="test-review-controls"><h3>Final da demo</h3><div className="test-control-actions">{action("Ver final",{action:"review",view:"end"})}{action("Ver resumo",{action:"review",view:"moments"})}{action("Ver despedida",{action:"review",view:"thanks"})}{action("Ver conclusão",{action:"review",view:"done"})}</div><Link href="/demo" onClick={onClose}>Abrir conversa ↗</Link></section>
+        </div>
       </fieldset>
-      {confirmation && <section ref={confirmBox} className="test-reset-confirm" aria-label="Confirmar reset"><h3>Confirmar alteração no banco</h3><p>{confirmation.action==="reset-demo"?"A conversa será apagada; o estudo será preservado.":confirmation.action==="reset-study"?"O estudo será apagado; a conversa será preservada.":confirmation.action==="reset-presentation"?"A conclusão da introdução será removida; a conversa e o estudo serão preservados.":"Introdução, conversa, estudo e eventos de aprendizagem serão reiniciados."} Essa ação não pode ser desfeita por este painel.</p><label>Digite <span translate="no">APAGAR PROGRESSO</span><input value={typed} disabled={busy} onChange={e=>setTyped(e.target.value)} /></label><div className="test-control-actions"><button type="button" disabled={typed!=="APAGAR PROGRESSO"||busy} onClick={()=>void run(confirmation,true)}>Confirmar reset</button><button type="button" disabled={busy} onClick={()=>setConfirmation(null)}>Cancelar</button></div></section>}
-      <p role="status" aria-live="polite">{busy?"Aplicando no banco…":notice}</p>
+      <p className="test-control-note">Os comandos são imediatos e salvam no banco da sua conta. Reservas, mensagens, pagamentos e mídias ficam preservados. Avanços simulados continuam marcados como teste.</p>
     </div>
+    <footer role="status" aria-live="polite">{busy?"Aplicando…":notice||"Escolha um comando acima."}</footer>
   </dialog>;
 }

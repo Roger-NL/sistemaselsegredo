@@ -97,4 +97,4 @@ A solicitação de 27/10/2026 autoriza consolidar as etapas na branch principal 
 
 ## Controles exclusivos de teste
 
-A conta de teste autorizada tem uma engrenagem no topo para ajustar o próprio progresso persistido, com revisão contra abas antigas e confirmação dos resets. Consulte o [estudo, ações e limites](docs/CONTROLES-SUPERUSUARIO-2026-11-02.md). O painel local isolado continua separado desses controles reais.
+A conta de teste autorizada tem uma engrenagem no topo para ajustar o próprio progresso persistido, com revisão contra abas antigas e comandos diretos. Consulte o [estudo, ações e limites](docs/CONTROLES-SUPERUSUARIO-2026-11-02.md). O painel local isolado continua separado desses controles reais.

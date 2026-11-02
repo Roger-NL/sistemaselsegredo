@@ -48,8 +48,14 @@ describe("exclusive server-bound test owner",()=>{
     fake.principal.mockResolvedValue(owner);
     expect((await POST(request("POST",{},"https://evil.test"))).status).toBe(403);
     expect((await POST(request("POST",{},undefined,"other"))).status).toBe(409);
-    for(const body of [{action:"complete-all",revision:0,userId:"other"},{action:"complete-all",revision:0,testMode:false},{action:"reset-all",revision:0},{action:"jump-part",revision:0,part:11},{action:"study-position",revision:0,step:24},{action:"jump-node",revision:0,node:"missing"},{action:"forward",revision:0,profile:"beginner"}]) expect((await POST(request("POST",body))).status).toBe(400);
+    for(const body of [{action:"complete-all",revision:0,userId:"other"},{action:"complete-all",revision:0,testMode:false},{action:"jump-part",revision:0,part:11},{action:"study-position",revision:0,step:24},{action:"jump-node",revision:0,node:"missing"},{action:"forward",revision:0,profile:"beginner"}]) expect((await POST(request("POST",body))).status).toBe(400);
     expect(fake.docs.size).toBe(1);
+  });
+  it("executes a reset directly without a typed phrase or confirmation field",async()=>{
+    const response=await POST(request("POST",{action:"reset-all",revision:0}));
+    expect(response.status).toBe(200);
+    expect((await response.json()).learning).toMatchObject({revision:1,demoSnapshot:null,studySnapshot:null,testMode:true});
+    expect(fake.docs.get(`learning_states/${owner.uid}`)?.revision).toBe(1);
   });
   it("rechecks canonical identity for every action and GET",async()=>{
     expect((await GET(request("GET"))).status).toBe(200);
@@ -60,11 +66,11 @@ describe("exclusive server-bound test owner",()=>{
 describe("transactional persisted progress controls",()=>{
   it("resets onboarding in the database and rejects an old presentation completion",async()=>{
     fake.docs.set(`users/${owner.uid}`,{accountStatus:"active",presentationCompletedAt:"2026-10-01",name:"keep"});
-    await mutateTestProgress(owner,{action:"reset-presentation",revision:0,confirmation:"APAGAR PROGRESSO"});
+    await mutateTestProgress(owner,{action:"reset-presentation",revision:0});
     expect(fake.docs.get(`users/${owner.uid}`)).toMatchObject({presentationCompletedAt:null,presentationRevision:1,name:"keep"});
     await expect(completePresentation(owner.uid,0)).rejects.toMatchObject({status:409});
     expect(await completePresentation(owner.uid,1)).toMatchObject({completed:true,revision:1});
-    await mutateTestProgress(owner,{action:"reset-all",revision:1,confirmation:"APAGAR PROGRESSO"});
+    await mutateTestProgress(owner,{action:"reset-all",revision:1});
     expect(fake.docs.get(`users/${owner.uid}`)).toMatchObject({presentationCompletedAt:null,presentationRevision:2,name:"keep"});
   });
   it("persists completion then resets own learning and learning events without touching operational records",async()=>{
@@ -74,7 +80,7 @@ describe("transactional persisted progress controls",()=>{
     const completed=await mutateTestProgress(owner,{action:"complete-all",revision:0});
     expect(completed.learning).toMatchObject({revision:1,testMode:true,studyCompleted:24});expect(decodeSnapshot(completed.learning.demoSnapshot!)?.nodeId).toBe("end");
     expect(fake.docs.get(`learning_states/${owner.uid}`)).toEqual(completed.learning);
-    const reset=await mutateTestProgress(owner,{action:"reset-all",revision:1,confirmation:"APAGAR PROGRESSO"});
+    const reset=await mutateTestProgress(owner,{action:"reset-all",revision:1});
     expect(reset.learning).toMatchObject({revision:2,testMode:true,demoSnapshot:null,studySnapshot:null});
     expect(fake.docs.has(`users/${owner.uid}/student_activity/old`)).toBe(false);
     expect(fake.docs.get(`demo_live_classes/${owner.uid}`)).toEqual(preserved.booking);expect(fake.docs.get('teacher_conversations/one')).toEqual(preserved.message);expect(fake.docs.get('learning_states/other')).toEqual(preserved.other);expect(fake.docs.get('media/global')).toEqual(preserved.media);expect(fake.docs.get(`users/${owner.uid}/student_activity/contact`)).toEqual(preserved.contact);
@@ -84,17 +90,17 @@ describe("transactional persisted progress controls",()=>{
   it("rejects stale normal saves and competing tweaks; normal mode requires a fresh reset",async()=>{
     const first=await mutateTestProgress(owner,{action:"complete-all",revision:0});
     await expect(saveLearning(owner,{revision:0,demoSnapshot:null})).rejects.toMatchObject({status:409});
-    const races=await Promise.allSettled([mutateTestProgress(owner,{action:"reset-study",revision:1,confirmation:"APAGAR PROGRESSO"}),mutateTestProgress(owner,{action:"reset-all",revision:1,confirmation:"APAGAR PROGRESSO"})]);
+    const races=await Promise.allSettled([mutateTestProgress(owner,{action:"reset-study",revision:1}),mutateTestProgress(owner,{action:"reset-all",revision:1})]);
     expect(races.filter(r=>r.status==="fulfilled")).toHaveLength(1);
     await expect(mutateTestProgress(owner,{action:"forward",revision:first.learning.revision})).rejects.toMatchObject({status:409});
-    const normal=await mutateTestProgress(owner,{action:"reset-real",revision:2,confirmation:"APAGAR PROGRESSO"});
+    const normal=await mutateTestProgress(owner,{action:"reset-real",revision:2});
     expect(normal.learning).toMatchObject({testMode:false,revision:3,demoSnapshot:null,studySnapshot:null});
   });
   it("blocks test evaluations and stale evaluation tabs before creating messages",async()=>{
     await mutateTestProgress(owner,{action:"complete-all",revision:0});
     for(const learningRevision of [0,1]) await expect(createConversation(owner,{subject:"Avaliação da conversa da cafeteria",body:"test",learningRevision})).rejects.toMatchObject({status:409});
     expect([...fake.docs.keys()].some(p=>p.startsWith("teacher_conversations/"))).toBe(false);
-    await mutateTestProgress(owner,{action:"reset-real",revision:1,confirmation:"APAGAR PROGRESSO"});
+    await mutateTestProgress(owner,{action:"reset-real",revision:1});
     await expect(createConversation(owner,{subject:"Avaliação da conversa da cafeteria",body:"stale",learningRevision:1})).rejects.toMatchObject({status:409});
   });
   it("continuing a test journey suppresses completion notifications and learning activity",async()=>{

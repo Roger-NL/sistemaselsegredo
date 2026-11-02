@@ -12,7 +12,7 @@ import { catalog } from "@/features/demo/content/catalog";
 import { PROFILES, REVIEW_VIEWS } from "@/features/demo/model/types";
 import { studySteps } from "@/features/theory/progress";
 export function validateTestAction(body: Record<string, unknown>): TestAction {
-  assertOnlyKeys(body,["action","revision","profile","part","node","step","view","confirmation"]);
+  assertOnlyKeys(body,["action","revision","profile","part","node","step","view"]);
   const action = body.action as TestAction["action"];
   if (!testActions.includes(action) || !Number.isSafeInteger(body.revision) || Number(body.revision)<0) throw new RequestPayloadError("Ação ou revisão inválida.");
   const fields = action === "jump-part" || action === "complete-part" ? ["part","profile"] : action === "jump-node" ? ["node","profile"] : ["start-demo","profile"].includes(action) ? ["profile"] : action.startsWith("study-") ? ["step"] : action === "review" ? ["view"] : [];
@@ -22,7 +22,6 @@ export function validateTestAction(body: Record<string, unknown>): TestAction {
   if (fields.includes("node") && (typeof body.node!=="string" || !catalog[body.node])) throw new RequestPayloadError("Momento inválido.");
   if (fields.includes("step") && (!Number.isInteger(body.step) || Number(body.step)<0 || Number(body.step)>=studySteps.length)) throw new RequestPayloadError("Prática inválida.");
   if (fields.includes("view") && !REVIEW_VIEWS.includes(body.view as never)) throw new RequestPayloadError("Tela de revisão inválida.");
-  if (action.startsWith("reset-") && body.confirmation !== "APAGAR PROGRESSO") throw new RequestPayloadError("Confirme o reset antes de executar.");
   return body as TestAction;
 }
 export async function mutateTestProgress(principal: RequestPrincipal, body: Record<string,unknown>) {

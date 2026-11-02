@@ -23,7 +23,7 @@ A engrenagem aparece no topo do painel, conversa, estudo, apresentação e ADM a
 | Processo inteiro | Completar tudo; zerar todo o progresso; recomeçar como percurso normal | Inclui introdução, conversa e estudo. Reset completo também remove os eventos de aprendizagem da própria conta. Voltar ao modo normal sempre exige reset: não converte conclusões simuladas em aprendizagem real. |
 | Acesso à aula | Consultar o estado existente pelo painel | Progresso simulado não libera novas reservas. Reserva já existente permanece intacta. |
 
-As ações alteram `learning_states/{uid}` de verdade. Cada ajuste incrementa `revision`; o registro técnico de ação/revisão fica em `learning_test_audit`. Reset completo não apaga esse registro de auditoria. Os resets exigem digitar **APAGAR PROGRESSO** na própria UI e confirmação equivalente na API. O aviso descreve o escopo antes de executar.
+As ações alteram `learning_states/{uid}` de verdade. Cada ajuste incrementa `revision`; o registro técnico de ação/revisão fica em `learning_test_audit`. Reset completo não apaga esse registro de auditoria. Por solicitação posterior de Roger, os resets agora são **imediatos, com um clique**. Não há frase digitada, tela de confirmação nem campo de confirmação na API. A exclusividade da identidade, origem e revisão permanece obrigatória.
 
 “Zerar tudo” não apaga usuário, pagamentos, reservas, mensagens, mídia, cache global ou dados de outras pessoas. Histórico antigo de mensagens/agendamento e auditoria administrativa não é progresso de aprendizagem e permanece preservado. Para manter o reset atômico, mais de 449 eventos de aprendizagem recusam a operação inteira, sem reset parcial; nesse caso é necessária uma rotina administrativa paginada específica.
 
@@ -40,15 +40,19 @@ As ações alteram `learning_states/{uid}` de verdade. Cada ajuste incrementa `r
 ## O que foi verificado
 
 - 523 testes em 70 arquivos passaram, incluindo os testes anteriores de migração cafe-v8, replay e isolamento local.
-- Testes das rotas: visitante, manager diferente, UID/e-mail forjado, e-mail não verificado, conta desabilitada, origem cruzada, revisão antiga, payload extra, índices e nós inválidos e confirmação ausente.
+- Testes das rotas: visitante, manager diferente, UID/e-mail forjado, e-mail não verificado, conta desabilitada, origem cruzada, revisão antiga, payload extra, índices e nós inválidos e campos extras.
 - Modelo: todos os dez saltos de parte e conclusão por parte, todos os nós/ramificações nos três apoios, avanço/recuo, retrospectiva e alteração individual das 24 práticas. Os snapshots continuam aceitos pelo validador normal.
 - Serviços com banco isolado: conclusão e reset persistem no documento correto; ações concorrentes com a mesma revisão têm apenas um vencedor; saves antigos são recusados; introdução é realmente reiniciada; mensagens, reserva, mídia e outra conta permanecem idênticas.
 - Novas reservas e avaliações são recusadas para conclusão simulada. A continuidade normal de um percurso de teste não produz aviso de conclusão.
 - Cliente: invalidação de componentes/edições antigas, substituição pela resposta do banco, recarga após conflito e recusa de controles para conta comum.
-- Navegador autenticado local: engrenagem, abertura do painel e confirmação de reset em 390×844. Campo recebeu foco, confirmação apareceu inteira e botão permaneceu desabilitado sem a frase. Foi usado **Cancelar**, sem efetivar reset.
+- A primeira versão tinha confirmação digitada; foi substituída por comandos diretos após a revisão de Roger. O menu agora traz ações rápidas, links para as páginas e grupos curtos: introdução, conversa, apoio/partes, estudo e final. No QA da conta real, apenas o menu é aberto; nenhum reset é acionado.
 
 Lint sem avisos, TypeScript e compilação passaram. No computador (1440×900), o painel inteiro coube na janela e seus botões não transbordaram horizontalmente; o conteúdo longo usa rolagem interna. O resultado da publicação e as evidências locais ficam em `output/superuser-2026-11-02/`. A verificação da conta real é exclusivamente de leitura, incluindo comparação de hashes do progresso e reserva antes/depois. Os testes de mutação usam banco em memória; não houve reset, conclusão ou reserva real do Roger para QA.
 
 ## Controles deliberadamente fora do painel
 
 Não há troca de identidade, alteração de papéis ou assinatura, remoção de usuário, pagamento, reserva real, mensagem, disparo de e-mail ou geração de mídia. A disponibilidade do professor e a aprovação auditiva humana continuam pendentes da entrega anterior. Simular novos estados operacionais de reserva/mensagens exigiria um ambiente de dados separado; não deve ser feito sobre registros reais para acelerar testes da demo.
+
+## Simplificação do menu
+
+A engrenagem abre todas as áreas em um único menu. “Apagar tudo” e “Completar tudo” ficam no início. Há atalhos visíveis para painel, conversa, estudo, cenas/áudios quando disponíveis, aula e ADM quando a conta é manager. Todos os comandos existentes permanecem disponíveis, organizados em cartões curtos, em duas colunas no computador e uma coluna no celular. Cabeçalho e retorno do comando ficam visíveis enquanto o conteúdo rola.
