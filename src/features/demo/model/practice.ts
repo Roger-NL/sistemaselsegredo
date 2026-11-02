@@ -1,3 +1,5 @@
+import { normalizeAnswer } from "./normalize";
+export { normalizeAnswer } from "./normalize";
 import { audio } from "../content/media";
 import type { AudioId, Block, DemoState, ResponseNode, SupportProfile } from "./types";
 import { expressionHistory } from "./history";
@@ -12,7 +14,7 @@ export function practice(node: ResponseNode, profile: SupportProfile) {
   const extra = profile === "some" && source.length === answer.length && distractors[node.response]
     ? [{ id: "distractor", text: distractors[node.response]! }] : [];
   const blocks = profile === "beginner" ? source.filter(b => answer.includes(b.id)) : [...source, ...extra];
-  const skeleton = profile === "some" ? node.skeleton ?? `${source.find(b => b.id === answer[0])?.text ?? ""} ___` : node.skeleton;
+  const skeleton = profile === "some" ? node.skeleton ?? (answer.length > 1 ? `${source.find(b => b.id === answer[0])?.text ?? ""} ___` : undefined) : node.skeleton;
   return { mode, blocks, answer, skeleton };
 }
 export function responsePhase(state: DemoState, node: ResponseNode, introducing = true): DemoState["phase"] {
@@ -27,12 +29,40 @@ export function recognitionOptions(node: ResponseNode): AudioId[] {
   const offset = [...node.id].reduce((n, c) => n + c.charCodeAt(0), 0) % choices.length;
   return [...choices.slice(offset), ...choices.slice(0, offset)];
 }
-export function normalizeAnswer(text: string) {
-  return text.normalize("NFC").toLowerCase().replace(/[’‘]/g, "'")
+// Deliberately finite, context-aware repertoire; never a semantic English grader.
+const alternatives: Partial<Record<AudioId, string[]>> = {
+  U01: ["No, not mine.", "It's not mine.", "No, it isn't mine."],
+  U02: ["What did you order"], U03: ["That's okay.", "No problem.", "It's alright."],
+  U05: ["It's mine.", "Yes, mine.", "Yes, this is mine."],
+  U06: ["Yes, I like it."], U07: ["No, not really."], U09: ["Oh, really?"],
+  U10: ["Sure!", "Yes, sure.", "Yes, please.", "Yes!"],
+  U11: ["I'm learning English now."], U12: ["Do you like your work?"],
+  U13: ["Do you like this cafe?"], U14: ["I like it.", "Yes, I like it."],
+  U15: ["I can stay a bit longer."], U16: ["I need to go.", "I've got to go."],
+  U17: ["I like this place."], U18: ["Could we keep in touch?"],
+  U19: ["It was nice talking to you.", "Nice to talk to you."],
+  U20: ["Goodbye!", "Bye bye!", "See you!"],
+};
+const contextual: Record<string, string[]> = {
+  "p4.same": ["I ordered an iced coffee too.", "I ordered the same."],
+  "p7.too": ["I'm tired too."], "p7.not": ["I'm not very tired."],
+  "p5.like": ["I like the coffee."], "p5.not": ["I don't really like it."],
+  "p9.english-like": ["I like learning English."], "p9.english-not": ["I don't really like learning English."],
+  "p9.cafe-like": ["I like this café.", "I like this cafe."],
+  "p9.cafe-not": ["I don't really like this café.", "I don't really like this cafe."],
+};
+export function writtenRepertoire(node: ResponseNode): string[] {
+  return [audio[node.response].text, ...(alternatives[node.response] ?? []), ...(contextual[node.id] ?? [])];
+}
+export function acceptsAnswer(text: string, id: AudioId, nodeId?: string) {
+  return [audio[id].text, ...(alternatives[id] ?? []), ...(nodeId ? contextual[nodeId] ?? [] : [])]
+    .some(value => normalizeAnswer(text) === normalizeAnswer(value));
+}
+/** Frozen acceptance for already recorded pre-v8 sends (including its old flaws). */
+export function acceptsLegacyAnswer(text: string, id: AudioId) {
+  const normalize = (value: string) => value.normalize("NFC").toLowerCase().replace(/[’‘]/g, "'")
     .replace(/\bit's\b/g, "it is").replace(/\bi'm\b/g, "i am")
     .replace(/\bisn't\b/g, "is not").replace(/\bthat's\b/g, "that is")
     .replace(/[.,!?]/g, "").replace(/\s+/g, " ").trim();
-}
-export function acceptsAnswer(text: string, id: AudioId) {
-  return normalizeAnswer(text) === normalizeAnswer(audio[id].text);
+  return normalize(text) === normalize(audio[id].text);
 }

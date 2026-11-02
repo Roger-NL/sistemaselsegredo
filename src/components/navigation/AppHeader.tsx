@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, type ReactNode, type MouseEvent } from "react";
 import { ArrowUpRight, CalendarDays, BookOpen, LayoutDashboard, Menu, MessageCircle, Settings2, TrendingUp, UserRound } from "lucide-react";
+import { LocalTestLauncher, LocalTestStatus } from "@/features/local-testing/LocalTestLauncher";
 import { Brand } from "@/components/ui/Brand";
 import { useJourneyTransition } from "./JourneyTransition";
 import { DASHBOARD_SECTION_EVENT } from "@/features/dashboard/use-dashboard-section";
@@ -39,9 +40,11 @@ export function AppHeader({ current, name, tone = "paper", guest = false, onAcco
     <Brand href={guest ? "/" : "/dashboard"} onClick={navigate} />
     <Link href={guest ? "/comecar?modo=entrar" : "/dashboard"} prefetch={true} className="app-header-panel" aria-current={current === "dashboard" ? "page" : undefined} onClick={navigate}><LayoutDashboard size={15} aria-hidden="true" />{guest ? "Entrar" : "Meu painel"}</Link>
     <div className="app-header-tools">{name && <span className="app-header-name">{name}</span>}
+      {process.env.NODE_ENV === "development" && <LocalTestStatus />}
       <details ref={menu} className="app-header-menu" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) close(); }} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); close(); menu.current?.querySelector("summary")?.focus(); } }}>
         <summary aria-label="Menu de navegação"><Menu size={18} aria-hidden="true" /><span>Menu</span></summary>
         <nav className="app-menu-panel" aria-label="Menu do BasedSpeak">
+          {process.env.NODE_ENV === "development" && <LocalTestLauncher onNavigate={navigate} />}
           <p>{guest ? "Explore a demo gratuita" : "Seu espaço no BasedSpeak"}</p>
           {!guest && <>
           <Link href="/dashboard" prefetch={true} onClick={navigate}><LayoutDashboard size={17} aria-hidden="true" />Meu painel<ArrowUpRight size={14} aria-hidden="true" /></Link>

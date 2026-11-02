@@ -1,3 +1,4 @@
+import { normalizeAnswer as normalizeResponse } from "@/features/demo/model/normalize";
 import { lessons, type Practice } from "./content";
 
 export const studySteps = lessons.flatMap(lesson => lesson.steps.map(step => ({ lesson, step })));
@@ -18,7 +19,7 @@ export function decodeProgress(raw: string | null): StudyProgress {
 }
 
 export function normalizeAnswer(value: string) {
-  return value.normalize("NFC").toLowerCase().replace(/[’‘]/g, "'").replace(/\bit's\b/g, "it is").replace(/\bi'm\b/g, "i am").replace(/\bdon't\b/g, "do not").replace(/\bisn't\b/g, "is not").replace(/[.,!?]/g, "").replace(/\s+/g, " ").trim();
+  return normalizeResponse(value);
 }
 export function isCorrect(practice: Practice, answer: string) {
   const accepted = practice.kind === "write" ? practice.answers : [practice.answer];
@@ -27,4 +28,16 @@ export function isCorrect(practice: Practice, answer: string) {
 export function completeStep(progress: StudyProgress, id: string, withModel: boolean): StudyProgress {
   if (!ids.has(id)) return progress;
   return { ...progress, completed: [...new Set([...progress.completed, id])], supported: withModel ? [...new Set([...progress.supported, id])] : progress.supported.filter(value => value !== id) };
+}
+
+/** Feedback is tied to the chosen distractor where available; assemblies and
+ * short writing retain the exact task explanation instead of grading English generally. */
+export function practiceFeedback(practice: Practice, answer: string) {
+  const explicit = practice.feedback?.[answer];
+  if (explicit) return explicit;
+  if (practice.kind === "order") {
+    if (practice.distractors?.some(token => answer.split(/\s+/).includes(token))) return practice.explanation;
+    return `Confira quais peças são necessárias e a ordem delas. ${practice.explanation}`;
+  }
+  return practice.explanation;
 }

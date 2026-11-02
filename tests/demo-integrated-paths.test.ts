@@ -157,8 +157,13 @@ class Journey {
       expect(before.audioAccess["lucas:p10.bye"]).toBe(this.mode);
       expect(catalog[node.next].kind).toBe("end");
     } else {
-      expect(listeningTarget(sent)?.kind).toBe("lucas");
-      expect(listeningTarget(sent)?.audio).toEqual(catalog[node.next].heard);
+      if (node.next === "p4.new-cup") {
+        expect(presentationCards(catalog[node.next], sent)[0].context).toContain("BASEDSPEAK");
+        expect(listeningTarget(sent)).toBeNull();
+      } else {
+        expect(listeningTarget(sent)?.kind).toBe("lucas");
+        expect(listeningTarget(sent)?.audio).toEqual(catalog[node.next].heard);
+      }
     }
     expect(transition(sent, { at: node.id, type: "SEND_RESPONSE" })).toBe(sent);
     if (node.id === "p3.ask" || node.id === "p3.okay") {
@@ -211,7 +216,7 @@ function verifyRetrospective(state: DemoState) {
   expect(after.includes("U05")).toBe(state.decisions["p3.intent"] === "okay");
   expect(after.includes("U12")).toBe(state.decisions["p8.topic"] === "job");
   expect(after.includes("U13")).toBe(state.decisions["p8.topic"] === "english");
-  expect(after.includes("U17")).toBe(state.decisions["p9.pause"] === "stay");
+  expect(after.includes("U17")).toBe(state.decisions["p9.pause"] === "stay" && state.decisions["p9.cafe-opinion"] !== "not");
   expect(responses.some(line => line.audioId === "U18")).toBe(state.decisions["p10.contact"] === "contact");
   const moments = transition(state, { at: "end", type: "REVIEW", view: "moments" });
   expect(render(moments)).toContain("Esta conversa não comprova domínio ou memorização.");

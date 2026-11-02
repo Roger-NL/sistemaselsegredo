@@ -1,7 +1,7 @@
 import { catalog } from "../content/catalog";
 import { presentationCards } from "../content/presentation";
 import { acceptsAudioAccess, listeningTarget } from "./listening";
-import { acceptsAnswer, practice, recognitionOptions, responsePhase } from "./practice";
+import { acceptsAnswer, acceptsLegacyAnswer, practice, recognitionOptions, responsePhase } from "./practice";
 import { PROFILES, REVIEW_VIEWS, SCHEMA_VERSION, STORY_VERSION, type DemoEvent, type DemoState, type SupportProfile } from "./types";
 
 function enter(state: DemoState, nodeId: string): DemoState {
@@ -17,8 +17,8 @@ function enter(state: DemoState, nodeId: string): DemoState {
 
 }
 
-export function createDemo(profile: SupportProfile, runId: string, startedAt: number): DemoState {
-  return enter({ schemaVersion: SCHEMA_VERSION, storyVersion: STORY_VERSION, runId, startedAt,
+export function createDemo(profile: SupportProfile, runId: string, startedAt: number, storyVersion = STORY_VERSION): DemoState {
+  return enter({ schemaVersion: SCHEMA_VERSION, storyVersion, replayVersion: storyVersion, runId, startedAt,
     initialProfile: profile, profile, activityProfile: profile, nodeId: "p1.first", phase: "scene", presentationStep: 0, audioAccess: {}, assemblyMistakes: 0, returnedBlocks: [], returnSerial: 0, selected: [], draft: "", recognized: null, assistedBlocks: false, help: {}, checked: [],
     decisions: {}, transcript: [], evidence: [], journal: [], notice: "", reviewView: "end", modelHidden: false,
   }, "p1.first");
@@ -26,11 +26,11 @@ export function createDemo(profile: SupportProfile, runId: string, startedAt: nu
 
 /** Rewind one screen advance, not one keystroke/piece/help click. The future is discarded. */
 function previousStep(state: DemoState): DemoState {
-  let cursor = createDemo(state.initialProfile, state.runId, state.startedAt);
+  let cursor = createDemo(state.initialProfile, state.runId, state.startedAt, state.replayVersion);
   let previous: DemoState | null = null;
   for (const event of state.journal) {
     const next = replayEvent(cursor, event);
-    if (next.nodeId !== cursor.nodeId || next.phase !== cursor.phase || next.reviewView !== cursor.reviewView || next.presentationStep !== cursor.presentationStep || next.audioAccess !== cursor.audioAccess) previous = cursor;
+    if (event.type !== "UPGRADE_CONTENT" && (next.nodeId !== cursor.nodeId || next.phase !== cursor.phase || next.reviewView !== cursor.reviewView || next.presentationStep !== cursor.presentationStep || next.audioAccess !== cursor.audioAccess)) previous = cursor;
     cursor = next;
   }
   return previous ?? state;
@@ -39,7 +39,13 @@ function previousStep(state: DemoState): DemoState {
 /** Current user actions cannot invoke the retired test shortcut. */
 export function transition(state: DemoState, event: DemoEvent): DemoState {
   if (event.type === "TEST_FORWARD") return state;
-  return replayEvent(state, event);
+  // Back replays the original rules. Resuming from an old point upgrades only
+  // future actions; the marker makes that boundary deterministic on reload.
+  if (event.type !== "BACK" && state.storyVersion !== STORY_VERSION) {
+    state = replayEvent(state, { at: state.nodeId, type: "UPGRADE_CONTENT" });
+  }
+  const next = replayEvent(state, event);
+  return next.storyVersion !== STORY_VERSION ? replayEvent(next, { at: next.nodeId, type: "UPGRADE_CONTENT" }) : next;
 }
 
 /** Persisted journal replay only. Preserve legacy skips without inventing learner evidence. */
@@ -59,12 +65,20 @@ export function replayEvent(state: DemoState, event: DemoEvent): DemoState {
   };
   let next = state;
   switch (event.type) {
+    case "UPGRADE_CONTENT":
+      if (state.storyVersion === STORY_VERSION) return state;
+      next = { ...state, storyVersion: STORY_VERSION };
+      // An unsent contradictory activity can be skipped; an actual past send
+      // remains in the transcript, including when it came from the old script.
+      if (node.kind === "response" && state.phase === "recall") next = { ...next, phase: responsePhase(next, node) };
+      if (state.nodeId === "p10.here" && state.decisions["p9.cafe-opinion"] === "not") next = enter(next, "p10.contact");
+      break;
     // Retired navigation retained only to reconstruct saved attempts and Back.
     case "TEST_FORWARD": {
       const target = listeningTarget(state);
       if (target && !state.audioAccess[target.key]) {
         next = { ...state, audioAccess: { ...state.audioAccess, [target.key]: "text" } };
-      } else if (state.presentationStep < presentationCards(node).length) {
+      } else if (state.presentationStep < presentationCards(node, state).length) {
         next = { ...state, presentationStep: state.presentationStep + 1 };
       } else if (node.kind === "choice") {
         const choice = node.choices[0];
@@ -82,7 +96,7 @@ export function replayEvent(state: DemoState, event: DemoEvent): DemoState {
       next = { ...state, audioAccess: { ...state.audioAccess, [event.key]: event.mode } }; break;
     case "ADVANCE_PRESENTATION":
       if (listeningTarget(state) && !state.audioAccess[listeningTarget(state)!.key]) return state;
-      if (state.presentationStep >= presentationCards(node).length) return state;
+      if (state.presentationStep >= presentationCards(node, state).length) return state;
       next = { ...state, presentationStep: state.presentationStep + 1 }; break;
     case "TYPE":
       if (state.phase !== "write" || typeof event.text !== "string" || event.text.length > 240 || event.text === state.draft) return state;
@@ -107,13 +121,13 @@ export function replayEvent(state: DemoState, event: DemoEvent): DemoState {
       next = { ...state, profile: event.profile, notice: "A mudança de apoio vale a partir da próxima atividade. Sua tentativa atual foi preservada." }; break;
     case "NEXT":
       if (node.kind !== "scene") return state;
-      next = enter(state, node.next); break;
+      next = enter(state, sceneDestination(state)); break;
     case "ANSWER_MEANING":
       if (node.kind !== "comprehension") return state;
-      next = event.correct ? enter(state, node.next) : { ...state, notice: "Essa opção não corresponde à fala. Ouça novamente ou tente outra." }; break;
+      next = event.correct ? enter(state, node.next) : { ...state, notice: event.option === "lucas" ? "Yours se dirige a você, a pessoa com quem Lucas fala. O nome no copo pode explicar o engano, mas a pergunta é se o copo pertence a você." : event.option === "order" ? "A pergunta não procura quem fez o pedido. Yours pergunta se o objeto apontado pertence à pessoa com quem Lucas fala." : "Essa opção não corresponde à fala. Ouça novamente ou tente outra." }; break;
     case "UNDERSTAND":
       if (node.kind !== "comprehension") return state;
-      next = event.correct ? enter(state, node.next) : { ...state, help: { ...state.help, [node.id]: 1 }, notice: "Volte às pistas: this aponta para o café; yours relaciona o copo a você. Tente de novo, sem pressa." }; break;
+      next = event.correct ? enter(state, node.next) : { ...state, help: { ...state.help, [node.id]: 1 }, notice: "Volte às pistas: this aponta para este objeto, o copo indicado; yours indica pertencimento. Tente de novo, sem pressa." }; break;
     case "CHOOSE": {
       if (node.kind !== "choice") return state;
       const selected = node.choices.find(choice => choice.id === event.choice);
@@ -170,12 +184,12 @@ export function replayEvent(state: DemoState, event: DemoEvent): DemoState {
           next = returnMistake(mismatch < 0 ? [] : state.selected.slice(mismatch), mismatch < 0 ? state.selected : state.selected.slice(0, mismatch)); break;
         }
         next = fail(node.id === "p4.mine" && state.selected.includes("negative")
-          ? "Esse trecho diz ‘não é’. Confira based no copo. Sua montagem foi mantida."
+          ? "Esse trecho diz ‘não é’. Confira BASEDSPEAK no copo. Sua montagem foi mantida."
           : state.activityProfile === "some" ? `Confira a peça ${mismatch >= 0 ? mismatch + 1 : state.selected.length + 1} e o sentido da frase. Sua montagem foi mantida.`
           : `${node.help[0] ?? node.context} Sua montagem foi mantida; tente novamente.`); break;
       }
-      if (!supported && state.phase === "write" && !acceptsAnswer(state.draft, node.response)) {
-        if (event.type === "SEND_RESPONSE") { next = { ...state, notice: "Ainda não reconheci essa resposta. Revise ou consulte Ajuda." }; break; }
+      if (!supported && state.phase === "write" && !(state.storyVersion === STORY_VERSION ? acceptsAnswer(state.draft, node.response, node.id) : acceptsLegacyAnswer(state.draft, node.response))) {
+        if (event.type === "SEND_RESPONSE") { next = { ...state, notice: "Essa formulação está fora do repertório deste passo; isso não significa que seja inglês incorreto. Sua escrita foi mantida. Consulte as expressões aceitas ou use as peças." }; break; }
         next = fail("Ainda não reconheci essa formulação entre as respostas previstas para esta situação. Sua escrita foi mantida: revise ou consulte uma pista/modelo."); break;
       }
       if (!supported && state.phase === "select" && state.recognized !== node.response) {
@@ -191,4 +205,12 @@ export function replayEvent(state: DemoState, event: DemoEvent): DemoState {
     }
   }
   return next === state ? state : { ...next, journal: [...state.journal, event] };
+}
+
+/** The only conditional scene edge; choices remain available in every branch. */
+export function sceneDestination(state: DemoState): string {
+  const node = catalog[state.nodeId];
+  if (node.kind !== "scene") throw new Error("EXPECTED_SCENE");
+  return state.storyVersion === STORY_VERSION && node.id === "p10.quiet" && state.decisions["p9.cafe-opinion"] === "not"
+    ? "p10.contact" : node.next;
 }

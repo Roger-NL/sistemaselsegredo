@@ -12,8 +12,8 @@ export function ResponseCue({ response, headingRef, onAccess }: { response: Audi
   return <article className="opening-card response-cue" data-presentation="prompt">
     <small>Você quer dizer</small>
     <h1 ref={headingRef} tabIndex={-1}>{audio[response].meaning}</h1>
-    <p>Ouça como dizer isso em inglês.</p>
-    <AudioButton audio={response} label="Ouvir resposta em inglês" onEnded={() => onAccess("heard")} onError={() => setFailed(true)}>Ouvir</AudioButton>
+    <p>Ouça um modelo para esta intenção.</p>
+    <AudioButton audio={response} label="Ouvir modelo em inglês" onEnded={() => onAccess("heard")} onError={() => setFailed(true)}>Ouvir modelo</AudioButton>
     {failed && <button className="text-button" onClick={() => onAccess("text")}>Seguir para a atividade</button>}
   </article>;
 }

@@ -7,7 +7,7 @@ import { audio, images } from "./content/media";
 import { mobileContext } from "./content/mobile-copy";
 import { nextSceneLabels, presentationCards } from "./content/presentation";
 import { profiles } from "./content/copy.pt-BR";
-import { practice, recognitionOptions } from "./model/practice";
+import { practice, recognitionOptions, writtenRepertoire } from "./model/practice";
 import { transition } from "./model/reducer";
 import { ResponseCue } from "./components/ResponseCue";
 import { ListeningPrompt } from "./components/ListeningPrompt";
@@ -34,7 +34,7 @@ export function DemoExperience({ initial, generation = -1, publishedAudio = {}, 
   const node = catalog[state.nodeId];
   const openingNode = node.kind === "scene" && node.presentation ? node : null;
   const sequenced = (node.part >= 3 && !openingNode) || node.kind === "response";
-  const card = presentationCards(node)[state.presentationStep];
+  const card = presentationCards(node, state)[state.presentationStep];
   const readingNode: SceneNode | null = card ? { ...node, kind: "scene", next: node.id, ...card }
     : openingNode ?? (node.kind === "scene" && (sequenced || Boolean(node.heard?.length)) ? { ...node, presentation: "dialogue" } : null);
   const target = listeningTarget(state);
@@ -70,7 +70,7 @@ export function DemoExperience({ initial, generation = -1, publishedAudio = {}, 
   const heard = node.heard ?? (node.kind === "comprehension" ? ["C01" as AudioId] : []);
   const activityActions = pendingListening ? null : card ? <button className="primary" onClick={() => event("ADVANCE_PRESENTATION")}>{card.button}</button>
     : node.kind === "scene" ? <button className="primary" onClick={() => event("NEXT")}>{nextSceneLabels[node.id] ?? node.button}</button>
-    : node.kind === "comprehension" ? <div className="choices"><button onClick={() => dispatch({ at: node.id, type: "ANSWER_MEANING", correct: true })}>Esse café é seu?</button><button onClick={() => dispatch({ at: node.id, type: "ANSWER_MEANING", correct: false })}>Você quer um café?</button></div>
+    : node.kind === "comprehension" ? <div className="choices"><button onClick={() => dispatch({ at: node.id, type: "ANSWER_MEANING", correct: true })}>O copo apontado pertence a você?</button><button onClick={() => dispatch({ at: node.id, type: "ANSWER_MEANING", correct: false, option: "lucas" })}>O copo apontado pertence a Lucas?</button><button onClick={() => dispatch({ at: node.id, type: "ANSWER_MEANING", correct: false, option: "order" })}>Quem pediu o café?</button></div>
     : node.kind === "choice" ? <div className="choices">{node.choices.map(choice => <button key={choice.id} onClick={() => dispatch({ at: node.id, type: "CHOOSE", choice: choice.id })}>{choice.label}<span aria-hidden>↗</span></button>)}</div>
     : node.kind === "response" ? <>
       {state.phase === "recall" && <button className="primary" onClick={() => event("CHECK")}>{state.activityProfile === "less" ? "Escrever minha resposta" : "Tentar com opções"}</button>}
@@ -105,16 +105,15 @@ export function DemoExperience({ initial, generation = -1, publishedAudio = {}, 
     {node.kind === "end" ? <Retrospective state={state} replaying={replaying} onReplayChange={setReplaying} setView={view => dispatch({ at: node.id, type: "REVIEW", view })} /> : <SceneFrame activityKey={`${node.id}:${state.presentationStep}:${state.phase}:${pendingListening?.key ?? "read"}`} opening={Boolean(readingNode) || sequenced || Boolean(pendingListening) || Boolean(modelCue)}
       intro={modelCue || pendingListening || readingNode || sequenced ? null : <header className={`scene-intro${node.part <= 3 ? " opening-instructions" : ""}`}>
         <h1 ref={heading} tabIndex={-1}>{node.kind === "comprehension" ? "Escolha o significado." : "A conversa continua."}</h1>
-        {node.id === "p10.contact" && state.decisions["p9.pause"] === "stay" && <p>Depois de mais alguns minutos, chega a hora de se despedir.</p>}
         <p className="context">{mobileContext[node.id] ? <><span className="desktop-context">{node.context}</span><span className="mobile-context">{mobileContext[node.id]}</span></> : node.context}</p>
-        {(node.image === "V02" || node.image === "V04") && <p className="cup-clue">Seu café: based · iced coffee. Copo: {node.image === "V02" ? "lucas" : "based"}.</p>}
+        {(node.image === "V02" || node.image === "V04") && <p className="cup-clue">Seu café: BASEDSPEAK · iced coffee. Copo: {node.image === "V02" ? "LUCAS" : "BASEDSPEAK"}.</p>}
       </header>}
       artwork={<aside className="scene-column"><figure className="scene-art"><picture><source media="(max-width: 760px)" srcSet={image.mobile} /><Image unoptimized width={960} height={640} src={image.path} alt={image.description} /></picture></figure></aside>}>
       <div className="activity-body"><div className="activity-content">
         {modelCue && node.kind === "response" ? <ResponseCue response={node.response} headingRef={heading} onAccess={mode => accessAudio(modelCue.key, mode)} /> : pendingListening ? <ListeningPrompt key={pendingListening.key} audio={pendingListening.audio} kind={pendingListening.kind} headingRef={heading} onAccess={mode => accessAudio(pendingListening.key, mode)} /> : readingNode ? <OpeningCard node={readingNode} headingRef={heading} /> : <>
         {sequenced && <h1 className="audio-sr-only" ref={heading} tabIndex={-1}>{node.kind === "choice" ? "Sua escolha" : state.phase === "present" ? "Uma forma de responder" : "Sua resposta"}</h1>}
         {response && <div className="activity-intent"><p>{response.meaning}</p></div>}
-        <div className={`conversation-tools${response ? " response-tools" : ""}`}><ConversationHistory label="Histórico" key={`${node.id}:${state.phase}`} state={state} lines={history} />{node.kind === "response" && <AudioButton audio={node.response} label="Ouvir resposta em inglês">Ouvir</AudioButton>}<HelpPanel key={node.id} node={node} level={helpLevel} onHelp={() => event("HELP")} onReveal={() => event("REVEAL_MODEL")} /></div>
+        <div className={`conversation-tools${response ? " response-tools" : ""}`}><ConversationHistory label="Histórico" key={`${node.id}:${state.phase}`} state={state} lines={history} />{node.kind === "response" && <AudioButton audio={node.response} label="Ouvir modelo em inglês">Ouvir modelo</AudioButton>}<HelpPanel key={node.id} node={node} level={helpLevel} onHelp={() => event("HELP")} onReveal={() => event("REVEAL_MODEL")} /></div>
         {!sequenced && justSent && <article className="speech sent"><small>Você<span className="sent-detail"> · fala enviada</span></small><p lang="en">{justSent.written ?? audio[justSent.audioId].text}</p><AudioButton key={justSent.id} audio={justSent.audioId}>{justSent.written ? "Ouvir modelo" : "Ouvir resposta"}</AudioButton></article>}
         {!sequenced && heard.length > 0 && <article className="speech heard"><small>Lucas</small><div className="heard-line"><div><p lang="en">{heard.map(id => audio[id].text).join(" ")}</p>{state.activityProfile === "beginner" && node.part > 2 && <p className="meaning">{heard.map(id => audio[id].meaning).join(" ")}</p>}</div><AudioButton audio={heard} label="Ouvir fala de Lucas" /></div></article>}
         {node.kind === "response" && response && <>
@@ -126,6 +125,8 @@ export function DemoExperience({ initial, generation = -1, publishedAudio = {}, 
           </div>}
           {state.phase === "write" && <form id="written-response-form" className="written-response" onSubmit={event => { event.preventDefault(); dispatch({ at: node.id, type: "SEND_RESPONSE" }); }}>
             <label htmlFor="written-answer">Sua resposta em inglês</label>
+            <p className="writing-scope">Use uma expressão curta deste passo. O repertório é limitado; outras formas podem ser inglês válido. Consultar as alternativas conta como apoio.</p>
+            <details className="writing-repertoire" onToggle={event => { if (event.currentTarget.open && helpLevel < node.help.length) dispatch({ at: node.id, type: "REVEAL_MODEL" }); }}><summary>Consultar expressões aceitas</summary><ul>{writtenRepertoire(node).map(text => <li key={text} lang="en">{text}</li>)}</ul></details>
             <input id="written-answer" type="text" enterKeyHint="send" lang="en" value={state.draft} maxLength={240} autoComplete="off" spellCheck={false} autoCapitalize="sentences" onChange={event => dispatch({ at: node.id, type: "TYPE", text: event.target.value })} />
           </form>}
           {state.phase === "select" && <div className="recognition-response"><div className="choices" aria-label="Expressões para responder">{recognitionOptions(node).map(id => <button key={id} lang="en" aria-pressed={state.recognized === id} onClick={() => dispatch({ at: node.id, type: "RECOGNIZE", response: id })}>{audio[id].text}</button>)}</div></div>}

@@ -8,7 +8,7 @@ import type { PublishedAudioCatalog } from "@/contracts/demo-audio";
 import { audio } from "@/features/demo/content/media";
 import { getBrowserSnapshot, getServerSnapshot, subscribe } from "@/features/demo/session/browser";
 import { lessons, type StudyStep } from "./content";
-import { completeStep, decodeProgress, isCorrect, normalizeAnswer, studySteps, type StudyProgress } from "./progress";
+import { completeStep, decodeProgress, isCorrect, normalizeAnswer, practiceFeedback, studySteps, type StudyProgress } from "./progress";
 
 import { useStudentWorkspace } from "@/features/dashboard/use-student-workspace";
 import { studentWorkspace, type WorkspaceState } from "@/features/dashboard/workspace-store";
@@ -18,10 +18,16 @@ import { GuestProgressImport } from "@/features/dashboard/GuestProgressImport";
 
 const phrases = Object.values(audio).filter((phrase, index, all) => all.findIndex(other => normalizeAnswer(other.text) === normalizeAnswer(phrase.text)) === index);
 
-function CachedAudio({ phrase, publishedAudio }: { phrase: string; publishedAudio: PublishedAudioCatalog }) {
-  const asset = Object.values(audio).find(item => normalizeAnswer(item.text) === normalizeAnswer(phrase));
-  const source = asset && publishedAudio[asset.id]?.audioUrl;
-  return source ? <div className="study-audio"><span>Ouça a frase da história</span><audio aria-label={`Ouvir ${phrase}`} controls preload="none" src={source} /></div> : null;
+/** Native controls remain lazy, and playing one published clip pauses the others. */
+export function pauseOtherStudyAudio(container: ParentNode, active: HTMLAudioElement) {
+  container.querySelectorAll<HTMLAudioElement>("audio").forEach(element => { if (element !== active && !element.paused) element.pause(); });
+}
+export function CachedAudio({ references, publishedAudio }: { references: StudyStep["storyAudio"]; publishedAudio: PublishedAudioCatalog }) {
+  return <>{references.map(reference => {
+    const asset = audio[reference.id];
+    const source = publishedAudio[reference.id]?.audioUrl;
+    return source ? <div key={reference.id} className="study-audio"><span>{reference.scope === "excerpt" ? "Ouça a fala completa da história (inclui o trecho): " : "Ouça a fala da história: "}<span lang="en">{asset.text}</span></span><audio aria-label={`Ouvir fala completa: ${asset.text}`} controls preload="none" src={source} /></div> : null;
+  })}</>;
 }
 
 export function TheoryExperience({ publishedAudio }: { publishedAudio: PublishedAudioCatalog }) {
@@ -57,10 +63,10 @@ function ConnectedTheory({ publishedAudio, workspaceState }: { publishedAudio: P
     if (progress.position === studySteps.length - 1) { setView("finished"); window.scrollTo({ top: 0, behavior: "instant" }); }
     else open(progress.position + 1);
   }
-  const lived = new Set(session.state?.transcript.map(line => normalizeAnswer(audio[line.audioId].text)) ?? []);
+  const lived = new Set(session.state?.transcript.map(line => normalizeAnswer(line.written ?? audio[line.audioId].text)) ?? []);
   const filtered = phrases.filter(item => `${item.text} ${item.meaning}`.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR")));
 
-  return <main className="study-shell">
+  return <main className="study-shell" onPlay={event => pauseOtherStudyAudio(event.currentTarget, event.target as HTMLAudioElement)}>
     <AppHeader current="study" guest={guest} />
     <GuestProgressImport state={workspaceState} />
     <nav className="study-breadcrumb" aria-label="Etapas da experiência"><Link href="/demo">A conversa</Link><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">O inglês por trás dela</span></nav>
@@ -78,13 +84,13 @@ function ConnectedTheory({ publishedAudio, workspaceState }: { publishedAudio: P
         <StudyCard key={current.step.id} step={current.step} headingRef={heading} publishedAudio={publishedAudio} onComplete={supported => save(completeStep(progress, current.step.id, supported))} onNext={next} onPrevious={progress.position > 0 ? () => open(progress.position - 1) : undefined} />
       </section>
     </div>}
-    {view === "phrases" && <section className="study-glossary"><button className="study-text-button" onClick={() => setView("overview")}><ArrowLeft size={16} aria-hidden="true" />Voltar aos blocos</button><p className="study-eyebrow">Para ter por perto</p><h1 ref={heading} tabIndex={-1}>O inglês da cafeteria.</h1><p>As expressões de todos os caminhos da história. Abra uma frase para consultar seu significado.</p><label htmlFor="phrase-search">Encontrar uma expressão em inglês ou português</label><input id="phrase-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Tente: mine, gostar, despedir…" /><p className="study-small" role="status">{filtered.length} expressões</p><div className="study-phrase-list">{filtered.map(item => <details key={item.id}><summary><span lang="en">{item.text}</span>{lived.has(normalizeAnswer(item.text)) && <small>Na sua conversa</small>}</summary><p>{item.meaning}</p><CachedAudio phrase={item.text} publishedAudio={publishedAudio} /></details>)}</div>{filtered.length === 0 && <p>Nenhuma expressão encontrada. Tente outra palavra.</p>}</section>}
-    {view === "finished" && <section className="study-finished"><p className="study-eyebrow">Uma pausa para perceber</p><h1 ref={heading} tabIndex={-1}>{allDone ? <>Você concluiu<br />este percurso.</> : <>Seu percurso<br />até aqui.</>}</h1><p>Você concluiu {completedCount} das {studySteps.length} práticas. {progress.supported.length > 0 ? `${progress.supported.length} com consulta ao modelo. Você pode revisitá-las para tentar com menos apoio.` : "Volte outro dia e experimente responder sem consultar as explicações."}</p><div className="study-intro-actions"><button className="study-primary" onClick={() => open(Math.max(0, studySteps.findIndex(({ step }) => progress.supported.includes(step.id) || !progress.completed.includes(step.id))))}><RotateCcw size={18} aria-hidden="true" />{allDone ? "Revisitar as práticas" : "Continuar descobrindo"}</button><button onClick={() => setView("overview")}>Ver meu percurso</button><Link href="/demo">Rever a conversa</Link></div><p className="study-small">Este percurso é uma primeira exploração. A revisão e o uso em outras situações continuam fazendo parte do aprendizado.</p></section>}
+    {view === "phrases" && <section className="study-glossary"><button className="study-text-button" onClick={() => setView("overview")}><ArrowLeft size={16} aria-hidden="true" />Voltar aos blocos</button><p className="study-eyebrow">Para ter por perto</p><h1 ref={heading} tabIndex={-1}>O inglês da cafeteria.</h1><p>As expressões de todos os caminhos da história. Abra uma frase para consultar seu significado.</p><label htmlFor="phrase-search">Encontrar uma expressão em inglês ou português</label><input id="phrase-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Tente: mine, gostar, despedir…" /><p className="study-small" role="status">{filtered.length} expressões</p><div className="study-phrase-list">{filtered.map(item => <details key={item.id}><summary><span lang="en">{item.text}</span>{lived.has(normalizeAnswer(item.text)) && <small>Na sua conversa</small>}</summary><p>{item.meaning}</p><CachedAudio references={[{ id: item.id, scope: "full" }]} publishedAudio={publishedAudio} /></details>)}</div>{filtered.length === 0 && <p>Nenhuma expressão encontrada. Tente outra palavra.</p>}</section>}
+    {view === "finished" && <section className="study-finished"><p className="study-eyebrow">Uma pausa para perceber</p><h1 ref={heading} tabIndex={-1}>{allDone ? <>Você concluiu<br />este percurso.</> : <>Seu percurso<br />até aqui.</>}</h1><p>Você concluiu {completedCount} das {studySteps.length} práticas. {progress.supported.length > 0 ? `${progress.supported.length} com consulta ao modelo na tentativa registrada. Você pode revisitá-las para tentar sem essa consulta.` : "Volte outro dia e experimente responder sem consultar as explicações."}</p><div className="study-intro-actions"><button className="study-primary" onClick={() => open(Math.max(0, studySteps.findIndex(({ step }) => progress.supported.includes(step.id) || !progress.completed.includes(step.id))))}><RotateCcw size={18} aria-hidden="true" />{allDone ? "Revisitar as práticas" : "Continuar descobrindo"}</button><button onClick={() => setView("overview")}>Ver meu percurso</button><Link href="/demo">Rever a conversa</Link></div><p className="study-small">A marca de consulta registra apenas o modelo aberto naquela tentativa; explicações, pistas e feedback também são apoios. Este percurso é uma primeira exploração. A revisão e o uso em outras situações continuam fazendo parte do aprendizado.</p></section>}
     <footer className="study-footer"><span>BasedSpeak · Do encontro ao entendimento.</span><Link href="/demo">Voltar à conversa</Link></footer>
   </main>;
 }
 
-function StudyCard({ step, publishedAudio, onComplete, onNext, onPrevious, headingRef }: { step: StudyStep; publishedAudio: PublishedAudioCatalog; onComplete: (supported: boolean) => void; onNext: () => void; onPrevious?: () => void; headingRef: React.RefObject<HTMLHeadingElement | null> }) {
+export function StudyCard({ step, publishedAudio, onComplete, onNext, onPrevious, headingRef }: { step: StudyStep; publishedAudio: PublishedAudioCatalog; onComplete: (supported: boolean) => void; onNext: () => void; onPrevious?: () => void; headingRef: React.RefObject<HTMLHeadingElement | null> }) {
   const [phase, setPhase] = useState<"learn" | "practice">("learn");
   const [answer, setAnswer] = useState("");
   const [selected, setSelected] = useState<number[]>([]);
@@ -94,7 +100,8 @@ function StudyCard({ step, publishedAudio, onComplete, onNext, onPrevious, headi
   const practice = step.practice;
   const solution = practice.kind === "write" ? practice.answers[0] : practice.answer;
   const locked = feedback === "correct" || feedback === "model";
-  const inputAnswer = practice.kind === "order" ? selected.map(index => practice.tokens[index]).join(" ") : answer;
+  const tokens = practice.kind === "order" ? [...practice.tokens, ...(practice.distractors ?? [])] : [];
+  const inputAnswer = practice.kind === "order" ? selected.map(index => tokens[index]).join(" ") : answer;
   const practiceHeading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { if (phase === "practice") practiceHeading.current?.focus(); else headingRef.current?.focus(); }, [phase, headingRef]);
   function check(event: FormEvent) {
@@ -110,12 +117,14 @@ function StudyCard({ step, publishedAudio, onComplete, onNext, onPrevious, headi
   }
 
   return <article className="study-card"><h1 ref={headingRef} tabIndex={-1}>{step.title}</h1>
-    {phase === "learn" ? <><div className="study-quote"><span className="study-eyebrow">Uma frase para explorar</span><p lang="en">{step.phrase}</p><span>{step.meaning}</span><CachedAudio phrase={step.phrase} publishedAudio={publishedAudio} /></div><p className="study-explanation">{step.body}</p><details className="study-deeper"><summary>Entender um pouco mais</summary><p>{step.detail}</p></details><div className="study-card-actions">{onPrevious && <button className="study-text-button" onClick={onPrevious}><ArrowLeft size={16} aria-hidden="true" />Anterior</button>}<button className="study-primary" onClick={() => setPhase("practice")}>Experimentar<ArrowRight size={18} aria-hidden="true" /></button></div></>
+    {phase === "learn" ? <><div className="study-quote"><span className="study-eyebrow">Uma frase para explorar</span><p lang="en">{step.phrase}</p><span>{step.meaning}</span><CachedAudio references={step.storyAudio} publishedAudio={publishedAudio} />{step.storyAudio.length === 0 && <p className="study-small">Exemplo novo, sem gravação na história.</p>}</div><p className="study-explanation">{step.body}</p><details className="study-deeper"><summary>Entender um pouco mais</summary><p>{step.detail}</p></details><div className="study-card-actions">{onPrevious && <button className="study-text-button" onClick={onPrevious}><ArrowLeft size={16} aria-hidden="true" />Anterior</button>}<button className="study-primary" onClick={() => setPhase("practice")}>Experimentar<ArrowRight size={18} aria-hidden="true" /></button></div></>
       : <><p className="study-eyebrow">Sua vez · {practice.kind === "order" ? "Organize as peças" : practice.kind === "write" ? "Complete em inglês" : "Escolha pelo sentido"}</p><h2 ref={practiceHeading} tabIndex={-1}>{practice.prompt}</h2><form onSubmit={check}>
+        {practice.context && <ol className="study-practice-context">{practice.context.map(item => <li key={item.text}><span lang="en">{item.text}</span><small>{item.meaning}</small></li>)}</ol>}
+        {practice.instruction && <p className="study-practice-instruction">{practice.instruction}</p>}
         {practice.kind === "choice" && <fieldset className="study-choices"><legend className="study-sr-only">Escolha uma resposta</legend>{practice.options.map((option, index) => <label key={option} data-selected={answer === option}><input type="radio" name={step.id} value={option} checked={answer === option} disabled={locked} onChange={() => { setAnswer(option); edit(); }} /><span className="study-choice-letter" aria-hidden="true">{String.fromCharCode(65 + index)}</span><span>{option}</span></label>)}</fieldset>}
-        {practice.kind === "order" && <><div className="study-answer-bank" aria-label="Sua frase"><span className="study-small">Toque em uma peça para devolvê-la</span><div>{selected.length ? selected.map((index, position) => <button type="button" lang="en" disabled={locked} key={index} aria-label={`Devolver ${practice.tokens[index]}`} onClick={() => { setSelected(selected.filter((_, i) => i !== position)); edit(); }}>{practice.tokens[index]} <span aria-hidden="true">×</span></button>) : <p className="study-small">Sua frase aparece aqui.</p>}</div></div><div className="study-token-bank" aria-label="Peças disponíveis">{practice.tokens.map((token, index) => <button key={index} type="button" lang="en" disabled={locked || selected.includes(index)} onClick={() => { setSelected([...selected, index]); edit(); }}>{token}</button>)}</div></>}
+        {practice.kind === "order" && <><div className="study-answer-bank" aria-label="Sua frase"><span className="study-small">Toque em uma peça para devolvê-la</span><div>{selected.length ? selected.map((index, position) => <button type="button" lang="en" disabled={locked} key={index} aria-label={`Devolver ${tokens[index]}`} onClick={() => { setSelected(selected.filter((_, i) => i !== position)); edit(); }}>{tokens[index]} <span aria-hidden="true">×</span></button>) : <p className="study-small">Sua frase aparece aqui.</p>}</div></div><div className="study-token-bank" aria-label="Peças disponíveis">{tokens.map((token, index) => <button key={index} type="button" lang="en" disabled={locked || selected.includes(index)} onClick={() => { setSelected([...selected, index]); edit(); }}>{token}</button>)}</div></>}
         {practice.kind === "write" && <><label className="study-input-label" htmlFor={`answer-${step.id}`}>Sua resposta em inglês</label><input id={`answer-${step.id}`} lang="en" autoComplete="off" autoCapitalize="off" spellCheck={false} disabled={locked} value={answer} onChange={event => { setAnswer(event.target.value); edit(); }} /><button type="button" className="study-text-button" onClick={() => setHint(!hint)} aria-expanded={hint}>{hint ? "Fechar pista" : "Quero uma pista"}</button>{hint && <p className="study-hint">{practice.hint}</p>}</>}
-        <div className="study-feedback" role="status" aria-live="polite">{feedback === "retry" && <><strong>Ainda não combina com esta proposta.</strong><p>{practice.explanation} {practice.kind === "write" && "Outras formas podem ser válidas; aqui praticamos a estrutura deste passo."}</p></>}{feedback === "correct" && <><strong>{model ? "Você praticou com apoio." : "Isso combina com a situação."}</strong><p>{practice.explanation}</p></>}{feedback === "model" && <><strong>Um jeito de dizer:</strong><p lang="en">{solution}</p><p>{practice.explanation}</p></>}</div>
+        <div className="study-feedback" role="status" aria-live="polite">{feedback === "retry" && <><strong>Ainda não combina com esta proposta.</strong><p>{practiceFeedback(practice, inputAnswer)} {practice.kind === "write" && "Outras formas podem ser válidas; aqui praticamos a estrutura deste passo."}</p></>}{feedback === "correct" && <><strong>{model ? "Você praticou com apoio." : "Isso combina com a situação."}</strong><p>{practice.explanation}</p></>}{feedback === "model" && <><strong>Um jeito de dizer:</strong><p lang="en">{solution}</p><p>{practice.explanation}</p></>}</div>
         <div className="study-card-actions"><button type="button" className="study-text-button" onClick={() => setPhase("learn")}><ArrowLeft size={16} aria-hidden="true" />Rever explicação</button>{!locked && <button className="study-primary" disabled={!inputAnswer.trim()}>Conferir<Check size={18} aria-hidden="true" /></button>}</div>
       </form>{locked ? <div className="study-next"><button className="study-text-button" onClick={retry}>Tentar outra vez</button><button className="study-primary" onClick={onNext}>Continuar<ArrowRight size={18} aria-hidden="true" /></button></div> : <button className="study-text-button study-model" onClick={reveal}>Consultar um modelo e continuar com apoio</button>}</>}
   </article>;

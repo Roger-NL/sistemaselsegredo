@@ -8,7 +8,7 @@ const character = [
   ["Do you like it?", "Você gosta?"], ["Really? Me too!", "Sério? Eu também!"],
   ["Really? I like it.", "Sério? Eu gosto."], ["Oh! Thanks!", "Ah! Obrigado!"],
   ["That was close.", "Foi por pouco."], ["I’m tired.", "Estou cansado."],
-  ["Yeah. Too much work. And you?", "Sim. Muito trabalho. E você?"],
+  ["Yeah. Too much work. And you?", "Sim. Trabalho demais. E você?"],
   ["Yeah… long day.", "É… um dia longo."], ["Lucky you!", "Que sorte a sua!"],
   ["Oh, a table!", "Ah, uma mesa!"], ["Sit with me?", "Senta comigo?"],
   ["Oh, nice!", "Ah, legal!"], ["Yeah, I like it. But I’m tired.", "Sim, eu gosto. Mas estou cansado."],
@@ -38,18 +38,18 @@ export const audio = Object.fromEntries([
 
 export type ImageAsset = { id: ImageId; description: string; path: string; mobile: string; ready: true };
 const scenes = [
- "Lucas e based se encontram no balcão da cafeteria.",
- "Lucas aponta o copo escrito LUCAS; o seu copo leva based.",
+ "Lucas e você se encontram no balcão da cafeteria.",
+ "Lucas aponta o copo escrito LUCAS; o seu copo leva BASEDSPEAK.",
  "Lucas pede desculpas pelo mal-entendido.",
- "Chega o café com o nome based. Lucas segura o copo LUCAS.",
+ "Você pega o café com o nome BASEDSPEAK. Lucas segura o copo LUCAS.",
  "Os dois provam seus cafés.",
  "O copo de Lucas está prestes a cair. A cena espera por você.",
  "Lucas segura o copo a tempo.",
  "Lucas conta sobre um dia cansativo.",
- "Lucas convida based para uma mesa livre.",
- "Lucas e based conversam à mesa.",
- "based conta que está aprendendo inglês.",
- "Lucas e based se despedem na cafeteria.",
+ "Lucas convida você para uma mesa livre.",
+ "Lucas e você conversam à mesa.",
+ "Você conta que está aprendendo inglês.",
+ "Lucas e você se despedem na cafeteria.",
 ] as const;
 export const images = Object.fromEntries(scenes.map((description, i) => {
  const id = `V${String(i + 1).padStart(2, "0")}` as ImageId;

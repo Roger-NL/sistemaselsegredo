@@ -8,13 +8,13 @@ import type { SupportProfile } from "./model/types";
 
 export function DemoEntry({ onStart }: { onStart: (profile: SupportProfile) => void }) {
   const [profile, setProfile] = useState<SupportProfile | null>(null);
-  const welcome = <><h1>Do primeiro café<br />à despedida.</h1><p className="lead">Uma conversa em inglês, com ajuda no seu ritmo.</p><p className="entry-details">Cerca de 20 minutos · Sem microfone</p></>;
+  const welcome = <><h1>Do primeiro café<br />à despedida.</h1><p className="lead">Uma conversa em inglês, com ajuda no seu ritmo.</p><p className="entry-details">Sem microfone</p></>;
   return <section className="entry-grid">
     <div className="entry-intro">
       <header className="entry-welcome">{welcome}</header>
       <figure className="entry-art"><picture><source media="(max-width: 760px)" srcSet="/demo/cafe/v2/images/V01-640.webp" /><Image width={960} height={640} unoptimized src="/demo/cafe/v2/images/V01-960.webp" alt="Lucas e based no balcão da cafeteria, com seus nomes nos copos." /></picture></figure>
     </div>
-    <div className="entry-copy"><div className="entry-reading"><header className="entry-mobile-welcome"><h1>Do primeiro café<br />à despedida.</h1><p className="lead">Uma conversa em inglês, no seu ritmo.</p><p className="entry-details">Cerca de 20 minutos · Sem microfone</p></header>
+    <div className="entry-copy"><div className="entry-reading"><header className="entry-mobile-welcome"><h1>Do primeiro café<br />à despedida.</h1><p className="lead">Uma conversa em inglês, no seu ritmo.</p><p className="entry-details">Sem microfone</p></header>
       <fieldset className="profile-options" aria-describedby="entry-support-note"><legend>Como você prefere começar?</legend>
         <p id="entry-support-note">Você pode mudar o apoio depois.</p>
         <div className="profile-list">{profiles.map(option => <label key={option.id} className={`profile-option ${profile === option.id ? "selected" : ""}`}>

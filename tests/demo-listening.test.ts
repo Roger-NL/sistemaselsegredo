@@ -42,14 +42,14 @@ describe("listen, understand, respond", () => {
       expect(decodeSnapshot(encodeSnapshot(after))).toEqual(after);
       let question = transition(after, { at: after.nodeId, type: "NEXT" });
       question = transition(question, { at: question.nodeId, type: "NEXT" });
-      expect(render(question)).toContain("Esse café é seu?");
+      expect(render(question)).toContain("O copo apontado pertence a você?");
       expect(render(question)).not.toContain("Escute Lucas.");
     }
   });
   it("keeps the beginner intention in Portuguese before and after the English audio", () => {
     const before = answer("beginner");
     expect(before.phase).toBe("present");
-    expect(render(before)).toContain("Ouvir resposta em inglês");
+    expect(render(before)).toContain("Ouvir modelo em inglês");
     expect(render(before)).not.toContain(audio.U01.text);
     expect(render(before)).toContain(audio.U01.meaning);
     expect(render(before)).not.toContain("Responder em inglês");
@@ -70,10 +70,13 @@ describe("listen, understand, respond", () => {
     expect(listeningTarget(independent)).toBeNull();
     expect(render(intermediate)).toContain('class="construction"');
     expect(render(independent)).toContain('id="written-answer"');
-    for (const state of [intermediate, independent]) {
-      expect(render(state)).not.toContain(audio.U01.text);
-      expect(render(state)).not.toContain("Ouvir modelo");
-    }
+    expect(render(intermediate)).not.toContain(audio.U01.text);
+    // Optional alternatives are in a closed disclosure, and their consultation
+    // records REVEAL_MODEL. The canonical audio is labelled as a model.
+    expect(render(independent)).toContain('class="writing-repertoire"');
+    expect(render(independent)).not.toContain('class="writing-repertoire" open');
+    expect(render(independent)).toContain("Consultar expressões aceitas");
+    for (const state of [intermediate, independent]) expect(render(state)).toContain("Ouvir modelo");
   });
   it("hides every story utterance and model until that listening stage has completed", () => {
     for (const profile of PROFILES) for (const node of nodes) {

@@ -1,6 +1,8 @@
 # Aula gratuita da cafeteria
 
-Implementada em 28/10/2026. No painel, Minha aula ao vivo aparece junto da conversa e do estudo, com atalho no menu compartilhado. A agenda é bloqueada até que a conta ativa tenha as 24 práticas concluídas no snapshot de estudo salvo. O servidor deriva essa condição dos IDs válidos; não utiliza a porcentagem geral nem exige Premium, pagamento ou espera de sete dias.
+Implementada em 28/10/2026. No painel, Minha aula ao vivo aparece junto da conversa e do estudo, com atalho no menu compartilhado. A agenda é bloqueada até que a conta ativa ou pendente tenha as 24 práticas concluídas no snapshot de estudo salvo. O servidor deriva essa condição dos IDs válidos; não utiliza a porcentagem geral nem exige Premium, pagamento ou espera de sete dias.
+
+**Antes dos primeiros convites:** Roger ainda precisa definir os dias e horários reais de atendimento. A oferta ampla abaixo é a configuração implementada, não uma confirmação de disponibilidade pessoal. Esta consolidação não alterou a agenda nem criou reservas.
 
 A agenda inicial oferece todos os dias e horários futuros, em intervalos de uma hora, no mês atual e nos dois seguintes. O fuso aparece explicitamente nas duas áreas: `LIVE_CLASS_TIMEZONE`, depois `GOOGLE_CALENDAR_TIMEZONE`, depois `Europe/Lisbon`. Horas locais inexistentes por mudança de horário são omitidas. A disponibilidade é a da agenda interna do BasedSpeak; não representa consulta ou sincronização com o Google Calendar.
 

@@ -11,7 +11,7 @@ export function visibleAppSize(layout: { width: number; height: number }, visual
 export function mobileArtworkHeight(width: number, space: Omit<SceneSpace, "mobile">) {
   const natural = Math.max(0, width) * 2 / 3;
   const remaining = space.available - space.intro - space.activity - space.gap * (space.intro > 0 ? 2 : 1);
-  return Math.floor(Math.min(natural, Math.max(144, remaining)));
+  return Math.floor(Math.min(natural, Math.max(96, remaining)));
 }
 
 /** Tighten spacing when necessary; image and activity always remain together. */

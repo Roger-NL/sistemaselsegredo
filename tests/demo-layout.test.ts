@@ -49,8 +49,11 @@ describe("mobile artwork sizing", () => {
   it("gives longer conversation text and its buttons space before sizing the image", () => {
     expect(mobileArtworkHeight(414, { available: 600, intro: 100, activity: 280, gap: 10 })).toBe(200);
   });
+  it("reserves the actual space for a long writing form before expanding the illustration", () => {
+    expect(mobileArtworkHeight(320, { available: 454, intro: 0, activity: 330, gap: 8 })).toBe(116);
+  });
   it("retains a recognizable scene on short screens and keeps narrow images in proportion", () => {
-    expect(mobileArtworkHeight(320, { available: 400, intro: 80, activity: 220, gap: 8 })).toBe(144);
+    expect(mobileArtworkHeight(320, { available: 400, intro: 80, activity: 220, gap: 8 })).toBe(96);
     expect(mobileArtworkHeight(200, { available: 400, intro: 0, activity: 120, gap: 8 })).toBe(133);
   });
 });

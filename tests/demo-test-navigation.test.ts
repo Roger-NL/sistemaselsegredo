@@ -18,10 +18,17 @@ const legacy = fixture as unknown as { sourceCommit: string; skipped: DemoState 
   beforeSend: DemoState; afterSend: DemoState; resumed: DemoState;
 }>;
 
+// Migration adds a version boundary; all observable state and original events
+// remain independently compared against the frozen fixture below.
+function material(state: DemoState) {
+  const { storyVersion: _story, replayVersion: _replay, ...rest } = state;
+  void _story; void _replay;
+  return { ...rest, journal: state.journal.filter(event => event.type !== "UPGRADE_CONTENT") };
+}
 function restore(expected: DemoState): DemoState {
   const state = decodeSnapshot(JSON.stringify(expected));
-  expect(state).toEqual(expected);
-  expect(decodeSnapshot(encodeSnapshot(state!))).toEqual(expected);
+  expect(material(state!)).toEqual(material(expected));
+  expect(decodeSnapshot(encodeSnapshot(state!))).toEqual(state);
   return state!;
 }
 
@@ -84,7 +91,7 @@ describe("retired test navigation and saved attempts", () => {
     });
 
     it(`preserves every legacy skip prefix through the ending and Back in ${profile}`, () => {
-      let state = createDemo(profile, legacy.skipped.runId, legacy.skipped.startedAt);
+      let state = createDemo(profile, legacy.skipped.runId, legacy.skipped.startedAt, "cafe-v7");
       const states = [state];
       const parts = new Set<number>();
       for (let guard = 0; catalog[state.nodeId].kind !== "end"; guard++) {
@@ -99,38 +106,38 @@ describe("retired test navigation and saved attempts", () => {
         states.push(state);
       }
       expect([...parts]).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-      if (profile === "beginner") expect(state).toEqual(legacy.skipped);
+      if (profile === "beginner") expect(material(state)).toEqual(material(legacy.skipped));
       let restored = restore(state);
       for (let index = states.length - 2; index >= 0; index--) {
         restored = transition(restored, { at: restored.nodeId, type: "BACK" });
-        expect(restored).toEqual(states[index]);
+        expect(material(restored)).toEqual(material(states[index]));
         restored = restore(restored);
       }
       expect(transition(restored, { at: restored.nodeId, type: "BACK" })).toBe(restored);
-      expect(restored).toEqual(createDemo(profile, state.runId, state.startedAt));
+      expect(material(restored)).toEqual(material(createDemo(profile, state.runId, state.startedAt)));
     });
 
     it(`preserves mixed journal prefixes, the filled response and a unique resend in ${profile}`, () => {
       const expected = legacy[profile];
-      let prefix = createDemo(profile, expected.resumed.runId, expected.resumed.startedAt);
+      let prefix = createDemo(profile, expected.resumed.runId, expected.resumed.startedAt, "cafe-v7");
       for (const event of expected.resumed.journal) {
         prefix = replayEvent(prefix, event);
         restore(prefix);
       }
-      expect(prefix).toEqual(expected.resumed);
+      expect(material(prefix)).toEqual(material(expected.resumed));
 
       const beforeSend = restore(expected.beforeSend);
       const sent = transition(beforeSend, { at: beforeSend.nodeId, type: "SEND_RESPONSE" });
-      expect(sent).toEqual(expected.afterSend);
+      expect(material(sent)).toEqual(material(expected.afterSend));
       const restoredSent = restore(expected.afterSend);
       expect(transition(restoredSent, { at: beforeSend.nodeId, type: "SEND_RESPONSE" })).toBe(restoredSent);
 
       const rewound = transition(restoredSent, { at: restoredSent.nodeId, type: "BACK" });
-      expect(rewound).toEqual(expected.beforeSend);
+      expect(material(rewound)).toEqual(material(expected.beforeSend));
       expect(rewound.selected).toEqual(expected.beforeSend.selected);
       expect(rewound.draft).toBe(expected.beforeSend.draft);
       const resent = transition(restore(rewound), { at: rewound.nodeId, type: "SEND_RESPONSE" });
-      expect(resent).toEqual(expected.afterSend);
+      expect(material(resent)).toEqual(material(expected.afterSend));
       expect(resent.transcript.filter(line => line.role === "you" && line.audioId === "U01")).toHaveLength(1);
       expect(resent.evidence).toHaveLength(1);
       expect(Object.values(resent.audioAccess)).not.toContain("heard");

@@ -1327,3 +1327,15 @@ html[data-demo-transition]::view-transition-new(demo-line) { animation:demo-mess
   html[data-demo-transition]::view-transition-old(*),
   html[data-demo-transition]::view-transition-new(*) { animation:none!important; }
 }
+
+.app-shell .writing-scope { font-size:13px; line-height:1.45; margin:0 0 8px; }
+.app-shell .writing-repertoire { font-size:13px; margin:0 0 8px; }
+.app-shell .writing-repertoire summary { cursor:pointer; padding:6px 0; }
+.app-shell .writing-repertoire ul { padding-left:20px; margin:6px 0; }
+
+/* Preserve the send controls when optional writing support or a keyboard reduces space. */
+@media(max-width:479px) {
+  .app-shell .scene-grid.opening-scene:has(.written-response) { grid-template-rows:var(--scene-art-height,144px) minmax(0,1fr); }
+  .app-shell .scene-grid:has(.written-response) .activity-body { flex:1 1 auto; overflow-y:auto; overscroll-behavior:contain; }
+  .app-shell .scene-grid:has(.written-response) .activity-actions { flex-shrink:0; }
+}

@@ -32,6 +32,9 @@
   ],
   "exclude": [
     "node_modules",
+    "tmp",
+    "output",
+    "coverage",
     ".next/types/validator.ts",
     ".next/dev/types/validator.ts"
   ]

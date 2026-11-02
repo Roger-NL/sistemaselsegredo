@@ -127,7 +127,7 @@ describe("approved café graph", () => {
           expect(transformed.includes("U05")).toBe(state.decisions["p3.intent"] === "okay");
           expect(transformed.includes("U12")).toBe(state.decisions["p8.topic"] === "job");
           expect(transformed.includes("U13")).toBe(state.decisions["p8.topic"] === "english");
-          expect(transformed.includes("U17")).toBe(state.decisions["p9.pause"] === "stay");
+          expect(transformed.includes("U17")).toBe(state.decisions["p9.pause"] === "stay" && state.decisions["p9.cafe-opinion"] !== "not");
           expect(state.transcript.some(line => line.audioId === "U18")).toBe(state.decisions["p10.contact"] === "contact");
           return;
         }
@@ -379,7 +379,7 @@ describe("three approved practice experiences", () => {
 });
 
 describe("local recovery of the shorter opening", () => {
-  const withoutAudioAccess = (state: DemoState | null) => state && ({ ...state, audioAccess: {}, journal: state.journal.filter(e => e.type !== "AUDIO_ACCESS") });
+  const withoutAudioAccess = (state: DemoState | null) => state && ({ ...state, audioAccess: {}, replayVersion: "migration-metadata", journal: state.journal.filter(e => !["AUDIO_ACCESS", "UPGRADE_CONTENT"].includes(e.type)) });
   it("migrates v3 progress and drafts without making the learner restart or send twice", () => {
     for (const profile of PROFILES) for (const id of ["p2.send", "p3.ask", "end"]) {
       let current = reach(id, {}, profile);

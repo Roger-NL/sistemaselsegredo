@@ -11,3 +11,9 @@
 .study-completion p { margin-bottom:0; font-size:14px; color:#59614f; }
 .study-shell .study-completion .study-primary { padding:13px 18px; border:1px solid var(--ink); border-radius:7px; font-size:14px; min-height:48px; gap:12px; }
 @media(max-width:760px) { .study-completion { padding:20px; gap:12px; } .study-completion>div { min-width:0; flex-basis:calc(100% - 42px); } .study-shell .study-completion .study-primary { width:100%; } }
+
+.study-practice-context { display:grid; gap:14px; padding-left:24px; margin:0 0 24px; }
+.study-practice-context li { padding-left:4px; }
+.study-practice-context span { display:block; font-size:19px; }
+.study-practice-context small { display:block; color:var(--muted); font-size:14px; margin-top:3px; }
+.study-practice-instruction { font-size:15px; margin-bottom:20px; }

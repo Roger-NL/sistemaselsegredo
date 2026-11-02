@@ -1,8 +1,10 @@
+import { legacyPresentationCards } from "./legacy-presentation";
+import type { DemoState } from "../model/types";
 import type { DemoNode, SceneNode } from "../model/types";
 
 type Card = Pick<SceneNode, "presentation" | "context" | "heard" | "button">;
 const moments: Record<string, [string, string]> = {
-  "p4.arrival-a": ["Seu café chegou.", "Lucas confere o nome no próprio copo. O café com o nome based chega ao balcão."],
+  "p4.arrival-a": ["Vamos conferir os cafés.", "Os dois cafés já estão no balcão. Lucas identifica o próprio copo pelo nome LUCAS. O seu leva BASEDSPEAK."],
   "p5.taste": ["O primeiro gole.", "Vocês experimentam os cafés. Lucas comenta o sabor do dele."],
   "p6.warn": ["Cuidado com o copo!", "O copo de Lucas está prestes a cair. Você pode avisá-lo. Sem pressa: a cena espera por você."],
   "p7.tired": ["Um dia longo.", "Com o copo seguro, a conversa recomeça. Lucas conta como está se sentindo."],
@@ -12,7 +14,7 @@ const moments: Record<string, [string, string]> = {
 };
 const prompts: Record<string, string> = {
   "p3.ask": "Pergunte o que Lucas pediu.", "p3.okay": "Responda à desculpa: diga que está tudo bem.",
-  "p4.same": "Diga que você pediu o mesmo.", "p4.mine": "O copo com o nome based é seu. Como confirmar isso?",
+  "p4.same": "Diga que você pediu o mesmo.", "p4.mine": "O copo com o nome BASEDSPEAK é seu. Como confirmar isso?",
   "p5.like": "Diga que você gosta do café.", "p5.not": "Diga que não gosta muito do café.",
   "p6.warn": "Como avisar Lucas sobre o copo?", "p7.tired": "Mostre interesse e surpresa com o que Lucas contou.",
   "p7.too": "Diga que você também está cansado.", "p7.not": "Diga que você não está muito cansado.",
@@ -30,14 +32,20 @@ const prompts: Record<string, string> = {
 // to that level's model or activity instead of asking the learner to read it twice.
 const chosenIntent = new Set(["p3.ask", "p3.okay", "p5.like", "p5.not", "p7.too", "p7.not", "p8.english", "p9.english-like", "p9.english-not", "p9.cafe-like", "p9.cafe-not", "p10.keep"]);
 /** Reading cards never send a reply. Reaction audio is always the first card. */
-export function presentationCards(node: DemoNode): Card[] {
+export function presentationCards(node: DemoNode, state?: Pick<DemoState, "storyVersion" | "decisions">): Card[] {
+  if (state && state.storyVersion !== "cafe-v8") return legacyPresentationCards(node);
   if (node.part < 3 || node.kind === "end" || (node.kind === "scene" && node.presentation)) return [];
   const cards: Card[] = [];
-  const moment = moments[node.id];
+  const moment = node.id === "p10.contact" && state?.decisions["p9.pause"] === "stay"
+    ? ["Até a próxima conversa.", "Depois de mais alguns minutos de conversa, chega a hora de se despedir. Você pode encerrar o encontro ou sugerir manter contato."]
+    : moments[node.id];
   if (moment) cards.push(
     { presentation: "title", context: moment[0], button: "Ver o que acontece" },
     { presentation: "context", context: moment[1], button: node.heard?.length ? "Ouvir o que Lucas diz" : "Ver como participar" },
   );
+  if (node.id === "p4.same") cards.push({ presentation: "context", context: "Lucas pediu um café com gelo. Você pediu o mesmo. Ao dizer ‘Eu também’, você retoma ‘também pedi isso’.", button: "Preparar minha resposta" });
+  if (node.id === "p4.new-cup") cards.push({ presentation: "context", context: "Vocês conferem os cafés já no balcão. Agora Lucas aponta para o copo BASEDSPEAK, que é o seu, e repete a pergunta.", button: "Ouvir a pergunta" });
+  if (node.id === "p4.arrival-b") cards.push({ presentation: "context", context: "Agora é Lucas quem identifica o próprio copo: ele confere o nome LUCAS e diz que este é dele.", button: "Ouvir Lucas" });
   if (node.kind === "scene") return cards;
   if (node.heard?.length) cards.push({ presentation: "dialogue", context: "", heard: node.heard, button: node.id === "p8.topic" ? "Acompanhar até a mesa" : "Pensar na resposta" });
   if (node.id === "p8.topic") cards.push({ presentation: "context", context: "Vocês se sentam com os cafés sobre a mesa. Agora você pode puxar um assunto.", button: "Escolher um assunto" });
@@ -52,7 +60,7 @@ export function presentationCards(node: DemoNode): Card[] {
 
 export const nextSceneLabels: Record<string, string> = {
   "p2.reaction": "Escolher como seguir",
-  "p4.order": "Responder sobre meu pedido", "p4.nice-a": "Ver os cafés chegarem", "p4.arrival-a": "Provar meu café",
+  "p4.order": "Responder sobre meu pedido", "p4.nice-a": "Conferir os cafés", "p4.arrival-a": "Provar meu café",
   "p4.new-cup": "Responder sobre o copo", "p4.nice-b": "Conferir os dois cafés", "p4.arrival-b": "Provar meu café",
   "p5.taste": "Ouvir a próxima pergunta", "p5.reaction-like": "Acompanhar a cena", "p5.reaction-not": "Acompanhar a cena",
   "p6.safe": "Retomar a conversa", "p7.work": "Pensar em como estou", "p7.long-day": "Ver o que acontece", "p7.lucky": "Ver o que acontece",

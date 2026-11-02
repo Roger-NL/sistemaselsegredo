@@ -12,7 +12,7 @@ const removedPreparation = new Set(["p2.model", "p2.prepare", "p2.meaning"]);
 function validEvent(value: unknown, legacy = false): value is DemoEvent {
   if (!isRecord(value) || typeof value.at !== "string" || (!catalog[value.at] && !(legacy && removedPreparation.has(value.at)))) return false;
   switch (value.type) {
-    case "TEST_FORWARD": case "SEND_RESPONSE": case "REVEAL_MODEL": case "ADVANCE_PRESENTATION": case "NEXT": case "PREPARE": case "SUBMIT": case "CHECK": case "HELP": case "USE_SUPPORT": case "CLEAR": case "TOGGLE_MODEL": return true;
+    case "UPGRADE_CONTENT": case "TEST_FORWARD": case "SEND_RESPONSE": case "REVEAL_MODEL": case "ADVANCE_PRESENTATION": case "NEXT": case "PREPARE": case "SUBMIT": case "CHECK": case "HELP": case "USE_SUPPORT": case "CLEAR": case "TOGGLE_MODEL": return true;
     case "AUDIO_ACCESS": return typeof value.key === "string" && value.key.length <= 160 && ["heard", "text"].includes(value.mode as string);
     case "TYPE": return typeof value.text === "string" && value.text.length <= 240;
     case "RECOGNIZE": return typeof value.response === "string";
@@ -30,7 +30,7 @@ export function decodeSnapshot(raw: string): DemoState | null {
   try {
     if (raw.length > 1_000_000) return null;
     const data: unknown = JSON.parse(raw);
-    if (!isRecord(data) || data.schemaVersion !== SCHEMA_VERSION || ![STORY_VERSION, "cafe-v6", "cafe-v5", "cafe-v4", "cafe-v3", "cafe-v2"].includes(data.storyVersion as string)
+    if (!isRecord(data) || data.schemaVersion !== SCHEMA_VERSION || ![STORY_VERSION, "cafe-v7", "cafe-v6", "cafe-v5", "cafe-v4", "cafe-v3", "cafe-v2"].includes(data.storyVersion as string)
       || typeof data.runId !== "string" || !/^[\w-]{8,100}$/.test(data.runId)
       || typeof data.startedAt !== "number" || !Number.isFinite(data.startedAt)
       || !PROFILES.includes(data.initialProfile as SupportProfile) || !Array.isArray(data.journal) || data.journal.length > 4_000) return null;
@@ -45,12 +45,14 @@ export function decodeSnapshot(raw: string): DemoState | null {
     // A support switch inside removed activities cannot be replayed unambiguously.
     // Keep the original snapshot intact and report incompatibility in that case.
     if (legacy && hadActualResponse && journal.some(event => removedPreparation.has(event.at) && event.type === "PROFILE")) return null;
-    let state = createDemo(data.initialProfile as SupportProfile, data.runId, data.startedAt);
+    const replayVersion = data.replayVersion ?? (data.storyVersion === STORY_VERSION ? STORY_VERSION : "cafe-v7");
+    if (![STORY_VERSION, "cafe-v7"].includes(replayVersion as string)) return null;
+    let state = createDemo(data.initialProfile as SupportProfile, data.runId, data.startedAt, replayVersion as string);
     const apply = (event: DemoEvent): boolean => {
       // Old journals recorded reading/advancing, not actual listening. Preserve
       // that distinction and their position without pretending audio was heard.
       const target = listeningTarget(state);
-      if (data.storyVersion !== STORY_VERSION && target && !state.audioAccess[target.key] && ["NEXT", "ADVANCE_PRESENTATION", "PREPARE", "UNDERSTAND", "SUBMIT"].includes(event.type)) {
+      if (![STORY_VERSION, "cafe-v7"].includes(data.storyVersion as string) && target && !state.audioAccess[target.key] && ["NEXT", "ADVANCE_PRESENTATION", "PREPARE", "UNDERSTAND", "SUBMIT"].includes(event.type)) {
         state = replayEvent(state, { at: state.nodeId, type: "AUDIO_ACCESS", key: target.key, mode: "text" });
       }
       const next = replayEvent(state, event);
@@ -83,15 +85,16 @@ export function decodeSnapshot(raw: string): DemoState | null {
     // Older attempts keep their current activity and draft. Reading cards are
     // added to the journal so Back can still visit them without another send.
     if (["cafe-v4", "cafe-v3", "cafe-v2"].includes(data.storyVersion as string)) {
-      while (state.presentationStep < presentationCards(catalog[state.nodeId]).length) {
+      while (state.presentationStep < presentationCards(catalog[state.nodeId], state).length) {
         if (!apply({ at: state.nodeId, type: "ADVANCE_PRESENTATION" })) return null;
       }
     }
+    if (state.storyVersion !== STORY_VERSION) state = replayEvent(state, { at: state.nodeId, type: "UPGRADE_CONTENT" });
     return state;
   } catch { return null; }
 }
 export function encodeSnapshot(state: DemoState) {
-  return JSON.stringify({ schemaVersion: SCHEMA_VERSION, storyVersion: STORY_VERSION, runId: state.runId,
+  return JSON.stringify({ schemaVersion: SCHEMA_VERSION, storyVersion: state.storyVersion, replayVersion: state.replayVersion, runId: state.runId,
     startedAt: state.startedAt, initialProfile: state.initialProfile, journal: state.journal });
 }
 export function restoreDemo(storage: StoragePort): RestoreResult {

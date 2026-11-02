@@ -14,7 +14,7 @@ const render = (state: DemoState) => renderToStaticMarkup(createElement(DemoExpe
 
 function read(state: DemoState) {
   const node = catalog[state.nodeId];
-  while (state.presentationStep < presentationCards(node).length) {
+  while (state.presentationStep < presentationCards(node, state).length) {
     const target = listeningTarget(state);
     if (target && !state.audioAccess[target.key]) state = transition(state, { at: node.id, type: "AUDIO_ACCESS", key: target.key, mode: "heard" });
     const previous = state;
@@ -53,8 +53,11 @@ describe("one main message per screen in parts 3–10", () => {
           expect(state.nodeId).toBe(node.next);
           const target = catalog[state.nodeId];
           if (target.kind !== "end") {
-            const first = presentationCards(target)[0];
-            expect(first?.presentation ?? (target.kind === "scene" ? "dialogue" : null)).toBe("dialogue");
+            const first = presentationCards(target, state)[0];
+            if (target.id === "p4.new-cup") {
+              expect(first?.presentation).toBe("context");
+              expect(first?.context).toContain("BASEDSPEAK");
+            } else expect(first?.presentation ?? (target.kind === "scene" ? "dialogue" : null)).toBe("dialogue");
             expect(target.heard?.length).toBeGreaterThan(0);
           }
           expect(transition(state, { at: node.id, type: "SUBMIT" })).toBe(state);

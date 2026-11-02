@@ -1,4 +1,4 @@
-.local-test-launcher { position:fixed; right:12px; bottom:10px; z-index:50; padding:9px 13px; background:#191919; color:#fffdf9; border:1px solid #716c64; border-radius:999px; font:500 12px/1.4 Arial,sans-serif; box-shadow:0 3px 14px #0002; text-decoration:none; }
+.local-test-status { font:500 10px/1.4 Arial,sans-serif; color:inherit; padding:3px 5px; border:1px solid currentColor; border-radius:4px; }
 .local-test-panel { min-height:100dvh; padding:24px max(20px,calc((100vw - 880px)/2)); background:#f4f0e8; color:#191919; font-family:var(--font-geist-sans),Arial,sans-serif; }
 .local-test-panel header { display:flex; justify-content:space-between; gap:16px; font-size:13px; margin-bottom:36px; }
 .local-test-panel h1 { font-size:clamp(28px,5vw,40px); letter-spacing:-.035em; margin:0 0 12px; }

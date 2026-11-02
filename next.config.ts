@@ -33,6 +33,7 @@ const publicDemoCsp = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  devIndicators: false,
   productionBrowserSourceMaps: false, // Segurança: Oculta código fonte em produção
   headers: async () => [
     {

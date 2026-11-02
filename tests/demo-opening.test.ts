@@ -41,13 +41,13 @@ describe("opening reading order", () => {
     const prompt = render(state);
     expect(prompt).toContain("O que ele está perguntando?");
     expect(prompt).not.toContain("Is this yours?");
-    expect(prompt).not.toContain("Esse café é seu?");
-    expect(prompt).not.toContain("Você quer um café?");
+    expect(prompt).not.toContain("O copo apontado pertence a você?");
+    expect(prompt).not.toContain("O copo apontado pertence a Lucas?");
     const question = render(next(state));
     expect(question).toContain("Escolha o significado.");
     expect(question).toContain("Is this yours?");
-    expect(question).toContain("Esse café é seu?");
-    expect(question).toContain("Você quer um café?");
+    expect(question).toContain("O copo apontado pertence a você?");
+    expect(question).toContain("O copo apontado pertence a Lucas?");
   });
   it("introduces the part-three intention before showing its choices", () => {
     let state = createDemo("beginner", "opening-render", 0);

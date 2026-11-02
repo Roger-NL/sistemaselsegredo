@@ -15,7 +15,7 @@ export function HelpPanel({ node, level, onHelp, onReveal }: { node: DemoNode; l
     <button className="text-button" onClick={() => { setRevealed(true); onReveal(); dialog.current?.showModal(); }}>Ajuda</button>
     <dialog ref={dialog} className="demo-dialog" aria-labelledby={title}>
       <div className="dialog-heading"><h2 id={title}>Uma resposta possível</h2><button autoFocus onClick={() => dialog.current?.close()}>Voltar à atividade ×</button></div>
-      {revealed && <><p className="help-solution" lang="en">{audio[node.response].text}</p><p>{audio[node.response].meaning}</p><AudioButton audio={node.response}>Ouvir</AudioButton></>}
+      {revealed && <><p className="help-solution" lang="en">{audio[node.response].text}</p><p>{audio[node.response].meaning}</p><AudioButton audio={node.response}>Ouvir modelo</AudioButton></>}
     </dialog>
   </aside>;
   return <aside className="help">

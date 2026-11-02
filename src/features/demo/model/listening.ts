@@ -10,7 +10,7 @@ export const lucasKey = (nodeId: string) => `lucas:${nodeId}`;
 /** Only the utterance on the current screen; never preload or synthesize audio. */
 export function listeningTarget(state: DemoState): ListeningTarget | null {
   const node = catalog[state.nodeId];
-  const cards = presentationCards(node);
+  const cards = presentationCards(node, state);
   const card = cards[state.presentationStep];
   if (card) return card.heard?.length ? { key: lucasKey(node.id), audio: card.heard, kind: "lucas" } : null;
   if (node.kind === "scene" && node.heard?.length) return { key: lucasKey(node.id), audio: node.heard, kind: "lucas" };
