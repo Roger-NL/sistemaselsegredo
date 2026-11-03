@@ -1,4 +1,6 @@
 "use client";
+import { BrowserText } from "@/components/i18n/BrowserText";
+
 
 import type { Ref } from "react";
 import type { SceneNode } from "../model/types";
@@ -11,7 +13,7 @@ export function OpeningCard({ node, headingRef }: { node: SceneNode; headingRef:
   return <article className="opening-card" data-presentation={node.presentation}>
     {dialogue && <p className="opening-speaker">Lucas</p>}
     <h1 ref={headingRef} tabIndex={-1} lang={dialogue ? "en" : "pt-BR"}>
-      {dialogue ? node.heard?.map(id => audio[id].text).join(" ") : node.context}
+      {dialogue ? <BrowserText>{node.heard?.map(id => audio[id].text).join(" ")}</BrowserText> : <BrowserText>{node.context}</BrowserText>}
     </h1>
     {dialogue && node.heard?.length ? <AudioButton audio={node.heard} label="Ouvir fala de Lucas" /> : null}
   </article>;

@@ -1,3 +1,4 @@
+import { JSDOM } from "jsdom";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -77,7 +78,7 @@ describe("public story navigation", () => {
     const title = createDemo("beginner", "normal-card-ui", 0);
     const titleHtml = renderHost(title);
     expect(titleHtml).toContain("Um encontro na cafeteria.");
-    expect(titleHtml).toMatch(/class="primary"[^>]*>Avançar<\/button>/);
+    expect([...new JSDOM(titleHtml).window.document.querySelectorAll("button.primary")].some(button=>button.textContent === "Avançar")).toBe(true);
     const context = transition(title, { at: title.nodeId, type: "NEXT" });
     expect(renderHost(context)).toContain("Começar a história");
   });

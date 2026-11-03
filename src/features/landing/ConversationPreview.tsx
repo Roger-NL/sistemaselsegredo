@@ -1,4 +1,6 @@
 "use client";
+import { BrowserText } from "@/components/i18n/BrowserText";
+
 
 import { Check, Pause, Play, RotateCcw } from "lucide-react";
 import { useState } from "react";
@@ -32,8 +34,8 @@ export function ConversationPreview() {
       <div className="language-paper-heading"><span>UMA FRASE SUA.</span><button type="button" className="language-reset" onClick={() => { setSelected([]); setNotice(""); }} aria-label="Recomeçar a amostra" disabled={selected.length === 0 && !notice}><RotateCcw size={15} aria-hidden="true" /></button></div>
       <p className="language-intention">“Estou aprendendo inglês.”</p>
       <div className={`language-answer ${complete ? "is-complete" : ""}`} aria-label="Sua frase em inglês"><span lang={selected.length ? "en" : "pt-BR"}>{selected.map(index => pieces[index]).join(" ") || <span className="language-placeholder">Monte sua resposta com as peças.</span>}</span>{complete && <Check size={18} aria-hidden="true" />}</div>
-      <div className="language-word-bank" aria-label="Peças da frase">{pieces.map((piece, index) => <button key={piece} type="button" lang="en" disabled={selected.includes(index)} onClick={() => choose(index)}>{piece}</button>)}</div>
-      <p className="language-notice" role="status" aria-live="polite">{notice || "Toque nas palavras. Veja acontecer."}</p>
+      <div className="language-word-bank" aria-label="Peças da frase">{pieces.map((piece, index) => <button key={piece} type="button" lang="en" disabled={selected.includes(index)} onClick={() => choose(index)}><BrowserText>{piece}</BrowserText></button>)}</div>
+      <p className="language-notice" role="status" aria-live="polite">{notice || <BrowserText>{"Toque nas palavras. Veja acontecer."}</BrowserText>}</p>
     </div>
     <div className="language-stage-bottom"><span>THINK IT. BUILD IT. SAY IT.</span><button type="button" className="language-motion-toggle" onClick={() => setMotion(value => !value)} aria-label={motion ? "Pausar animações" : "Retomar animações"}>{motion ? <Pause size={13} aria-hidden="true" /> : <Play size={13} aria-hidden="true" />}</button></div>
   </section>;

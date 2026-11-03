@@ -1,4 +1,6 @@
 "use client";
+import { BrowserText } from "@/components/i18n/BrowserText";
+
 
 import { useEffect, useRef, useState } from "react";
 import { useStudentWorkspace } from "@/features/dashboard/use-student-workspace";
@@ -30,11 +32,11 @@ export function Feedback({ onFinish }: { runId: string; onFinish: () => void }) 
     <h2 ref={heading} tabIndex={-1}>Como foi a experiência para você?</h2>
     <p>Avaliar é opcional. Sua avaliação será enviada ao professor e ficará no seu painel.</p>
     <fieldset className="feedback-options" disabled={sending || sent}><legend>Sua impressão</legend>{options.map(option => <label key={option}>
-      <input type="radio" name="feedback" checked={draft.option === option} onChange={() => setDraft({ ...draft, option })} /> {option}
+      <input type="radio" name="feedback" checked={draft.option === option} onChange={() => setDraft({ ...draft, option })} /> <BrowserText>{option}</BrowserText>
     </label>)}</fieldset>
     <label className="comment-label" htmlFor="feedback-comment">O que funcionou bem ou poderia melhorar? <span>(opcional)</span></label>
     <textarea id="feedback-comment" disabled={sending || sent} value={draft.comment} maxLength={2000} rows={4} onChange={event => setDraft({ ...draft, comment: event.target.value })} />
-    {error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
-    <div className="actions">{sent ? <button type="button" className="primary" onClick={onFinish}>Concluir</button> : <><button className="primary" disabled={sending || (!draft.option && !draft.comment.trim())} type="submit">{sending ? "Enviando…" : "Enviar avaliação"}</button><button type="button" disabled={sending} onClick={onFinish}>Terminar sem enviar</button></>}</div>
+    {error && <p role="alert"><BrowserText>{error}</BrowserText></p>}{notice && <p role="status"><BrowserText>{notice}</BrowserText></p>}
+    <div className="actions">{sent ? <button type="button" className="primary" onClick={onFinish}>Concluir</button> : <><button className="primary" disabled={sending || (!draft.option && !draft.comment.trim())} type="submit">{sending ? <BrowserText>{"Enviando…"}</BrowserText> : <BrowserText>{"Enviar avaliação"}</BrowserText>}</button><button type="button" disabled={sending} onClick={onFinish}>Terminar sem enviar</button></>}</div>
   </form>;
 }

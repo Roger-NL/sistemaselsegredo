@@ -1,3 +1,4 @@
+import { JSDOM } from "jsdom";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -83,7 +84,7 @@ describe("one main message per screen in parts 3–10", () => {
       expect(html).not.toContain('id="written-answer"');
       expect(html).not.toContain('class="recognition-response"');
       expect(html).not.toContain('class="construction"');
-      expect(html.includes('lang="en">I’m tired.')).toBe(step === 2);
+      expect([...new JSDOM(html).window.document.querySelectorAll('[lang="en"]')].some(element=>element.textContent === 'I’m tired.')).toBe(step === 2);
     }
     const activity = render({ ...state, phase: "write", presentationStep: cards.length });
     expect(activity).toContain('id="written-answer"');

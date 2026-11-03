@@ -1,4 +1,6 @@
 "use client";
+import { BrowserText } from "@/components/i18n/BrowserText";
+
 
 
 import Link from "next/link";
@@ -56,6 +58,6 @@ export function DemoHost({ experience = false, publishedAudio = {}, accountName 
       : snapshot.state && experience ? <DemoExperience key={`${workspaceState.generation}:${snapshot.state.runId}`} generation={workspaceState.generation} initial={snapshot.state} publishedAudio={publishedAudio} navigationRef={navigation} onBackAvailabilityChange={setCanGoBack} />
       : snapshot.state ? <section className="resume"><p className="eyebrow">Sua conversa está aqui</p><h1>Vamos continuar?</h1><p>Você pode retomar do ponto em que parou, sem repetir as falas já enviadas.</p><div className="actions"><Link className="primary button-link" href="/demo">Retomar conversa</Link><button onClick={reset}>Começar de novo</button></div></section>
       : <div className="entry-stage">{snapshot.status === "invalid" && <p role="status">Não foi possível retomar a tentativa anterior. Comece uma nova conversa.</p>}<DemoEntry onStart={profile => { const generation = workspaceState.generation; start({ prepare:() => remember(createDemo(profile, crypto.randomUUID(), Date.now()), generation) }); }} /></div>}
-    <footer><span>BasedSpeak · Um encontro de cada vez.<span className="demo-sync-status" role="status">{workspaceState.notice || (allowed ? guest ? "Demo livre. Seu avanço fica neste navegador." : workspaceState.saving ? "Salvando sua conversa…" : snapshot.state ? "Conversa sincronizada com sua conta." : "Sua conta está conectada." : "")}</span></span><nav aria-label="Informações legais"><Link href="/privacidade">Privacidade</Link><Link href="/termos">Termos</Link></nav></footer>
+    <footer><span>BasedSpeak · Um encontro de cada vez.<span className="demo-sync-status" role="status">{workspaceState.notice || <BrowserText>{(allowed ? guest ? "Demo livre. Seu avanço fica neste navegador." : workspaceState.saving ? "Salvando sua conversa…" : snapshot.state ? "Conversa sincronizada com sua conta." : "Sua conta está conectada." : "")}</BrowserText>}</span></span><nav aria-label="Informações legais"><Link href="/privacidade">Privacidade</Link><Link href="/termos">Termos</Link></nav></footer>
   </main>;
 }

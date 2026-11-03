@@ -1,4 +1,6 @@
 "use client";
+import { BrowserText } from "@/components/i18n/BrowserText";
+
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -19,15 +21,15 @@ export function ConversationReplay({ state, onClose }: { state: DemoState; onClo
   function move(next: number) { setPosition(next); setMeaning(false); }
   if (!slide) return <section className="ending"><h1>Não há falas registradas para rever.</h1><button onClick={onClose}>Voltar ao resumo</button></section>;
   return <div className="conversation-replay">
-    <header className="replay-bar"><div><strong>Revendo a conversa</strong><span>Parte {slide.part} de 10 · Fala {index + 1} de {slides.length}</span></div><button onClick={onClose}>Sair da revisão</button></header>
+    <header className="replay-bar"><div><strong>Revendo a conversa</strong><span><BrowserText>Parte </BrowserText><BrowserText>{slide.part}</BrowserText> <BrowserText>de 10 · Fala </BrowserText>{<BrowserText>{index + 1}</BrowserText>} <BrowserText>de </BrowserText><BrowserText>{slides.length}</BrowserText></span></div><button onClick={onClose}>Sair da revisão</button></header>
     <SceneFrame activityKey={`replay:${slide.id}`} opening intro={null}
       artwork={<aside className="scene-column"><figure className="scene-art"><picture><source media="(max-width: 760px)" srcSet={slide.image.mobile} /><Image unoptimized width={960} height={640} src={slide.image.path} alt={slide.image.description} /></picture></figure></aside>}>
       <div className="activity-body"><div className="activity-content">
         <article className="opening-card" data-presentation="dialogue">
-          <p className="opening-speaker">{slide.role === "character" ? "Lucas" : "Você respondeu"}</p>
-          <h1 ref={heading} tabIndex={-1} lang="en">{slide.text}</h1>
-          <AudioButton key={slide.id} audio={slide.audioId}>{slide.written === undefined ? "Ouvir" : "Ouvir modelo"}</AudioButton>
-          {slide.meaning && <div className="replay-meaning"><button className="text-button" aria-expanded={meaning} onClick={() => setMeaning(!meaning)}>{meaning ? "Ocultar significado" : "Ver significado"}</button>{meaning && <p>{slide.meaning}</p>}</div>}
+          <p className="opening-speaker">{slide.role === "character" ? <BrowserText>{"Lucas"}</BrowserText> : <BrowserText>{"Você respondeu"}</BrowserText>}</p>
+          <h1 ref={heading} tabIndex={-1} lang="en"><BrowserText>{slide.text}</BrowserText></h1>
+          <AudioButton key={slide.id} audio={slide.audioId}>{slide.written === undefined ? <BrowserText>{"Ouvir"}</BrowserText> : <BrowserText>{"Ouvir modelo"}</BrowserText>}</AudioButton>
+          {slide.meaning && <div className="replay-meaning"><button className="text-button" aria-expanded={meaning} onClick={() => setMeaning(!meaning)}>{meaning ? <BrowserText>{"Ocultar significado"}</BrowserText> : <BrowserText>{"Ver significado"}</BrowserText>}</button>{meaning && <p><BrowserText>{slide.meaning}</BrowserText></p>}</div>}
           {slide.written !== undefined && <p className="replay-model-note">Sua resposta está preservada. O áudio é o modelo desta fala.</p>}
         </article>
       </div></div>

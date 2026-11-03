@@ -1,4 +1,6 @@
 "use client";
+import { BrowserText } from "@/components/i18n/BrowserText";
+
 
 import Link from "next/link";
 import { Brand } from "@/components/ui/Brand";
@@ -83,7 +85,7 @@ export function PresentationGate({ children }: { children: (review: () => void) 
   }
 
   if (unauthenticated) return <main className="presentation-state"><p>Sua sessão mudou. Entre novamente para abrir a apresentação da sua conta.</p><Link href="/comecar?modo=entrar">Entrar novamente</Link></main>;
-  if (loading || !status) return <main className="presentation-state" aria-busy={loading}><Brand />{loading ? <p role="status">Preparando seu espaço…</p> : <><p role="alert">{error}</p><button type="button" onClick={() => void load()}>Tentar novamente</button><Link href="/comecar?modo=entrar">Voltar para a entrada</Link></>}</main>;
+  if (loading || !status) return <main className="presentation-state" aria-busy={loading}><Brand />{loading ? <p role="status">Preparando seu espaço…</p> : <><p role="alert"><BrowserText>{error}</BrowserText></p><button type="button" onClick={() => void load()}>Tentar novamente</button><Link href="/comecar?modo=entrar">Voltar para a entrada</Link></>}</main>;
   if (!status.completed) return <Presentation busy={busy} error={error} onFinish={() => void finish()} />;
   return <><div ref={dashboard} hidden={review}>{children(() => { returnFocus.current = document.activeElement as HTMLElement | null; returnScroll.current = window.scrollY; setReview(true); })}</div>{review && <Presentation review onFinish={() => void finish()} />}</>;
 }

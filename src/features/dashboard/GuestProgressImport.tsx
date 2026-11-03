@@ -1,4 +1,6 @@
 "use client";
+import { BrowserText } from "@/components/i18n/BrowserText";
+
 import { useState } from "react";
 import { canImportGuestLearning, hasGuestLearning } from "./guest-learning";
 import { studentWorkspace, type WorkspaceState } from "./workspace-store";
@@ -20,7 +22,7 @@ export function GuestProgressImport({ state }: { state: WorkspaceState }) {
     catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível salvar o percurso. Tente novamente."); }
   }
   return <aside className="guest-progress-import" aria-label="Continuar o percurso deste navegador">
-    <div><strong>{empty ? "Seu percurso pode continuar nesta conta." : "Seu percurso desta conta está preservado."}</strong><p>{empty ? `Há um avanço salvo neste navegador. Você pode associá-lo à conta ${workspace.account.email || workspace.account.name} e continuar do mesmo ponto.` : "Esta conta já tem um avanço próprio. O percurso feito sem entrar continua separado neste navegador e não substituirá seu estudo."}</p>{confirming && <p role="status">Confirme que este percurso é seu e que esta é a conta correta. Nenhum percurso existente será substituído.</p>}{error && <p role="alert">{error}</p>}</div>
-    <div>{empty && <button type="button" disabled={state.saving} onClick={() => confirming ? void save() : setConfirmingUid(workspace.account.id)}>{state.saving ? "Salvando percurso…" : confirming ? "Confirmar e salvar" : "Salvar este percurso na minha conta"}</button>}<button type="button" disabled={state.saving} onClick={() => confirming ? setConfirmingUid(null) : setDismissed(true)}>{confirming ? "Voltar" : empty ? "Agora não" : "Entendi"}</button></div>
+    <div><strong>{empty ? <BrowserText>{"Seu percurso pode continuar nesta conta."}</BrowserText> : <BrowserText>{"Seu percurso desta conta está preservado."}</BrowserText>}</strong><p>{empty ? <BrowserText>{`Há um avanço salvo neste navegador. Você pode associá-lo à conta ${workspace.account.email || workspace.account.name} e continuar do mesmo ponto.`}</BrowserText> : <BrowserText>{"Esta conta já tem um avanço próprio. O percurso feito sem entrar continua separado neste navegador e não substituirá seu estudo."}</BrowserText>}</p>{confirming && <p role="status">Confirme que este percurso é seu e que esta é a conta correta. Nenhum percurso existente será substituído.</p>}{error && <p role="alert"><BrowserText>{error}</BrowserText></p>}</div>
+    <div>{empty && <button type="button" disabled={state.saving} onClick={() => confirming ? void save() : setConfirmingUid(workspace.account.id)}>{state.saving ? <BrowserText>{"Salvando percurso…"}</BrowserText> : confirming ? <BrowserText>{"Confirmar e salvar"}</BrowserText> : <BrowserText>{"Salvar este percurso na minha conta"}</BrowserText>}</button>}<button type="button" disabled={state.saving} onClick={() => confirming ? setConfirmingUid(null) : setDismissed(true)}>{confirming ? <BrowserText>{"Voltar"}</BrowserText> : empty ? <BrowserText>{"Agora não"}</BrowserText> : <BrowserText>{"Entendi"}</BrowserText>}</button></div>
   </aside>;
 }

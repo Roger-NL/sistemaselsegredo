@@ -1,4 +1,6 @@
 "use client";
+import { BrowserText } from "@/components/i18n/BrowserText";
+
 
 import Link from "next/link";
 import { StudentLiveClass } from "@/features/live-class/StudentLiveClass";
@@ -20,20 +22,20 @@ export function StudentSections({ workspace, disabled }: { workspace: StudentWor
   const position = conversationPosition(learning.demoSnapshot);
   return <>
     <section className="student-section" id="avanco" aria-labelledby="student-progress-title">
-      <div className="student-section-heading"><div><p className="dashboard-overline">Um passo de cada vez</p><h2 id="student-progress-title" tabIndex={-1}>Meu avanço.</h2></div><span>{learning.updatedAt ? `Atualizado em ${formatStudentDate(learning.updatedAt)}` : "Seu percurso começa aqui"}</span></div>
+      <div className="student-section-heading"><div><p className="dashboard-overline">Um passo de cada vez</p><h2 id="student-progress-title" tabIndex={-1}>Meu avanço.</h2></div><span>{learning.updatedAt ? <BrowserText>{`Atualizado em ${formatStudentDate(learning.updatedAt)}`}</BrowserText> : <BrowserText>{"Seu percurso começa aqui"}</BrowserText>}</span></div>
       <div className="student-progress-grid">
         <ProgressCard href="/demo" disabled={disabled || !accountCanPractice(account.status)} label={position?.completed ? "Rever conversa" : position ? "Retomar conversa" : "Começar conversa"}>
-          <span>Conversa da cafeteria</span><strong className="student-conversation-position">{position ? position.completed ? "Concluída" : `Parte ${position.part} de 10` : "Ainda não começou"}</strong><progress value={position?.completed ? 10 : position ? position.part - 1 : 0} max={10} aria-label="Percurso da conversa da cafeteria" /><p>{position ? position.completed ? "Você chegou ao fim da conversa. Seu percurso está salvo." : "Seu ponto de retorno está guardado na sua conta." : "Ainda não há progresso desta história salvo na sua conta."}</p>
+          <span>Conversa da cafeteria</span><strong className="student-conversation-position">{position ? position.completed ? <BrowserText>{"Concluída"}</BrowserText> : <BrowserText>{`Parte ${position.part} de 10`}</BrowserText> : <BrowserText>{"Ainda não começou"}</BrowserText>}</strong><progress value={position?.completed ? 10 : position ? position.part - 1 : 0} max={10} aria-label="Percurso da conversa da cafeteria" /><p>{position ? position.completed ? <BrowserText>{"Você chegou ao fim da conversa. Seu percurso está salvo."}</BrowserText> : <BrowserText>{"Seu ponto de retorno está guardado na sua conta."}</BrowserText> : <BrowserText>{"Ainda não há progresso desta história salvo na sua conta."}</BrowserText>}</p>
         </ProgressCard>
         <ProgressCard href="/demo/estudo?practice=1" disabled={disabled || !accountCanPractice(account.status)} label="Ir para meu estudo">
-          <span>Estudo guiado</span><strong>{learning.studyCompleted}<small> / {learning.studyTotal}</small></strong><progress value={learning.studyCompleted} max={learning.studyTotal || 1} aria-label="Práticas de estudo concluídas" /><p>Práticas concluídas. Você pode revisitar os blocos quando quiser.</p>
+          <span>Estudo guiado</span><strong><BrowserText>{learning.studyCompleted}</BrowserText><small> <BrowserText>/ </BrowserText><BrowserText>{learning.studyTotal}</BrowserText></small></strong><progress value={learning.studyCompleted} max={learning.studyTotal || 1} aria-label="Práticas de estudo concluídas" /><p>Práticas concluídas. Você pode revisitar os blocos quando quiser.</p>
         </ProgressCard>
         <StudentLiveClass key={account.id} workspace={workspace} disabled={disabled} />
       </div>
     </section>
     <section className="student-section" id="atividades" aria-labelledby="student-activities-title">
       <div className="student-section-heading"><div><p className="dashboard-overline">O que você já fez</p><h2 id="student-activities-title" tabIndex={-1}>Minhas atividades.</h2></div></div>
-      {workspace.activities.length ? <ol className="student-activities">{workspace.activities.map(activity => <li key={activity.id}><span className="student-activity-icon"><BookOpen size={17} aria-hidden="true" /></span><div><strong>{activity.title}</strong><time dateTime={activity.at}>{formatStudentDate(activity.at)}</time></div></li>)}</ol> : <div className="student-empty"><BookOpen size={24} strokeWidth={1.4} aria-hidden="true" /><p>Ainda não há atividades registradas.</p><span>Ao praticar, seus registros aparecerão aqui.</span></div>}
+      {workspace.activities.length ? <ol className="student-activities">{workspace.activities.map(activity => <li key={activity.id}><span className="student-activity-icon"><BookOpen size={17} aria-hidden="true" /></span><div><strong><BrowserText>{activity.title}</BrowserText></strong><time dateTime={activity.at}><BrowserText>{formatStudentDate(activity.at)}</BrowserText></time></div></li>)}</ol> : <div className="student-empty"><BookOpen size={24} strokeWidth={1.4} aria-hidden="true" /><p>Ainda não há atividades registradas.</p><span>Ao praticar, seus registros aparecerão aqui.</span></div>}
     </section>
     <TeacherContact key={account.id} conversations={workspace.conversations} disabled={disabled} />
   </>;
@@ -41,7 +43,7 @@ export function StudentSections({ workspace, disabled }: { workspace: StudentWor
 
 function ProgressCard({href,disabled,label,children}:{href:string;disabled:boolean;label:string;children:ReactNode}) {
   if(disabled) return <article className="student-progress-card">{children}</article>;
-  return <Link href={href} prefetch={false} className="student-progress-card student-progress-link" aria-label={label}>{children}<span className="student-progress-cta">{label}<ArrowUpRight size={16} aria-hidden="true" /></span></Link>;
+  return <Link href={href} prefetch={false} className="student-progress-card student-progress-link" aria-label={label}>{children}<span className="student-progress-cta"><BrowserText>{label}</BrowserText><ArrowUpRight size={16} aria-hidden="true" /></span></Link>;
 }
 
 export function TeacherContact({ conversations, disabled }: { conversations: TeacherConversation[]; disabled: boolean }) {
@@ -86,16 +88,16 @@ export function TeacherContact({ conversations, disabled }: { conversations: Tea
     <p className="student-contact-intro">Envie uma dúvida ou conte como está sendo seu estudo. As respostas aparecem aqui e o painel confere atualizações automaticamente enquanto está aberto.</p>
     <div className="student-contact-grid">
       <aside className="student-conversations" aria-label="Minhas conversas com o professor"><button className="student-new-conversation" type="button" onClick={() => choose(null)} disabled={sending} aria-pressed={!current}>Nova conversa<Send size={15} aria-hidden="true" /></button>
-        {sorted.length ? <ul>{sorted.map(conversation => <li key={conversation.id}><button type="button" disabled={sending} aria-pressed={selected === conversation.id} onClick={() => choose(conversation.id)}><strong>{conversation.subject}</strong><span>{labels[conversation.status]}</span><time dateTime={conversation.updatedAt}>{formatStudentDate(conversation.updatedAt)}</time></button></li>)}</ul> : <p className="student-small">Você ainda não enviou mensagens. Comece uma nova conversa para falar com o professor.</p>}
+        {sorted.length ? <ul>{sorted.map(conversation => <li key={conversation.id}><button type="button" disabled={sending} aria-pressed={selected === conversation.id} onClick={() => choose(conversation.id)}><strong><BrowserText>{conversation.subject}</BrowserText></strong><span><BrowserText>{labels[conversation.status]}</BrowserText></span><time dateTime={conversation.updatedAt}><BrowserText>{formatStudentDate(conversation.updatedAt)}</BrowserText></time></button></li>)}</ul> : <p className="student-small">Você ainda não enviou mensagens. Comece uma nova conversa para falar com o professor.</p>}
       </aside>
       <div className="student-compose" aria-busy={sending}>
         {current ? <TeacherThread conversation={current} /> : <><h3>Nova mensagem.</h3><p className="student-small">A mensagem será salva na sua conta e recebida pelo professor.</p></>}
         {closed ? <p className="student-small">Esta conversa foi encerrada. Abra uma nova conversa para continuar o contato.</p> : <form onSubmit={send}><fieldset disabled={disabled || sending}>
           {!current && <label>Assunto<input name="subject" value={subject} onChange={event => setSubject(event.target.value)} maxLength={160} required /></label>}
-          <label>{current ? "Sua resposta" : "Mensagem"}<textarea name="body" rows={5} value={body} onChange={event => setBody(event.target.value)} maxLength={4000} required /></label>
-          <div className="student-compose-actions"><span>{body.length}/4000</span><button className="dashboard-primary" type="submit" disabled={!body.trim() || (!current && !subject.trim())}>{sending ? "Enviando…" : "Enviar mensagem"}<Send size={16} aria-hidden="true" /></button></div>
+          <label>{current ? <BrowserText>{"Sua resposta"}</BrowserText> : <BrowserText>{"Mensagem"}</BrowserText>}<textarea name="body" rows={5} value={body} onChange={event => setBody(event.target.value)} maxLength={4000} required /></label>
+          <div className="student-compose-actions"><span><BrowserText>{body.length}</BrowserText><BrowserText>/4000</BrowserText></span><button className="dashboard-primary" type="submit" disabled={!body.trim() || (!current && !subject.trim())}>{sending ? <BrowserText>{"Enviando…"}</BrowserText> : <BrowserText>{"Enviar mensagem"}</BrowserText>}<Send size={16} aria-hidden="true" /></button></div>
         </fieldset></form>}
-        {error && <p className="dashboard-form-error" role="alert">{error}</p>}{notice && <p className="student-sent" role="status"><Check size={16} aria-hidden="true" />{notice}</p>}
+        {error && <p className="dashboard-form-error" role="alert"><BrowserText>{error}</BrowserText></p>}{notice && <p className="student-sent" role="status"><Check size={16} aria-hidden="true" /><BrowserText>{notice}</BrowserText></p>}
       </div>
     </div>
   </section>;
@@ -103,5 +105,5 @@ export function TeacherContact({ conversations, disabled }: { conversations: Tea
 
 export function TeacherThread({ conversation }: { conversation: TeacherConversation }) {
   const labels = { open: "Aguardando resposta", answered: "Professor respondeu", closed: "Conversa encerrada" };
-  return <><div className="student-thread-heading"><h3>{conversation.subject}</h3><span>{labels[conversation.status]}</span></div><ol className="student-messages" aria-label={`Mensagens: ${conversation.subject}`}>{conversation.messages.map(message => <li key={message.id} data-author={message.role}><div><strong>{message.role === "manager" ? message.authorName ? `${message.authorName} · Professor` : "Professor" : "Você"}</strong><time dateTime={message.at}>{formatStudentDate(message.at)}</time></div><p>{message.body}</p></li>)}</ol></>;
+  return <><div className="student-thread-heading"><h3><BrowserText>{conversation.subject}</BrowserText></h3><span><BrowserText>{labels[conversation.status]}</BrowserText></span></div><ol className="student-messages" aria-label={`Mensagens: ${conversation.subject}`}>{conversation.messages.map(message => <li key={message.id} data-author={message.role}><div><strong>{message.role === "manager" ? message.authorName ? <BrowserText>{`${message.authorName} · Professor`}</BrowserText> : <BrowserText>{"Professor"}</BrowserText> : <BrowserText>{"Você"}</BrowserText>}</strong><time dateTime={message.at}><BrowserText>{formatStudentDate(message.at)}</BrowserText></time></div><p><BrowserText>{message.body}</BrowserText></p></li>)}</ol></>;
 }

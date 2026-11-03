@@ -1,3 +1,4 @@
+import { JSDOM } from "jsdom";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -96,10 +97,10 @@ function walk(profile: SupportProfile, destination = "end", choices: Record<stri
 }
 const panel = () => renderToStaticMarkup(createElement(Dashboard, { account: { name: "", email: "" } }));
 const theory = () => renderToStaticMarkup(createElement(TheoryExperience, { publishedAudio: {} }));
-const glossary = (html: string) => [...html.matchAll(/<summary><span lang="en">(.*?)<\/span>(.*?)<\/summary>/g)].map(([, phrase, badge]) => ({
-  phrase: phrase.replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&"),
-  lived: badge.includes("Na sua conversa"),
-}));
+const glossary = (html: string) => [...new JSDOM(html).window.document.querySelectorAll('details')].flatMap(entry=>{
+  const phrase=entry.querySelector('summary [lang="en"]');
+  return phrase ? [{phrase:phrase.textContent || '',lived:entry.querySelector('summary')!.textContent!.includes('Na sua conversa')}] : [];
+});
 
 beforeEach(() => { mocks.snapshot = { status: "empty", state: null }; mocks.studyView = "overview"; });
 

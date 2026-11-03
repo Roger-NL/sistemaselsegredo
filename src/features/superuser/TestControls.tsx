@@ -1,4 +1,6 @@
 "use client";
+import { BrowserText } from "@/components/i18n/BrowserText";
+
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Settings2 } from "lucide-react";
@@ -36,11 +38,11 @@ function TestPanel({onClose}:{onClose:()=>void}) {
     catch(error) {setNotice(error instanceof Error?error.message:"Não foi possível aplicar o comando.");}
     finally {setBusy(false);}
   }
-  const action=(text:string,input:TestAction)=><button type="button" data-test-action={input.action} onClick={()=>void run(input)}>{text}</button>;
+  const action=(text:string,input:TestAction)=><button type="button" data-test-action={input.action} onClick={()=>void run(input)}><BrowserText>{text}</BrowserText></button>;
   return <dialog className="test-controls-dialog" ref={dialog} aria-labelledby="test-controls-title" onCancel={e=>{e.preventDefault();if(!busy)onClose();}}>
     <header><div><small>SUA CONTA DE TESTE</small><h2 id="test-controls-title">O que você quer fazer?</h2></div><button type="button" disabled={busy} onClick={onClose}>Fechar ×</button></header>
     <div className="test-controls-scroll">
-      <div className="test-control-summary"><span>{learning.testMode?"Modo de teste":"Percurso normal"}</span><span>{demo?`Conversa · parte ${catalog[demo.nodeId].part}/10`:"Conversa não iniciada"}</span><span>Estudo · {study.completed.length}/24</span></div>
+      <div className="test-control-summary"><span>{learning.testMode?<BrowserText>{"Modo de teste"}</BrowserText>:<BrowserText>{"Percurso normal"}</BrowserText>}</span><span>{demo?<BrowserText>{`Conversa · parte ${catalog[demo.nodeId].part}/10`}</BrowserText>:<BrowserText>{"Conversa não iniciada"}</BrowserText>}</span><span><BrowserText>Estudo · </BrowserText><BrowserText>{study.completed.length}</BrowserText><BrowserText>/24</BrowserText></span></div>
       <fieldset disabled={busy}>
         <div className="test-quick-actions">{action("Apagar tudo",{action:"reset-all"})}{action("Completar tudo",{action:"complete-all"})}{action("Começar do zero, sem simulação",{action:"reset-real"})}</div>
         <nav className="test-page-links" aria-label="Páginas do curso">
@@ -56,6 +58,6 @@ function TestPanel({onClose}:{onClose:()=>void}) {
       </fieldset>
       <p className="test-control-note">Os comandos são imediatos e salvam no banco da sua conta. Reservas, mensagens, pagamentos e mídias ficam preservados. Avanços simulados continuam marcados como teste.</p>
     </div>
-    <footer role="status" aria-live="polite">{busy?"Aplicando…":notice||"Escolha um comando acima."}</footer>
+    <footer role="status" aria-live="polite">{busy?<BrowserText>{"Aplicando…"}</BrowserText>:notice||<BrowserText>{"Escolha um comando acima."}</BrowserText>}</footer>
   </dialog>;
 }

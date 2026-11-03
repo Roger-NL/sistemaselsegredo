@@ -1,4 +1,6 @@
 "use client";
+import { BrowserText } from "@/components/i18n/BrowserText";
+
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { flushSync } from "react-dom";
@@ -75,8 +77,8 @@ export function JourneyTransitionProvider({ children }: { children: ReactNode })
 
   return <JourneyContext.Provider value={{ start, ready, cancel, pending:cover !== null, headerTone:cover && cover.phase !== "reveal" ? "immersive" : "paper", reducedMotion:cover?.reduced ?? false }}>{children}
     {cover && <section className="journey-transition" data-phase={cover.phase} data-reduced={cover.reduced} aria-label="Entrada na conversa" role="status" aria-live="polite">
-      <div className="journey-transition-content"><small>História 01 · A cafeteria</small><h2>{cover.resume ? <>De volta<br />à conversa.</> : <>Sua vez<br />na história.</>}</h2><div className="journey-line" aria-hidden="true" />
-        {cover.phase === "error" ? <><p>Não foi possível preparar a cena. Você pode tentar novamente.</p><a href="/demo">Tentar novamente</a><button type="button" onClick={cancel}>Voltar</button></> : <p>{cover.resume ? "Continuando de onde você parou." : "Um encontro. Uma resposta de cada vez."}</p>}
+      <div className="journey-transition-content"><small>História 01 · A cafeteria</small><h2>{cover.resume ? <><BrowserText>De volta</BrowserText><br /><BrowserText>à conversa.</BrowserText></> : <><BrowserText>Sua vez</BrowserText><br /><BrowserText>na história.</BrowserText></>}</h2><div className="journey-line" aria-hidden="true" />
+        {cover.phase === "error" ? <><p>Não foi possível preparar a cena. Você pode tentar novamente.</p><a href="/demo">Tentar novamente</a><button type="button" onClick={cancel}>Voltar</button></> : <p>{cover.resume ? <BrowserText>{"Continuando de onde você parou."}</BrowserText> : <BrowserText>{"Um encontro. Uma resposta de cada vez."}</BrowserText>}</p>}
       </div>
     </section>}
   </JourneyContext.Provider>;

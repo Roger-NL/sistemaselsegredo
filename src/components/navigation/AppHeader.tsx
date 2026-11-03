@@ -1,4 +1,6 @@
 "use client";
+import { BrowserText } from "@/components/i18n/BrowserText";
+
 
 import Link from "next/link";
 import { TestControls } from "@/features/superuser/TestControls";
@@ -39,15 +41,15 @@ export function AppHeader({ current, name, tone = "paper", guest = false, onAcco
   }, []);
   return <header className="app-header" data-tone={headerTone === "immersive" ? headerTone : tone} data-reduced-motion={reducedMotion}>
     <Brand href={guest ? "/" : "/dashboard"} onClick={navigate} />
-    <Link href={guest ? "/comecar?modo=entrar" : "/dashboard"} prefetch={true} className="app-header-panel" aria-current={current === "dashboard" ? "page" : undefined} onClick={navigate}><LayoutDashboard size={15} aria-hidden="true" />{guest ? "Entrar" : "Meu painel"}</Link>
-    <div className="app-header-tools">{name && <span className="app-header-name">{name}</span>}
+    <Link href={guest ? "/comecar?modo=entrar" : "/dashboard"} prefetch={true} className="app-header-panel" aria-current={current === "dashboard" ? "page" : undefined} onClick={navigate}><LayoutDashboard size={15} aria-hidden="true" />{guest ? <BrowserText>{"Entrar"}</BrowserText> : <BrowserText>{"Meu painel"}</BrowserText>}</Link>
+    <div className="app-header-tools">{name && <span className="app-header-name"><BrowserText>{name}</BrowserText></span>}
       <TestControls />
       {process.env.NODE_ENV === "development" && <LocalTestStatus />}
       <details ref={menu} className="app-header-menu" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) close(); }} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); close(); menu.current?.querySelector("summary")?.focus(); } }}>
         <summary aria-label="Menu de navegação"><Menu size={18} aria-hidden="true" /><span>Menu</span></summary>
         <nav className="app-menu-panel" aria-label="Menu do BasedSpeak">
           {process.env.NODE_ENV === "development" && <LocalTestLauncher onNavigate={navigate} />}
-          <p>{guest ? "Explore a demo gratuita" : "Seu espaço no BasedSpeak"}</p>
+          <p>{guest ? <BrowserText>{"Explore a demo gratuita"}</BrowserText> : <BrowserText>{"Seu espaço no BasedSpeak"}</BrowserText>}</p>
           {!guest && <>
           <Link href="/dashboard" prefetch={true} onClick={navigate}><LayoutDashboard size={17} aria-hidden="true" />Meu painel<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <Link href="/dashboard#atividades" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Minhas atividades<ArrowUpRight size={14} aria-hidden="true" /></Link>
@@ -56,7 +58,7 @@ export function AppHeader({ current, name, tone = "paper", guest = false, onAcco
           </>}
           <Link href="/demo" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Conversa da cafeteria<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <Link href="/demo/estudo" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Área de estudo<ArrowUpRight size={14} aria-hidden="true" /></Link>
-          <Link href={guest ? "/comecar" : "/dashboard#aula-ao-vivo"} prefetch={true} onClick={navigate}><CalendarDays size={17} aria-hidden="true" />{guest ? "Minha aula gratuita" : "Minha aula ao vivo"}<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href={guest ? "/comecar" : "/dashboard#aula-ao-vivo"} prefetch={true} onClick={navigate}><CalendarDays size={17} aria-hidden="true" />{guest ? <BrowserText>{"Minha aula gratuita"}</BrowserText> : <BrowserText>{"Minha aula ao vivo"}</BrowserText>}<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <div className="app-menu-divider" />
           {guest ? <><Link href="/comecar" onClick={navigate}><UserRound size={17} aria-hidden="true" />Criar minha conta</Link><Link href="/comecar?modo=entrar" onClick={navigate}>Já tenho conta</Link></> : <>{onAccount ? <button className="app-menu-action" type="button" onClick={() => { close(); onAccount(); }}><UserRound size={17} aria-hidden="true" />Minha conta</button> : <Link href="/dashboard?painel=conta" prefetch={true} onClick={navigate}><UserRound size={17} aria-hidden="true" />Minha conta</Link>}
           {onSettings ? <button className="app-menu-action" type="button" onClick={() => { close(); onSettings(); }}><Settings2 size={17} aria-hidden="true" />Configurações</button> : <Link href="/dashboard?painel=configuracoes" prefetch={true} onClick={navigate}><Settings2 size={17} aria-hidden="true" />Configurações</Link>}</>}

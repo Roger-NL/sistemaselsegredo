@@ -5,3 +5,7 @@
 body { margin: 0; }
 button, input, textarea { font: inherit; }
 button, a, summary, input, textarea { -webkit-tap-highlight-color: transparent; }
+
+/* Stable elements keep browser translators from detaching React's text nodes.
+   They are text boundaries, not new layout or typography hooks. */
+[data-ui-text] { all:unset !important; display:contents !important; }

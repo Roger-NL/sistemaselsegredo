@@ -1,3 +1,4 @@
+import { JSDOM } from "jsdom";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -23,12 +24,19 @@ function render(state: DemoState, view: ReviewView = "moments") {
   return renderToStaticMarkup(createElement(DemoAudioContext.Provider, { value: controller },
     createElement(Retrospective, { state: { ...state, reviewView: view }, setView: () => {}, replaying: false, onReplayChange: () => {} })));
 }
+// Translation boundaries have no layout or semantic meaning. Preserve exact
+// phrase/evidence assertions while ignoring those neutral wrapper elements.
+function readableMarkup(html:string) {
+  const doc=new JSDOM(html).window.document;
+  for(const wrapper of doc.querySelectorAll('[data-ui-text]'))wrapper.replaceWith(...wrapper.childNodes);
+  return doc.body.innerHTML;
+}
 function moment(state: DemoState) {
-  const card = render(state).match(/<article class="moment-card">[\s\S]*?<\/article>/)?.[0];
+  const card = readableMarkup(render(state)).match(/<article class="moment-card">[\s\S]*?<\/article>/)?.[0];
   expect(card).toBeDefined();
   return card!;
 }
-const paragraph = (text: string) => renderToStaticMarkup(createElement("p", { lang: "en" }, text));
+const paragraph = (text: string) => readableMarkup(renderToStaticMarkup(createElement("p", { lang: "en" }, text)));
 type JourneyOptions = {
   profile?: SupportProfile; written?: Partial<Record<AudioId, string>>; support?: string[];
 };
