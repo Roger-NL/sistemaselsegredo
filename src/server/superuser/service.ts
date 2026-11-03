@@ -21,7 +21,7 @@ export function validateTestAction(body: Record<string, unknown>): TestAction {
   if (body.profile !== undefined && !PROFILES.includes(body.profile as never)) throw new RequestPayloadError("Apoio inválido.");
   if (fields.includes("part") && (!Number.isInteger(body.part) || Number(body.part)<1 || Number(body.part)>10)) throw new RequestPayloadError("Parte inválida.");
   if (fields.includes("node") && (typeof body.node!=="string" || !catalog[body.node])) throw new RequestPayloadError("Momento inválido.");
-  if (fields.includes("step") && (!Number.isInteger(body.step) || Number(body.step)<0 || Number(body.step)>=studySteps.length)) throw new RequestPayloadError("Prática inválida.");
+  if (fields.includes("step") && (!Number.isInteger(body.step) || Number(body.step)<0 || Number(body.step)>=studySteps.length)) throw new RequestPayloadError("Etapa inválida.");
   if (fields.includes("view") && !REVIEW_VIEWS.includes(body.view as never)) throw new RequestPayloadError("Tela de revisão inválida.");
   return body as TestAction;
 }

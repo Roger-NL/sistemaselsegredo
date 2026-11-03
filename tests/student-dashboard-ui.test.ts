@@ -131,7 +131,7 @@ describe("student dashboard", () => {
     expect(story).toContain("Começar a conversa");
     expect(story).toContain("Demo livre"); expect(story).not.toContain("Entre para continuar");
     const study = renderToStaticMarkup(createElement(TheoryExperience, { publishedAudio: {} }));
-    expect(study).toContain("Criar minha conta para a aula"); expect(study).toContain("sem refazer as práticas");
+    expect(study).toContain("Criar minha conta para a aula"); expect(study).toContain("sem refazer o percurso");
     expect(study).toContain('href="/comecar?modo=entrar"'); expect(study).not.toContain('href="/dashboard#aula-ao-vivo"');
   });
 });

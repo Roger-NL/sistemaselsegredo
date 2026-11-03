@@ -33,7 +33,7 @@ describe("real student account entry", () => {
     expect(html).toContain("sem cadastro e sem aprovação");
     expect(html).toContain('href="/demo"');
     expect(html).not.toContain("O professor aprova");
-    expect(html).toContain("oito blocos e 24 práticas");
+    expect(html).toContain("oito blocos e 24 etapas");
     expect(html).toContain("uma aula gratuita de 1 hora com professor, uma por conta");
     expect(html).toContain("No Meu painel");
   });

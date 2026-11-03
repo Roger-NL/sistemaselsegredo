@@ -18,13 +18,13 @@ export const presentationSteps = [
     label: "Estudo", visual: "study",
     frames: [
       { eyebrow: "02 / Estudo guiado", title: "A história continua.|Agora, tudo faz sentido.", description: "Oito blocos para explorar o inglês da sua conversa." },
-      { eyebrow: "Um pequeno passo por vez", title: "Ouvir. Montar.|Escrever. Descobrir.", description: "24 práticas para explorar o inglês. Um pequeno passo por vez." },
+      { eyebrow: "Um pequeno passo por vez", title: "Ouvir. Montar.|Escrever. Descobrir.", description: "24 etapas para explorar o inglês. Um pequeno passo por vez." },
     ],
   },
   {
     label: "Aula gratuita", visual: "class",
     frames: [
-      { eyebrow: "03 / Uma conquista sua", title: "Estudo em 100%.|Uma nova porta aberta.", description: "Concluir as 24 práticas libera uma aula gratuita com professor." },
+      { eyebrow: "03 / Uma conquista sua", title: "Estudo em 100%.|Uma nova porta aberta.", description: "Concluir as 24 etapas libera uma aula gratuita com professor." },
       { eyebrow: "Da história para uma conversa ao vivo", title: "Uma hora.|Com professor.", description: "Uma aula por conta. Peça um horário e acompanhe a confirmação no painel." },
     ],
   },

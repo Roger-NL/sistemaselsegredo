@@ -21,7 +21,7 @@ export function MoreInformation() {
         <ol className="landing-info-steps">
           <li><span>01</span><div><h3>Comece agora.</h3><p>A conversa e o estudo são gratuitos. Abra e participe, sem cadastro e sem aprovação.</p></div></li>
           <li><span>02</span><div><h3>Entre na conversa.</h3><p>Conheça Lucas na cafeteria. Escute, escolha e construa suas respostas com três opções de apoio. Sem usar o microfone.</p></div></li>
-          <li><span>03</span><div><h3>Veja o que construiu.</h3><p>Revisite suas escolhas e explore o inglês da cafeteria em oito blocos e 24 práticas do estudo guiado.</p></div></li>
+          <li><span>03</span><div><h3>Veja o que construiu.</h3><p>Revisite suas escolhas e explore o inglês da cafeteria em oito blocos e 24 etapas do estudo guiado.</p></div></li>
         </ol>
         <h3 className="landing-info-support-title">O apoio muda. A conversa continua.</h3>
         <SupportPreview />

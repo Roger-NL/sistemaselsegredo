@@ -63,11 +63,17 @@ afterEach(async () => {
 describe("study piece placement without grading or auto-submit", () => {
   it("places taps in the next slot, respects capacity, and makes returning a placed piece explicit", async () => {
     await mount({ slots: 2 });
+    expect(container.querySelectorAll(".study-piece-instruction")).toHaveLength(1);
+    expect(container.querySelector(".study-piece-instruction strong")?.textContent).toBe("Arraste as palavras");
+    expect(container.querySelector(".study-piece-instruction > span")?.textContent).toBe("ou toque");
     expect(slot(0).dataset.next).toBe("true");
     await act(async () => bankPiece("I").click());
     expect(mocks.change).toHaveBeenLastCalledWith([0]);
+    expect(bankPiece("I").hidden).toBe(true);
+    expect(bankPiece("I").disabled).toBe(true);
     expect(slot(1).dataset.next).toBe("true");
     expect(container.querySelector('[role="status"]')?.textContent).toContain("1 de 2");
+    expect(container.querySelector(".study-piece-answer-meta [aria-hidden]")?.textContent).toBe("1/2");
     await act(async () => bankPiece("like").click());
     expect(mocks.change).toHaveBeenLastCalledWith([0, 1]);
     expect(bankPiece("it.").disabled).toBe(true);
@@ -75,6 +81,8 @@ describe("study piece placement without grading or auto-submit", () => {
     expect(mocks.change).toHaveBeenCalledTimes(2);
     await act(async () => placedPiece("I").click());
     expect(mocks.change).toHaveBeenLastCalledWith([1]);
+    expect(bankPiece("I").hidden).toBe(false);
+    expect(bankPiece("I").disabled).toBe(false);
     expect(slot(0).querySelector("button")?.textContent).toContain("like");
     expect(slot(1).dataset.next).toBe("true");
     expect(mocks.submit).not.toHaveBeenCalled();
@@ -82,14 +90,24 @@ describe("study piece placement without grading or auto-submit", () => {
     expect(mocks.sound).toHaveBeenCalledTimes(3);
   });
 
-  it("accepts Enter and Space like tapping without triggering a form submission", async () => {
+  it("moves keyboard focus between the visible bank and placed piece without submitting", async () => {
     await mount();
+    bankPiece("I").focus();
     await act(async () => bankPiece("I").dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })));
     expect(mocks.change).toHaveBeenLastCalledWith([0]);
+    expect(document.activeElement).toBe(placedPiece("I"));
+    expect(document.activeElement?.getAttribute("data-piece-token")).toBe("0");
+    expect(bankPiece("I").hidden).toBe(true);
+    bankPiece("like").focus();
     await act(async () => bankPiece("like").dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true })));
     expect(mocks.change).toHaveBeenLastCalledWith([0, 1]);
+    expect(document.activeElement).toBe(placedPiece("like"));
+    placedPiece("I").focus();
     await act(async () => placedPiece("I").dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })));
     expect(mocks.change).toHaveBeenLastCalledWith([1]);
+    expect(document.activeElement).toBe(bankPiece("I"));
+    expect(bankPiece("I").hidden).toBe(false);
+    expect(bankPiece("I").disabled).toBe(false);
     expect(mocks.submit).not.toHaveBeenCalled();
     // Preventing the native keyboard default must not discard a later virtual
     // click from assistive technology merely because no pointerdown occurred.
@@ -188,6 +206,7 @@ describe("study piece placement without grading or auto-submit", () => {
   it("leaves all controls inactive when locked, including a lock arriving during a gesture", async () => {
     await mount({ locked: true, initial: [0] });
     expect([...container.querySelectorAll<HTMLButtonElement>("button")].every(button => button.disabled)).toBe(true);
+    expect(bank().hidden).toBe(true);
     expect(container.textContent).not.toContain("Arraste para mudar a ordem");
     expect(container.querySelector('[role="status"]')?.textContent).toBe("Frase pronta. Continue no botão abaixo.");
     await act(async () => placedPiece("I").dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true })));
@@ -213,8 +232,11 @@ describe("contextual reply board", () => {
     expect(container.querySelectorAll("[data-study-drop-slot]")).toHaveLength(1);
     await act(async () => bankPiece("Sorry!").click());
     expect(mocks.change).toHaveBeenLastCalledWith([0]);
+    expect(bankPiece("Sorry!").hidden).toBe(true);
     await act(async () => bankPiece("It's okay.").click());
     expect(mocks.change).toHaveBeenLastCalledWith([1]);
+    expect(bankPiece("Sorry!").hidden).toBe(false);
+    expect(bankPiece("It's okay.").hidden).toBe(true);
     await drag(bankPiece("Thanks!"), slot(0));
     expect(mocks.change).toHaveBeenLastCalledWith([2]);
     expect(container.querySelectorAll(".study-piece-placed")).toHaveLength(1);
@@ -222,5 +244,25 @@ describe("contextual reply board", () => {
     expect(mocks.change).toHaveBeenLastCalledWith([]);
     expect(mocks.submit).not.toHaveBeenCalled();
     expect(mocks.sound).toHaveBeenCalledTimes(4);
+  });
+
+  it("keeps focus on a keyboard-selected replacement reply and returns it to the bank", async () => {
+    await mount({ tokens: ["Really?", "Me too."], slots: 1, mode: "reply", cue: "Lucas: “I like it.”" });
+    expect(container.querySelector(".study-piece-speaker")?.textContent).toBe("Lucas");
+    expect(container.querySelector(".study-piece-cue [lang=en]")?.textContent).toBe("I like it.");
+    expect(container.querySelector(".study-piece-instruction strong")?.textContent).toBe("Arraste a resposta");
+    for (const [token, key] of [["Really?", "Enter"], ["Me too.", " "]]) {
+      bankPiece(token).focus();
+      await act(async () => bankPiece(token).dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true })));
+      expect(document.activeElement).toBe(placedPiece(token));
+      expect(bankPiece(token).hidden).toBe(true);
+    }
+    expect(bankPiece("Really?").hidden).toBe(false);
+    expect(bankPiece("Really?").disabled).toBe(false);
+    await act(async () => placedPiece("Me too.").dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true })));
+    expect(document.activeElement).toBe(bankPiece("Me too."));
+    expect(bankPiece("Me too.").hidden).toBe(false);
+    expect(mocks.change.mock.calls.map(([answer]) => answer)).toEqual([[0], [1], []]);
+    expect(mocks.submit).not.toHaveBeenCalled();
   });
 });

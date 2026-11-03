@@ -1,5 +1,7 @@
 # Teoria depois da cafeteria
 
+**Atualização de 03/11/2026:** o percurso atual tem 16 etapas de explicação e 8 práticas pontuais. Todas mostram um porquê curto antes de qualquer atividade. Estrutura, interface e compatibilidade de progresso estão descritas em [Estudo guiado: ensinar com clareza](ESTUDO-UX-GUIADO-2026-11-03.md). Os registros abaixo documentam as versões anteriores.
+
 Registro editorial de 27/10/2026. Conteúdo original em português para adultos iniciantes; o inventário de referência é `src/features/demo/content/media.ts`. A teoria é uma etapa conectada à retrospectiva, conceitualmente separada da narrativa.
 
 ## Prompt de trabalho

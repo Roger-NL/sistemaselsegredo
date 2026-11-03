@@ -35,8 +35,8 @@ export function LearningConflict() {
     <p>O que você fez aqui foi preservado. Confira antes de continuar. Nenhuma versão será substituída automaticamente.</p>
     {"demoSnapshot" in conflict.local && <p>Conversa desta aba: {localDemo ? `tentativa preservada${localDemo.draft ? ", com resposta em escrita" : ""}` : "recomeço solicitado"}.</p>}
     {localDemo?.draft && <label>Resposta desta aba<textarea readOnly value={localDemo.draft} /></label>}
-    {"studySnapshot" in conflict.local && <p>Estudo desta aba: {decodeProgress(conflict.local.studySnapshot ?? null).completed.length} práticas concluídas.</p>}
-    {conflict.remote && <p>Salvo na conta: {conflict.remote.studyCompleted} práticas concluídas. A conversa e o estudo salvos estão disponíveis para retomada.</p>}
+    {"studySnapshot" in conflict.local && <p>Estudo desta aba: {decodeProgress(conflict.local.studySnapshot ?? null).completed.length} etapas concluídas.</p>}
+    {conflict.remote && <p>Salvo na conta: {conflict.remote.studyCompleted} etapas concluídas. A conversa e o estudo salvos estão disponíveis para retomada.</p>}
     <p>Usar o percurso desta aba substitui na conta os trechos que você editou aqui. Retomar a conta encerra a edição desta aba; você pode baixar uma cópia antes de escolher.</p>
     {(error || failure) && <p role="alert">{failure || error}</p>}
     <div className="learning-conflict-actions">

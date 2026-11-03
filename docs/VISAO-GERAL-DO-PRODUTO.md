@@ -27,7 +27,7 @@ Princípios de experiência preservados:
 
 ## Estado atual e limites técnicos conhecidos
 
-O estado de implementação deve ser conferido no README e nos registros técnicos, especialmente quando outro chat estiver trabalhando no projeto. Atualmente há landing, cadastro, painel, demo da cafeteria e a primeira etapa de estudo em `/demo/estudo`: oito blocos, 24 práticas e consulta de expressões. O curso de várias histórias permanece como proposta. Demo e estudo também permanecem acessíveis diretamente. O progresso sem conta fica no navegador; na sessão autenticada, conversa e estudo são salvos no servidor. A importação do percurso público para uma conta vazia é explícita. Pesquisa e limites pedagógicos estão em [Teoria e pedagogia](TEORIA-PEDAGOGIA.md).
+O estado de implementação deve ser conferido no README e nos registros técnicos, especialmente quando outro chat estiver trabalhando no projeto. Atualmente há landing, cadastro, painel, demo da cafeteria e a primeira etapa de estudo em `/demo/estudo`: oito blocos, 24 etapas e consulta de expressões. O curso de várias histórias permanece como proposta. Demo e estudo também permanecem acessíveis diretamente. O progresso sem conta fica no navegador; na sessão autenticada, conversa e estudo são salvos no servidor. A importação do percurso público para uma conta vazia é explícita. Pesquisa e limites pedagógicos estão em [Teoria e pedagogia](TEORIA-PEDAGOGIA.md).
 
 Na demo, preservar roteiro em dez partes, Lucas, três apoios distintos (Guiado, Com pistas e Mais autônomo), imagens aprovadas, ajuda voluntária, retrospectiva, recuperação local e áudio compartilhado persistente. Não regenerar áudio já existente por causa de alterações de planejamento. A experiência não usa microfone nem deve ser anunciada como conversa generativa ilimitada ou avaliação de pronúncia. Não há duração de uso validada com participantes nem resultado de aprendizagem comprovado.
 
@@ -80,7 +80,7 @@ Dentro do curso, a proposta em discussão é repetir o ciclo: viver uma históri
 
 ## Operação e modelo comercial em discussão
 
-Estudo atualizado em 02/11/2026: [análise comercial, preços, aula gratuita e cenários de lançamento](ESTUDO-COMERCIAL-2026-11-02.md). Considera o estudo já implementado e a aula gratuita após as 24 práticas. Preços e projeções abaixo continuam hipóteses; o novo relatório não confirma vendas, eficácia ou retenção.
+Estudo atualizado em 02/11/2026: [análise comercial, preços, aula gratuita e cenários de lançamento](ESTUDO-COMERCIAL-2026-11-02.md). Considera o estudo já implementado e a aula gratuita após as 24 etapas. Preços e projeções abaixo continuam hipóteses; o novo relatório não confirma vendas, eficácia ou retenção.
 
 Roger trabalha sozinho: desenvolve o site, produz o conteúdo, divulga, atende e será o professor das aulas. Não há equipe ou professor contratado neste estágio. As contas não devem presumir pagamentos fictícios a terceiros; devem separar despesas reais, receita bruta e tempo de trabalho de Roger. Ser dono do site não elimina eventuais custos de hospedagem, serviços, pagamentos e tributos, mas nenhum valor desses foi apurado aqui.
 

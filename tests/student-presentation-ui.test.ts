@@ -27,7 +27,7 @@ describe("presentation before the student's dashboard", () => {
     expect(html).toMatch(/aria-label="Etapa 5: Meu painel"[^>]*disabled=""/);
     expect(html).toContain("Seu inglês");
     expect(html).not.toContain("O professor libera");
-    expect(html).not.toContain("24 práticas");
+    expect(html).not.toContain("24 etapas");
     const review = renderToStaticMarkup(createElement(Presentation, { review: true, onFinish: () => {} }));
     expect(review).toContain("Voltar ao painel");
     expect(review).not.toMatch(/aria-label="Etapa 5: Meu painel"[^>]*disabled=""/);
@@ -43,7 +43,7 @@ describe("presentation before the student's dashboard", () => {
   });
   it("explains the real journey and the exact one-hour, one-per-account benefit", () => {
     const copy = presentationFrames.map(frame => `${frame.title} ${frame.description}`).join(" ");
-    for (const value of ["Lucas", "microfone", "Três apoios", "Guiado", "Com pistas", "Mais autônomo", "oito blocos", "24 práticas", "100%", "Uma hora", "uma aula por conta", "confirmação", "Meu painel", "Sua conta está pronta"]) expect(copy.toLowerCase()).toContain(value.toLowerCase());
+    for (const value of ["Lucas", "microfone", "Três apoios", "Guiado", "Com pistas", "Mais autônomo", "oito blocos", "24 etapas", "100%", "Uma hora", "uma aula por conta", "confirmação", "Meu painel", "Sua conta está pronta"]) expect(copy.toLowerCase()).toContain(value.toLowerCase());
   });
   it("breaks five scenes into short click-led frames instead of showing every explanation together", () => {
     expect(presentationSteps).toHaveLength(5);
