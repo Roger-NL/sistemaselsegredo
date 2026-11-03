@@ -11,7 +11,7 @@ import { getAdminAuth } from "@/server/firebase";
 import "@/features/landing/landing.css";
 import "@/features/landing/signup.css";
 
-export const metadata: Metadata = { title: "Começar", description: "Crie sua conta e experimente a conversa guiada BasedSpeak.", robots: { index: false, follow: true } };
+export const metadata: Metadata = { title: "Começar", description: "Crie sua conta para salvar seu percurso e pedir sua aula gratuita após concluir o estudo.", robots: { index: false, follow: true } };
 
 export default async function StartPage({ searchParams }: { searchParams: Promise<{ modo?: string }> }) {
   const cookie = (await cookies()).get(AUTH_SESSION_COOKIE_NAME)?.value;

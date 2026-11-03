@@ -21,6 +21,7 @@ export function iso(value: unknown): string | null {
 export function learningFromData(data: Record<string, unknown> = {}): LearningProgress {
   return {
     ...(data.testMode === true ? { testMode: true } : {}),
+    saveVersion: Number.isSafeInteger(data.saveVersion) && Number(data.saveVersion) >= 0 ? Number(data.saveVersion) : 0,
     revision: Number.isSafeInteger(data.revision) && Number(data.revision) >= 0 ? Number(data.revision) : 0,
     demoSnapshot: typeof data.demoSnapshot === "string" ? data.demoSnapshot : null,
     studySnapshot: typeof data.studySnapshot === "string" ? data.studySnapshot : null,

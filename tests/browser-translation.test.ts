@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 const mocks=vi.hoisted(()=>({snapshot:{status:"empty",state:null},workspace:{status:"unauthenticated",generation:1,saving:false,error:"",notice:"",workspace:null,guestLearning:{revision:0,demoSnapshot:null,studySnapshot:null,demoPercent:0,studyCompleted:0,studyTotal:24,updatedAt:null}}}));
 vi.mock("next/navigation",()=>({useRouter:()=>({push:vi.fn()})}));
 vi.mock("@/features/dashboard/use-student-workspace",()=>({useStudentWorkspace:()=>mocks.workspace}));
-vi.mock("@/features/dashboard/workspace-store",()=>({studentWorkspace:{stage:vi.fn(),flush:vi.fn()}}));
+vi.mock("@/features/dashboard/workspace-store",()=>({studentWorkspace:{stage:vi.fn(),flush:vi.fn(),beginEdit:vi.fn(),endEdit:vi.fn()}}));
 vi.mock("@/features/demo/session/browser",()=>({subscribe:()=>()=>{},getBrowserSnapshot:()=>mocks.snapshot,getServerSnapshot:()=>mocks.snapshot}));
 import { TheoryExperience } from "@/features/theory/TheoryExperience";
 let root:Root,container:HTMLElement;

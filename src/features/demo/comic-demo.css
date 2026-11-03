@@ -1,0 +1,321 @@
+/* The café is a page in the same graphic story as the rest of the product.
+   Existing layout measurements and motion remain owned by demo.css. */
+html body .demo-shell {
+  --paper:var(--comic-paper,#fff7e8);
+  --ink:var(--comic-ink,#202722);
+  --muted:var(--comic-muted,#5d655b);
+  --line:var(--comic-ink,#202722);
+  --accent:var(--comic-teal,#39776b);
+  --surface:var(--comic-paper,#fff7e8);
+  color:var(--ink);
+  background-color:var(--paper);
+  background-image:radial-gradient(#20272210 .65px,transparent .8px);
+  background-size:9px 9px;
+  font-family:var(--comic-body,var(--font-geist-sans)),Arial,sans-serif;
+}
+
+html body .demo-shell .entry-welcome h1,
+html body .demo-shell .entry-mobile-welcome h1,
+html body .demo-shell .ending h1,
+html body .demo-shell .review-stage h1,
+html body .demo-shell .study-invitation h2,
+html body .demo-shell .scene-intro h1,
+html body .demo-shell .opening-card h1:not([lang="en"]),
+html body .demo-shell .dialog-heading h2 {
+  font-family:var(--comic-display,var(--font-geist-sans)),sans-serif;
+  font-weight:400;
+  letter-spacing:.015em;
+}
+
+html body .demo-shell .eyebrow,
+html body .demo-shell .entry-details,
+html body .demo-shell .replay-bar strong {
+  color:var(--comic-teal,#39776b);
+  font-weight:700;
+}
+
+html body .demo-shell .scene-art picture,
+html body .demo-shell .entry-art picture {
+  border:2px solid var(--ink);
+  border-radius:5px 11px 5px 8px;
+  background:var(--comic-blue,#8eb1c2);
+  box-shadow:3px 3px 0 var(--comic-teal,#39776b),5px 5px 0 var(--ink);
+}
+html body .demo-shell .scene-art picture img,
+html body .demo-shell .entry-art picture img {
+  border:0;
+  border-radius:0;
+}
+
+html body .demo-shell .entry-reading .profile-option {
+  border:2px solid var(--ink);
+  border-radius:5px 9px 5px 7px;
+  background:var(--paper);
+  box-shadow:3px 3px 0 var(--ink);
+}
+html body .demo-shell .entry-reading .profile-option:hover { background:#f8e8b4; }
+html body .demo-shell .entry-reading .profile-option.selected,
+html body .demo-shell .entry-reading .profile-option.selected:hover {
+  color:var(--paper);
+  background:var(--comic-teal,#39776b);
+  border-color:var(--ink);
+  box-shadow:3px 3px 0 var(--ink);
+}
+html body .demo-shell .entry-reading .profile-option.selected small { color:#f4f0dc; }
+html body .demo-shell .profile-indicator {
+  border:2px solid var(--ink);
+  background:var(--comic-yellow,#efc653);
+  color:var(--ink);
+  border-radius:4px;
+}
+html body .demo-shell .selected .profile-indicator {
+  background:var(--comic-yellow,#efc653);
+  border-color:var(--ink);
+  color:var(--ink);
+}
+
+html body .demo-shell .experience-bar > span,
+html body .demo-shell .replay-bar > div {
+  color:var(--ink);
+  font-weight:700;
+}
+html body .demo-shell .experience-bar > button {
+  color:var(--ink);
+  border:2px solid var(--ink);
+  border-radius:4px;
+  background:var(--paper);
+  box-shadow:2px 2px 0 var(--ink);
+  text-decoration:none;
+}
+html body .demo-shell progress {
+  background:#e1d7ba;
+  border:1px solid var(--ink);
+  border-radius:2px;
+  color:var(--comic-teal,#39776b);
+}
+html body .demo-shell progress::-webkit-progress-bar { background:#e1d7ba; }
+html body .demo-shell progress::-webkit-progress-value { background:var(--comic-teal,#39776b); }
+html body .demo-shell progress::-moz-progress-bar { background:var(--comic-teal,#39776b); }
+
+html body .demo-shell .opening-card,
+html body .demo-shell .expression,
+html body .demo-shell .speech,
+html body .demo-shell .moment-card,
+html body .demo-shell .history-line {
+  border:2px solid var(--ink);
+  border-radius:6px 15px 8px 14px;
+  background:var(--paper);
+  box-shadow:3px 3px 0 var(--ink);
+}
+html body .demo-shell .opening-card[data-presentation="context"] {
+  background:#f5dfa0;
+  border-radius:3px 8px 3px 6px;
+}
+html body .demo-shell .opening-card[data-presentation="title"] { background:#f5dfa0; }
+html body .demo-shell .opening-card[data-presentation="prompt"] { background:#f2d4c5; }
+html body .demo-shell .opening-card.listening-prompt { background:#d7e6eb; }
+html body .demo-shell .opening-card.response-cue { background:#f2d4c5; }
+html body .demo-shell .opening-card[data-presentation="dialogue"],
+html body .demo-shell .speech.heard {
+  position:relative;
+  border-radius:18px 18px 18px 4px;
+}
+html body .demo-shell .opening-card[data-presentation="dialogue"]::after,
+html body .demo-shell .speech.heard::after {
+  content:"";
+  position:absolute;
+  width:11px;
+  height:11px;
+  left:22px;
+  bottom:-7px;
+  background:var(--paper);
+  border-left:2px solid var(--ink);
+  border-bottom:2px solid var(--ink);
+  transform:skewY(-30deg);
+  pointer-events:none;
+}
+html body .demo-shell .speech.sent,
+html body .demo-shell .history-line.history-you { background:#d7e6eb; }
+html body .demo-shell .opening-speaker,
+html body .demo-shell .speech small,
+html body .demo-shell .history-line small,
+html body .demo-shell .moment-card small {
+  color:var(--comic-teal,#39776b);
+  font-weight:700;
+  letter-spacing:.075em;
+}
+
+/* English is learning content: retain its case, punctuation and readable body face. */
+html body .demo-shell .opening-card h1[lang="en"],
+html body .demo-shell p[lang="en"],
+html body .demo-shell .blocks button,
+html body .demo-shell .answer button,
+html body .demo-shell .recognition-response button,
+html body .demo-shell .written-response input {
+  font-family:var(--comic-body,var(--font-geist-sans)),Arial,sans-serif;
+  text-transform:none;
+  letter-spacing:normal;
+}
+html body .demo-shell .opening-card h1[lang="en"],
+html body .demo-shell .speech p[lang="en"] { font-weight:600; }
+html body .demo-shell .activity-intent {
+  border-left:4px solid var(--comic-coral,#d9755c);
+  padding-left:9px;
+  color:var(--ink);
+}
+html body .demo-shell .cup-clue { color:var(--comic-teal,#39776b); font-weight:600; }
+html body .demo-shell .context,
+html body .demo-shell .writing-scope { color:var(--muted); }
+
+html body .demo-shell .primary,
+html body .demo-shell .entry-start-actions > .primary,
+html body .demo-shell .activity-actions button,
+html body .demo-shell .pager button,
+html body .demo-shell .review-actions > button,
+html body .demo-shell .replay-entry-actions > button {
+  color:var(--ink);
+  background:var(--comic-yellow,#efc653);
+  border:2px solid var(--ink);
+  border-radius:4px 7px 4px 6px;
+  box-shadow:3px 3px 0 var(--ink);
+  font-weight:700;
+}
+html body .demo-shell .primary:hover,
+html body .demo-shell .activity-actions button:hover,
+html body .demo-shell .pager button:hover,
+html body .demo-shell .review-actions > button:hover,
+html body .demo-shell .replay-entry-actions > button:hover { background:#f6d879; }
+html body .demo-shell .entry-start-actions > .primary:disabled,
+html body .demo-shell .activity-actions button:disabled,
+html body .demo-shell .pager button:disabled {
+  color:#6d6c5e;
+  background:#e7e0cc;
+  border-color:#878b7b;
+  box-shadow:2px 2px 0 #878b7b;
+}
+html body .demo-shell .activity-actions .choices button {
+  background:var(--paper);
+  text-align:left;
+}
+html body .demo-shell .activity-actions .choices button:hover { background:#f8e8b4; }
+html body .demo-shell .audio-trigger .audio-button {
+  color:var(--comic-teal,#39776b);
+  border:2px solid var(--ink);
+  border-radius:999px;
+  background:var(--paper);
+  box-shadow:2px 2px 0 var(--ink);
+  font-weight:600;
+}
+html body .demo-shell .audio-trigger .audio-button:hover { background:#f8e8b4; }
+html body .demo-shell .audio-inline-error { color:#8c3c2d; }
+html body .demo-shell .text-button { color:var(--comic-teal,#39776b); font-weight:600; }
+
+html body .demo-shell .answer {
+  border:2px solid var(--ink);
+  border-radius:4px 8px 4px 6px;
+  background:#d7e6eb;
+}
+html body .demo-shell .blocks button,
+html body .demo-shell .answer button,
+html body .demo-shell .recognition-response .choices button {
+  border:2px solid var(--ink);
+  border-radius:4px;
+  box-shadow:2px 2px 0 var(--ink);
+  font-weight:600;
+}
+html body .demo-shell .blocks button { color:var(--ink); background:var(--comic-yellow,#efc653); }
+html body .demo-shell .blocks button:hover { background:#f6d879; }
+html body .demo-shell .answer button,
+html body .demo-shell .recognition-response [aria-pressed="true"] {
+  background:var(--comic-teal,#39776b);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+html body .demo-shell .recognition-response .choices button:not([aria-pressed="true"]) { background:var(--paper); }
+html body .demo-shell .written-response input,
+html body .demo-shell textarea,
+html body .demo-shell .audio-controls select {
+  background:var(--paper);
+  border:2px solid var(--ink);
+  border-radius:4px;
+  box-shadow:2px 2px 0 var(--ink);
+  color:var(--ink);
+}
+html body .demo-shell .writing-repertoire summary { color:var(--comic-teal,#39776b); font-weight:600; }
+html body .demo-shell .notice:not(:empty) {
+  background:#f5dfa0;
+  border-left:3px solid var(--comic-coral,#d9755c);
+  color:var(--ink);
+}
+
+html body .demo-shell .demo-dialog {
+  background:var(--paper);
+  border:2px solid var(--ink);
+  border-radius:6px 12px 6px 10px;
+  box-shadow:6px 6px 0 var(--ink);
+}
+html body .demo-shell .demo-dialog::backdrop { background:#20272299; }
+html body .demo-shell .support-dialog label { background:var(--paper); border:2px solid var(--ink); border-radius:4px; }
+html body .demo-shell .support-dialog label:has(input:checked) { background:#f5dfa0; border-color:var(--ink); }
+html body .demo-shell .support-dialog input { accent-color:var(--comic-teal,#39776b); }
+html body .demo-shell .study-invitation {
+  background:#d7e6eb;
+  border:2px solid var(--ink);
+  border-radius:5px 10px 5px 8px;
+  box-shadow:4px 4px 0 var(--ink);
+}
+html body .demo-shell .practice-summary { color:var(--comic-teal,#39776b); font-weight:600; }
+html body .demo-shell > footer { border-color:var(--ink); color:var(--muted); }
+
+@container demo-app (max-width:760px) {
+  html body .demo-shell .scene-art picture,
+  html body .demo-shell .entry-art picture { box-shadow:2px 2px 0 var(--comic-teal,#39776b),3px 3px 0 var(--ink); }
+  html body .demo-shell .opening-card,
+  html body .demo-shell .expression,
+  html body .demo-shell .speech,
+  html body .demo-shell .moment-card,
+  html body .demo-shell .history-line { box-shadow:2px 2px 0 var(--ink); }
+  html body .demo-shell .entry-reading .profile-option { box-shadow:2px 2px 0 var(--ink); }
+  html body .demo-shell .blocks button,
+  html body .demo-shell .answer button { box-shadow:1px 1px 0 var(--ink); }
+  html body .demo-shell .opening-card[data-presentation="dialogue"]::after,
+  html body .demo-shell .speech.heard::after { width:8px; height:8px; bottom:-6px; }
+}
+
+/* Keep the chapter bar and primary action in view on short landscape screens. */
+@media (min-width:480px) and (max-width:900px) and (max-height:500px) {
+  html:has(.app-shell .experience) { --app-nav-height:50px; }
+  html body .app-shell:has(.experience) { height:var(--app-height,100dvh); min-height:0; max-height:var(--app-height,100dvh); }
+  html body .app-shell:has(.experience) .app-header { min-height:50px; padding-block:2px; }
+  html body .app-shell .experience-bar { padding-block:1px; }
+  html body .app-shell .experience .scene-grid { min-height:0; }
+  html body .app-shell .scene-grid,
+  html body .app-shell .scene-grid[data-density],
+  html body .app-shell .scene-grid.opening-scene,
+  html body .app-shell .scene-grid.opening-scene[data-density] {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); gap:10px; padding-block:6px;
+  }
+  html body .app-shell .scene-grid .scene-intro-slot { grid-column:2; grid-row:1; }
+  html body .app-shell .scene-grid .scene-column { grid-column:1; grid-row:1/-1; }
+  html body .app-shell .scene-grid .conversation-panel { grid-column:2; grid-row:2; min-height:0; justify-content:flex-start; }
+  html body .app-shell .scene-grid.opening-scene,
+  html body .app-shell .scene-grid.opening-scene[data-density] { grid-template-rows:minmax(0,1fr); }
+  html body .app-shell .scene-grid.opening-scene .conversation-panel { grid-row:1; }
+  html body .app-shell .activity-body { flex:1 1 auto; overflow-y:auto; overscroll-behavior:contain; padding:0 4px 7px 0; margin-top:0; }
+  html body .app-shell .activity-actions { flex:0 0 auto; margin:0; padding:6px 4px 4px 0; }
+  html body .app-shell .activity-actions > .actions { margin:0; }
+  html body .app-shell .activity-intent { margin-bottom:4px; }
+  html body .app-shell .response-tools .audio-button { padding-inline:10px; }
+  html body .app-shell .answer:not(:has(button)) { min-height:28px; padding-block:2px; }
+  html body .app-shell .construction:has(> .skeleton) { display:grid; grid-template-columns:max-content minmax(0,1fr); gap:4px 6px; }
+  html body .app-shell .scene-grid .construction:has(> .skeleton) > .skeleton { grid-column:1; grid-row:1; align-self:center; margin:0; }
+  html body .app-shell .construction:has(> .skeleton) > .answer { grid-column:2; grid-row:1; margin:0; }
+  html body .app-shell .construction:has(> .skeleton) > .blocks { grid-column:1/-1; grid-row:2; margin:2px 0; }
+  html body .app-shell .opening-card { padding:8px 12px; }
+  html body .app-shell .opening-card h1,
+  html body .app-shell .opening-card[data-presentation="dialogue"] h1 { font-size:24px; }
+  html body .app-shell .opening-card .opening-speaker { margin-bottom:6px; }
+  html body .app-shell .opening-card .audio-trigger { margin-top:8px; }
+  html body .app-shell .opening-card .audio-button { min-height:44px; font-size:16px; padding:6px 20px; }
+  html body .app-shell .activity-actions button { min-height:44px; }
+}

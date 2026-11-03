@@ -90,7 +90,7 @@ export async function mutateManagement(principal: RequestPrincipal, action: Admi
       await db.runTransaction(async tx => {
         const ref = learningRef(action.userId), stored = await tx.get(ref);
         const previousLearning = learningFromData(stored.data());
-        tx.set(ref, { ...learningFromData(), revision: previousLearning.revision + 1, updatedAt: at });
+        tx.set(ref, { ...learningFromData(), revision: previousLearning.revision + 1, saveVersion: previousLearning.saveVersion + 1, updatedAt: at });
         tx.create(auditRef().doc(), audit(principal, target, "Progresso de conversa e estudo reiniciado", at));
         tx.create(studentActivityRef(action.userId).doc(), { kind: "reset", title: "Seu progresso foi reiniciado pela gestão", at });
       });

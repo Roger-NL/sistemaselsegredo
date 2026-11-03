@@ -11,7 +11,7 @@ const story = encodeSnapshot(createDemo("beginner", "public-practice-test", 0));
 const study = JSON.stringify({ ...emptyProgress, position: 4, completed: studySteps.slice(0, 4).map(item => item.step.id) });
 const fullStudy = JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) });
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status });
-const account = (uid = "student", status: "pending" | "active" = "pending"): StudentWorkspace => ({ account: { id: uid, name: "Student", email: "student@example.com", status, role: "student" }, learning: { revision: 0, demoSnapshot: null, studySnapshot: null, studyCompleted: 0, studyTotal: 24, demoPercent: 0, updatedAt: null }, liveClass: null, activities: [], conversations: [] });
+const account = (uid = "student", status: "pending" | "active" = "pending"): StudentWorkspace => ({ account: { id: uid, name: "Student", email: "student@example.com", status, role: "student" }, learning: { revision: 0, saveVersion: 0, demoSnapshot: null, studySnapshot: null, studyCompleted: 0, studyTotal: 24, demoPercent: 0, updatedAt: null }, liveClass: null, activities: [], conversations: [] });
 function setup() {
   const values = new Map<string, string>();
   const storage = { getItem: (key: string) => values.get(key) || null, setItem: (key: string, value: string) => { values.set(key, value); }, removeItem: (key: string) => { values.delete(key); } };
@@ -107,7 +107,7 @@ describe("explicit continuation into an account", () => {
     expect(s.store.getSnapshot().workspace?.learning.studyCompleted).toBe(0);
     const generation = s.store.getSnapshot().generation; await s.store.importGuestProgress(generation);
     expect(s.fetcher.mock.calls[1]).toEqual(["/api/student/learning/import", expect.objectContaining({ method: "POST", headers: { "Content-Type": "application/json", "X-Workspace-Uid": "student" } })]);
-    expect(JSON.parse(s.fetcher.mock.calls[1][1]!.body as string)).toEqual({ revision: 0, demoSnapshot: story, studySnapshot: fullStudy });
+    expect(JSON.parse(s.fetcher.mock.calls[1][1]!.body as string)).toEqual({ revision: 0, saveVersion: 0, demoSnapshot: story, studySnapshot: fullStudy });
     expect(s.store.getSnapshot().workspace?.learning.studyCompleted).toBe(24); expect(s.values.has(GUEST_LEARNING_KEY)).toBe(false);
     expect(s.store.stage("demoSnapshot", story, generation)).toBe(false);
   });

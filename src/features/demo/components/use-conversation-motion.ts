@@ -5,6 +5,7 @@ import { flushSync } from "react-dom";
 import { getMotionPreference, subscribePreferences } from "@/features/dashboard/preferences";
 import { transition } from "../model/reducer";
 import type { DemoEvent, DemoState } from "../model/types";
+import { playInteractionSound } from "@/components/interaction/sounds";
 
 /** Keep the real DOM current; only the browser's decorative snapshots overlap. */
 export function useConversationMotion(state: DemoState, dispatch: Dispatch<DemoEvent>) {
@@ -27,6 +28,12 @@ export function useConversationMotion(state: DemoState, dispatch: Dispatch<DemoE
   return useCallback((event: DemoEvent) => {
     const before = current.current;
     const after = transition(before, event);
+    if (event.type === "SEND_RESPONSE" && after !== before) void playInteractionSound(after.evidence.length > before.evidence.length ? "correct" : "retry");
+    else if (event.type === "ANSWER_MEANING" && after !== before) void playInteractionSound(event.correct ? "correct" : "retry");
+    else if (event.type === "PLACE_BLOCK" && after.returnSerial > before.returnSerial) void playInteractionSound("retry");
+    else if (["NEXT", "ADVANCE_PRESENTATION", "BACK", "CHOOSE", "PREPARE", "CHECK"].includes(event.type)) {
+      if (after !== before) void playInteractionSound("advance");
+    }
     const changed = after.nodeId !== before.nodeId || after.phase !== before.phase
       || after.presentationStep !== before.presentationStep || after.reviewView !== before.reviewView
       || after.audioAccess !== before.audioAccess;

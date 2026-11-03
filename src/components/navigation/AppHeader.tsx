@@ -11,6 +11,7 @@ import { Brand } from "@/components/ui/Brand";
 import { useJourneyTransition } from "./JourneyTransition";
 import { DASHBOARD_SECTION_EVENT } from "@/features/dashboard/use-dashboard-section";
 import { studentWorkspace } from "@/features/dashboard/workspace-store";
+import { SoundToggle } from "@/components/interaction/InteractionSounds";
 
 export function AppHeader({ current, name, tone = "paper", guest = false, onAccount, onSettings, onNavigate, children }: {
   current: "dashboard" | "demo" | "study"; name?: string; guest?: boolean; tone?: "paper" | "immersive"; onAccount?: () => void; onSettings?: () => void; onNavigate?: () => void; children?: ReactNode;
@@ -45,9 +46,16 @@ export function AppHeader({ current, name, tone = "paper", guest = false, onAcco
     <div className="app-header-tools">{name && <span className="app-header-name"><BrowserText>{name}</BrowserText></span>}
       <TestControls />
       {process.env.NODE_ENV === "development" && <LocalTestStatus />}
-      <details ref={menu} className="app-header-menu" onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) close(); }} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); close(); menu.current?.querySelector("summary")?.focus(); } }}>
+      <details ref={menu} className="app-header-menu" onBlur={event => {
+        // A touch can blur the summary without focusing its target. Closing
+        // before click hides the control and prevents its action from running.
+        if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) close();
+      }} onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); close(); menu.current?.querySelector("summary")?.focus(); } }}>
         <summary aria-label="Menu de navegação"><Menu size={18} aria-hidden="true" /><span>Menu</span></summary>
-        <nav className="app-menu-panel" aria-label="Menu do BasedSpeak">
+        <nav className="app-menu-panel" aria-label="Menu do BasedSpeak" onClick={event => {
+          // Dismiss after the action, including story controls supplied by DemoHost.
+          if (event.target instanceof Element && event.target.closest("a[href], button:not(:disabled)")) close();
+        }}>
           {process.env.NODE_ENV === "development" && <LocalTestLauncher onNavigate={navigate} />}
           <p>{guest ? <BrowserText>{"Explore a demo gratuita"}</BrowserText> : <BrowserText>{"Seu espaço no BasedSpeak"}</BrowserText>}</p>
           {!guest && <>
@@ -60,6 +68,7 @@ export function AppHeader({ current, name, tone = "paper", guest = false, onAcco
           <Link href="/demo/estudo" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Área de estudo<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <Link href={guest ? "/comecar" : "/dashboard#aula-ao-vivo"} prefetch={true} onClick={navigate}><CalendarDays size={17} aria-hidden="true" />{guest ? <BrowserText>{"Minha aula gratuita"}</BrowserText> : <BrowserText>{"Minha aula ao vivo"}</BrowserText>}<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <div className="app-menu-divider" />
+          <SoundToggle />
           {guest ? <><Link href="/comecar" onClick={navigate}><UserRound size={17} aria-hidden="true" />Criar minha conta</Link><Link href="/comecar?modo=entrar" onClick={navigate}>Já tenho conta</Link></> : <>{onAccount ? <button className="app-menu-action" type="button" onClick={() => { close(); onAccount(); }}><UserRound size={17} aria-hidden="true" />Minha conta</button> : <Link href="/dashboard?painel=conta" prefetch={true} onClick={navigate}><UserRound size={17} aria-hidden="true" />Minha conta</Link>}
           {onSettings ? <button className="app-menu-action" type="button" onClick={() => { close(); onSettings(); }}><Settings2 size={17} aria-hidden="true" />Configurações</button> : <Link href="/dashboard?painel=configuracoes" prefetch={true} onClick={navigate}><Settings2 size={17} aria-hidden="true" />Configurações</Link>}</>}
           {children && <div className="app-menu-story"><p>Controles da história</p>{children}</div>}

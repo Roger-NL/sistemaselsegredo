@@ -1,0 +1,9 @@
+.learning-conflict{box-sizing:border-box;position:fixed;inset:0;margin:auto;width:min(38rem,calc(100% - 2rem));max-height:calc(100dvh - 2rem);overflow:auto;padding:clamp(1rem,4vw,2rem);border:1px solid #777;background:#f4f1e8;color:#191919;border-radius:1rem;z-index:10000;font:inherit}
+.learning-conflict::backdrop{background:rgb(0 0 0 / .65)}
+.learning-conflict h2{font-size:1.5rem;margin:0 0 1rem}
+.learning-conflict p{margin:.85rem 0;line-height:1.5}
+.learning-conflict textarea{display:block;width:100%;min-height:5rem;margin-top:.5rem;padding:.5rem;font:inherit;font-size:1rem}
+.learning-conflict-actions{display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0}
+.learning-conflict-actions button{padding:.7rem;border:1px solid currentColor;border-radius:.5rem;font:inherit}
+.learning-conflict button:focus-visible{outline:3px solid #a64c00;outline-offset:3px}
+.learning-conflict button:disabled{opacity:.5}

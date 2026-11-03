@@ -1,4 +1,6 @@
 :root { --app-nav-height:72px; --site-gutter:clamp(16px,3vw,38px); }
+.learning-return { width:100%; max-width:1200px; margin:0 auto; display:flex; justify-content:flex-end; flex-shrink:0; padding:8px 0; font-size:13px; }
+.learning-return a { color:inherit; text-underline-offset:4px; min-height:32px; display:inline-flex; align-items:center; }
 .demo-shell.app-shell,.study-shell:has(>.app-header) { padding-inline:var(--site-gutter); }
 .study-shell>.app-header { max-width:1200px; }
 .app-header { --ink:#191919; --paper:#f4f0e8; --line:#ded8cd; --nav-panel:#fcfaf6; --nav-muted:#716c64; --nav-hover:#eee8de; --nav-selected:#e9e3d8; --nav-button-border:#c7c0b4; --nav-shadow:#19191918; color:var(--ink); background:var(--paper); font-family:var(--font-geist-sans),Arial,sans-serif; position:sticky; top:0; z-index:210; width:100%; max-width:1200px; min-height:var(--app-nav-height); margin:0 auto; display:flex; align-items:center; gap:28px; border-bottom:1px solid var(--line); flex-shrink:0; box-sizing:border-box; line-height:1.4; transition:background-color .4s ease,color .4s ease,border-color .4s ease; }

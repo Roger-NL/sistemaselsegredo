@@ -5,6 +5,7 @@ import "@/features/theory/theory.css";
 
 export const metadata: Metadata = { title: "Entenda sua primeira conversa", description: "Explore as palavras, expressões e estruturas da conversa da cafeteria. Explicações simples e pequenas práticas, no seu ritmo." };
 
-export default function StudyPage() {
-  return <TheoryExperience publishedAudio={pageAudioCatalog()} />;
+export default async function StudyPage({ searchParams }: { searchParams: Promise<{ practice?: string | string[] }> }) {
+  const params = await searchParams;
+  return <TheoryExperience publishedAudio={pageAudioCatalog()} resumeStudy={params.practice === "1"} />;
 }

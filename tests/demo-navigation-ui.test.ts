@@ -82,6 +82,14 @@ describe("public story navigation", () => {
     const context = transition(title, { at: title.nodeId, type: "NEXT" });
     expect(renderHost(context)).toContain("Começar a história");
   });
+
+  it("keeps a direct return to the saved study step visible outside the menu during the conversation", () => {
+    const document = new JSDOM(renderHost(createDemo("beginner", "study-return", 0))).window.document;
+    const link = document.querySelector<HTMLAnchorElement>('.learning-return a');
+    expect(link?.getAttribute("href")).toBe("/demo/estudo?practice=1");
+    expect(link?.textContent).toContain("Voltar ao estudo guiado");
+    expect(link?.closest("details")).toBeNull();
+  });
 });
 
 describe("honest review of saved test attempts", () => {

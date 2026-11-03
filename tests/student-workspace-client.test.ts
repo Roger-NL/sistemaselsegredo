@@ -4,7 +4,7 @@ import { createWorkspaceStore } from "@/features/dashboard/workspace-store";
 
 const workspace = (uid = "student-a", revision = 0): StudentWorkspace => ({
   account: { id: uid, name: "", email: "", status: "active", role: "student" },
-  learning: { revision, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null },
+  learning: { revision, saveVersion: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null },
   activities: [], conversations: [], liveClass: null,
 });
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
@@ -134,7 +134,7 @@ describe("student workspace synchronization", () => {
     store.stage("studySnapshot", "study", generation);
     await store.flush();
     expect(storage.setItem).toHaveBeenCalledWith("basedspeak.learning.uid%2Fwith%20spaces.7", expect.any(String));
-    expect(JSON.parse(fetcher.mock.calls[2][1]!.body as string)).toEqual({ revision: 7, demoSnapshot: "story", studySnapshot: "study" });
+    expect(JSON.parse(fetcher.mock.calls[2][1]!.body as string)).toEqual({ revision: 7, saveVersion: 0, demoSnapshot: "story", studySnapshot: "study" });
     expect(fetcher.mock.calls[2][1]!.headers).toEqual({ "Content-Type": "application/json", "X-Workspace-Uid": "uid/with spaces" });
     expect(fetcher.mock.calls[1][0]).toBe("/api/student/workspace");
     expect(store.getSnapshot().saving).toBe(false);
@@ -346,7 +346,7 @@ describe("persistent test controls synchronization",()=>{
     expect(fetcher.mock.calls.filter(([url])=>url==="/api/student/learning")).toHaveLength(0);
     expect(store.getSnapshot().workspace?.learning).toMatchObject({revision:1,testMode:true,studyCompleted:24});
     expect(store.stage("demoSnapshot","stale",generation)).toBe(false);
-    expect(JSON.parse(fetcher.mock.calls[1][1]!.body as string)).toEqual({action:"complete-study",revision:0});
+    expect(JSON.parse(fetcher.mock.calls[1][1]!.body as string)).toEqual({action:"complete-study",revision:0,saveVersion:0});
   });
   it("reloads a conflict instead of keeping an old epoch, and rejects ordinary account controls",async()=>{
     const {store,fetcher}=setup();const ordinary=workspace();fetcher.mockResolvedValueOnce(json(ordinary));await store.load();

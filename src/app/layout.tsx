@@ -3,8 +3,14 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "@/features/demo/demo.css";
 import "@/components/navigation/navigation.css";
+import "./comic-theme.css";
+import "./comic-public.css";
+import "@/features/dashboard/comic-dashboard.css";
+import "@/features/demo/comic-demo.css";
+import "@/features/theory/comic-study.css";
 import { JourneyTransitionProvider } from "@/components/navigation/JourneyTransition";
 import { StudentWorkspaceSession } from "@/features/dashboard/StudentWorkspaceSession";
+import { InteractionSounds } from "@/components/interaction/InteractionSounds";
 
 // Reuse the local Geist bundled with the pinned Next dependency; no font download at build time.
 const geist = localFont({ src: "../../node_modules/next/dist/next-devtools/server/font/geist-latin.woff2", variable: "--font-geist-sans", weight: "100 900", style: "normal", display: "swap" });
@@ -45,7 +51,7 @@ export default function RootLayout({
       <body
         className={`${geist.variable} antialiased`}
       >
-        <JourneyTransitionProvider><StudentWorkspaceSession />{children}</JourneyTransitionProvider>
+        <JourneyTransitionProvider><InteractionSounds /><StudentWorkspaceSession />{children}</JourneyTransitionProvider>
       </body>
     </html>
   );

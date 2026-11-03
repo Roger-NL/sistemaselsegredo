@@ -1,6 +1,7 @@
 "use client";
 
 import { TestControlsOverlay } from "@/features/superuser/TestControls";
+import { LearningConflict } from "./LearningConflict";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { studentWorkspace } from "./workspace-store";
@@ -53,5 +54,5 @@ export function StudentWorkspaceSession() {
     previous.current = pathname;
     if (learning && wasLearning) void studentWorkspace.refresh();
   }, [pathname, learning]);
-  return <TestControlsOverlay />;
+  return <><TestControlsOverlay /><LearningConflict /></>;
 }

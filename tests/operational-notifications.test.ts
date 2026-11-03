@@ -66,18 +66,18 @@ describe("durable operational events", () => {
     memory.docs.set("users/student", { accountStatus: "active", name: "Student" });
     memory.docs.set("learning_states/student", { studyCompleted: 24 });
     const full = JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) });
-    await saveLearning(student, { revision: 0, studySnapshot: full });
+    await saveLearning(student, { revision: 0, saveVersion: 0, studySnapshot: full });
     expect(pending()).toHaveLength(1); expect(pending()[0][1].kind).toBe("study_completed");
-    await saveLearning(student, { revision: 0, studySnapshot: full });
-    await saveLearning(student, { revision: 0, studySnapshot: null });
-    await saveLearning(student, { revision: 0, studySnapshot: full });
+    await saveLearning(student, { revision: 0, saveVersion: 0, studySnapshot: full });
+    await saveLearning(student, { revision: 0, saveVersion: 1, studySnapshot: null });
+    await saveLearning(student, { revision: 0, saveVersion: 2, studySnapshot: full });
     expect(pending()).toHaveLength(1);
   });
   it("does not invent a completion for an already complete saved study", async () => {
     memory.docs.set("users/student", { accountStatus: "active" });
     const completed = studySteps.map(item => item.step.id);
     memory.docs.set("learning_states/student", { studySnapshot: JSON.stringify({ ...emptyProgress, completed }) });
-    await saveLearning(student, { revision: 0, studySnapshot: JSON.stringify({ ...emptyProgress, position: 1, completed }) });
+    await saveLearning(student, { revision: 0, saveVersion: 0, studySnapshot: JSON.stringify({ ...emptyProgress, position: 1, completed }) });
     expect(pending()).toHaveLength(0);
   });
   it("records a message atomically without copying message content into the outbox", async () => {

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getDashboardIdentity } from "@/server/dashboard/account";
 import { ArrowUpRight, Check, MicOff } from "lucide-react";
 import { Brand } from "@/components/ui/Brand";
 import { ConversationPreview } from "@/features/landing/ConversationPreview";
@@ -9,7 +11,7 @@ import "@/features/landing/landing.css";
 
 export const metadata: Metadata = {
   title: "BasedSpeak | Inglês é pra participar",
-  description: "Entre na história, escolha o que dizer e construa sua resposta com apoio. Crie sua conta e experimente a demo gratuita, sem microfone.",
+  description: "Entre na história, escolha o que dizer e construa sua resposta com apoio. Experimente a demo e o estudo gratuitos, sem cadastro e sem microfone.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Inglês é pra participar. | BasedSpeak",
@@ -18,7 +20,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  if (await getDashboardIdentity()) redirect("/dashboard");
   return <ViewportFrame className="landing">
     <a className="landing-skip" href="#conteudo">Pular para o conteúdo</a>
     <header className="landing-header landing-wrap">
@@ -31,7 +34,7 @@ export default function HomePage() {
         <h1>Inglês é pra<br /><span>participar.</span></h1>
         <p className="landing-lead">Entre na história. Escolha o que dizer.<br className="landing-desktop-break" /> Construa sua resposta, com apoio.</p>
         <div className="landing-hero-actions">
-          <Link href="/comecar" prefetch={false} className="landing-cta">Criar conta e experimentar<ArrowUpRight size={19} aria-hidden="true" /></Link>
+          <Link href="/demo" prefetch={false} className="landing-cta">Começar a conversa<ArrowUpRight size={19} aria-hidden="true" /></Link>
           <MoreInformation />
         </div>
         <p className="landing-assurance"><span><Check size={14} aria-hidden="true" />Demo gratuita</span><span><MicOff size={14} aria-hidden="true" />Sem microfone</span></p>

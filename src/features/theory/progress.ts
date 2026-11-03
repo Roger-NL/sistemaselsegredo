@@ -1,5 +1,5 @@
 import { normalizeAnswer as normalizeResponse } from "@/features/demo/model/normalize";
-import { lessons, type Practice } from "./content";
+import { lessons, type Practice, type PracticeGap } from "./content";
 
 export const studySteps = lessons.flatMap(lesson => lesson.steps.map(step => ({ lesson, step })));
 export const THEORY_KEY = "basedspeak.study.cafe.v1";
@@ -21,7 +21,12 @@ export function decodeProgress(raw: string | null): StudyProgress {
 export function normalizeAnswer(value: string) {
   return normalizeResponse(value);
 }
-export function isCorrect(practice: Practice, answer: string) {
+export function isCorrectGap(gap: PracticeGap, answer: string) {
+  return gap.answers.some(value => normalizeAnswer(value) === normalizeAnswer(answer));
+}
+export function isCorrect(practice: Practice, answer: string | string[]) {
+  if (Array.isArray(answer)) return practice.kind === "write" && Boolean(practice.gaps?.length)
+    && answer.length === practice.gaps!.length && practice.gaps!.every((gap, index) => isCorrectGap(gap, answer[index]));
   const accepted = practice.kind === "write" ? practice.answers : [practice.answer];
   return accepted.some(value => normalizeAnswer(value) === normalizeAnswer(answer));
 }

@@ -28,6 +28,8 @@ export function DemoHost({ experience = false, publishedAudio = {}, accountName 
   const { ready, start, cancel, pending } = useJourneyTransition();
   const shell = useRef<HTMLElement>(null);
   const navigation = useRef<DemoNavigation>(null);
+  const restartDialog = useRef<HTMLDialogElement>(null);
+  const [restartNotice, setRestartNotice] = useState("");
   const [canGoBack, setCanGoBack] = useState(false);
   useEffect(() => {
     if (snapshot.status === "loading" || !shell.current) return;
@@ -48,11 +50,26 @@ export function DemoHost({ experience = false, publishedAudio = {}, accountName 
     return () => { viewport?.removeEventListener("resize", update); viewport?.removeEventListener("scroll", update); window.removeEventListener("resize", update); };
   }, []);
   function reset() {
-    if (snapshot.state && !window.confirm(`Recomeçar substitui a tentativa atual da história ${guest ? "neste navegador" : "na sua conta"}. Deseja continuar?`)) return;
-    restart(workspaceState.generation); router.push("/demo");
+    setRestartNotice("");
+    if (snapshot.state) { restartDialog.current?.showModal(); return; }
+    confirmRestart();
+  }
+  function confirmRestart() {
+    if (!restart(workspaceState.generation)) {
+      setRestartNotice("Não foi possível recomeçar agora. Sua conversa foi mantida. Confira o salvamento do progresso antes de tentar de novo.");
+      return;
+    }
+    restartDialog.current?.close(); cancel(); router.push("/demo");
   }
   return <main ref={shell} className="demo-shell app-shell">
     <AppHeader current="demo" guest={guest} name={workspaceState.workspace?.account.name || accountName} onNavigate={cancel}>{allowed && snapshot.state && <>{experience && <button disabled={pending || !canGoBack} onClick={() => navigation.current?.back()}>Voltar</button>}<button disabled={pending} aria-label="Recomeçar" onClick={reset}>Recomeçar</button></>}</AppHeader>
+    {allowed && <nav className="learning-return" aria-label="Continuar o estudo"><Link href="/demo/estudo?practice=1" onClick={cancel}>Voltar ao estudo guiado →</Link></nav>}
+    <dialog ref={restartDialog} className="demo-dialog" aria-labelledby="restart-conversation-title">
+      <h2 id="restart-conversation-title">Recomeçar a conversa?</h2>
+      <p>Isso substitui a tentativa atual da história {guest ? "neste navegador" : "na sua conta"}. Seu estudo guiado continua salvo.</p>
+      <p role="status"><BrowserText>{restartNotice}</BrowserText></p>
+      <div className="actions"><button type="button" onClick={() => restartDialog.current?.close()}>Continuar minha conversa</button><button type="button" className="primary" data-ui-sound="advance" onClick={confirmRestart}>Recomeçar conversa</button></div>
+    </dialog>
     <GuestProgressImport state={workspaceState} />
     {!allowed ? <PracticeAccess state={workspaceState} retry={workspaceState.refresh} />
       : snapshot.state && experience ? <DemoExperience key={`${workspaceState.generation}:${snapshot.state.runId}`} generation={workspaceState.generation} initial={snapshot.state} publishedAudio={publishedAudio} navigationRef={navigation} onBackAvailabilityChange={setCanGoBack} />

@@ -4,7 +4,7 @@ import { decodeProgress, studySteps } from "@/features/theory/progress";
 
 export const GUEST_LEARNING_KEY = "basedspeak.learning.guest.v1";
 export type GuestStorage = Pick<Storage, "setItem" | "removeItem"> & Partial<Pick<Storage, "getItem">>;
-export const emptyGuestLearning = (): LearningProgress => ({ revision: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: studySteps.length, updatedAt: null });
+export const emptyGuestLearning = (): LearningProgress => ({ revision: 0, saveVersion: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: studySteps.length, updatedAt: null });
 
 function checkedStudy(raw: unknown): string | null {
   if (raw === null || raw === undefined) return null;

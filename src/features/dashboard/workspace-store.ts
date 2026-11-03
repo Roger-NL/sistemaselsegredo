@@ -4,7 +4,9 @@ import { canImportGuestLearning, GUEST_LEARNING_KEY, hasGuestLearning, readGuest
 import { decodeProgress } from "@/features/theory/progress";
 
 type SnapshotKey = "demoSnapshot" | "studySnapshot";
+export type LearningRecovery = { uid: string; revision: number; baseVersion: number; local: Partial<Pick<SaveLearningInput, SnapshotKey>>; remote: LearningProgress | null };
 export type WorkspaceState = {
+  conflict?: LearningRecovery | null;
   status: "loading" | "ready" | "error" | "unauthenticated";
   workspace: StudentWorkspace | null;
   saving: boolean;
@@ -14,7 +16,7 @@ export type WorkspaceState = {
   guestLearning?: LearningProgress | null;
 };
 type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
-const initialState: WorkspaceState = { status: "loading", workspace: null, saving: false, error: "", notice: "", generation: 0 };
+const initialState: WorkspaceState = { conflict: null, status: "loading", workspace: null, saving: false, error: "", notice: "", generation: 0 };
 const cacheKey = (uid: string, revision: number) => `basedspeak.learning.${encodeURIComponent(uid)}.${revision}`;
 
 async function payload(response: Response) {
@@ -24,16 +26,19 @@ async function payload(response: Response) {
 }
 
 /** Account snapshots are authoritative. Guest work is separate and can only be imported explicitly into an empty account. */
-export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStorage) {
+export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStorage, recoveryStorage: () => GuestStorage | undefined = () => typeof window === "undefined" ? undefined : window.sessionStorage) {
   let state = initialState;
   let loadPromise: Promise<void> | null = null;
   let writePromise: Promise<void> | null = null;
   let importPromise: Promise<void> | null = null;
+  const recoveryKey = "basedspeak.learning.conflict.v1";
   let pending: Partial<Pick<SaveLearningInput, SnapshotKey>> = {};
   let timer: ReturnType<typeof setTimeout> | undefined;
   let ticket = 0;
   let edits = 0;
   let contactEdits = 0;
+  let editing = false;
+  let draftEdits = 0;
   let importing = false;
   let tweaking = false;
   const listeners = new Set<() => void>();
@@ -44,26 +49,57 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     if (!workspace) return;
     try { storage?.().removeItem(cacheKey(workspace.account.id, workspace.learning.revision)); } catch { /* Cache is optional. */ }
   };
-  const forgetPending = () => { clearTimeout(timer); pending = {}; clearCache(state.workspace); };
+  const clearRecovery = () => { try { recoveryStorage()?.removeItem(recoveryKey); } catch { /* Memory remains isolated. */ } };
+  const keepRecovery = (conflict: LearningRecovery) => { try { recoveryStorage()?.setItem(recoveryKey, JSON.stringify(conflict)); } catch { /* Before-unload warning still protects this page. */ } };
+  const readRecovery = (): LearningRecovery | null => {
+    try {
+      const raw = recoveryStorage()?.getItem?.(recoveryKey);
+      if (!raw) return null;
+      if (raw.length > 850_000) throw new Error("Invalid recovery");
+      const value = JSON.parse(raw);
+      if (!value || typeof value.uid !== "string" || !Number.isSafeInteger(value.revision) || value.revision < 0 || !Number.isSafeInteger(value.baseVersion) || value.baseVersion < 0 || !value.local || typeof value.local !== "object" || Array.isArray(value.local)) throw new Error("Invalid recovery");
+      for (const [key, snapshot] of Object.entries(value.local)) if (!["demoSnapshot", "studySnapshot"].includes(key) || (snapshot !== null && typeof snapshot !== "string")) throw new Error("Invalid recovery");
+      return { uid: value.uid, revision: value.revision, baseVersion: value.baseVersion, local: value.local, remote: null };
+    } catch { clearRecovery(); return null; }
+  };
+  const forgetPending = () => { clearTimeout(timer); pending = {}; editing = false; clearCache(state.workspace); };
   const replace = (workspace: StudentWorkspace, notice = "") => {
     const previous = state.workspace;
     const changed = previous?.account.id !== workspace.account.id || previous.learning.revision !== workspace.learning.revision || previous.account.status !== workspace.account.status;
     const contentChanged = previous?.learning.demoSnapshot !== workspace.learning.demoSnapshot || previous?.learning.studySnapshot !== workspace.learning.studySnapshot;
     const approved = previous?.account.id === workspace.account.id && previous.account.status === "pending" && workspace.account.status === "active";
-    if (changed) { forgetPending(); ticket++; }
+    if (changed) { forgetPending(); clearRecovery(); ticket++; }
     emit({ workspace, guestLearning: guest(), status: "ready", saving: false, error: "", notice: notice || (approved ? "Seu cadastro foi aprovado pelo professor." : previous && changed ? "Seu acesso ou progresso foi atualizado. O estado atual já está carregado." : state.notice), generation: state.generation + (changed || contentChanged ? 1 : 0) });
   };
   const read = () => fetcher("/api/student/workspace", { credentials: "same-origin", cache: "no-store" });
   const deny = (response: Response) => {
     if (response.status !== 401) return false;
     if (state.status === "unauthenticated" && state.guestLearning) return true;
-    forgetPending(); ticket++;
-    emit({ workspace: null, guestLearning: guest(), status: "unauthenticated", saving: false, error: state.workspace ? "Sua sessão terminou. Entre novamente para acessar seu painel." : "", generation: state.generation + 1 });
+    forgetPending(); clearRecovery(); ticket++;
+    emit({ conflict: null, workspace: null, guestLearning: guest(), status: "unauthenticated", saving: false, error: state.workspace ? "Sua sessão terminou. Entre novamente para acessar seu painel." : "", generation: state.generation + 1 });
     return true;
   };
 
+  async function preserveConflict(owner: StudentWorkspace, local: Partial<Pick<SaveLearningInput, SnapshotKey>>, remote?: StudentWorkspace) {
+    const conflict: LearningRecovery = { uid: owner.account.id, revision: owner.learning.revision, baseVersion: owner.learning.saveVersion, local: { ...local, ...pending }, remote: null };
+    forgetPending(); ticket++;
+    keepRecovery(conflict);
+    emit({ conflict, saving: false, error: "", notice: "Outro salvamento foi encontrado. Seu percurso desta aba foi preservado; escolha como continuar." });
+    const conflictTicket = ticket;
+    try {
+      if (!remote) { const response = await read(); if (conflictTicket !== ticket || deny(response)) return; remote = await payload(response) as StudentWorkspace; }
+      if (conflictTicket !== ticket) return;
+      if (remote.account.id !== conflict.uid || remote.learning.revision !== conflict.revision || !permitted(remote.account.status)) {
+        clearRecovery(); emit({ conflict: null }); replace(remote, "Seu acesso ou progresso foi atualizado. Carregamos o estado atual."); return;
+      }
+      const refreshed = { ...conflict, remote: remote.learning };
+      keepRecovery(refreshed); emit({ conflict: refreshed });
+    } catch { if (conflictTicket === ticket) emit({ error: "Seu percurso foi preservado. Conecte-se para conferir a versão salva na conta." }); }
+  }
+
   async function load(background = false) {
     if (importPromise) await importPromise.catch(() => {});
+    if (state.conflict && state.workspace) return preserveConflict(state.workspace, state.conflict.local);
     if (loadPromise) return loadPromise;
     if (writePromise) { await writePromise; if (state.status !== "ready") return; }
     // Never replace unsent work with an older GET. flush validates its owner/revision first.
@@ -81,10 +117,14 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
           // A navigation refresh may overlap editing or saving. An older GET
           // cannot replace newer work from this same account and revision.
           if (permitted(workspace.account.status) && state.workspace?.account.id === workspace.account.id && state.workspace.learning.revision === workspace.learning.revision
-            && (edits !== currentEdits || Object.keys(pending).length || writePromise)) workspace.learning = state.workspace.learning;
+            && (editing || edits !== currentEdits || Object.keys(pending).length || writePromise)) workspace.learning = state.workspace.learning;
           // A background read started before a confirmed send must not erase it.
           if (state.workspace?.account.id === workspace.account.id && contactEdits !== currentContactEdits) workspace.conversations = state.workspace.conversations;
+          const recovered = readRecovery();
           replace(workspace);
+          if (recovered?.uid === workspace.account.id && recovered.revision === workspace.learning.revision && permitted(workspace.account.status)) {
+            await preserveConflict(workspace, recovered.local, workspace);
+          } else if (recovered) clearRecovery();
           if (currentTicket === ticket && (Object.keys(pending).length || writePromise)) emit({ saving:true });
         }
       } catch (error) {
@@ -105,6 +145,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
 
   async function flush() {
     clearTimeout(timer);
+    if (state.conflict) return;
     if (writePromise) { await writePromise; if (Object.keys(pending).length && state.status === "ready") return flush(); return; }
     const owner = state.workspace;
     if (!owner || !Object.keys(pending).length || !permitted(owner.account.status)) return;
@@ -121,15 +162,21 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
         if (verified.account.id !== owner.account.id || verified.learning.revision !== owner.learning.revision || !permitted(verified.account.status)) {
           forgetPending(); replace(verified, "Seu acesso ou progresso mudou. Carregamos o estado atual da sua conta."); return;
         }
+        if (verified.learning.saveVersion !== owner.learning.saveVersion) {
+          await preserveConflict(owner, pending, verified); return;
+        }
         submitted = pending; pending = {};
+        const submittedDraftEdits = draftEdits;
         const response = await fetcher("/api/student/learning", {
           method: "PUT", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Workspace-Uid": owner.account.id },
-          body: JSON.stringify({ revision: owner.learning.revision, ...submitted }),
+          body: JSON.stringify({ revision: owner.learning.revision, saveVersion: owner.learning.saveVersion, ...submitted }),
         });
         if (currentTicket !== ticket || deny(response)) return;
         if (response.status === 409) {
+          const failure = await response.clone().json().catch(() => null);
+          if (failure?.code === "LEARNING_SAVE_CONFLICT") { await preserveConflict(owner, submitted); return; }
           // Drop ALL old-epoch work, including edits made while this request was in flight.
-          forgetPending(); ticket++;
+          forgetPending(); clearRecovery(); ticket++;
           emit({ workspace: null, status: "loading", saving: false, generation: state.generation + 1, notice: "Seu progresso foi reiniciado pelo professor. Carregando o estado atual…" });
           const resetTicket = ticket;
           try {
@@ -145,6 +192,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
         const result = await payload(response) as { learning: LearningProgress };
         if (currentTicket !== ticket || !state.workspace) return;
         const workspace = { ...verified, learning: { ...result.learning, ...pending } };
+        if (draftEdits === submittedDraftEdits) editing = false;
         edits++;
         emit({ workspace, status: "ready", saving: false, error: "" });
         clearCache(owner);
@@ -158,8 +206,18 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     if (state.status === "ready" && Object.keys(pending).length) return flush();
   }
 
+  function beginEdit(generation: number) {
+    if (state.conflict || tweaking || importing || state.generation !== generation || state.status !== "ready" || !state.workspace || !permitted(state.workspace.account.status)) return false;
+    // Some study answers stay in the mounted form until checked. Their editing
+    // base must also survive reads that finish before a snapshot is staged.
+    editing = true; draftEdits++; edits++; return true;
+  }
+  function endEdit(generation: number) {
+    if (state.generation === generation && !state.conflict && !writePromise && !Object.keys(pending).length) editing = false;
+  }
+
   function stage(key: SnapshotKey, value: string | null, generation: number) {
-    if (tweaking || importing || state.generation !== generation) return false;
+    if (state.conflict || tweaking || importing || state.generation !== generation) return false;
     const workspace = state.workspace;
     if (state.status === "unauthenticated" && !workspace && state.guestLearning) {
       const learning = { ...state.guestLearning, [key]: value, updatedAt: new Date().toISOString() };
@@ -183,7 +241,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
 
   async function importGuestProgress(generation: number) {
     const owner = state.workspace, learning = state.guestLearning;
-    if (importing || state.saving || state.generation !== generation || state.status !== "ready" || !owner || !permitted(owner.account.status) || !hasGuestLearning(learning) || !canImportGuestLearning(owner.learning, owner.liveClass)) throw new Error("Este percurso só pode ser salvo numa conta sem progresso. Seu avanço atual será preservado.");
+    if (state.conflict || importing || state.saving || state.generation !== generation || state.status !== "ready" || !owner || !permitted(owner.account.status) || !hasGuestLearning(learning) || !canImportGuestLearning(owner.learning, owner.liveClass)) throw new Error("Este percurso só pode ser salvo numa conta sem progresso. Seu avanço atual será preservado.");
     // Invalidate reads started before this deliberate write, then serialize new reads.
     const currentTicket = ++ticket;
     edits++;
@@ -191,7 +249,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     importPromise = (async () => { try {
       const response = await fetcher("/api/student/learning/import", {
         method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Workspace-Uid": owner.account.id },
-        body: JSON.stringify({ revision: 0, demoSnapshot: learning!.demoSnapshot, studySnapshot: learning!.studySnapshot }),
+        body: JSON.stringify({ revision: 0, saveVersion: owner.learning.saveVersion, demoSnapshot: learning!.demoSnapshot, studySnapshot: learning!.studySnapshot }),
       });
       const result = await payload(response) as { learning: LearningProgress };
       if (currentTicket !== ticket || state.workspace?.account.id !== owner.account.id) throw new Error("A conta conectada mudou. Confira seu painel antes de continuar.");
@@ -230,12 +288,12 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
 
   async function applyTestControl(input: Record<string, unknown>) {
     const owner = state.workspace;
-    if (tweaking || importing || !owner?.account.canTest || state.status !== "ready") throw new Error("Atualize a conta de testes antes de continuar.");
+    if (state.conflict || tweaking || importing || !owner?.account.canTest || state.status !== "ready") throw new Error("Atualize a conta de testes antes de continuar.");
     tweaking = true; forgetPending(); ticket++;
     emit({ saving:true, generation:state.generation+1 });
     try {
       if (writePromise) await writePromise;
-      const response = await fetcher("/api/student/test-controls", { method:"POST", credentials:"same-origin", headers:{"Content-Type":"application/json","X-Workspace-Uid":owner.account.id}, body:JSON.stringify({...input,revision:owner.learning.revision}) });
+      const response = await fetcher("/api/student/test-controls", { method:"POST", credentials:"same-origin", headers:{"Content-Type":"application/json","X-Workspace-Uid":owner.account.id}, body:JSON.stringify({...input,revision:owner.learning.revision,saveVersion:owner.learning.saveVersion}) });
       const result = await payload(response) as { learning:LearningProgress };
       if (state.workspace?.account.id !== owner.account.id) throw new Error("A conta mudou. Atualize o painel.");
       replace({...state.workspace,learning:result.learning},"Controle aplicado no banco de dados da sua conta.");
@@ -247,11 +305,38 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     } finally { tweaking=false; emit({saving:false}); }
   }
 
+  async function resolveConflict(choice: "server" | "local") {
+    const conflict = state.conflict, owner = state.workspace;
+    if (!conflict || !owner || conflict.uid !== owner.account.id) return;
+    const resolutionTicket = ticket;
+    const response = await read();
+    if (resolutionTicket !== ticket || deny(response)) return;
+    const fresh = await payload(response) as StudentWorkspace;
+    if (resolutionTicket !== ticket) return;
+    if (fresh.account.id !== conflict.uid || fresh.learning.revision !== conflict.revision || !permitted(fresh.account.status)) {
+      clearRecovery(); emit({ conflict: null }); replace(fresh); return;
+    }
+    if (choice === "local" && (!conflict.remote || fresh.learning.saveVersion !== conflict.remote.saveVersion)) {
+      const next = { ...conflict, remote: fresh.learning }; keepRecovery(next); emit({ conflict: next, error: "A conta mudou novamente. Confira a versão atual antes de escolher." }); return;
+    }
+    clearRecovery(); ticket++;
+    if (choice === "server") {
+      // Local content remains available in the recovery dialog until this explicit decision.
+      emit({ conflict: null }); replace(fresh, "Retomando o percurso salvo na conta.");
+      // Even identical snapshots may have an unstaged form draft: make this decision explicit to the mounted practice.
+      emit({ generation: state.generation + 1 }); return;
+    }
+    // Deliberate replacement of the edited fields; no automatic merging of story journals.
+    pending = { ...conflict.local };
+    emit({ conflict: null, workspace: { ...fresh, learning: { ...fresh.learning, ...pending } }, saving: true, error: "", notice: "Salvando o percurso escolhido desta aba…" });
+    await flush();
+  }
+
   function reset() {
-    forgetPending(); ticket++; loadPromise = null;
+    forgetPending(); clearRecovery(); ticket++; loadPromise = null;
     emit({ ...initialState, generation: state.generation + 1 });
   }
-  return { subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; }, getSnapshot: () => state, getServerSnapshot: () => initialState, hasPendingChanges: () => state.saving || Object.keys(pending).length > 0, load, refresh, flush, stage, importGuestProgress, sendMessage, applyTestControl, reset };
+  return { subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; }, getSnapshot: () => state, getServerSnapshot: () => initialState, hasPendingChanges: () => editing || Boolean(state.conflict) || state.saving || Object.keys(pending).length > 0, load, refresh, flush, stage, beginEdit, endEdit, importGuestProgress, sendMessage, applyTestControl, resolveConflict, reset };
 }
 
 export const studentWorkspace = createWorkspaceStore(workspaceFetch, workspaceStorage);

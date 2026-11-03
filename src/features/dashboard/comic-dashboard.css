@@ -1,0 +1,51 @@
+html body .dashboard-welcome h1{font-family:var(--comic-display);font-size:clamp(46px,5vw,66px);font-weight:400;letter-spacing:.025em;line-height:1.05}
+html body .dashboard-overline{color:var(--comic-teal);font-weight:600;letter-spacing:.12em}
+html body .dashboard-aside{color:var(--comic-ink);font-weight:600;background:var(--comic-yellow);border:var(--comic-border);padding:6px 11px;box-shadow:2px 2px 0 var(--comic-ink)}
+html body .dashboard .student-nav{gap:8px;border-bottom:2px solid var(--comic-ink)}
+html body .dashboard .student-nav a,html body .dashboard .student-nav button{padding:7px 12px;background:var(--comic-paper);color:var(--comic-ink);border:var(--comic-border);border-radius:5px 3px 6px 3px;font-weight:600;box-shadow:2px 2px 0 var(--comic-ink)}
+html body .dashboard .student-nav a[href="#jornada"]{background:var(--comic-yellow)}
+html body .dashboard .student-nav a:hover{background:#f5df9a;text-decoration:none}
+html body .dashboard-journey{--dashboard-card:#f5dfa0;--line:var(--comic-ink);border:var(--comic-border);border-radius:9px 5px 10px 5px;box-shadow:5px 5px 0 var(--comic-ink);background-color:var(--dashboard-card);background-image:radial-gradient(#20272216 .8px,transparent .9px);background-size:7px 7px}
+html body .dashboard-card-header{background:var(--comic-teal);color:var(--comic-paper);border-bottom:var(--comic-border)}
+html body .dashboard-card-header h2{font-family:var(--comic-display);font-size:22px;font-weight:400;letter-spacing:.04em}
+html body .dashboard-availability{color:var(--comic-paper);font-weight:600}
+html body .dashboard-availability:before{background:var(--comic-yellow)}
+html body .dashboard-access-word{font-family:var(--comic-display);font-style:normal;font-weight:400;letter-spacing:.02em}
+html body .dashboard-access-arrow{background:var(--comic-coral);border:var(--comic-border);border-radius:50%;box-shadow:2px 2px 0 var(--comic-ink)}
+html body .dashboard-access-copy{color:var(--comic-ink)}
+html body .dashboard-path-number{color:var(--comic-coral);font-family:var(--comic-display);letter-spacing:.01em;background:#f5dfa0;-webkit-text-stroke:1.5px var(--comic-ink)}
+html body .dashboard-path-line,html body .dashboard-path-line:after{border-color:var(--comic-teal);border-width:2px}
+html body .dashboard-path-dot{background:var(--comic-teal);box-shadow:0 0 0 2px var(--comic-ink)}
+html body .dashboard-path-label{background:var(--comic-paper);color:var(--comic-ink);border:1.5px solid var(--comic-ink);font-weight:600;letter-spacing:.05em}
+html body .dashboard-card-footer{border-top:2px solid var(--comic-ink);color:var(--comic-ink);font-weight:600}
+html body .dashboard-after>p>svg{color:var(--comic-teal)}
+html body .dashboard-after>button{color:var(--comic-teal);font-weight:600}
+html body .dashboard .student-section-heading h2{font-family:var(--comic-display);font-weight:400;letter-spacing:.025em;font-size:32px}
+html body .dashboard .student-progress-card{border:var(--comic-border);border-radius:8px 4px 9px 5px;box-shadow:var(--comic-shadow);background:#fffdf5}
+html body .dashboard .student-progress-card>span:first-child{font-weight:600;color:var(--comic-teal)}
+html body .dashboard .student-progress-card>strong{font-family:var(--comic-display);font-weight:400;letter-spacing:.015em;color:var(--comic-ink)}
+html body .dashboard .student-progress-card>small{color:var(--comic-muted)}
+html body .dashboard .student-progress-card progress{height:8px;border:1.5px solid var(--comic-ink);background:var(--comic-paper)}
+html body .dashboard .student-progress-card progress::-webkit-progress-bar{background:var(--comic-paper)}
+html body .dashboard .student-progress-card progress::-webkit-progress-value{background:var(--comic-teal)}
+html body .dashboard .student-progress-card progress::-moz-progress-bar{background:var(--comic-teal)}
+html body .dashboard .student-progress-card .student-progress-cta{color:var(--comic-ink);font-weight:600}
+html body .dashboard .student-progress-link:hover{background:#f7e9bb;border-color:var(--comic-ink)}
+html body .dashboard .live-class-card{background:#e2ede5}
+html body .dashboard .student-empty,html body .dashboard .student-activities{background:#fffdf5;border:var(--comic-border);border-radius:8px 4px 9px 5px;box-shadow:var(--comic-shadow)}
+html body .dashboard .student-activity-icon{background:var(--comic-yellow);border:1.5px solid var(--comic-ink);color:var(--comic-ink)}
+html body .dashboard .student-empty>svg{color:var(--comic-teal)}
+html body .dashboard .student-contact-grid{border:var(--comic-border);border-radius:8px 4px 9px 5px;box-shadow:var(--comic-shadow);background:#fffdf5}
+html body .dashboard .student-conversations{background:#e2ede5;border-color:var(--comic-ink)}
+html body .dashboard .student-conversations button{border:1.5px solid var(--comic-ink)}
+html body .dashboard .student-conversations button[aria-pressed="true"]{background:var(--comic-yellow);border-color:var(--comic-ink);color:var(--comic-ink);box-shadow:2px 2px 0 var(--comic-ink)}
+html body .dashboard .student-compose h3{font-family:var(--comic-display);font-size:25px;letter-spacing:.025em;font-weight:400}
+html body .dashboard .student-messages li{background:var(--comic-paper);border:1.5px solid var(--comic-ink);border-radius:10px 10px 10px 2px}
+html body .dashboard .student-messages li[data-author="manager"]{background:#e2ede5;border-radius:10px 10px 2px 10px}
+html body .student-reply-notice,html body .student-access-guide{border:var(--comic-border);border-radius:8px 4px 9px 5px;box-shadow:var(--comic-shadow);background:var(--comic-paper)}
+html body .student-access-guide h2{font-family:var(--comic-display);font-weight:400;letter-spacing:.025em;font-size:29px}
+html body .student-access-guide li{border:1.5px solid var(--comic-ink);border-radius:5px}
+html body .student-access-guide li[data-step="done"]{background:#e2ede5;border-color:var(--comic-ink)}
+html body .student-access-guide li[data-step="current"]{background:#f5dfa0;border-color:var(--comic-ink)}
+html body .dashboard .student-status{background:#f5dfa0;border:var(--comic-border);border-radius:5px}
+@media(max-width:580px){html body .dashboard-welcome h1{font-size:47px}html body .dashboard-card-header h2{font-size:20px}html body .dashboard .student-nav a,html body .dashboard .student-nav button{padding:6px 9px}html body .dashboard .student-section-heading h2{font-size:29px}}

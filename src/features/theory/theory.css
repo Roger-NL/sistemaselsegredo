@@ -17,3 +17,24 @@
 .study-practice-context span { display:block; font-size:19px; }
 .study-practice-context small { display:block; color:var(--muted); font-size:14px; margin-top:3px; }
 .study-practice-instruction { font-size:15px; margin-bottom:20px; }
+
+.study-gap-list { border:0; padding:0; margin:0 0 24px; display:grid; gap:20px; }
+.study-gap-row { display:block; }
+.study-gap-sentence { font-size:20px; line-height:2.4; }
+.study-shell input.study-gap { display:inline-block; min-height:44px; max-width:100%; margin:0 4px; padding:6px 8px; vertical-align:baseline; text-align:center; border-bottom:2px solid var(--ink); font-size:20px; }
+.study-gap-row small { display:block; color:var(--muted); font-size:14px; margin-top:4px; }
+.study-shell input.study-gap[aria-invalid=true] { border-color:#9c382a; }
+.study-admin-skip { margin-top:24px; font-size:13px!important; }
+
+.study-gap-row .study-gap-feedback { color:#823225; line-height:1.65; margin-top:8px; white-space:pre-line; }
+.study-feedback p { white-space:pre-line; }
+
+.study-task-path { display:flex; flex-wrap:wrap; gap:8px 18px; list-style:none; padding:0; margin:0 0 22px; font-size:13px; color:var(--muted); }
+.study-task-path li { display:flex; align-items:center; gap:6px; }
+.study-task-path li span { display:inline-grid; place-items:center; width:24px; height:24px; border:1px solid currentColor; border-radius:50%; font-size:12px; }
+.study-task-path li[aria-current=step] { color:var(--ink); font-weight:700; }
+.study-task-path li[aria-current=step] span { background:var(--ink); color:var(--paper); }
+.study-step-intent { font-size:16px; line-height:1.6; margin-bottom:22px; }
+.study-next-preview { flex-basis:100%; font-size:14px; line-height:1.5; color:var(--muted); margin:0; }
+.study-next { flex-wrap:wrap; }
+.study-card h2 { scroll-margin-top:88px; }

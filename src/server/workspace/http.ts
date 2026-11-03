@@ -1,4 +1,5 @@
 import "server-only";
+import { LearningConflictError } from "./conflict";
 import { NextResponse } from "next/server";
 import { RequestAuthError, requireRequestPrincipal, type RequestPrincipal } from "@/server/auth/request-auth";
 import { requireAdminPrincipal } from "@/server/auth/route-guards";
@@ -15,6 +16,7 @@ export async function workspaceApi(request: Request, options: { admin?: boolean;
     if (options.write && ((!options.admin && expectedUid !== principal.uid) || (expectedUid && expectedUid !== principal.uid))) throw new RequestAuthError("A conta conectada mudou. Atualize o painel antes de continuar.", 409);
     return privateJson(await handler(principal));
   } catch (error) {
+    if (error instanceof LearningConflictError) return privateJson({ error: error.message, code: error.code }, 409);
     if (error instanceof RequestAuthError || error instanceof RequestPayloadError) return privateJson({ error: error.message }, error.status);
     if (error instanceof RateLimitError) {
       const response = rateLimitErrorResponse(error);

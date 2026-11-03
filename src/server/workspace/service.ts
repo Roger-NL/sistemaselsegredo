@@ -1,4 +1,5 @@
 import "server-only";
+import { LearningConflictError } from "./conflict";
 import { isTestOwner } from "@/server/superuser/policy";
 import { getAdminAuth, getAdminDb } from "@/server/firebase";
 import type { RequestPrincipal } from "@/server/auth/principal";
@@ -35,8 +36,8 @@ export async function getStudentWorkspace(principal: RequestPrincipal): Promise<
 }
 
 export async function saveLearning(principal: RequestPrincipal, body: Record<string, unknown>, options: { requireEmpty?: boolean } = {}): Promise<{ learning: LearningProgress }> {
-  assertOnlyKeys(body, ["revision", "demoSnapshot", "studySnapshot"]);
-  if (!Number.isSafeInteger(body.revision) || Number(body.revision) < 0 || !("demoSnapshot" in body || "studySnapshot" in body)) throw new RequestPayloadError("Informe uma revisão e um progresso válidos.");
+  assertOnlyKeys(body, ["revision", "saveVersion", "demoSnapshot", "studySnapshot"]);
+  if (!Number.isSafeInteger(body.saveVersion) || Number(body.saveVersion) < 0 || !Number.isSafeInteger(body.revision) || Number(body.revision) < 0 || !("demoSnapshot" in body || "studySnapshot" in body)) throw new RequestPayloadError("Informe uma revisão e um progresso válidos.");
   await consumeRateLimit({ namespace: "learning-save", identifier: principal.uid, limit: 120, windowMs: 60_000 });
   const patch: Partial<LearningProgress> = { ...("demoSnapshot" in body ? parseDemoSnapshot(body.demoSnapshot) : {}), ...("studySnapshot" in body ? parseStudySnapshot(body.studySnapshot) : {}) };
   const result = await getAdminDb().runTransaction(async tx => {
@@ -45,9 +46,14 @@ export async function saveLearning(principal: RequestPrincipal, body: Record<str
     const previous = learningFromData(stored.data());
     if (options.requireEmpty && (previous.revision !== 0 || previous.demoSnapshot !== null || previous.studySnapshot !== null || booking?.exists)) throw new RequestAuthError("Esta conta já tem um percurso. Seu progresso atual foi preservado; o percurso deste navegador não foi importado.", 409);
     if (previous.revision !== body.revision) throw new RequestAuthError("Seu progresso foi reiniciado. Atualize o painel antes de continuar.", 409);
+    if (previous.saveVersion !== body.saveVersion) {
+      // A retry after a lost response is harmless only for the immediately preceding identical write.
+      if (previous.saveVersion === Number(body.saveVersion) + 1 && ((!("demoSnapshot" in patch) || patch.demoSnapshot === previous.demoSnapshot) && (!("studySnapshot" in patch) || patch.studySnapshot === previous.studySnapshot))) return { learning: previous, notificationIds: [] };
+      throw new LearningConflictError();
+    }
     if ((!("demoSnapshot" in patch) || patch.demoSnapshot === previous.demoSnapshot) && (!("studySnapshot" in patch) || patch.studySnapshot === previous.studySnapshot)) return { learning: previous, notificationIds: [] };
     const at = new Date().toISOString();
-    const next: LearningProgress = { ...previous, ...patch, updatedAt: at };
+    const next: LearningProgress = { ...previous, ...patch, saveVersion: previous.saveVersion + 1, updatedAt: at };
     const notifications: OperationalEvent[] = [];
     const identity = { userId: principal.uid, userName: String(profile.data()?.name || "Aluno"), userEmail: principal.email || "", occurredAt: at };
     const conversationCompleted = "demoSnapshot" in patch && completedConversation(next.demoSnapshot) && !completedConversation(previous.demoSnapshot);

@@ -1,0 +1,32 @@
+html body .study-shell h1:not([lang="en"]){font-family:var(--comic-display);font-weight:400;letter-spacing:.025em;line-height:1.12}
+html body .study-shell .study-section-heading h2,html body .study-shell .study-finished h2{font-family:var(--comic-display);font-size:31px;letter-spacing:.025em;font-weight:400}
+html body .study-eyebrow{color:var(--comic-teal);font-weight:600}
+html body .study-intro-note{background:#f5dfa0;border:var(--comic-border);border-radius:8px 4px 9px 5px;box-shadow:var(--comic-shadow);padding:26px}
+html body .study-intro-note>svg{color:var(--comic-teal)}
+html body .study-path li{background:#fffdf5;border:var(--comic-border);border-radius:7px 4px 8px 4px;margin-top:12px;box-shadow:var(--comic-shadow)}
+html body .study-path li>button{padding:22px 18px}
+html body .study-path li>button:hover{background:#f5dfa0}
+html body .study-number{font-family:var(--comic-display);color:var(--comic-teal);font-size:29px;font-weight:400}
+html body .study-path-copy strong{font-weight:600}
+html body .study-shell progress{height:8px;border:1.5px solid var(--comic-ink);background:#fffdf5}
+html body .study-shell progress::-webkit-progress-bar{background:#fffdf5}
+html body .study-shell progress::-webkit-progress-value{background:var(--comic-teal)}
+html body .study-shell progress::-moz-progress-bar{background:var(--comic-teal)}
+html body .study-sidebar li>button{border:1.5px solid transparent;border-radius:5px}
+html body .study-sidebar li>button[aria-current]{background:var(--comic-yellow);color:var(--comic-ink);border-color:var(--comic-ink);box-shadow:2px 2px 0 var(--comic-ink)}
+html body .study-quote{background:#f5dfa0;border:var(--comic-border);border-radius:8px 4px 9px 5px;box-shadow:var(--comic-shadow)}
+html body .study-quote p[lang="en"]{font-weight:600}
+html body .study-deeper,html body .study-phrase-list details{background:#fffdf5;border:var(--comic-border);border-radius:7px 4px 8px 4px;padding-inline:16px;box-shadow:2px 2px 0 var(--comic-ink);margin-bottom:14px}
+html body .study-choices label{background:#fffdf5;border:var(--comic-border);border-radius:7px 4px 8px 4px;box-shadow:2px 2px 0 var(--comic-ink)}
+html body .study-choices label[data-selected="true"]{background:#f5dfa0;border-color:var(--comic-ink)}
+html body .study-choice-letter{color:var(--comic-teal);font-weight:600}
+html body .study-shell .study-token-bank button,html body .study-shell .study-answer-bank button{background:var(--comic-paper);border:var(--comic-border);border-radius:5px;box-shadow:2px 2px 0 var(--comic-ink);font-weight:600}
+html body .study-shell .study-answer-bank{background:#e2ede5;border:1.5px dashed var(--comic-teal);border-radius:5px}
+html body .study-shell .study-feedback:not(:empty){background:#f5dfa0;border:var(--comic-border);border-radius:8px 8px 8px 2px;box-shadow:2px 2px 0 var(--comic-ink);color:var(--comic-ink)}
+html body .study-hint{background:#f5dfa0;border-left:3px solid var(--comic-ink)}
+html body .study-notice{background:#fffdf5;border:1.5px solid var(--comic-ink);border-radius:5px}
+html body .study-completion{background:#e2ede5;border:var(--comic-border);border-radius:8px 4px 9px 5px;box-shadow:var(--comic-shadow)}
+html body .study-shell .study-completion h2{font-family:var(--comic-display);font-size:27px;font-weight:400;letter-spacing:.025em}
+html body .study-completion p{color:var(--comic-muted)}
+html body .study-shell .study-text-button{box-shadow:none;background:transparent;border:0}
+@media(max-width:760px){html body .study-intro-note{padding:20px}html body .study-path li>button{padding:19px 14px}html body .study-shell h1:not([lang="en"]){font-size:36px}html body .study-shell .study-section-heading h2{font-size:27px}}

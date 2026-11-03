@@ -1,4 +1,5 @@
 import "server-only";
+import { LearningConflictError } from "@/server/workspace/conflict";
 import { getAdminDb } from "@/server/firebase";
 import type { RequestPrincipal } from "@/server/auth/principal";
 import { RequestAuthError } from "@/server/auth/request-auth";
@@ -12,9 +13,9 @@ import { catalog } from "@/features/demo/content/catalog";
 import { PROFILES, REVIEW_VIEWS } from "@/features/demo/model/types";
 import { studySteps } from "@/features/theory/progress";
 export function validateTestAction(body: Record<string, unknown>): TestAction {
-  assertOnlyKeys(body,["action","revision","profile","part","node","step","view"]);
+  assertOnlyKeys(body,["action","saveVersion","revision","profile","part","node","step","view"]);
   const action = body.action as TestAction["action"];
-  if (!testActions.includes(action) || !Number.isSafeInteger(body.revision) || Number(body.revision)<0) throw new RequestPayloadError("Ação ou revisão inválida.");
+  if (!Number.isSafeInteger(body.saveVersion) || Number(body.saveVersion)<0 || !testActions.includes(action) || !Number.isSafeInteger(body.revision) || Number(body.revision)<0) throw new RequestPayloadError("Ação ou revisão inválida.");
   const fields = action === "jump-part" || action === "complete-part" ? ["part","profile"] : action === "jump-node" ? ["node","profile"] : ["start-demo","profile"].includes(action) ? ["profile"] : action.startsWith("study-") ? ["step"] : action === "review" ? ["view"] : [];
   for (const key of ["profile","part","node","step","view"]) if (key in body && !fields.includes(key)) throw new RequestPayloadError("Parâmetro incompatível com a ação.");
   if (body.profile !== undefined && !PROFILES.includes(body.profile as never)) throw new RequestPayloadError("Apoio inválido.");
@@ -33,10 +34,11 @@ export async function mutateTestProgress(principal: RequestPrincipal, body: Reco
     if (!profile.exists || !["active","pending"].includes(accountStatus(profile.data()?.accountStatus))) throw new RequestAuthError("A conta está indisponível.",403);
     const previous = learningFromData(saved.data());
     if (previous.revision !== body.revision) throw new RequestAuthError("O progresso mudou em outra aba. Atualize antes de aplicar o controle.",409);
+    if (previous.saveVersion !== body.saveVersion) throw new LearningConflictError();
     const cleanHistory = ["reset-all","reset-real"].includes(action.action) ? await tx.get(studentActivityRef(principal.uid).where("kind","==","learning").limit(450)) : null;
     if (cleanHistory && cleanHistory.size >= 450) throw new RequestAuthError("O histórico é grande demais para um reset atômico. Nenhum dado foi alterado.",409);
     const changed = applyTestAction(previous,action);
-    const next = { ...changed, ...parseDemoSnapshot(changed.demoSnapshot), ...parseStudySnapshot(changed.studySnapshot), revision:previous.revision+1, updatedAt:new Date().toISOString() };
+    const next = { ...changed, ...parseDemoSnapshot(changed.demoSnapshot), ...parseStudySnapshot(changed.studySnapshot), revision:previous.revision+1, saveVersion:previous.saveVersion+1, updatedAt:new Date().toISOString() };
     if (["reset-all","reset-real","reset-presentation","complete-presentation","complete-all"].includes(action.action)) {
       const revision=Number(profile.data()?.presentationRevision)||0;
       tx.update(userRef(principal.uid), {presentationCompletedAt:["complete-presentation","complete-all"].includes(action.action)?next.updatedAt:null,presentationRevision:revision+1});

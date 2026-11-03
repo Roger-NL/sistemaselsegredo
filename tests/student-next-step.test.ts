@@ -4,7 +4,7 @@ import type { LiveClassBooking } from "@/contracts/live-class";
 import { applyTestAction } from "@/features/superuser/actions";
 import { studentNextStep, teacherReplies } from "@/features/dashboard/next-step";
 
-const workspace = (): StudentWorkspace => ({ account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [], liveClass: null });
+const workspace = (): StudentWorkspace => ({ account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, saveVersion: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [], liveClass: null });
 const booking: LiveClassBooking = { id: "student", userId: "student", studentName: "", studentEmail: "", status: "pending", start: "2026-11-01T13:00:00Z", end: "2026-11-01T14:00:00Z", timezone: "Europe/Lisbon", revision: 0, createdAt: "", updatedAt: "", reason: "", meetingUrl: "" };
 
 describe("the student's next useful step", () => {

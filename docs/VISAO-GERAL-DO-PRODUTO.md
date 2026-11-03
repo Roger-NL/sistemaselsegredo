@@ -1,6 +1,6 @@
 # BasedSpeak — visão geral do produto
 
-Atualizado em 27/10/2026. Consolidação solicitada por Roger das conversas “Ideia geral do projeto”, “Código Base Geral” e das propostas comerciais e de divulgação debatidas em “Avaliar chance de sucesso no início”. A conversa central para continuar o planejamento passa a ser **“Ideia geral do projeto”** (`01a13326-bfa1-7193-b54f-76ad008e134c`). “Código Base Geral” foi arquivada após a confirmação de leitura e incorporação na conversa central, com seu contexto preservado nos registros abaixo. Valores e cenários abaixo são propostas de trabalho, sem aprovação comercial definitiva.
+Atualizado em 03/11/2026. A conversa central de planejamento é **“Ideia geral do projeto”** (`01a13326-bfa1-7193-b54f-76ad008e134c`). A consolidação anterior reuniu “Código Base Geral” e as propostas comerciais. A organização de 03/11 reúne também avaliação de conteúdo, mercado, requisitos de lançamento e primeiros convites: [índice completo e históricos de origem](CONTEXTO-CENTRAL-2026-11-03.md). As conversas de implementação continuam separadas. Valores e cenários abaixo são propostas de trabalho, sem aprovação comercial definitiva.
 
 ## Referência central e preservação do histórico
 
@@ -31,7 +31,7 @@ O estado de implementação deve ser conferido no README e nos registros técnic
 
 Na demo, preservar roteiro em dez partes, Lucas, três apoios distintos (Guiado, Com pistas e Mais autônomo), imagens aprovadas, ajuda voluntária, retrospectiva, recuperação local e áudio compartilhado persistente. Não regenerar áudio já existente por causa de alterações de planejamento. A experiência não usa microfone nem deve ser anunciada como conversa generativa ilimitada ou avaliação de pronúncia. Não há duração de uso validada com participantes nem resultado de aprendizagem comprovado.
 
-As telas antigas de currículo, Globo/órbita, aluno/admin, provas e ranking foram removidas; aliases e APIs aposentadas mantêm compatibilidade. Auth, pagamentos, agenda e áudio permanecem como integrações compartilhadas. Contratos comerciais antigos não aprovam os novos planos. Nenhuma proposta deste documento autoriza excluir dados, mexer em credenciais ou reutilizar automaticamente regras antigas de acesso.
+As telas do currículo antigo, Globo/órbita, aluno/admin antigos, provas e ranking foram removidas; aliases e APIs aposentadas mantêm compatibilidade. O novo painel do aluno e a nova ADM já existem, com progresso, contato e agendamento da aula gratuita conectados. Auth, pagamentos, agenda e áudio permanecem como integrações compartilhadas. Contratos comerciais antigos não aprovam os novos planos. Nenhuma proposta deste documento autoriza excluir dados, mexer em credenciais ou reutilizar automaticamente regras antigas de acesso.
 
 Referências para consulta:
 
@@ -44,7 +44,7 @@ Referências para consulta:
 | Pesquisa e limites das alegações de mercado | [Pesquisa da landing](research-landing.md) |
 | Cache e arquivos de áudio existentes | [Validação de áudio](plano-nova-demo/VALIDACAO-AUDIO-COMPLETA.md) |
 
-Regra de trabalho preservada de Roger: ao alterar o site, manter localhost e domínio publicado alinhados e verificar ambos, sem alegar igualdade sem conferência. Endereços conhecidos: `http://localhost:3100/` e `https://basedspeak.com`; Vercel `novoessite`. Mudanças só de planejamento/documentação não exigem alterar ou publicar a interface. Datas e verificações históricas não atestam automaticamente o estado de uma publicação posterior.
+Regra de trabalho preservada de Roger: ao alterar o site, manter localhost e domínio publicado alinhados e verificar ambos, sem alegar igualdade sem conferência. A entrega de 02/11 usa `http://127.0.0.1:3000/` e `https://basedspeak.com`; a porta 3100 aparece em registros anteriores. Vercel `novoessite`. Mudanças só de planejamento/documentação não exigem alterar ou publicar a interface. Datas e verificações históricas não atestam automaticamente o estado de uma publicação posterior.
 
 ## Direção apresentada por Roger
 
@@ -79,6 +79,8 @@ Dentro do curso, a proposta em discussão é repetir o ciclo: viver uma históri
 - Quais limites comerciais e de acesso serão definidos? A proposta de assinatura está registrada abaixo, mas os planos e preços ainda precisam ser validados.
 
 ## Operação e modelo comercial em discussão
+
+Estudo atualizado em 02/11/2026: [análise comercial, preços, aula gratuita e cenários de lançamento](ESTUDO-COMERCIAL-2026-11-02.md). Considera o estudo já implementado e a aula gratuita após as 24 práticas. Preços e projeções abaixo continuam hipóteses; o novo relatório não confirma vendas, eficácia ou retenção.
 
 Roger trabalha sozinho: desenvolve o site, produz o conteúdo, divulga, atende e será o professor das aulas. Não há equipe ou professor contratado neste estágio. As contas não devem presumir pagamentos fictícios a terceiros; devem separar despesas reais, receita bruta e tempo de trabalho de Roger. Ser dono do site não elimina eventuais custos de hospedagem, serviços, pagamentos e tributos, mas nenhum valor desses foi apurado aqui.
 

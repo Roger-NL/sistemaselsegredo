@@ -63,7 +63,7 @@ describe("connected student and manager services", () => {
     memory.docs.set("learning_states/student", { studyCompleted: 24 });
     expect(await getStudentWorkspace(student)).toMatchObject({ liveClass: null, learning: { studyCompleted: 0 } });
     memory.docs.set("demo_live_classes/student", booking);
-    await saveLearning(student, { revision: 0, studySnapshot: study });
+    await saveLearning(student, { revision: 0, saveVersion: 0, studySnapshot: study });
     expect(await getStudentWorkspace(student)).toMatchObject({ liveClass: booking, learning: { studyCompleted: 1 } });
     memory.docs.set("demo_live_classes/student", { ...booking, userId: "manager" });
     expect((await getStudentWorkspace(student)).liveClass).toBeNull();
@@ -75,7 +75,7 @@ describe("connected student and manager services", () => {
     expect(data.conversations).toEqual([]);
   });
   it("joins the same saved practices and live booking into follow-up, ignoring orphan booking records", async () => {
-    await saveLearning(student, { revision: 0, studySnapshot: JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) }) });
+    await saveLearning(student, { revision: 0, saveVersion: 0, studySnapshot: JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) }) });
     let snapshot = await getManagementSnapshot(manager);
     expect(snapshot.users.find(user => user.id === student.uid)).toMatchObject({ canBookLiveClass: true, studyCompleted: 24, liveClass: null });
     const booking = { id: student.uid, userId: student.uid, status: "confirmed", start: "2026-11-01T13:00:00Z", timezone: "Europe/Lisbon" };
@@ -114,40 +114,40 @@ describe("connected student and manager services", () => {
     expect(memory.docs.get("users/student")).toMatchObject({ subscriptionStatus: "premium", paymentId: "preserve", name: "Edited" });
   });
   it("saves progress to the account, exposes it to management, and rejects writes predating a manager reset", async () => {
-    const saved = await saveLearning(student, { revision: 0, studySnapshot: study });
+    const saved = await saveLearning(student, { revision: 0, saveVersion: 0, studySnapshot: study });
     expect(saved.learning.studyCompleted).toBe(1);
     expect((await getManagementSnapshot(manager)).users.find(user => user.id === "student")?.studyCompleted).toBe(1);
     await mutateManagement(manager, { type: "reset-progress", userId: "student" });
-    await expect(saveLearning(student, { revision: 0, studySnapshot: study })).rejects.toMatchObject({ status: 409 });
+    await expect(saveLearning(student, { revision: 0, saveVersion: 0, studySnapshot: study })).rejects.toMatchObject({ status: 409 });
     const workspace = await getStudentWorkspace(student);
-    expect(workspace.learning).toMatchObject({ revision: 1, studyCompleted: 0, studySnapshot: null });
+    expect(workspace.learning).toMatchObject({ revision: 1, saveVersion: 2, studyCompleted: 0, studySnapshot: null });
     expect(workspace.activities.some(item => item.kind === "reset")).toBe(true);
   });
   it("lets a pending student practice, synchronize progress and contact the professor without approval", async () => {
     memory.docs.set("users/student", { name: "Student", accountStatus: "pending" });
-    expect((await saveLearning(student, { revision: 0, studySnapshot: study })).learning.studyCompleted).toBe(1);
+    expect((await saveLearning(student, { revision: 0, saveVersion: 0, studySnapshot: study })).learning.studyCompleted).toBe(1);
     const result = await createConversation(student, { subject: "Dúvida", body: "Como continuar?" });
     expect(result.conversation.status).toBe("open");
   });
   it("imports a public journey into an empty pending account once and exposes it to the real management workspace", async () => {
     memory.docs.set("users/student", { name: "Student", accountStatus: "pending" });
     const full = JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) });
-    expect((await importGuestLearning(student, { revision: 0, demoSnapshot: null, studySnapshot: full })).learning.studyCompleted).toBe(24);
+    expect((await importGuestLearning(student, { revision: 0, saveVersion: 0, demoSnapshot: null, studySnapshot: full })).learning.studyCompleted).toBe(24);
     expect((await getManagementSnapshot(manager)).users.find(user => user.id === student.uid)).toMatchObject({ status: "pending", studyCompleted: 24, canBookLiveClass: true });
-    await expect(importGuestLearning(student, { revision: 0, studySnapshot: study })).rejects.toMatchObject({ status: 409 });
+    await expect(importGuestLearning(student, { revision: 0, saveVersion: 0, studySnapshot: study })).rejects.toMatchObject({ status: 409 });
     expect((await getStudentWorkspace(student)).learning.studyCompleted).toBe(24);
   });
   it("never imports over saved story/study, a reset epoch, or an existing booking; rejects suspended accounts and invalid progress", async () => {
     for (const existing of [{ studySnapshot: study }, { demoSnapshot: "saved-story" }, { revision: 1 }]) {
       memory.docs.set("learning_states/student", existing);
-      await expect(importGuestLearning(student, { revision: 0, studySnapshot: study })).rejects.toMatchObject({ status: 409 });
+      await expect(importGuestLearning(student, { revision: 0, saveVersion: 0, studySnapshot: study })).rejects.toMatchObject({ status: 409 });
       expect(memory.docs.get("learning_states/student")).toEqual(existing);
     }
     memory.docs.delete("learning_states/student"); memory.docs.set("demo_live_classes/student", { userId: student.uid, status: "confirmed" });
-    await expect(importGuestLearning(student, { revision: 0, studySnapshot: study })).rejects.toMatchObject({ status: 409 });
+    await expect(importGuestLearning(student, { revision: 0, saveVersion: 0, studySnapshot: study })).rejects.toMatchObject({ status: 409 });
     memory.docs.delete("demo_live_classes/student"); memory.docs.set("users/student", { accountStatus: "suspended" });
-    await expect(importGuestLearning(student, { revision: 0, studySnapshot: study })).rejects.toMatchObject({ status: 403 });
-    await expect(importGuestLearning(student, { revision: 0, studySnapshot: "forged" })).rejects.toThrow();
+    await expect(importGuestLearning(student, { revision: 0, saveVersion: 0, studySnapshot: study })).rejects.toMatchObject({ status: 403 });
+    await expect(importGuestLearning(student, { revision: 0, saveVersion: 0, studySnapshot: "forged" })).rejects.toThrow();
     expect(memory.docs.has("learning_states/student")).toBe(false);
   });
   it("connects a real student message and manager reply with both panels and activity history", async () => {

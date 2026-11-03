@@ -1,0 +1,64 @@
+/* One printed-comic vocabulary across the public journey and account surfaces. */
+@font-face{font-family:"BasedSpeak Bangers";src:url("/fonts/Bangers-Regular.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:"BasedSpeak Barlow";src:url("/fonts/Barlow-Regular.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:"BasedSpeak Barlow";src:url("/fonts/Barlow-SemiBold.ttf") format("truetype");font-style:normal;font-weight:600 900;font-display:swap}
+:root{
+  --comic-paper:#fff7e8;--comic-ink:#202722;--comic-yellow:#efc653;
+  --comic-coral:#d9755c;--comic-teal:#39776b;--comic-blue:#8eb1c2;
+  --comic-muted:#5d655b;--comic-display:"BasedSpeak Bangers",Impact,sans-serif;
+  --comic-body:"BasedSpeak Barlow",Arial,sans-serif;
+  --comic-shadow:3px 3px 0 var(--comic-ink);--comic-border:2px solid var(--comic-ink);
+  background:var(--comic-paper);color:var(--comic-ink);
+}
+html body[class]{--font-geist-sans:var(--comic-body);font-family:var(--comic-body)}
+html body :is(.landing,.start-page,.dashboard,.demo-shell,.study-shell,.admin-shell,.admin-login-shell){
+  --ink:var(--comic-ink);--paper:var(--comic-paper);--muted:var(--comic-muted);
+  --line:#b9b6a4;--dashboard-card:#fffdf5;
+  color:var(--comic-ink);background-color:var(--comic-paper);font-family:var(--comic-body);
+  background-image:radial-gradient(#20272213 .7px,transparent .8px);background-size:8px 8px;
+}
+html body .app-header:not([data-tone="immersive"]){
+  --ink:var(--comic-ink);--paper:var(--comic-paper);--line:var(--comic-ink);
+  --nav-panel:#fffdf5;--nav-muted:var(--comic-muted);--nav-hover:#f4df98;--nav-selected:var(--comic-yellow);
+  --nav-button-border:var(--comic-ink);border-bottom-width:2px;
+}
+html body .app-header .app-menu-panel{border:var(--comic-border);border-radius:7px 4px 8px 5px;box-shadow:4px 4px 0 var(--comic-ink)}
+html body .app-header-menu>summary{border-width:2px;border-radius:5px;box-shadow:2px 2px 0 currentColor;font-weight:600}
+html body .app-header[data-tone="immersive"] .app-header-menu>summary{box-shadow:2px 2px 0 #797d6c}
+html body .app-header .app-menu-panel p{font-weight:600;letter-spacing:.09em}
+html body :is(.dashboard-primary,.study-primary,.demo-shell .primary,.admin-primary){
+  color:var(--comic-ink);background:var(--comic-yellow);border:var(--comic-border);
+  border-radius:6px 4px 7px 4px;box-shadow:var(--comic-shadow);font-weight:600;
+}
+html body :is(.dashboard-primary,.study-primary,.demo-shell .primary,.admin-primary):hover{background:#f6d779;color:var(--comic-ink)}
+html body :is(.dashboard-dialog,.demo-dialog,.live-class-dialog,.learning-conflict){
+  color:var(--comic-ink);background:var(--comic-paper);border:var(--comic-border);
+  border-radius:9px 5px 10px 5px;box-shadow:5px 5px 0 var(--comic-ink);
+}
+html body :is(.dashboard-dialog,.demo-dialog,.live-class-dialog,.learning-conflict) h2{
+  font-family:var(--comic-display);font-weight:400;letter-spacing:.025em;
+}
+html body :is(.dashboard,.study-shell,.demo-shell) :focus-visible{outline-color:var(--comic-teal)}
+html body :is(.dashboard-field input,.student-compose input,.student-compose textarea,.study-glossary input){
+  background:#fffdf6;color:var(--comic-ink);border:var(--comic-border);border-radius:5px;
+}
+html body :is(.dashboard,.study-shell,.demo-shell) [lang="en"]{
+  font-family:var(--comic-body);text-transform:none;letter-spacing:normal;
+}
+
+/* Administrative data keeps the same ink, paper and navigation vocabulary. */
+html body .admin-shell{--admin-line:#aeb6a8;--admin-green:var(--comic-teal);--admin-muted:var(--comic-muted)}
+html body .admin-sidebar{background:#e3eadc;border-right:var(--comic-border)}
+html body .admin-topbar{background:var(--comic-paper);border-bottom:var(--comic-border)}
+html body .admin-sidebar nav>button[aria-current]{color:var(--comic-ink);background:var(--comic-yellow);border:var(--comic-border);box-shadow:2px 2px 0 var(--comic-ink)}
+html body .admin-main h1,html body .admin-main>header h2{font-family:var(--comic-display);font-weight:400;letter-spacing:.025em}
+@media(max-width:640px){html body .admin-sidebar{border-right:0;border-bottom:var(--comic-border)}}
+
+/* Keep the existing transition choreography, using the same chapter styling. */
+html body .journey-transition{background-color:var(--comic-ink);color:var(--comic-paper);font-family:var(--comic-body)}
+html body .journey-transition h2,html body .dashboard-cinematic-word{font-family:var(--comic-display);font-weight:400;letter-spacing:.025em;color:var(--comic-yellow)}
+html body .journey-transition small{color:var(--comic-yellow)}
+html body .journey-line{background:var(--comic-teal)}
+html body .journey-line:after{background:var(--comic-yellow)}
+html body .dashboard-intro{background-color:var(--comic-ink);color:var(--comic-paper)}
+html body .dashboard-intro h2{font-family:var(--comic-display);font-weight:400;letter-spacing:.025em;color:var(--comic-yellow)}

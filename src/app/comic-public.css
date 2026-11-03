@@ -1,0 +1,304 @@
+/* One printed-comic language for the public entry, account and introduction.
+   Existing grids, viewport sizing and motion remain owned by their components. */
+html body :is(.landing,.start-page) {
+  --ink:var(--comic-ink); --paper:var(--comic-paper); --muted:var(--comic-muted); --line:var(--comic-ink);
+  color:var(--comic-ink); background-color:var(--comic-paper);
+  font-family:var(--comic-body),Arial,sans-serif;
+  background-image:radial-gradient(#2027220e .65px,transparent .8px);
+  background-size:9px 9px;
+}
+/* These are page separators, not panels: keep room for the login shadow. */
+html body :is(.landing-header,.start-header) {
+  border:0;
+  border-bottom:2px solid var(--comic-ink);
+  padding-right:4px;
+}
+html body :is(.landing-footer,.start-footer) {
+  border:0;
+  border-top:2px solid var(--comic-ink);
+}
+html body :is(.landing-header,.start-header) .brand { color:var(--comic-ink); }
+html body :is(.landing-eyebrow,.start-free) { color:var(--comic-teal); font-weight:700; }
+html body .landing-small-mark { background:var(--comic-coral); outline:1px solid var(--comic-ink); }
+html body :is(.landing-hero-copy h1,.start-story h2,.start-type,.signup-card h1,.landing-info h2,.landing-info h3) {
+  font-family:var(--comic-display); font-weight:400; letter-spacing:.015em;
+  color:var(--comic-ink);
+}
+html body .landing-hero-copy h1 { line-height:.99; }
+html body .landing-hero-copy h1>span { color:var(--comic-teal); font-style:normal; font-weight:400; }
+html body .landing-lead { color:var(--comic-muted); }
+html body :is(.landing-login,.landing-info-header>button) {
+  border:2px solid var(--comic-ink); border-radius:5px; background:var(--comic-paper);
+  box-shadow:3px 3px 0 var(--comic-ink); color:var(--comic-ink);
+}
+html body :is(.landing-login:hover,.landing-info-header>button:hover) { background:var(--comic-yellow); }
+html body .landing .landing-cta,html body .start-page .landing-cta {
+  border:2px solid var(--comic-ink); border-radius:5px; background:var(--comic-yellow);
+  color:var(--comic-ink); box-shadow:4px 4px 0 var(--comic-ink);
+  font-weight:750; letter-spacing:.01em;
+}
+html body .landing .landing-cta:hover,html body .start-page .landing-cta:hover { background:#f6d779; }
+html body .landing-more { font-weight:700; color:var(--comic-teal); }
+html body .landing-assurance { color:var(--comic-muted); }
+html body .landing-assurance svg { color:var(--comic-teal); }
+html body :is(.landing-footer,.start-footer) { color:var(--comic-muted); }
+html body :is(.landing-footer,.start-footer) a { color:var(--comic-ink); }
+
+/* The interactive sample uses the same ink panel and paper pieces as the demo. */
+html body .language-stage {
+  background-color:var(--comic-teal); color:var(--comic-paper);
+  border:2px solid var(--comic-ink); border-radius:7px;
+  box-shadow:6px 6px 0 var(--comic-ink);
+  background-image:radial-gradient(#fff7e829 .8px,transparent .9px);
+  background-size:9px 9px;
+}
+html body :is(.language-stage-top,.language-stage-bottom) { color:var(--comic-paper); }
+html body .language-poster {
+  font-family:var(--comic-display); font-weight:400; letter-spacing:.015em;
+  color:var(--comic-yellow); text-shadow:2px 2px 0 var(--comic-ink);
+}
+html body .language-poster>span:last-child { font-weight:400; }
+html body .language-sticker {
+  background:var(--comic-coral); color:var(--comic-ink); border:2px solid var(--comic-ink);
+  box-shadow:3px 3px 0 var(--comic-ink); font-weight:800;
+}
+html body .language-paper {
+  background:var(--comic-paper); color:var(--comic-ink); border:2px solid var(--comic-ink);
+  border-radius:6px; box-shadow:4px 4px 0 var(--comic-ink);
+}
+html body .language-stage.is-complete .language-paper { box-shadow:4px 4px 0 var(--comic-yellow); }
+html body .language-intention { font-weight:650; }
+html body .language-answer { border-color:var(--comic-ink); }
+html body .language-word-bank>button {
+  background:#fffdf5; color:var(--comic-ink); border:2px solid var(--comic-ink);
+  border-bottom-width:3px; border-radius:4px; box-shadow:2px 2px 0 var(--comic-ink); font-weight:650;
+}
+html body .language-word-bank>button:hover:enabled { background:var(--comic-yellow); }
+html body .language-word-bank>button:disabled { color:#76796e; background:#e8e5d7; border-color:#a2a695; box-shadow:none; }
+html body :is(.language-notice,.language-placeholder,.language-reset) { color:var(--comic-muted); }
+html body .language-reset:hover:enabled { background:#efc6534d; }
+
+/* Information is a printed side panel, retaining the existing drawer behavior. */
+html body .landing-info {
+  color:var(--comic-ink); background:var(--comic-paper); border-left:2px solid var(--comic-ink);
+}
+html body .landing-info::backdrop { background:#2027229c; }
+html body .landing-info-header { background:var(--comic-paper); color:var(--comic-teal); }
+html body .landing-info h2 { line-height:1.03; }
+html body :is(.landing-info-lead,.landing-info-steps p,.landing-info-next>p) { color:var(--comic-muted); }
+html body .landing-info-steps>li { border-color:var(--comic-ink); }
+html body .landing-info-steps>li>span { color:var(--comic-teal); font-weight:750; }
+html body .landing-info h3 { font-size:21px; }
+html body .landing-support-preview { border:2px solid var(--comic-ink); border-radius:6px; background:#fffdf5; box-shadow:4px 4px 0 var(--comic-ink); }
+html body .landing-support-tabs { border-color:var(--comic-ink); background:#efc65340; }
+html body .landing-support-tabs>button { color:var(--comic-ink); font-weight:650; }
+html body .landing-support-tabs>button[aria-pressed=true] { background:var(--comic-teal); color:var(--comic-paper); }
+html body .landing-support-tabs>button:hover:not([aria-pressed=true]) { background:var(--comic-yellow); }
+html body .landing-support-icon { border:2px solid var(--comic-ink); color:var(--comic-ink); background:var(--comic-yellow); }
+html body .landing-support-demo>span:not(.landing-writing) { border:2px solid var(--comic-ink); background:var(--comic-paper); box-shadow:2px 2px 0 var(--comic-ink); }
+html body .landing-support-demo>span.is-blank { border-style:dashed; color:var(--comic-muted); box-shadow:none; }
+html body .landing-info-next { border-color:var(--comic-ink); }
+
+/* Account forms stay quiet enough to read; the frame and primary action carry the style. */
+html body .start-type { color:var(--comic-teal); line-height:1; }
+html body .start-type>span:nth-child(2) { color:var(--comic-ink); font-weight:400; font-style:normal; }
+html body .start-type>span:last-child { color:var(--comic-coral); }
+html body .signup-card {
+  background:var(--comic-paper); color:var(--comic-ink);
+  border:2px solid var(--comic-ink); border-radius:8px; box-shadow:5px 5px 0 var(--comic-ink);
+}
+html body .signup-card h1 { font-size:32px; line-height:1.04; }
+html body :is(.signup-intro,.signup-card small,.signup-legal,.signup-divider) { color:var(--comic-muted); }
+html body .signup-google { background:#fffdf5; color:var(--comic-ink); border:2px solid var(--comic-ink); border-radius:4px; font-weight:650; }
+html body .signup-google:hover { background:#efc65345; }
+html body .signup-card input { background:#fffdf5; color:var(--comic-ink); border:2px solid var(--comic-ink); border-radius:4px; }
+html body .signup-card input::placeholder { color:#6d7367; }
+html body .signup-card input:focus { outline-color:var(--comic-teal); }
+html body .signup-password button { color:var(--comic-ink); }
+html body .signup-password button:hover { background:#efc65345; }
+html body .signup-card .signup-forgot,html body .signup-switch button { color:var(--comic-teal); font-weight:650; }
+html body .signup-divider::before,html body .signup-divider::after { background:var(--comic-ink); }
+html body .signup-approval-note { border:1px solid var(--comic-ink); border-left-width:4px; background:#efc65330; color:var(--comic-muted); }
+html body .signup-error { background:#d9755c24; color:#702c21; border:2px solid var(--comic-coral); }
+html body .signup-message { background:#39776b17; color:#28584e; border:2px solid var(--comic-teal); }
+
+/* The introduction remains the dark chapter of the same printed story. */
+html body :is(.presentation,.presentation-state) {
+  --presentation-cream:var(--comic-paper); --presentation-ink:var(--comic-ink);
+  color:var(--comic-paper); background-color:var(--comic-ink);
+  font-family:var(--comic-body),Arial,sans-serif;
+  background-image:radial-gradient(#fff7e818 .7px,transparent .9px); background-size:10px 10px;
+}
+html body .presentation::before { background:radial-gradient(ellipse,#efc65320,transparent 65%); }
+html body .presentation-copy h1 { font-family:var(--comic-display); font-weight:400; letter-spacing:.015em; line-height:1.02; }
+html body .presentation-copy h1>span+span { color:var(--comic-yellow); }
+html body .presentation-eyebrow { color:var(--comic-coral); font-weight:650; }
+html body .presentation-description { color:#e4dfce; }
+html body :is(.presentation-header button,.presentation-progress p,.presentation-progress p>span,.presentation-back) { color:var(--comic-paper); }
+html body .presentation-footer { border-color:#fff7e83d; }
+html body .presentation-progress nav button span { height:3px; background:#fff7e838; }
+html body .presentation-progress nav button[aria-current] span { background:var(--comic-yellow); box-shadow:none; }
+html body .presentation-next,html body .presentation-state button {
+  border:2px solid var(--comic-ink); border-radius:5px; background:var(--comic-yellow);
+  color:var(--comic-ink); box-shadow:3px 3px 0 var(--comic-coral); font-weight:750;
+}
+html body .presentation-next:hover { background:#f6d779; }
+html body .presentation-orbit-ring { border:2px solid #efc65366; }
+html body .presentation-orbit-spark { color:var(--comic-yellow); background:var(--comic-ink); }
+html body .presentation-signal>span { background:var(--comic-yellow); box-shadow:none; }
+html body .presentation-start>span { border:2px solid var(--comic-ink); background:var(--comic-paper); color:var(--comic-ink); box-shadow:3px 3px 0 var(--comic-coral); }
+html body .presentation-start>span:first-child { background:var(--comic-yellow); }
+html body .presentation-start>svg { color:var(--comic-coral); }
+html body :is(.presentation-start small,.presentation-support-caption,.presentation-study-caption,.presentation-reward-tag) { color:#e4dfce; }
+html body .presentation-photo { border:2px solid var(--comic-ink); border-radius:7px; box-shadow:5px 5px 0 var(--comic-coral); }
+html body .presentation-photo>span { border:1px solid var(--comic-ink); border-radius:3px; background:var(--comic-yellow); color:var(--comic-ink); font-weight:650; }
+html body .presentation-floating { background:var(--comic-paper); color:var(--comic-ink); border:2px solid var(--comic-ink); border-radius:5px; box-shadow:4px 4px 0 var(--comic-coral); }
+html body .presentation-support-card,html body .presentation-support-card:nth-child(2),html body .presentation-support-card:nth-child(3) { background:var(--comic-paper); color:var(--comic-ink); border:2px solid var(--comic-ink); border-radius:7px; box-shadow:4px 4px 0 var(--comic-coral); }
+html body .presentation-support-icon { background:var(--comic-yellow); color:var(--comic-ink); border:1px solid var(--comic-ink); }
+html body .presentation-support-glyph i { background:var(--comic-teal); }
+html body .presentation-support-card:nth-child(2) .presentation-support-glyph i:nth-child(2),html body .presentation-support-card:nth-child(3) .presentation-support-glyph { border-color:var(--comic-teal); }
+html body .presentation-study-number strong,html body .presentation-reward-core strong { color:var(--comic-yellow); font-family:var(--comic-display); font-weight:400; letter-spacing:.015em; }
+html body .presentation-study-number>span,html body .presentation-reward-core strong>span { color:var(--comic-paper); }
+html body .presentation-study-grid>div { background:var(--comic-paper); border:2px solid var(--comic-ink); border-radius:5px; box-shadow:3px 3px 0 var(--comic-coral); }
+html body .presentation-study-grid>div>span { color:var(--comic-ink); font-weight:650; }
+html body .presentation-study-grid i { background:#b3c5b8; }
+html body .presentation-study-grid i[data-filled="true"] { background:var(--comic-teal); }
+html body .presentation-reward-ring circle { stroke:#fff7e838; }
+html body .presentation-reward-ring circle+circle { stroke:var(--comic-yellow); }
+html body :is(.presentation-reward-core>svg,.presentation-reward-star) { color:var(--comic-coral); }
+html body .presentation-reward-core small { color:var(--comic-paper); }
+html body .presentation-panel { background:var(--comic-paper); color:var(--comic-ink); border:2px solid var(--comic-ink); border-radius:8px; box-shadow:6px 6px 0 var(--comic-coral); }
+html body .presentation-panel-heading { color:var(--comic-teal); font-weight:650; }
+html body .presentation-online { background:var(--comic-teal); box-shadow:0 0 0 2px var(--comic-ink); }
+html body .presentation-panel-greeting { font-family:var(--comic-display); letter-spacing:.015em; }
+html body .presentation-panel-greeting>span { color:var(--comic-coral); }
+html body .presentation-panel-route::before { height:2px; background:var(--comic-ink); }
+html body .presentation-panel-route>div>span { background:var(--comic-yellow); border:2px solid var(--comic-ink); color:var(--comic-ink); }
+html body .presentation-panel-route small { color:var(--comic-muted); }
+html body .presentation-panel-contact { border-color:var(--comic-ink); color:var(--comic-ink); }
+
+/* Long-form reading is deliberately calmer, inside the same paper-and-ink frame. */
+html body .legal {
+  border:2px solid var(--comic-ink); border-radius:7px; background:var(--comic-paper);
+  color:var(--comic-ink); box-shadow:4px 4px 0 var(--comic-ink); padding:clamp(18px,3vw,32px);
+  font-family:var(--comic-body),Arial,sans-serif;
+}
+html body .legal h1,html body .legal h2 { font-family:var(--comic-display); font-weight:400; letter-spacing:.015em; line-height:1.1; }
+html body .legal h1 { color:var(--comic-teal); }
+html body .legal h2 { color:var(--comic-ink); }
+html body .legal p { line-height:1.75; }
+html body .legal a { color:var(--comic-teal); text-decoration-thickness:1.5px; text-underline-offset:3px; }
+
+@container public-viewport (max-width:760px) {
+  html body .landing-hero-copy h1 { letter-spacing:.01em; }
+  html body .language-stage { box-shadow:4px 4px 0 var(--comic-ink); }
+  html body .signup-card h1 { font-size:29px; }
+  html body .signup-card { box-shadow:3px 3px 0 var(--comic-ink); }
+}
+@container public-viewport (max-height:620px) {
+  html body .signup-card h1 { font-size:27px; }
+}
+@container public-viewport (max-height:480px) {
+  html body .signup-card h1 { font-size:25px; }
+}
+@media(max-width:360px), (max-height:700px) and (max-width:760px) {
+  html body .presentation-copy h1 { line-height:1; }
+  html body .presentation-study-grid>div { border-width:1px; box-shadow:2px 2px 0 var(--comic-coral); }
+}
+
+/* Management uses the same printed surfaces while keeping its compact data layout. */
+html body :is(.admin-card,.admin-stat,.admin-quick-card,.admin-dialog) {
+  background:var(--comic-paper); color:var(--comic-ink); border:2px solid var(--comic-ink);
+  border-radius:7px 4px 8px 5px; box-shadow:3px 3px 0 var(--comic-ink);
+}
+html body .admin-stat:hover { background:#efc65326; border-color:var(--comic-ink); }
+html body .admin-card-heading { background:#efc65326; border-color:var(--comic-ink); }
+html body .admin-card-heading h2 { color:var(--comic-ink); font-weight:600; }
+html body :is(.admin-quick-card h2,.admin-dialog h2,.admin-inbox-placeholder h2) { font-family:var(--comic-display); font-weight:400; letter-spacing:.025em; }
+html body :is(.admin-stat-heading,.admin-card-heading p,.admin-quick-card>p:not(.admin-eyebrow),.admin-dialog-description,.admin-dialog-note) { color:var(--comic-muted); }
+html body :is(.admin-stat-heading>svg,.admin-quick-icon,.admin-text-button,.admin-eyebrow) { color:var(--comic-teal); }
+html body .admin-stat-footer { color:var(--comic-muted); border-color:#b9b6a4; }
+html body .admin-button { background:var(--comic-paper); color:var(--comic-ink); border:2px solid var(--comic-ink); border-radius:5px; box-shadow:2px 2px 0 var(--comic-ink); font-weight:600; }
+html body .admin-button:hover:not(:disabled) { background:#efc65345; border-color:var(--comic-ink); }
+html body .admin-button-primary { background:var(--comic-yellow); color:var(--comic-ink); border-color:var(--comic-ink); }
+html body .admin-button-primary:hover:not(:disabled) { background:#f6d779; border-color:var(--comic-ink); }
+html body .admin-button-danger { background:#d9755c24; color:#702c21; }
+html body .admin-button-danger:hover:not(:disabled) { background:#d9755c45; }
+html body :is(.admin-search,.admin-select select,.admin-fields input,.admin-fields select,.admin-fields textarea,.admin-inbox-filter select,.admin-reply-label textarea) { background:#fffdf5; color:var(--comic-ink); border:2px solid var(--comic-ink); border-radius:4px; }
+html body .admin-search input { background:transparent; color:var(--comic-ink); }
+html body .admin-table th { color:var(--comic-ink); background:#efc65345; border-color:var(--comic-ink); font-weight:600; }
+html body .admin-table td,html body .admin-table-footer { border-color:#b9b6a4; }
+html body .admin-table tbody tr:hover { background:#39776b12; }
+html body :is(.admin-inline-count,.admin-activity-icon,.admin-avatar) { background:#efc65340; color:var(--comic-ink); border-color:var(--comic-ink); }
+html body .admin-status { color:#28584e; background:#39776b17; border-color:var(--comic-teal); }
+html body .admin-status[data-status="pending"] { color:#725520; background:#efc65333; border-color:#997121; }
+html body .admin-status[data-status="suspended"],html body .admin-status[data-status="rejected"] { color:#702c21; background:#d9755c24; border-color:var(--comic-coral); }
+html body .admin-inbox-list li>button[aria-pressed="true"] { background:#efc65330; box-shadow:inset 3px 0 var(--comic-teal); }
+html body .admin-message-list li { background:#fffdf5; border-color:var(--comic-ink); border-radius:7px 7px 7px 2px; }
+html body .admin-message-list li[data-author="manager"] { background:#efc65330; border-color:var(--comic-ink); border-radius:7px 7px 2px 7px; }
+html body .admin-dialog::backdrop { background:#2027229c; }
+html body .admin-login-shell { --ink:var(--comic-ink); --admin-green:var(--comic-teal); --admin-line:var(--comic-ink); background:var(--comic-paper); color:var(--comic-ink); font-family:var(--comic-body),Arial,sans-serif; }
+html body .admin-login-intro { background-color:var(--comic-teal); background-image:radial-gradient(#fff7e824 .7px,transparent .9px); background-size:9px 9px; color:var(--comic-paper); }
+html body .admin-login-intro h1,html body .admin-login-form h2 { font-family:var(--comic-display); font-weight:400; letter-spacing:.025em; }
+html body .admin-login-intro h1 { color:var(--comic-yellow); text-shadow:2px 2px 0 var(--comic-ink); }
+html body .admin-login-intro .admin-eyebrow,html body .admin-login-intro>div>p:last-child { color:var(--comic-paper); }
+html body .admin-login-symbol { background:var(--comic-yellow); color:var(--comic-ink); border:2px solid var(--comic-ink); border-radius:6px; box-shadow:3px 3px 0 var(--comic-ink); }
+html body .admin-login-form { background:var(--comic-paper); }
+html body .admin-login-form>div>p:not(.admin-eyebrow):not(.admin-form-error):not(.admin-dialog-note) { color:var(--comic-muted); }
+html body .admin-login-divider { color:var(--comic-muted); }
+html body .admin-login-divider::before,html body .admin-login-divider::after { background:var(--comic-ink); }
+html body :is(.admin-shell,.admin-login-shell) :focus-visible { outline-color:var(--comic-teal); }
+
+/* Separators occupy space too: legal links must fit inside the footer border. */
+html body :is(.landing-footer,.start-footer) { min-height:34px; }
+
+/* Keep a card's ink shadow inside its scroll region, with the same page alignment. */
+@container public-viewport (max-width:760px) {
+  html body .start-main { width:calc(100% - 28px); padding-inline:6px; }
+}
+@container public-viewport (min-width:761px) and (max-width:1100px) {
+  html body .start-main { width:calc(100% - 52px); padding-inline:6px; }
+}
+
+/* The desktop form also needs compact spacing before its panel becomes scrollable. */
+@container public-viewport (min-width:761px) and (min-height:481px) and (max-height:760px) {
+  html body .signup-card[data-mode="signup"] { padding:18px 24px 12px; }
+  html body .signup-card[data-mode="signup"] .signup-intro { margin-bottom:13px; }
+  html body .signup-card[data-mode="signup"] .signup-divider { margin-block:10px; }
+  html body .signup-card[data-mode="signup"] label { margin-bottom:10px; }
+  html body .signup-card[data-mode="signup"] .signup-approval-note { padding-block:7px; margin-bottom:10px; }
+  html body .signup-card[data-mode="signup"] .signup-legal { margin-top:8px; }
+  html body .signup-card[data-mode="signup"] .signup-switch { margin-top:6px; }
+}
+
+/* Compact spacing, with the original text and 44px form targets intact. */
+@container public-viewport (max-width:760px) and (min-height:481px) and (max-height:620px) {
+  html body .signup-card[data-mode="signup"] { padding:9px 18px 7px; }
+  html body .signup-card[data-mode="signup"] h1 { font-size:24px; }
+  html body .signup-card[data-mode="signup"] .signup-approval-note { padding-block:6px; line-height:1.4; margin-bottom:5px; }
+  html body .signup-card[data-mode="signup"] .signup-divider { margin-block:5px; }
+  html body .signup-card[data-mode="signup"] label { margin-bottom:6px; }
+  html body .signup-card[data-mode="signup"] .signup-legal { margin-top:4px; line-height:1.4; }
+  html body .signup-card[data-mode="signup"] .signup-switch { margin-top:0; }
+}
+
+/* Sideways phones use both columns; explanatory text stays beside the form. */
+@container public-viewport (min-width:480px) and (max-height:480px) {
+  html body .start-footer { min-height:30px; }
+  html body .signup-card { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); column-gap:20px; align-items:center; max-width:700px; padding:10px 16px; }
+  html body .signup-card h1 { grid-column:1/-1; font-size:23px; margin-bottom:9px; }
+  html body .signup-card .signup-divider { display:none; }
+  html body .signup-card form { grid-column:2; grid-row:2/6; align-self:start; }
+  html body .signup-card form fieldset { display:block; }
+  html body .signup-card .signup-google { grid-column:1; grid-row:2; align-self:end; min-height:44px; }
+  html body .signup-card .signup-legal { grid-column:1; grid-row:3; margin-top:8px; }
+  html body .signup-card .signup-switch { grid-column:1; grid-row:4; flex-wrap:wrap; gap:2px; margin-top:3px; }
+  html body .signup-card[data-mode="signup"] .signup-approval-note { grid-column:1; grid-row:2; margin-top:0; margin-bottom:8px; line-height:1.4; }
+  html body .signup-card[data-mode="signup"] .signup-google { grid-row:3; }
+  html body .signup-card[data-mode="signup"] .signup-legal { grid-row:4; }
+  html body .signup-card[data-mode="signup"] .signup-switch { grid-row:5; }
+  html body .signup-card[data-mode="reset"] { display:block; max-width:420px; }
+}
+@container public-viewport (max-height:360px) {
+  html body .start-footer { min-height:26px; }
+}
