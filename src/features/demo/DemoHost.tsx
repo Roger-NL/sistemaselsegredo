@@ -1,4 +1,5 @@
 "use client";
+import "./demo-shell.css";
 import { BrowserText } from "@/components/i18n/BrowserText";
 
 

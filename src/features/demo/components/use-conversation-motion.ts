@@ -6,6 +6,7 @@ import { getMotionPreference, subscribePreferences } from "@/features/dashboard/
 import { transition } from "../model/reducer";
 import type { DemoEvent, DemoState } from "../model/types";
 import { playInteractionSound } from "@/components/interaction/sounds";
+import { storySoundFor } from "../model/story-sound";
 
 /** Keep the real DOM current; only the browser's decorative snapshots overlap. */
 export function useConversationMotion(state: DemoState, dispatch: Dispatch<DemoEvent>) {
@@ -28,7 +29,9 @@ export function useConversationMotion(state: DemoState, dispatch: Dispatch<DemoE
   return useCallback((event: DemoEvent) => {
     const before = current.current;
     const after = transition(before, event);
-    if (event.type === "SEND_RESPONSE" && after !== before) void playInteractionSound(after.evidence.length > before.evidence.length ? "correct" : "retry");
+    const storySound = storySoundFor(before, after, event);
+    if (storySound) void playInteractionSound(storySound);
+    else if (event.type === "SEND_RESPONSE" && after !== before) void playInteractionSound(after.evidence.length > before.evidence.length ? "correct" : "retry");
     else if (event.type === "ANSWER_MEANING" && after !== before) void playInteractionSound(event.correct ? "correct" : "retry");
     else if (event.type === "PLACE_BLOCK" && after.returnSerial > before.returnSerial) void playInteractionSound("retry");
     else if (["NEXT", "ADVANCE_PRESENTATION", "BACK", "CHOOSE", "PREPARE", "CHECK"].includes(event.type)) {

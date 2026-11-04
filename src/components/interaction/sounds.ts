@@ -1,10 +1,12 @@
-export type InteractionSound = "click" | "advance" | "correct" | "retry";
+import { isStorySound, renderStorySound, type StorySound } from "./story-sounds";
+
+export type InteractionSound = "click" | "advance" | "correct" | "retry" | StorySound;
 const KEY = "basedspeak.interface-sounds.v1";
 const listeners = new Set<() => void>();
 let memoryMuted: boolean | undefined;
 let context: AudioContext | undefined;
 let generation = 0;
-const active = new Set<OscillatorNode>();
+const active = new Set<AudioScheduledSourceNode>();
 
 export function getInteractionSoundsMuted() {
   if (memoryMuted !== undefined) return memoryMuted;
@@ -32,7 +34,7 @@ export function saveInteractionSoundsMuted(muted: boolean) {
   listeners.forEach(listener => listener());
 }
 
-/** Short local tones only. No media fetch, speech synthesis, music or autoplay. */
+/** Local interface and story accents. No media fetch or speech generation. */
 export async function playInteractionSound(kind: InteractionSound) {
   if (typeof window === "undefined" || getInteractionSoundsMuted()) return;
   try {
@@ -43,6 +45,7 @@ export async function playInteractionSound(kind: InteractionSound) {
     const ticket = generation;
     if (context.state === "suspended") await context.resume();
     if (ticket !== generation || getInteractionSoundsMuted() || context.state !== "running") return;
+    if (isStorySound(kind)) { renderStorySound(context, kind, active); return; }
     const notes = kind === "click" ? [620] : kind === "advance" ? [440, 660] : kind === "correct" ? [520, 660, 880] : [330, 260];
     const duration = kind === "click" ? 0.025 : kind === "retry" ? 0.09 : 0.065;
     const start = context.currentTime;

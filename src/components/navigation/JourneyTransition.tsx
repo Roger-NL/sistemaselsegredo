@@ -7,6 +7,7 @@ import { flushSync } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import { getMotionPreference } from "@/features/dashboard/preferences";
 import { decodeSceneImage } from "./scene-ready";
+import { playInteractionSound, stopInteractionSounds } from "@/components/interaction/sounds";
 
 type StartOptions = { resume?: boolean; prepare?: () => void };
 type Journey = { start: (options?: StartOptions) => void; ready: (element: HTMLElement) => () => void; cancel: () => void; pending: boolean; headerTone: "paper" | "immersive"; reducedMotion: boolean };
@@ -25,6 +26,7 @@ export function JourneyTransitionProvider({ children }: { children: ReactNode })
   const lockedContent = useRef(new Set<HTMLElement>());
   const cancel = useCallback(() => {
     const wasActive = active.current;
+    if (wasActive) stopInteractionSounds();
     operation.current++; active.current = false;
     timers.current.forEach(clearTimeout); timers.current = [];
     lockedContent.current.forEach(element => { element.inert = false; }); lockedContent.current.clear();
@@ -33,6 +35,7 @@ export function JourneyTransitionProvider({ children }: { children: ReactNode })
   }, []);
   const start = useCallback((options: StartOptions = {}) => {
     if (active.current) return;
+    void playInteractionSound("story-enter");
     active.current = true; operation.current++; startedAt.current = performance.now(); origin.current = window.location.pathname;
     const reduced = getMotionPreference() || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const originContent = document.querySelector<HTMLElement>("#meu-painel");
@@ -73,7 +76,7 @@ export function JourneyTransitionProvider({ children }: { children: ReactNode })
   useEffect(() => {
     if (active.current && pathname !== "/demo" && pathname !== origin.current) queueMicrotask(cancel);
   }, [pathname, cancel]);
-  useEffect(() => () => { timers.current.forEach(clearTimeout); }, []);
+  useEffect(() => () => { timers.current.forEach(clearTimeout); if (active.current) stopInteractionSounds(); }, []);
 
   return <JourneyContext.Provider value={{ start, ready, cancel, pending:cover !== null, headerTone:cover && cover.phase !== "reveal" ? "immersive" : "paper", reducedMotion:cover?.reduced ?? false }}>{children}
     {cover && <section className="journey-transition" data-phase={cover.phase} data-reduced={cover.reduced} aria-label="Entrada na conversa" role="status" aria-live="polite">

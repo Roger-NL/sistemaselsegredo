@@ -5,6 +5,7 @@ import { DemoAudioPlayer, type AudioProgress } from "./player";
 import { createCatalogAudioClient } from "../services/audio-client";
 import type { AudioId } from "../model/types";
 import type { PublishedAudioCatalog } from "../../../contracts/demo-audio";
+import { stopInteractionSounds } from "@/components/interaction/sounds";
 
 export type Playback = { source: string | null; status: "idle" | AudioProgress["status"]; progress: number };
 export type DemoAudio = {
@@ -37,6 +38,7 @@ export function useDemoAudio(activityKey: string, publishedAudio: PublishedAudio
   }, [activityKey]);
   const release = useCallback((source: string) => { if (operation.current.source === source) stop(); }, [stop]);
   async function replay(input: AudioId | AudioId[], source: string) {
+    stopInteractionSounds();
     const version = ++operation.current.version;
     operation.current.controller?.abort(); player.current?.cancel();
     const controller = new AbortController(); operation.current.controller = controller;
@@ -69,6 +71,7 @@ export function useDemoAudio(activityKey: string, publishedAudio: PublishedAudio
     },
     async resume() {
       if (playback.status !== "paused") return;
+      stopInteractionSounds();
       const version = operation.current.version;
       const ok = await player.current?.resume();
       if (version === operation.current.version) setState(current => ({ ...current, status: ok ? "playing" : "error" }));
