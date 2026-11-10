@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { BlobNotFoundError, head, put } from "@vercel/blob";
 import { getAdminDb } from "../firebase";
 import { generatePreparedSpeech } from "../integrations/elevenlabs";
-import { createSpeechCache, readPublishedSpeech, SpeechUnavailableError, type SpeechParameters, type SpeechRecord, type SpeechStore } from "./cache";
+import { createSpeechCache, readPublishedSpeech, SpeechUnavailableError, type SpeechParameters, type SpeechRecord, type SpeechStore, type SpeechPorts } from "./cache";
 
 export { speechParameters } from "./parameters";
 
@@ -23,7 +23,7 @@ const store: SpeechStore = {
   },
 };
 export const readCachedSpeech = (text: string, parameters: SpeechParameters) => readPublishedSpeech(store, text, parameters);
-export const resolveCachedSpeech = createSpeechCache({
+const ports: SpeechPorts = {
   store,
   async find(pathname) {
     try {
@@ -41,4 +41,8 @@ export const resolveCachedSpeech = createSpeechCache({
       contentType: "audio/mpeg", cacheControlMaxAge: 31_536_000 });
     return { url: blob.url, pathname: blob.pathname, bytes: bytes.length, checksum: createHash("sha256").update(bytes).digest("hex") };
   },
-});
+};
+
+export const resolveCachedSpeech = createSpeechCache(ports);
+/** One-time, operator-controlled imports retain the exact same durable admission and storage. */
+export const speechCacheWithGenerator = (generate: SpeechPorts["generate"]) => createSpeechCache({ ...ports, generate });

@@ -17,6 +17,41 @@ export function practice(node: ResponseNode, profile: SupportProfile) {
   const skeleton = profile === "some" ? node.skeleton ?? (answer.length > 1 ? `${source.find(b => b.id === answer[0])?.text ?? ""} ___` : undefined) : node.skeleton;
   return { mode, blocks, answer, skeleton };
 }
+
+export type ConstructionView = {
+  kind: "assembly" | "completion";
+  before: string;
+  after: string;
+  blocks: Block[];
+  answer: string[];
+  selected: { id: string; index: number }[];
+  prefill: string[];
+};
+
+/** A view of the existing exercise, never a new persisted answer contract.
+ * Given words stay outside the missing part. Canonical IDs and old journals
+ * keep their meaning; a user click can supply the given prefix through the
+ * same PLACE_BLOCK events that have always been understood by the reducer.
+ */
+export function constructionView(node: ResponseNode, profile: SupportProfile, selected: string[] = []): ConstructionView {
+  const exercise = practice(node, profile);
+  const full: ConstructionView = { kind: "assembly", before: "", after: "", blocks: exercise.blocks,
+    answer: exercise.answer, selected: selected.map((id, index) => ({ id, index })), prefill: [] };
+  if (exercise.mode !== "build" || !exercise.skeleton?.includes("___")) return full;
+  const generated = profile === "some" && !node.skeleton;
+  const prefix = generated ? exercise.answer.slice(0, 1) : [];
+  // A pre-v8 journal may contain an out-of-order partial assembly. Keep it
+  // visible and removable; do not reinterpret it as a completed fixed prefix.
+  if (prefix.length && selected.length && selected[0] !== prefix[0]) return full;
+  const [before, ...after] = exercise.skeleton.split("___");
+  return {
+    kind: "completion", before: before.trimEnd(), after: after.join("___").trimStart(),
+    blocks: exercise.blocks.filter(block => !prefix.includes(block.id)),
+    answer: exercise.answer.slice(prefix.length),
+    selected: selected.slice(prefix.length).map((id, index) => ({ id, index: index + prefix.length })),
+    prefill: selected.length ? [] : prefix,
+  };
+}
 export function responsePhase(state: DemoState, node: ResponseNode, introducing = true): DemoState["phase"] {
   if (node.id === "p6.warn") return "ready";
   if (introducing && node.mode === "recall" && expressionHistory(state, node.response) !== "new") return "recall";

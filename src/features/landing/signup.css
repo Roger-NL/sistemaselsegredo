@@ -10,7 +10,7 @@
 .start-story .landing-eyebrow{font-size:9px;margin-bottom:16px}
 .start-story>p.start-free{display:flex;gap:8px;align-items:center;font-size:11px;margin:12px 0 0}
 .signup-card{width:100%;max-width:420px;background:#fcfaf6;padding:24px 28px 18px;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px -30px #54452b44}
-.signup-card>.landing-eyebrow{font-size:9px;margin-bottom:9px;justify-content:center}
+.signup-card-reading>.auto-fit-size>.auto-fit-content>.landing-eyebrow{font-size:9px;margin-bottom:9px;justify-content:center}
 .signup-card h1{font-size:27px;font-weight:450;letter-spacing:-.04em;line-height:1.15;margin:0 0 8px;text-align:center}
 .signup-intro{font-size:12px;line-height:1.5;color:var(--muted);margin:0 0 18px;text-align:center}
 .signup-google{width:100%;min-height:44px;background:#fff;border:1px solid #cfc7ba;border-radius:5px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:13px;color:var(--ink)}
@@ -46,13 +46,13 @@
   .start-header{height:64px}.start-header .brand{font-size:22px}
   .start-main{display:grid;grid-template-columns:minmax(0,1fr);padding-block:16px;gap:0}
   .start-story{display:none}.signup-card{max-width:400px;margin-inline:auto;padding:24px 22px 18px}
-  .signup-card h1{font-size:26px}.signup-card>.landing-eyebrow{font-size:9px}
+  .signup-card h1{font-size:26px}.signup-card-reading>.auto-fit-size>.auto-fit-content>.landing-eyebrow{font-size:9px}
   .signup-card small{font-size:11px}.signup-divider{font-size:11px}
   .start-footer{height:36px;font-size:9px;justify-content:center;gap:14px}.start-footer>span{display:none}.start-footer nav{gap:24px}
 }
 @container public-viewport (max-height:700px){
   .start-header{height:56px}.start-main{padding-block:12px}.signup-card{padding:18px 24px 12px}
-  .signup-card>.landing-eyebrow{margin-bottom:6px;font-size:8px}.signup-card h1{font-size:25px;margin-bottom:6px}
+  .signup-card-reading>.auto-fit-size>.auto-fit-content>.landing-eyebrow{margin-bottom:6px;font-size:8px}.signup-card h1{font-size:25px;margin-bottom:6px}
   .signup-intro{margin-bottom:13px}.signup-divider{margin-block:10px}
   .signup-card label{margin-bottom:10px}.signup-card small{font-size:10px;margin-top:3px}
   .signup-legal{margin-top:8px}.signup-switch{margin-top:6px}
@@ -61,7 +61,7 @@
 }
 @container public-viewport (max-width:760px) and (max-height:700px){
   .start-main{padding-block:10px}.signup-card{padding:18px 18px 12px}.signup-card h1{font-size:24px}
-  .signup-card>.landing-eyebrow{display:none}.signup-intro{font-size:12px}
+  .signup-card-reading>.auto-fit-size>.auto-fit-content>.landing-eyebrow{display:none}.signup-intro{font-size:12px}
   .signup-card:has(.signup-error){padding-block:13px 9px}.signup-card:has(.signup-error) .signup-intro{margin-bottom:9px}
 }
 @container public-viewport (max-width:760px) and (min-height:481px) and (max-height:620px){
@@ -75,7 +75,7 @@
 }
 @container public-viewport (max-height:480px){
   .start-header{height:46px}.start-main{grid-template-columns:minmax(0,1fr);padding-block:8px}.start-story{display:none}
-  .signup-card{max-width:640px;padding:8px 24px 6px}.signup-card>.landing-eyebrow,.signup-intro{display:none}
+  .signup-card{max-width:640px;padding:8px 24px 6px}.signup-card-reading>.auto-fit-size>.auto-fit-content>.landing-eyebrow,.signup-intro{display:none}
   .signup-card h1{font-size:23px;margin-bottom:6px}
   .signup-card form fieldset{display:grid;grid-template-columns:1fr 1fr;column-gap:14px;align-items:start}
   .signup-card label{margin-bottom:8px}.signup-google{min-height:38px}.signup-divider{margin-block:4px}
@@ -109,3 +109,34 @@
 @container public-viewport (max-height:360px){.signup-approval-note{grid-column:1/-1;grid-row:5;margin-top:8px;margin-bottom:0}}
 
 .start-main{overflow-y:auto;overscroll-behavior:contain;align-items:safe center}
+
+/* The fields adapt inside their measured stage; submitting stays outside it. */
+html body .start-page .signup-card { display:flex; flex-direction:column; min-width:0; min-height:0; max-height:100%; overflow:hidden; }
+html body .start-page .signup-card-reading.auto-fit { display:flex; min-width:0; min-height:0; padding:0; }
+html body .start-page .signup-card-reading :is(form,fieldset,label,.signup-password,.auto-fit-content) { min-inline-size:0; max-inline-size:100%; }
+html body .start-page .signup-card :is(.signup-intro,.signup-approval-note,.signup-error,.signup-message) { font-size:14px; }
+html body .start-page .signup-card :is(.landing-eyebrow,label,small,.signup-divider,.signup-legal,.signup-switch,.signup-forgot) { font-size:12px; }
+html body .start-page .signup-card :is(.signup-google,.signup-submit,.signup-switch button,.signup-forgot) { min-height:44px; font-size:14px; }
+html body .start-page .signup-card input { min-height:44px; font-size:16px; }
+html body .start-page .signup-password button { top:0; bottom:0; min-height:44px; }
+html body .start-page .signup-card-actions { flex:none; min-width:0; }
+html body .start-page .signup-card-actions .signup-switch { flex-wrap:wrap; }
+html body .start-page .signup-card-actions :is(.signup-submit,.signup-switch button) { grid-column:auto; grid-row:auto; }
+html body .start-page :is(.start-back,.start-footer a) { min-height:44px; font-size:12px; }
+html body .start-page .start-footer { height:44px; min-height:44px; }
+
+/* The wrapper is not the grid: Google and e-mail live in its inner stage. */
+@container public-viewport (min-width:480px) and (max-height:480px) {
+  html body .start-page .signup-card-reading > .auto-fit-size > .auto-fit-content {
+    display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+    gap:8px 16px; align-items:start;
+  }
+  html body .start-page .signup-card-reading .auto-fit-content > h1 { grid-column:1/-1; grid-row:1; margin-bottom:4px; }
+  html body .start-page .signup-card-reading .auto-fit-content > .signup-google { grid-column:1; grid-row:2; align-self:start; }
+  html body .start-page .signup-card-reading .auto-fit-content > .signup-approval-note { grid-column:1; grid-row:3; margin:0; }
+  html body .start-page .signup-card-reading .auto-fit-content > form { grid-column:2; grid-row:2/4; align-self:start; }
+  html body .start-page .signup-card form fieldset { display:block; }
+  html body .start-page .signup-card-reading .signup-divider { display:none; }
+  html body .start-page .signup-card-reading label { margin-bottom:6px; }
+  html body .start-page .signup-card[data-mode=reset] .signup-card-reading > .auto-fit-size > .auto-fit-content { display:block; }
+}

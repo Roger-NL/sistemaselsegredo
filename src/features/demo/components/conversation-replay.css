@@ -29,3 +29,18 @@
   .app-shell .conversation-replay .scene-grid.opening-scene[data-density] { grid-template-rows:clamp(72px,17dvh,110px) auto; }
   .app-shell .conversation-replay .opening-card[data-presentation=dialogue] h1 { font-size:24px; }
 }
+
+/* Match the measured content stage; the scene's pager remains outside it. */
+html body .demo-shell .conversation-replay .replay-bar { flex-shrink:0; min-width:0; }
+html body .demo-shell .conversation-replay .replay-bar > div { min-width:0; overflow-wrap:anywhere; }
+html body .demo-shell .conversation-replay .replay-reading { padding:0; }
+html body .demo-shell .conversation-replay .activity-content { min-width:0; max-width:100%; }
+html body .demo-shell .conversation-replay .replay-reading :is(.replay-meaning p,.replay-model-note) { font-size:16px; line-height:1.4; }
+html body .demo-shell .conversation-replay .replay-reading :is(button,.audio-button) { min-height:48px; }
+html body .demo-shell .conversation-replay .replay-pager > button { min-height:44px; overflow-wrap:anywhere; }
+html body .demo-shell .replay-reading[data-fit-density=compact] .opening-card { padding:12px; }
+html body .demo-shell .replay-reading[data-fit-density=compact] .opening-card .audio-trigger { margin-top:8px; }
+html body .demo-shell .replay-reading[data-fit-density=tight] .opening-card { padding:8px 10px; }
+html body .demo-shell .replay-reading[data-fit-density=tight] .opening-card h1 { margin-block:4px; }
+html body .demo-shell .replay-reading[data-fit-density=tight] .opening-card .audio-trigger { margin-top:4px; }
+html body .demo-shell .replay-reading[data-fit-density=tight] :is(.speaker-label,.replay-meaning,.replay-model-note) { margin-block:4px; }

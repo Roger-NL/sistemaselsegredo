@@ -6,7 +6,7 @@ import { audio } from "@/features/demo/content/media";
 class FakeAudio extends EventTarget {
   preload = ""; src = "test";
   currentTime = 0; duration = Number.NaN;
-  playbackRate = 1;
+  playbackRate = 1; preservesPitch = false;
   play = vi.fn(async () => {}); pause = vi.fn();
 }
 describe("single prepared-audio player", () => {
@@ -132,4 +132,14 @@ describe("single prepared-audio player", () => {
     expect(progress).toHaveBeenLastCalledWith({ status: "error", progress: 0 });
     expect(element.src).toBe("");
   });
+});
+
+
+it("uses the already slow files at rate1 and keeps extra slowing across a two-person sequence", async()=>{
+  const first=new FakeAudio(),second=new FakeAudio();const create=vi.fn().mockReturnValueOnce(first).mockReturnValueOnce(second);
+  const player=new DemoAudioPlayer(create);const done=player.playSequence(["slow-lucas.mp3","slow-learner.mp3"]);
+  expect(first.playbackRate).toBe(1);player.setPlaybackRate(0.8);expect(first.playbackRate).toBe(0.8);expect(first.preservesPitch).toBe(true);
+  expect(create).toHaveBeenCalledTimes(1);first.dispatchEvent(new Event("ended"));await Promise.resolve();
+  expect(create).toHaveBeenLastCalledWith("slow-learner.mp3");expect(second.playbackRate).toBe(0.8);expect(second.preservesPitch).toBe(true);
+  second.dispatchEvent(new Event("ended"));expect(await done).toBe(true);expect(create).toHaveBeenCalledTimes(2);
 });

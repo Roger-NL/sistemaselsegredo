@@ -14,6 +14,7 @@ vi.mock("@/features/dashboard/use-student-workspace", () => ({ useStudentWorkspa
 vi.mock("@/features/dashboard/workspace-store", () => ({ studentWorkspace: { stage: mocks.stage, beginEdit: mocks.beginEdit, endEdit: mocks.endEdit } }));
 vi.mock("@/features/demo/session/browser", () => ({ subscribe: () => () => {}, getBrowserSnapshot: () => mocks.session, getServerSnapshot: () => mocks.session }));
 vi.mock("@/components/interaction/sounds", () => ({ playInteractionSound: mocks.sound }));
+import { plainStudyText } from "@/features/theory/study-text";
 import { StudyCard, TheoryExperience } from "@/features/theory/TheoryExperience";
 import { studySteps, emptyProgress, isCorrect, decodeProgress, type StudyProgress } from "@/features/theory/progress";
 
@@ -56,7 +57,7 @@ async function lesson(id: string) {
 async function card(id: string) {
   const step = await lesson(id);
   expect(step.mode).toBe("practice");
-  expect(container.querySelector(".study-reason p")?.textContent).toBe(step.why);
+  expect(container.querySelector(".study-reason p")?.textContent).toBe(plainStudyText(step.why));
   expect(container.querySelector(".study-reason")?.closest("details")).toBeNull();
   await click("Praticar"); return step;
 }
@@ -95,7 +96,7 @@ describe("teaching before occasional practice", () => {
     for (const { step } of explanations) {
       await lesson(step.id);
       const previousAcknowledgements = acknowledged.mock.calls.length;
-      expect(container.querySelector(".study-reason p")?.textContent).toBe(step.why);
+      expect(container.querySelector(".study-reason p")?.textContent).toBe(plainStudyText(step.why));
       expect(container.querySelector(".study-reason")?.closest("details")).toBeNull();
       const examples = [...container.querySelectorAll(".study-examples li")];
       expect(examples).toHaveLength(step.examples?.length ?? 0);
@@ -273,7 +274,7 @@ describe("writing in the sentence", () => {
 describe("help and deliberate navigation", () => {
   it("teaches the reason and contrasts before the optional practice action", async () => {
     const step = await lesson("mine-your");
-    expect(container.querySelector(".study-reason p")?.textContent).toBe(step.why);
+    expect(container.querySelector(".study-reason p")?.textContent).toBe(plainStudyText(step.why));
     expect(container.querySelector(".study-reason")?.closest("details")).toBeNull();
     expect(container.querySelectorAll(".study-examples li")).toHaveLength(step.examples!.length);
     expect(container.querySelector(".study-examples")?.closest("details")).toBeNull();
@@ -288,7 +289,7 @@ describe("help and deliberate navigation", () => {
     expect(completed).toHaveBeenCalledExactlyOnceWith(true);
     expect(container.querySelector(".study-support")).toBeNull();
     const result = await openDisclosure("details.study-result-detail", "Entender a resposta");
-    expect(result.querySelector("p")?.textContent).toBe(step.practice.explanation);
+    expect(result.querySelector("p")?.textContent).toBe(plainStudyText(step.practice.explanation));
     await click("Rever explicação");
     expect(container.querySelector(".study-quote [lang=en]")?.textContent).toBe(step.phrase);
     expect(container.querySelector(".study-task-path")?.classList.contains("study-sr-only")).toBe(true);
@@ -302,7 +303,7 @@ describe("help and deliberate navigation", () => {
       await card(step.id);
       expect(container.querySelector<HTMLDetailsElement>(".study-support")?.open).toBe(false);
       const support = await help();
-      expect(support.querySelector(".study-hint")?.textContent).toBe(step.practice.hint);
+      expect(support.querySelector(".study-hint")?.textContent).toBe(plainStudyText(step.practice.hint));
       expect(support.querySelector("small")?.textContent).toBe("Ver o modelo registra esta prática com apoio.");
       expect(step.practice.hint.length).toBeGreaterThan(45);
       expect(completed).not.toHaveBeenCalled();
@@ -356,4 +357,19 @@ describe("help and deliberate navigation", () => {
       expect(container.querySelector(".study-admin-skip")).toBeNull();
     }
   });
+});
+
+it("keeps the native submit control outside the reading region without losing its form association",async()=>{
+  await lesson("mine-your");
+  expect(container.querySelector(".study-card-reading .study-reason")).not.toBeNull();
+  expect(container.querySelector(".study-card-controls .study-card-actions")).not.toBeNull();
+  expect(container.querySelector(".study-card-reading .study-card-actions")).toBeNull();
+  await click("Praticar");
+  const form=container.querySelector<HTMLFormElement>(".study-card-reading form")!;
+  const button=container.querySelector<HTMLButtonElement>(".study-card-controls button[type=submit]")!;
+  expect(form).not.toBeNull(); expect(button).not.toBeNull();
+  expect(button.form).toBe(form);
+  expect(button.disabled).toBe(true);
+  expect(container.querySelector(".study-card-reading .study-checkbar")).toBeNull();
+  expect(completed).not.toHaveBeenCalled();
 });

@@ -1,4 +1,7 @@
 "use client";
+import { useVisibleHeight } from "@/components/core/use-visible-height";
+import { AutoFit } from "@/components/core/AutoFit";
+import { SpeakerLabel } from "@/features/demo/components/SpeakerLabel";
 import { BrowserText } from "@/components/i18n/BrowserText";
 
 
@@ -19,18 +22,20 @@ import { canPractice, practiceLearning } from "@/features/dashboard/practice-acc
 import { GuestProgressImport } from "@/features/dashboard/GuestProgressImport";
 import { playInteractionSound } from "@/components/interaction/sounds";
 import { StudyPieceBoard } from "./StudyPieceBoard";
+import { StudyText } from "./StudyText";
 
-const phrases = Object.values(audio).filter((phrase, index, all) => all.findIndex(other => normalizeAnswer(other.text) === normalizeAnswer(phrase.text)) === index);
+const phrases = Object.values(audio).filter((phrase, index, all) => all.findIndex(other => other.role === phrase.role && normalizeAnswer(other.text) === normalizeAnswer(phrase.text)) === index);
 
 /** Native controls remain lazy, and playing one published clip pauses the others. */
 export function pauseOtherStudyAudio(container: ParentNode, active: HTMLAudioElement) {
   container.querySelectorAll<HTMLAudioElement>("audio").forEach(element => { if (element !== active && !element.paused) element.pause(); });
 }
 export function CachedAudio({ references, publishedAudio }: { references: StudyStep["storyAudio"]; publishedAudio: PublishedAudioCatalog }) {
+  const [rate, setRate] = useState(1);
   return <>{references.map(reference => {
     const asset = audio[reference.id];
     const source = publishedAudio[reference.id]?.audioUrl;
-    return source ? <div key={reference.id} className="study-audio">{reference.scope === "excerpt" && <span>Ouvir fala completa da história</span>}<audio aria-label={`Ouvir fala completa: ${asset.text}`} controls preload="none" src={source} /></div> : null;
+    return source ? <div key={reference.id} className="study-audio"><SpeakerLabel role={asset.role} model={asset.role === "you"} /><label className="study-listening-speed">Ritmo de escuta<select aria-label={`Velocidade: ${asset.role === "you" ? "sua resposta" : "Lucas"} — ${asset.text}`} value={rate} onChange={event => setRate(Number(event.target.value))}><option value={1}>Lento (padrão)</option><option value={0.8}>Ainda mais lento</option></select></label>{reference.scope === "excerpt" && <span>Ouvir fala completa da história</span>}<audio ref={element => { if (element) { element.playbackRate = rate; element.preservesPitch = true; } }} aria-label={`Ouvir ${asset.role === "you" ? "modelo da sua resposta" : "Lucas"}: ${asset.text}`} controls preload="none" src={source} /></div> : null;
   })}</>;
 }
 
@@ -44,6 +49,8 @@ export function TheoryExperience({ publishedAudio, resumeStudy = false }: { publ
 }
 
 function ConnectedTheory({ publishedAudio, workspaceState, resumeStudy }: { publishedAudio: PublishedAudioCatalog; workspaceState: WorkspaceState; resumeStudy: boolean }) {
+  const shell = useRef<HTMLElement>(null);
+  useVisibleHeight(shell, "--study-height");
   const progress = decodeProgress(practiceLearning(workspaceState)?.studySnapshot ?? null);
   const guest = !workspaceState.workspace;
   const ready = true;
@@ -76,10 +83,10 @@ function ConnectedTheory({ publishedAudio, workspaceState, resumeStudy }: { publ
     if (progress.position === studySteps.length - 1) { setView("finished"); window.scrollTo({ top: 0, behavior: "instant" }); }
     else open(progress.position + 1);
   }
-  const lived = new Set(session.state?.transcript.map(line => normalizeAnswer(line.written ?? audio[line.audioId].text)) ?? []);
+  const lived = new Set(session.state?.transcript.map(line => `${line.role}:${normalizeAnswer(line.written ?? audio[line.audioId].text)}`) ?? []);
   const filtered = phrases.filter(item => `${item.text} ${item.meaning}`.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR")));
 
-  return <main className="study-shell" data-view={view} onPlay={event => pauseOtherStudyAudio(event.currentTarget, event.target as HTMLAudioElement)}>
+  return <main ref={shell} className="study-shell" data-view={view} onPlay={event => pauseOtherStudyAudio(event.currentTarget, event.target as HTMLAudioElement)}>
     <AppHeader current="study" guest={guest} />
     <GuestProgressImport state={workspaceState} />
     {view !== "study" && <nav className="study-breadcrumb" aria-label="Etapas da experiência"><Link href="/demo">A conversa</Link><ChevronRight size={14} aria-hidden="true" /><span aria-current="page">Meu estudo</span></nav>}
@@ -97,7 +104,7 @@ function ConnectedTheory({ publishedAudio, workspaceState, resumeStudy }: { publ
         <StudyCard onEdit={() => studentWorkspace.beginEdit(workspaceState.generation)} onAcknowledge={acknowledge} key={current.step.id} step={current.step} nextStepTitle={studySteps[progress.position + 1]?.step.title} headingRef={heading} publishedAudio={publishedAudio} onComplete={supported => save(completeStep(progress, current.step.id, supported))} onNext={next} onSkip={workspaceState.workspace?.account.role === "manager" ? next : undefined} onPrevious={progress.position > 0 ? () => open(progress.position - 1) : undefined} />
       </section>
     </div>}
-    {view === "phrases" && <section className="study-glossary"><button className="study-text-button" onClick={() => setView("overview")}><ArrowLeft size={16} aria-hidden="true" />Voltar aos blocos</button><p className="study-eyebrow">Para ter por perto</p><h1 ref={heading} tabIndex={-1}>O inglês da cafeteria.</h1><p>As expressões de todos os caminhos da história. Abra uma frase para consultar seu significado.</p><label htmlFor="phrase-search">Encontrar uma expressão em inglês ou português</label><input id="phrase-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Tente: mine, gostar, despedir…" /><p className="study-small" role="status"><BrowserText>{filtered.length}</BrowserText> <BrowserText>expressões</BrowserText></p><div className="study-phrase-list">{filtered.map(item => <details key={item.id}><summary><span lang="en"><BrowserText>{item.text}</BrowserText></span>{lived.has(normalizeAnswer(item.text)) && <small>Na sua conversa</small>}</summary><p><BrowserText>{item.meaning}</BrowserText></p><CachedAudio references={[{ id: item.id, scope: "full" }]} publishedAudio={publishedAudio} /></details>)}</div>{filtered.length === 0 && <p>Nenhuma expressão encontrada. Tente outra palavra.</p>}</section>}
+    {view === "phrases" && <section className="study-glossary"><button className="study-text-button" onClick={() => setView("overview")}><ArrowLeft size={16} aria-hidden="true" />Voltar aos blocos</button><p className="study-eyebrow">Para ter por perto</p><h1 ref={heading} tabIndex={-1}>O inglês da cafeteria.</h1><p>As falas de Lucas e os modelos para você responder. Cada card indica quem fala. Abra uma frase para consultar seu significado.</p><label htmlFor="phrase-search">Encontrar uma expressão em inglês ou português</label><input id="phrase-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Busque uma palavra ou expressão…" /><p className="study-small" role="status"><BrowserText>{filtered.length}</BrowserText> <BrowserText>falas</BrowserText></p><div className="study-phrase-list">{filtered.map(item => <details key={item.id} data-speaker={item.role}><summary><span className="study-phrase-speaker"><BrowserText>{item.role === "you" ? "Você · modelo da resposta" : "Lucas · fala dele"}</BrowserText></span><span lang="en" translate="no"><StudyText english>{item.text}</StudyText></span>{lived.has(`${item.role}:${normalizeAnswer(item.text)}`) && <small>Na sua conversa</small>}</summary><p><BrowserText>{item.meaning}</BrowserText></p><CachedAudio references={[{ id: item.id, scope: "full" }]} publishedAudio={publishedAudio} /></details>)}</div>{filtered.length === 0 && <p>Nenhuma expressão encontrada. Tente outra palavra.</p>}</section>}
     {view === "finished" && <section className="study-finished"><p className="study-eyebrow">Uma pausa para perceber</p><h1 ref={heading} tabIndex={-1}>{allDone ? <><BrowserText>Você concluiu</BrowserText><br /><BrowserText>este percurso.</BrowserText></> : <><BrowserText>Seu percurso</BrowserText><br /><BrowserText>até aqui.</BrowserText></>}</h1><p><BrowserText>Você concluiu </BrowserText><BrowserText>{completedCount}</BrowserText> <BrowserText>das </BrowserText><BrowserText>{studySteps.length}</BrowserText> <BrowserText>etapas. </BrowserText>{progress.supported.length > 0 ? <BrowserText>{`${progress.supported.length} etapas com registro de consulta ao modelo. Você pode revisitar os exemplos e as práticas.`}</BrowserText> : <BrowserText>{"Você pode voltar aos exemplos e às atividades quando quiser."}</BrowserText>}</p><div className="study-intro-actions"><button className="study-primary" onClick={() => open(Math.max(0, studySteps.findIndex(({ step }) => (step.mode === "practice" && progress.supported.includes(step.id)) || !progress.completed.includes(step.id))))}><RotateCcw size={18} aria-hidden="true" />{allDone ? <BrowserText>{"Revisitar o estudo"}</BrowserText> : <BrowserText>{"Continuar descobrindo"}</BrowserText>}</button><button onClick={() => setView("overview")}>Ver meu percurso</button><Link href="/demo">Rever a conversa</Link></div><p className="study-small">A marca de consulta registra apenas o modelo aberto naquela tentativa; explicações, pistas e feedback também são apoios. Este percurso é uma primeira exploração. A revisão e o uso em outras situações continuam fazendo parte do aprendizado.</p></section>}
     <footer className="study-footer"><span>BasedSpeak · Do encontro ao entendimento.</span><Link href="/demo">Voltar à conversa</Link></footer>
   </main>;
@@ -119,7 +126,10 @@ export function StudyCard({ step, publishedAudio, onComplete, onNext, onAcknowle
   const canCheck = inlineGaps ? gapAnswers.every(value => value.trim()) : practice.kind === "order" ? selected.length === practice.tokens.length : Boolean(inputAnswer.trim());
   const gapInputs = useRef<(HTMLInputElement | null)[]>([]);
   const practiceHeading = useRef<HTMLHeadingElement>(null);
+  const reading = useRef<HTMLDivElement>(null);
+  const practiceFormId = `study-practice-${step.id}`;
   useEffect(() => {
+    if (reading.current) reading.current.scrollTop = 0;
     if (phase === "practice") {
       practiceHeading.current?.focus({ preventScroll: true });
       window.scrollTo({ top: 0, behavior: "instant" });
@@ -154,7 +164,9 @@ export function StudyCard({ step, publishedAudio, onComplete, onNext, onAcknowle
   }
 
   return <article className="study-card" data-phase={phase} data-feedback={feedback ?? "none"}>
-    <h1 ref={headingRef} tabIndex={-1} className={phase === "practice" ? "study-sr-only" : undefined}><BrowserText>{step.title}</BrowserText></h1>
+    <AutoFit className="study-card-reading" shellRef={reading}>
+    <h1 ref={headingRef} tabIndex={-1} className={phase === "practice" ? "study-sr-only" : undefined}><StudyText>{step.title}</StudyText></h1>
+    <p className="study-language-key"><span aria-hidden="true" />Os destaques indicam palavras e expressões em inglês para estudar.</p>
     {step.mode === "practice" && <ol className="study-task-path study-sr-only" aria-label="Caminho deste passo">
       <li aria-current={phase === "learn" ? "step" : undefined}><span aria-hidden="true">1</span> Entenda</li>
       <li aria-current={phase === "practice" && !locked ? "step" : undefined}><span aria-hidden="true">2</span> <BrowserText>{actionLabel}</BrowserText></li>
@@ -162,7 +174,7 @@ export function StudyCard({ step, publishedAudio, onComplete, onNext, onAcknowle
     </ol>}
     {phase === "learn" ? <>
       <div className="study-quote">
-        <p lang="en"><BrowserText>{step.phrase}</BrowserText></p>
+        <p lang="en" translate="no"><StudyText english>{step.phrase}</StudyText></p>
         <span><BrowserText>{step.meaning}</BrowserText></span>
         {step.storyAudio.some(reference => publishedAudio[reference.id]?.audioUrl) && <details className="study-listen">
           <summary><Volume2 size={17} aria-hidden="true" />Ouvir exemplo<ChevronDown size={15} aria-hidden="true" /></summary>
@@ -171,42 +183,38 @@ export function StudyCard({ step, publishedAudio, onComplete, onNext, onAcknowle
       </div>
       <section className="study-reason" aria-label="Por que funciona">
         <h2><Lightbulb size={17} aria-hidden="true" />O porquê</h2>
-        <p><BrowserText>{step.why}</BrowserText></p>
+        <p><StudyText>{step.why}</StudyText></p>
       </section>
       {step.examples && <ul className="study-examples" aria-label="Veja a diferença">{step.examples.map(example => <li key={example.text}>
-        <div><span lang="en"><BrowserText>{example.text}</BrowserText></span><small><BrowserText>{example.meaning}</BrowserText></small></div>
-        {example.note && <span className="study-example-note"><BrowserText>{example.note}</BrowserText></span>}
+        <div><span lang="en" translate="no"><StudyText english>{example.text}</StudyText></span><small><BrowserText>{example.meaning}</BrowserText></small></div>
+        {example.note && <span className="study-example-note"><StudyText>{example.note}</StudyText></span>}
       </li>)}</ul>}
       <details className="study-deeper">
         <summary>Mais detalhes<ChevronDown size={17} aria-hidden="true" /></summary>
-        <p className="study-explanation"><BrowserText>{step.body}</BrowserText></p>
-        <p><BrowserText>{step.detail}</BrowserText></p>
+        <p className="study-explanation"><StudyText>{step.body}</StudyText></p>
+        <p><StudyText>{step.detail}</StudyText></p>
       </details>
-      <div className="study-card-actions">
-        {onPrevious && <button className="study-text-button" data-ui-sound="advance" onClick={onPrevious}><ArrowLeft size={16} aria-hidden="true" />Anterior</button>}
-        {step.mode === "practice" ? <button className="study-primary" data-ui-sound="advance" onClick={() => { onEdit?.(); setPhase("practice"); }}>Praticar<ArrowRight size={18} aria-hidden="true" /></button>
-          : <button className="study-primary" data-ui-sound="advance" onClick={onAcknowledge}>Entendi, continuar<ArrowRight size={18} aria-hidden="true" /></button>}
-      </div>
+
     </> : <>
-      <h2 className="study-task-heading" ref={practiceHeading} tabIndex={-1}><BrowserText>{practice.prompt}</BrowserText></h2>
-      <form onSubmit={check}>
-        {practice.context && <ol className="study-practice-context">{practice.context.map(item => <li key={item.text}><span lang="en"><BrowserText>{item.text}</BrowserText></span><small><BrowserText>{item.meaning}</BrowserText></small></li>)}</ol>}
-        {practice.instruction && <p className="study-practice-instruction"><BrowserText>{practice.instruction}</BrowserText></p>}
+      <h2 className="study-task-heading" ref={practiceHeading} tabIndex={-1}><StudyText>{practice.prompt}</StudyText></h2>
+      <form id={practiceFormId} onSubmit={check}>
+        {practice.context && <ol className="study-practice-context">{practice.context.map(item => <li key={item.text}><span lang="en" translate="no"><StudyText english>{item.text}</StudyText></span><small><BrowserText>{item.meaning}</BrowserText></small></li>)}</ol>}
+        {practice.instruction && <p className="study-practice-instruction"><StudyText>{practice.instruction}</StudyText></p>}
         {practice.kind === "choice" && !practice.placement && <fieldset className="study-choices"><legend className="study-sr-only">Escolha uma resposta</legend>{practice.options.map((option, index) => <label key={option} data-selected={answer === option}>
           <input type="radio" name={step.id} value={option} checked={answer === option} disabled={locked} onChange={() => { setAnswer(option); edit(); }} />
           <span className="study-choice-letter" aria-hidden="true"><BrowserText>{String.fromCharCode(65 + index)}</BrowserText></span>
-          <span><BrowserText>{option}</BrowserText></span>
+          <span><StudyText english={practice.optionLanguage === "en"}>{option}</StudyText></span>
         </label>)}</fieldset>}
         {practice.kind === "choice" && practice.placement && <StudyPieceBoard tokens={practice.options} selected={answer ? [practice.options.indexOf(answer)] : []} onChange={selection => { setAnswer(selection.length ? practice.options[selection[0]] : ""); edit(); }} slots={1} locked={locked} mode="reply" cue={practice.placement.cue} />}
         {practice.kind === "order" && <StudyPieceBoard tokens={tokens} selected={selected} onChange={selection => { setSelected(selection); edit(); }} slots={practice.tokens.length} locked={locked} />}
         {inlineGaps && <fieldset className="study-gap-list"><legend className="study-sr-only">Complete as lacunas nas frases</legend>{inlineGaps.map((gap, index) => <label className="study-gap-row" key={index}>
-          <span className="study-gap-sentence" lang="en">
+          <span className="study-gap-sentence" lang="en" translate="no">
             <BrowserText>{gap.before}</BrowserText>
             <input className="study-gap" ref={element => { gapInputs.current[index] = element; }} aria-describedby={feedback === "retry" && !isCorrectGap(gap, gapAnswers[index]) ? "gap-feedback-" + step.id + "-" + index : undefined} aria-label={"Lacuna " + (index + 1) + ": " + gap.meaning} aria-invalid={feedback === "retry" ? !isCorrectGap(gap, gapAnswers[index]) : undefined} style={{ width: Math.max(6, ...gap.answers.map(value => value.length + 3)) + "ch" }} lang="en" autoComplete="off" autoCapitalize="off" spellCheck={false} disabled={locked} value={gapAnswers[index]} onChange={event => { setGapAnswers(gapAnswers.map((value, position) => position === index ? event.target.value : value)); edit(); }} />
             <BrowserText>{gap.after}</BrowserText>
           </span>
           <small><BrowserText>{gap.meaning}</BrowserText></small>
-          {feedback === "retry" && !isCorrectGap(gap, gapAnswers[index]) && gap.feedback && <small className="study-gap-feedback" id={"gap-feedback-" + step.id + "-" + index}><BrowserText>{gap.feedback}</BrowserText></small>}
+          {feedback === "retry" && !isCorrectGap(gap, gapAnswers[index]) && gap.feedback && <small className="study-gap-feedback" id={"gap-feedback-" + step.id + "-" + index}><StudyText>{gap.feedback}</StudyText></small>}
         </label>)}</fieldset>}
         {practice.kind === "write" && !inlineGaps && <>
           <label className="study-input-label" htmlFor={"answer-" + step.id}>Sua resposta em inglês</label>
@@ -215,12 +223,12 @@ export function StudyCard({ step, publishedAudio, onComplete, onNext, onAcknowle
         {feedback && <div className="study-feedback" data-state={feedback}>
           <div role="status" aria-live="polite">
             <strong>{feedback === "retry" ? <BrowserText>Vamos ajustar</BrowserText> : feedback === "model" ? <BrowserText>Com apoio</BrowserText> : <><Check size={18} aria-hidden="true" /><BrowserText>Certo.</BrowserText></>}</strong>
-            {feedback === "retry" && <p><BrowserText>{inlineGaps ? "Ajuste a lacuna destacada." : practiceFeedback(practice, inputAnswer)}</BrowserText></p>}
-            {locked && <p><BrowserText>{step.why}</BrowserText></p>}
+            {feedback === "retry" && <p><StudyText>{inlineGaps ? "Ajuste a lacuna destacada." : practiceFeedback(practice, inputAnswer)}</StudyText></p>}
+            {locked && <p><StudyText>{step.why}</StudyText></p>}
           </div>
           {locked && <details className="study-result-detail">
             <summary>Entender a resposta<ChevronDown size={16} aria-hidden="true" /></summary>
-            <p><BrowserText>{practice.explanation}</BrowserText></p>
+            <p><StudyText>{practice.explanation}</StudyText></p>
             <button type="button" className="study-text-button" onClick={() => setPhase("learn")}>Rever explicação</button>
           </details>}
         </div>}
@@ -228,7 +236,7 @@ export function StudyCard({ step, publishedAudio, onComplete, onNext, onAcknowle
           <details className="study-support">
             <summary><Lightbulb size={17} aria-hidden="true" />Ajuda<ChevronDown size={15} aria-hidden="true" /></summary>
             <div className="study-support-content">
-              <p className="study-hint"><BrowserText>{practice.hint}</BrowserText></p>
+              <p className="study-hint"><StudyText>{practice.hint}</StudyText></p>
               <div className="study-support-actions">
                 <button type="button" className="study-text-button" onClick={() => setPhase("learn")}>Rever explicação</button>
                 <button type="button" className="study-text-button" onClick={reveal}>Ver modelo</button>
@@ -236,15 +244,29 @@ export function StudyCard({ step, publishedAudio, onComplete, onNext, onAcknowle
               <small>Ver o modelo registra esta prática com apoio.</small>
             </div>
           </details>
-          <div className="study-checkbar"><button className="study-primary" data-ui-sound="none" disabled={!canCheck}>Conferir<Check size={18} aria-hidden="true" /></button></div>
+
         </>}
       </form>
-      {locked && <div className="study-next">
+
+    </>}
+    </AutoFit>
+    <div className="study-card-controls" key={`${phase}:${locked ? "locked" : "open"}`}>
+      {phase === "learn" ? <>
+      <div className="study-card-actions">
+        {onPrevious && <button className="study-text-button" data-ui-sound="advance" onClick={onPrevious}><ArrowLeft size={16} aria-hidden="true" />Anterior</button>}
+        {step.mode === "practice" ? <button className="study-primary" data-ui-sound="advance" onClick={() => { onEdit?.(); setPhase("practice"); }}>Praticar<ArrowRight size={18} aria-hidden="true" /></button>
+          : <button className="study-primary" data-ui-sound="advance" onClick={onAcknowledge}>Entendi, continuar<ArrowRight size={18} aria-hidden="true" /></button>}
+      </div>
+      </> : locked ? <>
+      <div className="study-next">
         {nextStepTitle && <p className="study-next-preview"><BrowserText>{"A seguir: " + nextStepTitle}</BrowserText></p>}
         <button className="study-text-button" onClick={retry}>Tentar outra vez</button>
         <button className="study-primary" data-ui-sound="advance" onClick={onNext}>Continuar<ArrowRight size={18} aria-hidden="true" /></button>
-      </div>}
-    </>}
+      </div>
+      </> : <>
+          <div className="study-checkbar"><button type="submit" form={practiceFormId} className="study-primary" data-ui-sound="none" disabled={!canCheck}>Conferir<Check size={18} aria-hidden="true" /></button></div>
+      </>}
     {onSkip && !locked && <button type="button" className="study-text-button study-admin-skip" data-ui-sound="advance" onClick={onSkip}>Avançar sem concluir (ADM)<ArrowRight size={16} aria-hidden="true" /></button>}
+    </div>
   </article>;
 }

@@ -31,6 +31,7 @@ export function PresentationGate({ children }: { children: (review: () => void) 
     setLoading(true); setError(""); setUnauthenticated(false);
     try {
       const response = await fetch("/api/student/presentation", { credentials: "same-origin", cache: "no-store", signal });
+      if (signal?.aborted || ticket !== epoch.current) return;
       if (response.status === 401) { setUnauthenticated(true); throw new Error("SESSION_EXPIRED"); }
       if (!response.ok) throw new Error("PRESENTATION_UNAVAILABLE");
       const value = parsePresentationStatus(await response.json());
@@ -46,7 +47,7 @@ export function PresentationGate({ children }: { children: (review: () => void) 
   }, [load]);
 
   useEffect(()=>{
-    const changed=()=>{void load();};
+    const changed=()=>{setReview(false);void load();};
     window.addEventListener("basedspeak.presentation.changed",changed);
     const storage=(e:StorageEvent)=>{if(e.key === "basedspeak.test-progress.changed")changed();};
     window.addEventListener("storage",storage);
@@ -71,6 +72,7 @@ export function PresentationGate({ children }: { children: (review: () => void) 
         headers: { "Content-Type": "application/json", "X-Presentation-Uid": status.uid },
         body: JSON.stringify({ completed: true, revision:status.revision??0 }),
       });
+      if (ticket !== epoch.current) return;
       if (response.status === 401 || response.status === 409) { setUnauthenticated(true); throw new Error("SESSION_CHANGED"); }
       if (!response.ok) throw new Error("PRESENTATION_SAVE_FAILED");
       const saved = parsePresentationStatus(await response.json());

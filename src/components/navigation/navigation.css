@@ -30,6 +30,14 @@
 .app-header :focus-visible { outline:3px solid var(--ink); outline-offset:3px; }
 .app-header[data-reduced-motion="true"],.app-header[data-reduced-motion="true"] summary { transition:none; }
 @media(max-width:760px) { :root { --app-nav-height:64px; } .app-header { gap:16px; } .app-header .brand { font-size:21px; } .app-header-panel,.app-header-name { display:none; } .app-header-menu>summary { padding-inline:11px; } }
+/* Keep the owner's labelled test control beside Menu at narrow phone widths. */
+@media(max-width:390px) {
+  .app-header:has(.test-controls-trigger) { gap:8px; }
+  .app-header:has(.test-controls-trigger) .brand { font-size:17px; }
+  .app-header:has(.test-controls-trigger) .brand-mark { margin-right:6px; }
+  .app-header:has(.test-controls-trigger) .app-header-tools { gap:8px; flex-shrink:0; }
+  .app-header:has(.test-controls-trigger) .app-header-menu>summary { gap:6px; padding-inline:8px; }
+}
 
 .journey-transition { position:fixed; inset:var(--app-nav-height) 0 0; z-index:200; background:#191919; color:#f4f0e8; font-family:var(--font-geist-sans),Arial,sans-serif; display:grid; place-items:center; padding:28px; isolation:isolate; animation:journey-cover .32s cubic-bezier(.22,1,.36,1) both; }
 .journey-transition-content { width:min(650px,100%); }

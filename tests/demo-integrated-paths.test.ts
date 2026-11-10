@@ -158,7 +158,7 @@ class Journey {
       expect(catalog[node.next].kind).toBe("end");
     } else {
       if (node.next === "p4.new-cup") {
-        expect(presentationCards(catalog[node.next], sent)[0].context).toContain("BASEDSPEAK");
+        expect(presentationCards(catalog[node.next], sent)[0].context).toContain("que é seu");
         expect(listeningTarget(sent)).toBeNull();
       } else {
         expect(listeningTarget(sent)?.kind).toBe("lucas");

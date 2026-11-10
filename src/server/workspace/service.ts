@@ -1,6 +1,6 @@
 import "server-only";
 import { LearningConflictError } from "./conflict";
-import { isTestOwner } from "@/server/superuser/policy";
+import { isTestOwner, isTestOwnerUid, requireTestOwner } from "@/server/superuser/policy";
 import { getAdminAuth, getAdminDb } from "@/server/firebase";
 import type { RequestPrincipal } from "@/server/auth/principal";
 import type { LiveClassBooking } from "@/contracts/live-class";
@@ -84,7 +84,9 @@ export async function createConversation(principal: RequestPrincipal, body: Reco
   const subject = textField(body.subject, "Assunto", 160);
   const message = textField(body.body, "Mensagem", 4000);
   const evaluation = subject === "Avaliação da conversa da cafeteria";
-  if (evaluation && (!Number.isSafeInteger(body.learningRevision) || Number(body.learningRevision)<0)) throw new RequestPayloadError("Atualize a conversa antes de avaliar.");
+  const testOwner = isTestOwnerUid(principal.uid);
+  if (testOwner) await requireTestOwner(principal);
+  if ((evaluation || testOwner) && (!Number.isSafeInteger(body.learningRevision) || Number(body.learningRevision)<0)) throw new RequestPayloadError("Atualize a conversa antes de enviar.");
   await consumeRateLimit({ namespace: "teacher-contact", identifier: principal.uid, limit: 20, windowMs: 60 * 60 * 1000 });
   const profile = (await userRef(principal.uid).get()).data() || {};
   const at = new Date().toISOString(), ref = conversationsRef().doc();
@@ -95,10 +97,12 @@ export async function createConversation(principal: RequestPrincipal, body: Reco
     batch.create(studentActivityRef(principal.uid).doc(), { kind: "contact", title: `Mensagem enviada ao professor: ${subject}`, at });
     return writeOperationalNotifications(batch, [{ kind: "student_message", userId: principal.uid, userName: name, userEmail: principal.email || "", occurredAt: at, entityId: ref.id }]);
   };
-  const notificationIds = evaluation ? await getAdminDb().runTransaction(async tx=>{
+  // The owner's ordinary messages must serialize against Apagar tudo too. A
+  // message started on an old device must never recreate the cleared journey.
+  const notificationIds = evaluation || testOwner ? await getAdminDb().runTransaction(async tx=>{
     const saved = await tx.get(learningRef(principal.uid));
     const learning = learningFromData(saved.data());
-    if (learning.testMode || learning.revision !== body.learningRevision) throw new RequestAuthError("Percurso de teste ou conversa alterada: avaliação não enviada.",409);
+    if (learning.revision !== body.learningRevision || (evaluation && learning.testMode)) throw new RequestAuthError("Percurso alterado ou avaliação de teste: mensagem não enviada. Atualize antes de continuar.",409);
     return write(tx);
   }) : await (async()=>{const batch=getAdminDb().batch();const ids=write(batch);await batch.commit();return ids;})();
   scheduleOperationalNotifications(notificationIds);

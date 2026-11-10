@@ -1,5 +1,7 @@
 # Controles exclusivos de teste — 02/11/2026
 
+> Histórico da implementação de 02/11. O pedido posterior de 04/11 alterou **Apagar tudo**: agora remove também mensagens, atividades e agendamentos da única conta proprietária. As descrições de preservação de reservas/mensagens abaixo documentam o comportamento anterior. Consulte [Reset completo da conta de teste](RESET-CONTA-TESTE-2026-11-04.md) para o contrato vigente, limites e sincronização entre aparelhos.
+
 ## Identidade e limites
 
 A única identidade autorizada é a conta Firebase já existente solicitada por Roger. O UID foi localizado por `getUserByEmail`, com e-mail verificado e conta habilitada. A política `src/server/superuser/policy.ts` exige simultaneamente o UID fixado no servidor, o e-mail canônico atual, verificação e conta habilitada. Nenhum UID, e-mail, papel ou flag enviados pelo navegador concede acesso. Um papel de manager, sozinho, não concede acesso.

@@ -1,0 +1,2086 @@
+{
+  "sourceDeployment": "dpl_54pjvwFNGC9mNzExge33hBUrPqon",
+  "nodes": [
+    {
+      "id": "p1.first",
+      "kind": "scene",
+      "part": 1,
+      "image": "V01",
+      "heard": [],
+      "next": "p1.context",
+      "presentation": "title",
+      "button": "Avançar",
+      "helpCount": 0
+    },
+    {
+      "id": "p1.context",
+      "kind": "scene",
+      "part": 1,
+      "image": "V01",
+      "heard": [],
+      "next": "p1.lucas",
+      "presentation": "context",
+      "button": "Começar a história",
+      "helpCount": 0
+    },
+    {
+      "id": "p1.lucas",
+      "kind": "scene",
+      "part": 1,
+      "image": "V01",
+      "heard": [
+        "C01"
+      ],
+      "next": "p2.prompt",
+      "presentation": "dialogue",
+      "button": "Entender a pergunta",
+      "helpCount": 0
+    },
+    {
+      "id": "p2.prompt",
+      "kind": "scene",
+      "part": 2,
+      "image": "V02",
+      "heard": [],
+      "next": "p2.question",
+      "presentation": "prompt",
+      "button": "Ver a pergunta e as opções",
+      "helpCount": 0
+    },
+    {
+      "id": "p2.question",
+      "kind": "comprehension",
+      "part": 2,
+      "image": "V02",
+      "next": "p2.send",
+      "helpCount": 1
+    },
+    {
+      "id": "p2.send",
+      "kind": "response",
+      "part": 2,
+      "image": "V02",
+      "next": "p2.reaction",
+      "response": "U01",
+      "mode": "blocks",
+      "blocks": [
+        {
+          "id": "mine",
+          "text": "mine"
+        },
+        {
+          "id": "no",
+          "text": "No"
+        },
+        {
+          "id": "negative",
+          "text": "it’s not"
+        },
+        {
+          "id": "positive",
+          "text": "it’s"
+        }
+      ],
+      "answer": [
+        "no",
+        "negative",
+        "mine"
+      ],
+      "helpCount": 3
+    },
+    {
+      "id": "p2.reaction",
+      "kind": "scene",
+      "part": 2,
+      "image": "V03",
+      "heard": [
+        "C02"
+      ],
+      "next": "p3.prompt",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p3.prompt",
+      "kind": "scene",
+      "part": 3,
+      "image": "V03",
+      "heard": [],
+      "next": "p3.intent",
+      "presentation": "prompt",
+      "button": "Ver minhas opções",
+      "helpCount": 0
+    },
+    {
+      "id": "p3.intent",
+      "kind": "choice",
+      "part": 3,
+      "image": "V03",
+      "heard": [],
+      "helpCount": 0,
+      "choices": [
+        {
+          "id": "ask",
+          "label": "Perguntar o que ele pediu",
+          "next": "p3.ask"
+        },
+        {
+          "id": "okay",
+          "label": "Dizer que está tudo bem",
+          "next": "p3.okay"
+        }
+      ]
+    },
+    {
+      "id": "p3.ask",
+      "kind": "response",
+      "part": 3,
+      "image": "V03",
+      "next": "p4.order",
+      "response": "U02",
+      "mode": "blocks",
+      "teach": true,
+      "blocks": [
+        {
+          "id": "order",
+          "text": "order?"
+        },
+        {
+          "id": "what",
+          "text": "What did you"
+        }
+      ],
+      "answer": [
+        "what",
+        "order"
+      ],
+      "helpCount": 3
+    },
+    {
+      "id": "p3.okay",
+      "kind": "response",
+      "part": 3,
+      "image": "V03",
+      "next": "p4.new-cup",
+      "response": "U03",
+      "mode": "whole",
+      "helpCount": 1
+    },
+    {
+      "id": "p4.order",
+      "kind": "scene",
+      "part": 4,
+      "image": "V03",
+      "heard": [
+        "C03"
+      ],
+      "next": "p4.same",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p4.same",
+      "kind": "response",
+      "part": 4,
+      "image": "V03",
+      "next": "p4.nice-a",
+      "response": "U04",
+      "mode": "whole",
+      "helpCount": 1
+    },
+    {
+      "id": "p4.nice-a",
+      "kind": "scene",
+      "part": 4,
+      "image": "V03",
+      "heard": [
+        "C04"
+      ],
+      "next": "p4.arrival-a",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p4.arrival-a",
+      "kind": "scene",
+      "part": 4,
+      "image": "V04",
+      "heard": [
+        "C05"
+      ],
+      "next": "p5.taste",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p4.new-cup",
+      "kind": "scene",
+      "part": 4,
+      "image": "V04",
+      "heard": [
+        "C01"
+      ],
+      "next": "p4.mine",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p4.mine",
+      "kind": "response",
+      "part": 4,
+      "image": "V04",
+      "next": "p4.nice-b",
+      "response": "U05",
+      "mode": "blocks",
+      "blocks": [
+        {
+          "id": "mine",
+          "text": "mine"
+        },
+        {
+          "id": "negative",
+          "text": "it’s not"
+        },
+        {
+          "id": "yes",
+          "text": "Yes"
+        },
+        {
+          "id": "positive",
+          "text": "it’s"
+        }
+      ],
+      "answer": [
+        "yes",
+        "positive",
+        "mine"
+      ],
+      "helpCount": 3
+    },
+    {
+      "id": "p4.nice-b",
+      "kind": "scene",
+      "part": 4,
+      "image": "V04",
+      "heard": [
+        "C04"
+      ],
+      "next": "p4.arrival-b",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p4.arrival-b",
+      "kind": "scene",
+      "part": 4,
+      "image": "V05",
+      "heard": [
+        "C05"
+      ],
+      "next": "p5.taste",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p5.taste",
+      "kind": "scene",
+      "part": 5,
+      "image": "V05",
+      "heard": [
+        "C06"
+      ],
+      "next": "p5.opinion",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p5.opinion",
+      "kind": "choice",
+      "part": 5,
+      "image": "V05",
+      "heard": [
+        "C07"
+      ],
+      "helpCount": 1,
+      "choices": [
+        {
+          "id": "like",
+          "label": "Sim, eu gosto",
+          "next": "p5.like"
+        },
+        {
+          "id": "not",
+          "label": "Não muito",
+          "next": "p5.not"
+        }
+      ]
+    },
+    {
+      "id": "p5.like",
+      "kind": "response",
+      "part": 5,
+      "image": "V05",
+      "next": "p5.reaction-like",
+      "response": "U06",
+      "mode": "blocks",
+      "teach": true,
+      "blocks": [
+        {
+          "id": "it",
+          "text": "it"
+        },
+        {
+          "id": "like",
+          "text": "I like"
+        }
+      ],
+      "answer": [
+        "like",
+        "it"
+      ],
+      "helpCount": 3
+    },
+    {
+      "id": "p5.not",
+      "kind": "response",
+      "part": 5,
+      "image": "V05",
+      "next": "p5.reaction-not",
+      "response": "U07",
+      "mode": "whole",
+      "helpCount": 1
+    },
+    {
+      "id": "p5.reaction-like",
+      "kind": "scene",
+      "part": 5,
+      "image": "V05",
+      "heard": [
+        "C08"
+      ],
+      "next": "p6.warn",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p5.reaction-not",
+      "kind": "scene",
+      "part": 5,
+      "image": "V05",
+      "heard": [
+        "C09"
+      ],
+      "next": "p6.warn",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p6.warn",
+      "kind": "response",
+      "part": 6,
+      "image": "V06",
+      "next": "p6.safe",
+      "response": "U08",
+      "mode": "whole",
+      "button": "Avisar",
+      "helpCount": 1
+    },
+    {
+      "id": "p6.safe",
+      "kind": "scene",
+      "part": 6,
+      "image": "V07",
+      "heard": [
+        "C10",
+        "C11"
+      ],
+      "next": "p7.tired",
+      "button": "Continuar",
+      "helpCount": 2
+    },
+    {
+      "id": "p7.tired",
+      "kind": "response",
+      "part": 7,
+      "image": "V08",
+      "heard": [
+        "C12"
+      ],
+      "next": "p7.work",
+      "response": "U09",
+      "mode": "recall",
+      "helpCount": 2
+    },
+    {
+      "id": "p7.work",
+      "kind": "scene",
+      "part": 7,
+      "image": "V08",
+      "heard": [
+        "C13"
+      ],
+      "next": "p7.opinion",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p7.opinion",
+      "kind": "choice",
+      "part": 7,
+      "image": "V08",
+      "heard": [],
+      "helpCount": 0,
+      "choices": [
+        {
+          "id": "too",
+          "label": "Também estou cansado",
+          "next": "p7.too"
+        },
+        {
+          "id": "not",
+          "label": "Não muito",
+          "next": "p7.not"
+        }
+      ]
+    },
+    {
+      "id": "p7.too",
+      "kind": "response",
+      "part": 7,
+      "image": "V08",
+      "next": "p7.long-day",
+      "response": "U04",
+      "mode": "recall",
+      "helpCount": 1
+    },
+    {
+      "id": "p7.not",
+      "kind": "response",
+      "part": 7,
+      "image": "V08",
+      "next": "p7.lucky",
+      "response": "U07",
+      "mode": "recall",
+      "helpCount": 1
+    },
+    {
+      "id": "p7.long-day",
+      "kind": "scene",
+      "part": 7,
+      "image": "V08",
+      "heard": [
+        "C14"
+      ],
+      "next": "p8.table",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p7.lucky",
+      "kind": "scene",
+      "part": 7,
+      "image": "V08",
+      "heard": [
+        "C15"
+      ],
+      "next": "p8.table",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p8.table",
+      "kind": "scene",
+      "part": 8,
+      "image": "V09",
+      "heard": [
+        "C16",
+        "C17"
+      ],
+      "next": "p8.accept",
+      "button": "Responder ao convite",
+      "helpCount": 2
+    },
+    {
+      "id": "p8.accept",
+      "kind": "response",
+      "part": 8,
+      "image": "V09",
+      "next": "p8.topic",
+      "response": "U10",
+      "mode": "whole",
+      "helpCount": 1
+    },
+    {
+      "id": "p8.topic",
+      "kind": "choice",
+      "part": 8,
+      "image": "V10",
+      "heard": [
+        "C04"
+      ],
+      "helpCount": 1,
+      "choices": [
+        {
+          "id": "english",
+          "label": "Contar que você está aprendendo inglês",
+          "next": "p8.english"
+        },
+        {
+          "id": "job",
+          "label": "Perguntar se ele gosta do trabalho",
+          "next": "p8.job"
+        }
+      ]
+    },
+    {
+      "id": "p8.english",
+      "kind": "response",
+      "part": 8,
+      "image": "V11",
+      "next": "p8.nice",
+      "response": "U11",
+      "mode": "blocks",
+      "teach": true,
+      "blocks": [
+        {
+          "id": "english",
+          "text": "English"
+        },
+        {
+          "id": "learning",
+          "text": "I’m learning"
+        }
+      ],
+      "answer": [
+        "learning",
+        "english"
+      ],
+      "helpCount": 3
+    },
+    {
+      "id": "p8.nice",
+      "kind": "scene",
+      "part": 8,
+      "image": "V11",
+      "heard": [
+        "C18"
+      ],
+      "next": "p9.english-opinion",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p8.job",
+      "kind": "response",
+      "part": 8,
+      "image": "V10",
+      "next": "p8.job-reaction",
+      "response": "U12",
+      "mode": "recombine",
+      "blocks": [
+        {
+          "id": "job",
+          "text": "your job"
+        }
+      ],
+      "answer": [
+        "job"
+      ],
+      "skeleton": "Do you like ___?",
+      "helpCount": 3
+    },
+    {
+      "id": "p8.job-reaction",
+      "kind": "scene",
+      "part": 8,
+      "image": "V10",
+      "heard": [
+        "C19"
+      ],
+      "next": "p9.break",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.english-opinion",
+      "kind": "choice",
+      "part": 9,
+      "image": "V10",
+      "heard": [
+        "C07"
+      ],
+      "helpCount": 1,
+      "choices": [
+        {
+          "id": "like",
+          "label": "Sim",
+          "next": "p9.english-like"
+        },
+        {
+          "id": "not",
+          "label": "Não muito",
+          "next": "p9.english-not"
+        }
+      ]
+    },
+    {
+      "id": "p9.english-like",
+      "kind": "response",
+      "part": 9,
+      "image": "V10",
+      "next": "p9.english-positive",
+      "response": "U06",
+      "mode": "recall",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.english-not",
+      "kind": "response",
+      "part": 9,
+      "image": "V10",
+      "next": "p9.english-negative",
+      "response": "U07",
+      "mode": "recall",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.english-positive",
+      "kind": "scene",
+      "part": 9,
+      "image": "V10",
+      "heard": [
+        "C20"
+      ],
+      "next": "p9.cafe",
+      "button": "Perguntar se ele gosta daqui",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.english-negative",
+      "kind": "scene",
+      "part": 9,
+      "image": "V10",
+      "heard": [
+        "C21"
+      ],
+      "next": "p9.cafe",
+      "button": "Perguntar se ele gosta daqui",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.cafe",
+      "kind": "response",
+      "part": 9,
+      "image": "V10",
+      "next": "p9.cafe-reaction",
+      "response": "U13",
+      "mode": "recombine",
+      "blocks": [
+        {
+          "id": "cafe",
+          "text": "this café"
+        }
+      ],
+      "answer": [
+        "cafe"
+      ],
+      "skeleton": "Do you like ___?",
+      "helpCount": 3
+    },
+    {
+      "id": "p9.cafe-reaction",
+      "kind": "scene",
+      "part": 9,
+      "image": "V10",
+      "heard": [
+        "C22"
+      ],
+      "next": "p9.pause",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.break",
+      "kind": "scene",
+      "part": 9,
+      "image": "V10",
+      "heard": [
+        "C23"
+      ],
+      "next": "p9.cafe-opinion",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.cafe-opinion",
+      "kind": "choice",
+      "part": 9,
+      "image": "V10",
+      "heard": [
+        "C24"
+      ],
+      "helpCount": 1,
+      "choices": [
+        {
+          "id": "like",
+          "label": "Sim",
+          "next": "p9.cafe-like"
+        },
+        {
+          "id": "not",
+          "label": "Não muito",
+          "next": "p9.cafe-not"
+        }
+      ]
+    },
+    {
+      "id": "p9.cafe-like",
+      "kind": "response",
+      "part": 9,
+      "image": "V10",
+      "next": "p9.work-positive",
+      "response": "U14",
+      "mode": "whole",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.cafe-not",
+      "kind": "response",
+      "part": 9,
+      "image": "V10",
+      "next": "p9.work-negative",
+      "response": "U07",
+      "mode": "recall",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.work-positive",
+      "kind": "scene",
+      "part": 9,
+      "image": "V10",
+      "heard": [
+        "C25"
+      ],
+      "next": "p9.pause",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.work-negative",
+      "kind": "scene",
+      "part": 9,
+      "image": "V10",
+      "heard": [
+        "C21"
+      ],
+      "next": "p9.pause",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.pause",
+      "kind": "choice",
+      "part": 9,
+      "image": "V10",
+      "heard": [],
+      "helpCount": 0,
+      "choices": [
+        {
+          "id": "stay",
+          "label": "Continuar conversando",
+          "next": "p9.stay"
+        },
+        {
+          "id": "go",
+          "label": "Começar a se despedir",
+          "next": "p9.go"
+        }
+      ]
+    },
+    {
+      "id": "p9.stay",
+      "kind": "response",
+      "part": 9,
+      "image": "V10",
+      "next": "p9.stay-reaction",
+      "response": "U15",
+      "mode": "blocks",
+      "teach": true,
+      "blocks": [
+        {
+          "id": "longer",
+          "text": "a little longer"
+        },
+        {
+          "id": "stay",
+          "text": "I can stay"
+        }
+      ],
+      "answer": [
+        "stay",
+        "longer"
+      ],
+      "helpCount": 3
+    },
+    {
+      "id": "p9.go",
+      "kind": "response",
+      "part": 9,
+      "image": "V10",
+      "next": "p9.go-reaction",
+      "response": "U16",
+      "mode": "blocks",
+      "teach": true,
+      "blocks": [
+        {
+          "id": "go",
+          "text": "go"
+        },
+        {
+          "id": "have",
+          "text": "I have to"
+        }
+      ],
+      "answer": [
+        "have",
+        "go"
+      ],
+      "helpCount": 3
+    },
+    {
+      "id": "p9.stay-reaction",
+      "kind": "scene",
+      "part": 9,
+      "image": "V10",
+      "heard": [
+        "C30"
+      ],
+      "next": "p10.quiet",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p9.go-reaction",
+      "kind": "scene",
+      "part": 9,
+      "image": "V10",
+      "heard": [
+        "C26"
+      ],
+      "next": "p10.contact",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p10.quiet",
+      "kind": "scene",
+      "part": 10,
+      "image": "V10",
+      "heard": [
+        "C27"
+      ],
+      "next": "p10.here",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p10.here",
+      "kind": "response",
+      "part": 10,
+      "image": "V10",
+      "next": "p10.here-reaction",
+      "response": "U17",
+      "mode": "recombine",
+      "blocks": [
+        {
+          "id": "here",
+          "text": "here"
+        }
+      ],
+      "answer": [
+        "here"
+      ],
+      "skeleton": "I like it ___",
+      "button": "Responder",
+      "helpCount": 3
+    },
+    {
+      "id": "p10.here-reaction",
+      "kind": "scene",
+      "part": 10,
+      "image": "V10",
+      "heard": [
+        "C25"
+      ],
+      "next": "p10.contact",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p10.contact",
+      "kind": "choice",
+      "part": 10,
+      "image": "V12",
+      "heard": [],
+      "helpCount": 0,
+      "choices": [
+        {
+          "id": "bye",
+          "label": "Apenas me despedir",
+          "next": "p10.farewell"
+        },
+        {
+          "id": "contact",
+          "label": "Sugerir manter contato",
+          "next": "p10.keep"
+        }
+      ]
+    },
+    {
+      "id": "p10.keep",
+      "kind": "response",
+      "part": 10,
+      "image": "V12",
+      "next": "p10.sure",
+      "response": "U18",
+      "mode": "blocks",
+      "teach": true,
+      "blocks": [
+        {
+          "id": "touch",
+          "text": "keep in touch?"
+        },
+        {
+          "id": "can",
+          "text": "Can we"
+        }
+      ],
+      "answer": [
+        "can",
+        "touch"
+      ],
+      "helpCount": 3
+    },
+    {
+      "id": "p10.sure",
+      "kind": "scene",
+      "part": 10,
+      "image": "V12",
+      "heard": [
+        "C28"
+      ],
+      "next": "p10.farewell",
+      "button": "Continuar",
+      "helpCount": 1
+    },
+    {
+      "id": "p10.farewell",
+      "kind": "response",
+      "part": 10,
+      "image": "V12",
+      "next": "p10.bye",
+      "response": "U19",
+      "mode": "whole",
+      "helpCount": 1
+    },
+    {
+      "id": "p10.bye",
+      "kind": "response",
+      "part": 10,
+      "image": "V12",
+      "heard": [
+        "C29"
+      ],
+      "next": "end",
+      "response": "U20",
+      "mode": "whole",
+      "helpCount": 1
+    },
+    {
+      "id": "end",
+      "kind": "end",
+      "part": 10,
+      "image": "V12",
+      "helpCount": 0
+    }
+  ],
+  "cards": {
+    "cafe-v7": {
+      "p1.first": [],
+      "p1.context": [],
+      "p1.lucas": [],
+      "p2.prompt": [],
+      "p2.question": [],
+      "p2.send": [],
+      "p2.reaction": [],
+      "p3.prompt": [],
+      "p3.intent": [],
+      "p3.ask": [],
+      "p3.okay": [],
+      "p4.order": [],
+      "p4.same": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p4.nice-a": [],
+      "p4.arrival-a": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p4.new-cup": [],
+      "p4.mine": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p4.nice-b": [],
+      "p4.arrival-b": [],
+      "p5.taste": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p5.opinion": [
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C07"
+          ]
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p5.like": [],
+      "p5.not": [],
+      "p5.reaction-like": [],
+      "p5.reaction-not": [],
+      "p6.warn": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p6.safe": [],
+      "p7.tired": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        },
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C12"
+          ]
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p7.work": [],
+      "p7.opinion": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p7.too": [],
+      "p7.not": [],
+      "p7.long-day": [],
+      "p7.lucky": [],
+      "p8.table": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p8.accept": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p8.topic": [
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C04"
+          ]
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p8.english": [],
+      "p8.nice": [],
+      "p8.job": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p8.job-reaction": [],
+      "p9.english-opinion": [
+        {
+          "presentation": "context"
+        },
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C07"
+          ]
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p9.english-like": [],
+      "p9.english-not": [],
+      "p9.english-positive": [],
+      "p9.english-negative": [],
+      "p9.cafe": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p9.cafe-reaction": [],
+      "p9.break": [],
+      "p9.cafe-opinion": [
+        {
+          "presentation": "context"
+        },
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C24"
+          ]
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p9.cafe-like": [],
+      "p9.cafe-not": [],
+      "p9.work-positive": [],
+      "p9.work-negative": [],
+      "p9.pause": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p9.stay": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p9.go": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p9.stay-reaction": [],
+      "p9.go-reaction": [],
+      "p10.quiet": [],
+      "p10.here": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p10.here-reaction": [],
+      "p10.contact": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p10.keep": [],
+      "p10.sure": [],
+      "p10.farewell": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p10.bye": [
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C29"
+          ]
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "end": []
+    },
+    "cafe-v8": {
+      "p1.first": [],
+      "p1.context": [],
+      "p1.lucas": [],
+      "p2.prompt": [],
+      "p2.question": [],
+      "p2.send": [],
+      "p2.reaction": [],
+      "p3.prompt": [],
+      "p3.intent": [],
+      "p3.ask": [],
+      "p3.okay": [],
+      "p4.order": [],
+      "p4.same": [
+        {
+          "presentation": "context"
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p4.nice-a": [],
+      "p4.arrival-a": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p4.new-cup": [
+        {
+          "presentation": "context"
+        }
+      ],
+      "p4.mine": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p4.nice-b": [],
+      "p4.arrival-b": [
+        {
+          "presentation": "context"
+        }
+      ],
+      "p5.taste": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p5.opinion": [
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C07"
+          ]
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p5.like": [],
+      "p5.not": [],
+      "p5.reaction-like": [],
+      "p5.reaction-not": [],
+      "p6.warn": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p6.safe": [],
+      "p7.tired": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        },
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C12"
+          ]
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p7.work": [],
+      "p7.opinion": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p7.too": [],
+      "p7.not": [],
+      "p7.long-day": [],
+      "p7.lucky": [],
+      "p8.table": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p8.accept": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p8.topic": [
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C04"
+          ]
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p8.english": [],
+      "p8.nice": [],
+      "p8.job": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p8.job-reaction": [],
+      "p9.english-opinion": [
+        {
+          "presentation": "context"
+        },
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C07"
+          ]
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p9.english-like": [],
+      "p9.english-not": [],
+      "p9.english-positive": [],
+      "p9.english-negative": [],
+      "p9.cafe": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p9.cafe-reaction": [],
+      "p9.break": [],
+      "p9.cafe-opinion": [
+        {
+          "presentation": "context"
+        },
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C24"
+          ]
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p9.cafe-like": [],
+      "p9.cafe-not": [],
+      "p9.work-positive": [],
+      "p9.work-negative": [],
+      "p9.pause": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p9.stay": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p9.go": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p9.stay-reaction": [],
+      "p9.go-reaction": [],
+      "p10.quiet": [],
+      "p10.here": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p10.here-reaction": [],
+      "p10.contact": [
+        {
+          "presentation": "title"
+        },
+        {
+          "presentation": "context"
+        }
+      ],
+      "p10.keep": [],
+      "p10.sure": [],
+      "p10.farewell": [
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "p10.bye": [
+        {
+          "presentation": "dialogue",
+          "heard": [
+            "C29"
+          ]
+        },
+        {
+          "presentation": "prompt"
+        }
+      ],
+      "end": []
+    }
+  },
+  "study": [
+    {
+      "id": "this-yours",
+      "mode": "explain",
+      "phrase": "Is this yours?",
+      "meaning": "Esse café é seu?",
+      "storyAudio": [
+        {
+          "id": "C01",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "choice",
+        "options": [
+          "Se você gosta do café.",
+          "Se o copo é seu.",
+          "Se você quer sair."
+        ],
+        "answer": "Se o copo é seu."
+      }
+    },
+    {
+      "id": "mine-your",
+      "mode": "practice",
+      "phrase": "Oh! This is mine.",
+      "meaning": "Ah! Este é meu.",
+      "storyAudio": [
+        {
+          "id": "C05",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "write",
+        "answers": [
+          "my mine your yours"
+        ],
+        "gaps": [
+          {
+            "before": "This is ",
+            "after": " coffee.",
+            "meaning": "Este é meu café.",
+            "answers": [
+              "my"
+            ],
+            "feedback": "Aqui, `coffee` vem depois da lacuna e a tradução diz ‘meu café’. Use a forma que acompanha o nome: `my coffee`."
+          },
+          {
+            "before": "It is ",
+            "after": ".",
+            "meaning": "É meu.",
+            "answers": [
+              "mine"
+            ],
+            "feedback": "O nome `coffee` já ficou entendido. `Mine` representa ‘o meu café’ inteiro: `It is mine.` — É meu."
+          },
+          {
+            "before": "Is this ",
+            "after": " coffee?",
+            "meaning": "Este é seu café?",
+            "answers": [
+              "your"
+            ],
+            "feedback": "A tradução diz ‘seu café’ e `coffee` vem depois da lacuna. Use a forma que acompanha o nome: `your coffee`."
+          },
+          {
+            "before": "Is it ",
+            "after": "?",
+            "meaning": "É seu?",
+            "answers": [
+              "yours"
+            ],
+            "feedback": "A pergunta não repete `coffee`. `Yours` já representa ‘o seu café’: `Is it yours?` — É seu?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "its-not",
+      "mode": "explain",
+      "phrase": "No, it's not mine.",
+      "meaning": "Não, não é meu.",
+      "storyAudio": [
+        {
+          "id": "U01",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "write",
+        "answers": [
+          "not"
+        ],
+        "gaps": [
+          {
+            "before": "No, it's ",
+            "after": " mine.",
+            "meaning": "Não, não é meu.",
+            "answers": [
+              "not"
+            ],
+            "feedback": "Você quer dizer ‘não é meu’. `Not` faz essa mudança dentro da frase: `it's not mine.` Complete só a palavra que falta."
+          }
+        ]
+      }
+    },
+    {
+      "id": "did-order",
+      "mode": "practice",
+      "phrase": "What did you order?",
+      "meaning": "O que você pediu?",
+      "storyAudio": [
+        {
+          "id": "U02",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "order",
+        "answer": "What did you order?",
+        "tokens": [
+          "order?",
+          "you",
+          "What",
+          "did"
+        ],
+        "distractors": [
+          "ordered?"
+        ]
+      }
+    },
+    {
+      "id": "iced-coffee",
+      "mode": "explain",
+      "phrase": "An iced coffee.",
+      "meaning": "Um café com gelo.",
+      "storyAudio": [
+        {
+          "id": "C03",
+          "scope": "excerpt"
+        }
+      ],
+      "practice": {
+        "kind": "choice",
+        "optionLanguage": "en",
+        "options": [
+          "a / an",
+          "an / a",
+          "an / an"
+        ],
+        "answer": "an / a"
+      }
+    },
+    {
+      "id": "and-you",
+      "mode": "explain",
+      "phrase": "An iced coffee. And you?",
+      "meaning": "Um café com gelo. E você?",
+      "storyAudio": [
+        {
+          "id": "C03",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "write",
+        "answers": [
+          "And you?",
+          "And you"
+        ]
+      }
+    },
+    {
+      "id": "really-too",
+      "mode": "explain",
+      "phrase": "Really? Me too!",
+      "meaning": "Sério? Eu também!",
+      "storyAudio": [
+        {
+          "id": "C08",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "choice",
+        "optionLanguage": "en",
+        "options": [
+          "Not really.",
+          "Really?",
+          "Me too."
+        ],
+        "answer": "Me too.",
+        "placement": {
+          "cue": "Lucas: “I like it.”"
+        }
+      }
+    },
+    {
+      "id": "sorry-okay",
+      "mode": "explain",
+      "phrase": "Oh! Sorry! — It's okay.",
+      "meaning": "Ah! Desculpa! — Tudo bem.",
+      "storyAudio": [
+        {
+          "id": "C02",
+          "scope": "full"
+        },
+        {
+          "id": "U03",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "choice",
+        "optionLanguage": "en",
+        "options": [
+          "It's okay.",
+          "Sorry!",
+          "Thanks!"
+        ],
+        "answer": "It's okay.",
+        "placement": {
+          "cue": "Lucas: “Sorry!”"
+        }
+      }
+    },
+    {
+      "id": "careful-close",
+      "mode": "practice",
+      "phrase": "Careful! — That was close.",
+      "meaning": "Cuidado! — Foi por pouco.",
+      "storyAudio": [
+        {
+          "id": "U08",
+          "scope": "full"
+        },
+        {
+          "id": "C11",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "choice",
+        "optionLanguage": "en",
+        "options": [
+          "Nice!",
+          "That was close.",
+          "Careful!"
+        ],
+        "answer": "Careful!"
+      }
+    },
+    {
+      "id": "like-it",
+      "mode": "explain",
+      "phrase": "I like it.",
+      "meaning": "Eu gosto disso.",
+      "storyAudio": [
+        {
+          "id": "U06",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "order",
+        "answer": "I like it.",
+        "tokens": [
+          "it.",
+          "I",
+          "like"
+        ],
+        "distractors": [
+          "am",
+          "of"
+        ]
+      }
+    },
+    {
+      "id": "do-you-like",
+      "mode": "practice",
+      "phrase": "Do you like your job?",
+      "meaning": "Você gosta do seu trabalho?",
+      "storyAudio": [
+        {
+          "id": "U12",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "order",
+        "answer": "Do you like this café?",
+        "tokens": [
+          "this",
+          "like",
+          "café?",
+          "Do",
+          "you"
+        ]
+      }
+    },
+    {
+      "id": "like-here",
+      "mode": "explain",
+      "phrase": "I like it here.",
+      "meaning": "Eu gosto daqui.",
+      "storyAudio": [
+        {
+          "id": "U17",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "choice",
+        "optionLanguage": "en",
+        "options": [
+          "I like English.",
+          "I like it here.",
+          "It's mine."
+        ],
+        "answer": "I like it here."
+      }
+    },
+    {
+      "id": "im-tired",
+      "mode": "practice",
+      "phrase": "I'm tired.",
+      "meaning": "Estou cansado ou cansada.",
+      "storyAudio": [
+        {
+          "id": "C12",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "write",
+        "answers": [
+          "I'm",
+          "I’m"
+        ],
+        "gaps": [
+          {
+            "before": "",
+            "after": " tired.",
+            "meaning": "Estou cansado ou cansada.",
+            "answers": [
+              "I'm",
+              "I am"
+            ],
+            "feedback": "Complete com ‘eu estou’: `I'm` ou `I am`. As duas formas dão a mesma frase completa: `I'm tired.` / `I am tired.`"
+          }
+        ]
+      }
+    },
+    {
+      "id": "learning",
+      "mode": "explain",
+      "phrase": "I'm learning English.",
+      "meaning": "Estou aprendendo inglês.",
+      "storyAudio": [
+        {
+          "id": "U11",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "order",
+        "answer": "I'm learning English.",
+        "tokens": [
+          "English.",
+          "learning",
+          "I'm"
+        ],
+        "distractors": [
+          "tired",
+          "learn"
+        ]
+      }
+    },
+    {
+      "id": "work-job",
+      "mode": "explain",
+      "phrase": "Too much work. — Long day.",
+      "meaning": "Trabalho demais. — Um dia longo.",
+      "storyAudio": [
+        {
+          "id": "C13",
+          "scope": "excerpt"
+        },
+        {
+          "id": "C14",
+          "scope": "excerpt"
+        }
+      ],
+      "practice": {
+        "kind": "choice",
+        "optionLanguage": "en",
+        "options": [
+          "I like my work, but I have a lot of work.",
+          "I like my job, but I have too much work.",
+          "I like my job, but I have too much job."
+        ],
+        "answer": "I like my job, but I have too much work."
+      }
+    },
+    {
+      "id": "sit-me",
+      "mode": "explain",
+      "phrase": "Sit with me?",
+      "meaning": "Senta comigo?",
+      "storyAudio": [
+        {
+          "id": "C17",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "choice",
+        "options": [
+          "Que você peça outro café.",
+          "Que você se sente com ela.",
+          "Que você vá embora."
+        ],
+        "answer": "Que você se sente com ela."
+      }
+    },
+    {
+      "id": "yeah-sure",
+      "mode": "explain",
+      "phrase": "Yeah, sure.",
+      "meaning": "Sim, claro.",
+      "storyAudio": [
+        {
+          "id": "U10",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "write",
+        "answers": [
+          "Sure!",
+          "Yeah, sure.",
+          "Yes, sure."
+        ]
+      }
+    },
+    {
+      "id": "can-sit",
+      "mode": "practice",
+      "phrase": "Can I sit here?",
+      "meaning": "Posso sentar aqui? · exemplo novo",
+      "storyAudio": [],
+      "practice": {
+        "kind": "order",
+        "answer": "Can I sit here?",
+        "tokens": [
+          "here?",
+          "I",
+          "sit",
+          "Can"
+        ]
+      }
+    },
+    {
+      "id": "stay-longer",
+      "mode": "explain",
+      "phrase": "I can stay a little longer.",
+      "meaning": "Posso ficar mais um pouco.",
+      "storyAudio": [
+        {
+          "id": "U15",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "order",
+        "answer": "I can stay a little longer.",
+        "tokens": [
+          "longer.",
+          "can",
+          "a",
+          "stay",
+          "I",
+          "little"
+        ]
+      }
+    },
+    {
+      "id": "have-go",
+      "mode": "practice",
+      "phrase": "I have to go.",
+      "meaning": "Tenho que ir.",
+      "storyAudio": [
+        {
+          "id": "U16",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "choice",
+        "optionLanguage": "en",
+        "options": [
+          "I can go.",
+          "I have to go.",
+          "I can stay."
+        ],
+        "answer": "I have to go."
+      }
+    },
+    {
+      "id": "break-quiet",
+      "mode": "explain",
+      "phrase": "I need a break. It's quiet here.",
+      "meaning": "Preciso de uma pausa. É tranquilo aqui.",
+      "storyAudio": [
+        {
+          "id": "C23",
+          "scope": "full"
+        },
+        {
+          "id": "C27",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "choice",
+        "optionLanguage": "en",
+        "options": [
+          "It's quiet here.",
+          "I need a break.",
+          "I like it here."
+        ],
+        "answer": "I need a break.",
+        "placement": {
+          "cue": "Você está cansado."
+        }
+      }
+    },
+    {
+      "id": "keep-touch",
+      "mode": "explain",
+      "phrase": "Can we keep in touch?",
+      "meaning": "Podemos manter contato?",
+      "storyAudio": [
+        {
+          "id": "U18",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "order",
+        "answer": "Can we keep in touch?",
+        "tokens": [
+          "touch?",
+          "we",
+          "in",
+          "Can",
+          "keep"
+        ]
+      }
+    },
+    {
+      "id": "nice-talking",
+      "mode": "explain",
+      "phrase": "Nice talking to you.",
+      "meaning": "Foi bom conversar com você.",
+      "storyAudio": [
+        {
+          "id": "U19",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "choice",
+        "options": [
+          "Ao avisar que um copo vai cair.",
+          "Ao encerrar uma conversa agradável.",
+          "Ao perguntar quem fez o pedido."
+        ],
+        "answer": "Ao encerrar uma conversa agradável."
+      }
+    },
+    {
+      "id": "you-too-bye",
+      "mode": "practice",
+      "phrase": "You too. Bye!",
+      "meaning": "Também gostei de conversar. Tchau!",
+      "storyAudio": [
+        {
+          "id": "C29",
+          "scope": "full"
+        }
+      ],
+      "practice": {
+        "kind": "write",
+        "answers": [
+          "You"
+        ],
+        "gaps": [
+          {
+            "before": "",
+            "after": " too. Bye!",
+            "meaning": "Também gostei de conversar. Tchau!",
+            "answers": [
+              "You"
+            ],
+            "feedback": "A pessoa se dirigiu a você ao dizer `Nice talking to you.` Para retribuir a gentileza, complete `You too.` — ‘Também gostei de conversar’."
+          }
+        ]
+      }
+    }
+  ]
+}

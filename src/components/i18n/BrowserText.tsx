@@ -5,6 +5,9 @@ import type { ReactNode } from "react";
  * changes, so an old translation cannot overwrite the new visible value.
  * This renders the source text only; the browser remains the translator. */
 export function BrowserText({ children }: { children: ReactNode }) {
+  // Empty live messages must remain truly empty for :empty and assistive tech.
+  // Keep whitespace-only fragments: callers also use this boundary inline.
+  if (children === "") return null;
   return typeof children === "string" || typeof children === "number"
     ? <span data-ui-text key={children}>{children}</span>
     : children;

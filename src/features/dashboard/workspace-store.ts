@@ -31,6 +31,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
   let loadPromise: Promise<void> | null = null;
   let writePromise: Promise<void> | null = null;
   let importPromise: Promise<void> | null = null;
+  let resetCheckPromise: Promise<void> | null = null;
   const recoveryKey = "basedspeak.learning.conflict.v1";
   let pending: Partial<Pick<SaveLearningInput, SnapshotKey>> = {};
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -41,6 +42,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
   let draftEdits = 0;
   let importing = false;
   let tweaking = false;
+  let activeControl: object | null = null;
   const listeners = new Set<() => void>();
   const guest = () => { try { return readGuestLearning(storage?.()); } catch { return readGuestLearning(); } };
   const permitted = (status: string) => status === "active" || status === "pending";
@@ -63,13 +65,18 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     } catch { clearRecovery(); return null; }
   };
   const forgetPending = () => { clearTimeout(timer); pending = {}; editing = false; clearCache(state.workspace); };
-  const replace = (workspace: StudentWorkspace, notice = "") => {
+  const replace = (workspace: StudentWorkspace, notice = "", control?: object) => {
     const previous = state.workspace;
     const changed = previous?.account.id !== workspace.account.id || previous.learning.revision !== workspace.learning.revision || previous.account.status !== workspace.account.status;
     const contentChanged = previous?.learning.demoSnapshot !== workspace.learning.demoSnapshot || previous?.learning.studySnapshot !== workspace.learning.studySnapshot;
     const approved = previous?.account.id === workspace.account.id && previous.account.status === "pending" && workspace.account.status === "active";
-    if (changed) { forgetPending(); clearRecovery(); ticket++; }
-    emit({ workspace, guestLearning: guest(), status: "ready", saving: false, error: "", notice: notice || (approved ? "Seu cadastro foi aprovado pelo professor." : previous && changed ? "Seu acesso ou progresso foi atualizado. O estado atual já está carregado." : state.notice), generation: state.generation + (changed || contentChanged ? 1 : 0) });
+    if (changed) {
+      forgetPending(); clearRecovery(); ticket++;
+      // Old requests may still finish, but cannot block or mutate the new epoch.
+      loadPromise = null; writePromise = null; importPromise = null; resetCheckPromise = null; importing = false;
+      if (activeControl !== control) { activeControl = null; tweaking = false; }
+    }
+    emit({ conflict: changed ? null : state.conflict, workspace, guestLearning: guest(), status: "ready", saving: false, error: "", notice: notice || (approved ? "Seu cadastro foi aprovado pelo professor." : previous && changed ? "Seu acesso ou progresso foi atualizado. O estado atual já está carregado." : state.notice), generation: state.generation + (changed || contentChanged ? 1 : 0) });
   };
   const read = () => fetcher("/api/student/workspace", { credentials: "same-origin", cache: "no-store" });
   const deny = (response: Response) => {
@@ -108,7 +115,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     const currentEdits = edits;
     const currentContactEdits = contactEdits;
     if (!background || (state.status !== "ready" && !state.guestLearning)) emit({ status: "loading", error: "" });
-    loadPromise = (async () => {
+    const loading = (async () => {
       try {
         const response = await read();
         if (currentTicket !== ticket || deny(response)) return;
@@ -119,7 +126,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
           if (permitted(workspace.account.status) && state.workspace?.account.id === workspace.account.id && state.workspace.learning.revision === workspace.learning.revision
             && (editing || edits !== currentEdits || Object.keys(pending).length || writePromise)) workspace.learning = state.workspace.learning;
           // A background read started before a confirmed send must not erase it.
-          if (state.workspace?.account.id === workspace.account.id && contactEdits !== currentContactEdits) workspace.conversations = state.workspace.conversations;
+          if (state.workspace?.account.id === workspace.account.id && state.workspace.learning.revision === workspace.learning.revision && contactEdits !== currentContactEdits) workspace.conversations = state.workspace.conversations;
           const recovered = readRecovery();
           replace(workspace);
           if (recovered?.uid === workspace.account.id && recovered.revision === workspace.learning.revision && permitted(workspace.account.status)) {
@@ -132,9 +139,43 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
           if (!state.workspace) emit({ status: "unauthenticated", guestLearning: guest(), saving: false, error: "", notice: "Não foi possível conectar sua conta. Você pode explorar a demo com o avanço salvo apenas neste navegador.", generation: state.generation + 1 });
           else emit({ status: "error", saving: false, error: error instanceof Error ? error.message : "Não foi possível carregar seu espaço." });
         }
-      } finally { loadPromise = null; }
+      }
     })();
-    return loadPromise;
+    loadPromise = loading;
+    try { await loading; } finally { if (loadPromise === loading) loadPromise = null; }
+  }
+
+  /** Owner controls can reset another device while its old save is still in flight. */
+  async function checkForReset() {
+    const owner = state.workspace;
+    if (!owner?.account.canTest) return;
+    if (resetCheckPromise) return resetCheckPromise;
+    const currentTicket = ticket;
+    const currentEdits = edits;
+    const currentContactEdits = contactEdits;
+    const checking = (async () => {
+      try {
+        const response = await read();
+        if (currentTicket !== ticket || deny(response)) return;
+        const remote = await payload(response) as StudentWorkspace;
+        if (currentTicket !== ticket || state.workspace?.account.id !== owner.account.id) return;
+        if (remote.account.id !== owner.account.id || remote.learning.revision !== owner.learning.revision || remote.account.status !== owner.account.status) {
+          replace(remote, "O estado da sua conta foi atualizado noutro aparelho. Carregamos o percurso atual.");
+          return;
+        }
+        // Ordinary saves must keep the current editing base and any form draft.
+        if (state.conflict) { await preserveConflict(state.workspace, state.conflict.local, remote); return; }
+        if (editing || edits !== currentEdits || Object.keys(pending).length || writePromise || importPromise || tweaking) remote.learning = state.workspace.learning;
+        if (contactEdits !== currentContactEdits) remote.conversations = state.workspace.conversations;
+        const saving = Boolean(Object.keys(pending).length || writePromise || importPromise || tweaking);
+        replace(remote);
+        if (currentTicket === ticket && saving) emit({ saving: true });
+      } catch {
+        // A failed background check is not a reset and must not hide the controls.
+      }
+    })();
+    resetCheckPromise = checking;
+    try { await checking; } finally { if (resetCheckPromise === checking) resetCheckPromise = null; }
   }
 
   async function refresh() {
@@ -151,7 +192,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     if (!owner || !Object.keys(pending).length || !permitted(owner.account.status)) return;
     const currentTicket = ticket;
     emit({ saving: true, error: "" });
-    writePromise = (async () => {
+    const writing = (async () => {
       let submitted: typeof pending = {};
       try {
         // Check identity again before every write: an open tab may outlive a login/logout.
@@ -202,7 +243,10 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
         emit({ status: "error", saving: false, error: error instanceof Error ? error.message : "Não foi possível salvar. Tente novamente." });
       }
     })();
-    await writePromise; writePromise = null;
+    writePromise = writing;
+    await writing;
+    if (writePromise !== writing) return;
+    writePromise = null;
     if (state.status === "ready" && Object.keys(pending).length) return flush();
   }
 
@@ -246,7 +290,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     const currentTicket = ++ticket;
     edits++;
     importing = true; emit({ saving: true, error: "" });
-    importPromise = (async () => { try {
+    const importingWork = (async () => { try {
       const response = await fetcher("/api/student/learning/import", {
         method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Workspace-Uid": owner.account.id },
         body: JSON.stringify({ revision: 0, saveVersion: owner.learning.saveVersion, demoSnapshot: learning!.demoSnapshot, studySnapshot: learning!.studySnapshot }),
@@ -259,8 +303,9 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     } catch (error) {
       if (currentTicket === ticket) emit({ saving: false });
       throw error;
-    } finally { importing = false; } })();
-    try { await importPromise; } finally { importPromise = null; }
+    } })();
+    importPromise = importingWork;
+    try { await importingWork; } finally { if (importPromise === importingWork) { importPromise = null; importing = false; } }
   }
 
   async function sendMessage(subject: string, body: string, conversationId?: string) {
@@ -275,7 +320,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     }
     const response = await fetcher(conversationId ? `/api/student/conversations/${encodeURIComponent(conversationId)}/messages` : "/api/student/conversations", {
       method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Workspace-Uid": owner.account.id },
-      body: JSON.stringify(conversationId ? { body } : { subject, body, ...(subject === "Avaliação da conversa da cafeteria" ? {learningRevision:owner.learning.revision}:{}) }),
+      body: JSON.stringify(conversationId ? { body } : { subject, body, ...(owner.account.canTest || subject === "Avaliação da conversa da cafeteria" ? {learningRevision:owner.learning.revision}:{}) }),
     });
     if (deny(response)) throw new Error("Entre novamente para enviar sua mensagem.");
     const result = await payload(response) as { conversation: TeacherConversation };
@@ -289,20 +334,38 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
   async function applyTestControl(input: Record<string, unknown>) {
     const owner = state.workspace;
     if (state.conflict || tweaking || importing || !owner?.account.canTest || state.status !== "ready") throw new Error("Atualize a conta de testes antes de continuar.");
-    tweaking = true; forgetPending(); ticket++;
+    const control = {};
+    activeControl = control; tweaking = true; forgetPending(); const controlTicket = ++ticket;
     emit({ saving:true, generation:state.generation+1 });
     try {
       if (writePromise) await writePromise;
+      if (controlTicket !== ticket || activeControl !== control) return;
       const response = await fetcher("/api/student/test-controls", { method:"POST", credentials:"same-origin", headers:{"Content-Type":"application/json","X-Workspace-Uid":owner.account.id}, body:JSON.stringify({...input,revision:owner.learning.revision,saveVersion:owner.learning.saveVersion}) });
+      if (controlTicket !== ticket) return;
       const result = await payload(response) as { learning:LearningProgress };
+      if (controlTicket !== ticket) return;
       if (state.workspace?.account.id !== owner.account.id) throw new Error("A conta mudou. Atualize o painel.");
-      replace({...state.workspace,learning:result.learning},"Controle aplicado no banco de dados da sua conta.");
+      const fullReset = input.action === "reset-all";
+      replace({...state.workspace,learning:result.learning,...(fullReset ? { activities: [], conversations: [], liveClass: null } : {})},"Controle aplicado no banco de dados da sua conta.", control);
+      const appliedTicket = ticket;
+      // The POST confirms learning; operational records come from the full workspace.
+      try {
+        const fresh = await read();
+        if (appliedTicket !== ticket || deny(fresh)) return;
+        const workspace = await payload(fresh) as StudentWorkspace;
+        if (appliedTicket !== ticket) return;
+        if (workspace.account.id !== owner.account.id) { replace(workspace); throw new Error("A conta mudou. Atualize o painel."); }
+        if (workspace.learning.revision >= result.learning.revision) replace(workspace, "", control);
+      } catch {
+        if (appliedTicket === ticket) emit({ notice: "Controle salvo na sua conta. Não foi possível atualizar todos os dados do painel; confira sua conexão." });
+      }
       if (typeof window !== "undefined" && ["reset-all","reset-real","reset-presentation","complete-presentation","complete-all"].includes(String(input.action))) window.dispatchEvent(new Event("basedspeak.presentation.changed"));
       try { window.localStorage.setItem("basedspeak.test-progress.changed",JSON.stringify({uid:owner.account.id,revision:result.learning.revision,at:Date.now()})); } catch { /* Server revision remains authoritative. */ }
     } catch (error) {
+      if (controlTicket !== ticket) return;
       reset(); await load();
       throw error;
-    } finally { tweaking=false; emit({saving:false}); }
+    } finally { if (activeControl === control) { activeControl = null; tweaking=false; emit({saving:false}); } }
   }
 
   async function resolveConflict(choice: "server" | "local") {
@@ -334,9 +397,11 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
 
   function reset() {
     forgetPending(); clearRecovery(); ticket++; loadPromise = null;
+    writePromise = null; importPromise = null; resetCheckPromise = null; importing = false;
+    activeControl = null; tweaking = false;
     emit({ ...initialState, generation: state.generation + 1 });
   }
-  return { subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; }, getSnapshot: () => state, getServerSnapshot: () => initialState, hasPendingChanges: () => editing || Boolean(state.conflict) || state.saving || Object.keys(pending).length > 0, load, refresh, flush, stage, beginEdit, endEdit, importGuestProgress, sendMessage, applyTestControl, resolveConflict, reset };
+  return { subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; }, getSnapshot: () => state, getServerSnapshot: () => initialState, hasPendingChanges: () => editing || Boolean(state.conflict) || state.saving || Object.keys(pending).length > 0, load, refresh, checkForReset, flush, stage, beginEdit, endEdit, importGuestProgress, sendMessage, applyTestControl, resolveConflict, reset };
 }
 
 export const studentWorkspace = createWorkspaceStore(workspaceFetch, workspaceStorage);

@@ -12,10 +12,10 @@ export class DemoAudioPlayer {
   cancel() { this.generation++; this.stop(); }
   pause() { if (!this.current) return false; this.current.pause(); return true; }
   async resume() { try { if (!this.current) return false; await this.current.play(); return true; } catch { return false; } }
-  setPlaybackRate(rate: number) { this.rate = rate === 0.9 ? 0.9 : 1; if (this.current) this.current.playbackRate = this.rate; }
+  setPlaybackRate(rate: number) { this.rate = rate === 0.8 || rate === 0.9 ? rate : 1; if (this.current) this.current.playbackRate = this.rate; }
   async play(url: string) {
     this.cancel();
-    const element = this.create(url); element.preload = "none"; element.playbackRate = this.rate; this.current = element;
+    const element = this.create(url); element.preload = "none"; element.playbackRate = this.rate; element.preservesPitch = true; this.current = element;
     try { await element.play(); return true; }
     catch { if (this.current === element) this.cancel(); return false; }
   }
@@ -33,7 +33,7 @@ export class DemoAudioPlayer {
       const url = typeof urls[index] === "string" ? urls[index] as string : await urls[index];
       if (generation !== this.generation) return false;
       if (!url) { onProgress({ status: "error", progress: index / urls.length }); return false; }
-      const element = this.create(url); element.preload = "none"; element.playbackRate = this.rate; this.current = element;
+      const element = this.create(url); element.preload = "none"; element.playbackRate = this.rate; element.preservesPitch = true; this.current = element;
       const completed = await new Promise<boolean>(resolve => {
         let status: AudioProgress["status"] = "loading";
         let finished = false;

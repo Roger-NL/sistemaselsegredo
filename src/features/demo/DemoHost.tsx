@@ -1,5 +1,7 @@
 "use client";
 import "./demo-shell.css";
+import { InterfaceIcon } from "@/components/ui/InterfaceIcon";
+
 import { BrowserText } from "@/components/i18n/BrowserText";
 
 
@@ -64,7 +66,7 @@ export function DemoHost({ experience = false, publishedAudio = {}, accountName 
   }
   return <main ref={shell} className="demo-shell app-shell">
     <AppHeader current="demo" guest={guest} name={workspaceState.workspace?.account.name || accountName} onNavigate={cancel}>{allowed && snapshot.state && <>{experience && <button disabled={pending || !canGoBack} onClick={() => navigation.current?.back()}>Voltar</button>}<button disabled={pending} aria-label="Recomeçar" onClick={reset}>Recomeçar</button></>}</AppHeader>
-    {allowed && <nav className="learning-return" aria-label="Continuar o estudo"><Link href="/demo/estudo?practice=1" onClick={cancel}>Voltar ao estudo guiado →</Link></nav>}
+    {allowed && <nav className="learning-return" aria-label="Continuar o estudo"><Link href="/demo/estudo?practice=1" onClick={cancel}>Voltar ao estudo guiado <InterfaceIcon name="arrow-right" /></Link></nav>}
     <dialog ref={restartDialog} className="demo-dialog" aria-labelledby="restart-conversation-title">
       <h2 id="restart-conversation-title">Recomeçar a conversa?</h2>
       <p>Isso substitui a tentativa atual da história {guest ? "neste navegador" : "na sua conta"}. Seu estudo guiado continua salvo.</p>

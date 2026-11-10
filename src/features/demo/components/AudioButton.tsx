@@ -1,4 +1,5 @@
 "use client";
+import { audio as audioInventory } from "../content/media";
 import { BrowserText } from "@/components/i18n/BrowserText";
 
 
@@ -12,6 +13,9 @@ const statuses = { idle: "", loading: "Preparando áudio", playing: "Reproduzind
 export function AudioButton({ audio, children = "Ouvir", label, onEnded, onError }: { audio: AudioId | AudioId[]; children?: ReactNode; label?: string; onEnded?: () => void; onError?: () => void }) {
   const controller = useContext(DemoAudioContext);
   const source = useId();
+  const speakerDescription = `${source}-speaker`;
+  const roles = new Set((Array.isArray(audio) ? audio : [audio]).map(id => audioInventory[id].role));
+  const speaker = roles.size > 1 ? "Lucas e você, cada um com sua voz modelo." : roles.has("you") ? "Modelo de fala da sua resposta. Não é uma gravação da sua voz." : "Fala de Lucas.";
   const release = controller?.release;
   useEffect(() => () => release?.(source), [release, source]);
   const reported = useRef(false);
@@ -25,13 +29,14 @@ export function AudioButton({ audio, children = "Ouvir", label, onEnded, onError
   }, [status, onEnded, onError]);
   if (!controller) throw new Error("DEMO_AUDIO_PROVIDER_REQUIRED");
   return <span className="audio-trigger" data-audio-status={status}>
-    <button type="button" className="audio-button" aria-label={label} aria-busy={status === "loading"} onClick={() => { reported.current = false; void controller.replay(audio, source); }}>
+    <button type="button" className="audio-button" aria-label={label} aria-describedby={speakerDescription} aria-busy={status === "loading"} onClick={() => { reported.current = false; void controller.replay(audio, source); }}>
       <span><BrowserText>{children}</BrowserText></span>
       <svg className="audio-ring" viewBox="0 0 24 24" aria-hidden="true">
         <circle className="audio-ring-track" cx="12" cy="12" r="9" />
         <circle className="audio-ring-fill" cx="12" cy="12" r="9" pathLength="100" strokeDasharray={status === "loading" ? "24 76" : "100"} strokeDashoffset={status === "loading" ? 0 : 100 * (1 - progress)} />
       </svg>
     </button>
+    <span id={speakerDescription} className="audio-sr-only"><BrowserText>{speaker}</BrowserText></span>
     <span className="audio-sr-only" role="status">{status === "error" ? <BrowserText>{""}</BrowserText> : <BrowserText>{statuses[status]}</BrowserText>}</span>
     {status === "error" && <span className="audio-inline-error" role="status"><BrowserText>{statuses.error}</BrowserText></span>}
   </span>;

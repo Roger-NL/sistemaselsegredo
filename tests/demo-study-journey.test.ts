@@ -99,7 +99,7 @@ const panel = () => renderToStaticMarkup(createElement(Dashboard, { account: { n
 const theory = () => renderToStaticMarkup(createElement(TheoryExperience, { publishedAudio: {} }));
 const glossary = (html: string) => [...new JSDOM(html).window.document.querySelectorAll('details')].flatMap(entry=>{
   const phrase=entry.querySelector('summary [lang="en"]');
-  return phrase ? [{phrase:phrase.textContent || '',lived:entry.querySelector('summary')!.textContent!.includes('Na sua conversa')}] : [];
+  return phrase ? [{phrase:phrase.textContent || '',role:entry.getAttribute('data-speaker'),lived:entry.querySelector('summary')!.textContent!.includes('Na sua conversa')}] : [];
 });
 
 beforeEach(() => { mocks.snapshot = { status: "empty", state: null }; mocks.studyView = "overview"; });
@@ -169,11 +169,11 @@ describe("narrative, panel and study journey", () => {
     roundTrip(state);
     mocks.studyView = "phrases";
     const html = theory();
-    const lived = new Set(state.transcript.map(line => normalizeAnswer(audio[line.audioId].text)));
+    const lived = new Set(state.transcript.map(line => `${line.role}:${normalizeAnswer(audio[line.audioId].text)}`));
     const entries = glossary(html);
     expect(entries.length).toBeGreaterThan(lived.size);
     for (const entry of entries) {
-      expect(entry.lived, entry.phrase).toBe(lived.has(normalizeAnswer(entry.phrase)));
+      expect(entry.lived, entry.phrase).toBe(lived.has(`${entry.role}:${normalizeAnswer(entry.phrase)}`));
     }
     expect(new Set(Object.values(state.audioAccess))).toEqual(new Set(["text"]));
     expect(html).not.toContain("Você ouviu");

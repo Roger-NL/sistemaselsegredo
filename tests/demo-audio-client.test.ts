@@ -30,18 +30,21 @@ describe("catalog audio client", () => {
     expect(JSON.parse(request.mock.calls[0][1]!.body as string)).toEqual({ audioId: "C02" });
     expect(() => createCatalogAudioClient(request, undefined, { C01: { key, audioUrl: "https://foreign.example/file.mp3" } })).toThrow();
   });
-  it("reuses an identical phrase across narrative IDs without merging different punctuation", async () => {
-    const request = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ key, audioUrl: url }));
-    const resolve = createCatalogAudioClient(request);
-    const signal = new AbortController().signal;
+  it("keeps the four identical C/U phrases in distinct voices, with or without a page seed", async () => {
     for (const [first, second] of [["C21", "U09"], ["C22", "U14"], ["C24", "U13"], ["C25", "U04"]] as const) {
-      const before = request.mock.calls.length;
-      expect(await resolve(first, signal)).toBe(url);
-      expect(await resolve(second, signal)).toBe(url);
-      expect(request).toHaveBeenCalledTimes(before + 1);
+      const firstKey = "a".repeat(64), secondKey = "b".repeat(64);
+      const lucas = `https://test.public.blob.vercel-storage.com/speech-cache/v3/${firstKey}.mp3`;
+      const learner = `https://test.public.blob.vercel-storage.com/speech-cache/v3/${secondKey}.mp3`;
+      const request = vi.fn<typeof fetch>().mockResolvedValueOnce(Response.json({ key:firstKey, audioUrl:lucas })).mockResolvedValueOnce(Response.json({ key:secondKey, audioUrl:learner }));
+      const client = createCatalogAudioClient(request);
+      const signal = new AbortController().signal;
+      expect(await client(first, signal)).toBe(lucas); expect(await client(second, signal)).toBe(learner);
+      expect(await client(first, signal)).toBe(lucas); expect(await client(second, signal)).toBe(learner);
+      expect(request).toHaveBeenCalledTimes(2);
+      const seeded = createCatalogAudioClient(request, undefined, { [first]:{ key:firstKey,audioUrl:lucas }, [second]:{ key:secondKey,audioUrl:learner } });
+      expect(await seeded(first, signal)).toBe(lucas); expect(await seeded(second, signal)).toBe(learner);
+      expect(request).toHaveBeenCalledTimes(2);
     }
-    await resolve("C30", signal); // Me too! remains distinct from Me too.
-    expect(request).toHaveBeenCalledTimes(5);
   });
   it("replays a known recording without another API lookup, but a new session still consults the global cache", async () => {
     const request = vi.fn<typeof fetch>().mockImplementation(async () => Response.json({ key, audioUrl: url }));

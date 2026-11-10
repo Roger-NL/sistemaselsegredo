@@ -2,10 +2,10 @@ import { response, scene } from "../builders";
 import type { DemoNode } from "../../model/types";
 const blocks = [{ id: "mine", text: "mine" }, { id: "no", text: "No" }, { id: "negative", text: "it’s not" }, { id: "positive", text: "it’s" }];
 const answer = ["no", "negative", "mine"];
-const help = ["Seu copo leva BASEDSPEAK. O copo mostrado leva LUCAS. Ele não é seu.", "No, ___ ___. Peças: it’s not / mine.", "No, it’s not mine. → Não, não é meu."];
+const help = ["Esse café é de Lucas, não é seu. Responda negando que ele pertence a você.", "No, ___ ___. Peças: it’s not / mine.", "No, it’s not mine. → Não, não é meu."];
 export const part02: DemoNode[] = [
   { ...scene("p2.prompt", 2, "V02", "O que ele está perguntando?", [], "p2.question", "Ver a pergunta e as opções"), presentation: "prompt" },
-  { id: "p2.question", part: 2, image: "V02", kind: "comprehension", context: "Observe o copo e o gesto. O que ele está perguntando?", next: "p2.send", help: ["This aponta para este objeto; na cena, o copo/café indicado. Yours indica pertencimento. Observe o gesto e ouça de novo."] },
-  response({ id: "p2.send", part: 2, image: "V02", context: "O copo mostrado é de Lucas. Diga a ele que não é seu.", response: "U01", mode: "blocks", blocks, answer, next: "p2.reaction", help }),
+  { id: "p2.question", part: 2, image: "V02", kind: "comprehension", context: "Lucas está falando de um café no balcão. O que ele quer saber com essa pergunta em inglês?", next: "p2.send", help: ["This se refere ao café de que Lucas está falando. Yours indica pertencimento à pessoa com quem ele fala. Leia a pergunta novamente ou ouça o áudio."] },
+  response({ id: "p2.send", part: 2, image: "V02", context: "Esse café é de Lucas, não é seu. Diga isso a ele.", response: "U01", mode: "blocks", blocks, answer, next: "p2.reaction", help }),
   scene("p2.reaction", 2, "V03", "O mal-entendido terminou. Ele volta a olhar os cafés no balcão.", ["C02"], "p3.prompt"),
 ];

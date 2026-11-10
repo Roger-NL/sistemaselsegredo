@@ -14,7 +14,7 @@ const moments: Record<string, [string, string]> = {
 };
 const prompts: Record<string, string> = {
   "p3.ask": "Pergunte o que Lucas pediu.", "p3.okay": "Responda à desculpa: diga que está tudo bem.",
-  "p4.same": "Diga que você pediu o mesmo.", "p4.mine": "O copo com o nome BASEDSPEAK é seu. Como confirmar isso?",
+  "p4.same": "Diga que você pediu o mesmo.", "p4.mine": "Agora Lucas pergunta sobre o seu café. Como confirmar que ele é seu?",
   "p5.like": "Diga que você gosta do café.", "p5.not": "Diga que não gosta muito do café.",
   "p6.warn": "Como avisar Lucas sobre o copo?", "p7.tired": "Mostre interesse e surpresa com o que Lucas contou.",
   "p7.too": "Diga que você também está cansado.", "p7.not": "Diga que você não está muito cansado.",
@@ -44,7 +44,7 @@ export function presentationCards(node: DemoNode, state?: Pick<DemoState, "story
     { presentation: "context", context: moment[1], button: node.heard?.length ? "Ouvir o que Lucas diz" : "Ver como participar" },
   );
   if (node.id === "p4.same") cards.push({ presentation: "context", context: "Lucas pediu um café com gelo. Você pediu o mesmo. Ao dizer ‘Eu também’, você retoma ‘também pedi isso’.", button: "Preparar minha resposta" });
-  if (node.id === "p4.new-cup") cards.push({ presentation: "context", context: "Vocês conferem os cafés já no balcão. Agora Lucas aponta para o copo BASEDSPEAK, que é o seu, e repete a pergunta.", button: "Ouvir a pergunta" });
+  if (node.id === "p4.new-cup") cards.push({ presentation: "context", context: "Vocês conferem os cafés no balcão. Lucas se refere a outro café, que é seu, e repete a pergunta.", button: "Ouvir a pergunta" });
   if (node.id === "p4.arrival-b") cards.push({ presentation: "context", context: "Agora é Lucas quem identifica o próprio copo: ele confere o nome LUCAS e diz que este é dele.", button: "Ouvir Lucas" });
   if (node.kind === "scene") return cards;
   if (node.heard?.length) cards.push({ presentation: "dialogue", context: "", heard: node.heard, button: node.id === "p8.topic" ? "Acompanhar até a mesa" : "Pensar na resposta" });

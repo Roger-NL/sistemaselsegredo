@@ -1,5 +1,9 @@
-.test-controls-trigger { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:44px; min-height:44px; border:1px solid #d9d3c7; border-radius:10px; background:transparent; color:inherit; cursor:pointer; }
+.test-controls-trigger,.app-header .test-controls-trigger,.presentation-header .test-controls-trigger { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:44px; min-height:44px; padding:0 8px; flex-shrink:0; box-sizing:border-box; border:2px solid var(--comic-ink,#202722); border-radius:5px; background:var(--comic-yellow,#efc653); color:var(--comic-ink,#202722); box-shadow:2px 2px 0 var(--comic-ink,#202722); font:inherit; font-weight:600; white-space:nowrap; cursor:pointer; }
 .test-controls-trigger span { font-size:11px; }
+.presentation-header .test-controls-trigger:hover { color:var(--comic-ink,#202722); }
+.test-controls-trigger:focus-visible { outline:3px solid currentColor; outline-offset:3px; }
+.presentation-header:has(.test-controls-trigger) { flex-wrap:wrap; }
+.presentation-header:has(.test-controls-trigger)>button:not(.test-controls-trigger) { margin-left:auto; }
 .test-controls-dialog { width:min(1100px,calc(100vw - 24px)); max-width:none; max-height:calc(100dvh - 24px); padding:0; border:1px solid #d9d3c7; border-radius:20px; background:#f5f1e9; color:#191919; box-sizing:border-box; font:15px/1.5 Arial,sans-serif; }
 .test-controls-dialog[open] { display:flex; flex-direction:column; }
 .test-controls-dialog::backdrop { background:#151b1a99; backdrop-filter:blur(4px); }
@@ -20,7 +24,7 @@
 .test-quick-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
 .test-quick-actions button { font-weight:600; background:#fffdf8; }
 .test-page-links { display:flex; flex-wrap:wrap; gap:8px; padding:18px 0; margin-bottom:6px; }
-.test-page-links a { display:inline-flex; align-items:center; min-height:42px; padding:8px 14px; box-sizing:border-box; background:#eae4d9; border-radius:8px; text-decoration:none; font-weight:500; }
+.test-page-links a { display:inline-flex; align-items:center; gap:.35em; min-height:42px; padding:8px 14px; box-sizing:border-box; background:#eae4d9; border-radius:8px; text-decoration:none; font-weight:500; }
 .test-control-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; align-items:start; }
 .test-review-controls { grid-column:1/-1; }
 .test-review-controls .test-control-actions { grid-template-columns:repeat(4,minmax(0,1fr)); }

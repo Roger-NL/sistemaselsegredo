@@ -30,14 +30,14 @@ export function StudentSections({ workspace, disabled }: { workspace: StudentWor
         <ProgressCard href="/demo/estudo?practice=1" disabled={disabled || !accountCanPractice(account.status)} label="Ir para meu estudo">
           <span>Estudo guiado</span><strong><BrowserText>{learning.studyCompleted}</BrowserText><small> <BrowserText>/ </BrowserText><BrowserText>{learning.studyTotal}</BrowserText></small></strong><progress value={learning.studyCompleted} max={learning.studyTotal || 1} aria-label="Etapas do estudo concluídas" /><p>Etapas concluídas. Você pode revisitar os blocos quando quiser.</p>
         </ProgressCard>
-        <StudentLiveClass key={account.id} workspace={workspace} disabled={disabled} />
+        <StudentLiveClass key={`${account.id}:${account.canTest ? learning.revision : "account"}`} workspace={workspace} disabled={disabled} />
       </div>
     </section>
     <section className="student-section" id="atividades" aria-labelledby="student-activities-title">
       <div className="student-section-heading"><div><p className="dashboard-overline">O que você já fez</p><h2 id="student-activities-title" tabIndex={-1}>Minhas atividades.</h2></div></div>
       {workspace.activities.length ? <ol className="student-activities">{workspace.activities.map(activity => <li key={activity.id}><span className="student-activity-icon"><BookOpen size={17} aria-hidden="true" /></span><div><strong><BrowserText>{activity.title}</BrowserText></strong><time dateTime={activity.at}><BrowserText>{formatStudentDate(activity.at)}</BrowserText></time></div></li>)}</ol> : <div className="student-empty"><BookOpen size={24} strokeWidth={1.4} aria-hidden="true" /><p>Ainda não há atividades registradas.</p><span>Ao praticar, seus registros aparecerão aqui.</span></div>}
     </section>
-    <TeacherContact key={account.id} conversations={workspace.conversations} disabled={disabled} />
+    <TeacherContact key={`${account.id}:${account.canTest ? learning.revision : "account"}`} conversations={workspace.conversations} disabled={disabled} />
   </>;
 }
 

@@ -12,6 +12,7 @@ import { applyTestAction, testActions, type TestAction } from "@/features/superu
 import { catalog } from "@/features/demo/content/catalog";
 import { PROFILES, REVIEW_VIEWS } from "@/features/demo/model/types";
 import { studySteps } from "@/features/theory/progress";
+import { ownerResetFailure, prepareOwnerJourneyReset } from "./owner-reset";
 export function validateTestAction(body: Record<string, unknown>): TestAction {
   assertOnlyKeys(body,["action","saveVersion","revision","profile","part","node","step","view"]);
   const action = body.action as TestAction["action"];
@@ -29,13 +30,16 @@ export async function mutateTestProgress(principal: RequestPrincipal, body: Reco
   await requireTestOwner(principal);
   const action = validateTestAction(body);
   await consumeRateLimit({namespace:"test-controls",identifier:principal.uid,limit:120,windowMs:60_000});
-  return getAdminDb().runTransaction(async tx => {
+  try { return await getAdminDb().runTransaction(async tx => {
     const [saved,profile] = await Promise.all([tx.get(learningRef(principal.uid)),tx.get(userRef(principal.uid))]);
     if (!profile.exists || !["active","pending"].includes(accountStatus(profile.data()?.accountStatus))) throw new RequestAuthError("A conta está indisponível.",403);
     const previous = learningFromData(saved.data());
     if (previous.revision !== body.revision) throw new RequestAuthError("O progresso mudou em outra aba. Atualize antes de aplicar o controle.",409);
     if (previous.saveVersion !== body.saveVersion) throw new LearningConflictError();
-    const cleanHistory = ["reset-all","reset-real"].includes(action.action) ? await tx.get(studentActivityRef(principal.uid).where("kind","==","learning").limit(450)) : null;
+    // Only Apagar tudo removes the entire journey. The normal-mode and section
+    // resets retain their existing, narrower operational semantics.
+    const clearJourney = action.action === "reset-all" ? await prepareOwnerJourneyReset(tx, principal.uid) : null;
+    const cleanHistory = action.action === "reset-real" ? await tx.get(studentActivityRef(principal.uid).where("kind","==","learning").limit(450)) : null;
     if (cleanHistory && cleanHistory.size >= 450) throw new RequestAuthError("O histórico é grande demais para um reset atômico. Nenhum dado foi alterado.",409);
     const changed = applyTestAction(previous,action);
     const next = { ...changed, ...parseDemoSnapshot(changed.demoSnapshot), ...parseStudySnapshot(changed.studySnapshot), revision:previous.revision+1, saveVersion:previous.saveVersion+1, updatedAt:new Date().toISOString() };
@@ -44,8 +48,9 @@ export async function mutateTestProgress(principal: RequestPrincipal, body: Reco
       tx.update(userRef(principal.uid), {presentationCompletedAt:["complete-presentation","complete-all"].includes(action.action)?next.updatedAt:null,presentationRevision:revision+1});
     }
     tx.set(learningRef(principal.uid),next);
+    clearJourney?.();
     for (const item of cleanHistory?.docs ?? []) tx.delete(item.ref);
     tx.create(getAdminDb().collection("learning_test_audit").doc(),{userId:principal.uid,action:action.action,fromRevision:previous.revision,toRevision:next.revision,testMode:next.testMode,at:next.updatedAt});
     return { learning:next };
-  });
+  }); } catch (error) { if (action.action === "reset-all") ownerResetFailure(error); throw error; }
 }

@@ -1,3 +1,4 @@
+import { continueSceneEvents, sceneReadingGroup } from "./scene-conversation";
 import { catalog } from "../content/catalog";
 import { presentationCards } from "../content/presentation";
 import { acceptsAudioAccess, listeningTarget } from "./listening";
@@ -39,6 +40,28 @@ function previousStep(state: DemoState): DemoState {
 /** Current user actions cannot invoke the retired test shortcut. */
 export function transition(state: DemoState, event: DemoEvent): DemoState {
   if (event.type === "TEST_FORWARD") return state;
+  if (event.type === "BACK_SCENE") {
+    if (event.at !== state.nodeId) return state;
+    let previous = transition(state, { at: state.nodeId, type: "BACK" });
+    if (previous.phase === "present" && state.phase !== "present" && previous.journal.at(-1)?.type === "ADVANCE_PRESENTATION" && previous.nodeId === state.nodeId) previous = transition(previous, { at: previous.nodeId, type: "BACK" });
+    while (previous !== state) {
+      const group = sceneReadingGroup(previous);
+      const sameScreen = previous.nodeId === state.nodeId && previous.phase === state.phase && previous.reviewView === state.reviewView
+        && (group?.start ?? previous.presentationStep) === (sceneReadingGroup(state)?.start ?? state.presentationStep);
+      // Hearing a line no longer creates a second screen. Back crosses that
+      // access marker too, while the original BACK/journal rules stay intact.
+      if ((!group || group.start === previous.presentationStep) && !sameScreen) break;
+      const earlier = transition(previous, { at: previous.nodeId, type: "BACK" });
+      if (earlier === previous) break;
+      previous = earlier;
+    }
+    return previous;
+  }
+  if (event.type === "CONTINUE_SCENE") {
+    if (event.at !== state.nodeId) return state;
+    if (state.storyVersion !== STORY_VERSION) state = replayEvent(state, { at: state.nodeId, type: "UPGRADE_CONTENT" });
+    return continueSceneEvents(state).reduce((cursor, step) => transition(cursor, step), state);
+  }
   // Back replays the original rules. Resuming from an old point upgrades only
   // future actions; the marker makes that boundary deterministic on reload.
   if (event.type !== "BACK" && state.storyVersion !== STORY_VERSION) {
@@ -124,10 +147,10 @@ export function replayEvent(state: DemoState, event: DemoEvent): DemoState {
       next = enter(state, sceneDestination(state)); break;
     case "ANSWER_MEANING":
       if (node.kind !== "comprehension") return state;
-      next = event.correct ? enter(state, node.next) : { ...state, notice: event.option === "lucas" ? "Yours se dirige a você, a pessoa com quem Lucas fala. O nome no copo pode explicar o engano, mas a pergunta é se o copo pertence a você." : event.option === "order" ? "A pergunta não procura quem fez o pedido. Yours pergunta se o objeto apontado pertence à pessoa com quem Lucas fala." : "Essa opção não corresponde à fala. Ouça novamente ou tente outra." }; break;
+      next = event.correct ? enter(state, node.next) : { ...state, notice: event.option === "lucas" ? "Yours significa seu ou sua, referindo-se a você. Dele seria his. Lucas quer saber se essa bebida pertence a você." : event.option === "order" ? "A pergunta não é sobre qual bebida você pediu. Yours pergunta se essa bebida pertence à pessoa com quem Lucas fala." : "Essa opção não corresponde à fala. Leia novamente ou ouça o áudio e tente outra." }; break;
     case "UNDERSTAND":
       if (node.kind !== "comprehension") return state;
-      next = event.correct ? enter(state, node.next) : { ...state, help: { ...state.help, [node.id]: 1 }, notice: "Volte às pistas: this aponta para este objeto, o copo indicado; yours indica pertencimento. Tente de novo, sem pressa." }; break;
+      next = event.correct ? enter(state, node.next) : { ...state, help: { ...state.help, [node.id]: 1 }, notice: "Volte às pistas: this se refere ao café; yours indica pertencimento à pessoa com quem Lucas fala. Tente de novo, sem pressa." }; break;
     case "CHOOSE": {
       if (node.kind !== "choice") return state;
       const selected = node.choices.find(choice => choice.id === event.choice);
@@ -184,7 +207,7 @@ export function replayEvent(state: DemoState, event: DemoEvent): DemoState {
           next = returnMistake(mismatch < 0 ? [] : state.selected.slice(mismatch), mismatch < 0 ? state.selected : state.selected.slice(0, mismatch)); break;
         }
         next = fail(node.id === "p4.mine" && state.selected.includes("negative")
-          ? "Esse trecho diz ‘não é’. Confira BASEDSPEAK no copo. Sua montagem foi mantida."
+          ? "Esse trecho diz ‘não é’, mas este café é seu. Sua montagem foi mantida."
           : state.activityProfile === "some" ? `Confira a peça ${mismatch >= 0 ? mismatch + 1 : state.selected.length + 1} e o sentido da frase. Sua montagem foi mantida.`
           : `${node.help[0] ?? node.context} Sua montagem foi mantida; tente novamente.`); break;
       }

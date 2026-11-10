@@ -4,6 +4,7 @@ import { createHash, randomUUID } from "node:crypto";
 export type SpeechParameters = {
   voiceId: string; model: string; format: string; speed: number;
   language: string; stability: number; similarityBoost: number;
+  processing?: { tempo: number; version: "atempo-v1" };
 };
 export type StoredAudio = { url: string; pathname: string; bytes: number; checksum?: string };
 export type SpeechRecord = {
@@ -33,11 +34,24 @@ export function normalizeSpeechText(text: string) { return text.normalize("NFC")
 export function speechIdentity(text: string, p: SpeechParameters) {
   const normalized = normalizeSpeechText(text);
   if (!normalized || normalized.length > 2_000 || !p.voiceId.trim() || !Number.isFinite(p.speed) || p.speed <= 0) throw new SpeechUnavailableError("INVALID_SPEECH_INPUT");
-  const key = createHash("sha256").update(JSON.stringify([
-    "elevenlabs", 3, normalized, p.voiceId, p.speed, p.model, p.format, p.language, p.stability, p.similarityBoost,
-  ])).digest("hex");
+  const identity: unknown[] = ["elevenlabs", 3, normalized, p.voiceId, p.speed, p.model, p.format, p.language, p.stability, p.similarityBoost];
+  // Leave source identities byte-for-byte compatible; only derived media adds a suffix.
+  if (p.processing) {
+    if (p.processing.version !== "atempo-v1" || !Number.isFinite(p.processing.tempo) || p.processing.tempo < 0.5 || p.processing.tempo > 1) throw new SpeechUnavailableError("INVALID_SPEECH_PROCESSING");
+    identity.push([p.processing.version, p.processing.tempo]);
+  }
+  const key = createHash("sha256").update(JSON.stringify(identity)).digest("hex");
   return { key, text: normalized, pathname: `speech-cache/v3/${key}.mp3` };
 }
+/** Verify an immutable download, including uploads recovered before checksum finalization. */
+export function verifyStoredSpeechBytes(audio: StoredAudio, bytes: Uint8Array): string {
+  const buffer = Buffer.from(bytes);
+  const mp3 = buffer.subarray(0, 3).toString() === "ID3" || (buffer[0] === 0xff && (buffer[1] & 0xe0) === 0xe0);
+  const checksum = createHash("sha256").update(buffer).digest("hex");
+  if (!mp3 || buffer.length !== audio.bytes || (audio.checksum && audio.checksum !== checksum)) throw new SpeechUnavailableError("STORED_AUDIO_CHECKSUM_MISMATCH");
+  return checksum;
+}
+
 function validAudio(audio: StoredAudio, pathname: string) {
   try {
     const url = new URL(audio.url);

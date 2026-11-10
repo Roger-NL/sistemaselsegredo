@@ -1,0 +1,25 @@
+/* On wide screens, the illustration and the complete reading/action group
+   share one grid. Controls stay outside the scrolling reading area. */
+@container demo-app (min-width:761px) {
+  html body .demo-shell .scene-frame.scene-composition {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-rows:minmax(0,1fr) auto minmax(0,max-content) auto minmax(0,1fr);
+    column-gap:clamp(1.25rem,3vw,3rem);
+    row-gap:0;
+    padding-block:12px;
+    align-items:stretch;
+  }
+  html body .demo-shell .scene-frame.scene-composition > .scene-grid { display:contents; }
+  html body .demo-shell .scene-frame.scene-composition > .scene-grid > .scene-column { grid-column:1; grid-row:1/-1; align-self:stretch; min-height:0; }
+  html body .demo-shell .scene-frame.scene-composition > .scene-grid > .scene-intro-slot { grid-column:2; grid-row:2; }
+  html body .demo-shell .scene-frame.scene-composition > .scene-grid > .conversation-panel { grid-column:2; grid-row:3; margin:0; min-height:0; }
+  html body .demo-shell .scene-frame.scene-composition > .activity-actions { grid-column:2; grid-row:4; width:100%; min-width:0; margin:0; padding:12px 6px 6px; }
+  html body .demo-shell .scene-frame.scene-composition > .activity-actions:empty { padding:0; }
+  html body .demo-shell .scene-frame.scene-composition .activity-body.auto-fit { flex:0 1 auto; }
+  html body .demo-shell .scene-frame.scene-composition .activity-body > .auto-fit-size { margin-block:0; }
+}
+html body .demo-shell .scene-choice-prompt {
+  font-family:var(--comic-display,var(--font-geist-sans)),sans-serif;
+  font-weight:400; font-size:clamp(22px,2.3vw,34px); line-height:1.2;
+  letter-spacing:.015em; margin:0 0 12px;
+}

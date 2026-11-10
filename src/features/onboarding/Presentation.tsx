@@ -1,5 +1,9 @@
 "use client";
+import { SoundMenu } from "@/components/interaction/InteractionSounds";
+import { InterfaceIcon } from "@/components/ui/InterfaceIcon";
+
 import { BrowserText } from "@/components/i18n/BrowserText";
+import { useVisibleHeight } from "@/components/core/use-visible-height";
 
 
 import Image from "next/image";
@@ -9,6 +13,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Check, Coffee, LockKeyhole, MessageCir
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { getMotionPreference, getServerPreference, subscribePreferences } from "@/features/dashboard/preferences";
 import { canVisitPresentationScene, presentationFrames, presentationSceneStart, presentationSteps } from "./content";
+import { usePresentationFit } from "./use-presentation-fit";
 import "./presentation.css";
 
 type Props = { review?: boolean; busy?: boolean; error?: string; onFinish: () => void };
@@ -16,7 +21,7 @@ type Props = { review?: boolean; busy?: boolean; error?: string; onFinish: () =>
 function Scene({ visual, frame }: { visual: string; frame: number }) {
   if (visual === "welcome") return <div className="presentation-orbit">
     <div className="presentation-orbit-ring" /><div className="presentation-orbit-ring" /><div className="presentation-orbit-ring" />
-    {frame === 0 ? <div className="presentation-signal">{[0, 1, 2, 3].map(i => <span key={i} style={{ "--i": i } as React.CSSProperties} />)}</div> : <div className="presentation-start"><span><Coffee size={28} /></span><ArrowRight size={22} /><span><BookOpen size={28} /></span><small>Conversa <span>→</span> Estudo</small></div>}
+    {frame === 0 ? <div className="presentation-signal">{[0, 1, 2, 3].map(i => <span key={i} style={{ "--i": i } as React.CSSProperties} />)}</div> : <div className="presentation-start"><span><Coffee size={28} /></span><ArrowRight size={22} /><span><BookOpen size={28} /></span><small>Conversa <span><InterfaceIcon name="arrow-right" /></span> Estudo</small></div>}
     <span className="presentation-orbit-spark"><Sparkles size={18} /></span>
   </div>;
   if (visual === "cafe" && frame === 1) return <div className="presentation-support-choice">
@@ -28,7 +33,7 @@ function Scene({ visual, frame }: { visual: string; frame: number }) {
     <div className="presentation-floating"><Coffee size={18} /><span>Sua vez na história.</span><MoveUpRight size={17} /></div>
   </div>;
   if (visual === "study") return <div className="presentation-study">
-    <div className="presentation-study-number"><strong>{frame === 0 ? <BrowserText>{"8"}</BrowserText> : <BrowserText>{"24"}</BrowserText>}</strong><span>{frame === 0 ? <BrowserText>{"blocos"}</BrowserText> : <BrowserText>{"práticas"}</BrowserText>}</span></div>
+    <div className="presentation-study-number"><strong>{frame === 0 ? <BrowserText>{"8"}</BrowserText> : <BrowserText>{"24"}</BrowserText>}</strong><span>{frame === 0 ? <BrowserText>{"blocos"}</BrowserText> : <BrowserText>{"etapas"}</BrowserText>}</span></div>
     <div className="presentation-study-grid">{Array.from({ length: 8 }, (_, i) => <div key={i} style={{ "--i": i } as React.CSSProperties}><span><BrowserText>{String(i + 1).padStart(2, "0")}</BrowserText></span><div>{[0, 1, 2].map(j => <i key={j} data-filled={frame === 1} />)}</div></div>)}</div>
     <span className="presentation-study-caption"><BookOpen size={15} />O inglês da sua conversa</span>
   </div>;
@@ -44,7 +49,12 @@ export function Presentation({ review = false, busy = false, error = "", onFinis
   const reduced = useSyncExternalStore(subscribePreferences, getMotionPreference, getServerPreference);
   const [cursor, setCursor] = useState(0);
   const [furthestFrame, setFurthestFrame] = useState(0);
+  const root = useRef<HTMLElement>(null);
+  const stageArea = useRef<HTMLDivElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
+  useVisibleHeight(root, "--presentation-height");
+  usePresentationFit(stageArea, stage, cursor);
   const frame = presentationFrames[cursor];
   const step = presentationSteps[frame.stepIndex];
   const last = cursor === presentationFrames.length - 1;
@@ -58,9 +68,10 @@ export function Presentation({ review = false, busy = false, error = "", onFinis
     setFurthestFrame(previous => Math.max(previous, next));
   }
 
-  return <main className="presentation" data-scene={frame.visual} data-reduced-motion={reduced} aria-label={review ? "Rever apresentação do BasedSpeak" : "Apresentação do BasedSpeak"} aria-busy={busy}>
-    <header className="presentation-header"><Brand href="/dashboard" /><TestControls />{review && <button type="button" disabled={busy} onClick={onFinish}>Voltar ao painel<ArrowRight size={15} aria-hidden="true" /></button>}</header>
-    <div className="presentation-stage" key={cursor}>
+  return <main ref={root} className="presentation" data-scene={frame.visual} data-reduced-motion={reduced} aria-label={review ? "Rever apresentação do BasedSpeak" : "Apresentação do BasedSpeak"} aria-busy={busy}>
+    <header className="presentation-header"><Brand href="/dashboard" /><div className="presentation-header-actions"><TestControls />{review && <button type="button" disabled={busy} onClick={onFinish}>Voltar ao painel<ArrowRight size={15} aria-hidden="true" /></button>}<SoundMenu /></div></header>
+    <div ref={stageArea} className="presentation-stage-area"><div className="presentation-stage-fit">
+    <div ref={stage} className="presentation-stage" key={cursor}>
       <div className="presentation-art" aria-hidden="true"><Scene visual={frame.visual} frame={frame.frameIndex} /></div>
       <section className="presentation-copy">
         <p className="presentation-eyebrow"><BrowserText>{frame.eyebrow}</BrowserText></p>
@@ -68,9 +79,10 @@ export function Presentation({ review = false, busy = false, error = "", onFinis
         <p className="presentation-description"><BrowserText>{frame.description}</BrowserText></p>
       </section>
     </div>
+    </div></div>
     <footer className="presentation-footer">
-      <div className="presentation-progress"><p aria-live="polite" aria-atomic="true"><BrowserText>{String(frame.stepIndex + 1).padStart(2, "0")}</BrowserText> <BrowserText>/ 05 </BrowserText><span><BrowserText>{step.label}</BrowserText></span><span className="presentation-frame-count">{<BrowserText>{frame.frameIndex + 1}</BrowserText>}<BrowserText>/</BrowserText><BrowserText>{step.frames.length}</BrowserText></span></p><nav aria-label="Etapas da apresentação">{presentationSteps.map((item, i) => <button key={item.label} type="button" aria-label={`Etapa ${i + 1}: ${item.label}`} aria-current={frame.stepIndex === i ? "step" : undefined} disabled={busy || !canVisitPresentationScene(i, furthestFrame, review)} onClick={() => moveTo(presentationSceneStart(i))}><span /></button>)}</nav></div>
-      <div className="presentation-actions"><button type="button" className="presentation-back" aria-label="Voltar" disabled={cursor === 0 || busy} onClick={() => moveTo(cursor - 1)}><ArrowLeft size={17} aria-hidden="true" /><span>Voltar</span></button><button type="button" className="presentation-next" disabled={busy} onClick={() => last ? onFinish() : moveTo(cursor + 1)}>{busy ? <BrowserText>{"Salvando…"}</BrowserText> : last ? review ? <BrowserText>{"Voltar ao painel"}</BrowserText> : <BrowserText>{"Abrir meu painel"}</BrowserText> : <BrowserText>{"Continuar"}</BrowserText>}<ArrowRight size={17} aria-hidden="true" /></button></div>
+      <div className="presentation-progress"><p aria-live="polite" aria-atomic="true"><BrowserText>{String(frame.stepIndex + 1).padStart(2, "0")}</BrowserText> <BrowserText>/ 05 </BrowserText><span><BrowserText>{step.label}</BrowserText></span><span className="presentation-frame-count">{<BrowserText>{frame.frameIndex + 1}</BrowserText>}<BrowserText>/</BrowserText><BrowserText>{step.frames.length}</BrowserText></span></p><nav aria-label="Etapas da apresentação">{presentationSteps.map((item, i) => <button key={item.label} type="button" aria-label={`Etapa ${i + 1}: ${item.label}`} aria-current={frame.stepIndex === i ? "step" : undefined} data-ui-sound={cursor === presentationSceneStart(i) ? "none" : presentationFrames[presentationSceneStart(i)].sound} disabled={busy || !canVisitPresentationScene(i, furthestFrame, review)} onClick={() => moveTo(presentationSceneStart(i))}><span /></button>)}</nav></div>
+      <div className="presentation-actions"><button type="button" className="presentation-back" data-ui-sound={presentationFrames[Math.max(0, cursor - 1)].sound} aria-label="Voltar" disabled={cursor === 0 || busy} onClick={() => moveTo(cursor - 1)}><ArrowLeft size={17} aria-hidden="true" /><span>Voltar</span></button><button type="button" className="presentation-next" data-ui-sound={last ? "advance" : presentationFrames[cursor + 1].sound} disabled={busy} onClick={() => last ? onFinish() : moveTo(cursor + 1)}>{busy ? <BrowserText>{"Salvando…"}</BrowserText> : last ? review ? <BrowserText>{"Voltar ao painel"}</BrowserText> : <BrowserText>{"Abrir meu painel"}</BrowserText> : <BrowserText>{"Continuar"}</BrowserText>}<ArrowRight size={17} aria-hidden="true" /></button></div>
       {error && <p className="presentation-error" role="alert"><BrowserText>{error}</BrowserText></p>}
     </footer>
   </main>;

@@ -79,3 +79,12 @@ describe("short, cancellable story soundscapes", () => {
     expect(contexts).toHaveLength(0);
   });
 });
+
+it("reduces every story tone and air layer to half its original gain", async () => {
+  const { renderStorySound } = await import("@/components/interaction/story-sounds");
+  const original = new Context();
+  renderStorySound(original as unknown as AudioContext, "story-enter", new Set());
+  await sounds.playInteractionSound("story-enter");
+  expect(contexts[0].gains).toHaveLength(original.gains.length);
+  contexts[0].gains.forEach((gain, i) => expect(gain.gain.exponentialRampToValueAtTime.mock.calls[0][0]).toBe(original.gains[i].gain.exponentialRampToValueAtTime.mock.calls[0][0] * 0.5));
+});

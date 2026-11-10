@@ -54,7 +54,7 @@ export function AppHeader({ current, name, tone = "paper", guest = false, onAcco
         <summary aria-label="Menu de navegação"><Menu size={18} aria-hidden="true" /><span>Menu</span></summary>
         <nav className="app-menu-panel" aria-label="Menu do BasedSpeak" onClick={event => {
           // Dismiss after the action, including story controls supplied by DemoHost.
-          if (event.target instanceof Element && event.target.closest("a[href], button:not(:disabled)")) close();
+          if (event.target instanceof Element && event.target.closest("a[href], button:not(:disabled)") && !event.target.closest("[data-keep-menu-open]")) close();
         }}>
           {process.env.NODE_ENV === "development" && <LocalTestLauncher onNavigate={navigate} />}
           <p>{guest ? <BrowserText>{"Explore a demo gratuita"}</BrowserText> : <BrowserText>{"Seu espaço no BasedSpeak"}</BrowserText>}</p>

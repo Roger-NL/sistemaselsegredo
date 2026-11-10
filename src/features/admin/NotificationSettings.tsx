@@ -1,4 +1,6 @@
 "use client";
+import { InterfaceIcon } from "@/components/ui/InterfaceIcon";
+
 import { BrowserText } from "@/components/i18n/BrowserText";
 
 
@@ -75,7 +77,7 @@ export function NotificationSettings({ accountId }: { accountId: string }) {
           <label className="admin-notification-toggle"><input type="checkbox" checked={enabled} onChange={event => setEnabled(event.target.checked)} /><span>Receber avisos por e-mail</span></label>
           <button className="admin-button admin-button-primary" type="submit">{busy === "save" ? <LoaderCircle size={16} className="admin-spinner" aria-hidden="true" /> : <Check size={16} aria-hidden="true" />}<BrowserText>Salvar preferências</BrowserText></button>
         </fieldset></form>
-        {!settings.configured && <details className="admin-notification-setup"><summary>Como ativar o envio</summary><p>Conecte o Resend ao projeto BasedSpeak na Vercel e confirme o domínio remetente. O envio precisa de RESEND_API_KEY e NOTIFICATION_FROM_EMAIL nas variáveis de ambiente do servidor. Nenhuma chave deve ser colocada neste formulário.</p><a href="https://vercel.com/roger-chaves-projects/~/integrations/accept-terms/resend?source=cli" target="_blank" rel="noreferrer">Abrir configuração do serviço ↗</a></details>}
+        {!settings.configured && <details className="admin-notification-setup"><summary>Como ativar o envio</summary><p>Conecte o Resend ao projeto BasedSpeak na Vercel e confirme o domínio remetente. O envio precisa de RESEND_API_KEY e NOTIFICATION_FROM_EMAIL nas variáveis de ambiente do servidor. Nenhuma chave deve ser colocada neste formulário.</p><a href="https://vercel.com/roger-chaves-projects/~/integrations/accept-terms/resend?source=cli" target="_blank" rel="noreferrer">Abrir configuração do serviço <InterfaceIcon name="arrow-up-right" /></a></details>}
         {settings.configured && !settings.cronConfigured && <p className="admin-notification-note">Os eventos novos são enviados na hora. A recuperação automática da fila ainda precisa ser ativada; por enquanto, confira os pendentes abaixo.</p>}
       </section>
       <section className="admin-card admin-notification-events"><header className="admin-card-heading"><div><h2><BellRing size={21} aria-hidden="true" />O que chega no seu e-mail</h2><p>Um aviso para cada novo evento, com acesso aos detalhes na ADM.</p></div></header><ul>{Object.entries(eventLabels).map(([kind, label]) => <li key={kind}><Check size={16} aria-hidden="true" /><BrowserText>{label}</BrowserText></li>)}</ul><p>Conclusões são avisadas uma vez por aluno. Revisitar atividades não gera novos avisos de conclusão.</p></section>

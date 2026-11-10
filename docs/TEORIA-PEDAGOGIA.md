@@ -1,5 +1,17 @@
 # Teoria depois da cafeteria
 
+## Destaques do inglês e identidade de gibi — 04/11/2026
+
+Correção solicitada por Roger: as palavras e expressões inglesas citadas nas explicações devem ser identificadas como material de estudo, sem se confundirem com a prosa portuguesa. Os oito blocos foram revisados: 160 campos de prosa agora delimitam explicitamente os trechos ingleses com crases simples. `StudyText` renderiza esses limites como marca-texto com `lang="en"` e `translate="no"`, preservando o português e a compatibilidade dos nós dinâmicos com a tradução do navegador. A legenda explica o significado dos destaques. Isso cobre explicações, aprofundamento, notas dos exemplos, enunciados, dicas e feedback, incluindo o feedback de cada lacuna. As alternativas inteiramente inglesas têm idioma editorial explícito, sem detecção automática de palavras ambíguas como `a` ou `me`.
+
+As crases são formatação editorial, não HTML. Não devem entrar em IDs, respostas aceitas, peças, distratores, chaves de feedback ou textos usados para reproduzir áudio. Esses valores foram preservados e a nova apresentação não exige migrar o progresso. Frases inglesas em blocos e atividades continuam com limites de idioma explícitos.
+
+Na mesma solicitação, Roger pediu que esta etapa acompanhasse o design cartoon/gibi do restante do produto. A folha do estudo agora reutiliza os tokens de papel, tinta, verde e amarelo, títulos Bangers, leitura Barlow, contornos e sombras chapadas, balões e quadros editoriais. Isso substitui a direção visual intermediária de superfície neutra; a leitura do inglês mantém a fonte de texto. Os destaques quebram linha em telas estreitas, sem exigir arrastar nem alterar os fluxos das atividades.
+
+Verificação desta correção: 615 testes em 81 arquivos, lint, TypeScript e build de produção aprovados. O teste editorial verifica todas as lições, preserva espaços e traduções portuguesas, impede marcações em respostas e valida a identificação das seis ocorrências de inglês no exemplo de `my`/`your`/`mine`/`yours`. Na prévia do aplicativo, explicação, aprofundamento e ajuda foram conferidos com os destaques; as larguras de 320, 390 e 1440 px permaneceram sem overflow horizontal. A evidência visual e a matriz estão em `output/theory-highlight-qa/`, ignorado pelo Git. É conferência em navegador, sem teste em aparelho físico.
+
+Correção publicada no projeto Vercel original, deployment `dpl_AgoM1tQTLFTm1vBAsrZurEjKf6Mo`, estado Ready. O exemplo de pertencimento foi conferido em `https://www.basedspeak.com/demo/estudo?practice=1`: seis termos marcados com idioma inglês e tradução desativada, título com a fonte Bangers e quadro com sombra chapada. A captura pública fica em `output/theory-highlight-qa/publicado-desktop.png`. O localhost permanece na porta 3100. Sem commit, nova mídia ou mudança de dados remotos.
+
 **Atualização de 03/11/2026:** o percurso atual tem 16 etapas de explicação e 8 práticas pontuais. Todas mostram um porquê curto antes de qualquer atividade. Estrutura, interface e compatibilidade de progresso estão descritas em [Estudo guiado: ensinar com clareza](ESTUDO-UX-GUIADO-2026-11-03.md). Os registros abaixo documentam as versões anteriores.
 
 Registro editorial de 27/10/2026. Conteúdo original em português para adultos iniciantes; o inventário de referência é `src/features/demo/content/media.ts`. A teoria é uma etapa conectada à retrospectiva, conceitualmente separada da narrativa.

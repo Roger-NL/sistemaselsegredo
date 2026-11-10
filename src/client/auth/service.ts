@@ -116,8 +116,11 @@ async function mapFirebaseUser(fbUser: FirebaseUser): Promise<User> {
         await signOut(auth).catch(() => undefined);
         throw new Error("SERVER_SESSION_FAILED");
     }
-    const tokenResult = await fbUser.getIdTokenResult();
-    const isAdmin = tokenResult.claims.admin === true;
+    // The server has already verified the session. An optional client-side
+    // claims read must not turn a successful entry into an apparent failure;
+    // administrative access remains checked by the server on every request.
+    const tokenResult = await fbUser.getIdTokenResult().catch(() => null);
+    const isAdmin = tokenResult?.claims.admin === true;
     const fallbackUser = { ...buildFallbackUserFromAuth(fbUser), isAdmin };
     const userDocRef = doc(db, "users", fbUser.uid);
     let userDoc;

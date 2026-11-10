@@ -79,8 +79,8 @@ describe("transactional persisted progress controls",()=>{
     await mutateTestProgress(owner,{action:"reset-all",revision:1,saveVersion:1});
     expect(fake.docs.get(`users/${owner.uid}`)).toMatchObject({presentationCompletedAt:null,presentationRevision:2,name:"keep"});
   });
-  it("persists completion then resets own learning and learning events without touching operational records",async()=>{
-    const preserved={booking:{status:"confirmed"},message:{body:"keep"},other:{studyCompleted:24},media:{url:"keep"},contact:{kind:"contact"}};
+  it("persists completion then clears the whole owner journey while preserving neighboring and global records",async()=>{
+    const preserved={booking:{userId:owner.uid,status:"confirmed"},message:{userId:owner.uid,body:"old"},other:{studyCompleted:24},media:{url:"keep"},contact:{kind:"contact"}};
     for(const [path,value] of Object.entries({[`demo_live_classes/${owner.uid}`]:preserved.booking,[`teacher_conversations/one`]:preserved.message,[`learning_states/other`]:preserved.other,[`media/global`]:preserved.media,[`users/${owner.uid}/student_activity/contact`]:preserved.contact}))fake.docs.set(path,value);
     fake.docs.set(`users/${owner.uid}/student_activity/old`,{kind:"learning"});
     const completed=await mutateTestProgress(owner,{action:"complete-all",revision:0,saveVersion:0});
@@ -89,7 +89,7 @@ describe("transactional persisted progress controls",()=>{
     const reset=await mutateTestProgress(owner,{action:"reset-all",revision:1,saveVersion:1});
     expect(reset.learning).toMatchObject({revision:2,testMode:true,demoSnapshot:null,studySnapshot:null});
     expect(fake.docs.has(`users/${owner.uid}/student_activity/old`)).toBe(false);
-    expect(fake.docs.get(`demo_live_classes/${owner.uid}`)).toEqual(preserved.booking);expect(fake.docs.get('teacher_conversations/one')).toEqual(preserved.message);expect(fake.docs.get('learning_states/other')).toEqual(preserved.other);expect(fake.docs.get('media/global')).toEqual(preserved.media);expect(fake.docs.get(`users/${owner.uid}/student_activity/contact`)).toEqual(preserved.contact);
+    expect(fake.docs.has(`demo_live_classes/${owner.uid}`)).toBe(false);expect(fake.docs.has('teacher_conversations/one')).toBe(false);expect(fake.docs.get('learning_states/other')).toEqual(preserved.other);expect(fake.docs.get('media/global')).toEqual(preserved.media);expect(fake.docs.has(`users/${owner.uid}/student_activity/contact`)).toBe(false);
     expect([...fake.docs.keys()].filter(p=>p.startsWith('learning_test_audit/'))).toHaveLength(2);
     expect(effects.prepare).not.toHaveBeenCalled();expect(effects.schedule).not.toHaveBeenCalled();
   });

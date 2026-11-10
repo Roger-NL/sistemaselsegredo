@@ -41,7 +41,7 @@ describe("published global audio index", () => {
   });
   it("ships the complete existing public-file inventory without provider configuration", () => {
     expect(Object.keys(published.entries).sort()).toEqual(Object.keys(audio).sort());
-    expect(new Set(Object.values(published.entries).map(entry => validateAudioReference(entry).key)).size).toBe(46);
+    expect(new Set(Object.values(published.entries).map(entry => validateAudioReference(entry).key)).size).toBe(50);
     for (const entry of Object.values(published.entries)) expect(Object.keys(entry).sort()).toEqual(["audioUrl", "key"]);
   });
 });

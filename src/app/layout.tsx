@@ -8,6 +8,9 @@ import "./comic-public.css";
 import "@/features/dashboard/comic-dashboard.css";
 import "@/features/demo/comic-demo.css";
 import "@/features/theory/comic-study.css";
+import "@/components/core/viewport.css";
+import "@/components/core/auto-fit.css";
+import { SiteViewport } from "@/components/core/SiteViewport";
 import { JourneyTransitionProvider } from "@/components/navigation/JourneyTransition";
 import { StudentWorkspaceSession } from "@/features/dashboard/StudentWorkspaceSession";
 import { InteractionSounds } from "@/components/interaction/InteractionSounds";
@@ -51,7 +54,7 @@ export default function RootLayout({
       <body
         className={`${geist.variable} antialiased`}
       >
-        <JourneyTransitionProvider><InteractionSounds /><StudentWorkspaceSession />{children}</JourneyTransitionProvider>
+        <SiteViewport /><JourneyTransitionProvider><InteractionSounds /><StudentWorkspaceSession />{children}</JourneyTransitionProvider>
       </body>
     </html>
   );

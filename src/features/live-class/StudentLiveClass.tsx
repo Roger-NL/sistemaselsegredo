@@ -1,4 +1,6 @@
 "use client";
+import { InterfaceIcon } from "@/components/ui/InterfaceIcon";
+
 import { BrowserText } from "@/components/i18n/BrowserText";
 
 import "./live-class.css";
@@ -69,8 +71,8 @@ export function StudentLiveClass({ workspace, disabled }: { workspace: StudentWo
     <span><CalendarDays size={17} aria-hidden="true" />Minha aula ao vivo</span>
     <strong className="live-class-title">{booking ? <BrowserText>{LIVE_CLASS_LABELS[booking.status]}</BrowserText> : loading ? <BrowserText>{"Carregando…"}</BrowserText> : available ? <BrowserText>{"Sua vez de conversar."}</BrowserText> : <BrowserText>{"Um próximo encontro."}</BrowserText>}</strong>
     <p>Uma aula gratuita com o professor, depois do estudo da cafeteria.</p>
-    {booking && <div className="live-class-booking"><time dateTime={booking.start}><BrowserText>{liveClassDate(booking.start, booking.timezone)}</BrowserText></time><small><BrowserText>1 hora · </BrowserText><BrowserText>{booking.timezone}</BrowserText></small>{booking.reason && <p><BrowserText>{booking.reason}</BrowserText></p>}{booking.status === "confirmed" && (booking.meetingUrl ? <a href={booking.meetingUrl} target="_blank" rel="noreferrer">Entrar na aula ↗</a> : <p>O professor enviará as orientações de acesso pelo contato do painel.</p>)}{booking.status === "pending" && <p>O professor recebeu seu pedido. O horário será confirmado nesta área.</p>}</div>}
-    {booking && ["pending", "confirmed"].includes(booking.status) && <a href="#contato">Falar com o professor ↗</a>}
+    {booking && <div className="live-class-booking"><time dateTime={booking.start}><BrowserText>{liveClassDate(booking.start, booking.timezone)}</BrowserText></time><small><BrowserText>1 hora · </BrowserText><BrowserText>{booking.timezone}</BrowserText></small>{booking.reason && <p><BrowserText>{booking.reason}</BrowserText></p>}{booking.status === "confirmed" && (booking.meetingUrl ? <a href={booking.meetingUrl} target="_blank" rel="noreferrer">Entrar na aula <InterfaceIcon name="arrow-up-right" /></a> : <p>O professor enviará as orientações de acesso pelo contato do painel.</p>)}{booking.status === "pending" && <p>O professor recebeu seu pedido. O horário será confirmado nesta área.</p>}</div>}
+    {booking && ["pending", "confirmed"].includes(booking.status) && <a href="#contato">Falar com o professor <InterfaceIcon name="arrow-up-right" /></a>}
     {!booking && !available && !loading && <p className="live-class-lock"><LockKeyhole size={16} aria-hidden="true" />{!accountCanPractice(workspace.account.status) ? <BrowserText>{"Seu acesso à aula está indisponível. Fale com o professor."}</BrowserText> : <BrowserText>{`Conclua 100% do estudo guiado para liberar a agenda. ${data?.completed ?? workspace.learning.studyCompleted} de ${workspace.learning.studyTotal} etapas concluídas.`}</BrowserText>}</p>}
     <button type="button" className="dashboard-primary" disabled={!available || disabled || loading} onClick={() => { setNotice(""); dialog.current?.showModal(); void load(); }}><CalendarDays size={16} aria-hidden="true" />{booking?.status === "cancelled" ? <BrowserText>{"Escolher outro horário"}</BrowserText> : booking?.status === "pending" ? <BrowserText>{"Pedido enviado"}</BrowserText> : booking?.status === "confirmed" ? <BrowserText>{"Aula agendada"}</BrowserText> : booking?.status === "completed" ? <BrowserText>{"Aula concluída"}</BrowserText> : <BrowserText>{"Agendar minha aula"}</BrowserText>}</button>
     {notice && <p role="status" className="student-sent"><Check size={16} /><BrowserText>{notice}</BrowserText></p>}

@@ -133,3 +133,35 @@ describe("global persistent speech cache", () => {
     expect(infra.save).not.toHaveBeenCalled();
   });
 });
+
+
+describe("verification of recovered immutable uploads", () => {
+  it("accepts a fully recovered MP3 with no checksum and returns its verifiable hash", async () => {
+    const { verifyStoredSpeechBytes } = await import("@/server/speech/cache");
+    const bytes = Buffer.from("ID3already-uploaded-audio");
+    const checksum = verifyStoredSpeechBytes({ url: "unused", pathname: "unused", bytes: bytes.length }, bytes);
+    expect(checksum).toMatch(/^[a-f0-9]{64}$/);
+    expect(verifyStoredSpeechBytes({ url: "unused", pathname: "unused", bytes: bytes.length, checksum }, bytes)).toBe(checksum);
+  });
+  it("rejects a provided checksum mismatch, truncated file or invalid MP3 without generation", async () => {
+    const { verifyStoredSpeechBytes } = await import("@/server/speech/cache");
+    const bytes = Buffer.from("ID3already-uploaded-audio");
+    expect(() => verifyStoredSpeechBytes({ url: "unused", pathname: "unused", bytes: bytes.length, checksum: "0".repeat(64) }, bytes)).toThrow("STORED_AUDIO_CHECKSUM_MISMATCH");
+    expect(() => verifyStoredSpeechBytes({ url: "unused", pathname: "unused", bytes: bytes.length + 1 }, bytes)).toThrow("STORED_AUDIO_CHECKSUM_MISMATCH");
+    expect(() => verifyStoredSpeechBytes({ url: "unused", pathname: "unused", bytes: 3 }, Buffer.from("bad"))).toThrow("STORED_AUDIO_CHECKSUM_MISMATCH");
+  });
+});
+
+
+it("preserves source keys and versions the slow derivative independently", async () => {
+  const { createHash } = await import("node:crypto");
+  const { speechIdentity } = await import("@/server/speech/cache");
+  const p = { voiceId: "actor", model: "eleven_multilingual_v2", format: "mp3_44100_128", speed:1, language:"en", stability:0.5, similarityBoost:0.75 };
+  const legacy = createHash("sha256").update(JSON.stringify(["elevenlabs",3,"Hello",p.voiceId,p.speed,p.model,p.format,p.language,p.stability,p.similarityBoost])).digest("hex");
+  expect(speechIdentity("Hello",p).key).toBe(legacy);
+  expect(speechIdentity("Hello",{...p,processing:undefined}).key).toBe(legacy);
+  const slow = {...p,processing:{tempo:0.78,version:"atempo-v1" as const}};
+  expect(speechIdentity("Hello",slow).key).not.toBe(legacy);
+  expect(speechIdentity("Hello",{...slow,voiceId:"other-actor"}).key).not.toBe(speechIdentity("Hello",slow).key);
+  expect(() => speechIdentity("Hello",{...slow,processing:{tempo:0,version:"atempo-v1"}})).toThrow("INVALID_SPEECH_PROCESSING");
+});

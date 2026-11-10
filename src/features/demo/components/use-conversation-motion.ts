@@ -34,12 +34,11 @@ export function useConversationMotion(state: DemoState, dispatch: Dispatch<DemoE
     else if (event.type === "SEND_RESPONSE" && after !== before) void playInteractionSound(after.evidence.length > before.evidence.length ? "correct" : "retry");
     else if (event.type === "ANSWER_MEANING" && after !== before) void playInteractionSound(event.correct ? "correct" : "retry");
     else if (event.type === "PLACE_BLOCK" && after.returnSerial > before.returnSerial) void playInteractionSound("retry");
-    else if (["NEXT", "ADVANCE_PRESENTATION", "BACK", "CHOOSE", "PREPARE", "CHECK"].includes(event.type)) {
+    else if (["CONTINUE_SCENE", "BACK_SCENE", "NEXT", "ADVANCE_PRESENTATION", "BACK", "CHOOSE", "PREPARE", "CHECK"].includes(event.type)) {
       if (after !== before) void playInteractionSound("advance");
     }
     const changed = after.nodeId !== before.nodeId || after.phase !== before.phase
-      || after.presentationStep !== before.presentationStep || after.reviewView !== before.reviewView
-      || after.audioAccess !== before.audioAccess;
+      || after.presentationStep !== before.presentationStep || after.reviewView !== before.reviewView;
     if (!changed || !document.startViewTransition || getMotionPreference()
       || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       dispatch(event); return;

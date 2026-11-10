@@ -26,10 +26,14 @@ describe("opening reading order", () => {
     expect(html).toContain("Começar a história");
     expect(html).not.toContain("Is this yours?");
     state = next(state); html = render(state);
-    expect(html).toContain("Escute Lucas.");
-    expect(html).not.toContain("Is this yours?");
-    expect(html).not.toContain("Entender a pergunta");
+    expect(html).toContain("Ouvir fala de Lucas");
+    expect(html).toContain("Is this yours?");
+    expect(html).toContain("Entender a pergunta");
+    expect(html).not.toContain("Li, continuar");
+    const beforeListening = html;
     state = listen(state); html = render(state);
+    expect(state.nodeId).toBe("p1.lucas");
+    expect(html).toBe(beforeListening);
     expect(html).toContain("Is this yours?");
     expect(html).toContain("Entender a pergunta");
     expect(html).not.toContain("Ele aponta para um copo");
@@ -41,13 +45,13 @@ describe("opening reading order", () => {
     const prompt = render(state);
     expect(prompt).toContain("O que ele está perguntando?");
     expect(prompt).not.toContain("Is this yours?");
-    expect(prompt).not.toContain("O copo apontado pertence a você?");
-    expect(prompt).not.toContain("O copo apontado pertence a Lucas?");
+    expect(prompt).not.toContain("Se essa bebida é sua.");
+    expect(prompt).not.toContain("Se essa bebida é dele.");
     const question = render(next(state));
     expect(question).toContain("Escolha o significado.");
     expect(question).toContain("Is this yours?");
-    expect(question).toContain("O copo apontado pertence a você?");
-    expect(question).toContain("O copo apontado pertence a Lucas?");
+    expect(question).toContain("Se essa bebida é sua.");
+    expect(question).toContain("Se essa bebida é dele.");
   });
   it("introduces the part-three intention before showing its choices", () => {
     let state = createDemo("beginner", "opening-render", 0);

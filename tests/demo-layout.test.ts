@@ -57,3 +57,25 @@ describe("mobile artwork sizing", () => {
     expect(mobileArtworkHeight(200, { available: 400, intro: 0, activity: 120, gap: 8 })).toBe(133);
   });
 });
+
+describe("mobile framing with comic balloons", () => {
+  it("compacts spacing before reducing a full-width comic illustration", () => {
+    const measured = { available:540, intro:0, activity:310, gap:6, mobile:true, artwork:238 };
+    expect(nextSceneDensity("comfortable",measured)).toBe("compact");
+    expect(nextSceneDensity("compact",{...measured,activity:285})).toBe("compact");
+  });
+  it("fits the measured reading area and controls without a conflicting natural image minimum", () => {
+    const measured = {available:540,intro:0,activity:310,gap:6};
+    const image = mobileArtworkHeight(358,measured,144);
+    expect(image).toBe(224);
+    expect(image + measured.activity + measured.gap).toBe(measured.available);
+  });
+  it("keeps a readable balloon frame when longer text needs its own reading area", () => {
+    const measured = {available:400,intro:0,activity:320,gap:6};
+    expect(mobileArtworkHeight(358,measured,144)).toBe(144);
+  });
+});
+
+it("counts only the two actual row gaps when a mobile scene has an introduction",()=>{
+  expect(nextSceneDensity("comfortable",{available:400,intro:50,activity:190,gap:8,mobile:true,artwork:144})).toBe("comfortable");
+});

@@ -1,3 +1,4 @@
+import { SoundMenu } from "@/components/interaction/InteractionSounds";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -26,7 +27,7 @@ export default async function HomePage() {
     <a className="landing-skip" href="#conteudo">Pular para o conteúdo</a>
     <header className="landing-header landing-wrap">
       <Brand />
-      <Link href="/comecar?modo=entrar" prefetch={false} className="landing-login">Entrar<ArrowUpRight size={15} aria-hidden="true" /></Link>
+      <div className="public-header-actions"><Link href="/comecar?modo=entrar" prefetch={false} className="landing-login">Entrar<ArrowUpRight size={15} aria-hidden="true" /></Link><SoundMenu /></div>
     </header>
     <main id="conteudo" className="landing-main landing-wrap">
       <div className="landing-hero-copy">

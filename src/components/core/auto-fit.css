@@ -1,0 +1,96 @@
+/* Resize finite interactions before resorting to a scroll area. */
+html body :is(.demo-shell,.study-shell,.start-page) .auto-fit.auto-fit {
+  display:flex; flex-direction:column; flex:1 1 0%; min-width:0; min-height:0;
+  overflow:auto; overscroll-behavior:contain;
+}
+.auto-fit-size { flex:none; width:100%; min-inline-size:0; margin-block:auto; }
+.auto-fit-content { display:flow-root; box-sizing:border-box; min-width:0; width:100%; padding:6px; overflow-wrap:anywhere; }
+.auto-fit[data-fitted=true] > .auto-fit-size { position:relative; width:var(--fit-width); height:var(--fit-height); overflow:clip; }
+.auto-fit[data-fitted=true] > .auto-fit-size > .auto-fit-content { position:absolute; top:0; left:var(--fit-left); width:var(--fit-natural-width); transform:scale(var(--fit-scale)); transform-origin:top left; }
+.auto-fit :is(fieldset,.profile-option-copy) { min-width:0; max-width:100%; }
+.auto-fit :is(button,a[href],input:not([type=radio]):not([type=checkbox]):not([type=hidden]),select,textarea,summary,.profile-option,.study-choices>label) { min-block-size:44px; min-inline-size:44px; }
+.auto-fit :is(fieldset,input,select,textarea) { box-sizing:border-box; min-inline-size:0; max-inline-size:100%; }
+.auto-fit[data-fit-overflow=true] > .auto-fit-size { margin-block:0; }
+html body .demo-shell .scene-frame .conversation-panel { max-block-size:var(--scene-panel-space,100%); }
+html body .demo-shell .scene-frame .activity-body.auto-fit { flex:1 1 auto; padding:0; }
+html body .demo-shell .auto-fit :is(.speech,.opening-card) { max-inline-size:100%; box-sizing:border-box; }
+html body .demo-shell .auto-fit[data-fit-density=compact] :is(.opening-card,.speech,.expression) { padding-block:12px; margin-block:8px; }
+html body .demo-shell .auto-fit[data-fit-density=compact] :is(h1,p,.conversation-tools,.blocks,.written-response) { margin-block:8px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] :is(.opening-card,.speech,.expression) { padding:8px 10px; margin-block:5px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] :is(h1,p,.conversation-tools,.blocks,.written-response) { margin-block:5px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .opening-card h1 { font-size:clamp(22px,3vw,32px); }
+html body .demo-shell .auto-fit[data-fit-density=tight] .conversation-tools { gap:6px; min-height:44px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] :is(.choices,.blocks) { gap:6px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] :is(.choices,.blocks) button { padding:8px 10px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .writing-scope { font-size:14px; line-height:1.35; }
+html body .demo-shell .auto-fit .notice:empty { margin:0; padding:0; }
+
+/* The three support choices share the available space, including their caption. */
+html body .demo-shell .entry-grid .entry-copy { min-width:0; justify-content:center; }
+html body .demo-shell .entry-grid .entry-reading { padding:0; }
+html body .demo-shell .auto-fit .profile-options { width:100%; margin:0; min-inline-size:0; }
+html body .demo-shell .auto-fit .profile-option { min-width:0; width:100%; margin-inline:0; }
+html body .demo-shell .auto-fit[data-fit-density=compact] .profile-option { min-height:76px; padding:12px; }
+html body .demo-shell .auto-fit[data-fit-density=compact] .profile-list { gap:8px; }
+html body .demo-shell .auto-fit[data-fit-density=compact] .profile-options legend { font-size:22px; margin-bottom:8px; }
+html body .demo-shell .auto-fit[data-fit-density=compact] .profile-options > p { margin:0 0 12px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .profile-option { min-height:60px; padding:8px 10px; gap:10px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .profile-list { gap:6px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .profile-options legend { font-size:18px; margin-bottom:6px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .profile-options > p { margin:0 0 8px; font-size:14px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .profile-option strong { font-size:15px; line-height:1.25; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .profile-option small { font-size:13px; line-height:1.3; margin-top:3px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .entry-mobile-welcome h1 { font-size:22px; margin-bottom:6px; }
+@container demo-app (max-width:760px) {
+  html body .demo-shell .entry-grid .entry-intro { flex:0 0 var(--entry-art-height,160px); }
+  html body .demo-shell .entry-grid .entry-copy { flex:1 1 0%; }
+  html body .demo-shell .entry-reading .profile-option { min-height:64px; }
+  html body .demo-shell .auto-fit[data-fit-density=compact] .profile-option { min-height:64px; }
+  html body .demo-shell .auto-fit[data-fit-density=tight] .profile-option { min-height:56px; }
+}
+@container demo-app (max-width:760px) and (max-height:620px) {
+  html body .demo-shell .entry-stage .entry-grid { row-gap:8px; padding-block:4px; }
+  html body .demo-shell .entry-start-actions { margin-top:6px; }
+  html body .demo-shell .entry-start-actions > .primary { min-height:44px; padding-block:8px; }
+  html body .demo-shell .auto-fit .entry-mobile-welcome { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; align-items:end; margin-bottom:8px; }
+  html body .demo-shell .auto-fit .entry-mobile-welcome h1 { grid-column:1; grid-row:1; margin-block:0; }
+  html body .demo-shell .auto-fit .entry-mobile-welcome .entry-details { grid-column:2; grid-row:1; margin:0; font-size:12px; }
+  html body .demo-shell .auto-fit .entry-mobile-welcome .lead { grid-column:1/-1; grid-row:2; }
+  html body .demo-shell .auto-fit[data-fit-density=tight] .entry-mobile-welcome h1 { font-size:20px; }
+}
+@container demo-app (max-width:760px) and (max-height:500px) {
+  html body .demo-shell .entry-start-actions { margin-top:6px; }
+}
+@container demo-app (min-width:480px) and (max-width:760px) and (max-height:500px) {
+  html body .demo-shell .entry-stage .entry-grid { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); grid-template-rows:minmax(0,1fr); align-content:stretch; gap:12px; }
+  html body .demo-shell .entry-grid .entry-intro { grid-column:1; grid-row:1; height:100%; max-height:100%; min-height:0; }
+  html body .demo-shell .entry-grid .entry-copy { grid-column:2; grid-row:1; height:100%; min-width:0; }
+}
+
+/* Study, summaries and account forms use the same measured density. */
+html body .study-shell[data-view=study] .study-card { flex:1 1 0%; }
+html body .study-shell .auto-fit[data-fit-density=compact] :is(.study-quote,.study-reason) { padding:12px 14px; margin-block:8px; }
+html body .study-shell .auto-fit[data-fit-density=compact] :is(h1,.study-language-key,.study-step-intent,.study-practice-context,.study-gap-list) { margin-bottom:10px; }
+html body .study-shell .auto-fit[data-fit-density=tight] :is(.study-quote,.study-reason) { padding:9px 12px; margin-block:6px; }
+html body .study-shell .auto-fit[data-fit-density=tight] :is(h1,h2,.study-language-key,.study-step-intent,.study-practice-context,.study-gap-list,.study-practice-instruction) { margin-block:0 7px; }
+html body .study-shell .auto-fit[data-fit-density=tight] .study-card-title { font-size:26px; }
+html body .study-shell .auto-fit[data-fit-density=tight] .study-quote > p { font-size:25px; margin-block:0 4px; }
+html body .study-shell .auto-fit[data-fit-density=tight] .study-examples > li { padding-block:6px; }
+html body .study-shell .auto-fit[data-fit-density=tight] :is(.study-examples,.study-deeper,.study-support,.study-feedback) { margin-block:6px; }
+html body .study-shell .auto-fit[data-fit-density=tight] .study-gap-list { gap:10px; }
+html body .start-page .auto-fit[data-fit-density=compact] :is(.signup-intro,.signup-approval-note,.signup-divider,label) { margin-block:0 8px; }
+html body .start-page .auto-fit[data-fit-density=tight] :is(.signup-intro,.signup-approval-note,.signup-divider,label) { margin-block:0 5px; }
+html body .start-page .auto-fit[data-fit-density=tight] .signup-approval-note { padding:6px 8px; }
+html body .start-page .auto-fit[data-fit-density=tight] h1 { font-size:24px; margin-bottom:5px; }
+html body .demo-shell .auto-fit[data-fit-density=compact] :is(.moment-card,.practice-summary) { padding-block:10px; margin-block:8px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] :is(.moment-card,.practice-summary) { padding-block:6px; margin-block:5px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .moment-card p { margin-block:5px; }
+html body .demo-shell .ending:has(>.auto-fit) { display:flex; flex-direction:column; flex:1 1 0%; gap:8px; overflow:hidden; }
+html body .demo-shell .ending > :not(.auto-fit) { flex-shrink:0; }
+html body .demo-shell .auto-fit[data-fit-density=compact] .study-invitation { padding:14px; margin-block:10px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .study-invitation { padding:10px; margin-block:6px; }
+html body .demo-shell .auto-fit[data-fit-density=tight] .study-invitation h2 { font-size:24px; }
+html body .demo-shell .ending-reading[data-fit-density=tight] h1 { font-size:clamp(24px,4vw,36px); }
+
+/* Give text room to wrap instead of creating a horizontal drag bar. */
+html body :is(.demo-shell,.study-shell,.start-page) :is(fieldset,.entry-copy,.conversation-panel,.study-card,.signup-card) { min-inline-size:0; max-inline-size:100%; }

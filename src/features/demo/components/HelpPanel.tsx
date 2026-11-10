@@ -1,4 +1,7 @@
 "use client";
+import { SpeakerLabel } from "./SpeakerLabel";
+import { InterfaceIcon } from "@/components/ui/InterfaceIcon";
+
 import { BrowserText } from "@/components/i18n/BrowserText";
 
 
@@ -16,16 +19,16 @@ export function HelpPanel({ node, level, onHelp, onReveal }: { node: DemoNode; l
   if (node.kind === "response") return <aside className="help">
     <button className="text-button" onClick={() => { setRevealed(true); onReveal(); dialog.current?.showModal(); }}>Ajuda</button>
     <dialog ref={dialog} className="demo-dialog" aria-labelledby={title}>
-      <div className="dialog-heading"><h2 id={title}>Uma resposta possível</h2><button autoFocus onClick={() => dialog.current?.close()}>Voltar à atividade ×</button></div>
-      {revealed && <><p className="help-solution" lang="en"><BrowserText>{audio[node.response].text}</BrowserText></p><p><BrowserText>{audio[node.response].meaning}</BrowserText></p><AudioButton audio={node.response}>Ouvir modelo</AudioButton></>}
+      <div className="dialog-heading"><h2 id={title}>Uma resposta possível</h2><button autoFocus onClick={() => dialog.current?.close()}>Voltar à atividade <InterfaceIcon name="close" /></button></div>
+      {revealed && <><SpeakerLabel role="you" model /><p className="help-solution" lang="en"><BrowserText>{audio[node.response].text}</BrowserText></p><p><BrowserText>{audio[node.response].meaning}</BrowserText></p><AudioButton audio={node.response}>Ouvir modelo</AudioButton></>}
     </dialog>
   </aside>;
   return <aside className="help">
     <button className="text-button" onClick={() => { if (level === 0) onHelp(); setPage(Math.max(0, level - 1)); dialog.current?.showModal(); }}>Ajuda</button>
     <dialog ref={dialog} className="demo-dialog" aria-labelledby={title}>
-      <div className="dialog-heading"><h2 id={title}>Um apoio para continuar</h2><button autoFocus onClick={() => dialog.current?.close()}>Voltar à conversa ×</button></div>
+      <div className="dialog-heading"><h2 id={title}>Um apoio para continuar</h2><button autoFocus onClick={() => dialog.current?.close()}>Voltar à conversa <InterfaceIcon name="close" /></button></div>
       <p className="help-clue"><BrowserText>{node.help[page]}</BrowserText></p>
-      <nav className="pager" aria-label="Percorrer pistas"><button disabled={page === 0} onClick={() => setPage(page - 1)}>← Anterior</button><span><BrowserText>Pista </BrowserText>{<BrowserText>{page + 1}</BrowserText>} <BrowserText>de </BrowserText><BrowserText>{node.help.length}</BrowserText></span><button aria-label="Mais uma pista" disabled={page + 1 >= node.help.length} onClick={() => { if (page + 1 >= level) onHelp(); setPage(page + 1); }}>Próxima →</button></nav>
+      <nav className="pager" aria-label="Percorrer pistas"><button disabled={page === 0} onClick={() => setPage(page - 1)}><InterfaceIcon name="arrow-left" /> Anterior</button><span><BrowserText>Pista </BrowserText>{<BrowserText>{page + 1}</BrowserText>} <BrowserText>de </BrowserText><BrowserText>{node.help.length}</BrowserText></span><button aria-label="Mais uma pista" disabled={page + 1 >= node.help.length} onClick={() => { if (page + 1 >= level) onHelp(); setPage(page + 1); }}>Próxima <InterfaceIcon name="arrow-right" /></button></nav>
     </dialog>
   </aside>;
 }

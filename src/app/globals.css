@@ -6,6 +6,34 @@ body { margin: 0; }
 button, input, textarea { font: inherit; }
 button, a, summary, input, textarea { -webkit-tap-highlight-color: transparent; }
 
+.ui-symbol { display:inline-block; flex-shrink:0; width:1em; height:1em; vertical-align:-.125em; }
+
 /* Stable elements keep browser translators from detaching React's text nodes.
    They are text boundaries, not new layout or typography hooks. */
 [data-ui-text] { all:unset !important; display:contents !important; }
+
+/* Shared audio menu: available before sign-in and during the presentation. */
+.public-header-actions,.presentation-header-actions { display:flex; align-items:center; gap:12px; min-width:0; }
+.sound-menu { position:relative; z-index:80; flex-shrink:0; color:#222923; }
+.sound-menu > summary { display:flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 12px; cursor:pointer; list-style:none; border:1px solid currentColor; border-radius:8px; font-size:13px; }
+.sound-menu > summary::-webkit-details-marker { display:none; }
+.sound-menu > summary:focus-visible,.sound-option:focus-visible { outline:2px solid #397a6d; outline-offset:3px; }
+.sound-menu-panel { position:absolute; right:0; top:calc(100% + 8px); width:260px; max-width:calc(100vw - 34px); max-height:calc(100dvh - 100px); overflow:auto; padding:8px; border:2px solid #222923; border-radius:10px; background:#fff7ea; color:#222923; box-shadow:4px 4px 0 #222923; }
+.sound-menu-panel .sound-option { display:flex; width:100%; align-items:center; gap:10px; min-height:48px; padding:10px 8px; border:0; border-radius:5px; background:transparent; color:#222923; text-align:left; font:inherit; font-size:13px; cursor:pointer; }
+.sound-option svg { flex-shrink:0; }
+.sound-menu-panel .sound-option:hover { background:#e8ecdf; color:#222923; }
+.presentation-header .sound-menu > summary { color:#f4f0e8; }
+@media(max-width:480px) {
+ .public-header-actions,.presentation-header-actions { gap:8px; }
+ .sound-menu > summary { width:44px; padding:0; }
+ .sound-menu > summary > span { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+ .presentation-header-actions > button { max-width:82px; text-align:left; }
+ .presentation-header:has(.test-controls-trigger) .brand { font-size:17px; }
+}
+
+@media(max-width:480px) { .presentation-header { flex-wrap:wrap; padding:10px 0; gap:8px; }.presentation-header-actions { margin-left:auto; flex-wrap:wrap; justify-content:flex-end; } }
+@media(max-width:390px) {
+ .landing-header,.start-header { gap:8px; }
+ .landing-header .brand,.start-header .brand { font-size:18px; }
+ .public-header-actions .landing-login { padding-inline:8px; gap:6px; font-size:12px; }
+}

@@ -41,12 +41,12 @@ export function isStorySound(value: string): value is StorySound {
 }
 
 /** Use the shared context, cancellation and mute preference. No downloaded media. */
-export function renderStorySound(audio: AudioContext, kind: StorySound, active: Set<AudioScheduledSourceNode>) {
+export function renderStorySound(audio: AudioContext, kind: StorySound, active: Set<AudioScheduledSourceNode>, volumeScale = 1) {
   const score = scores[kind];
   const envelope = (at: number, duration: number, attack: number, volume: number) => {
     const gain = audio.createGain();
     gain.gain.setValueAtTime(0.0001, at);
-    gain.gain.exponentialRampToValueAtTime(volume, at + attack);
+    gain.gain.exponentialRampToValueAtTime(volume * volumeScale, at + attack);
     gain.gain.exponentialRampToValueAtTime(0.0001, at + duration);
     gain.connect(audio.destination);
     return gain;

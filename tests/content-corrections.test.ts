@@ -115,7 +115,7 @@ describe("corrected content and actual current-event routes", () => {
       const html = renderToStaticMarkup(createElement(DemoExperience, { initial: { ...s, presentationStep: 1 } }));
       expect(html.includes("Depois de mais alguns minutos")).toBe(stayed);
     }
-    for (const [id, phrase] of [["p4.same", "também pedi isso"], ["p4.new-cup", "BASEDSPEAK"], ["p4.arrival-b", "próprio copo"]]) {
+    for (const [id, phrase] of [["p4.same", "também pedi isso"], ["p4.new-cup", "que é seu"], ["p4.arrival-b", "próprio copo"]]) {
       expect(presentationCards(catalog[id]).some(card => card.context.includes(phrase))).toBe(true);
     }
     for (const node of nodes) if (node.kind === "response") {

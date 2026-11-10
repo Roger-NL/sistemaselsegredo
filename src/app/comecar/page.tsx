@@ -1,3 +1,5 @@
+import { SoundMenu } from "@/components/interaction/InteractionSounds";
+import { InterfaceIcon } from "@/components/ui/InterfaceIcon";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
@@ -23,9 +25,9 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   if (authenticated) redirect("/dashboard");
   const { modo } = await searchParams;
   return <ViewportFrame className="start-page">
-    <header className="start-header landing-wrap"><Brand /><Link href="/" className="start-back"><ArrowLeft size={15} aria-hidden="true" />Voltar</Link></header>
+    <header className="start-header landing-wrap"><Brand /><div className="public-header-actions"><Link href="/" className="start-back"><ArrowLeft size={15} aria-hidden="true" />Voltar</Link><SoundMenu /></div></header>
     <main className="start-main landing-wrap">
-      <div className="start-story"><p className="landing-eyebrow">SEU PRIMEIRO ENCONTRO COM O INGLÊS.</p><h2>Tem uma conversa<br />esperando por você.</h2><p>Escolha o que dizer. Construa com apoio.<br />Descubra o jeito BasedSpeak de aprender.</p><div className="start-type" aria-hidden="true"><span>Think it.</span><span>Build it.</span><span>Say it. ↗</span></div><p className="start-free"><Check size={15} aria-hidden="true" />Demo gratuita. Sem cartão. Sem microfone.</p></div>
+      <div className="start-story"><p className="landing-eyebrow">SEU PRIMEIRO ENCONTRO COM O INGLÊS.</p><h2>Tem uma conversa<br />esperando por você.</h2><p>Escolha o que dizer. Construa com apoio.<br />Descubra o jeito BasedSpeak de aprender.</p><div className="start-type" aria-hidden="true"><span>Think it.</span><span>Build it.</span><span>Say it. <InterfaceIcon name="arrow-up-right" /></span></div><p className="start-free"><Check size={15} aria-hidden="true" />Demo gratuita. Sem cartão. Sem microfone.</p></div>
       <SignupForm initialMode={modo === "entrar" ? "login" : "signup"} />
     </main>
     <footer className="start-footer landing-wrap"><span>BasedSpeak · Um encontro de cada vez.</span><nav aria-label="Informações legais"><Link href="/privacidade">Privacidade</Link><Link href="/termos">Termos</Link></nav></footer>

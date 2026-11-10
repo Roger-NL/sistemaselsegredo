@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { audio } from "@/features/demo/content/media";
-import { assertOnlyKeys, getRequestIp, readJsonObject, RequestPayloadError, requestPayloadErrorResponse } from "@/server/http/request";
-import { consumeRateLimit, RateLimitError, rateLimitErrorResponse } from "@/server/http/rate-limit";
-import { readCachedSpeech, resolveCachedSpeech, speechParameters } from "@/server/speech/runtime";
+import { assertOnlyKeys, readJsonObject, RequestPayloadError, requestPayloadErrorResponse } from "@/server/http/request";
+import { speechPlaybackParameters } from "@/server/speech/parameters";
 import { SpeechUnavailableError } from "@/server/speech/cache";
 import type { AudioId } from "@/features/demo/model/types";
 import { getPublishedAudioCatalog } from "@/server/speech/published";
@@ -20,22 +19,14 @@ export async function POST(req: Request) {
     const payload = await readJsonObject(req, 1024);
     assertOnlyKeys(payload, ["audioId"]);
     if (typeof payload.audioId !== "string" || !Object.hasOwn(audio, payload.audioId)) throw new RequestPayloadError("UNKNOWN_AUDIO_ID");
-    const parameters = speechParameters(); // Fail before any database/provider call when not configured.
-    const published = getPublishedAudioCatalog(parameters)[payload.audioId as AudioId];
+    const parameters = speechPlaybackParameters();
+    const published = getPublishedAudioCatalog(parameters, speechPlaybackParameters("you"))[payload.audioId as AudioId];
     // Public, already published media has no generation cost and needs no database admission.
     if (published) return NextResponse.json({ status: "ready", ...published }, { headers });
-    const text = audio[payload.audioId as AudioId].text;
-    // Only the read-only hit lookup runs alongside admission. Generation must wait for admission.
-    const [, cached] = await Promise.all([
-      consumeRateLimit({ namespace: "demo-audio-ip", identifier: getRequestIp(req), limit: 120, windowMs: 60_000 }),
-      readCachedSpeech(text, parameters),
-    ]);
-    const result = cached ?? await resolveCachedSpeech(text, parameters);
-    if (result.status === "pending") return NextResponse.json(result, { status: 202, headers: { ...headers, "Retry-After": String(result.retryAfter) } });
-    return NextResponse.json({ status: "ready", key: result.key, audioUrl: result.url }, { headers });
+    // Listening is strictly read-only. A missing file must never spend provider credits.
+    return NextResponse.json({ error: "AUDIO_NOT_PUBLISHED" }, { status: 503, headers });
   } catch (error) {
     if (error instanceof RequestPayloadError) return requestPayloadErrorResponse(error);
-    if (error instanceof RateLimitError) return rateLimitErrorResponse(error);
     return NextResponse.json({ error: error instanceof SpeechUnavailableError ? error.code : "SPEECH_UNAVAILABLE" }, { status: 503, headers });
   }
 }

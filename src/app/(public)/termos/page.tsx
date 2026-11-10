@@ -1,8 +1,9 @@
+import { InterfaceIcon } from "@/components/ui/InterfaceIcon";
 import type { Metadata } from "next";
 import Link from "next/link";
 export const metadata: Metadata = { title: "Termos de uso", description: "Sobre a experiência da cafeteria e a conta BasedSpeak." };
 export default function TermsPage() {
-  return <main className="demo-shell"><article className="legal"><Link href="/">← Voltar ao início</Link><h1>Termos de uso</h1><p>Atualizado em 3 de novembro de 2026.</p>
+  return <main className="demo-shell"><article className="legal"><Link href="/"><InterfaceIcon name="arrow-left" /> Voltar ao início</Link><h1>Termos de uso</h1><p>Atualizado em 3 de novembro de 2026.</p>
     <h2>A experiência</h2><p>A demo BasedSpeak é uma conversa guiada fictícia em uma cafeteria. A conversa em <Link href="/demo">/demo</Link> e o <Link href="/demo/estudo">estudo guiado</Link> são públicos e gratuitos, sem cadastro ou aprovação. Sem conta, o progresso fica apenas neste navegador. Não há pagamento, gravação de voz ou microfone. Você pode pedir ajuda, escolher como participar e encerrar quando quiser.</p>
     <h2>A conta e o curso</h2><p>Criar uma conta não gera cobrança nem contratação de um plano. A conta permite salvar e retomar conversa e estudo em outros dispositivos, após confirmação do salvamento, acompanhar atividades e conversar com o professor pelo painel. A revisão cadastral de contas novas não bloqueia a prática nem o salvamento; suspensão ou rejeição podem restringir o acesso da conta. Um percurso anônimo só é importado com sua escolha explícita, para uma conta sem progresso salvo e sem agendamento; ele não substitui um percurso já existente. A próxima etapa do curso ainda está em preparação; não há oferta comercial, preço ou acesso a um curso completo nesta página.</p>
     <h2>Aprender com apoio</h2><p>A experiência permite construir respostas e participar de um diálogo com ajuda. Não é um teste de proficiência nem uma promessa de fluência, certificação ou memorização independente.</p>

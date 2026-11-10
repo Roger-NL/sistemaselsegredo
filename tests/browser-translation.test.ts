@@ -43,7 +43,7 @@ describe("native browser translation compatibility",()=>{
     // A delayed translation of the old count must update only the detached
     // boundary, never replace the current search result count.
     oldCounterBoundary.textContent='45 translated expressions';
-    expect(container.querySelector('[role="status"].study-small')?.textContent).toBe(`${count} expressões`);
+    expect(container.querySelector('[role="status"].study-small')?.textContent).toBe(`${count} falas`);
     await click("Voltar aos blocos");
     expect(container.querySelector('#phrase-search')).toBeNull();
     expect(container.textContent).toContain('Começar a descobrir');

@@ -14,23 +14,20 @@ function waitForRetry(ms: number, signal: AbortSignal) {
 /** A session shortcut for published URLs, in addition to (never instead of) the global server cache. */
 export function createCatalogAudioClient(request: typeof fetch = fetch,
   wait: (ms: number, signal: AbortSignal) => Promise<void> = waitForRetry, published: PublishedAudioCatalog = {}) {
-  const ready = new Map<string, string>();
+  const ready = new Map<AudioId, string>();
   for (const [id, value] of Object.entries(published)) {
     if (!Object.hasOwn(audio, id)) throw new Error("INVALID_AUDIO_RESPONSE");
     const reference = validateAudioReference(value);
-    const text = audio[id as AudioId].text;
-    if (ready.has(text) && ready.get(text) !== reference.audioUrl) throw new Error("INVALID_AUDIO_RESPONSE");
-    ready.set(text, reference.audioUrl);
+    ready.set(id as AudioId, reference.audioUrl);
   }
   return async (id: AudioId, signal: AbortSignal) => {
     signal.throwIfAborted();
-    // Different narrative roles/IDs can use the exact same approved phrase.
-    const text = audio[id].text;
-    const cached = ready.get(text);
+    // The same phrase spoken by different people must retain its own recording.
+    const cached = ready.get(id);
     if (cached) return cached;
     const url = await requestCatalogAudio(id, signal, request, wait);
     signal.throwIfAborted();
-    ready.set(text, url);
+    ready.set(id, url);
     return url;
   };
 }

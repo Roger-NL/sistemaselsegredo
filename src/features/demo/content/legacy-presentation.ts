@@ -13,7 +13,7 @@ const moments: Record<string, [string, string]> = {
 };
 const prompts: Record<string, string> = {
   "p3.ask": "Pergunte o que Lucas pediu.", "p3.okay": "Responda à desculpa: diga que está tudo bem.",
-  "p4.same": "Diga que você pediu o mesmo.", "p4.mine": "O copo com o nome based é seu. Como confirmar isso?",
+  "p4.same": "Diga que você pediu o mesmo.", "p4.mine": "Agora Lucas pergunta sobre o seu café. Como confirmar que ele é seu?",
   "p5.like": "Diga que você gosta do café.", "p5.not": "Diga que não gosta muito do café.",
   "p6.warn": "Como avisar Lucas sobre o copo?", "p7.tired": "Mostre interesse e surpresa com o que Lucas contou.",
   "p7.too": "Diga que você também está cansado.", "p7.not": "Diga que você não está muito cansado.",

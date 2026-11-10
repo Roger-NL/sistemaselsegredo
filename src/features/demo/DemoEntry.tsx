@@ -1,22 +1,26 @@
 "use client";
 import { BrowserText } from "@/components/i18n/BrowserText";
+import { AutoFit } from "@/components/core/AutoFit";
 
 
 import { ArrowUpRight, Check } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useEntryFit } from "./components/use-entry-fit";
 import { profiles } from "./content/copy.pt-BR";
 import type { SupportProfile } from "./model/types";
 
 export function DemoEntry({ onStart }: { onStart: (profile: SupportProfile) => void }) {
   const [profile, setProfile] = useState<SupportProfile | null>(null);
+  const frame = useRef<HTMLElement>(null);
+  useEntryFit(frame);
   const welcome = <><h1>Do primeiro café<br />à despedida.</h1><p className="lead">Uma conversa em inglês, com ajuda no seu ritmo.</p><p className="entry-details">Sem microfone</p></>;
-  return <section className="entry-grid">
+  return <section ref={frame} className="entry-grid">
     <div className="entry-intro">
       <header className="entry-welcome">{welcome}</header>
       <figure className="entry-art"><picture><source media="(max-width: 760px)" srcSet="/demo/cafe/v2/images/V01-640.webp" /><Image width={960} height={640} unoptimized src="/demo/cafe/v2/images/V01-960.webp" alt="Lucas e based no balcão da cafeteria, com seus nomes nos copos." /></picture></figure>
     </div>
-    <div className="entry-copy"><div className="entry-reading"><header className="entry-mobile-welcome"><h1>Do primeiro café<br />à despedida.</h1><p className="lead">Uma conversa em inglês, no seu ritmo.</p><p className="entry-details">Sem microfone</p></header>
+    <div className="entry-copy"><AutoFit className="entry-reading"><header className="entry-mobile-welcome"><h1>Do primeiro café<br />à despedida.</h1><p className="lead">Uma conversa em inglês, no seu ritmo.</p><p className="entry-details">Sem microfone</p></header>
       <fieldset className="profile-options" aria-describedby="entry-support-note"><legend>Como você prefere começar?</legend>
         <p id="entry-support-note">Você pode mudar o apoio depois.</p>
         <div className="profile-list">{profiles.map(option => <label key={option.id} className={`profile-option ${profile === option.id ? "selected" : ""}`}>
@@ -25,7 +29,7 @@ export function DemoEntry({ onStart }: { onStart: (profile: SupportProfile) => v
           <span className="profile-indicator" aria-hidden="true">{profile === option.id && <Check size={14} strokeWidth={2.5} />}</span>
         </label>)}</div>
       </fieldset>
-      </div>
+      </AutoFit>
       <div className="entry-start-actions"><button className="primary" disabled={!profile} onClick={() => profile && onStart(profile)}>Começar a conversa <ArrowUpRight aria-hidden size={18} /></button></div>
     </div>
   </section>;

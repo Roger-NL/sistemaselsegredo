@@ -30,6 +30,23 @@ function getSlotLockId(slotStart: string, slotEnd: string) {
   return createHash('sha256').update(`${slotStart}|${slotEnd}`).digest('hex');
 }
 
+/** Merge a result computed outside Firestore only into the session it read. */
+async function updateExistingSession(expected: LiveSessionBooking, patch: Partial<LiveSessionBooking>): Promise<LiveSessionBooking | null> {
+  const ref = getAdminDb().collection(COLLECTION).doc(expected.id!);
+  return getAdminDb().runTransaction(async transaction => {
+    const stored = await transaction.get(ref);
+    if (!stored.exists) return null;
+    const current = { ...(stored.data() as LiveSessionBooking), id: stored.id };
+    if (current.userId !== expected.userId) return null;
+    const unchanged = (['status', 'requestedSlotStart', 'requestedSlotEnd', 'bookingRevision', 'calendarEventId', 'updatedAt'] as const)
+      .every(key => current[key] === expected[key]);
+    if (!unchanged) return current;
+    const cleanPatch = stripUndefined(patch);
+    transaction.update(ref, cleanPatch);
+    return { ...current, ...cleanPatch };
+  });
+}
+
 async function updateSessionAndReleaseSlot(options: {
   sessionId: string;
   expectedStatuses: LiveSessionBooking['status'][];
@@ -217,7 +234,7 @@ async function syncSessionWithCalendar(session: LiveSessionBooking) {
       : null;
 
     if (nextStatus !== 'ready_to_schedule') {
-      await getAdminDb().collection(COLLECTION).doc(session.id!).set(stripUndefined(updatedSession), { merge: true });
+      return updateExistingSession(session, updatedSession);
     }
 
 
@@ -306,7 +323,7 @@ export async function getSchedulingStatusForUser(userId: string): Promise<LiveSe
     session = await syncSessionWithCalendar(session);
 
     if (
-      session.status === "awaiting_release_window" &&
+      session?.status === "awaiting_release_window" &&
       session.earliestScheduleAt &&
       !isAfter(parseISO(session.earliestScheduleAt), new Date())
     ) {
@@ -316,12 +333,7 @@ export async function getSchedulingStatusForUser(userId: string): Promise<LiveSe
         lastActionMessage: "Sua primeira sessão ao vivo já pode ser marcada.",
       };
 
-      await getAdminDb().collection(COLLECTION).doc(session.id!).set(promoted, { merge: true });
-
-      session = {
-        ...session,
-        ...promoted,
-      };
+      session = await updateExistingSession(session, promoted);
     }
   }
 

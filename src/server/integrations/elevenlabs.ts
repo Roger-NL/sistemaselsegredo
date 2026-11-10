@@ -3,6 +3,7 @@ import type { SpeechParameters } from "../speech/cache";
 
 /** Low-level provider adapter. Production callers must go through server/speech/runtime.ts. */
 export async function generatePreparedSpeech(text: string, p: SpeechParameters) {
+  if (p.processing) throw new Error("DERIVED_AUDIO_REQUIRES_OFFLINE_PROCESSING");
   if (!text.trim() || text.length > 2_000 || !p.voiceId.trim()) throw new Error("INVALID_SPEECH_TEXT");
   const apiKey = process.env.ELEVENLABS_API_KEY?.trim();
   if (!apiKey) throw new Error("ELEVENLABS_NOT_CONFIGURED");

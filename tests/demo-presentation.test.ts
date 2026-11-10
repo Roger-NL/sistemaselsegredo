@@ -57,7 +57,7 @@ describe("one main message per screen in parts 3–10", () => {
             const first = presentationCards(target, state)[0];
             if (target.id === "p4.new-cup") {
               expect(first?.presentation).toBe("context");
-              expect(first?.context).toContain("BASEDSPEAK");
+              expect(first?.context).toContain("que é seu");
             } else expect(first?.presentation ?? (target.kind === "scene" ? "dialogue" : null)).toBe("dialogue");
             expect(target.heard?.length).toBeGreaterThan(0);
           }

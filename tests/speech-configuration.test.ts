@@ -17,6 +17,14 @@ describe("server speech configuration", () => {
   });
   it("uses the configured voice and approved synthesis settings without exposing the API key", () => {
     vi.stubEnv("ELEVENLABS_API_KEY", "test-only-key"); vi.stubEnv("ELEVENLABS_VOICE_ID", " test-only-voice "); vi.stubEnv("BLOB_READ_WRITE_TOKEN", "test-only-blob");
-    expect(speechParameters()).toEqual({ voiceId: "test-only-voice", model: "eleven_flash_v2_5", format: "mp3_44100_128", speed: 0.78, language: "en", stability: 0.62, similarityBoost: 0.75 });
+    expect(speechParameters()).toEqual({ voiceId: "test-only-voice", model: "eleven_multilingual_v2", format: "mp3_44100_128", speed: 1, language: "en", stability: 0.5, similarityBoost: 0.75, processing: undefined });
   });
+});
+
+it("plays published audio with no provider or upload credential", async () => {
+  const { speechPlaybackParameters } = await import("@/server/speech/parameters");
+  vi.stubEnv("ELEVENLABS_API_KEY", ""); vi.stubEnv("BLOB_READ_WRITE_TOKEN", ""); vi.stubEnv("ELEVENLABS_VOICE_ID", "warren");
+  expect(speechPlaybackParameters().voiceId).toBe("warren");
+  expect(() => speechParameters()).toThrow("SPEECH_NOT_CONFIGURED");
+  expect(mocks.generate).not.toHaveBeenCalled(); expect(mocks.db).not.toHaveBeenCalled();
 });

@@ -1,0 +1,141 @@
+/* Shared geometry only. Each chapter continues to own its colors, type and motion. */
+:root { --visible-width:100vw; --visible-height:100dvh; --visible-top:0px; --visible-left:0px; }
+html:has(.demo-shell.app-shell,.presentation,.study-shell[data-view=study],.public-viewport),
+body:has(.demo-shell.app-shell,.presentation,.study-shell[data-view=study],.public-viewport) { overflow:hidden; }
+html body :is(.demo-shell.app-shell,.presentation,.study-shell[data-view=study],.public-viewport) {
+  position:fixed; top:var(--visible-top); left:var(--visible-left);
+  width:var(--visible-width); height:var(--visible-height); min-height:0; max-height:var(--visible-height);
+}
+html body .demo-shell.app-shell { container:demo-app / size; display:flex; flex-direction:column; overflow:hidden; }
+html body .demo-shell.app-shell > :not(.experience):not(.entry-stage):not(.resume) { flex-shrink:0; }
+html body .demo-shell.app-shell > :is(.experience,.entry-stage,.resume) { flex:1 1 auto; min-height:0; }
+html body .demo-shell.app-shell > .experience { display:flex; flex-direction:column; overflow:hidden; }
+html body .demo-shell .experience > :not(.scene-frame):not(.review-stage):not(.ending):not(.feedback-form):not(.conversation-replay) { flex-shrink:0; }
+html body .demo-shell .conversation-replay { flex:1 1 auto; min-height:0; overflow:hidden; }
+
+/* Actions have their own row. Even an expanded hint cannot push Send out of the frame. */
+html body .demo-shell .scene-frame { flex:1 1 auto; display:grid; grid-template-rows:minmax(0,1fr) auto; min-height:0; min-width:0; }
+html body .demo-shell .scene-frame > .scene-grid { min-height:0; overflow:auto; overscroll-behavior:contain; }
+html body .demo-shell .scene-frame > .activity-actions { width:calc((100% - clamp(1.25rem,3vw,3rem)) / 2); margin:0 0 0 auto; padding:6px 4px 6px 0; }
+html body .demo-shell .scene-frame > .activity-actions:empty { display:none; }
+html body .demo-shell .scene-frame > .activity-actions > .activity-actions { width:100%; margin:0; padding:0; }
+html body .demo-shell .scene-frame .conversation-panel { min-height:0; max-height:100%; overflow:hidden; }
+html body .demo-shell .scene-frame .activity-body { flex:0 1 auto; min-height:0; margin:0; overflow:auto; overscroll-behavior:contain; padding-bottom:6px; }
+html body .demo-shell .entry-grid { height:100%; min-height:0; overflow:hidden; }
+html body .demo-shell .entry-grid .entry-copy { display:flex; flex-direction:column; min-height:0; height:100%; }
+html body .demo-shell .entry-grid .entry-reading { display:block; flex:0 1 auto; min-height:0; overflow:auto; overscroll-behavior:contain; }
+html body .demo-shell .entry-grid .entry-start-actions { flex-shrink:0; }
+html body .demo-shell .review-stage { flex:1 1 auto; min-height:0; overflow:hidden; }
+html body .demo-shell .review-reading { flex:0 1 auto; min-height:0; overflow:auto; }
+html body .demo-shell :is(.ending,.feedback-form) { flex:0 1 auto; min-height:0; overflow:auto; }
+
+@container demo-app (min-width:761px) {
+  html body .demo-shell .entry-grid .entry-intro { min-height:0; height:100%; max-height:100%; }
+  html body .demo-shell .entry-intro .entry-welcome { flex-shrink:0; }
+  html body .demo-shell .entry-intro .entry-art { flex:1 1 auto; min-height:0; height:0; }
+  html body .demo-shell .entry-intro .entry-art picture { position:relative; display:block; height:100%; aspect-ratio:auto; }
+  html body .demo-shell .entry-intro .entry-art picture img { position:absolute; height:100%; width:100%; object-fit:contain; }
+  html body .demo-shell .scene-frame .scene-grid { grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:minmax(0,1fr) auto minmax(0,max-content) minmax(0,1fr); }
+  html body .demo-shell .scene-frame .scene-intro-slot { grid-column:2; grid-row:2; }
+  html body .demo-shell .scene-frame .conversation-panel { grid-column:2; grid-row:3; }
+  html body .demo-shell .scene-frame .scene-column { grid-column:1; grid-row:1/-1; }
+}
+@container demo-app (max-width:760px) {
+  html body .demo-shell .entry-stage .entry-grid { display:flex; flex-direction:column; justify-content:center; gap:12px; padding-block:8px; }
+  html body .demo-shell .entry-grid .entry-intro { display:flex; width:100%; flex:0 1 160px; min-height:80px; }
+  html body .demo-shell .entry-intro .entry-art { height:100%; width:100%; }
+  html body .demo-shell .entry-grid .entry-copy { flex:0 1 auto; width:100%; height:auto; }
+  html body .demo-shell .scene-frame > .activity-actions { width:100%; }
+  html body .demo-shell .scene-frame .scene-grid:has(.comic-scene) { grid-template-rows:auto var(--scene-art-height,144px) minmax(0,max-content); }
+  html body .demo-shell .scene-frame .scene-grid.opening-scene:has(.comic-scene) { grid-template-rows:var(--scene-art-height,144px) minmax(0,max-content); }
+}
+/* Fit the frame itself to the full 3:2 artwork, instead of painting side bands. */
+html body .demo-shell .entry-grid .entry-art { display:grid; place-items:center; container:entry-image / size; }
+html body .demo-shell .entry-grid .entry-art picture {
+  position:relative; flex:none; box-sizing:content-box;
+  width:min(calc(100cqw - 4px),calc((100cqh - 4px) * 1.5));
+  height:auto; aspect-ratio:3/2;
+}
+html body .demo-shell .entry-grid .entry-art picture img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; }
+@container demo-app (min-width:480px) and (max-width:760px) and (max-height:500px) {
+  html body .demo-shell .scene-frame .scene-grid:has(.comic-scene) { grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); }
+  html body .demo-shell .scene-frame .scene-grid .scene-intro-slot { grid-column:2; grid-row:1; }
+  html body .demo-shell .scene-frame .scene-grid .scene-column { grid-column:1; grid-row:1/-1; }
+  html body .demo-shell .scene-frame .scene-grid .conversation-panel { grid-column:2; grid-row:2; }
+  html body .demo-shell .scene-frame > .activity-actions { width:calc((100% - 12px) / 2); }
+}
+@container demo-app (max-height:540px) {
+  html body .demo-shell.app-shell > footer { display:none; }
+  html body .demo-shell .app-header { min-height:56px; padding-block:0; }
+  html body .demo-shell .learning-return { padding-block:0; }
+  html body .demo-shell .learning-return a { min-height:28px; }
+  html body .demo-shell .scene-frame .scene-grid { padding-block:4px; row-gap:4px; }
+}
+@container demo-app (max-height:620px) {
+  html body .demo-shell .entry-reading .profile-option { min-height:76px; padding:12px; }
+  html body .demo-shell .entry-reading .profile-list { gap:8px; }
+  html body .demo-shell .entry-start-actions { margin-top:12px; }
+  html body .demo-shell .entry-welcome h1 { font-size:32px; }
+}
+@container demo-app (max-width:760px) and (max-height:480px) {
+  html body .demo-shell .scene-frame .scene-grid:has(.written-response input:focus) { grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); }
+  html body .demo-shell .scene-frame .scene-grid:has(.written-response input:focus) .scene-column { display:none; }
+  html body .demo-shell .scene-frame .scene-grid:has(.written-response input:focus) .scene-intro-slot { grid-column:1; grid-row:1; }
+  html body .demo-shell .scene-frame .scene-grid:has(.written-response input:focus) .conversation-panel { grid-column:1; grid-row:2; }
+  html body .demo-shell .scene-frame:has(.written-response input:focus) > .activity-actions { width:100%; }
+}
+
+/* The same bounded reading/control layout also applies to study on desktop. */
+html body .study-shell[data-view=study] { container:study-app / size; display:flex; flex-direction:column; overflow:hidden; padding-bottom:max(4px,env(safe-area-inset-bottom)); }
+html body .study-shell[data-view=study] > :not(.study-workspace) { flex-shrink:0; }
+html body .study-shell[data-view=study] .study-workspace { flex:1 1 auto; min-height:0; width:100%; overflow:hidden; padding-block:12px; }
+html body .study-shell[data-view=study] .study-sidebar { min-height:0; overflow:auto; }
+html body .study-shell[data-view=study] .study-main { display:flex; flex-direction:column; min-height:0; height:100%; width:100%; }
+html body .study-shell[data-view=study] .study-main > :not(.study-card) { flex-shrink:0; }
+html body .study-shell[data-view=study] .study-card { display:flex; flex-direction:column; flex:0 1 auto; min-height:0; padding-block:0; }
+html body .study-shell[data-view=study] .study-card-reading { display:block; flex:0 1 auto; min-height:0; overflow:auto; overscroll-behavior:contain; padding:0 5px 5px 0; }
+html body .study-shell[data-view=study] .study-card-controls { display:block; flex:0 0 auto; padding-top:6px; background:var(--paper); }
+html body .study-shell[data-view=study] :is(.study-card-actions,.study-checkbar,.study-next) { position:static; margin:0; padding-block:6px; }
+html body .study-shell[data-view=study] .study-admin-skip { margin-top:4px; }
+html body .study-shell[data-view=study] .study-footer { margin:0 auto; padding-block:5px; }
+@container study-app (max-height:720px) {
+  html body .study-shell .study-workspace { padding-block:6px; }
+  html body .study-shell .study-step-meta { margin-bottom:4px; }
+  html body .study-shell .study-main > progress { margin-bottom:8px; }
+  html body .study-shell .study-card h1 { margin-bottom:12px; }
+  html body .study-shell .study-quote { padding:12px 16px; margin-bottom:12px; }
+  html body .study-shell :is(.study-reason,.study-examples,.study-deeper) { margin-block:8px; }
+}
+@container study-app (max-height:540px) {
+  html body .study-shell .app-header { min-height:56px; padding-block:0; }
+  html body .study-shell .study-footer { display:none; }
+  html body .study-shell .study-next-preview { display:none; }
+  html body .study-shell .study-card-controls button { min-height:44px; padding-block:8px; }
+}
+
+/* Login fields may scroll, but submitting remains a separate, stable action. */
+html body .start-page .start-main { overflow:hidden; }
+html body .start-page .signup-card { display:flex; flex-direction:column; max-height:100%; min-height:0; }
+html body .start-page .signup-card-reading { min-height:0; overflow:auto; overscroll-behavior:contain; padding:0 4px 4px 0; }
+html body .start-page .signup-card-actions { flex-shrink:0; }
+html body .start-page .signup-card-actions .signup-submit { margin-top:6px; }
+@container public-viewport (min-width:480px) and (max-height:480px) {
+  html body .start-page .signup-card-reading { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); column-gap:20px; }
+}
+html body .landing-hero-copy { max-height:100%; overflow:auto; overscroll-behavior:contain; }
+html body .landing-hero-actions { position:sticky; bottom:0; background:var(--paper); }
+
+/* Native dialogs center inside the visible rectangle, even when Safari pans it. */
+html body dialog[open]:not(.landing-info):not(.dashboard-intro) {
+  position:fixed; top:var(--visible-top); left:var(--visible-left);
+  right:calc(100% - var(--visible-left) - var(--visible-width));
+  bottom:calc(100% - var(--visible-top) - var(--visible-height));
+  margin:auto; max-width:calc(var(--visible-width) - 24px); max-height:calc(var(--visible-height) - 24px); overflow:auto;
+}
+html body .dashboard-intro { top:var(--visible-top); left:var(--visible-left); right:auto; bottom:auto; width:var(--visible-width); height:var(--visible-height); }
+html body .app-header .app-menu-panel { max-height:calc(var(--visible-height) - var(--app-nav-height) - 24px); max-width:calc(var(--visible-width) - 32px); }
+html body .sound-menu-panel { max-height:calc(var(--visible-height) - 100px); max-width:calc(var(--visible-width) - 32px); }
+html body .journey-transition { top:calc(var(--visible-top) + var(--app-nav-height)); left:var(--visible-left); right:auto; bottom:auto; width:var(--visible-width); height:max(0px,calc(var(--visible-height) - var(--app-nav-height))); overflow:auto; }
+html body :is(.dashboard,.admin-shell,.study-shell:not([data-view=study])) { min-height:var(--visible-height); }
+@media(min-width:641px) { html body .admin-sidebar { top:var(--visible-top); height:var(--visible-height); overflow:auto; } }
+html body .admin-login-shell { min-height:var(--visible-height); }

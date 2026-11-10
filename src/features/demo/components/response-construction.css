@@ -1,0 +1,8 @@
+/* Fixed words and the missing part share one sentence instead of two boards. */
+html body .demo-shell .construction .completion-instruction { font-size:14px; line-height:1.35; margin:0 0 6px; }
+html body .demo-shell .construction .completion-answer { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+html body .demo-shell .construction .completion-answer > ol { min-width:0; max-width:100%; margin:0; }
+html body .demo-shell .construction .completion-answer > ol:empty { display:none; }
+html body .demo-shell .construction .completion-fixed,
+html body .demo-shell .construction .completion-placeholder { font-size:clamp(18px,2vw,24px); line-height:1.3; overflow-wrap:anywhere; }
+html body .demo-shell .construction .completion-placeholder { min-width:42px; text-align:center; }

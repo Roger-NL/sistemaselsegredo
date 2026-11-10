@@ -27,13 +27,21 @@ function answer(profile: SupportProfile) {
 }
 
 describe("listen, understand, respond", () => {
-  it("does not render Lucas's question or comprehension options before listening, in every profile", () => {
+  it("keeps Lucas's readable line, playback and next step on one screen without revealing comprehension options", () => {
     for (const profile of PROFILES) {
       const before = opening(profile);
-      expect(render(before)).toContain("Ouvir Lucas");
-      expect(render(before)).not.toContain(audio.C01.text);
-      expect(render(before)).not.toContain("Entender a pergunta");
+      expect(render(before)).toContain("Ouvir fala de Lucas");
+      expect(render(before)).toContain(audio.C01.text);
+      expect(render(before)).toContain('class="scene-balloon" data-speaker="character"');
+      expect(render(before)).not.toContain("Li, continuar");
+      expect(render(before)).toContain("Entender a pergunta");
+      expect(render(before)).not.toContain("Se essa bebida é sua.");
       const after = heard(before);
+      expect(render(after)).toBe(render(before));
+      expect(after.nodeId).toBe(before.nodeId);
+      expect(after.phase).toBe(before.phase);
+      expect(after.presentationStep).toBe(before.presentationStep);
+      expect(after.audioAccess["lucas:p1.lucas"]).toBe("heard");
       expect(render(after)).toContain(audio.C01.text);
       expect(render(after)).toContain("Entender a pergunta");
       expect(after.transcript).toEqual(before.transcript);
@@ -42,7 +50,7 @@ describe("listen, understand, respond", () => {
       expect(decodeSnapshot(encodeSnapshot(after))).toEqual(after);
       let question = transition(after, { at: after.nodeId, type: "NEXT" });
       question = transition(question, { at: question.nodeId, type: "NEXT" });
-      expect(render(question)).toContain("O copo apontado pertence a você?");
+      expect(render(question)).toContain("Se essa bebida é sua.");
       expect(render(question)).not.toContain("Escute Lucas.");
     }
   });
@@ -52,8 +60,14 @@ describe("listen, understand, respond", () => {
     expect(render(before)).toContain("Ouvir modelo em inglês");
     expect(render(before)).not.toContain(audio.U01.text);
     expect(render(before)).toContain(audio.U01.meaning);
-    expect(render(before)).not.toContain("Responder em inglês");
+    expect(render(before)).toContain("Responder em inglês");
     const after = heard(before);
+    expect(render(after)).toBe(render(before));
+    expect(after.nodeId).toBe(before.nodeId);
+    expect(after.phase).toBe("present");
+    expect(after.presentationStep).toBe(before.presentationStep);
+    expect(after.evidence).toEqual(before.evidence);
+    expect(after.audioAccess["model:p2.send"]).toBe("heard");
     expect(render(after)).not.toContain(audio.U01.text);
     expect(render(after)).toContain(audio.U01.meaning);
     expect(render(after)).toContain("Responder em inglês");
@@ -78,7 +92,7 @@ describe("listen, understand, respond", () => {
     expect(render(independent)).toContain("Consultar expressões aceitas");
     for (const state of [intermediate, independent]) expect(render(state)).toContain("Ouvir modelo");
   });
-  it("hides every story utterance and model until that listening stage has completed", () => {
+  it("shows Lucas in the comic while keeping learner models hidden before practice", () => {
     for (const profile of PROFILES) for (const node of nodes) {
       const steps = presentationCards(node).length;
       for (let step = 0; step <= steps; step++) {
@@ -86,7 +100,10 @@ describe("listen, understand, respond", () => {
         const target = listeningTarget(state);
         if (!target) continue;
         const before = render(state);
-        for (const id of target.audio) expect(before).not.toContain(audio[id].text);
+        for (const id of target.audio) {
+          if (target.kind === "lucas") expect(before).toContain(audio[id].text);
+          else expect(before).not.toContain(audio[id].text);
+        }
         expect(before).not.toContain('class="construction"');
         expect(before).not.toContain('id="written-answer"');
         const after = render(heard(state));
@@ -123,4 +140,20 @@ describe("listen, understand, respond", () => {
     expect(decodeSnapshot(JSON.stringify(pending))!.audioAccess).toEqual({});
     expect(catalog[migrated.nodeId].kind).toBe("response");
   });
+});
+
+it("keeps the warning model and explicit send on one screen before and after playback", () => {
+  const state = { ...createDemo("beginner", "comic-ready-test", 0), nodeId: "p6.warn", presentationStep: presentationCards(catalog["p6.warn"]).length, phase: "ready" as const };
+  expect(render(state)).toContain("Avisar Lucas");
+  expect(render(state)).not.toContain("Ir direto para a atividade");
+  expect(render(state)).not.toContain(audio.U08.text);
+  const after = heard(state);
+  expect(render(after)).toBe(render(state));
+  expect(after.nodeId).toBe("p6.warn");
+  expect(after.phase).toBe("ready");
+  expect(render(after)).toContain("Avisar Lucas");
+  expect(render(after)).not.toContain("Ir direto para a atividade");
+  expect(render(after)).toContain("Ouvir modelo");
+  expect(after.evidence).toEqual([]);
+  expect(after.transcript).toEqual(state.transcript);
 });
