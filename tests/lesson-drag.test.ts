@@ -59,6 +59,21 @@ describe("lesson direct manipulation", () => {
     await click(target()); expect(onDrop).toHaveBeenCalledTimes(1);
   });
 
+  it("consumes touch travel on a draggable while leaving normal page and text-field gestures available", async () => {
+    await render();
+    const outside = document.createElement("div"), field = document.createElement("input");
+    document.body.append(outside, field);
+    const gesture = (element: HTMLElement) => { const event = new Event("touchmove", { bubbles: true, cancelable: true }); element.dispatchEvent(event); return event.defaultPrevented; };
+    expect(gesture(source())).toBe(true);
+    expect(gesture(outside)).toBe(false);
+    expect(gesture(field)).toBe(false);
+    geometry(); await pointer(source(), "pointerdown", 25, 35);
+    expect(gesture(document.body)).toBe(true);
+    await pointer(document, "pointercancel", 25, 35);
+    expect(gesture(document.body)).toBe(false);
+    outside.remove(); field.remove();
+  });
+
   it("keeps keyboard alternatives and Escape available", async () => {
     await render();
     expect(target().getAttribute("role")).toBe("button"); expect(target().tabIndex).toBe(0);

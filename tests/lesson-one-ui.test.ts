@@ -2,7 +2,7 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { LESSON_SCENES, phraseText, type Round } from "../src/features/first-encounters/lesson-one";
+import { LESSON_SCENES, PERSON_NAMES, phraseText, type Round } from "../src/features/first-encounters/lesson-one";
 import { createWorkspaceStore } from "../src/features/dashboard/workspace-store";
 import { emptyGuestLearning } from "../src/features/dashboard/guest-learning";
 import type { StudentWorkspace } from "../src/contracts/workspace";
@@ -135,7 +135,7 @@ async function gradeAndAdvance(round: Round) {
       break;
     }
     case "join":
-      await dragInto(source("Ana"), target("team"));
+      await dragInto(source(PERSON_NAMES[round.speaker]), target("team"));
       break;
     case "speaker":
       // Exercise the alternative correct member, not just the stored example speaker.
@@ -221,7 +221,7 @@ describe("the actual twelve-scene lesson UI", () => {
     expect(field.isConnected).toBe(false);
   });
 
-  it("completes every round through real click/drop controls, including joining, words, messages and the full ensemble", async () => {
+  it("completes every round through real click/drop controls, including anonymous messages and the varied final conversation", async () => {
     await mount();
     const visited: string[] = [];
     for (const scene of LESSON_SCENES) {

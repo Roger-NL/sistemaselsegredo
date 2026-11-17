@@ -18,24 +18,41 @@ describe("automatic speech keeps the lesson's hidden decisions hidden", () => {
   });
   it("reads both anonymous messages neutrally before any sender is accepted", () => {
     expect(getAutomaticLessonSpeech(find("g5-messages"), false)).toEqual([
-      {person:"nina",text:"We are a team.",role:"narration",turnIndex:0},
-      {person:"nina",text:"They are a team.",role:"narration",turnIndex:1},
+      {person:"nina",text:"They are a team.",role:"narration",turnIndex:0},
+      {person:"nina",text:"We are a team.",role:"narration",turnIndex:1},
     ]);
   });
   it("performs the identified message authors only after the whole answer is accepted", () => {
     expect(getAutomaticLessonSpeech(find("g5-messages"), true)).toEqual([
-      {person:"ana",text:"We are a team.",role:"character",turnIndex:0},
-      {person:"maya",text:"They are a team.",role:"character",turnIndex:1},
+      {person:"maya",text:"They are a team.",role:"character",turnIndex:0},
+      {person:"ana",text:"We are a team.",role:"character",turnIndex:1},
     ]);
   });
-  it("performs all four accepted turns in their conversational order", () => {
+  it("reads the final Nina prompt neutrally and performs Leo only after acceptance", () => {
     const round = find("g6-ensemble");
-    expect(getAutomaticLessonSpeech(round, true)).toEqual(round.ensemble!.map((turn,turnIndex)=>({person:turn.speaker,text:phraseText(turn.expected),role:"character",turnIndex})));
+    expect(getAutomaticLessonSpeech(round, false)).toEqual([{person:"nina",text:"You are Nina.",role:"narration"}]);
+    expect(getAutomaticLessonSpeech(round, true, "leo")).toEqual([{person:"leo",text:"You are Nina.",role:"character"}]);
+  });
+  it("keeps the final identity/team messages neutral until Leo and Nina are identified", () => {
+    const round = find("use6-they");
+    expect(getAutomaticLessonSpeech(round, false)).toEqual([
+      {person:"nina",text:"They are a team.",role:"narration",turnIndex:0},
+      {person:"nina",text:"I am Nina.",role:"narration",turnIndex:1},
+    ]);
+    expect(getAutomaticLessonSpeech(round, true)).toEqual([
+      {person:"leo",text:"They are a team.",role:"character",turnIndex:0},
+      {person:"nina",text:"I am Nina.",role:"character",turnIndex:1},
+    ]);
   });
   it("uses the valid chosen speaker and preserves narrator/actor roles even for Nina", () => {
     expect(getAutomaticLessonSpeech(find("g4-inside"), true, "leo")).toEqual([{person:"leo",text:"We are a team.",role:"character"}]);
     expect(getAutomaticLessonSpeech(find("g2-outside"), false)[0].role).toBe("narration");
     expect(getAutomaticLessonSpeech(find("g2-outside"), true)[0]).toEqual({person:"nina",text:"They are a team.",role:"character"});
+  });
+  it.each(["g2-join", "use6-we"])("explains the team control without naming the person to choose in %s", id => {
+    const guide = getLessonSceneGuide(find(id));
+    expect(guide.title + guide.action).not.toMatch(/Ana|Leo|Maya|Sam|Nina/);
+    expect(guide.action).toContain("uma pessoa");
   });
   it("always performs canonical accepted forms and gives every round a concrete instruction", () => {
     for (const round of rounds) {

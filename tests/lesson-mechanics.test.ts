@@ -1,15 +1,17 @@
 import { describe, expect, it } from "vitest";
+import { existsSync } from "node:fs";
 import { LESSON_SCENES } from "../src/features/first-encounters/lesson-one";
 import { LESSON_MECHANICS, LESSON_MECHANICS_STORAGE, getLessonMechanic, getLessonMechanicHandPlan } from "../src/features/first-encounters/lesson-mechanics";
 import { getTutorialNarration } from "../src/features/first-encounters/tutorial-script";
 
 const rounds = LESSON_SCENES.flatMap(scene => scene.rounds);
 describe("lesson control guidance", () => {
-  it("covers the seven actual mechanics with distinct frozen local narration", () => {
-    expect(new Set(rounds.map(round => getLessonMechanic(round)?.id))).toEqual(new Set(["bubbles", "join", "speaker", "verb", "build", "messages", "ensemble"]));
+  it("covers the six active mechanics and preserves the existing local narration registry", () => {
+    expect(new Set(rounds.map(round => getLessonMechanic(round)?.id))).toEqual(new Set(["bubbles", "join", "speaker", "verb", "build", "messages"]));
     for (const [id, clip] of Object.entries(LESSON_MECHANICS)) {
       expect(clip).toMatchObject({ id, person: "nina", role: "narration", key: `nina:${clip.text}` });
       if (id !== "write") expect(clip.url).toBe(`/first-encounters/audio/mechanics-pt/nina-${id}.m4a`);
+      expect(existsSync(new URL(`../public${clip.url}`, import.meta.url)), id).toBe(true);
     }
     expect(LESSON_MECHANICS_STORAGE).toBe("basedspeak.lesson-one.mechanics.v1");
     expect(getLessonMechanic(null)).toBeNull();

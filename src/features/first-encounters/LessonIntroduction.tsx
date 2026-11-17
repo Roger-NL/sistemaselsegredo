@@ -10,6 +10,7 @@ import { TutorialCaption, type TutorialClipTiming } from "./TutorialCaption";
 import { PERSON_NAMES, type PersonId } from "./lesson-one";
 import { IntroductionStage } from "./IntroductionStage";
 import { LessonJourney } from "./LessonJourney";
+import { LessonStepTransition } from "./LessonStepTransition";
 import { isLessonButtonClick } from "./lesson-sound-events";
 import { useLessonAudio } from "./useLessonAudio";
 import { useLessonSounds } from "./useLessonSounds";
@@ -142,6 +143,7 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
     <header className="li-header"><LessonJourney stage="introduction" completed={step} label={`Apresentação · ${step + 1}/3`}/>
       <div className="li-header-actions"><button type="button" className="li-icon-button" aria-label={sounds.muted ? "Ativar efeitos sonoros" : "Silenciar efeitos sonoros"} aria-pressed={sounds.muted} data-sound-silent="true" onClick={() => { sounds.toggleMuted(); if (sounds.muted) playSound("tap"); }}>{sounds.muted ? <BellOff size={19}/> : <Bell size={19}/>}</button><button type="button" className="li-icon-button" aria-label="Fechar apresentação" onClick={() => finish(true)}><X size={21}/></button></div>
     </header>
+    <LessonStepTransition stepKey={scene.id} className="li-content">
     <div className="li-heading"><h1 id="li-title">{scene.title}</h1><p>{scene.subtitle}</p></div>
     <div className={`li-visual li-visual--${scene.id}`}>
       <IntroductionStage scene={scene} modelIndex={current?.english ? current.modelIndex : null} speech={audio.speech} onCharacterReady={characterReady}/>
@@ -159,6 +161,7 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
       </div>
       <div className="li-caption-slot" lang={current?.english ? "en" : "pt-BR"}><TutorialCaption key={`${current?.token ?? "preview"}:${displayedKey}`} speech={audio.speech} text={displayedText} clipKey={displayedKey} timing={!current?.english ? TIMING[scene.id] : undefined} complete={!started || current?.complete === true}/></div>
     </section>
+    </LessonStepTransition>
     <footer className="li-footer"><button type="button" className="li-back" disabled={!positionReady || step === 0} onClick={goBack}><ArrowLeft size={18}/><span>Voltar</span></button>
       <button type="button" className="li-skip" onClick={() => finish(true)}>Pular apresentação</button>
       <LessonButton type="button" className="li-primary" aria-label={!started ? "Começar com som" : step === 2 ? finishLabel : "Continuar"} disabled={!positionReady} onClick={advance}>{!started ? <Volume2 size={19}/> : null}<span>{!started ? "Começar com som" : step === 2 ? "Ver guia" : "Continuar"}</span>{started ? <ArrowRight size={19}/> : null}</LessonButton>

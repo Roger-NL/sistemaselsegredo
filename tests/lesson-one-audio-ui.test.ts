@@ -2,7 +2,7 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { LESSON_SCENES, phraseText } from "../src/features/first-encounters/lesson-one";
+import { LESSON_SCENES } from "../src/features/first-encounters/lesson-one";
 
 const audio = vi.hoisted(() => ({
   snapshot: { playingKey: null as string | null, error: null as string | null, blocked: false },
@@ -108,10 +108,10 @@ describe("lesson audio without answer or identity shortcuts", () => {
   it("keeps anonymous A/B messages neutral and listening never assigns a selected person", async () => {
     await mount("g5-messages"); await click(source("Ana"));
     const buttons = [...container.querySelectorAll<HTMLButtonElement>(".lo-message-audio")]; expect(buttons).toHaveLength(2);
-    await click(buttons[0]); expect(audio.play).toHaveBeenLastCalledWith("nina", "We are a team.");
+    await click(buttons[0]); expect(audio.play).toHaveBeenLastCalledWith("nina", "They are a team.");
     expect([...container.querySelectorAll(".lo-message-sender")].map(element => element.textContent)).toEqual(["Quem enviou?", "Quem enviou?"]);
     expect(source("Ana").getAttribute("aria-pressed")).toBe("true");
-    await click(buttons[1]); expect(audio.play).toHaveBeenLastCalledWith("nina", "They are a team."); noGrade();
+    await click(buttons[1]); expect(audio.play).toHaveBeenLastCalledWith("nina", "We are a team."); noGrade();
     expect(target("message:0").getAttribute("role")).toBe("button");
   });
 
@@ -122,12 +122,20 @@ describe("lesson audio without answer or identity shortcuts", () => {
     await click(main()); expect(audio.play).toHaveBeenLastCalledWith("leo", "We are a team.");
   });
 
-  it("keeps all ensemble option previews neutral and gives the accepted active turn its own voice", async () => {
+  it.each([false, true])("keeps the Nina prompt neutral and uses Leo after acceptance, listening first=%s", async listenFirst => {
     await mount("g6-ensemble");
-    expect([...container.querySelectorAll(".lo-ensemble-bank [data-audio-person]")].every(button => button.getAttribute("data-audio-person") === "nina")).toBe(true);
-    const round = LESSON_SCENES[10].rounds[0];
-    for (const [index, turn] of round.ensemble!.entries()) await place(phraseText(turn.expected), `turn:${index}`);
-    noGrade(); await click(footer()); await click(main()); expect(audio.play).toHaveBeenLastCalledWith("sam", "They are a team.");
+    expect(container.querySelector(".lo-ensemble-bank,.lo-turns")).toBeNull();
+    expect(container.querySelector('[data-person="ana"]')).toBeNull();
+    if (listenFirst) { await click(main()); expect(audio.play).toHaveBeenLastCalledWith("nina", "You are Nina."); }
+    noGrade(); await click(container.querySelector<HTMLButtonElement>('[data-person="nina"]')!);
+    expect(container.querySelector(".lo-feedback.is-retry")).not.toBeNull();
+    expect(main().dataset.audioPerson).toBe("nina");
+    if (!listenFirst) { await click(main()); expect(audio.play).toHaveBeenLastCalledWith("nina", "You are Nina."); }
+    expect(audio.play.mock.calls.every(([actor]) => actor === "nina")).toBe(true);
+    await click(container.querySelector<HTMLButtonElement>('[data-person="leo"]')!);
+    expect(container.querySelector(".lo-feedback.is-correct")).not.toBeNull();
+    expect(main().dataset.audioPerson).toBe("leo");
+    await click(main()); expect(audio.play).toHaveBeenLastCalledWith("leo", "You are Nina.");
   });
 
   it("offers a plain retry after playback failure without grading or advancing", async () => {

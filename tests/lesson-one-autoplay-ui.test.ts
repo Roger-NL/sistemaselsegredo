@@ -95,7 +95,7 @@ describe("guided start, automatic turns and learner control",()=>{
     }else if(round.kind==="join"){
       enabledTarget("team");for(const person of round.candidateSpeakers??[])enabledSource(PERSON_NAMES[person]);
     }else if(round.kind==="messages"){
-      enabledSource("Ana");enabledSource("Maya");enabledTarget("message:0");enabledTarget("message:1");
+      for(const person of round.candidateSpeakers??[])enabledSource(PERSON_NAMES[person]);enabledTarget("message:0");enabledTarget("message:1");
     }else if(round.kind==="ensemble"){
       for(const phrase of round.bubbleChoices??[])enabledSource(phraseText(phrase));for(let index=0;index<4;index++)enabledTarget(`turn:${index}`);
     }else if(round.kind==="bubbles"){
@@ -135,27 +135,57 @@ describe("guided start, automatic turns and learner control",()=>{
 
   it("reads anonymous messages sequentially without character mouths, then performs identified authors in order",async()=>{
     await mount("g5-messages");expect(Media.calls).toHaveLength(1);expect(speaking()).toEqual([]);
-    await ended();expect(Media.calls).toHaveLength(2);expect(Media.calls[1]).toContain("nina-they-are-a-team");expect(speaking()).toEqual([]);
-    await ended();await place("Ana","message:0");await place("Maya","message:1");await click(footer());
-    expect(Media.calls).toHaveLength(3);expect(Media.calls[2]).toContain("ana-we-are-a-team");expect(speaking()).toEqual(["ana"]);
-    await ended();expect(Media.calls).toHaveLength(4);expect(Media.calls[3]).toContain("maya-they-are-a-team");expect(speaking()).toEqual(["maya"]);
+    expect(Media.calls[0]).toContain("nina-they-are-a-team");
+    await ended();expect(Media.calls).toHaveLength(2);expect(Media.calls[1]).toContain("nina-we-are-a-team");expect(speaking()).toEqual([]);
+    await ended();await place("Maya","message:0");await place("Ana","message:1");await click(footer());
+    expect(Media.calls).toHaveLength(3);expect(Media.calls[2]).toContain("maya-they-are-a-team");expect(speaking()).toEqual(["maya"]);
+    await ended();expect(Media.calls).toHaveLength(4);expect(Media.calls[3]).toContain("ana-we-are-a-team");expect(speaking()).toEqual(["ana"]);
     await ended();expect(speaking()).toEqual([]);expect(current()).toBe("g5-messages");
   });
 
   it("retries the failed second author instead of restarting the first message",async()=>{
-    await mount("g5-messages");await ended();await ended();await place("Ana","message:0");await place("Maya","message:1");await click(footer());
-    Media.failURL="/first-encounters/audio/lesson-one/maya-they-are-a-team.m4a";await ended();
+    await mount("g5-messages");await ended();await ended();await place("Maya","message:0");await place("Ana","message:1");await click(footer());
+    Media.failURL="/first-encounters/audio/lesson-one/ana-we-are-a-team.m4a";await ended();
     expect(speaking()).toEqual([]);expect(container.querySelector(".lo-audio-error")).not.toBeNull();
-    await click(byText("Tentar novamente"));expect(Media.calls.at(-1)).toContain("maya-they-are-a-team");expect(speaking()).toEqual(["maya"]);
+    await click(byText("Tentar novamente"));expect(Media.calls.at(-1)).toContain("ana-we-are-a-team");expect(speaking()).toEqual(["ana"]);
   });
 
-  it("performs four accepted turns, and explicit turn repetition cancels the rest of the old queue",async()=>{
-    await mount("g6-ensemble");expect(Media.calls).toEqual([]);
-    for(const [index,turn] of LESSON_SCENES[10].rounds[0].ensemble!.entries())await place(phraseText(turn.expected),`turn:${index}`);
-    expect(Media.calls).toEqual([]);await click(footer());expect(Media.calls.at(-1)).toContain("ana-i-am-ana");
-    await ended();expect(Media.calls.at(-1)).toContain("maya-you-are-ana");
-    await click(container.querySelectorAll<HTMLButtonElement>(".lo-turn-context")[0]);expect(Media.calls.at(-1)).toContain("ana-i-am-ana");
-    const calls=Media.calls.length;await ended();expect(Media.calls).toHaveLength(calls);expect(current()).toBe("g6-ensemble");
+  it("lets manual message repetition replace the remaining automatic queue without overlapping voices",async()=>{
+    await mount("g5-messages");await ended();await ended();await place("Maya","message:0");await place("Ana","message:1");await click(footer());
+    expect(speaking()).toEqual(["maya"]);
+    await click(container.querySelectorAll<HTMLButtonElement>(".lo-message-audio")[1]);
+    expect(Media.calls.at(-1)).toContain("ana-we-are-a-team");expect(speaking()).toEqual(["ana"]);
+    expect(Media.instances.filter(media=>!media.paused)).toHaveLength(1);
+    const calls=Media.calls.length;await ended();expect(Media.calls).toHaveLength(calls);expect(speaking()).toEqual([]);expect(current()).toBe("g5-messages");
+  });
+
+  it("finishes with identity/team inference and changes Nina from neutral reader to identified actor only after acceptance",async()=>{
+    await mount("use6-they");expect(Media.calls).toHaveLength(1);expect(Media.calls[0]).toContain("nina-they-are-a-team");expect(speaking()).toEqual([]);
+    expect(container.querySelector(".lo-word-bank,.lo-write-toggle")).toBeNull();
+    await ended();expect(Media.calls.at(-1)).toContain("nina-i-am-nina");expect(speaking()).toEqual([]);await ended();
+    await place("Nina","message:0");await place("Leo","message:1");await click(footer());
+    expect(container.querySelector(".lo-feedback.is-retry")).not.toBeNull();expect(Media.calls).toHaveLength(2);expect(current()).toBe("use6-they");
+    await place("Leo","message:0");await place("Nina","message:1");await click(footer());
+    expect(container.querySelector(".lo-feedback.is-correct")).not.toBeNull();expect(Media.calls.at(-1)).toContain("leo-they-are-a-team");expect(speaking()).toEqual(["leo"]);
+    await ended();expect(Media.calls.at(-1)).toContain("nina-i-am-nina");expect(speaking()).toEqual(["nina"]);
+    expect(Media.instances.filter(media=>!media.paused)).toHaveLength(1);await ended();expect(speaking()).toEqual([]);expect(footer().disabled).toBe(false);
+  });
+
+  it.each([false,true])("keeps the Nina choice neutral, performs accepted Leo and cancels stale speech on Next, prompt repeated=%s",async repeatPrompt=>{
+    await mount("g6-ensemble");expect(Media.calls).toHaveLength(1);expect(Media.calls[0]).toContain("nina-you-are-nina");expect(speaking()).toEqual([]);
+    expect(container.querySelector(".lo-turns,.lo-ensemble-bank")).toBeNull();
+    expect(container.querySelector('[data-person="ana"]')).toBeNull();
+    if(repeatPrompt){await ended();await click(main());expect(Media.calls.at(-1)).toContain("nina-you-are-nina");expect(speaking()).toEqual([]);}
+    const prompts=Media.calls.length;
+    await click(container.querySelector<HTMLButtonElement>('[data-person="nina"]')!);
+    expect(Media.calls).toHaveLength(prompts);expect(container.querySelector(".lo-feedback.is-retry")).not.toBeNull();expect(footer().disabled).toBe(true);
+    await click(container.querySelector<HTMLButtonElement>('[data-person="leo"]')!);
+    const accepted=last();expect(Media.calls).toHaveLength(prompts+1);expect(Media.calls.at(-1)).toContain("leo-you-are-nina");expect(speaking()).toEqual(["leo"]);
+    expect(Media.instances.filter(media=>!media.paused)).toHaveLength(1);
+    await click(main());expect(speaking()).toEqual([]);await click(main());expect(Media.calls).toHaveLength(prompts+2);expect(speaking()).toEqual(["leo"]);
+    await click(footer());expect(current()).toBe("use6-i");expect(accepted.paused).toBe(true);expect(speaking()).toEqual([]);
+    expect(Media.calls.at(-1)).toContain("nina-i-am-nina");const calls=Media.calls.length;
+    await ended(accepted);expect(Media.calls).toHaveLength(calls);expect(current()).toBe("use6-i");
   });
 
   it("cancels a pending accepted request without reopening a mouth after Refazer",async()=>{

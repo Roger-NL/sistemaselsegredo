@@ -2,7 +2,7 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { LESSON_SCENES, phraseText } from "../src/features/first-encounters/lesson-one";
+import { LESSON_SCENES, PERSON_NAMES, phraseText } from "../src/features/first-encounters/lesson-one";
 import type { LessonSoundCue } from "../src/features/first-encounters/lesson-sounds";
 
 const sfx = vi.hoisted(() => ({ play: vi.fn(), toggleMuted: vi.fn(), unlock: vi.fn(async () => true) }));
@@ -77,8 +77,8 @@ describe("semantic UI sound intentions", () => {
 
   it("keeps message assignments neutral until Conferir, without interrupting the given speech", async () => {
     await mount("g5-messages"); const speech = Media.current, count = Media.calls.length; sfx.play.mockClear();
-    await place("Ana", "message:0"); expect(number("place")).toBe(1); expect(number("success")).toBe(0);
-    expect(speech.paused).toBe(false); expect(Media.calls).toHaveLength(count); await place("Maya", "message:1");
+    await place("Maya", "message:0"); expect(number("place")).toBe(1); expect(number("success")).toBe(0);
+    expect(speech.paused).toBe(false); expect(Media.calls).toHaveLength(count); await place("Ana", "message:1");
     expect(number("place")).toBe(2); expect(number("success")).toBe(0); expect(container.querySelector(".lo-feedback.is-correct")).toBeNull();
     await click(next()); expect(number("success")).toBe(1); expect(container.querySelector(".lo-feedback.is-correct")).not.toBeNull();
   });
@@ -90,14 +90,17 @@ describe("semantic UI sound intentions", () => {
     expect(cues()).toEqual([]); await click(next()); expect(number("success")).toBe(1); expect(number("retry")).toBe(0);
   });
 
-  it.each(["g1-self", "g2-join", "g2-outside", "g3-i", "use3-i", "g6-ensemble"])("keeps confirmation sounds tied to evaluation in %s", async id => {
+  it.each(["g1-self", "g2-join", "g2-outside", "g3-i", "use3-i", "g6-ensemble", "use6-i", "use6-you", "use6-we", "use6-they"])("keeps confirmation sounds tied to evaluation in %s", async id => {
     await mount(id); const round = all.find(round => round.id === id)!; sfx.play.mockClear();
     if (round.kind === "bubbles") await place(phraseText(round.expected), "speech");
-    else if (round.kind === "join") await place("Ana", "team");
+    else if (round.kind === "join") await place(PERSON_NAMES[round.speaker], "team");
     else if (round.kind === "speaker") await click(container.querySelector<HTMLButtonElement>(`[data-person="${round.speaker}"]`)!);
     else if (round.kind === "verb" || round.kind === "build") {
       if (round.kind === "build") await place(round.expected.pronoun, "word:pronoun"); await place(round.expected.verb, "word:verb");
       expect(number("success")).toBe(0); await click(next());
+    } else if (round.kind === "messages") {
+      for (const [index, message] of round.ensemble!.entries()) await place(PERSON_NAMES[message.speaker], `message:${index}`);
+      expect(number("place")).toBe(2); expect(number("success")).toBe(0); await click(next());
     } else {
       for (const [index, turn] of round.ensemble!.entries()) await place(phraseText(turn.expected), `turn:${index}`);
       expect(number("place")).toBe(4); expect(number("success")).toBe(0); await click(next());

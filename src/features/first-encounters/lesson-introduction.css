@@ -17,7 +17,8 @@
   font: inherit;
   overflow: hidden;
 }
-.li-introduction[open] { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; gap: 18px; }
+.li-introduction[open] { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 18px; }
+.li-content { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: inherit; min-width: 0; min-height: 0; }
 .li-introduction::backdrop { background: #28334d66; backdrop-filter: blur(6px); }
 .li-introduction *, .li-introduction *::before, .li-introduction *::after { box-sizing: border-box; }
 .li-introduction :is(h1, p, ol) { margin: 0; }

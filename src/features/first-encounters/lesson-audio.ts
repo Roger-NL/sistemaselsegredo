@@ -78,8 +78,12 @@ export function getLessonAudioRequirements(): LessonAudioRequest[] {
   function visit(round: Round) {
     if (round.referent !== "team") referenceNames.add(round.expected.complement);
     if (round.kind === "messages") {
-      // The recipient reads both messages. Author-specific voices would reveal G5.
-      for (const message of round.ensemble ?? []) add(round.listener, phraseText(message.expected));
+      // Nina reads every anonymous message, independently of its recipient.
+      // The identified authors also need their own recording after acceptance.
+      for (const message of round.ensemble ?? []) {
+        add("nina", phraseText(message.expected));
+        visit(message);
+      }
     } else if (round.kind === "ensemble") {
       for (const turn of round.ensemble ?? []) visit(turn);
     } else if (round.kind === "speaker") {

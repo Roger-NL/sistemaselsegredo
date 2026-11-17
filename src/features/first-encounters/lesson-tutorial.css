@@ -1,5 +1,6 @@
 .lo-tutorial{position:fixed;inset:0;margin:auto;border:1px solid #dedbec;border-radius:26px;background:#fff;color:var(--lo-ink);width:min(920px,calc(100vw - 40px));height:min(730px,calc(100dvh - 36px));max-height:calc(100dvh - 36px);max-width:calc(100vw - 40px);padding:22px 28px;overflow:hidden}
 .lo-tutorial[open]{display:flex;flex-direction:column;gap:12px}
+.lo-tutorial-content{display:flex;flex-direction:column;flex:1;gap:inherit;min-height:0;min-width:0}
 .lo-tutorial::backdrop{background:#292b4d55;backdrop-filter:blur(6px)}
 .lo-tutorial-top{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#766d99;font-size:13px;flex-shrink:0}
 .lo-tutorial-heading{text-align:center;flex-shrink:0}.lo-tutorial-heading h2{font-size:clamp(24px,3.3vw,34px);font-weight:620;line-height:1.2;letter-spacing:-.8px}.lo-tutorial-heading p{font-size:clamp(15px,1.6vw,18px);margin-top:9px;color:#736d87;line-height:1.4}

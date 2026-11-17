@@ -10,9 +10,10 @@ const Character = dynamic(() => import("./AnimatedCharacter").then(module => mod
 const CAST: readonly PersonId[] = ["nina", "ana", "leo", "maya"];
 
 /** Keep one native rig per person loaded; only the current speaker receives the voice clock. */
-export function IntroductionStage({ scene, modelIndex, speech, onCharacterReady }: {
+export function IntroductionStage({ scene, modelIndex, speech, onCharacterReady, guideLabel = "Nina apresenta a aula." }: {
   scene: IntroductionScene; modelIndex: number | null; speech: LessonSpeechDriver;
   onCharacterReady: (person: PersonId) => void;
+  guideLabel?: string;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const bubble = useRef<HTMLDivElement>(null);
@@ -55,7 +56,7 @@ export function IntroductionStage({ scene, modelIndex, speech, onCharacterReady 
 
   return <div ref={root} className="li-character-scene" data-introduction-stage={scene.id}
     data-stage-guide={!model} data-stage-group={group && Boolean(model)} data-stage-speaker={speaker}
-    aria-label={!model ? "Nina apresenta a aula." : group ? `${PERSON_NAMES[speaker]} fala sobre a equipe de Ana e Leo.` : `${PERSON_NAMES[speaker]} fala ${speaker === "ana" ? "de si" : "com Ana"}.`}>
+    aria-label={!model ? guideLabel : group ? `${PERSON_NAMES[speaker]} fala sobre a equipe de Ana e Leo.` : `${PERSON_NAMES[speaker]} fala ${speaker === "ana" ? "de si" : "com Ana"}.`}>
     {!model && <span className="li-guide-label">Nina · sua guia</span>}
     {group && model && <div className="li-stage-team" aria-label="Equipe de Ana e Leo"><span>Equipe</span></div>}
     <div className="li-stage-floor" aria-hidden="true"/>

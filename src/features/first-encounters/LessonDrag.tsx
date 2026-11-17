@@ -276,6 +276,15 @@ export function LessonDragProvider({ onDrop, onSelect, children }: { onDrop: (it
       }
     };
     const blur = () => { if (session.current) cancel(); };
+    // iOS may start rubber-banding before PointerEvent movement is delivered.
+    // Only this provider's interaction surfaces consume touch gestures.
+    const protectedTouch = (event: TouchEvent) => {
+      if (!(event.target instanceof Element) || event.target.closest("input,textarea,select,[contenteditable=true]")) return;
+      const source = event.target.closest<HTMLElement>("[data-lesson-drag-source]");
+      const ownsSource = source?.dataset.lessonDragProvider === providerId;
+      if ((ownsSource || session.current) && event.cancelable) event.preventDefault();
+    };
+    document.addEventListener("touchmove", protectedTouch, { capture: true, passive: false });
     document.addEventListener("pointermove", move, { capture: true, passive: false });
     document.addEventListener("pointerup", end, true);
     document.addEventListener("pointercancel", pointerCancel, true);
@@ -283,6 +292,7 @@ export function LessonDragProvider({ onDrop, onSelect, children }: { onDrop: (it
     window.addEventListener("blur", blur);
     return () => {
       mounted.current = false;
+      document.removeEventListener("touchmove", protectedTouch, true);
       document.removeEventListener("pointermove", move, true);
       document.removeEventListener("pointerup", end, true);
       document.removeEventListener("pointercancel", pointerCancel, true);
@@ -290,7 +300,7 @@ export function LessonDragProvider({ onDrop, onSelect, children }: { onDrop: (it
       window.removeEventListener("blur", blur);
       detach(); stopSettling();
     };
-  }, [cancel, detach, finishDrop, hitTarget, returnGhost, setSelection, stopSettling]);
+  }, [cancel, detach, finishDrop, hitTarget, returnGhost, setSelection, stopSettling, providerId]);
 
   const value = useMemo(() => ({ selected, cancel, providerId, instructionsId, select, begin, suppressClick, register, activate, removeSource }),
     [selected, cancel, providerId, instructionsId, select, begin, suppressClick, register, activate, removeSource]);
@@ -315,7 +325,7 @@ export function useLessonDrag(): { selected: DragItem | null; cancel: () => void
 export function DragSource({ item, children, className, disabled = false, onClick }: {
   item: DragItem; children?: ReactNode; className?: string; disabled?: boolean; onClick?: () => void;
 }) {
-  const { selected, instructionsId, select, begin, suppressClick, removeSource } = useDragContext();
+  const { selected, providerId, instructionsId, select, begin, suppressClick, removeSource } = useDragContext();
   const ref = useRef<HTMLButtonElement>(null);
   useLayoutEffect(() => {
     const element = ref.current;
@@ -323,7 +333,7 @@ export function DragSource({ item, children, className, disabled = false, onClic
     return () => { if (element) removeSource(element); };
   }, [item.id, item.kind, item.value, disabled, removeSource]);
   return <button ref={ref} type="button" className={`lesson-drag-source${className ? ` ${className}` : ""}`}
-    data-lesson-drag-source={item.id} data-drag-kind={item.kind} aria-label={item.label} aria-describedby={instructionsId}
+    data-lesson-drag-source={item.id} data-lesson-drag-provider={providerId} data-drag-kind={item.kind} aria-label={item.label} aria-describedby={instructionsId}
     aria-pressed={selected?.id === item.id && selected.kind === item.kind} disabled={disabled} draggable={false}
     onDragStart={event => event.preventDefault()}
     onPointerDown={event => { if (!disabled) begin(event, item); }}

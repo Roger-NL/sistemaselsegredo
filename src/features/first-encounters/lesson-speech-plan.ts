@@ -23,10 +23,10 @@ export function getAutomaticLessonSpeech(round: Round, accepted: boolean, chosen
 /** The large instruction lives beside the people and objects it describes. */
 export function getLessonSceneGuide(round: Round, writing = false): { title: string; action: string } {
   const who = PERSON_NAMES[round.speaker], listener = PERSON_NAMES[round.listener];
-  if (round.kind === "messages") return { title: "Quem enviou cada mensagem?", action: "Leve Ana e Maya até as mensagens." };
+  if (round.kind === "messages") return { title: "Quem enviou cada mensagem?", action: "Leve cada pessoa até a mensagem que ela poderia enviar." };
   if (round.kind === "ensemble") return { title: "Vamos montar esta conversa.", action: "Escolha um turno. Depois, leve a fala até ele." };
   if (round.kind === "speaker") return { title: "Quem pode dizer esta frase?", action: "Clique na pessoa." };
-  if (round.kind === "join") return { title: `${who} quer fazer parte da equipe.`, action: `Leve ${who} até a área da equipe.` };
+  if (round.kind === "join") return { title: "Faça a equipe combinar com a fala.", action: "Inclua uma pessoa na equipe." };
   if (round.kind === "verb") return { title: `Complete a fala de ${who}.`, action: writing ? "Escreva a frase do seu jeito." : "Leve am ou are até o espaço vazio." };
   const title = round.expected.pronoun === "I" ? `${who} quer se apresentar.`
     : round.expected.pronoun === "you" ? `${who} fala diretamente com ${listener}.`

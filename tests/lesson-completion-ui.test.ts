@@ -1,0 +1,133 @@
+// @vitest-environment jsdom
+import { act, createElement, StrictMode } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { CONCLUSION_QUESTIONS, LESSON_CONCLUSION_STORAGE, conclusionModel, createConclusionState, setConclusionDraft, submitConclusionAnswer } from "../src/features/first-encounters/lesson-conclusion";
+import type { LessonSpeechDriver } from "../src/features/first-encounters/lesson-audio";
+import type { IntroductionScene } from "../src/features/first-encounters/lesson-introduction";
+import type { PersonId } from "../src/features/first-encounters/lesson-one";
+
+const sounds = vi.hoisted(() => ({ play: vi.fn() }));
+const characters = vi.hoisted(() => ({ readyImmediately: true, ready: null as ((person: PersonId) => void) | null }));
+vi.mock("../src/features/first-encounters/useLessonSounds", () => ({ useLessonSounds: () => sounds }));
+vi.mock("../src/features/first-encounters/IntroductionStage", async () => {
+  const { useEffect, useRef } = await import("react");
+  return { IntroductionStage: function Stage({ scene, modelIndex, speech, onCharacterReady }: {
+    scene: IntroductionScene; modelIndex: number | null; speech: LessonSpeechDriver; onCharacterReady: (person: PersonId) => void;
+  }) {
+    const ref = useRef<HTMLDivElement>(null);
+    useEffect(() => { characters.ready = onCharacterReady; if (characters.readyImmediately) for (const person of ["nina", "ana", "leo", "maya"] as const) onCharacterReady(person); }, [onCharacterReady]);
+    useEffect(() => speech.subscribeFrame(frame => {
+      if (!ref.current) return;
+      ref.current.dataset.speaking = String(frame.playing);
+      ref.current.dataset.voice = frame.person ?? "";
+      ref.current.dataset.role = frame.role;
+    }), [speech]);
+    return createElement("div", { ref, "data-completion-stage": modelIndex === null ? "nina" : scene.models[modelIndex].speaker });
+  } };
+});
+import { LessonConclusion } from "../src/features/first-encounters/LessonConclusion";
+
+class Media extends EventTarget {
+  static all: Media[] = []; static calls: string[] = []; static current: Media; static maxActive = 0;
+  src: string; currentTime = 0; duration = 2; paused = true; ended = false; preload = "";
+  constructor(url: string) { super(); this.src = url; Media.all.push(this); }
+  play = vi.fn(async () => { this.paused = false; this.ended = false; Media.current = this; Media.calls.push(this.src);
+    Media.maxActive = Math.max(Media.maxActive, Media.all.filter(audio => !audio.paused && !audio.ended).length); this.dispatchEvent(new Event("playing")); });
+  pause = vi.fn(() => { this.paused = true; this.dispatchEvent(new Event("pause")); });
+  load = vi.fn();
+  end() { this.currentTime = this.duration; this.ended = true; this.paused = true; this.dispatchEvent(new Event("pause")); this.dispatchEvent(new Event("ended")); }
+}
+
+let root: Root, host: HTMLDivElement;
+beforeEach(() => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true); vi.stubGlobal("Audio", Media);
+  vi.stubGlobal("requestAnimationFrame", () => 1); vi.stubGlobal("cancelAnimationFrame", vi.fn());
+  vi.stubGlobal("fetch", vi.fn(() => { throw new Error("A completion must not generate or request remote speech."); }));
+  window.matchMedia = vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
+  Media.all = []; Media.calls = []; Media.maxActive = 0; sounds.play.mockClear(); characters.readyImmediately = true; characters.ready = null; localStorage.clear();
+  let saved = createConclusionState();
+  for (const question of CONCLUSION_QUESTIONS) saved = submitConclusionAnswer(setConclusionDraft(saved, question, conclusionModel(question)), question);
+  localStorage.setItem(LESSON_CONCLUSION_STORAGE, JSON.stringify({ ...saved, phase: "summary", testStarted: true, theoryIndex: 4, questionIndex: 5 }));
+  localStorage.setItem("basedspeak.lesson-one.v2", "practice-is-preserved");
+  host = document.createElement("div"); document.body.append(host); root = createRoot(host);
+});
+afterEach(async () => { await act(async () => root.unmount()); host.remove(); localStorage.clear(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
+async function mount(onComplete = vi.fn(async () => {})) {
+  await act(async () => root.render(createElement(LessonConclusion, { onReturnToPractice: vi.fn(), onComplete })));
+  return onComplete;
+}
+async function click(selector: string) { const button = host.querySelector<HTMLButtonElement>(selector); expect(button).not.toBeNull(); await act(async () => button!.click()); }
+async function end() { await act(async () => Media.current.end()); }
+
+describe("lesson completion", () => {
+  it("starts only after Nina is ready, then recaps with the four actual cached character voices", async () => {
+    characters.readyImmediately = false;
+    await mount();
+    expect(host.textContent).toContain("Parabéns! Você chegou até aqui.");
+    expect(host.querySelector(".lc-score-details,.lc-summary-actions")).toBeNull();
+    expect(host.textContent).not.toMatch(/Refazer (teste|prática)|Na primeira resposta|Sentido da frase/);
+    expect(host.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow")).toBe("100");
+    expect(Media.calls).toHaveLength(0);
+    await act(async () => { for (const person of ["ana", "leo", "maya"] as const) characters.ready?.(person); });
+    expect(Media.calls).toHaveLength(0);
+    await act(async () => characters.ready?.("nina"));
+    expect(Media.calls).toHaveLength(1);
+    expect(Media.calls[0]).toContain("revision-pt/nina-completion-congratulations.m4a");
+    expect(host.querySelector("[data-completion-stage]")?.getAttribute("data-voice")).toBe("nina");
+    await end();
+    expect(host.querySelector("[data-completion-stage]")?.getAttribute("data-voice")).toBe("ana");
+    expect(host.querySelector("[data-completion-stage]")?.getAttribute("data-role")).toBe("character");
+    await end(); await end(); await end(); await end();
+    expect(Media.calls.map(url => url.split("/").at(-1))).toEqual([
+      "nina-completion-congratulations.m4a", "ana-i-am-ana.m4a", "leo-you-are-ana.m4a", "ana-we-are-a-team.m4a", "maya-they-are-a-team.m4a",
+    ]);
+    expect(Media.maxActive).toBe(1);
+    expect(host.querySelector("[data-completion-stage]")?.getAttribute("data-completion-stage")).toBe("nina");
+    expect(host.querySelector("[data-completion-stage]")?.getAttribute("data-speaking")).toBe("false");
+    expect(fetch).not.toHaveBeenCalled();
+    expect(localStorage.getItem("basedspeak.lesson-one.v2")).toBe("practice-is-preserved");
+  });
+
+  it("waits for the owning save once, cancels speech and preserves the work when saving fails", async () => {
+    let rejectSave!: (error: Error) => void;
+    const onComplete = vi.fn(() => new Promise<void>((_, reject) => { rejectSave = reject; }));
+    await mount(onComplete);
+    const before = localStorage.getItem(LESSON_CONCLUSION_STORAGE);
+    await end();
+    await click(".lc-complete"); await click(".lc-complete");
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(host.querySelector<HTMLButtonElement>(".lc-complete")?.disabled).toBe(true);
+    expect(host.textContent).toContain("Confirmando seu avanço…");
+    expect(Media.all.every(audio => audio.paused)).toBe(true);
+    await act(async () => rejectSave(new Error("not saved")));
+    expect(host.querySelector<HTMLButtonElement>(".lc-complete")?.disabled).toBe(false);
+    expect(host.querySelector('[role="alert"]')?.textContent).toContain("Não foi possível confirmar seu avanço");
+    expect(localStorage.getItem(LESSON_CONCLUSION_STORAGE)).toBe(before);
+    expect(localStorage.getItem("basedspeak.lesson-one.v2")).toBe("practice-is-preserved");
+    onComplete.mockResolvedValueOnce();
+    await click(".lc-complete"); expect(onComplete).toHaveBeenCalledTimes(2);
+  });
+
+  it("cancels the remaining recap after pause or a manual model, and stops on unmount", async () => {
+    await mount();
+    const abandoned = Media.current;
+    await click('[aria-label="Pausar recapitulação"]');
+    await act(async () => abandoned.end());
+    expect(Media.calls).toHaveLength(1);
+    await click('[data-recap-model="3"]'); await end();
+    expect(Media.calls).toHaveLength(2); expect(Media.calls[1]).toContain("maya-they-are-a-team.m4a");
+    await click('[aria-label="Ouvir recapitulação"]');
+    const last = Media.current;
+    await act(async () => root.unmount()); root = createRoot(host);
+    await act(async () => last.end());
+    expect(Media.all.every(audio => audio.paused)).toBe(true); expect(Media.calls).toHaveLength(3);
+  });
+
+  it("starts the real Nina clip once through the Strict Mode effect remount", async () => {
+    await act(async () => root.render(createElement(StrictMode, null, createElement(LessonConclusion, { onReturnToPractice: vi.fn(), onComplete: vi.fn() }))));
+    expect(Media.calls).toHaveLength(1);
+    expect(Media.calls[0]).toContain("revision-pt/nina-completion-congratulations.m4a");
+    expect(Media.maxActive).toBe(1);
+  });
+});

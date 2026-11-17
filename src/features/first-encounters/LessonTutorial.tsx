@@ -2,6 +2,8 @@
 
 import { useLessonStorage } from "./lesson-storage";
 
+import { LessonWordCoach } from "./LessonWordCoach";
+import { LessonStepTransition } from "./LessonStepTransition";
 import { LessonButton } from "./LessonButton";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -65,6 +67,7 @@ export function LessonTutorial({ onFinish }: { onFinish: (learned?: readonly ("b
       : episode.kind === "write" ? Boolean(writing.result?.correct) : true;
 
   const playClip = useCallback((clip: TutorialStepAudio, source: PlaybackSource) => {
+    document.dispatchEvent(new Event("lesson-stop-word-coach"));
     stopAudio();
     const ticket = ++generation.current;
     setHandEnabled(source !== "model");
@@ -108,7 +111,7 @@ export function LessonTutorial({ onFinish }: { onFinish: (learned?: readonly ("b
     return () => cancelAnimationFrame(frame);
   }, [positionReady, started, context, guideClip, playClip]);
 
-  function stop() { generation.current++; stopAudio(); }
+  function stop() { document.dispatchEvent(new Event("lesson-stop-word-coach")); generation.current++; stopAudio(); }
   function finish() {
     stop(); dialog.current?.close();
     const learned: ("bubbles" | "build" | "write")[] = [];
@@ -164,6 +167,7 @@ export function LessonTutorial({ onFinish }: { onFinish: (learned?: readonly ("b
       <button type="button" className="lo-icon lo-tutorial-sounds" aria-label={sounds.muted ? "Ativar sons de confirmação" : "Desativar sons de confirmação"} aria-pressed={!sounds.muted} title="Sons de confirmação" data-sound-silent="true" onClick={() => { sounds.toggleMuted(); if (sounds.muted) playSound("tap"); }}>{sounds.muted ? <BellOff size={18}/> : <Bell size={18}/>}</button>
       <button type="button" className="lo-icon" aria-label="Fechar tutorial" onClick={finish}><X size={21}/></button>
     </div></div>
+    <LessonStepTransition stepKey={context} className="lo-tutorial-content">
     <div className="lo-tutorial-heading"><h2 id="lo-tutorial-title">{episode.title}</h2></div>
     <LessonDragProvider key={`${episode.id}:${visit}`} onDrop={receive} onSelect={() => playSound("tap")}>
       <div className="lo-tutorial-scene">
@@ -192,11 +196,13 @@ export function LessonTutorial({ onFinish }: { onFinish: (learned?: readonly ("b
         : <p className="lo-tutorial-caption lo-tutorial-ready">Clique em Começar com som. Depois, experimente cada ação.</p>}
     </div>
     {(audio.blocked || audio.error) && <div className="lo-tutorial-playback-status" role="status">{audio.blocked ? <button type="button" className="lo-secondary" onClick={() => void audio.unlock()}><Volume2 size={17}/>Ativar som</button> : <><span>{audio.error}</span><button type="button" onClick={replay}>Tentar novamente</button></>}</div>}
+    </LessonStepTransition>
     <div className="lo-tutorial-footer">
       <button type="button" className="lo-secondary lo-tutorial-back" disabled={!positionReady || !started || history.length < 2} onClick={goBack}><ArrowLeft size={17}/>Voltar</button>
       <button type="button" className="lo-text-button lo-tutorial-skip" onClick={finish}>Pular tutorial</button>
       <LessonButton type="button" className="lo-next" data-tutorial-cue={episode.kind === "finish" ? "start" : "next"} disabled={!positionReady || started && !isComplete} onClick={advance}>{!started ? "Começar com som" : episode.kind === "finish" ? "Começar a aula" : "Avançar"}<ArrowRight size={18}/></LessonButton>
     </div>
+    <LessonWordCoach key={episode.id} enabled={started && episode.kind === "words"} onOpen={stop}/>
     <TutorialHand scopeRef={dialog} speech={audio.speech} plan={handPlan} active={started && handEnabled}/>
   </dialog>;
 }

@@ -2,7 +2,7 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { LESSON_SCENES } from "../src/features/first-encounters/lesson-one";
+import { LESSON_SCENES, PERSON_NAMES } from "../src/features/first-encounters/lesson-one";
 import { CONCLUSION_QUESTIONS, LESSON_CONCLUSION_STORAGE, conclusionModel } from "../src/features/first-encounters/lesson-conclusion";
 import type { LessonSpeechDriver } from "../src/features/first-encounters/lesson-audio";
 
@@ -103,9 +103,11 @@ describe("presentation and written conclusion boundaries", () => {
 
   it("moves only the last practice boundary into five silent written pages", async () => {
     localStorage.setItem(INTRO, "done"); localStorage.setItem(TUTORIAL, "done"); seed("use6-they"); await mount();
-    for (const [label, id] of [["they", "word:pronoun"], ["are", "word:verb"]]) {
-      await click([...container.querySelectorAll<HTMLButtonElement>("[data-lesson-drag-source]")].find(element => element.getAttribute("aria-label") === label)!);
-      await click(container.querySelector<HTMLElement>(`[data-lesson-drop="${id}"]`)!);
+    const final = LESSON_SCENES.at(-1)!.rounds.at(-1)!;
+    expect(final.kind).toBe("messages");
+    for (const [index, turn] of final.ensemble!.entries()) {
+      await click([...container.querySelectorAll<HTMLButtonElement>("[data-lesson-drag-source]")].find(element => element.getAttribute("aria-label") === PERSON_NAMES[turn.speaker])!);
+      await click(container.querySelector<HTMLElement>(`[data-lesson-drop="message:${index}"]`)!);
     }
     await click(container.querySelector<HTMLButtonElement>(".lo-footer .lo-next")!); const voice = Media.current; await click(button("Concluir aula"));
     expect(voice.paused).toBe(true); expect(conclusion().dataset.conclusionPhase).toBe("theory"); const count = Media.calls.length;
@@ -122,14 +124,15 @@ describe("presentation and written conclusion boundaries", () => {
     expect(savedConclusion().attempts.self).toMatchObject({ firstAnswer: wrongSelf, lastAnswer: selfModel }); expect(container.querySelector(".lc-feedback.is-correct")).not.toBeNull(); expect(Media.calls).toEqual([]);
   });
 
-  it("accepts flexible writing, reports first-answer results and returns without resetting practice", async () => {
+  it("accepts flexible writing and completes without rewriting first answers or resetting practice", async () => {
     localStorage.setItem(TUTORIAL, "done"); seed("finished"); const attempts = Object.fromEntries(CONCLUSION_QUESTIONS.slice(0, 4).map((question, index) => [question.id, { draft: conclusionModel(question), firstAnswer: index === 0 ? wrongSelf : conclusionModel(question), lastAnswer: conclusionModel(question) }]));
     localStorage.setItem(LESSON_CONCLUSION_STORAGE, JSON.stringify({ version: 1, phase: "test", theoryIndex: 4, questionIndex: 4, testStarted: true, attempts }));
     await mount(); await input("im ana"); await click(conclusionNext()); expect(container.querySelector(".lc-feedback.is-correct")).not.toBeNull(); expect(container.querySelector(".lc-feedback")?.textContent).toContain("apóstrofo");
     await click(conclusionNext()); await input(`youre ${CONCLUSION_QUESTIONS[5].expected.complement.toLowerCase()}`); await click(conclusionNext()); await click(conclusionNext());
-    expect(conclusion().dataset.conclusionPhase).toBe("summary"); expect(container.querySelector(".lc-summary h2")?.textContent).toContain("5 de 6"); expect(Media.calls).toEqual([]);
-    await click(button("Rever teoria")); expect(savedConclusion().attempts.self.firstAnswer).toBe(wrongSelf); await click(button("Voltar"));
-    expect(container.querySelector('[data-conclusion-phase]')).toBeNull(); expect(container.querySelector<HTMLElement>(".lo-app")!.dataset.finished).toBe("false"); expect(savedPractice().completed).toHaveLength(29); expect(savedConclusion().attempts.self.firstAnswer).toBe(wrongSelf);
+    expect(conclusion().dataset.conclusionPhase).toBe("summary"); expect(container.querySelector(".lc-completion h2")?.textContent).toContain("Parabéns"); expect(Media.calls).toHaveLength(1); expect(Media.calls[0]).toContain("revision-pt/nina-completion-congratulations.m4a");
+    expect(container.querySelector(".lc-score-details,.lc-summary-actions")).toBeNull();
+    expect([...container.querySelectorAll("button")].some(button => /Refazer (teste|prática)/.test(button.textContent ?? ""))).toBe(false);
+    expect(savedPractice().completed).toHaveLength(29); expect(savedConclusion().attempts.self.firstAnswer).toBe(wrongSelf);
   });
 
   it("consumes old review shortcuts and follows presentation, guide and practice before theory", async () => {
@@ -197,7 +200,7 @@ describe("presentation and written conclusion boundaries", () => {
     expect(container.querySelector(".lo-tutorial")).not.toBeNull(); expect(Media.maxActive).toBe(1);
   });
 
-  it("uses one course percentage through practice, final result, quiz retake and full reset", async () => {
+  it("uses one course percentage through practice, completion, reload and full reset", async () => {
     const percent = (scope: ParentNode) => Number(scope.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow"));
     localStorage.setItem(INTRO, "done"); localStorage.setItem(TUTORIAL, "done"); seed("finished");
     await mount(); expect(savedPractice().completed).toHaveLength(29); expect(percent(conclusion())).toBe(78);
@@ -209,8 +212,8 @@ describe("presentation and written conclusion boundaries", () => {
       await click(conclusionNext());
     }
     expect(conclusion().dataset.conclusionPhase).toBe("summary"); expect(percent(conclusion())).toBe(100);
-    await click(button("Refazer teste")); expect(percent(conclusion())).toBe(88); expect(savedConclusion().attempts).toEqual({}); expect(savedPractice().completed).toHaveLength(29);
+    await remount(); expect(percent(conclusion())).toBe(100); expect(Object.keys(savedConclusion().attempts)).toHaveLength(6); expect(savedPractice().completed).toHaveLength(29);
     await click(button("Abrir percurso da aula")); await click(button("Recomeçar aula do zero", container.querySelector(".lo-menu")!)); await click(button("Recomeçar", container.querySelector('[aria-labelledby="lo-reset-title"]')!));
-    expect(percent(intro())).toBe(0); expect(savedPractice().completed).toEqual([]); expect(localStorage.getItem(LESSON_CONCLUSION_STORAGE)).toBeNull(); expect(Media.calls).toEqual([]);
+    expect(percent(intro())).toBe(0); expect(savedPractice().completed).toEqual([]); expect(localStorage.getItem(LESSON_CONCLUSION_STORAGE)).toBeNull(); expect(Media.calls.every(url => url.includes("revision-pt/nina-completion-congratulations.m4a"))).toBe(true); expect(Media.all.every(media => media.paused)).toBe(true);
   });
 });

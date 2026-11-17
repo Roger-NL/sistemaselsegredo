@@ -89,19 +89,18 @@ async function ended(media = Media.current) { await act(async () => media.end())
 const guides = () => Media.calls.filter(url => Object.values(LESSON_MECHANICS).some(guide => guide.url === url));
 const first: { id: LessonMechanicId; round: string }[] = [
   { id: "bubbles", round: "g1-self" }, { id: "join", round: "g2-join" }, { id: "speaker", round: "g2-outside" },
-  { id: "verb", round: "g3-i" }, { id: "build", round: "use3-i" }, { id: "messages", round: "g5-messages" }, { id: "ensemble", round: "g6-ensemble" },
+  { id: "verb", round: "g3-i" }, { id: "build", round: "use3-i" }, { id: "messages", round: "g5-messages" }, { id: "speaker", round: "g6-ensemble" },
 ];
 
 describe("activity guidance on the actual controls", () => {
-  it.each(first)("shows $id once, lets input interrupt it, and rejects its stale ended callback", async ({ id, round }) => {
+  it.each(first)("shows $id once in $round, lets input interrupt it, and rejects its stale ended callback", async ({ id, round }) => {
     await mount(round); expect(app().dataset.mechanicGuide).toBe(id); expect(Media.calls).toEqual([LESSON_MECHANICS[id].url]); const guide = Media.current;
     if (id === "bubbles") await place("You are Ana.", "speech");
     else if (id === "join") await place("Maya", "team");
-    else if (id === "speaker") { const person = container.querySelector<HTMLButtonElement>('[data-person="ana"]')!; await pointer(person); await click(person); }
+    else if (id === "speaker") { const person = container.querySelector<HTMLButtonElement>(`[data-person="${round === "g6-ensemble" ? "nina" : "ana"}"]`)!; await pointer(person); await click(person); }
     else if (id === "verb") await place("are", "word:verb");
     else if (id === "build") await place("you", "word:pronoun");
     else if (id === "messages") await place("Ana", "message:0");
-    else await place("I am Ana.", "turn:0");
     expect(guide.paused).toBe(true); expect(app().dataset.mechanicGuide).toBeUndefined(); expect(Media.calls).toHaveLength(1);
     await ended(guide); expect(Media.calls).toHaveLength(1); expect(container.querySelector(".lo-feedback.is-correct")).toBeNull();
     expect(JSON.parse(localStorage.getItem(LESSON_MECHANICS_STORAGE)!).seen).toContain(id);
@@ -118,7 +117,7 @@ describe("activity guidance on the actual controls", () => {
     expect(document.querySelector(".lesson-drag-ghost")).toBeNull();
   });
 
-  it.each(["g2-join", "g2-outside", "g5-messages"])("queues only the given neutral English prompt after an uninterrupted guide for %s", async id => {
+  it.each(["g2-join", "g2-outside", "g5-messages", "g6-ensemble", "use6-i"])("queues only the given neutral English prompt after an uninterrupted guide for %s", async id => {
     await mount(id); const round = rounds.find(round => round.id === id)!;
     const expected = (round.ensemble ?? [round]).map(turn => catalog[`nina:${phraseText(turn.expected)}` as keyof typeof catalog]);
     expect(Media.calls).toHaveLength(1);
@@ -138,6 +137,19 @@ describe("activity guidance on the actual controls", () => {
     await mount("g1-listener"); await place("You are Ana.", "speech"); await click(next()); expect(app().dataset.round).toBe("use1-self");
     await click(button("Voltar")); expect(app().dataset.round).toBe("g1-listener"); expect(app().dataset.mechanicGuide).toBeUndefined();
     await click(button("Refazer atividade")); expect(guides()).toEqual([LESSON_MECHANICS.bubbles.url]); expect(next().disabled).toBe(true);
+  });
+
+  it("reuses the learned speaker control for the final decision and only repeats its guide on request", async () => {
+    await mount("g6-ensemble", ["speaker"]);
+    expect(guides()).toEqual([]); expect(Media.calls).toEqual([catalog["nina:You are Nina."]]);
+    expect(container.querySelector(".lo-turns,.lo-ensemble-bank")).toBeNull();
+    const prompt = Media.current; await press(button("Como fazer"));
+    expect(prompt.paused).toBe(true); expect(guides()).toEqual([LESSON_MECHANICS.speaker.url]);
+    const guide = Media.current; const leo = container.querySelector<HTMLButtonElement>('[data-person="leo"]')!;
+    await pointer(leo); await click(leo);
+    expect(guide.paused).toBe(true); expect(app().dataset.mechanicGuide).toBeUndefined();
+    expect(container.querySelector(".lo-feedback.is-correct")).not.toBeNull(); expect(Media.calls.at(-1)).toBe(catalog["leo:You are Nina."]);
+    const calls = Media.calls.length; await ended(guide); expect(Media.calls).toHaveLength(calls);
   });
 
   it.each(["I am Sam.", "I are Sam."])("keeps direct text %s during its first guide and shows the spoken canonical model after grading", async text => {

@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import lessonAudio from "../src/features/first-encounters/lesson-one-audio.json";
+import { restoreLessonProgress } from "../src/features/first-encounters/lesson-progress";
 import {
   LESSON_SCENES,
   PERSON_NAMES,
@@ -24,6 +26,11 @@ function round(id: string): Round {
 function permutations<T>(items: T[]): T[][] {
   if (!items.length) return [[]];
   return items.flatMap((item, index) => permutations(items.filter((_, i) => i !== index)).map(rest => [item, ...rest]));
+}
+/** Keep the reusable evaluator covered without restoring the retired final worksheet. */
+function ensembleFixture(): Round {
+  const turns = ["g3-i", "g3-you", "g3-we", "g3-they"].map(id => ({ ...round(id) }));
+  return { ...turns[0], id: "ensemble-evaluator-fixture", kind: "ensemble", ensemble: turns, bubbleChoices: turns.map(turn => ({ ...turn.expected })) };
 }
 
 describe("the approved first lesson", () => {
@@ -57,8 +64,10 @@ describe("the approved first lesson", () => {
     expect(round("g2-outside")).toMatchObject({ kind: "speaker", team: ["ana", "leo", "sam"], candidateSpeakers: ["ana", "leo", "nina"], expected: { pronoun: "they" } });
     expect(round("g5-messages")).toMatchObject({ kind: "messages", anonymous: true, listener: "nina" });
     expect(round("g5-messages").ensemble?.every(item => item.anonymous)).toBe(true);
-    expect(round("g6-ensemble").ensemble).toHaveLength(4);
-    expect(LESSON_SCENES[11].rounds.every(item => item.kind === "build" && item.team.join("/") === "nina/sam")).toBe(true);
+    expect(round("g6-ensemble")).toMatchObject({ kind: "speaker", speaker: "leo", listener: "nina", team: [], candidateSpeakers: ["leo", "nina"], expected: { pronoun: "you", complement: "Nina" } });
+    expect(round("g6-ensemble").ensemble).toBeUndefined();
+    expect(round("use5-i")).toMatchObject({ kind: "bubbles", speaker: "sam", listener: "maya", referent: "sam", expected: { pronoun: "I", complement: "Sam" } });
+    expect(LESSON_SCENES[11].rounds.map(item => item.kind)).toEqual(["speaker", "bubbles", "join", "messages"]);
   });
 
   it("keeps the lesson to four affirmative forms and the two stated complement families", () => {
@@ -67,6 +76,38 @@ describe("the approved first lesson", () => {
     for (const item of allRounds) {
       expect(item.expected.verb, item.id).toBe(item.expected.pronoun === "I" ? "am" : "are");
       expect(item.expected.complement, item.id).toBe(item.referent === "team" ? "a team" : PERSON_NAMES[item.referent]);
+    }
+  });
+
+  it("preserves all 29 saved round IDs, scene boundaries and existing completion prefixes", () => {
+    const groups = [
+      ["g1-self", "g1-listener"], ["use1-self", "use1-listener"], ["g2-join", "g2-outside"], ["use2-inside", "use2-outside"],
+      ["g3-i", "g3-you", "g3-we", "g3-they"], ["use3-i", "use3-you", "use3-we", "use3-they"],
+      ["g4-inside", "g4-outside"], ["use4-inside", "use4-outside"], ["g5-messages"], ["use5-i", "use5-we", "use5-they"],
+      ["g6-ensemble"], ["use6-i", "use6-you", "use6-we", "use6-they"],
+    ];
+    expect(LESSON_SCENES.map(scene => scene.rounds.map(item => item.id))).toEqual(groups);
+    const ids = groups.flat();
+    expect(ids).toHaveLength(29);
+    const saved = { version: 2 as const, scene: 11, round: 2, completed: ids.slice(0, 27), supported: ["g6-ensemble"] };
+    expect(restoreLessonProgress(JSON.stringify(saved))).toEqual(saved);
+    const complete = { ...saved, scene: 12, round: 0, completed: ids };
+    expect(restoreLessonProgress(JSON.stringify(complete))).toEqual(complete);
+  });
+
+  it("has existing audio for every correct actor, alternative valid speaker and visible phrase preview", () => {
+    const catalog = lessonAudio as Record<string, string>;
+    for (const target of allRounds) {
+      const speakers = target.kind === "speaker"
+        ? target.candidateSpeakers!.filter(person => evaluateSpeaker(target, person).correct)
+        : [target.speaker];
+      for (const person of speakers) expect(catalog[`${person}:${phraseText(target.expected)}`], `${target.id}: accepted ${person}`).toBeTruthy();
+      if (["speaker", "join", "messages"].includes(target.kind)) {
+        expect(catalog[`nina:${phraseText(target.expected)}`], `${target.id}: neutral reading`).toBeTruthy();
+      }
+      for (const option of target.bubbleChoices ?? []) {
+        expect(catalog[`nina:${phraseText(option)}`], `${target.id}: phrase preview`).toBeTruthy();
+      }
     }
   });
 });
@@ -170,6 +211,16 @@ describe("team and speaker decisions", () => {
     expect(evaluateSpeaker(outside, "sam").correct).toBe(false);
     expect(evaluateSpeaker(outside, "nina").correct).toBe(false);
   });
+
+  it("identifies Leo addressing Nina while the recipient keeps listening", () => {
+    const target = round("g6-ensemble");
+    expect(evaluateSpeaker(target, "leo").correct).toBe(true);
+    expect(evaluateSpeaker(target, "nina").meaningCorrect).toBe(false);
+    expect(evaluateSpeaker(target, "maya").correct).toBe(false);
+    expect(evaluateSpeaker(target, "ana").correct).toBe(false);
+    expect(evaluateSpeaker(target, "sam").correct).toBe(false);
+    expect(evaluateSpeaker({ ...target, candidateSpeakers: ["nina", "leo"] }, "leo").correct).toBe(true);
+  });
 });
 
 describe("whole linguistic puzzles", () => {
@@ -177,16 +228,30 @@ describe("whole linguistic puzzles", () => {
     const target = round("g5-messages");
     const assignments: PersonId[][] = [["ana", "maya"], ["maya", "ana"], ["ana", "ana"], ["maya", "maya"]];
     const solutions = assignments.filter(assignment => evaluateMessages(target, assignment).correct);
-    expect(solutions).toEqual([["ana", "maya"]]);
+    expect(solutions).toEqual([["maya", "ana"]]);
     expect(evaluateMessages(target, ["ana", null]).correct).toBe(false);
     expect(evaluateMessages(target, ["ana"]).correct).toBe(false);
     expect(evaluateMessages(target, ["ana", "maya", "leo"]).correct).toBe(false);
     expect(evaluateMessages(target, ["leo", "maya"]).correct).toBe(false);
-    expect(Object.keys(evaluateMessages(target, ["maya", "ana"])).sort()).toEqual(["correct", "corrections", "feedback", "meaningCorrect"]);
+    expect(Object.keys(evaluateMessages(target, ["ana", "maya"])).sort()).toEqual(["correct", "corrections", "feedback", "meaningCorrect"]);
   });
 
-  it("has exactly one correct distribution among all 24 final-game arrangements", () => {
-    const target = round("g6-ensemble");
+  it("infers message ownership from membership rather than candidate positions or the stored model actor", () => {
+    const target = round("g5-messages");
+    expect(evaluateMessages(target, target.candidateSpeakers!).correct).toBe(false);
+    const reordered = { ...target, candidateSpeakers: [...target.candidateSpeakers!].reverse(),
+      ensemble: target.ensemble!.map(turn => ({ ...turn, speaker: turn.speaker === "ana" ? "maya" as const : "ana" as const, candidateSpeakers: [...turn.candidateSpeakers!].reverse() })) };
+    expect(evaluateMessages(reordered, ["maya", "ana"]).correct).toBe(true);
+    const changedWorld = { ...target, team: ["maya", "leo"] as PersonId[],
+      ensemble: target.ensemble!.map(turn => ({ ...turn, team: ["maya", "leo"] as PersonId[] })) };
+    expect(evaluateMessages(changedWorld, ["ana", "maya"]).correct).toBe(true);
+    expect(evaluateMessages(changedWorld, ["maya", "ana"]).correct).toBe(false);
+    expect(target.ensemble!.map(turn => phraseText(turn.expected))).toEqual(["They are a team.", "We are a team."]);
+    expect(LESSON_SCENES[8].hint).not.toMatch(/Ana|Maya/);
+  });
+
+  it("still evaluates complete four-context arrangements independently of the active curriculum", () => {
+    const target = ensembleFixture();
     const arrangements = permutations(target.bubbleChoices!);
     expect(arrangements).toHaveLength(24);
     const solutions = arrangements.filter(answers => evaluateEnsemble(target, answers).correct);
@@ -198,30 +263,46 @@ describe("whole linguistic puzzles", () => {
   });
 
   it("preserves meaning-based coaching when all ensemble relations are correct", () => {
-    const target = round("g6-ensemble");
+    const target = ensembleFixture();
     const answers: Phrase[] = target.ensemble!.map(turn => ({ ...turn.expected, verb: turn.expected.verb === "am" ? "are" : "am" }));
     const checked = evaluateEnsemble(target, answers);
     expect(checked).toMatchObject({ correct: true, meaningCorrect: true });
     expect(checked.corrections).toHaveLength(4);
   });
 
-  it("requires a new use with Nina/Sam rather than accepting the old Ana identity", () => {
+  it("uses four different decisions in the final conversation and carries the changed team forward", () => {
     const uses = LESSON_SCENES[11].rounds;
     expect(uses.map(item => phraseText(item.expected))).toEqual(["I am Nina.", "You are Nina.", "We are a team.", "They are a team."]);
-    expect(uses.every(item => evaluatePhrase(item, item.expected).correct)).toBe(true);
+    expect(evaluateSpeaker(uses[0], "nina").correct).toBe(true);
+    expect(evaluateSpeaker(uses[0], "maya").correct).toBe(false);
+    expect(evaluatePhrase(uses[1], uses[1].expected).correct).toBe(true);
+    expect(evaluatePhrase(uses[1], uses[1].bubbleChoices![0]).meaningCorrect).toBe(false);
+    const joined = [...uses[2].team, "nina"] as PersonId[];
+    expect(evaluateTeam(uses[2], joined).correct).toBe(true);
+    expect(evaluateTeam(uses[2], [...uses[2].team, "leo"]).correct).toBe(false);
+    expect(uses[2].team).toEqual(["sam"]);
+    expect(uses[3].team).toEqual(joined);
+    expect(uses[3]).toMatchObject({ kind: "messages", listener: "maya", candidateSpeakers: ["nina", "leo"], anonymous: true });
+    expect(uses[3].ensemble!.every(message => message.anonymous && message.listener === "maya")).toBe(true);
+    expect(uses[3].ensemble!.map(message => phraseText(message.expected))).toEqual(["They are a team.", "I am Nina."]);
+    const solutions = permutations(uses[3].candidateSpeakers!).filter(assignment => evaluateMessages(uses[3], assignment).correct);
+    expect(solutions).toEqual([["leo", "nina"]]);
+    expect(evaluateMessages(uses[3], uses[3].candidateSpeakers!).correct).toBe(false);
+    expect(evaluateMessages(uses[3], ["leo", null]).correct).toBe(false);
+    expect(evaluateMessages(uses[3], ["nina", "nina"]).correct).toBe(false);
     expect(evaluatePhrase(uses[0], { pronoun: "I", verb: "am", complement: "Ana" }).meaningCorrect).toBe(false);
-    expect(evaluatePhrase(uses[2], { pronoun: "they", verb: "are", complement: "a team" }).meaningCorrect).toBe(false);
   });
 
   it("never mutates lesson data, phrases, membership arrays or assignments during evaluation", () => {
     const before = JSON.stringify(LESSON_SCENES);
     const joined = Object.freeze(["ana", "leo", "sam"] as PersonId[]);
     const senders = Object.freeze(["ana", "maya"] as PersonId[]);
-    const full = Object.freeze(round("g6-ensemble").ensemble!.map(item => Object.freeze({ ...item.expected })));
+    const fullTarget = ensembleFixture();
+    const full = Object.freeze(fullTarget.ensemble!.map(item => Object.freeze({ ...item.expected })));
     evaluateTeam(round("g2-join"), joined);
     evaluateSpeaker(round("g4-inside"), "leo");
     evaluateMessages(round("g5-messages"), senders);
-    evaluateEnsemble(round("g6-ensemble"), full);
+    evaluateEnsemble(fullTarget, full);
     expect(JSON.stringify(LESSON_SCENES)).toBe(before);
     expect(joined).toEqual(["ana", "leo", "sam"]);
     expect(senders).toEqual(["ana", "maya"]);

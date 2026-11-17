@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { act, createElement, StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createLessonAudioController, createLessonSpeechEnvelope, sampleLessonSpeechEnvelope, getLessonAudioClip, getLessonAudioCoverage, getLessonAudioKey, getLessonAudioRequirements, validateLessonAudioCatalog, type LessonSpeechEnvelope } from "../src/features/first-encounters/lesson-audio";
 import { useLessonAudio } from "../src/features/first-encounters/useLessonAudio";
@@ -60,18 +62,35 @@ describe("recorded lesson audio catalog", () => {
 
   it("covers deduplicated correct models, alternative valid speakers and anonymous Nina reading", () => {
     const requirements = getLessonAudioRequirements();
-    expect(requirements).toHaveLength(26);
+    expect(requirements).toHaveLength(24);
     expect(requirements.map(item => item.key)).toContain("leo:We are a team.");
     expect(requirements.map(item => item.key)).toContain("nina:We are a team.");
     expect(requirements.map(item => item.key)).toContain("nina:They are a team.");
     expect(requirements.map(item => item.key)).toContain("nina:I am Ana.");
     expect(requirements.map(item => item.key)).toContain("nina:You are Sam.");
+    expect(requirements.map(item => item.key)).toContain("leo:You are Ana.");
+    expect(requirements.map(item => item.key)).toContain("nina:You are Nina.");
+    expect(requirements.map(item => item.key)).toContain("nina:I am Nina.");
+    expect(requirements.map(item => item.key)).toContain("leo:You are Nina.");
+    expect(requirements.map(item => item.key)).toContain("leo:They are a team.");
+    expect(requirements.map(item => item.key)).not.toContain("maya:I am Nina.");
     expect(new Set(requirements.map(item => item.key)).size).toBe(requirements.length);
     const complete = Object.fromEntries(requirements.map((item, index) => [item.key, `/first-encounters/audio/lesson-one/${item.person}-clip-${index}.mp3`]));
     expect(getLessonAudioCoverage(complete).complete).toBe(true);
     expect(getLessonAudioCoverage(complete).missing).toEqual([]);
     delete complete[requirements[0].key];
     expect(getLessonAudioCoverage(complete).missing).toEqual([requirements[0]]);
+  });
+
+  it("keeps the recorded catalog valid and every required voice backed by a real local asset", () => {
+    // The controller fixtures above deliberately mock a tiny catalog; inspect the
+    // published JSON directly so missing recordings cannot pass through the mock.
+    const published: unknown = JSON.parse(readFileSync(resolve("src/features/first-encounters/lesson-one-audio.json"), "utf8"));
+    expect(validateLessonAudioCatalog(published)).toEqual({ valid: true, errors: [], entries: 26 });
+    expect(getLessonAudioCoverage(published).missing).toEqual([]);
+    for (const [key, url] of Object.entries(published as Record<string, string>)) {
+      expect(existsSync(resolve("public", url.slice(1))), key).toBe(true);
+    }
   });
 });
 

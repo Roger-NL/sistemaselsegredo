@@ -1,0 +1,266 @@
+/* Mobile composition. Keep the same comic frame and learning controls; when a
+   keyboard reduces the viewport, scroll the content inside that frame. */
+.lo-mobile-actions { display: none; }
+.lo-brand-mobile { display: none; }
+
+@media (max-width: 759px) {
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) {
+    height: var(--lesson-visible-height, 100dvh);
+    grid-template-rows: 52px minmax(0, 1fr) 74px;
+  }
+  .lo-app .lo-header { padding-inline: 14px; gap: 10px; }
+  .lo-brand-mobile { display: block; }
+  .lo-brand-desktop { display: none; }
+  .lo-brand-row > .lo-icon { display: none; }
+  .lo-brand-menu { display: inline-flex; align-items: center; gap: 7px; padding: 6px 0; border: 0; color: inherit; background: transparent; }
+  .lo-brand-menu .brand { pointer-events: none; }
+  .lo-header-name, .lo-header-divider, .lo-header-tools .lo-level { display: none; }
+  .lo-help-button { min-width: 44px; min-height: 44px; justify-content: center; padding: 8px; }
+  .lo-header-tools .lo-help-button > span { display: none; }
+  .lo-app .lo-main {
+    grid-template-rows: auto minmax(min-content, 1fr) auto;
+    padding: 10px 12px 9px;
+    gap: 9px;
+    overflow-y: auto;
+    overflow-x: clip;
+    overscroll-behavior-y: contain;
+    scroll-padding-block: 12px;
+  }
+  .lo-heading { min-height: 29px; align-items: center; gap: 8px; }
+  .lo-heading > div:first-child { display: flex; flex: 1; flex-direction: row-reverse; align-items: center; justify-content: space-between; gap: 8px; }
+  .lo-heading h1 { font-size: 18px; line-height: 1.15; }
+  .lo-heading .lj-journey { flex-shrink: 0; max-width: 54%; }
+  .lo-heading .lj-label { display: none; }
+  .lo-progress { display: none; }
+  .lo-main .lesson-task-transition { min-height: min-content; }
+  .lo-app .lo-learning { --lesson-scene-min: 340px; height: auto; min-height: min-content; grid-template-rows: minmax(var(--lesson-scene-min), 1fr) auto; }
+  .lo-app .lo-kind-messages { --lesson-scene-min: 520px; }
+  .lo-app .lo-kind-ensemble { --lesson-scene-min: 440px; }
+  .lo-learning .ls-stage { min-height: var(--lesson-scene-min); border-radius: inherit; }
+  .lo-learning .ls-stage-content { padding: 16px 12px 0; gap: 7px; }
+  .lo-scene-guide { width: 100%; max-width: 100%; }
+  .lo-scene-guide h2 { font-size: clamp(25px, 6.6vw, 31px); line-height: 1.12; }
+  .lo-scene-guide p { max-width: 34ch; margin: 7px auto 0; font-size: 17px; line-height: 1.3; }
+  .lo-learning .lo-context-caption { max-width: 100%; font-size: 13px; line-height: 1.3; }
+  .ls-world { padding: 6px 7px 10px; }
+  .lo-learning .ls-stage > .ls-world { padding-top: 64px; }
+  .ls-conversation { gap: 14px; padding-inline: 4px; }
+  .ls-person { grid-template-rows: 22px minmax(0, 1fr) 30px; }
+  .ls-role { min-height: 22px; font-size: 11px; }
+  .ls-role:empty { visibility: hidden; }
+  .ls-person-name { min-height: 28px; padding: 5px 10px; font-size: 12px; }
+  .ls-speech-anchor { max-width: calc(100% - 20px); }
+  .ls-speech-anchor .ls-speech-bubble { width: 252px; max-width: 100%; }
+  .ls-speech-anchor :is(.lo-speech-target, .lo-fixed-speech, .lo-sentence-area) {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 60px; padding: 8px 13px;
+  }
+  .ls-speech-anchor :is(.lo-speech-target, .lo-fixed-speech) > strong,
+  .ls-speech-anchor .lo-speech-target:not(.is-filled) > strong { font-size: 19px; line-height: 1.2; }
+  .ls-speech-anchor .lo-sentence { min-height: 34px; font-size: 20px; gap: 5px; }
+  .ls-speech-anchor .lo-word-slot { width: 64px; min-width: 64px; flex: 0 0 64px; min-height: 38px; padding: 4px 8px; font-size: 20px; }
+  .ls-speech-anchor .lo-word-slot > span { font-size: 13px; }
+
+  .lo-app .lo-workbench { padding: 8px 9px 12px; border-radius: 0 0 6px 4px; }
+  .lo-workbench-top { min-height: 36px; margin-bottom: 8px; }
+  .lo-workbench-tools { width: 100%; justify-content: flex-end; gap: 8px; }
+  .lo-app :is(.lo-audio-main, .lo-write-toggle) { min-height: 36px; padding: 6px 8px; font-size: 13px !important; }
+  .lo-audio-main small { display: none; }
+  .lo-phrase-bank { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 10px; }
+  .lo-phrase-bank > .lo-audio-option { display: grid; grid-template-columns: minmax(0, 1fr) 34px; align-items: stretch; gap: 5px; min-width: 0; }
+  .lo-app .lo-phrase-bank .lo-phrase {
+    width: 100%; min-height: 62px; height: 100%; padding: 9px 7px;
+    justify-content: center; text-align: center; white-space: normal;
+    font-size: clamp(18px, 4.7vw, 21px) !important; line-height: 1.18;
+  }
+  .lo-app .lo-phrase-bank .lo-audio-icon { align-self: center; width: 34px; min-width: 34px; min-height: 44px; padding: 6px; }
+  .lo-word-bank { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 12px; align-items: start; height: auto; min-height: min-content; }
+  .lo-word-family { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; padding: 0; min-width: 0; height: auto; min-height: min-content; }
+  .lo-word-family + .lo-word-family { padding: 0; border: 0; }
+  .lo-word-family-label { grid-column: 1 / -1; margin-bottom: 1px; font-size: 12px; line-height: 1.2; font-weight: 600; color: var(--lo-muted); }
+  .lo-app .lo-word { min-width: 0; min-height: 44px; padding: 6px 9px; font-size: 22px !important; justify-content: center; }
+  .lo-write { min-height: 58px; gap: 5px; }
+  .lo-write input { min-width: 0; min-height: 50px; font-size: 22px; }
+  .lo-app .lo-clear-writing { min-width: 38px; min-height: 44px; padding: 6px; }
+  .lo-write > button[type="submit"] { min-width: 44px; min-height: 44px; }
+  .lo-feedback { min-height: 58px; padding: 10px; align-items: center; gap: 8px; }
+  .lo-app[data-lesson-theme] .lo-feedback.is-empty { position: relative; border-color: transparent; background: transparent; }
+  .lo-feedback.is-empty > * { position: absolute; visibility: hidden; }
+  .lo-feedback > div { font-size: 13px; line-height: 1.35; }
+  .lo-feedback > svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .lo-feedback > .lo-mechanic-help { min-height: 40px; font-size: 12px; padding-inline: 4px; }
+  .lo-feedback > .lo-mechanic-help > span { max-width: 6ch; }
+  .lo-mechanic-coach { min-height: 80px; }
+  .lo-mechanic-coach > .lo-tutorial-caption { font-size: 15px; line-height: 1.35; }
+  .lo-mechanic-actions > button { min-width: 36px; min-height: 32px; }
+
+  .lo-kind-join .ls-world, .lo-kind-speaker .ls-stage--with-team .ls-world,
+  .lo-kind-messages .ls-world, .lo-kind-ensemble .ls-world {
+    gap: 10px; padding-inline: 8px;
+  }
+  .lo-app[data-lesson-theme] .ls-stage[data-stage-kind] .ls-team-boundary { top: 28%; border-width: 2px; border-color: var(--comic-teal, #39776b); background: #e2ede57a; }
+  .ls-stage--with-team .ls-team { padding-inline: 5px; }
+  .ls-stage--with-team .ls-team-label { min-height: 26px; gap: 4px; margin-top: 3px; font-size: 11px; color: var(--comic-teal, #39776b); }
+  .ls-stage--with-team .ls-person-name { padding-inline: 6px; font-size: 11px; }
+  .lo-messages { width: 100%; max-width: 100%; gap: 8px; }
+  .lo-message { min-height: 84px; padding: 9px; gap: 6px; }
+  .lo-message > strong { font-size: 18px; }
+  .lo-message-sender { min-height: 36px; padding: 5px 7px; font-size: 12px; }
+  .lo-turns { gap: 8px; }
+  .lo-turn { min-height: 52px; padding: 7px; gap: 4px; }
+  .lo-turn > strong { font-size: 14px; }
+  .lo-turn-context { font-size: 10px !important; }
+  .lo-app .lo-ensemble-bank .lo-phrase { min-height: 54px; font-size: 17px !important; }
+
+  .lo-footer { min-height: 0; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); gap: 10px; }
+  .lo-footer > .lo-navigation, .lo-footer-actions > .lo-text-button { display: none; }
+  .lo-footer-actions { flex: 1; margin-left: 0; min-width: 0; }
+  .lo-footer-actions .lo-next { width: 100%; }
+  .lo-mobile-actions { display: flex; flex: 0 0 auto; align-items: center; }
+  .lo-actions-menu { position: relative; }
+  .lo-actions-menu > summary { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; padding: 10px 13px; border: 1px solid var(--lo-ink); border-radius: 5px; list-style: none; font-size: 14px; cursor: pointer; background: var(--lo-paper); }
+  .lo-actions-menu > summary::-webkit-details-marker { display: none; }
+  .lo-actions-panel { position: absolute; z-index: 30; left: 0; bottom: calc(100% + 12px); width: min(268px, calc(100vw - 28px)); display: grid; gap: 4px; padding: 9px; border: 2px solid var(--lo-ink); border-radius: 7px 4px; background: #fffdf5; box-shadow: 3px 3px 0 var(--lo-ink); }
+  .lo-actions-panel > button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 9px; border: 0; background: transparent; color: var(--lo-ink); font-size: 15px !important; text-align: left; }
+
+  /* A dialog keeps its outer frame, navigation and one scrollable reading area. */
+  .lo-app .li-introduction { width: calc(100vw - 20px); height: calc(var(--lesson-visible-height, 100dvh) - 20px); max-height: none; padding: 12px; }
+  .li-introduction[open] { grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px; }
+  .li-header { min-height: 36px; }
+  .li-header .lj-journey { width: 174px; max-width: 100%; }
+  .li-icon-button { min-width: 36px; width: 36px; height: 36px; }
+  .li-content { min-height: 0; display: grid; grid-template-rows: auto minmax(330px, 1fr) auto; align-content: start; gap: 7px; overflow-y: auto; overflow-x: clip; overscroll-behavior-y: contain; scrollbar-width: thin; padding: 0 2px 1px; }
+  .li-heading h1 { font-size: 29px; line-height: 1.12; }
+  .li-heading > p { margin-top: 6px; font-size: 16px; line-height: 1.3; }
+  .li-visual, .li-visual--lesson-path { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(240px, 1fr) auto; gap: 9px; }
+  .li-character-scene { min-height: 240px; }
+  .li-models { grid-template-rows: repeat(2, minmax(40px, auto)); gap: 8px; }
+  .li-model { padding: 4px 10px; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 8px; }
+  .li-model > strong { font-size: 23px; line-height: 1.15; white-space: nowrap; }
+  .li-model-translation { max-width: 120px; font-size: 14px; line-height: 1.1; }
+  .li-stage-floor { bottom: 31px; }
+  .li-character-scene[data-stage-guide=true] .li-actor { top: 14px; bottom: 28px; width: min(54%, 240px); }
+  .li-character-scene[data-stage-guide=false] .li-actor { top: 49px; bottom: 28px; width: 41%; }
+  .li-character-scene[data-stage-group=true] .li-actor { width: 44%; }
+  .li-stage-team { top: 48px; bottom: 14px; }
+  .li-stage-team > span { bottom: 2px; }
+  .li-actor-name { bottom: -17px; font-size: 12px; }
+  .li-stage-speech { max-width: calc(100% - 18px); padding: 7px 11px; }
+  .li-stage-speech > strong { font-size: 22px; }
+  .li-narration { padding-top: 10px; }
+  .li-narration-heading { min-height: 26px; margin-bottom: 6px; font-size: 12px; }
+  .li-caption-slot { height: auto; min-height: 5.4em; font-size: 19px; line-height: 1.35; }
+  .li-footer { min-height: 74px; grid-template-columns: auto minmax(0, 1fr); gap: 7px 10px; }
+  .li-back { min-height: 48px; padding: 10px 12px; }
+  .li-skip { min-height: 23px; padding: 3px; }
+
+  .lo-app .lo-tutorial { width: calc(100vw - 20px); max-width: none; height: calc(var(--lesson-visible-height, 100dvh) - 20px); max-height: none; padding: 13px; overflow: hidden; }
+  .lo-tutorial[open] { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 10px; }
+  .lo-tutorial-content { overflow-y: auto; overflow-x: clip; overscroll-behavior-y: contain; padding: 0 2px 4px; }
+  .lo-tutorial-top { min-height: 36px; }
+  .lo-tutorial-top .lj-journey { width: 168px; }
+  .lo-tutorial--spoken .lo-tutorial-top-actions { gap: 6px; }
+  .lo-tutorial-replay { min-width: 36px; min-height: 36px; }
+  .lo-tutorial--spoken .lo-tutorial-heading h2 { font-size: 27px; line-height: 1.12; }
+  .lo-tutorial-scene { min-height: 310px; grid-template-rows: minmax(240px, 1fr) 60px; flex: 1 0 310px; }
+  .lo-tutorial--spoken .lo-tutorial-world { min-height: 220px; }
+  .lo-tutorial--spoken .lo-tutorial-practice { height: 60px; min-height: 60px; max-height: 60px; flex-basis: 60px; }
+  .lo-tutorial--spoken .lo-tutorial-phrase-anchor { height: 52px; }
+  .lo-tutorial--spoken .lo-tutorial-phrase { width: 100%; min-width: 215px !important; height: 52px; min-height: 52px !important; max-height: 52px; font-size: 23px !important; }
+  .lo-tutorial--spoken .lo-tutorial-target { min-width: 190px; min-height: 52px; font-size: 19px; }
+  .lo-tutorial-coach { flex: 0 0 auto; min-height: 110px; padding: 12px; gap: 9px; }
+  .lo-tutorial .lo-tutorial-caption { font-size: 18px; line-height: 1.35; }
+  .lo-tutorial-coach-icon { width: 27px; height: 27px; }
+  .lo-tutorial-footer { position: sticky; bottom: -13px; z-index: 12; padding-block: 10px 4px; background: #fffdf5; }
+  .lo-tutorial--spoken .lo-tutorial-footer .lo-next { flex: 1; }
+  .lo-tutorial-footer .lo-tutorial-back { min-height: 48px; }
+  .lo-tutorial--skill .lo-tutorial-scene { min-height: 420px; grid-template-rows: minmax(190px, 1fr) auto; flex-basis: 420px; }
+  .lo-tutorial--skill .lo-tutorial-practice { height: auto; min-height: 0; max-height: none; flex-basis: auto; padding: 4px; }
+  .lo-tutorial--skill .tsp-panel { max-width: 100%; gap: 12px; }
+  .lo-tutorial--skill .tsp-writing { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .lo-tutorial--skill .tsp-writing-actions { min-width: 0; }
+  .tsp-word-slot { min-height: 52px; font-size: 25px; }
+  .tsp-word { min-height: 50px; font-size: 24px; }
+  .tsp-writing > input { min-height: 52px; font-size: 23px; }
+  .tsp-result { min-height: 21px; font-size: 14px; }
+  .tsp-model > span { font-size: 14px; }
+
+  .lo-app .lc-main { grid-template-rows: minmax(0, 1fr); padding: 12px 12px 9px; gap: 0; }
+  .lc-content { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 13px; min-height: 0; overflow-y: auto; overflow-x: clip; overscroll-behavior-y: contain; padding: 0 2px 4px; }
+  .lc-heading h1 { font-size: 28px; line-height: 1.14; }
+  .lc-heading-topline { gap: 7px; }
+  .lc-heading-topline > .lj-journey { max-width: 64%; }
+  .lc-card { min-height: min-content; padding: 20px 17px; }
+  .lc-test { display: flex; flex-direction: column; gap: 18px; }
+  .lc-question-context > p { margin-top: 5px; font-size: 20px; line-height: 1.35; }
+  .lc-answer-area { width: 100%; }
+  .lc-choice { min-height: 67px; padding: 12px 10px; font-size: 20px; }
+  .lc-feedback { width: 100%; min-height: 90px; padding: 13px; font-size: 16px; line-height: 1.4; }
+  .lc-feedback > strong { font-size: 18px; }
+  .lc-writing { gap: 10px; }
+  .lo-app .lc-input-row > input { min-height: 58px; font-size: 24px; }
+  .lc-writing-note { font-size: 15px; }
+  .lc-theory { gap: 22px; }
+  .lc-explanation > p, .lc-explanation > .lc-en, .lc-explanation > .lc-note { font-size: 18px; line-height: 1.4; }
+  .lo-app .lc-footer { padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
+  .lc-footer .lc-next { flex: 1; }
+  .lc-completion { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .lc-completion-stage { min-height: 230px; }
+  .lc-completion-copy h2 { font-size: 32px; }
+  .lc-completion .lo-tutorial-caption { min-height: 5.6em; font-size: 18px; line-height: 1.4; }
+  .lc-completion-models { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .lc-completion-models > button { min-height: 52px; font-size: 20px; }
+  .lo-app:has(.lc-complete) { grid-template-rows: 52px minmax(0, 1fr) 110px; }
+  .lo-app .lc-footer:has(.lc-complete) { display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; gap: 6px; }
+  .lc-completion-save { font-size: 12px; line-height: 1.25; text-align: center; }
+  .lc-footer .lc-complete { width: 100%; }
+}
+
+@media (max-width: 359px) {
+  .lo-app .lo-main { padding-inline: 9px; }
+  .lo-scene-guide h2 { font-size: 25px; }
+  .lo-scene-guide p { font-size: 16px; }
+  .lo-app .lo-phrase-bank .lo-phrase { min-height: 68px; font-size: 18px !important; }
+  .lo-phrase-bank > .lo-audio-option { grid-template-columns: minmax(0, 1fr) 31px; gap: 4px; }
+  .lo-app .lo-phrase-bank .lo-audio-icon { width: 31px; min-width: 31px; }
+  .li-header .lj-journey { width: 151px; }
+  .li-header-actions { gap: 4px; }
+  .li-heading h1 { font-size: 27px; }
+  .li-model { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+  .li-model > strong { font-size: 23px; }
+  .li-model-translation { max-width: none; font-size: 14px; }
+  .li-content { grid-template-rows: auto minmax(370px, 1fr) auto; }
+  .lo-tutorial-top .lj-journey { width: 147px; }
+  .lo-tutorial--spoken .lo-tutorial-top-actions { gap: 3px; }
+  .lo-tutorial--spoken .lo-tutorial-heading h2 { font-size: 25px; }
+  .lc-heading h1 { font-size: 26px; }
+  .lc-card { padding: 17px 13px; }
+  .lc-choice { font-size: 18px; }
+  .lc-forms > span { font-size: 22px; }
+}
+
+@media (max-width: 759px) and (max-height: 560px) {
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) { grid-template-rows: 46px minmax(0, 1fr) 66px; }
+  .lo-app:has(.lc-complete) { grid-template-rows: 46px minmax(0, 1fr) 110px; }
+  .lo-app .lo-main { padding-top: 7px; }
+  .lo-header .brand { font-size: 18px; }
+  .lo-app .lo-learning { min-height: min-content; }
+  .lo-footer, .lo-app .lc-footer { padding-block: 7px; }
+  .lo-app .lo-header .lo-help-button { min-height: 40px; }
+  .li-introduction[open] { gap: 8px; }
+  .li-footer { min-height: 74px; }
+  .lo-tutorial-coach { min-height: 108px; }
+}
+
+@media (max-width: 759px) {
+  html[data-keyboard-open="true"] .lo-app {
+    position: fixed; top: var(--lesson-visible-top, 0px); right: 0; left: 0;
+  }
+  html[data-keyboard-open="true"] :is(.li-introduction, .lo-tutorial) {
+    position: fixed; top: calc(var(--lesson-visible-top, 0px) + 10px); bottom: auto; margin-block: 0;
+  }
+}
+
+@media (max-width: 759px) and (prefers-reduced-motion: reduce) {
+  .lo-actions-panel, .li-content, .lc-content { scroll-behavior: auto; }
+}

@@ -154,6 +154,12 @@ export function LessonStage({ round, children, speechContent, teamOverride, spea
       const topLimit = guideBesideWorld ? worldRect.top - stageRect.top + 8 : (header?.bottom ?? stageRect.top) - stageRect.top + 6;
       const canvas = speaker ? stage.querySelector<HTMLCanvasElement>(`[data-stage-person="${speaker}"] canvas`) : null;
       observe(canvas);
+      // A public speech target has one owner from its first visible frame.
+      // Never expose a temporary centered drop target while the rig is loading.
+      if (speaker && (!canvas || canvas.getBoundingClientRect().width <= 0 || canvas.getBoundingClientRect().height <= 0)) {
+        anchor.dataset.speechReady = "false";
+        return;
+      }
       const previousReserve = Number.parseFloat(stage.style.getPropertyValue("--ls-speech-height")) || 0;
       const canvases = canvas ? [canvas] : [...stage.querySelectorAll<HTMLCanvasElement>("[data-stage-person] canvas")];
       const requiredHeadTop = topLimit + bubbleRect.height + 12;
@@ -169,7 +175,9 @@ export function LessonStage({ round, children, speechContent, teamOverride, spea
         const maximumReserve = Math.max(0, naturalHeight - 100);
         return Math.max(0, Math.min(maximumReserve, Math.ceil(naturalHeight - 460 * (fixedBottom - requiredHeadTop) / 415 - .01)));
       });
-      const reserve = requiredReserves.length ? Math.max(...requiredReserves) : Math.ceil(bubbleRect.height + 14);
+      // Mobile reserves a full bubble row before any selection; its rig never shrinks on tap.
+      const mobile = window.matchMedia?.("(max-width: 759px)").matches;
+      const reserve = mobile ? 64 : requiredReserves.length ? Math.max(...requiredReserves) : Math.ceil(bubbleRect.height + 14);
       if (stage.style.getPropertyValue("--ls-speech-height") !== `${reserve}px`) stage.style.setProperty("--ls-speech-height", `${reserve}px`);
       const character = canvas?.getBoundingClientRect();
       const width = bubbleRect.width, height = bubbleRect.height;

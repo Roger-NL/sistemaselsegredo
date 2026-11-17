@@ -32,6 +32,13 @@ import { accountLesson } from "./helpers/lesson-snapshot";
     expect(JSON.parse(snapshot.progress.guidePosition!)).toEqual({ version: 1, index: 0 });
     expect(JSON.parse(snapshot.mechanics!)).toEqual({ version: 1, seen: ["bubbles"] });
   });
+  it("preserves introduced vocabulary with the account, filtering unknown words", () => {
+    const current = decodeLessonAccountSnapshot(accountLesson())!;
+    const encoded = encodeLessonAccountSnapshot(current.progress, JSON.stringify({ version: 1, seen: ["build"], words: ["I", "am", "am", "invented"] }));
+    const restored = decodeLessonAccountSnapshot(encoded)!;
+    expect(JSON.parse(restored.mechanics!)).toEqual({ version: 1, seen: ["build"], words: ["I", "am"] });
+    expect(encodeLessonAccountSnapshot(restored.progress, restored.mechanics)).toBe(encoded);
+  });
   it("rechecks test answers and never trusts a saved summary label", () => {
     const snapshot = decodeLessonAccountSnapshot(accountLesson())!;
     const conclusion = JSON.parse(snapshot.progress.conclusion!);

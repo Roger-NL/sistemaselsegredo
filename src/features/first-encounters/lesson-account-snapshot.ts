@@ -35,7 +35,9 @@ function canonicalMechanics(raw: unknown): string | null {
     const value: unknown = JSON.parse(raw);
     if (!record(value) || value.version !== 1 || !Array.isArray(value.seen)) return null;
     const seen = new Set(value.seen.filter((id): id is string => typeof id === "string"));
-    return JSON.stringify({ version: 1, seen: Object.keys(LESSON_MECHANICS).filter(id => seen.has(id)) });
+    const vocabulary = ["I", "you", "we", "they", "am", "are"];
+    const words = vocabulary.filter(word => Array.isArray(value.words) && value.words.includes(word));
+    return JSON.stringify({ version: 1, seen: Object.keys(LESSON_MECHANICS).filter(id => seen.has(id)), ...(words.length ? { words } : {}) });
   } catch { return null; }
 }
 

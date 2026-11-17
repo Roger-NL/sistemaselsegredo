@@ -1,4 +1,4 @@
-/** The approved first lesson: six linguistic games, each followed by a new use. */
+/** The first lesson: six perspective activities, each followed by a new use. */
 export type PersonId = "ana" | "leo" | "maya" | "sam" | "nina";
 export type Pronoun = "I" | "you" | "we" | "they";
 export type Verb = "am" | "are";
@@ -41,15 +41,13 @@ function round(id: string, kind: Round["kind"], speaker: PersonId, listener: Per
 }
 
 const messages = [
-  round("g5-a", "speaker", "ana", "nina", ["ana", "leo"], "team", phrase("we", "a team"), "Mensagem A: We are a team.", { candidateSpeakers: ["ana", "maya"], anonymous: true }),
-  round("g5-b", "speaker", "maya", "nina", ["ana", "leo"], "team", phrase("they", "a team"), "Mensagem B: They are a team.", { candidateSpeakers: ["ana", "maya"], anonymous: true }),
+  // Message order deliberately differs from candidate order: position is no clue.
+  round("g5-a", "speaker", "maya", "nina", ["ana", "leo"], "team", phrase("they", "a team"), "Mensagem A: They are a team.", { candidateSpeakers: ["ana", "maya"], anonymous: true }),
+  round("g5-b", "speaker", "ana", "nina", ["ana", "leo"], "team", phrase("we", "a team"), "Mensagem B: We are a team.", { candidateSpeakers: ["ana", "maya"], anonymous: true }),
 ];
-const ensembleChoices = [phrase("I", "Ana"), phrase("you", "Ana"), phrase("we", "a team"), phrase("they", "a team")];
-const ensemble = [
-  round("g6-self", "bubbles", "ana", "maya", ["ana", "leo"], "ana", phrase("I", "Ana"), "Ana se apresenta a Maya.", { bubbleChoices: ensembleChoices }),
-  round("g6-listener", "bubbles", "maya", "ana", ["ana", "leo"], "ana", phrase("you", "Ana"), "Maya fala diretamente com Ana sobre Ana.", { bubbleChoices: ensembleChoices }),
-  round("g6-inside", "bubbles", "ana", "maya", ["ana", "leo"], "team", phrase("we", "a team"), "Ana apresenta sua equipe a Maya.", { bubbleChoices: ensembleChoices }),
-  round("g6-outside", "bubbles", "sam", "maya", ["ana", "leo"], "team", phrase("they", "a team"), "Sam descreve a equipe Ana + Leo para Maya.", { bubbleChoices: ensembleChoices }),
+const finalMessages = [
+  round("use6-message-a", "speaker", "leo", "maya", ["sam", "nina"], "team", phrase("they", "a team"), "Mensagem A: They are a team.", { candidateSpeakers: ["nina", "leo"], anonymous: true }),
+  round("use6-message-b", "speaker", "nina", "maya", ["sam", "nina"], "nina", phrase("I", "Nina"), "Mensagem B: I am Nina.", { candidateSpeakers: ["nina", "leo"], anonymous: true }),
 ];
 
 export const LESSON_SCENES: Scene[] = [
@@ -139,44 +137,45 @@ export const LESSON_SCENES: Scene[] = [
   },
   {
     id: "lesson-09", game: 5, mode: "game", title: "Mensagem sem remetente",
-    prompt: "As mensagens são de Ana e Maya, uma vez cada. Descubra quem enviou cada uma.",
-    hint: "Ana pertence à equipe. Maya está fora. O que We e They dizem sobre quem fala?",
+    prompt: "Cada pessoa enviou uma mensagem verdadeira sobre a equipe marcada. Descubra as remetentes.",
+    hint: "Compare cada fala com a equipe: quem enviou faz parte dela ou está de fora?",
     insight: "A fala permite inferir o remetente quando a equipe e o destinatário estão definidos.",
     rounds: [
       // Container speaker is structural only: anonymous UIs must not reveal it.
-      round("g5-messages", "messages", "ana", "nina", ["ana", "leo"], "team", phrase("we", "a team"), "Equipe Ana + Leo. Nina recebe A: We are a team; B: They are a team. Todos descrevem os fatos corretamente.", { candidateSpeakers: ["ana", "maya"], ensemble: messages, anonymous: true }),
+      round("g5-messages", "messages", "ana", "nina", ["ana", "leo"], "team", phrase("we", "a team"), "As mensagens descrevem a mesma equipe. Cada pessoa envia uma mensagem; a destinatária está fora do grupo. Todas as falas são verdadeiras.", { candidateSpeakers: ["ana", "maya"], ensemble: messages, anonymous: true }),
     ],
   },
   {
     id: "lesson-10", game: 5, mode: "use", title: "A mensagem vira conversa",
-    prompt: "Ana foi identificada. Use essa informação numa conversa nova.",
-    hint: "Ana continua na equipe quando muda quem a escuta. Maya continua descrevendo-a de fora.",
-    insight: "A identidade resolvida é útil para se apresentar e para falar da equipe.",
+    prompt: "Leve o que você descobriu para uma conversa nova.",
+    hint: "Observe quem fala e de quem a fala trata. A equipe marcada continua valendo para as duas últimas falas.",
+    insight: "A mesma ideia funciona com uma apresentação nova e com a equipe já conhecida.",
     rounds: [
-      round("use5-i", "build", "ana", "maya", ["ana", "leo"], "ana", phrase("I", "Ana"), "Ana se apresenta a Maya."),
+      round("use5-i", "bubbles", "sam", "maya", [], "sam", phrase("I", "Sam"), "Sam se apresenta a Maya. Escolha a fala de quem está falando.", { bubbleChoices: individualChoices("Sam") }),
       round("use5-we", "build", "ana", "maya", ["ana", "leo"], "team", phrase("we", "a team"), "Ana apresenta a equipe Ana + Leo a Maya."),
       round("use5-they", "build", "maya", "sam", ["ana", "leo"], "team", phrase("they", "a team"), "Maya descreve essa equipe para Sam."),
     ],
   },
   {
-    id: "lesson-11", game: 6, mode: "game", title: "Quatro falas, um encontro",
-    prompt: "Entregue os quatro balões aos turnos. Confira o conjunto quando terminar.",
-    hint: "Veja quem fala, para quem e de quem. Nome ou equipe iguais não significam perspectiva igual.",
-    insight: "I, you, we e they conservam relações diferentes, mesmo com o mesmo nome ou a mesma equipe.",
+    id: "lesson-11", game: 6, mode: "game", title: "Quem completa esta conversa?",
+    prompt: "A fala está pronta e Nina está ouvindo. Escolha quem pode completar a conversa.",
+    hint: "Quem escuta não assume este balão. Observe para quem a fala vai.",
+    insight: "You continua indicando quem recebe a fala, mesmo quando outra pessoa assume o balão.",
     rounds: [
-      round("g6-ensemble", "ensemble", "ana", "maya", ["ana", "leo"], "ana", phrase("I", "Ana"), "Distribua as quatro falas entre os turnos de Ana, Maya e Sam.", { ensemble, bubbleChoices: ensembleChoices }),
+      // The saved round ID remains stable; the four-slot worksheet is retired.
+      round("g6-ensemble", "speaker", "leo", "nina", [], "nina", phrase("you", "Nina"), "Nina escuta. Outra pessoa fala diretamente com ela, dizendo quem ela é.", { candidateSpeakers: ["leo", "nina"] }),
     ],
   },
   {
-    id: "lesson-12", game: 6, mode: "use", title: "Outro encontro completo",
-    prompt: "Nina e Sam formam a equipe. Monte quatro falas novas, sem modelo preenchido.",
-    hint: "Você pode rever uma relação e continuar. O apoio fica separado do resultado sem ajuda.",
-    insight: "Você praticou falar de si, com alguém, da própria equipe e de uma equipe externa.",
+    id: "lesson-12", game: 6, mode: "use", title: "Você completa a conversa",
+    prompt: "Descubra quem fala, escolha um balão, forme a dupla e resolva as últimas mensagens.",
+    hint: "A ação muda a cada turno. Confira quem fala, quem escuta e quem pertence à equipe.",
+    insight: "Você usou quem fala, quem escuta e quem participa da equipe para entender e completar uma conversa.",
     rounds: [
-      round("use6-i", "build", "nina", "leo", ["nina", "sam"], "nina", phrase("I", "Nina"), "Nina se apresenta a Leo."),
-      round("use6-you", "build", "leo", "nina", ["nina", "sam"], "nina", phrase("you", "Nina"), "Leo fala diretamente com Nina."),
-      round("use6-we", "build", "nina", "leo", ["nina", "sam"], "team", phrase("we", "a team"), "Nina apresenta sua equipe a Leo."),
-      round("use6-they", "build", "ana", "leo", ["nina", "sam"], "team", phrase("they", "a team"), "Ana descreve a equipe Nina + Sam para Leo."),
+      round("use6-i", "speaker", "nina", "leo", [], "nina", phrase("I", "Nina"), "Leo recebe uma apresentação. Quem pode dizer I am Nina?", { candidateSpeakers: ["sam", "maya", "nina"] }),
+      round("use6-you", "bubbles", "leo", "nina", [], "nina", phrase("you", "Nina"), "Leo fala diretamente com Nina sobre ela. Escolha o balão desse turno.", { bubbleChoices: individualChoices("Nina") }),
+      round("use6-we", "join", "nina", "maya", ["sam"], "team", phrase("we", "a team"), "Sam está sozinho na área. Complete a dupla para Nina poder apresentá-la a Maya.", { candidateSpeakers: ["leo", "nina"] }),
+      round("use6-they", "messages", "leo", "maya", ["sam", "nina"], "team", phrase("they", "a team"), "Nina se juntou a Sam. Maya recebe uma mensagem de cada pessoa disponível. Todas são verdadeiras e se referem a essa conversa.", { candidateSpeakers: ["nina", "leo"], anonymous: true, ensemble: finalMessages }),
     ],
   },
 ];

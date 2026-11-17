@@ -71,3 +71,10 @@
   padding: 0;
   border: 0;
 }
+
+/* Protected work areas keep touch gestures in the exercise; page navigation outside remains native. */
+@media (pointer:coarse) {
+  .lo-learning,.lo-tutorial-world,.lo-tutorial-practice { overscroll-behavior:contain; }
+  .lo-write,.lo-write input,.tutorial-skill-write,input,textarea { touch-action:manipulation; }
+  .lo-learning .lesson-drag-source,.lo-tutorial .lesson-drag-source { touch-action:none; }
+}
