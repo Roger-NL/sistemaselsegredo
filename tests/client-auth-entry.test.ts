@@ -11,9 +11,9 @@ vi.mock("firebase/auth", () => ({
 vi.mock("firebase/firestore", () => ({ doc: vi.fn(), getDoc: mocks.getDoc, updateDoc: vi.fn(), deleteField: vi.fn() }));
 import { register, login, loginWithGoogle, resetPassword, logout } from "@/client/auth/service";
 import { auth } from "@/client/auth/firebase";
-import legacy from "./fixtures/demo-legacy-navigation.json";
-import { decodeSnapshot, STORAGE_KEY } from "@/features/demo/session/storage";
-import { THEORY_KEY } from "@/features/theory/progress";
+import { completeLessonSnapshot } from "./helpers/first-encounters-progress";
+import { decodeLessonAccountSnapshot } from "@/features/first-encounters/lesson-account-snapshot";
+import { GUEST_LEARNING_KEY, emptyGuestLearning } from "@/features/dashboard/guest-learning";
 
 const user = { uid: "new-account", email: "qa@example.test", displayName: "QA", metadata: { creationTime: "2026-10-27" }, getIdToken: vi.fn(async () => "verified-token"), getIdTokenResult: vi.fn(async () => ({ claims: {} })) };
 beforeEach(() => {
@@ -146,16 +146,16 @@ describe("reactivated account entry", () => {
     await logout();
     expect(mocks.signOut).toHaveBeenCalledWith({}); expect(clear).not.toHaveBeenCalled();
   });
-  it("preserves a real legacy attempt and separate study progress through signup, login and logout", async () => {
-    const story = JSON.stringify(legacy.less.resumed);
-    const study = JSON.stringify({ version: 1, position: 1, completed: ["this-yours"], supported: ["this-yours"] });
-    const data = new Map([[STORAGE_KEY, story], [THEORY_KEY, study]]);
+  it("preserves the new guest lesson and another account cache through signup, login and logout", async () => {
+    const story = JSON.stringify({ ...emptyGuestLearning(), lessonSnapshot: completeLessonSnapshot() });
+    const privateCache = "private-other-account";
+    const data = new Map([[GUEST_LEARNING_KEY, story], ["basedspeak.learning.other.1", privateCache]]);
     vi.stubGlobal("localStorage", {
       getItem: (key: string) => data.get(key) ?? null,
       setItem: (key: string, value: string) => data.set(key, value),
       removeItem: (key: string) => data.delete(key), clear: () => data.clear(),
     });
-    const original = decodeSnapshot(story);
+    const original = decodeLessonAccountSnapshot(JSON.parse(story).lessonSnapshot);
     expect(original).not.toBeNull();
     for (const action of [
       () => register("Usuário", "qa@example.test", "test-password", "test-password"),
@@ -163,9 +163,9 @@ describe("reactivated account entry", () => {
     ]) {
       expect((await action()).success).toBe(true);
       await logout();
-      expect(data.get(STORAGE_KEY)).toBe(story);
-      expect(data.get(THEORY_KEY)).toBe(study);
-      expect(decodeSnapshot(data.get(STORAGE_KEY)!)).toEqual(original);
+      expect(data.get(GUEST_LEARNING_KEY)).toBe(story);
+      expect(data.get("basedspeak.learning.other.1")).toBe(privateCache);
+      expect(decodeLessonAccountSnapshot(JSON.parse(data.get(GUEST_LEARNING_KEY)!).lessonSnapshot)).toEqual(original);
     }
   });
 });

@@ -1,137 +1,136 @@
-import { createElement } from "react";
+// @vitest-environment jsdom
+import { act, createElement } from "react";
+import { createRoot, type Root } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { readFileSync, writeFileSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { StudentWorkspace } from "@/contracts/workspace";
 import type { WorkspaceState } from "@/features/dashboard/workspace-store";
+import type { LessonDashboardInput } from "@/features/first-encounters/lesson-dashboard";
+import { lessonInput } from "./helpers/first-encounters-progress";
+import { accountLesson } from "./helpers/lesson-snapshot";
+import { decodeLessonAccountSnapshot } from "@/features/first-encounters/lesson-account-snapshot";
 
-vi.mock("@/features/onboarding/PresentationGate", () => ({ PresentationGate: ({ children }: { children: (review: () => void) => unknown }) => children(() => {}) }));
-
-const mocks = vi.hoisted(() => ({ state: null as WorkspaceState | null }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }) }));
-vi.mock("@/features/dashboard/use-student-workspace", () => ({ useStudentWorkspace: () => ({ ...mocks.state, refresh: vi.fn() }) }));
-vi.mock("@/features/demo/session/browser", () => ({ subscribe: () => () => {}, getBrowserSnapshot: () => ({ status: "empty", state: null }), getServerSnapshot: () => ({ status: "empty", state: null }) }));
-
-import { applyTestAction } from "@/features/superuser/actions";
+const mocks = vi.hoisted(() => ({ state: null as WorkspaceState | null, input: null as LessonDashboardInput | null, ready: true, error: "", saving: false,
+  refresh: vi.fn(async () => {}), reset: vi.fn(async () => {}), flush: vi.fn(async () => {}), clear: vi.fn(), replace: vi.fn(), routerRefresh: vi.fn(), logout: vi.fn(async () => {}) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: mocks.replace, refresh: mocks.routerRefresh }) }));
+vi.mock("@/client/auth/service", () => ({ logout: mocks.logout }));
+vi.mock("@/features/dashboard/use-student-workspace", () => ({ useStudentWorkspace: () => ({ ...mocks.state, refresh: mocks.refresh }) }));
+vi.mock("@/features/dashboard/workspace-store", () => ({ studentWorkspace: { getSnapshot: () => mocks.state, flush: mocks.flush, reset: mocks.clear } }));
+vi.mock("@/features/first-encounters/useLessonAccountProgress", () => ({ useLessonAccountProgress: () => ({ ready: mocks.ready, input: mocks.input, storageAvailable: true, refresh: mocks.refresh, reset: mocks.reset, saving: mocks.saving, error: mocks.error, notice: "" }) }));
+vi.mock("@/features/first-encounters/useLessonSounds", () => ({ useLessonSounds: () => ({ play: vi.fn(), muted: false, toggleMuted: vi.fn() }) }));
+vi.mock("@/features/dashboard/LearningConflict", () => ({ LearningConflict: () => null }));
+vi.mock("@/features/first-encounters/LessonAccountPanels", () => ({ LessonAccountPanels: ({ section }: { section: string }) => createElement("section", { "data-account-section": section }, createElement("h2", null, section === "live" ? "Minha aula ao vivo." : "Fale com o professor.")) }));
 import { Dashboard } from "@/features/dashboard/Dashboard";
-import { TeacherContact, TeacherThread } from "@/features/dashboard/StudentSections";
-import { PracticeAccess } from "@/features/dashboard/PracticeAccess";
-import { TheoryExperience } from "@/features/theory/TheoryExperience";
-import { emptyProgress, studySteps } from "@/features/theory/progress";
-import { canPractice } from "@/features/dashboard/practice-access";
-import { emptyGuestLearning } from "@/features/dashboard/guest-learning";
-import { DemoHost } from "@/features/demo/DemoHost";
+import { TeacherContact, TeacherThread } from "@/features/dashboard/TeacherContact";
 
+let root: Root, host: HTMLDivElement;
 beforeEach(() => {
-  mocks.state = { status: "ready", generation: 1, saving: false, error: "", notice: "", workspace: { account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, saveVersion: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [], liveClass: null } };
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true); mocks.ready = true; mocks.error = ""; mocks.saving = false; mocks.input = lessonInput();
+  mocks.state = { status: "ready", generation: 1, saving: false, error: "", notice: "", workspace: { account: { id: "student", name: "Julia", email: "julia@example.com", status: "active", role: "student" }, learning: { revision: 0, saveVersion: 0, demoSnapshot: null, studySnapshot: null, lessonSnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 49, updatedAt: null }, activities: [], conversations: [], liveClass: null } };
+  for (const fn of [mocks.refresh, mocks.reset, mocks.flush, mocks.clear, mocks.replace, mocks.routerRefresh, mocks.logout]) fn.mockClear();
+  Object.defineProperty(HTMLDialogElement.prototype, "showModal", { configurable: true, value: function(this: HTMLDialogElement) { this.open = true; } });
+  Object.defineProperty(HTMLDialogElement.prototype, "close", { configurable: true, value: function(this: HTMLDialogElement) { this.open = false; } });
+  window.history.replaceState(null, "", "/dashboard"); host = document.createElement("div"); document.body.append(host); root = createRoot(host);
 });
-const render = () => renderToStaticMarkup(createElement(Dashboard, { account: { name: "", email: "" } }));
+afterEach(async () => { await act(async () => root.unmount()); host.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+const mount = async () => { await act(async () => root.render(createElement(Dashboard, { account: { name: "Julia", email: "julia@example.com" } }))); };
+const button = (text: string) => [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent?.trim() === text)!;
+const click = async (node: HTMLElement) => { expect(node).toBeTruthy(); await act(async () => node.click()); };
+const tab = (hash: string) => host.querySelector<HTMLAnchorElement>(`.student-nav a[href='#${hash}']`)!;
+async function typeName(text: string) { const input = host.querySelector<HTMLInputElement>('input[name="name"]')!; await act(async () => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, text); input.dispatchEvent(new InputEvent("input", { bubbles: true, data: text })); }); }
 
-describe("student dashboard", () => {
-  it("makes the entire saved conversation and study cards direct return links",()=>{
-    mocks.state!.workspace!.learning={...applyTestAction(emptyGuestLearning(),{action:"jump-part",part:2}),revision:2};
-    const html=render();
-    expect(html).toMatch(/<a\b(?=[^>]*class="student-progress-card student-progress-link")(?=[^>]*href="\/demo")(?=[^>]*aria-label="Retomar conversa")[^>]*>/);
-    expect(html).toMatch(/<a\b(?=[^>]*class="student-progress-card student-progress-link")(?=[^>]*href="\/demo\/estudo\?practice=1")[^>]*>/);
-    expect(html).toContain("Parte 2 de 10");
+describe("the main account dashboard", () => {
+  it("shows the current49-step snapshot and real tabs instead of the retired conversation", async () => {
+    mocks.input = lessonInput(10); await mount();
+    expect(host.querySelector("details")?.open).toBe(false); expect(host.querySelector(".dashboard-access")?.getAttribute("href")).toBe("/demo");
+    await click(tab("avanco")); expect(host.textContent).toContain("39%"); expect(host.textContent).toContain("49 etapas");
+    expect(host.querySelectorAll("[data-dashboard-step]")).toHaveLength(5);
+    await click(tab("atividades")); expect(host.querySelectorAll(".lesson-dashboard-activity")).toHaveLength(6);
+    await click(tab("contato")); expect(host.querySelector('[data-account-section="teacher"]')).not.toBeNull();
+    expect(host.innerHTML).not.toMatch(/cafeteria|Parte 2 de 10|\/demo\/estudo/);
   });
-  it("renders real empty sections, account-bound progress and direct navigation", () => {
-    const html = render();
-    for (const label of ["Minhas atividades.", "Meu avanço.", "Fale com o professor.", "Ainda não há atividades registradas.", "Você ainda não enviou mensagens."]) expect(html).toContain(label);
-    for (const id of ["jornada", "atividades", "avanco", "contato"]) expect(html).toContain(`id="${id}"`);
-    expect(html).toContain("Ainda não começou");
-    expect(html).toContain("Seu próximo passo");
-    expect(html).not.toMatch(/whatsapp|wa\.me|exemplo|ilustrativ|prévia|modo demonstração|roger@example/i);
-    // Optional static visual harness, outside the app and without adding a product preview route.
-    if (process.env.ALUNO_VISUAL_HTML) {
-      const css = ["src/app/globals.css", "src/features/dashboard/dashboard.css", "src/components/navigation/navigation.css", "src/features/demo/demo.css"].map(path => readFileSync(path, "utf8").replace('@import "tailwindcss";', "")).join("\n");
-      writeFileSync(process.env.ALUNO_VISUAL_HTML, `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aluno · verificação de layout vazio</title><style>:root{--font-geist-sans:Arial}body{margin:0}button,input,textarea{font:inherit}${css}</style></head><body>${html}</body></html>`);
+  it("shows all four account areas on arrival and opens each detail from the overview", async () => {
+    await mount();
+    const overview = host.querySelector<HTMLElement>(".lesson-dashboard-overview")!;
+    expect(overview.querySelectorAll("[data-overview-section]")).toHaveLength(4);
+    expect(overview.textContent).toContain("Meu avanço");
+    expect(overview.textContent).toContain("Minhas atividades");
+    expect(overview.textContent).toContain("Minha aula ao vivo");
+    expect(overview.textContent).toContain("Fale com o professor");
+    expect(host.textContent).toContain("Inglês na prática.");
+    expect(host.textContent).not.toMatch(/hist[oó]ria|jogos?|jogar/i);
+    for (const section of ["avanco", "atividades", "aula-ao-vivo", "contato"]) {
+      await click(host.querySelector<HTMLAnchorElement>(`.lesson-dashboard-overview a[href='#${section}']`)!);
+      expect(host.querySelector("[data-dashboard-section]")?.getAttribute("data-dashboard-section")).toBe(section);
+      await click(tab("jornada"));
     }
   });
-
-  it("lets a pending student begin immediately and contact the teacher without approval", () => {
-    mocks.state!.workspace!.account.status = "pending";
-    const html = render();
-    expect(html).toContain("sem esperar aprovação");
-    expect(html).not.toMatch(/class="dashboard-access"[^>]*disabled=""/);
-    expect(html).toContain('name="body"');
-    expect(html).toContain("Enviar mensagem");
-    expect(html).toContain("Conta criada");
-    expect(html).toContain("Tudo pronto para começar.");
-    expect(html).toContain("Libera ao concluir 100% do estudo guiado.");
+  it("keeps the lesson action while displaying an actual booking and teacher reply below", async () => {
+    mocks.state!.workspace!.liveClass = { id: "booking", userId: "student", studentName: "Julia", studentEmail: "julia@example.com", start: "2026-12-01T14:00:00Z", end: "2026-12-01T15:00:00Z", timezone: "UTC", status: "confirmed", revision: 1, createdAt: "2026-11-17", updatedAt: "2026-11-17", reason: "", meetingUrl: "" };
+    mocks.state!.workspace!.conversations = [{ id: "reply", userId: "student", userName: "Julia", userEmail: "", subject: "Dúvida sobre we are", status: "answered", createdAt: "2026-11-17", updatedAt: "2026-11-17", messages: [{ id: "message", authorId: "teacher", authorName: "Professor", role: "manager", body: "Resposta real", at: "2026-11-17" }] }];
+    await mount();
+    expect(host.querySelector("a.dashboard-access")?.getAttribute("href")).toBe("/demo");
+    expect(host.querySelector("[data-overview-section='aula-ao-vivo']")?.textContent).toContain("Aula confirmada");
+    expect(host.querySelector("[data-overview-section='contato']")?.textContent).toContain("Dúvida sobre we are");
+    const received = vi.fn(); window.addEventListener("basedspeak:open-teacher-conversation", received);
+    try {
+      await click(host.querySelector<HTMLAnchorElement>("[data-overview-section='contato'] a")!);
+      await act(async () => { await new Promise<void>(resolve => requestAnimationFrame(() => resolve())); });
+      expect(received).toHaveBeenCalledOnce();
+      expect((received.mock.calls[0][0] as CustomEvent).detail).toBe("reply");
+    } finally { window.removeEventListener("basedspeak:open-teacher-conversation", received); }
   });
-  it("guides the first approved visit and stops showing onboarding after practice begins", () => {
-    expect(render()).toContain("Tudo pronto para começar.");
-    expect(render()).toContain('aria-label="Acessar minha história"');
-    mocks.state!.workspace!.learning.studyCompleted = 1;
-    expect(render()).not.toContain("Tudo pronto para começar.");
+  it("does not announce an unlocked agenda from a pending save, simulated completion or foreign booking", async () => {
+    mocks.input = lessonInput(29);
+    // Finishing the activities alone still leaves theory and the test.
+    mocks.state!.workspace!.learning.studyCompleted = 38;
+    mocks.state!.workspace!.liveClass = { userId: "other-student", status: "confirmed" } as StudentWorkspace["liveClass"];
+    await mount();
+    const text = () => host.querySelector("[data-overview-section='aula-ao-vivo']")!.textContent;
+    expect(text()).toContain("Conclua a aula, a teoria e o teste");
+    expect(text()).not.toContain("Aula confirmada");
+    expect(text()).not.toContain("está liberada");
+    mocks.input = decodeLessonAccountSnapshot(accountLesson(49))!.progress;
+    mocks.state!.workspace!.learning.studyCompleted = 49;
+    mocks.saving = true;
+    await mount(); expect(text()).toContain("Confirmando seu avanço"); expect(text()).not.toContain("está liberada");
+    mocks.saving = false;
+    await mount(); expect(text()).toContain("Sua aula gratuita de 1 hora está liberada");
+    mocks.state!.workspace!.learning.testMode = true;
+    await mount(); expect(text()).toContain("Conclusões simuladas não liberam a agenda"); expect(text()).not.toContain("está liberada");
   });
-  it("opens the connected study for pending accounts instead of rendering an approval barrier", () => {
-    mocks.state!.workspace!.account.status = "pending";
-    const html = renderToStaticMarkup(createElement(TheoryExperience, { publishedAudio: {} }));
-    expect(canPractice(mocks.state!)).toBe(true);
-    expect(html).toContain("Começar a descobrir");
-    expect(html).not.toContain("Aguardando aprovação");
+  it("opens a real account modal and saves a name with the current principal guard", async () => {
+    const fetcher = vi.fn(async () => Response.json({ name: "Joana" })); vi.stubGlobal("fetch", fetcher); await mount();
+    await click(button("Minha conta")); expect(host.querySelector<HTMLDialogElement>('[aria-labelledby="lesson-account-title"]')?.open).toBe(true);
+    await typeName("Joana"); const form = host.querySelector<HTMLFormElement>('[aria-labelledby="lesson-account-title"] form')!;
+    await act(async () => { form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); });
+    expect(fetcher).toHaveBeenCalledWith("/api/account/profile", expect.objectContaining({ method: "PATCH", headers: expect.objectContaining({ "X-Workspace-Uid": "student" }), body: JSON.stringify({ name: "Joana" }) }));
+    expect(host.textContent).toContain("Nome atualizado."); expect(mocks.refresh).toHaveBeenCalled();
+    expect(host.querySelector('a[href="/dashboard?painel=conta"]')).toBeNull();
   });
-
-  it("shows actual activity titles and confirmed teacher replies, escaping message markup", () => {
-    const data = mocks.state!.workspace!;
-    data.activities = [{ id: "activity-1", title: "Estudo salvo", kind: "study", at: "2026-10-27T12:00:00Z" }];
-    data.conversations = [{ id: "thread-1", userId: "student", userName: "", userEmail: "", subject: "Dúvida enviada", status: "answered", createdAt: "2026-10-27T12:00:00Z", updatedAt: "2026-10-27T12:01:00Z", messages: [{ id: "reply-1", authorId: "manager", authorName: "", role: "manager", at: "2026-10-27T12:01:00Z", body: "Resposta do professor <script>alert(1)</script>" }] }];
-    const html = render();
-    expect(html).toContain("Estudo salvo");
-    expect(html).toContain("Dúvida enviada");
-    expect(html).toContain("Professor respondeu");
-    expect(html).not.toContain("Ainda não há atividades registradas.");
-    const contact = renderToStaticMarkup(createElement(TeacherContact, { conversations: data.conversations, disabled: false }));
-    expect(contact).toContain("Nova mensagem.");
-    expect(contact).not.toContain("Mensagem enviada ao professor.");
-    const thread = renderToStaticMarkup(createElement(TeacherThread, { conversation: data.conversations[0] }));
-    expect(thread).toContain("Resposta do professor &lt;script&gt;");
-    expect(thread).not.toContain("<script>");
-    expect(thread).toContain('data-author="manager"');
+  it("keeps practice available for pending accounts but blocks suspended access while keeping contact", async () => {
+    mocks.state!.workspace!.account.status = "pending"; await mount(); expect(host.querySelector('a.dashboard-access')).not.toBeNull();
+    mocks.state!.workspace!.account.status = "suspended"; mocks.ready = false; mocks.error = "Seu acesso à aula está indisponível.";
+    await act(async () => root.render(createElement(Dashboard, { account: { name: "Julia", email: "julia@example.com" } })));
+    expect(host.querySelector<HTMLButtonElement>("button.dashboard-access")?.disabled).toBe(true); expect(host.textContent).toContain(mocks.error);
+    await click(tab("contato")); expect(host.querySelector('[data-account-section="teacher"]')).not.toBeNull();
   });
-
-  it("does not show a fabricated workspace when loading or when the API fails", () => {
-    mocks.state = { ...mocks.state!, status: "loading", workspace: null };
-    expect(render()).toContain("Carregando seu espaço…");
-    expect(render()).not.toContain('id="atividades"');
-    mocks.state = { ...mocks.state, status: "error", error: "Não foi possível conectar" };
-    expect(render()).toContain("Tentar novamente");
-    expect(render()).toContain("Não foi possível conectar");
-    expect(render()).not.toContain('aria-label="Percurso da conversa da cafeteria"');
+  it("reports persistence errors and resets only on the explicit settings action", async () => {
+    mocks.saving = true; await mount(); expect(host.textContent).toContain("Salvando seu avanço"); expect(mocks.reset).not.toHaveBeenCalled();
+    mocks.saving = false; await mount(); await click(button("Configurações"));
+    await click(button("Recomeçar percurso")); expect(mocks.reset).toHaveBeenCalledOnce(); expect(host.textContent).toContain("mensagens e aulas foram preservadas");
+    mocks.error = "Não foi possível salvar"; await act(async () => root.render(createElement(Dashboard, { account: { name: "Julia", email: "julia@example.com" } })));
+    expect(host.textContent).toContain(mocks.error); expect(button("Tentar novamente")).toBeTruthy();
   });
-
-  it("keeps the public demo available without a sign-in requirement", () => {
-    const state = { ...mocks.state!, status: "unauthenticated" as const, workspace: null };
-    const html = renderToStaticMarkup(createElement(PracticeAccess, { state, retry: async () => {} }));
-    expect(html).toContain("sem cadastro");
-    expect(html).not.toContain('href="/comecar?modo=entrar"');
-    expect(canPractice({ ...state, guestLearning: emptyGuestLearning() })).toBe(true);
+  it("signs out through the existing session endpoint without deleting the account", async () => {
+    const fetcher = vi.fn(async () => new Response(null, { status: 204 })); vi.stubGlobal("fetch", fetcher); await mount(); await click(button("Minha conta")); await click(button("Sair da conta"));
+    expect(mocks.flush).toHaveBeenCalledOnce(); expect(fetcher).toHaveBeenCalledWith("/api/auth/session", { method: "DELETE", credentials: "same-origin" });
+    expect(mocks.clear).toHaveBeenCalledOnce(); expect(mocks.replace).toHaveBeenCalledWith("/comecar?modo=entrar"); expect(mocks.logout).toHaveBeenCalledOnce();
   });
-
-  it("connects saved study completion to booking, waiting for persistence and respecting an existing booking", () => {
-    const theory = () => renderToStaticMarkup(createElement(TheoryExperience, { publishedAudio: {} }));
-    const data = mocks.state!.workspace!;
-    data.learning.studySnapshot = JSON.stringify({ ...emptyProgress, completed: studySteps.slice(0, 23).map(item => item.step.id) });
-    expect(theory()).not.toContain('class="study-completion"');
-    data.learning.studySnapshot = JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) });
-    mocks.state!.saving = true;
-    expect(theory()).toContain('disabled="">Confirmando seu progresso');
-    expect(theory()).not.toContain("Agendar minha aula gratuita");
-    mocks.state!.saving = false;
-    expect(theory()).toContain('href="/dashboard#aula-ao-vivo"');
-    expect(theory()).toContain("Agendar minha aula gratuita");
-    data.liveClass = { id: "student", userId: "student", status: "confirmed" } as NonNullable<typeof data.liveClass>;
-    expect(theory()).toContain("Ver minha aula ao vivo");
-    expect(theory()).not.toContain("Agendar minha aula gratuita");
-  });
-  it("lets anonymous visitors start the story and study; requires a deliberate account continuation for the free lesson", () => {
-    mocks.state = { ...mocks.state!, status: "unauthenticated", workspace: null, guestLearning: { ...emptyGuestLearning(), studySnapshot: JSON.stringify({ ...emptyProgress, completed: studySteps.map(item => item.step.id) }), studyCompleted: 24 } };
-    const story = renderToStaticMarkup(createElement(DemoHost, { experience: true }));
-    expect(story).toContain("Começar a conversa");
-    expect(story).toContain("Demo livre"); expect(story).not.toContain("Entre para continuar");
-    const study = renderToStaticMarkup(createElement(TheoryExperience, { publishedAudio: {} }));
-    expect(study).toContain("Criar minha conta para a aula"); expect(study).toContain("sem refazer o percurso");
-    expect(study).toContain('href="/comecar?modo=entrar"'); expect(study).not.toContain('href="/dashboard#aula-ao-vivo"');
+  it("preserves teacher conversations and escapes message content", () => {
+    const conversation = { id: "thread", userId: "student", userName: "Julia", userEmail: "", subject: "Dúvida real", status: "answered" as const, createdAt: "2026-11-01", updatedAt: "2026-11-02", messages: [{ id: "reply", authorId: "manager", authorName: "Professor", role: "manager" as const, body: "Resposta <script>alert(1)</script>", at: "2026-11-02" }] };
+    const contact = renderToStaticMarkup(createElement(TeacherContact, { conversations: [conversation], disabled: false }));
+    expect(contact).toContain("Dúvida real"); expect(contact).toContain("Enviar mensagem"); expect(contact).not.toContain("Mensagem enviada ao professor.");
+    const thread = renderToStaticMarkup(createElement(TeacherThread, { conversation })); expect(thread).toContain("&lt;script&gt;"); expect(thread).not.toContain("<script>");
   });
 });

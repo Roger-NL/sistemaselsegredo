@@ -1,9 +1,11 @@
 import { workspaceFetch, workspaceStorage } from "@/features/local-testing/sandbox";
 import type { LearningProgress, SaveLearningInput, StudentWorkspace, TeacherConversation } from "@/contracts/workspace";
 import { canImportGuestLearning, GUEST_LEARNING_KEY, hasGuestLearning, readGuestLearning, writeGuestLearning, type GuestStorage } from "./guest-learning";
-import { decodeProgress } from "@/features/theory/progress";
+import { decodeLessonAccountSnapshot } from "@/features/first-encounters/lesson-account-snapshot";
+import { getLessonDashboardSnapshot, LESSON_DASHBOARD_STORAGE } from "@/features/first-encounters/lesson-dashboard";
+import { LESSON_MECHANICS_STORAGE } from "@/features/first-encounters/lesson-mechanics";
 
-type SnapshotKey = "demoSnapshot" | "studySnapshot";
+type SnapshotKey = "demoSnapshot" | "studySnapshot" | "lessonSnapshot";
 export type LearningRecovery = { uid: string; revision: number; baseVersion: number; local: Partial<Pick<SaveLearningInput, SnapshotKey>>; remote: LearningProgress | null };
 export type WorkspaceState = {
   conflict?: LearningRecovery | null;
@@ -18,6 +20,7 @@ export type WorkspaceState = {
 type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
 const initialState: WorkspaceState = { conflict: null, status: "loading", workspace: null, saving: false, error: "", notice: "", generation: 0 };
 const cacheKey = (uid: string, revision: number) => `basedspeak.learning.${encodeURIComponent(uid)}.${revision}`;
+function lessonMetrics(raw: string | null) { const progress = getLessonDashboardSnapshot(decodeLessonAccountSnapshot(raw)?.progress); return { demoPercent: progress.percent, studyCompleted: progress.completedUnits, studyTotal: progress.totalUnits }; }
 
 async function payload(response: Response) {
   const value = await response.json().catch(() => null);
@@ -60,7 +63,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
       if (raw.length > 850_000) throw new Error("Invalid recovery");
       const value = JSON.parse(raw);
       if (!value || typeof value.uid !== "string" || !Number.isSafeInteger(value.revision) || value.revision < 0 || !Number.isSafeInteger(value.baseVersion) || value.baseVersion < 0 || !value.local || typeof value.local !== "object" || Array.isArray(value.local)) throw new Error("Invalid recovery");
-      for (const [key, snapshot] of Object.entries(value.local)) if (!["demoSnapshot", "studySnapshot"].includes(key) || (snapshot !== null && typeof snapshot !== "string")) throw new Error("Invalid recovery");
+      for (const [key, snapshot] of Object.entries(value.local)) if (!["demoSnapshot", "studySnapshot", "lessonSnapshot"].includes(key) || (snapshot !== null && typeof snapshot !== "string")) throw new Error("Invalid recovery");
       return { uid: value.uid, revision: value.revision, baseVersion: value.baseVersion, local: value.local, remote: null };
     } catch { clearRecovery(); return null; }
   };
@@ -68,7 +71,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
   const replace = (workspace: StudentWorkspace, notice = "", control?: object) => {
     const previous = state.workspace;
     const changed = previous?.account.id !== workspace.account.id || previous.learning.revision !== workspace.learning.revision || previous.account.status !== workspace.account.status;
-    const contentChanged = previous?.learning.demoSnapshot !== workspace.learning.demoSnapshot || previous?.learning.studySnapshot !== workspace.learning.studySnapshot;
+    const contentChanged = previous?.learning.demoSnapshot !== workspace.learning.demoSnapshot || previous?.learning.studySnapshot !== workspace.learning.studySnapshot || previous?.learning.lessonSnapshot !== workspace.learning.lessonSnapshot;
     const approved = previous?.account.id === workspace.account.id && previous.account.status === "pending" && workspace.account.status === "active";
     if (changed) {
       forgetPending(); clearRecovery(); ticket++;
@@ -265,7 +268,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     const workspace = state.workspace;
     if (state.status === "unauthenticated" && !workspace && state.guestLearning) {
       const learning = { ...state.guestLearning, [key]: value, updatedAt: new Date().toISOString() };
-      if (key === "studySnapshot") learning.studyCompleted = decodeProgress(value).completed.length;
+      if (key === "lessonSnapshot") Object.assign(learning, lessonMetrics(value));
       let notice = "";
       try { writeGuestLearning(storage?.(), learning); } catch { notice = "O navegador não permitiu salvar o avanço. Ele ficará disponível enquanto esta página estiver aberta."; }
       edits++;
@@ -276,9 +279,9 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     if (workspace.learning[key] === value) return true;
     edits++;
     pending[key] = value;
-    const learning = { ...workspace.learning, [key]: value };
+    const learning = { ...workspace.learning, [key]: value, ...(key === "lessonSnapshot" ? lessonMetrics(value) : {}) };
     emit({ workspace: { ...workspace, learning }, saving: true, error: "", notice: "" });
-    try { storage?.().setItem(cacheKey(workspace.account.id, learning.revision), JSON.stringify({ uid: workspace.account.id, revision: learning.revision, demoSnapshot: learning.demoSnapshot, studySnapshot: learning.studySnapshot })); } catch { /* Server persistence remains available. */ }
+    try { storage?.().setItem(cacheKey(workspace.account.id, learning.revision), JSON.stringify({ uid: workspace.account.id, revision: learning.revision, demoSnapshot: learning.demoSnapshot, studySnapshot: learning.studySnapshot, lessonSnapshot: learning.lessonSnapshot })); } catch { /* Server persistence remains available. */ }
     clearTimeout(timer); timer = setTimeout(() => { void flush(); }, 650);
     return true;
   }
@@ -293,11 +296,11 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     const importingWork = (async () => { try {
       const response = await fetcher("/api/student/learning/import", {
         method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Workspace-Uid": owner.account.id },
-        body: JSON.stringify({ revision: 0, saveVersion: owner.learning.saveVersion, demoSnapshot: learning!.demoSnapshot, studySnapshot: learning!.studySnapshot }),
+        body: JSON.stringify({ revision: 0, saveVersion: owner.learning.saveVersion, lessonSnapshot: learning!.lessonSnapshot }),
       });
       const result = await payload(response) as { learning: LearningProgress };
       if (currentTicket !== ticket || state.workspace?.account.id !== owner.account.id) throw new Error("A conta conectada mudou. Confira seu painel antes de continuar.");
-      try { storage?.().removeItem(GUEST_LEARNING_KEY); } catch { /* A completed import remains safe to repeat: the server refuses to overwrite it. */ }
+      try { const target = storage?.(); target?.removeItem(GUEST_LEARNING_KEY); for (const key of [...Object.values(LESSON_DASHBOARD_STORAGE), LESSON_MECHANICS_STORAGE]) target?.removeItem(key); } catch { /* A completed import remains safe to repeat: the server refuses to overwrite it. */ }
       edits++; ticket++;
       emit({ workspace: { ...state.workspace, learning: result.learning }, guestLearning: null, generation: state.generation + 1, saving: false, error: "", notice: "Seu percurso deste navegador foi salvo na sua conta." });
     } catch (error) {
@@ -320,7 +323,7 @@ export function createWorkspaceStore(fetcher: Fetcher, storage?: () => GuestStor
     }
     const response = await fetcher(conversationId ? `/api/student/conversations/${encodeURIComponent(conversationId)}/messages` : "/api/student/conversations", {
       method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", "X-Workspace-Uid": owner.account.id },
-      body: JSON.stringify(conversationId ? { body } : { subject, body, ...(owner.account.canTest || subject === "Avaliação da conversa da cafeteria" ? {learningRevision:owner.learning.revision}:{}) }),
+      body: JSON.stringify(conversationId ? { body } : { subject, body, ...(owner.account.canTest || subject === "Avaliação da Aula 1" || subject === "Avaliação da conversa da cafeteria" ? {learningRevision:owner.learning.revision}:{}) }),
     });
     if (deny(response)) throw new Error("Entre novamente para enviar sua mensagem.");
     const result = await payload(response) as { conversation: TeacherConversation };

@@ -1,0 +1,11 @@
+{
+  "nina:Primeiro, escute a Ana.": "/first-encounters/audio/tutorial-pt/nina-welcome.m4a",
+  "nina:Para ouvir de novo, clique neste botão.": "/first-encounters/audio/tutorial-pt/nina-repeat.m4a",
+  "nina:Agora, clique aqui para experimentar.": "/first-encounters/audio/tutorial-pt/nina-next.m4a",
+  "nina:Olhe só. Segure esta fala, arraste até aqui e solte.": "/first-encounters/audio/tutorial-pt/nina-drag.m4a",
+  "nina:Agora é com você. Arraste a fala até a Ana.": "/first-encounters/audio/tutorial-pt/nina-your-turn.m4a",
+  "nina:Você também pode clicar na fala e depois clicar na Ana.": "/first-encounters/audio/tutorial-pt/nina-click.m4a",
+  "nina:Isso! Você conseguiu. Clique aqui para começar a aula.": "/first-encounters/audio/tutorial-pt/nina-success.m4a",
+  "nina:Monte a fala com estas peças. Para tentar de novo, toque em Refazer.": "/first-encounters/audio/tutorial-pt/nina-word-pieces.m4a",
+  "nina:Agora escreva a fala e toque em Conferir. Para corrigir o texto, use Apagar.": "/first-encounters/audio/tutorial-pt/nina-write-check.m4a"
+}

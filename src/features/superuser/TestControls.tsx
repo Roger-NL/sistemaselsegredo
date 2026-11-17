@@ -8,10 +8,10 @@ import Link from "next/link";
 import { Settings2 } from "lucide-react";
 import { useStudentWorkspace } from "@/features/dashboard/use-student-workspace";
 import { studentWorkspace } from "@/features/dashboard/workspace-store";
-import { nodes, catalog } from "@/features/demo/content/catalog";
-import { decodeSnapshot } from "@/features/demo/session/storage";
-import { decodeProgress, studySteps } from "@/features/theory/progress";
-import type { SupportProfile } from "@/features/demo/model/types";
+import { LESSON_SCENES } from "@/features/first-encounters/lesson-one";
+import { CONCLUSION_THEORY, CONCLUSION_QUESTIONS } from "@/features/first-encounters/lesson-conclusion";
+import { decodeLessonAccountSnapshot } from "@/features/first-encounters/lesson-account-snapshot";
+import { EMPTY_LESSON_DASHBOARD_INPUT, getLessonDashboardSnapshot } from "@/features/first-encounters/lesson-dashboard";
 import { testActionDestination, type TestAction } from "./actions";
 import "./test-controls.css";
 export function TestControls() {
@@ -28,13 +28,15 @@ export function TestControlsOverlay() {
 function TestPanel({onClose}:{onClose:()=>void}) {
   const {workspace} = useStudentWorkspace();
   const dialog = useRef<HTMLDialogElement>(null);
-  const [profile,setProfile] = useState<SupportProfile>("beginner");
-  const [part,setPart] = useState(1), [node,setNode] = useState("p1.first"), [step,setStep] = useState(0);
+  const [part,setPart] = useState(1), [node,setNode] = useState(LESSON_SCENES[0].rounds[0].id), [step,setStep] = useState(0);
   const [busy,setBusy] = useState(false), [notice,setNotice] = useState("");
   const running = useRef(false);
   useEffect(()=>{const element=dialog.current;element?.showModal();return ()=>element?.close();},[]);
-  const learning=workspace!.learning, demo=learning.demoSnapshot ? decodeSnapshot(learning.demoSnapshot):null;
-  const study=decodeProgress(learning.studySnapshot);
+  const learning = workspace!.learning;
+  const snapshot = getLessonDashboardSnapshot(decodeLessonAccountSnapshot(learning.lessonSnapshot ?? null)?.progress ?? EMPTY_LESSON_DASHBOARD_INPUT);
+  const activities = LESSON_SCENES.filter(scene => scene.mode === "game");
+  const rounds = LESSON_SCENES.flatMap(scene => scene.rounds.map(round => ({ ...round, game: scene.game })));
+  const reviewSteps = [...CONCLUSION_THEORY.map(page => `Teoria · ${page.title}`), ...CONCLUSION_QUESTIONS.map((question, index) => `Teste ${index + 1} · ${question.prompt}`)];
   async function run(input:TestAction) {
     if (running.current) return;
     running.current=true;
@@ -47,21 +49,18 @@ function TestPanel({onClose}:{onClose:()=>void}) {
   return <dialog className="test-controls-dialog" ref={dialog} aria-labelledby="test-controls-title" onCancel={e=>{e.preventDefault();if(!busy)onClose();}}>
     <header><div><small>SUA CONTA DE TESTE</small><h2 id="test-controls-title">O que você quer fazer?</h2></div><button type="button" disabled={busy} onClick={onClose}>Fechar <InterfaceIcon name="close" /></button></header>
     <div className="test-controls-scroll">
-      <div className="test-control-summary"><span>{learning.testMode?<BrowserText>{"Modo de teste"}</BrowserText>:<BrowserText>{"Percurso normal"}</BrowserText>}</span><span>{demo?<BrowserText>{`Conversa · parte ${catalog[demo.nodeId].part}/10`}</BrowserText>:<BrowserText>{"Conversa não iniciada"}</BrowserText>}</span><span><BrowserText>Estudo · </BrowserText><BrowserText>{study.completed.length}</BrowserText><BrowserText>/24</BrowserText></span></div>
+      <div className="test-control-summary"><span>{learning.testMode ? "Modo de teste" : "Percurso normal"}</span><span>{snapshot.percent}% do percurso</span><span>{snapshot.completedUnits}/49 etapas</span></div>
       <fieldset disabled={busy}>
-        <div className="test-quick-actions">{action("Apagar tudo",{action:"reset-all"})}{action("Completar tudo",{action:"complete-all"})}{action("Começar do zero, sem simulação",{action:"reset-real"})}</div>
-        <nav className="test-page-links" aria-label="Páginas do curso">
-          <Link href="/dashboard" onClick={onClose}>Meu painel <InterfaceIcon name="arrow-up-right" /></Link><Link href="/demo" onClick={onClose}>Conversa <InterfaceIcon name="arrow-up-right" /></Link><Link href="/demo/estudo?practice=1" onClick={onClose}>Estudo <InterfaceIcon name="arrow-up-right" /></Link>{demo?.nodeId === "end" && <Link href="/demo?replay=1" onClick={onClose}>Cenas e áudios <InterfaceIcon name="arrow-up-right" /></Link>}<Link href="/dashboard#aula-ao-vivo" onClick={onClose}>Minha aula <InterfaceIcon name="arrow-up-right" /></Link>{workspace!.account.role === "manager" && <Link href="/adm" onClick={onClose}>ADM <InterfaceIcon name="arrow-up-right" /></Link>}
-        </nav>
+        <div className="test-quick-actions">{action("Recomeçar percurso real", { action: "reset-real" })}{action("Completar percurso simulado", { action: "complete-all" })}</div>
+        <nav className="test-page-links" aria-label="Páginas do curso"><Link href="/dashboard" onClick={onClose}>Meu painel</Link><Link href="/demo" onClick={onClose}>Aula</Link><Link href="/demo?retomar=conclusao" onClick={onClose}>Teoria e teste</Link><Link href="/dashboard#aula-ao-vivo" onClick={onClose}>Minha aula ao vivo</Link>{workspace!.account.role === "manager" && <Link href="/adm" onClick={onClose}>ADM</Link>}</nav>
         <div className="test-control-grid">
-          <section><h3>Introdução</h3><div className="test-control-actions">{action("Mostrar de novo",{action:"reset-presentation"})}{action("Pular introdução",{action:"complete-presentation"})}</div></section>
-          <section><h3>Conversa</h3><div className="test-control-actions">{action("Voltar uma tela",{action:"back"})}{action("Avançar um momento",{action:"forward"})}{action("Próxima parte",{action:"next-part"})}{action("Completar conversa",{action:"complete-demo"})}{action("Apagar conversa",{action:"reset-demo"})}{action("Iniciar conversa",{action:"start-demo",profile})}</div></section>
-          <section><h3>Apoio e partes</h3><label>Nível de apoio<select value={profile} onChange={e=>setProfile(e.target.value as SupportProfile)}><option value="beginner">Iniciante</option><option value="some">Com pistas</option><option value="less">Menos apoio</option></select></label><div className="test-control-actions">{action("Usar este apoio",{action:"profile",profile})}</div><label>Parte da conversa<select value={part} onChange={e=>setPart(Number(e.target.value))}>{Array.from({length:10},(_,i)=><option key={i} value={i+1}>Parte {i+1}</option>)}</select></label><div className="test-control-actions">{action("Ir para esta parte",{action:"jump-part",part,profile})}{action("Completar esta parte",{action:"complete-part",part,profile})}</div><label>Momento específico<select value={node} onChange={e=>setNode(e.target.value)}>{nodes.map((n,i)=><option value={n.id} key={n.id}>{i+1}. Parte {n.part} · {n.context.slice(0,65)}</option>)}</select></label><div className="test-control-actions">{action("Ir para este momento",{action:"jump-node",node,profile})}</div></section>
-          <section><h3>Estudo</h3><label>Prática<select value={step} onChange={e=>setStep(Number(e.target.value))}>{studySteps.map(({step:s},i)=><option key={s.id} value={i}>{i+1} · {s.title}</option>)}</select></label><div className="test-control-actions">{action("Ir para esta prática",{action:"study-position",step})}{action("Concluir esta prática",{action:"study-complete",step})}{action("Refazer esta prática",{action:"study-uncomplete",step})}{action("Completar estudo",{action:"complete-study"})}{action("Apagar estudo",{action:"reset-study"})}</div><Link href="/demo/estudo?practice=1" onClick={onClose}>Abrir prática selecionada <InterfaceIcon name="arrow-up-right" /></Link></section>
-          <section className="test-review-controls"><h3>Final da demo</h3><div className="test-control-actions">{action("Ver final",{action:"review",view:"end"})}{action("Ver resumo",{action:"review",view:"moments"})}{action("Ver despedida",{action:"review",view:"thanks"})}{action("Ver conclusão",{action:"review",view:"done"})}</div><Link href="/demo" onClick={onClose}>Abrir conversa <InterfaceIcon name="arrow-up-right" /></Link></section>
+          <section><h3>Apresentação</h3><div className="test-control-actions">{action("Mostrar de novo", { action: "reset-presentation" })}{action("Concluir apresentação", { action: "complete-presentation" })}</div></section>
+          <section><h3>Aula visual</h3><div className="test-control-actions">{action("Voltar uma rodada", { action: "back" })}{action("Avançar uma rodada", { action: "forward" })}{action("Próxima atividade", { action: "next-part" })}{action("Completar atividades", { action: "complete-demo" })}{action("Recomeçar atividades", { action: "reset-demo" })}</div></section>
+          <section><h3>Seis atividades</h3><label>Atividade<select value={part} onChange={event => setPart(Number(event.target.value))}>{activities.map(scene => <option key={scene.id} value={scene.game}>{scene.game}. {scene.title}</option>)}</select></label><div className="test-control-actions">{action("Ir para esta atividade", { action: "jump-part", part })}{action("Completar esta atividade", { action: "complete-part", part })}</div><label>Rodada<select value={node} onChange={event => setNode(event.target.value)}>{rounds.map((round, index) => <option key={round.id} value={round.id}>{index + 1}. Atividade {round.game} · {round.instruction.slice(0, 65)}</option>)}</select></label><div className="test-control-actions">{action("Ir para esta rodada", { action: "jump-node", node })}</div></section>
+          <section><h3>Teoria e teste</h3><label>Página ou pergunta<select value={step} onChange={event => setStep(Number(event.target.value))}>{reviewSteps.map((label, index) => <option key={index} value={index}>{label}</option>)}</select></label><div className="test-control-actions">{action("Ir para esta etapa", { action: "study-position", step })}{action("Concluir esta etapa", { action: "study-complete", step })}{action("Refazer esta etapa", { action: "study-uncomplete", step })}{action("Completar teoria e teste", { action: "complete-study" })}{action("Recomeçar teoria e teste", { action: "reset-study" })}</div></section>
         </div>
       </fieldset>
-      <p className="test-control-note">Os comandos são imediatos e salvam no banco da sua conta. Apagar tudo reinicia sua apresentação, conversa e estudo e apaga atividades, mensagens e agendamentos desta conta. Sua identidade, login e acesso ADM, o histórico financeiro, as mídias e os dados globais ou de outras pessoas ficam preservados. Avanços simulados continuam marcados como teste.</p>
+      <p className="test-control-note">Estes comandos alteram o percurso de teste da conta conectada. As conclusões simuladas não liberam novas reservas. Use o painel para acompanhar mensagens e aulas já agendadas.</p>
     </div>
     <footer role="status" aria-live="polite">{busy?<BrowserText>{"Aplicando…"}</BrowserText>:notice||<BrowserText>{"Escolha um comando acima."}</BrowserText>}</footer>
   </dialog>;

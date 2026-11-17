@@ -1,0 +1,4 @@
+interface:
+  display_name: "Web Design Guidelines"
+  short_description: "Revisão de usabilidade e acessibilidade para web"
+  default_prompt: "Use $web-design-guidelines para revisar a UI nos arquivos indicados."

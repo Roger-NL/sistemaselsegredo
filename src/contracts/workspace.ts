@@ -9,6 +9,7 @@ export type LearningProgress = {
   saveVersion: number;
   demoSnapshot: string | null;
   studySnapshot: string | null;
+  lessonSnapshot?: string | null;
   demoPercent: number;
   studyCompleted: number;
   studyTotal: number;
@@ -22,7 +23,7 @@ export type TeacherConversation = {
   createdAt: string; updatedAt: string; messages: TeacherMessage[];
 };
 export type StudentWorkspace = { account: WorkspaceAccount; learning: LearningProgress; activities: StudentActivity[]; conversations: TeacherConversation[]; liveClass: LiveClassBooking | null };
-export type SaveLearningInput = { revision: number; saveVersion: number; demoSnapshot?: string | null; studySnapshot?: string | null };
+export type SaveLearningInput = { revision: number; saveVersion: number; demoSnapshot?: string | null; studySnapshot?: string | null; lessonSnapshot?: string | null };
 
 // All routes require a verified server session. Mutations require same-origin JSON
 // and X-Workspace-Uid matching the verified account (prevents cross-tab login races).

@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { StudentWorkspace } from "@/contracts/workspace";
 import { createWorkspaceStore } from "@/features/dashboard/workspace-store";
+import { accountLesson } from "./helpers/lesson-snapshot";
 import { GUEST_LEARNING_KEY } from "@/features/dashboard/guest-learning";
-import { emptyProgress, studySteps } from "@/features/theory/progress";
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
 function account(revision = 0, canTest = true): StudentWorkspace {
@@ -188,8 +188,7 @@ describe("owner reset across independent clients", () => {
   it("does not wait for a guest import before adopting the owner's reset", async () => {
     const records = new Map<string, string>();
     const storage = { getItem: (key: string) => records.get(key) ?? null, setItem: (key: string, value: string) => { records.set(key, value); }, removeItem: (key: string) => { records.delete(key); } };
-    const study = JSON.stringify({ ...emptyProgress, completed: [studySteps[0].step.id] });
-    const guest = JSON.stringify({ version: 1, demoSnapshot: null, studySnapshot: study, updatedAt: null });
+    const guest = JSON.stringify({ version: 2, lessonSnapshot: accountLesson(1), updatedAt: null });
     records.set(GUEST_LEARNING_KEY, guest);
     let remote = account();
     remote = { ...remote, learning: { ...remote.learning, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0 }, liveClass: null };
@@ -201,7 +200,7 @@ describe("owner reset across independent clients", () => {
     const rejected = expect(importing).rejects.toThrow("conta conectada mudou");
     remote = account(1); await store.checkForReset();
     expect(store.beginEdit(store.getSnapshot().generation)).toBe(true);
-    oldImport.resolve(json({ learning: { ...account().learning, studySnapshot: study, studyCompleted: 1 } }));
+    oldImport.resolve(json({ learning: { ...account().learning, lessonSnapshot: accountLesson(1), studyCompleted: 1 } }));
     await rejected;
     expect(store.getSnapshot().workspace?.learning).toEqual(remote.learning);
     expect(records.get(GUEST_LEARNING_KEY)).toBe(guest);

@@ -1,0 +1,157 @@
+{
+  "version": 2,
+  "artboard": "Character",
+  "width": 360,
+  "height": 460,
+  "transparentRuntimeBackground": true,
+  "stateMachine": "Character preview",
+  "fps": 60,
+  "loop": "oneShot",
+  "scripts": false,
+  "characters": [
+    {
+      "id": "ana",
+      "name": "Ana",
+      "url": "/first-encounters/characters/ana.riv",
+      "identity": "Coral work jacket, asymmetric dark bob, gold hoops"
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "url": "/first-encounters/characters/leo.riv",
+      "identity": "Mustard utility overshirt, rolled cuffs, curls, glasses"
+    },
+    {
+      "id": "maya",
+      "name": "Maya",
+      "url": "/first-encounters/characters/maya.riv",
+      "identity": "Teal knit sweater, high bun, sand trousers"
+    },
+    {
+      "id": "sam",
+      "name": "Sam",
+      "url": "/first-encounters/characters/sam.riv",
+      "identity": "Lavender round-neck workshirt, pocket pencil, ginger quiff, freckles"
+    },
+    {
+      "id": "nina",
+      "name": "Nina",
+      "url": "/first-encounters/characters/nina.riv",
+      "identity": "Blue vest over yellow shirt, silver side part, earrings"
+    }
+  ],
+  "animations": {
+    "idle": {
+      "frames": 48,
+      "seconds": 0.8,
+      "representativePoseSeconds": 0
+    },
+    "wave": {
+      "frames": 108,
+      "seconds": 1.8,
+      "representativePoseSeconds": 0.7
+    },
+    "self-point": {
+      "frames": 84,
+      "seconds": 1.4,
+      "representativePoseSeconds": 0.65
+    },
+    "yes": {
+      "frames": 66,
+      "seconds": 1.1,
+      "representativePoseSeconds": 0.233333
+    },
+    "no": {
+      "frames": 66,
+      "seconds": 1.1,
+      "representativePoseSeconds": 0.216667
+    },
+    "receive-badge": {
+      "frames": 90,
+      "seconds": 1.5,
+      "representativePoseSeconds": 0.75
+    },
+    "thinking": {
+      "frames": 96,
+      "seconds": 1.6,
+      "representativePoseSeconds": 0.7
+    },
+    "speech-self": {
+      "frames": 60,
+      "seconds": 1,
+      "controlledPoseRange": true
+    },
+    "speech-listener-left": {
+      "frames": 60,
+      "seconds": 1,
+      "controlledPoseRange": true
+    },
+    "speech-listener-right": {
+      "frames": 60,
+      "seconds": 1,
+      "controlledPoseRange": true
+    },
+    "speech-team": {
+      "frames": 60,
+      "seconds": 1,
+      "controlledPoseRange": true
+    },
+    "speech-mouth": {
+      "frames": 60,
+      "seconds": 1,
+      "controlledPoseRange": true
+    }
+  },
+  "articulation": {
+    "type": "hierarchical transform rig with shoulder, elbow, wrist and neck pivots",
+    "parts": [
+      "head",
+      "torso",
+      "left-eye",
+      "right-eye",
+      "left-brow",
+      "right-brow",
+      "mouth-expressions",
+      "left-upper-arm",
+      "left-forearm",
+      "left-hand",
+      "right-upper-arm",
+      "right-forearm",
+      "right-hand"
+    ],
+    "allAnimatedPropertiesResetAtFrameZero": "Normal cues reset all; speech body/mouth use disjoint ownership and reset together when entering speech",
+    "normalClipsReturnToNeutral": true,
+    "unattendedLoops": false
+  },
+  "build": {
+    "command": "python3 assets/first-encounters/characters/build.py --capture",
+    "authenticatedLocalExport": "python3 assets/first-encounters/characters/build.py --export",
+    "nativeEvidenceDirectory": "assets/first-encounters/characters/qa/renders",
+    "note": "CLI 1.9.2 keeps local preview builds in memory; --export uses only --publish=local after account authentication. No --publish=web or push is performed."
+  },
+  "artworkOrigin": "Original in-project vector artwork, authored in build.py and compiled from RML; no downloaded character art.",
+  "runtimeExport": {
+    "status": "exported",
+    "method": "official Rive CLI --publish=local",
+    "destination": "public/first-encounters/characters",
+    "accountPlan": "Free; Rive splash screen retained",
+    "webPublishingPerformed": false,
+    "sourcePushPerformed": false
+  },
+  "speech": {
+    "driver": "LessonSpeechDriver (lesson-audio.ts)",
+    "mouth": "Native Speech mouth beneath Head; cavity, teeth and tongue; no DOM/CSS overlay",
+    "bodyClock": "Normalized actual media.currentTime/media.duration; paused pose timelines, no autonomous speech loop",
+    "mouthClock": "Decoded local audio RMS level 0\u20131 scrubs speech-mouth",
+    "ownership": "speech-mouth owns only mouth properties; speech body timelines exclude every mouth property",
+    "activation": "playing && role=character && voice person equals this actor && visible && !pause && !reducedMotion",
+    "gestures": {
+      "I": "speech-self",
+      "You": "speech-listener-left/right when listener direction supplied; otherwise speech-team open palms",
+      "We/They": "speech-team"
+    },
+    "stop": "Stop/ended/pause/error/hidden/reduced motion immediately closes the mouth and restores idle; no extra animation frame loop",
+    "listenerDirectionProp": "speechListenerSide?: left | right",
+    "limitation": "Amplitude-driven mouth opening; not phoneme/viseme recognition"
+  }
+}

@@ -30,10 +30,10 @@ describe("real student account entry", () => {
   });
   it("offers the free demo directly without registration or approval", () => {
     const html = renderToStaticMarkup(createElement(MoreInformation));
-    expect(html).toContain("sem cadastro e sem aprovação");
+    expect(html).toContain("sem cadastro");
     expect(html).toContain('href="/demo"');
     expect(html).not.toContain("O professor aprova");
-    expect(html).toContain("oito blocos e 24 etapas");
+    expect(html).toContain("seis atividades");
     expect(html).toContain("uma aula gratuita de 1 hora com professor, uma por conta");
     expect(html).toContain("No Meu painel");
   });

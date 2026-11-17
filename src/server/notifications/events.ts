@@ -1,8 +1,10 @@
-import { catalog } from "@/features/demo/content/catalog";
-import { decodeSnapshot } from "@/features/demo/session/storage";
+import { decodeLessonAccountSnapshot } from "@/features/first-encounters/lesson-account-snapshot";
+import { getLessonDashboardSnapshot } from "@/features/first-encounters/lesson-dashboard";
 
-/** A branched story can end without answering the unchosen branches. Test skipping is not completion. */
-export function completedConversation(raw: string | null): boolean {
-  const state = raw ? decodeSnapshot(raw) : null;
-  return Boolean(state && catalog[state.nodeId]?.kind === "end" && !state.journal.some(event => event.type === "TEST_FORWARD"));
+/** Practice, theory and the six checked test answers all belong to Aula 1. */
+export function completedLesson(raw: string | null): boolean {
+  const snapshot = decodeLessonAccountSnapshot(raw);
+  if (!snapshot) return false;
+  const progress = getLessonDashboardSnapshot(snapshot.progress);
+  return progress.completedUnits === 49 && progress.percent === 100;
 }

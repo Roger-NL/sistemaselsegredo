@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend Design"
+  short_description: "Direção visual intencional para interfaces web"
+  default_prompt: "Use $frontend-design para criar uma interface alinhada ao briefing e mostrar o resultado."

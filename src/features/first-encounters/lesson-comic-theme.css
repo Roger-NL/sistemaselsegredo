@@ -1,0 +1,359 @@
+/* Product theme only. Layout, responsive fitting and authored character colors
+   remain owned by the existing lesson styles and native Rive files. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) {
+  --lo-ink: var(--lesson-ink, #000);
+  --lo-muted: var(--lesson-muted, rgb(0 0 0 / 60%));
+  --lo-paper: var(--lesson-bg, #f5f3f1);
+  --lo-line: var(--lesson-line, rgb(0 0 0 / 15%));
+  --lo-violet: var(--lesson-green, #29cc57);
+  --lesson-wash: rgb(0 0 0 / 3%);
+  --lesson-line-strong: rgb(0 0 0 / 30%);
+  color: var(--lo-ink);
+  background: var(--lo-paper);
+  font-family: var(--lesson-font, var(--font-geist-sans), sans-serif);
+}
+
+/* Local component tokens must bridge on the component, not only its parent. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .ls-stage {
+  --ls-ink: var(--lo-ink);
+  --ls-violet: var(--lesson-focus, #456dff);
+  --ls-soft: var(--lesson-bg, #f5f3f1);
+  --ls-line: var(--lo-line);
+  color: var(--lo-ink);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .li-introduction {
+  --li-ink: var(--lo-ink);
+  --li-muted: var(--lo-muted);
+  --li-line: var(--lo-line);
+  --li-accent: var(--lo-ink);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(button, input, dialog) { font-family: inherit; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(button, a, input, [tabindex="0"]):focus-visible,
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lc-choice:has(input:focus-visible) {
+  outline-color: var(--lesson-focus, #456dff);
+}
+
+/* Large surfaces and neutral elevation. No new boxes or layout rows. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-header, .lo-footer, .lo-workbench, .lo-learning, .lo-menu, .lo-dialog, .lo-tutorial, .li-introduction, .lc-card) {
+  background: var(--lesson-panel, #fff);
+  border-color: var(--lo-line);
+  color: var(--lo-ink);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-learning { box-shadow: 0 2px 12px rgb(0 0 0 / 3%); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-menu { box-shadow: 20px 0 70px rgb(0 0 0 / 10%); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .li-introduction { box-shadow: 0 24px 100px rgb(0 0 0 / 16%); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-menu, .lo-dialog, .lo-tutorial, .li-introduction)::backdrop { background: rgb(0 0 0 / 32%); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-skip { background: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-brand > span:first-child { background: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-brand-dot { color: var(--lo-ink); }
+
+/* Primary fallback: the TS button wrapper owns its measured face/press states. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-next, .li-primary, .lc-next, .tsp-check):not([data-lesson-button]) {
+  background: var(--lesson-primary, #383838);
+  border-color: var(--lesson-primary-shadow, #000) !important;
+  color: var(--lesson-white, #fff);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-next, .li-primary, .lc-next, .tsp-check):not([data-lesson-button]):disabled {
+  background: rgb(0 0 0 / 5%);
+  border-color: transparent !important;
+  color: rgb(0 0 0 / 20%);
+  opacity: 1;
+}
+
+/* Measured product control: a native hit area and an independently pressed face. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) button[data-lesson-button="primary"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: min(var(--lesson-button-width, 480px), 100%);
+  max-width: 100%;
+  min-width: 0;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 56px;
+  background: transparent;
+  color: var(--lesson-white, #fff);
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  line-height: 20px;
+  flex-shrink: 1;
+  opacity: 1;
+  box-shadow: none;
+  overflow: visible;
+  transition: opacity 100ms ease-out;
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) [data-lesson-button="primary"] > .br-button-face {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  min-height: 48px;
+  padding: 14px 24px;
+  border: 0;
+  border-radius: 60px;
+  background: var(--lesson-primary, #383838);
+  color: var(--lesson-white, #fff);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: normal;
+  white-space: nowrap;
+  box-shadow: 0 4px 0 var(--lesson-primary-shadow, #000);
+  transform: translateY(-4px);
+  transition: transform 100ms ease-out, box-shadow 100ms ease-out;
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .br-button-face > svg { flex-shrink: 0; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) [data-lesson-button="primary"]:not(:disabled):active > .br-button-face {
+  transform: translateY(0);
+  box-shadow: 0 0 0 var(--lesson-primary-shadow, #000);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) button[data-lesson-button="primary"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--lesson-focus, #456dff);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) button[data-lesson-button="primary"]:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) [data-lesson-button="primary"]:disabled > .br-button-face {
+  color: rgb(0 0 0 / 20%);
+  background: rgb(0 0 0 / 5%);
+  transform: none;
+  box-shadow: none;
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-footer-actions { min-width: 0; }
+
+/* Secondary and small utility controls keep their proven responsive sizes. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-secondary, .lo-help-button, .lo-audio-button, .lo-tutorial-replay, .li-back, .li-icon-button, .li-audio-notice, .tsp-clear, .lc-summary-actions > button) {
+  color: var(--lo-ink);
+  background: var(--lesson-panel, #fff);
+  border-color: var(--lo-line);
+  box-shadow: none;
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-back, .lo-text-button, .lo-write-toggle, .lo-reset-button, .lo-sound-toggle, .lo-menu-introduction, .lo-mechanic-help, .lo-tutorial-context-actions > button, .lo-tutorial-success > button, .li-audio-button, .li-skip, .tsp-reset, .lc-back, .lc-clear, .lc-test-restart) {
+  color: var(--lo-muted);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-audio-button[aria-pressed="true"], .lo-text-button.is-active) {
+  background: var(--lesson-bg, #f5f3f1);
+  color: var(--lo-ink);
+  border-color: var(--lesson-line-strong);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-menu-review, .lo-menu nav > button[aria-current]) {
+  background: var(--lesson-bg, #f5f3f1);
+  color: var(--lo-ink);
+  border-color: var(--lo-line);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-menu nav > button { color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-menu nav > button > span { background: var(--lesson-wash); color: var(--lo-ink); }
+
+/* Answer cards, phrase tiles and word tiles share one neutral material. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-phrase, .lo-word, .lo-person-token, .tsp-word, .lo-message, .lc-choice) {
+  color: var(--lo-ink);
+  background: var(--lesson-panel, #fff);
+  border-color: var(--lo-line);
+  box-shadow: none;
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-phrase, .lo-word, .lo-person-token, .tsp-word) { border-bottom-color: var(--lesson-line-strong); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-phrase-grip, .lo-phrase > svg, .lo-person-token > svg, .tsp-word > svg) { color: var(--lo-muted); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-verb, .lo-person-mark, .lo-message-letter, .lo-turn-context > span) { color: var(--lo-ink); background: var(--lesson-bg, #f5f3f1); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-turn, .lo-word-slot, .tsp-word-slot, .lo-message-sender) {
+  color: var(--lo-muted);
+  background: var(--lesson-wash);
+  border-color: var(--lesson-line-strong);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-turn.is-active, .lc-choice.is-selected, .tsp-word-slot.is-filled) {
+  color: var(--lo-ink);
+  background: var(--lesson-panel, #fff);
+  border-color: var(--lo-ink);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lc-choice.is-selected { box-shadow: inset 0 0 0 1px var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-write, .tsp-writing > input, .lc-input-row > input) { color: var(--lo-ink); border-color: var(--lesson-line-strong); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.tsp-writing > input, .lc-input-row > input) { background: var(--lesson-panel, #fff); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-write input { color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-write input, .tsp-writing > input, .lc-input-row > input)::placeholder { color: var(--lo-muted); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-write button { color: var(--lo-ink); background: var(--lesson-bg, #f5f3f1); }
+
+/* Arena and native speech surfaces. The character canvases are untouched. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .ls-stage-backdrop { background: var(--lesson-bg, #f5f3f1); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .ls-stage-backdrop > span { background: radial-gradient(ellipse at 50% 100%, rgb(0 0 0 / 3%), transparent 72%); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .ls-stage-backdrop > i { background: linear-gradient(90deg, transparent, var(--lo-line) 20%, var(--lo-line) 80%, transparent); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .ls-person-shadow { background: rgb(0 0 0 / 8%); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.ls-role, .ls-person-name) { color: var(--lo-muted); border-color: var(--lo-line); background: var(--lesson-panel, #fff); box-shadow: none; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.ls-person--speaking .ls-role, .ls-person--speaking .ls-person-name, .ls-person--selected .ls-person-name) { color: var(--lo-ink); background: var(--lesson-panel, #fff); border-color: var(--lo-ink); box-shadow: none; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .ls-person--listening .ls-role { background: var(--lesson-wash); color: var(--lo-muted); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .ls-name-dot { background: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .ls-team-boundary,
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .ls-stage[data-stage-kind="join"] .ls-team-boundary { border-color: var(--lesson-line-strong); background: var(--lesson-wash); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .ls-team-label { color: var(--lo-muted); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-speech-target, .lo-fixed-speech, .lo-sentence-area, .lo-tutorial-bubble, .lo-tutorial-target, .li-stage-speech) {
+  color: var(--lo-ink);
+  border-color: var(--lo-line);
+  background: var(--lesson-panel, #fff);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 3%);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-speech-target, .lo-fixed-speech, .lo-sentence-area)::after { background: var(--lesson-panel, #fff); border-color: var(--lo-line); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-speech-target:not(.is-filled) { border-color: var(--lesson-line-strong); background: var(--lesson-panel, #fff); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-speech-target:not(.is-filled) > strong { color: var(--lo-muted); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.ls-speech-tail > path, .li-stage-speech-tail) { fill: var(--lesson-panel, #fff); stroke: var(--lo-line); }
+
+/* Introduction scene, examples and the written theory use the same surfaces. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.li-character-scene, .li-model, .li-example, .lo-example-pair > div, .lo-takeaways > div, .lc-forms > span, .tsp-model) {
+  color: var(--lo-ink);
+  background: var(--lesson-bg, #f5f3f1);
+  border-color: var(--lo-line);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.li-model[data-example-speaking="true"], .li-example[data-example-speaking="true"]) { border-color: var(--lo-ink); background: var(--lesson-panel, #fff); box-shadow: inset 3px 0 var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .li-stage-floor { background: var(--lo-line); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.li-stage-team, .li-team) { border-color: var(--lesson-line-strong); background: var(--lesson-wash); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.li-stage-team > span, .li-team-label) { color: var(--lo-muted); background: var(--lesson-bg, #f5f3f1); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.li-demo-path > li > span, .li-eyebrow > span) { color: var(--lo-ink); background: var(--lesson-bg, #f5f3f1); border-color: var(--lo-line); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .li-demo-path > li[aria-current="step"] { color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .li-demo-path > li[aria-current="step"] > span { background: var(--lesson-panel, #fff); border-color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.li-path-icon, .li-path-step) { color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .li-path > li + li::before,
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .li-conversation-arrow { color: var(--lo-muted); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lc-example, .lc-score-details, .lc-note) { border-color: var(--lo-line); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-dialog .lo-coach-model, .lo-finish-icon) { background: var(--lesson-bg, #f5f3f1); color: var(--lo-ink); }
+
+/* Text hierarchy stays at its existing sizes, weights and responsive line-height. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-scene-guide, .lo-message > strong, .lo-turn > strong, .lo-fixed-speech > strong, .lo-sentence, .lo-tutorial-bubble strong, .lo-tutorial-caption, .lo-example-pair strong, .lo-takeaways strong, .lc-english, .lc-forms strong, .lc-score-details strong, .tsp-model > strong, .li-actor[data-speaker="true"] .li-actor-name) { color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-header-name, .lo-level, .lo-level svg, .lo-progress, .lo-stage-topline, .lo-scene-guide p, .lo-context-caption, .lo-context-note, .lo-context-note > svg, .lo-piece-note, .lo-word-slot > span, .lo-turn-context, .lo-turn-context > small, .lo-audio-main small, .lo-footer-note, .lo-dialog-heading, .lo-dialog > p, .lo-dialog ul, .lo-menu nav small, .lo-menu h2 + p, .lo-menu-audio, .lo-sound-toggle > strong, .lo-example-pair p, .lo-takeaways span, .lo-finish-intro, .lo-finished > p, .lo-finished > small, .lo-tutorial-top, .lo-tutorial-heading p, .lo-tutorial-method, .lo-tutorial-method > svg, .lo-tutorial-bubble > span, .li-guide-label, .li-actor-name, .li-model-context, .li-model-translation, .li-person > span, .li-self-label, .li-relationship, .li-demo-path > li, .lc-progress-label, .lc-loading, .lc-portuguese, .lc-example > span, .lc-en, .lc-explanation > .lc-note, .lc-question-context > span, .lc-writing > label, .lc-writing-note, .lc-summary-result > span, .lc-summary-result > p, .lc-summary-note, .lc-footer-note, .tsp-model > span, .tsp-result) { color: var(--lo-muted); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-tutorial-ready { color: var(--lo-muted) !important; }
+
+/* Coaching is neutral; green denotes actual success and earned progress. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-feedback, .lo-mechanic-coach, .lo-tutorial-coach, .lc-feedback) { background: var(--lesson-bg, #f5f3f1); color: var(--lo-muted); border-color: var(--lo-line); box-shadow: none; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-feedback strong, .lo-feedback button, .lo-feedback > .lo-mechanic-help) { color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-feedback.is-correct, .lc-feedback.is-correct) { background: #e2ede5; color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-feedback.is-correct strong, .lo-feedback.is-retry strong) { color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-accepted, .lo-tutorial-success, .tsp-result.is-correct) { color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-feedback.is-retry, .lc-feedback.is-retry) { color: var(--lo-ink); background: var(--lesson-wash); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-audio-error, .lo-tutorial-error, .lo-tutorial-playback-status, .lc-storage-note) { color: var(--lo-muted); border-color: var(--lo-line); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-tutorial-coach-icon, .lo-mechanic-actions > button) { color: var(--lo-ink); background: var(--lesson-wash); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-tutorial-typed::after { border-color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-progress > div > span, .lc-page-dots > span) { background: var(--lo-line); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-progress > div > .is-done, .lo-progress > div > .is-current, .lc-page-dots > .is-done, .lc-page-dots > .is-current) { background: var(--lesson-green, #29cc57); box-shadow: none; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lj-percent { color: var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-mode { color: var(--lo-ink); background: var(--lesson-bg, #f5f3f1); }
+
+/* Native drag selection/focus and the authored demonstration hand. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lesson-drag-source[aria-pressed="true"], .lesson-drag-source:focus-visible, .lesson-drop-target:focus-visible, .lesson-drop-target[data-lesson-drop-active="true"]) { outline-color: var(--lesson-focus, #456dff); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .th-hand { filter: drop-shadow(0 3px 2px rgb(0 0 0 / 14%)); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .th-skin { stroke: var(--lesson-primary, #383838); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .th-cuff { fill: var(--lesson-primary, #383838); stroke: var(--lesson-primary-shadow, #000); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .th-cuff-shine { stroke: rgb(255 255 255 / 45%); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .th-ghost { border-color: var(--lo-ink); background: var(--lesson-panel, #fff); color: var(--lo-ink); box-shadow: 0 10px 24px rgb(0 0 0 / 16%); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.th-example, .th-callout) { border-color: var(--lo-line); background: var(--lesson-panel, #fff); color: var(--lo-ink); box-shadow: none; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .th-click-ring { border-color: var(--lesson-focus, #456dff); background: rgb(57 119 107 / 10%); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .th-target { border-color: var(--lesson-focus, #456dff); background: rgb(57 119 107 / 3%); box-shadow: 0 0 0 5px rgb(57 119 107 / 8%); }
+/* A physical drag clone lives in body (or the modal top layer); its main
+   material is already copied from the source's computed styles. */
+body:has(.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"])) .lesson-drag-ghost { filter: drop-shadow(0 12px 20px rgb(0 0 0 / 18%)); }
+body:has(.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"])) .lesson-drag-ghost :is(.lo-phrase-grip, .lo-phrase > svg, .tsp-word > svg) { color: rgb(0 0 0 / 40%); }
+
+@media (hover: hover) and (pointer: fine) {
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) button[data-lesson-button="primary"]:not(:disabled):hover { opacity: .85; }
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-secondary, .lo-help-button, .lo-icon, .li-icon-button, .lo-tutorial-replay, .tsp-reset):not(:disabled):hover { background: var(--lesson-bg, #f5f3f1); color: var(--lo-ink); }
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-phrase, .lo-word, .tsp-word):not(:disabled):hover { border-color: var(--lesson-line-strong); }
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .ls-person:hover .ls-person-name { background: var(--lesson-panel, #fff); border-color: var(--lesson-line-strong); color: var(--lo-ink); }
+}
+@media (max-height: 720px) and (min-width: 760px) {
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) { grid-template-rows: 52px minmax(0, 1fr) 68px; }
+}
+@media (max-height: 570px) and (min-width: 760px) {
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) { grid-template-rows: 46px minmax(0, 1fr) 68px; }
+}
+@media (max-width: 759px) {
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) { grid-template-rows: 52px minmax(0, 1fr) 68px; }
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) button[data-lesson-button="primary"] { width: 100%; }
+}
+@media (max-width: 759px) and (max-height: 740px) {
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) { grid-template-rows: 47px minmax(0, 1fr) 68px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .th-hand { filter: none; }
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) button[data-lesson-button="primary"],
+  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) [data-lesson-button="primary"] > .br-button-face { transition: none; }
+}
+
+/* Printed-comic materials and the original BasedSpeak reading fonts. */
+.lesson-comic-font { --font-lesson-sans: var(--comic-body, "BasedSpeak Barlow", Arial, sans-serif); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) {
+  --lo-ink: var(--comic-ink, #202722); --lo-muted: var(--comic-muted, #5d655b);
+  --lo-paper: var(--comic-paper, #fff7e8); --lo-line: var(--comic-ink, #202722);
+  --lo-violet: var(--comic-teal, #39776b);
+  font-family: var(--comic-body, "BasedSpeak Barlow", Arial, sans-serif);
+  background: var(--lo-paper); background-image: radial-gradient(#20272213 .7px, transparent .8px); background-size: 8px 8px;
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-heading h1, .li-heading h1, .lo-tutorial-heading h2, .lc-heading h1, .lo-dialog h2, .lo-menu h2, .lc-summary h2) {
+  font-family: var(--comic-display, "BasedSpeak Bangers", Impact, sans-serif); font-weight: 400; letter-spacing: .025em;
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-header,.lo-footer) { background: var(--lo-paper); border-color:var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-learning,.lo-menu,.lo-dialog,.lo-tutorial,.li-introduction,.lc-card) {
+  background:#fffdf5; border:2px solid var(--lo-ink); border-radius:8px 4px 9px 5px; box-shadow:3px 3px 0 var(--lo-ink);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.li-character-scene,.lo-workbench,.li-model,.lo-message,.lo-turn,.lc-choice,.tsp-model) {
+  background:var(--lo-paper); border-color:var(--lo-ink); border-radius:7px 4px 8px 5px;
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-phrase,.lo-word,.lo-person-token,.tsp-word,.lc-choice) { border:2px solid var(--lo-ink); border-radius:6px 4px 7px 4px; box-shadow:2px 2px 0 var(--lo-ink); background:#fffdf5; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-phrase,.lo-word,.tsp-word):not(:disabled):hover { background:#f5dfa0; border-color:var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-speech-target,.lo-fixed-speech,.lo-sentence-area,.li-stage-speech) { background:#fffdf5; border:2px solid var(--lo-ink); color:var(--lo-ink); border-radius:9px 5px 10px 5px; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-speech-target,.lo-fixed-speech,.lo-sentence-area):after { background:#fffdf5; border-color:var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .li-stage-speech-tail { fill:#fffdf5; stroke:var(--lo-ink); stroke-width:2; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.li-stage-team,.li-team) { background:#e2ede5; border-color:var(--comic-teal,#39776b); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .li-model[data-example-speaking=true] { background:#f5dfa0; border-color:var(--lo-ink); box-shadow:inset 3px 0 var(--comic-teal,#39776b); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lc-choice.is-selected { background:#f5dfa0; color:var(--lo-ink); border-color:var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-feedback,.lo-mechanic-coach,.lo-tutorial-coach,.lc-feedback) { border:1px solid #b9b6a4; border-radius:6px 4px 7px 4px; background:var(--lo-paper); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-feedback.is-correct,.lc-feedback.is-correct) { background:#e2ede5; color:var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-mode,.lo-level,.lo-tutorial-ready) { color:var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-mode { background:var(--comic-yellow,#efc653); border:1px solid var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-secondary,.lo-help-button,.lo-audio-button,.lo-tutorial-replay,.li-back,.li-icon-button,.tsp-clear,.lc-summary-actions>button) { border-color:var(--lo-ink); background:var(--lo-paper); border-radius:5px 3px 6px 3px; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(button,a,input,[tabindex="0"]):focus-visible { outline:2px solid var(--comic-teal,#39776b); outline-offset:3px; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) button[data-lesson-button="primary"] {
+  height:48px; min-height:48px; border:0; border-radius:6px 4px 7px 4px; background:transparent; padding:0; overflow:visible; opacity:1; font-family:var(--comic-body);
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) [data-lesson-button="primary"]>.br-button-face {
+  height:48px; min-height:48px; padding:12px 20px; border:2px solid var(--lo-ink); border-radius:6px 4px 7px 4px;
+  background:var(--comic-yellow,#efc653); color:var(--lo-ink); font-family:var(--comic-body); font-size:16px; font-weight:600; line-height:20px;
+  box-shadow:3px 3px 0 var(--lo-ink); transform:none; transition:transform 80ms ease-out,box-shadow 80ms ease-out,background-color 100ms ease-out; user-select:none;
+}
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) button[data-lesson-button="primary"]:not(:disabled):hover { opacity:1; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) [data-lesson-button="primary"]:not(:disabled):hover>.br-button-face { background:#f6d779; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) [data-lesson-button="primary"]:not(:disabled):active>.br-button-face { transform:translate(3px,3px); box-shadow:0 0 0 var(--lo-ink); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) button[data-lesson-button="primary"]:focus-visible { outline:2px solid var(--comic-teal,#39776b); outline-offset:4px; box-shadow:none; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) [data-lesson-button="primary"]:disabled>.br-button-face { background:#ebe7dc; color:#777b6a; border-color:#b9b6a4; box-shadow:none; transform:none; }
+@media(prefers-reduced-motion:reduce) { .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) button[data-lesson-button="primary"],.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) [data-lesson-button="primary"]>.br-button-face { transition:none; } }
+/* The actual instructional headline and original four-bar brand. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-scene-guide h2 { font-family:var(--comic-display,"BasedSpeak Bangers",Impact,sans-serif); font-weight:400; letter-spacing:.025em; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand { font-family:var(--comic-body,"BasedSpeak Barlow",Arial,sans-serif); font-size:22px; min-width:0; }
+.lo-app.lo-session-loading:is([data-lesson-theme="comic"], [data-theme="comic"]) { grid-template-rows:auto minmax(0,1fr); padding:24px; gap:24px; }
+.lo-app.lo-session-loading:is([data-lesson-theme="comic"], [data-theme="comic"])>main { width:min(640px,100%); margin:auto; display:grid; align-content:center; gap:16px; }
+.lo-app.lo-session-loading:is([data-lesson-theme="comic"], [data-theme="comic"]) h1 { font-family:var(--comic-display); font-size:36px; font-weight:400; letter-spacing:.025em; line-height:1.1; }
+.lo-app.lo-session-loading:is([data-lesson-theme="comic"], [data-theme="comic"]) p { font-size:18px; }
+.lo-app.lo-session-loading:is([data-lesson-theme="comic"], [data-theme="comic"]) button { justify-self:start; padding:12px 20px; border:2px solid var(--comic-ink); border-radius:6px 4px 7px 4px; background:var(--comic-yellow); color:var(--comic-ink); box-shadow:3px 3px 0 var(--comic-ink); font-weight:600; }
+.lo-app.lo-session-loading:is([data-lesson-theme="comic"], [data-theme="comic"]) main>a { justify-self:start; text-decoration:underline; }
+@media(max-width:759px) {
+ .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header { padding-inline:16px; gap:10px; }
+ .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-brand-row { gap:10px; }
+ .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand { font-size:18px; gap:7px; }
+ .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header-tools { gap:8px; }
+}
+/* Brand is shared with the landing/panel; its ink must resolve in the lesson. */
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) { --ink:var(--comic-ink,#202722); --paper:var(--comic-paper,#fff7e8); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand { display:inline-flex; align-items:center; color:var(--lo-ink); text-decoration:none; font-weight:750; letter-spacing:-1px; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand-light { font-weight:400; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand-mark { display:flex; align-items:center; flex-shrink:0; gap:3px; margin-right:10px; height:24px; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand-mark>span { width:3px; height:12px; background:currentColor; border-radius:3px; transform:rotate(18deg); }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand-mark>span:nth-child(2) { height:23px; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand-mark>span:nth-child(3) { height:18px; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand-mark>span:nth-child(4) { height:9px; }
+@media(min-width:760px) {
+ .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-footer .lo-text-button { white-space:nowrap; flex-shrink:0; }
+ .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-footer-actions .lo-next { width:min(320px,100%); flex:0 1 320px; }
+}

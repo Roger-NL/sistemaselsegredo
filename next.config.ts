@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 // A client-side route change keeps the starting document's CSP. The landing
-// and story must therefore permit authentication when users navigate to login.
+// and lesson must therefore permit authentication when users navigate to login.
 const authScriptSources = "https://accounts.google.com https://apis.google.com";
 const authConnectSources = "https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com https://accounts.google.com";
 const authFrameSources = "https://accounts.google.com https://*.firebaseapp.com";
@@ -12,7 +12,7 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "form-action 'self'",
   "frame-ancestors 'self'",
-  `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval' " : ""}${authScriptSources}`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' ${process.env.NODE_ENV === "development" ? "'unsafe-eval' " : ""}${authScriptSources}`,
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",
   "img-src 'self' data: blob: https:",
@@ -25,7 +25,7 @@ const contentSecurityPolicy = [
 
 const publicDemoCsp = [
   "default-src 'self'", "base-uri 'self'", "object-src 'none'", "form-action 'self'", "frame-ancestors 'self'",
-  `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval' " : ""}${authScriptSources}`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' ${process.env.NODE_ENV === "development" ? "'unsafe-eval' " : ""}${authScriptSources}`,
   "style-src 'self' 'unsafe-inline'", "font-src 'self' data:", "img-src 'self' data: blob:",
   "media-src 'self' https://*.public.blob.vercel-storage.com", `connect-src 'self' ${authConnectSources} ${process.env.NODE_ENV === "development" ? "ws:" : ""}`,
   `frame-src 'self' ${authFrameSources}`, "worker-src 'self' blob:",

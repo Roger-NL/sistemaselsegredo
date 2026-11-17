@@ -1,13 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import "@/features/demo/demo.css";
+import "./product-base.css";
 import "@/components/navigation/navigation.css";
 import "./comic-theme.css";
 import "./comic-public.css";
 import "@/features/dashboard/comic-dashboard.css";
-import "@/features/demo/comic-demo.css";
-import "@/features/theory/comic-study.css";
 import "@/components/core/viewport.css";
 import "@/components/core/auto-fit.css";
 import { SiteViewport } from "@/components/core/SiteViewport";
@@ -29,10 +27,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://basedspeak.com"),
   title: {
-    default: "BasedSpeak | Inglês com prática guiada",
+    default: "BasedSpeak | Inglês na prática",
     template: "%s | BasedSpeak",
   },
-  description: "Participe de uma conversa guiada em uma cafeteria. Escolha o que quer dizer e construa respostas com ajuda, sem microfone.",
+  description: "Aprenda inglês em cenas visuais. Explore, construa suas primeiras falas e entenda a regra com apoio, sem microfone.",
   icons: {
     icon: [{ url: "/basedspeak-tab.png", type: "image/png" }],
     shortcut: ["/basedspeak-tab.png"],

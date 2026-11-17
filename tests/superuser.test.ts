@@ -1,3 +1,4 @@
+import { accountLesson } from "./helpers/lesson-snapshot";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { RequestPrincipal } from "@/server/auth/principal";
 const fake = vi.hoisted(()=>{
@@ -25,15 +26,15 @@ vi.mock("@/server/notifications/outbox",()=>({prepareOperationalNotifications:ef
 vi.mock("@/server/notifications/background",()=>({scheduleOperationalNotifications:effects.schedule}));
 import { GET,POST } from "@/app/api/student/test-controls/route";
 import { isTestOwner } from "@/server/superuser/policy";
-import { mutateTestProgress,validateTestAction } from "@/server/superuser/service";
+import { mutateTestProgress } from "@/server/superuser/service";
 import { completePresentation } from "@/server/presentation/service";
 import { saveLearning,createConversation } from "@/server/workspace/service";
 import { testActionDestination, applyTestAction } from "@/features/superuser/actions";
-import { emptyGuestLearning } from "@/features/dashboard/guest-learning";
-import { decodeSnapshot } from "@/features/demo/session/storage";
-import { decodeProgress,studySteps } from "@/features/theory/progress";
-import { parseDemoSnapshot } from "@/server/workspace/validation";
-import { catalog,nodes } from "@/features/demo/content/catalog";
+import { learningFromData } from "@/server/workspace/validation";
+import { LESSON_SCENES } from "@/features/first-encounters/lesson-one";
+import { decodeLessonAccountSnapshot } from "@/features/first-encounters/lesson-account-snapshot";
+import { restoreLessonProgress } from "@/features/first-encounters/lesson-progress";
+import { restoreConclusionState } from "@/features/first-encounters/lesson-conclusion";
 const owner:RequestPrincipal={uid:fake.identity.uid,email:fake.identity.email,role:"student",source:"session_cookie",subscriptionStatus:"free"};
 const request=(method:string,body={},origin="https://basedspeak.test",uid=owner.uid)=>new Request("https://basedspeak.test/api/student/test-controls",{method,headers:{origin,"content-type":"application/json","x-workspace-uid":uid},...(method==="POST"?{body:JSON.stringify(body)}:{})});
 beforeEach(()=>{vi.clearAllMocks();fake.docs.clear();fake.auth.getUser.mockResolvedValue({...fake.identity});fake.principal.mockResolvedValue(owner);fake.docs.set(`users/${owner.uid}`,{accountStatus:"active"});});
@@ -65,7 +66,7 @@ describe("exclusive server-bound test owner",()=>{
 });
 describe("transactional persisted progress controls",()=>{
   it("requires a current save token even when the reset revision still matches",async()=>{
-    await saveLearning(owner,{revision:0,saveVersion:0,studySnapshot:JSON.stringify({version:1,position:1,completed:[],supported:[]})});
+    await saveLearning(owner,{revision:0,saveVersion:0,lessonSnapshot:accountLesson(1)});
     await expect(mutateTestProgress(owner,{action:"reset-study",revision:0,saveVersion:0})).rejects.toMatchObject({status:409,code:"LEARNING_SAVE_CONFLICT"});
     await expect(mutateTestProgress(owner,{action:"reset-study",revision:0})).rejects.toMatchObject({status:400});
     expect((await mutateTestProgress(owner,{action:"reset-study",revision:0,saveVersion:1})).learning).toMatchObject({revision:1,saveVersion:2});
@@ -84,7 +85,7 @@ describe("transactional persisted progress controls",()=>{
     for(const [path,value] of Object.entries({[`demo_live_classes/${owner.uid}`]:preserved.booking,[`teacher_conversations/one`]:preserved.message,[`learning_states/other`]:preserved.other,[`media/global`]:preserved.media,[`users/${owner.uid}/student_activity/contact`]:preserved.contact}))fake.docs.set(path,value);
     fake.docs.set(`users/${owner.uid}/student_activity/old`,{kind:"learning"});
     const completed=await mutateTestProgress(owner,{action:"complete-all",revision:0,saveVersion:0});
-    expect(completed.learning).toMatchObject({revision:1,testMode:true,studyCompleted:24});expect(decodeSnapshot(completed.learning.demoSnapshot!)?.nodeId).toBe("end");
+    expect(completed.learning).toMatchObject({revision:1,testMode:true,studyCompleted:49});expect(completed.learning.lessonSnapshot).toContain("first-encounters-v1");
     expect(fake.docs.get(`learning_states/${owner.uid}`)).toEqual(completed.learning);
     const reset=await mutateTestProgress(owner,{action:"reset-all",revision:1,saveVersion:1});
     expect(reset.learning).toMatchObject({revision:2,testMode:true,demoSnapshot:null,studySnapshot:null});
@@ -111,34 +112,48 @@ describe("transactional persisted progress controls",()=>{
   });
   it("continuing a test journey suppresses completion notifications and learning activity",async()=>{
     await mutateTestProgress(owner,{action:"start-demo",revision:0,saveVersion:0});
-    const completed=applyTestAction(emptyGuestLearning(),{action:"complete-all"});
-    await saveLearning(owner,{revision:1, saveVersion: 1,demoSnapshot:completed.demoSnapshot,studySnapshot:completed.studySnapshot});
+    await saveLearning(owner,{revision:1, saveVersion: 1,lessonSnapshot:accountLesson()});
     expect(effects.prepare.mock.calls[0]?.[1]).toEqual([]);
     expect([...fake.docs.keys()].some(p=>p.includes('/student_activity/'))).toBe(false);
     expect(fake.docs.get(`learning_states/${owner.uid}`)?.testMode).toBe(true);
   });
 });
-describe("coherent controls for every support, part and branch",()=>{
-  it("full resets return to a clean dashboard URL instead of retaining the old lesson fragment",()=>{
+describe("coherent controls for the new lesson", () => {
+  it("full resets return to a clean dashboard URL", () => {
     expect(testActionDestination("reset-all")).toBe("/dashboard");
     expect(testActionDestination("reset-real")).toBe("/dashboard");
     expect(testActionDestination("forward")).toBeNull();
   });
-  for(const profile of ["beginner","some","less"] as const) it(`covers all parts, nodes, back/forward and review for ${profile}`,()=>{
-    for(let part=1;part<=10;part++) {
-      const started=applyTestAction(emptyGuestLearning(),{action:"jump-part",part,profile});const state=decodeSnapshot(started.demoSnapshot!)!;expect(catalog[state.nodeId].part).toBe(part);expect(state.profile).toBe(profile);
-      const completed=applyTestAction(started,{action:"complete-part",part,profile});expect(catalog[decodeSnapshot(completed.demoSnapshot!)!.nodeId].part).toBe(part===10?10:part+1);expect(()=>parseDemoSnapshot(completed.demoSnapshot)).not.toThrow();
-      const next=applyTestAction(started,{action:"forward"});expect(decodeSnapshot(next.demoSnapshot!)!.nodeId).not.toBe(state.nodeId);
-      const back=applyTestAction(next,{action:"back"});expect(()=>parseDemoSnapshot(back.demoSnapshot)).not.toThrow();
+  for (const profile of ["beginner", "some", "less"] as const) it(`uses coherent new-course prefixes for compatibility profile ${profile}`, () => {
+    const practice = (raw: string | null | undefined) => restoreLessonProgress(decodeLessonAccountSnapshot(raw ?? null)!.progress.lesson);
+    for (let part = 1; part <= 6; part++) {
+      const started = applyTestAction(learningFromData(), { action: "jump-part", part, profile });
+      expect(practice(started.lessonSnapshot).scene).toBe((part - 1) * 2);
+      expect(started.demoSnapshot).toBeNull(); expect(started.testMode).toBe(true);
+      const completed = applyTestAction(started, { action: "complete-part", part, profile });
+      expect(practice(completed.lessonSnapshot).scene).toBe(part * 2);
+      const next = applyTestAction(started, { action: "forward" });
+      expect(practice(next.lessonSnapshot).completed.length).toBeGreaterThan(practice(started.lessonSnapshot).completed.length);
+      const back = applyTestAction(next, { action: "back" });
+      expect(practice(back.lessonSnapshot).scene).toBe(practice(started.lessonSnapshot).scene);
     }
-    for(const n of nodes) {const reached=applyTestAction(emptyGuestLearning(),{action:"jump-node",node:n.id,profile});expect(decodeSnapshot(reached.demoSnapshot!)!.nodeId).toBe(n.id);}
-    for(const view of ["end","moments","thanks","done"] as const) expect(decodeSnapshot(applyTestAction(emptyGuestLearning(),{action:"review",view}).demoSnapshot!)?.reviewView).toBe(view);
+    for (const [sceneIndex, scene] of LESSON_SCENES.entries()) for (const [roundIndex, round] of scene.rounds.entries()) {
+      const reached = applyTestAction(learningFromData(), { action: "jump-node", node: round.id, profile });
+      expect(practice(reached.lessonSnapshot)).toMatchObject({ scene: sceneIndex, round: roundIndex });
+    }
+    const done = applyTestAction(learningFromData(), { action: "review", view: "done" });
+    expect(done).toMatchObject({ studyCompleted: 49, studyTotal: 49, testMode: true });
   });
-  it("marks only the selected practice, removes it and preserves unrelated completions",()=>{
-    let p=emptyGuestLearning();
-    for(let step=0;step<24;step++)p=applyTestAction(p,validateTestAction({action:"study-complete",step,revision:0,saveVersion:0}));
-    expect(decodeProgress(p.studySnapshot).supported).toHaveLength(24);
-    p=applyTestAction(p,{action:"study-uncomplete",step:9});expect(decodeProgress(p.studySnapshot).completed).toHaveLength(23);expect(decodeProgress(p.studySnapshot).completed).not.toContain(studySteps[9].step.id);
-    p=applyTestAction(p,{action:"study-position",step:3});expect(decodeProgress(p.studySnapshot).position).toBe(3);expect(decodeProgress(p.studySnapshot).completed).toHaveLength(23);
+  it("completes and reopens written steps without removing the 29 practice rounds", () => {
+    let progress = learningFromData();
+    for (let step = 0; step < 11; step++) progress = applyTestAction(progress, { action: "study-complete", step });
+    expect(progress.studyCompleted).toBe(49);
+    progress = applyTestAction(progress, { action: "study-uncomplete", step: 9 });
+    const snapshot = decodeLessonAccountSnapshot(progress.lessonSnapshot!)!;
+    expect(restoreLessonProgress(snapshot.progress.lesson).completed).toHaveLength(29);
+    expect(Object.keys(restoreConclusionState(snapshot.progress.conclusion).attempts)).toHaveLength(4);
+    expect(progress.studyCompleted).toBe(47);
+    progress = applyTestAction(progress, { action: "study-position", step: 3 });
+    expect(restoreConclusionState(decodeLessonAccountSnapshot(progress.lessonSnapshot!)!.progress.conclusion)).toMatchObject({ phase: "theory", theoryIndex: 3 });
   });
 });

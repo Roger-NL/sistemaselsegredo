@@ -17,7 +17,10 @@ describe("returning through the home page", () => {
   it("keeps the public landing and sign-in link without contacting Firebase for an anonymous visitor", async () => {
     const html = renderToStaticMarkup(await HomePage());
     expect(html).toContain('href="/comecar?modo=entrar"');
-    expect(html).toContain("Começar a conversa");
+    expect(html).toContain("Começar a aula");
+    expect(html).toContain("APRENDA FAZENDO");
+    expect(html).toContain("Inglês na");
+    expect(html).not.toMatch(/hist[oó]rias?|\bjog(?:o|os|ar)\b/i);
     expect(mocks.verify).not.toHaveBeenCalled();
     expect(mocks.db).not.toHaveBeenCalled();
   });

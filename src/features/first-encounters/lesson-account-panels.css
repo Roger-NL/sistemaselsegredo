@@ -1,0 +1,16 @@
+.lesson-demo-dashboard .lesson-account-panels{min-width:0;min-height:0;max-height:100%;color:var(--comic-ink);font-family:var(--comic-body)}
+.lesson-demo-dashboard .lesson-account-panels.student-empty{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:16px;padding:clamp(22px,3vw,44px);height:100%}
+.lesson-demo-dashboard .lesson-account-panels h2{font-family:var(--comic-display);font-size:clamp(28px,3vw,40px);font-weight:400;letter-spacing:.025em;line-height:1.1}
+.lesson-demo-dashboard .lesson-account-panels.student-empty>p{max-width:60ch;font-size:17px;line-height:1.45}
+.lesson-demo-dashboard .lesson-account-panels .dashboard-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:9px 16px}
+.lesson-demo-dashboard .lesson-account-panels>.live-class-card{width:100%;height:100%;min-height:0;padding:24px;align-content:center}
+.lesson-demo-dashboard .lesson-account-panels>.student-section{margin:0;min-height:0;height:100%;display:flex;flex-direction:column;gap:10px}
+.lesson-demo-dashboard .lesson-account-panels .student-section-heading{margin:0;flex-shrink:0}
+.lesson-demo-dashboard .lesson-account-panels .student-contact-intro{margin:0;max-width:72ch;font-size:15px;flex-shrink:0}
+.lesson-demo-dashboard .lesson-account-panels .student-contact-grid{min-height:0;flex:1;overflow:hidden}
+.lesson-demo-dashboard .lesson-account-panels .student-conversations{min-height:0;overflow:auto}
+.lesson-demo-dashboard .lesson-account-panels .student-compose{min-height:0;overflow:auto;padding:18px}
+.lesson-demo-dashboard .lesson-account-panels .student-compose h3{font-size:26px;margin:0}
+.lesson-demo-dashboard .lesson-account-panels .student-compose textarea{min-height:70px;max-height:120px;resize:vertical}
+.lesson-demo-dashboard .lesson-account-panels .student-compose input{min-height:38px}
+@media(max-height:650px) and (min-width:760px){.lesson-demo-dashboard .lesson-account-panels .student-contact-intro{display:none}.lesson-demo-dashboard .lesson-account-panels .student-compose{padding:12px}.lesson-demo-dashboard .lesson-account-panels.student-empty{gap:12px}.lesson-demo-dashboard .lesson-account-panels .student-compose textarea{height:66px;min-height:66px}}

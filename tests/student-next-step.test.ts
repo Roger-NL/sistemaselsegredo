@@ -1,62 +1,49 @@
 import { describe, expect, it } from "vitest";
 import type { StudentWorkspace, TeacherConversation } from "@/contracts/workspace";
 import type { LiveClassBooking } from "@/contracts/live-class";
-import { applyTestAction } from "@/features/superuser/actions";
 import { studentNextStep, teacherReplies } from "@/features/dashboard/next-step";
-
-const workspace = (): StudentWorkspace => ({ account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, saveVersion: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 24, updatedAt: null }, activities: [], conversations: [], liveClass: null });
-const booking: LiveClassBooking = { id: "student", userId: "student", studentName: "", studentEmail: "", status: "pending", start: "2026-11-01T13:00:00Z", end: "2026-11-01T14:00:00Z", timezone: "Europe/Lisbon", revision: 0, createdAt: "", updatedAt: "", reason: "", meetingUrl: "" };
-
-describe("the student's next useful step", () => {
-  it("starts with the conversation, then offers study and only releases booking at all practices", () => {
+import { encodeLessonAccountSnapshot } from "@/features/first-encounters/lesson-account-snapshot";
+import { completeLessonSnapshot, lessonInput } from "./helpers/first-encounters-progress";
+const workspace = (): StudentWorkspace => ({ account: { id: "student", name: "", email: "", status: "active", role: "student" }, learning: { revision: 0, saveVersion: 0, demoSnapshot: null, studySnapshot: null, lessonSnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 49, updatedAt: null }, activities: [], conversations: [], liveClass: null });
+const booking: LiveClassBooking = { id: "student", userId: "student", studentName: "", studentEmail: "", status: "pending", start: "2027-01-01T13:00:00Z", end: "2027-01-01T14:00:00Z", timezone: "Europe/Lisbon", revision: 0, createdAt: "", updatedAt: "", reason: "", meetingUrl: "" };
+describe("the next step in the main49-step lesson", () => {
+  it("uses only the new validated snapshot, including the actual introduction and lesson positions", () => {
     const data = workspace();
-    expect(studentNextStep(data)).toMatchObject({ kind: "conversation", word: "Começar." });
-    data.learning.studyCompleted = 23;
-    expect(studentNextStep(data)).toMatchObject({ kind: "study", href: "/demo/estudo" });
-    data.learning.studyCompleted = 24;
+    expect(studentNextStep(data)).toMatchObject({ kind: "lesson", word: "Começar.", href: "/demo" });
+    data.learning.demoPercent = 100; data.learning.studyCompleted = 49;
+    expect(studentNextStep(data).kind).toBe("lesson");
+    data.learning.lessonSnapshot = encodeLessonAccountSnapshot({ ...lessonInput(), introPosition: '{"version":1,"index":2}' });
+    expect(studentNextStep(data).description).toContain("4%");
+    data.learning.lessonSnapshot = encodeLessonAccountSnapshot(lessonInput(10));
+    expect(studentNextStep(data)).toMatchObject({ word: "Continuar.", description: expect.stringContaining("39%") });
+    expect(studentNextStep(data).description).not.toMatch(/parte.*10|cafeteria/i);
+    data.learning.lessonSnapshot = completeLessonSnapshot();
     expect(studentNextStep(data)).toMatchObject({ kind: "booking", href: "#aula-ao-vivo" });
   });
-  it("preserves existing reservation outside a restarted journey and never offers a second completed free lesson", () => {
+  it("keeps real bookings accessible without offering a second completed free class", () => {
     const data = { ...workspace(), liveClass: booking };
-    expect(studentNextStep(data)).toMatchObject({ kind: "requested", href: "#aula-ao-vivo" });
-    data.liveClass = { ...booking, status: "confirmed" };
-    expect(studentNextStep(data)).toMatchObject({ kind: "confirmed", status: "Aula confirmada" });
-    data.liveClass = { ...booking, status: "completed" };
-    data.learning.studyCompleted = 24;
-    expect(studentNextStep(data)).toMatchObject({ kind: "completed", href: "/demo/estudo" });
-    data.liveClass = { ...booking, status: "cancelled" };
+    expect(studentNextStep(data).kind).toBe("requested");
+    data.liveClass = { ...booking, status: "confirmed" }; expect(studentNextStep(data).kind).toBe("confirmed");
+    data.liveClass = { ...booking, status: "completed" }; expect(studentNextStep(data).kind).toBe("completed");
+    data.liveClass = { ...booking, status: "cancelled" }; data.learning.lessonSnapshot = completeLessonSnapshot();
     expect(studentNextStep(data).kind).toBe("booking");
-    data.learning.studyCompleted = 0;
-    expect(studentNextStep(data).kind).toBe("conversation");
   });
-  it("returns to the beginning after a reset even with an existing confirmed lesson",()=>{
-    const data={...workspace(),liveClass:{...booking,status:"confirmed" as const}};
-    data.learning.revision=1;
-    const before=structuredClone(data);
-    expect(studentNextStep(data)).toMatchObject({kind:"conversation",word:"Começar.",href:"/demo"});
-    expect(data).toEqual(before);
-    data.learning={...applyTestAction(data.learning,{action:"jump-part",part:2}),revision:2};
-    expect(studentNextStep(data)).toMatchObject({kind:"conversation",word:"Continuar.",href:"/demo",description:expect.stringContaining("parte 2")});
-    data.learning={...applyTestAction(data.learning,{action:"complete-demo"}),revision:3};
-    expect(studentNextStep(data)).toMatchObject({kind:"study",href:"/demo/estudo"});
-    data.learning={...applyTestAction(data.learning,{action:"complete-all"}),revision:4};
-    expect(studentNextStep(data)).toMatchObject({kind:"study",status:"Conclusão simulada"});
-    expect(data.liveClass).toEqual(before.liveClass);
+  it("preserves booking history after explicit resets and never books from simulated completion", () => {
+    const data = { ...workspace(), liveClass: { ...booking, status: "confirmed" as const } }; data.learning.revision = 1;
+    const previous = structuredClone(data);
+    expect(studentNextStep(data)).toMatchObject({ kind: "lesson", word: "Começar." }); expect(data).toEqual(previous);
+    data.learning.lessonSnapshot = completeLessonSnapshot(); data.learning.testMode = true;
+    expect(studentNextStep(data)).toMatchObject({ kind: "lesson", status: "Conclusão simulada" });
+    expect(data.liveClass).toEqual(previous.liveClass);
   });
-  it("respects unavailable access and rejects another account's booking", () => {
-    const data = { ...workspace(), liveClass: { ...booking, userId: "someone-else" } };
-    expect(studentNextStep(data).kind).toBe("conversation");
-    data.account.status = "pending"; data.learning.studyCompleted = 24;
-    expect(studentNextStep(data).kind).toBe("booking");
-    for (const status of ["suspended", "rejected"] as const) {
-      data.account.status = status; data.learning.studyCompleted = 24;
-      expect(studentNextStep(data).kind).toBe("access");
-      expect(studentNextStep(data).href).toBeUndefined();
-    }
+  it("blocks unavailable accounts and ignores another principal's booking", () => {
+    const data = { ...workspace(), liveClass: { ...booking, userId: "other" } };
+    expect(studentNextStep(data).kind).toBe("lesson");
+    data.account.status = "pending"; data.learning.lessonSnapshot = completeLessonSnapshot(); expect(studentNextStep(data).kind).toBe("booking");
+    for (const status of ["suspended", "rejected"] as const) { data.account.status = status; expect(studentNextStep(data).kind).toBe("access"); expect(studentNextStep(data).href).toBeUndefined(); }
   });
-  it("highlights actual latest teacher replies, including closed threads, without claiming unread messages", () => {
+  it("reports actual latest teacher replies without inventing unread messages", () => {
     const thread = (id: string, role: "student" | "manager", updatedAt: string): TeacherConversation => ({ id, userId: "student", userName: "", userEmail: "", subject: "Dúvida", status: "closed", createdAt: "", updatedAt, messages: [{ id, authorId: role, authorName: "", role, body: "Mensagem", at: updatedAt }] });
-    const replies = teacherReplies([thread("old", "manager", "2026-10-01T00:00:00Z"), thread("mine", "student", "2026-10-28T00:00:00Z"), thread("recent", "manager", "2026-10-27T00:00:00Z")]);
-    expect(replies.map(item => item.id)).toEqual(["recent", "old"]);
+    expect(teacherReplies([thread("old", "manager", "2026-10-01"), thread("mine", "student", "2026-10-28"), thread("recent", "manager", "2026-10-27")]).map(item => item.id)).toEqual(["recent", "old"]);
   });
 });

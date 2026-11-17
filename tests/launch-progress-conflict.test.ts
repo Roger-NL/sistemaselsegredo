@@ -1,8 +1,6 @@
 import { beforeEach, expect, it, vi } from "vitest";
-import { emptyProgress, studySteps } from "@/features/theory/progress";
+import { accountLesson } from "./helpers/lesson-snapshot";
 import type { RequestPrincipal } from "@/server/auth/principal";
-import { createDemo, transition } from "@/features/demo/model/reducer";
-import { encodeSnapshot } from "@/features/demo/session/storage";
 
 // Two tabs may both finish preflight at revision 0, then commit in this order.
 // A serial transaction schedule is sufficient to reproduce a stale write;
@@ -29,54 +27,52 @@ vi.mock("@/server/auth/principal", () => ({ getRequestPrincipal: async () => ({ 
 import { saveLearning, importGuestLearning } from "@/server/workspace/service";
 import { PUT } from "@/app/api/student/learning/route";
 const principal: RequestPrincipal = { uid: "launch-qa", email: "qa@example.invalid", role: "student", source: "session_cookie", subscriptionStatus: "free" };
-const snapshot = (count: number) => JSON.stringify({ ...emptyProgress, completed: studySteps.slice(0, count).map(item => item.step.id) });
+const snapshot = accountLesson;
 beforeEach(() => { memory.docs.clear(); memory.docs.set("users/launch-qa", { accountStatus: "active" }); });
 
-it("preserves newer saved study when a second tab submits a stale snapshot from the same reset revision", async () => {
-  await saveLearning(principal, { revision: 0, saveVersion: 0, studySnapshot: snapshot(2) });
+it("preserves the newer saved lesson when a second tab submits a stale snapshot from the same reset revision", async () => {
+  await saveLearning(principal, { revision: 0, saveVersion: 0, lessonSnapshot: snapshot(2) });
   // A rejected stale request or a safe merge are both acceptable outcomes.
   const newer = structuredClone(memory.docs.get("learning_states/launch-qa"));
-  await expect(saveLearning(principal, { revision: 0, saveVersion: 0, studySnapshot: snapshot(1) })).rejects.toMatchObject({ status: 409, code: "LEARNING_SAVE_CONFLICT" });
+  await expect(saveLearning(principal, { revision: 0, saveVersion: 0, lessonSnapshot: snapshot(1) })).rejects.toMatchObject({ status: 409, code: "LEARNING_SAVE_CONFLICT" });
   expect(memory.docs.get("learning_states/launch-qa")).toEqual(newer);
   expect(memory.docs.get("learning_states/launch-qa")?.studyCompleted).toBe(2);
 });
 
-it("rejects conflicting story journals and multi-field snapshots without changing either saved field", async () => {
-  const initial = createDemo("less", "launch-story", 0);
-  const first = encodeSnapshot(initial);
-  const next = encodeSnapshot(transition(initial, { type: "PROFILE", profile: "some", at: initial.nodeId }));
-  await saveLearning(principal, { revision: 0, saveVersion: 0, demoSnapshot: next, studySnapshot: snapshot(2) });
+it("rejects conflicting lesson and multi-field clears without changing any saved field", async () => {
+  memory.docs.set("learning_states/launch-qa", { demoSnapshot: "historical-story", studySnapshot: "historical-study" });
+  await saveLearning(principal, { revision: 0, saveVersion: 0, lessonSnapshot: snapshot(2) });
   const newer = structuredClone(memory.docs.get("learning_states/launch-qa"));
-  for (const patch of [{ demoSnapshot: first }, { demoSnapshot: first, studySnapshot: snapshot(1) }, { studySnapshot: snapshot(1) }]) {
+  for (const patch of [{ lessonSnapshot: snapshot(1) }, { lessonSnapshot: snapshot(1), demoSnapshot: null }, { lessonSnapshot: snapshot(2), studySnapshot: null }]) {
     await expect(saveLearning(principal, { revision: 0, saveVersion: 0, ...patch })).rejects.toMatchObject({ status: 409, code: "LEARNING_SAVE_CONFLICT" });
     expect(memory.docs.get("learning_states/launch-qa")).toEqual(newer);
   }
 });
 
 it("returns a distinct private HTTP conflict and rejects a missing save token", async () => {
-  await saveLearning(principal, { revision: 0, saveVersion: 0, studySnapshot: snapshot(2) });
+  await saveLearning(principal, { revision: 0, saveVersion: 0, lessonSnapshot: snapshot(2) });
   const request = (body: object) => new Request("http://localhost/api/student/learning", { method: "PUT", headers: { Origin: "http://localhost", "Content-Type": "application/json", "X-Workspace-Uid": principal.uid }, body: JSON.stringify(body) });
-  const conflict = await PUT(request({ revision: 0, saveVersion: 0, studySnapshot: snapshot(1) }));
+  const conflict = await PUT(request({ revision: 0, saveVersion: 0, lessonSnapshot: snapshot(1) }));
   expect(conflict.status).toBe(409);
   expect(await conflict.json()).toMatchObject({ code: "LEARNING_SAVE_CONFLICT" });
   expect(conflict.headers.get("cache-control")).toBe("private, no-store");
-  expect((await PUT(request({ revision: 0, studySnapshot: snapshot(1) }))).status).toBe(400);
+  expect((await PUT(request({ revision: 0, lessonSnapshot: snapshot(1) }))).status).toBe(400);
 });
 
 it("retries a lost response without extra versions or activity; permits a deliberate regression with the current token", async () => {
-  const input = { revision: 0, saveVersion: 0, studySnapshot: snapshot(2) };
+  const input = { revision: 0, saveVersion: 0, lessonSnapshot: snapshot(2) };
   const first = await saveLearning(principal, input);
   const before = structuredClone([...memory.docs]);
   expect(await saveLearning(principal, input)).toEqual(first);
   expect([...memory.docs]).toEqual(before);
   expect(first.learning.saveVersion).toBe(1);
-  const back = await saveLearning(principal, { revision: 0, saveVersion: 1, studySnapshot: snapshot(1) });
+  const back = await saveLearning(principal, { revision: 0, saveVersion: 1, lessonSnapshot: snapshot(1) });
   expect(back.learning).toMatchObject({ saveVersion: 2, studyCompleted: 1 });
 });
 
 it("starts legacy records at zero, versions import, and prevents a stale write after import", async () => {
   memory.docs.set("learning_states/launch-qa", { revision: 0 });
-  expect((await importGuestLearning(principal, { revision: 0, saveVersion: 0, studySnapshot: snapshot(2) })).learning.saveVersion).toBe(1);
-  await expect(saveLearning(principal, { revision: 0, saveVersion: 0, studySnapshot: snapshot(1) })).rejects.toMatchObject({ code: "LEARNING_SAVE_CONFLICT" });
-  await expect(importGuestLearning(principal, { revision: 0, saveVersion: 1, studySnapshot: snapshot(1) })).rejects.toMatchObject({ status: 409 });
+  expect((await importGuestLearning(principal, { revision: 0, saveVersion: 0, lessonSnapshot: snapshot(2) })).learning.saveVersion).toBe(1);
+  await expect(saveLearning(principal, { revision: 0, saveVersion: 0, lessonSnapshot: snapshot(1) })).rejects.toMatchObject({ code: "LEARNING_SAVE_CONFLICT" });
+  await expect(importGuestLearning(principal, { revision: 0, saveVersion: 1, lessonSnapshot: snapshot(1) })).rejects.toMatchObject({ status: 409 });
 });

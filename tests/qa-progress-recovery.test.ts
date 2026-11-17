@@ -2,17 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import type { StudentWorkspace } from "@/contracts/workspace";
 import { GUEST_LEARNING_KEY, readGuestLearning } from "@/features/dashboard/guest-learning";
 import { createWorkspaceStore } from "@/features/dashboard/workspace-store";
-import { createDemo } from "@/features/demo/model/reducer";
-import { encodeSnapshot } from "@/features/demo/session/storage";
-import { emptyProgress, studySteps } from "@/features/theory/progress";
-
-const story = encodeSnapshot(createDemo("beginner", "qa-guest-journey", 0));
-const study = JSON.stringify({ ...emptyProgress, position: 2, completed: [studySteps[0].step.id, studySteps[1].step.id] });
-const guestRecord = JSON.stringify({ version: 1, demoSnapshot: story, studySnapshot: study, updatedAt: null });
+import { accountLesson } from "./helpers/lesson-snapshot";
+const study = accountLesson(2);
+const guestRecord = JSON.stringify({ version: 2, lessonSnapshot: study, updatedAt: null });
 const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
 const account = (uid = "student-a"): StudentWorkspace => ({
   account: { id: uid, name: "Pessoa", email: `${uid}@example.invalid`, status: "active", role: "student" },
-  learning: { revision: 0, saveVersion: 0, demoSnapshot: null, studySnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: studySteps.length, updatedAt: null },
+  learning: { revision: 0, saveVersion: 0, demoSnapshot: null, studySnapshot: null, lessonSnapshot: null, demoPercent: 0, studyCompleted: 0, studyTotal: 49, updatedAt: null },
   activities: [], conversations: [], liveClass: null,
 });
 function memoryStorage() {
@@ -40,20 +36,20 @@ describe("resuming and protecting local progress", () => {
 
     await expect(store.importGuestProgress(generation)).rejects.toThrow("Connection interrupted");
     expect(local.getItem(GUEST_LEARNING_KEY)).toBe(guestRecord);
-    expect(store.getSnapshot().workspace?.learning.studySnapshot).toBeNull();
+    expect(store.getSnapshot().workspace?.learning.lessonSnapshot).toBeNull();
     expect(store.getSnapshot().saving).toBe(false);
     expect(fetcher.mock.calls.filter(([, init]) => init?.method === "POST")).toHaveLength(1);
 
     const retry = store.importGuestProgress(generation);
     expect(local.getItem(GUEST_LEARNING_KEY)).toBe(guestRecord);
-    expect(store.getSnapshot().workspace?.learning.studySnapshot).toBeNull();
-    const imported = { ...data.learning, saveVersion: 1, demoSnapshot: story, studySnapshot: study, studyCompleted: 2 };
+    expect(store.getSnapshot().workspace?.learning.lessonSnapshot).toBeNull();
+    const imported = { ...data.learning, saveVersion: 1, lessonSnapshot: study, studyCompleted: 2 };
     finishImport(response({ learning: imported }));
     await retry;
     expect(local.getItem(GUEST_LEARNING_KEY)).toBeNull();
     expect(store.getSnapshot().workspace?.learning).toEqual(imported);
     expect(store.getSnapshot().generation).toBeGreaterThan(generation);
-    expect(store.stage("studySnapshot", study, generation)).toBe(false);
+    expect(store.stage("lessonSnapshot", study, generation)).toBe(false);
     expect(fetcher.mock.calls.filter(([, init]) => init?.method === "POST")).toHaveLength(2);
   });
 
@@ -62,8 +58,8 @@ describe("resuming and protecting local progress", () => {
     local.setItem(GUEST_LEARNING_KEY, guestRecord);
     const fetcher = vi.fn(async (_url: string, init?: RequestInit) => {
       if (init?.method !== "POST") return response(structuredClone(remote));
-      if (remote.learning.studySnapshot) return response({ error: "Esta conta já tem um percurso." }, 409);
-      remote.learning = { ...remote.learning, saveVersion: 1, demoSnapshot: story, studySnapshot: study, studyCompleted: 2 };
+      if (remote.learning.lessonSnapshot) return response({ error: "Esta conta já tem um percurso." }, 409);
+      remote.learning = { ...remote.learning, saveVersion: 1, lessonSnapshot: study, studyCompleted: 2 };
       throw new Error("Response lost after save");
     });
     const store = createWorkspaceStore(fetcher, () => local);
@@ -72,13 +68,13 @@ describe("resuming and protecting local progress", () => {
 
     await expect(store.importGuestProgress(generation)).rejects.toThrow("Response lost after save");
     expect(local.getItem(GUEST_LEARNING_KEY)).toBe(guestRecord);
-    expect(store.getSnapshot().workspace?.learning.studySnapshot).toBeNull();
+    expect(store.getSnapshot().workspace?.learning.lessonSnapshot).toBeNull();
     await expect(store.importGuestProgress(generation)).rejects.toThrow("já tem um percurso");
     expect(local.getItem(GUEST_LEARNING_KEY)).toBe(guestRecord);
     await store.refresh();
-    expect(store.getSnapshot().workspace?.learning.studySnapshot).toBe(study);
+    expect(store.getSnapshot().workspace?.learning.lessonSnapshot).toBe(study);
     expect(store.getSnapshot().workspace?.learning.studyCompleted).toBe(2);
-    expect(store.getSnapshot().guestLearning?.studySnapshot).toBe(study);
+    expect(store.getSnapshot().guestLearning?.lessonSnapshot).toBe(study);
     expect(fetcher.mock.calls.filter(([, init]) => init?.method === "POST")).toHaveLength(2);
   });
 
@@ -97,15 +93,15 @@ describe("resuming and protecting local progress", () => {
     const rejected = expect(importing).rejects.toThrow("conta conectada mudou");
     store.reset();
     const loadingOtherAccount = store.load();
-    finishImport(response({ learning: { ...first.learning, saveVersion: 1, studySnapshot: study, studyCompleted: 2 } }));
+    finishImport(response({ learning: { ...first.learning, saveVersion: 1, lessonSnapshot: study, studyCompleted: 2 } }));
     await rejected;
     await loadingOtherAccount;
 
     expect(store.getSnapshot().workspace?.account.id).toBe("student-b");
-    expect(store.getSnapshot().workspace?.learning.studySnapshot).toBeNull();
-    expect(store.getSnapshot().guestLearning?.studySnapshot).toBe(study);
+    expect(store.getSnapshot().workspace?.learning.lessonSnapshot).toBeNull();
+    expect(store.getSnapshot().guestLearning?.lessonSnapshot).toBe(study);
     expect(local.getItem(GUEST_LEARNING_KEY)).toBe(guestRecord);
-    expect(store.stage("studySnapshot", study, oldGeneration)).toBe(false);
+    expect(store.stage("lessonSnapshot", study, oldGeneration)).toBe(false);
     const writes = fetcher.mock.calls.filter(([, init]) => init?.method === "POST");
     expect(writes).toHaveLength(1);
     expect(writes[0][1]?.headers).toMatchObject({ "X-Workspace-Uid": "student-a" });
@@ -113,7 +109,7 @@ describe("resuming and protecting local progress", () => {
 
   it("releases an abandoned editing base so a fresh remote snapshot can be resumed", async () => {
     const first = account(), remote = account();
-    remote.learning = { ...remote.learning, saveVersion: 1, studySnapshot: study, studyCompleted: 2 };
+    remote.learning = { ...remote.learning, saveVersion: 1, lessonSnapshot: study, studyCompleted: 2 };
     const fetcher = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>()
       .mockResolvedValueOnce(response(first)).mockResolvedValueOnce(response(remote));
     const store = createWorkspaceStore(fetcher);
@@ -126,20 +122,20 @@ describe("resuming and protecting local progress", () => {
     await store.load(true);
     expect(store.getSnapshot().workspace?.learning).toEqual(remote.learning);
     expect(store.getSnapshot().generation).toBeGreaterThan(generation);
-    expect(store.stage("studySnapshot", study, generation)).toBe(false);
+    expect(store.stage("lessonSnapshot", study, generation)).toBe(false);
     expect(fetcher.mock.calls.every(([, init]) => init?.method !== "PUT")).toBe(true);
   });
 
   it.each([
     ["an oversized cache", "x".repeat(850_001)],
-    ["an oversized study", JSON.stringify({ version: 1, studySnapshot: "x".repeat(50_001) })],
-    ["an unsupported consultation", JSON.stringify({ version: 1, studySnapshot: JSON.stringify({ ...emptyProgress, supported: [studySteps[0].step.id] }) })],
+    ["an oversized study", JSON.stringify({ version: 1, lessonSnapshot: "x".repeat(50_001) })],
+    ["an unsupported consultation", JSON.stringify({ version: 1, lessonSnapshot: JSON.stringify({ version: 999, completed: ["unknown"] }) })],
   ])("discards %s without touching a private account cache", (_label, corrupt) => {
     const local = memoryStorage();
     local.setItem("basedspeak.learning.student-a.0", "private-cache");
     local.setItem(GUEST_LEARNING_KEY, corrupt);
     const restored = readGuestLearning(local);
-    expect(restored.studySnapshot).toBeNull();
+    expect(restored.lessonSnapshot).toBeNull();
     expect(restored.studyCompleted).toBe(0);
     expect(local.getItem(GUEST_LEARNING_KEY)).toBeNull();
     expect(local.getItem("basedspeak.learning.student-a.0")).toBe("private-cache");
@@ -155,7 +151,7 @@ describe("resuming and protecting local progress", () => {
 
     expect(store.getSnapshot().conflict).toBeNull();
     expect(store.getSnapshot().workspace?.learning).toEqual(data.learning);
-    expect(store.getSnapshot().guestLearning?.studySnapshot).toBe(study);
+    expect(store.getSnapshot().guestLearning?.lessonSnapshot).toBe(study);
     expect(session.getItem("basedspeak.learning.conflict.v1")).toBeNull();
     expect(local.getItem(GUEST_LEARNING_KEY)).toBe(guestRecord);
     expect(fetcher).toHaveBeenCalledTimes(1);

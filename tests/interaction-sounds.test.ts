@@ -83,6 +83,20 @@ describe("short local interaction audio", () => {
     expect(contexts[0].oscillators[0].start).toHaveBeenCalledOnce();
   });
 
+  it("leaves an explicitly local sound scope to its owner while ordinary outside clicks still sound", async () => {
+    const react = await import("react"); act = react.act;
+    const { createRoot } = await import("react-dom/client");
+    const { InteractionSounds } = await import("@/components/interaction/InteractionSounds");
+    document.body.innerHTML = '<div id="root"></div><section data-ui-sound-scope="local"><button id="local"><span id="local-icon">Conferir</span></button><dialog open><button id="local-dialog" data-ui-sound="correct">Confirmar</button></dialog></section><button id="outside">Abrir</button>';
+    root = createRoot(document.getElementById("root")!);
+    await act(async () => root!.render(react.createElement(InteractionSounds)));
+    const handled = vi.fn(); document.getElementById("local")!.addEventListener("click", handled);
+    await act(async () => { document.getElementById("local-icon")!.click(); document.getElementById("local-dialog")!.click(); });
+    expect(handled).toHaveBeenCalledOnce(); expect(contexts).toHaveLength(0);
+    await act(async () => document.getElementById("outside")!.click());
+    expect(contexts).toHaveLength(1); expect(frequencies(contexts[0])).toEqual([620]);
+  });
+
   it("makes a brief click and a separate forward signal, without creating a context per interaction", async () => {
     await sounds.playInteractionSound("click");
     const context = contexts[0];
@@ -115,12 +129,12 @@ describe("short local interaction audio", () => {
     }
   });
 
-  it("gives the nine frames distinct musical signatures, all under a second and a half", async () => {
-    const { presentationFrames } = await import("@/features/onboarding/content");
+  it("keeps shared UI entrance cues distinct and under a second and a half", async () => {
+    const cues = ["presentation-welcome", "presentation-ready", "presentation-practice", "presentation-lesson", "presentation-dashboard"] as const;
     const signatures: string[] = [];
     let previousCount = 0;
-    for (const frame of presentationFrames) {
-      await sounds.playInteractionSound(frame.sound);
+    for (const cue of cues) {
+      await sounds.playInteractionSound(cue);
       const nodes = contexts[0].oscillators.slice(previousCount);
       expect(nodes.length).toBeGreaterThan(3);
       const end = Math.max(...nodes.map(node => node.stop.mock.calls[0][0] as number));
@@ -128,7 +142,7 @@ describe("short local interaction audio", () => {
       signatures.push(JSON.stringify(nodes.map(node => [node.frequency.setValueAtTime.mock.calls[0][0], node.start.mock.calls[0][0]])));
       previousCount = contexts[0].oscillators.length;
     }
-    expect(new Set(signatures).size).toBe(9);
+    expect(new Set(signatures).size).toBe(cues.length);
   });
 
   it("cancels the previous presentation cue on rapid navigation, and mute stops every layer", async () => {

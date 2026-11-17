@@ -6,9 +6,10 @@ import type { StudentWorkspace } from "@/contracts/workspace";
 import type { LiveClassAvailability, LiveClassBooking } from "@/contracts/live-class";
 const mocks = vi.hoisted(() => ({ flush: vi.fn(), refresh: vi.fn(), getSnapshot: vi.fn() }));
 vi.mock("@/features/dashboard/workspace-store", () => ({ studentWorkspace: mocks }));
+import { completeLessonSnapshot } from "./helpers/first-encounters-progress";
 import { StudentLiveClass } from "@/features/live-class/StudentLiveClass";
-const workspace = { account: { id: "qa-student", status: "active" }, learning: { studyCompleted: 24, studyTotal: 24 } } as StudentWorkspace;
-const availability: LiveClassAvailability = { userId: "qa-student", eligible: true, completed: 24, total: 24, month: "2026-11", timezone: "Europe/Lisbon", booking: null, slots: [
+const workspace = { account: { id: "qa-student", status: "active" }, learning: { studyCompleted: 49, studyTotal: 49, lessonSnapshot: completeLessonSnapshot() } } as StudentWorkspace;
+const availability: LiveClassAvailability = { userId: "qa-student", eligible: true, completed: 49, total: 49, month: "2026-11", timezone: "Europe/Lisbon", booking: null, slots: [
   { start: "2026-11-12T10:00:00Z", end: "2026-11-12T11:00:00Z", day: "2026-11-12", time: "10:00" },
   { start: "2026-11-13T11:00:00Z", end: "2026-11-13T12:00:00Z", day: "2026-11-13", time: "11:00" },
 ] };

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vercel React Best Practices"
+  short_description: "Desempenho e padrões de React e Next.js"
+  default_prompt: "Use $vercel-react-best-practices para revisar o desempenho dos componentes indicados."

@@ -64,14 +64,14 @@ export function AppHeader({ current, name, tone = "paper", guest = false, onAcco
           <Link href="/dashboard#avanco" prefetch={true} onClick={navigate}><TrendingUp size={17} aria-hidden="true" />Meu avanço<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <Link href="/dashboard#contato" prefetch={true} onClick={navigate}><MessageCircle size={17} aria-hidden="true" />Falar com o professor<ArrowUpRight size={14} aria-hidden="true" /></Link>
           </>}
-          <Link href="/demo" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Conversa da cafeteria<ArrowUpRight size={14} aria-hidden="true" /></Link>
-          <Link href="/demo/estudo" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Área de estudo<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/demo" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Primeiros encontros<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <Link href="/demo?retomar=conclusao" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />Teoria e teste<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <Link href={guest ? "/comecar" : "/dashboard#aula-ao-vivo"} prefetch={true} onClick={navigate}><CalendarDays size={17} aria-hidden="true" />{guest ? <BrowserText>{"Minha aula gratuita"}</BrowserText> : <BrowserText>{"Minha aula ao vivo"}</BrowserText>}<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <div className="app-menu-divider" />
           <SoundToggle />
           {guest ? <><Link href="/comecar" onClick={navigate}><UserRound size={17} aria-hidden="true" />Criar minha conta</Link><Link href="/comecar?modo=entrar" onClick={navigate}>Já tenho conta</Link></> : <>{onAccount ? <button className="app-menu-action" type="button" onClick={() => { close(); onAccount(); }}><UserRound size={17} aria-hidden="true" />Minha conta</button> : <Link href="/dashboard?painel=conta" prefetch={true} onClick={navigate}><UserRound size={17} aria-hidden="true" />Minha conta</Link>}
           {onSettings ? <button className="app-menu-action" type="button" onClick={() => { close(); onSettings(); }}><Settings2 size={17} aria-hidden="true" />Configurações</button> : <Link href="/dashboard?painel=configuracoes" prefetch={true} onClick={navigate}><Settings2 size={17} aria-hidden="true" />Configurações</Link>}</>}
-          {children && <div className="app-menu-story"><p>Controles da história</p>{children}</div>}
+          {children && <div className="app-menu-story"><p>Controles da aula</p>{children}</div>}
         </nav>
       </details>
     </div>

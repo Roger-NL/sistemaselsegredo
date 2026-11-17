@@ -95,6 +95,8 @@ export async function playInteractionSound(kind: InteractionSound, channel: Soun
 }
 
 export function interactionSoundFor(target: Element): InteractionSound | null {
+  // Some lesson surfaces provide their own semantic, independently muted cues.
+  if (target.closest('[data-ui-sound-scope="local"]')) return null;
   const action = target.closest("button, a[href], summary, input[type=radio], [role=button]");
   if (!action || action.matches(":disabled, [aria-disabled=true]") || action.closest("[inert]")) return null;
   const explicit = action.getAttribute("data-ui-sound");

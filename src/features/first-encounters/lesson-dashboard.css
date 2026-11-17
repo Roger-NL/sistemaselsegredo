@@ -1,0 +1,471 @@
+/* Shared comic identity for the main account dashboard.
+   Responsive fitting stays scoped to this dashboard. */
+.dashboard.lesson-demo-dashboard {
+  --paper: var(--comic-paper, #fff7e8);
+  --ink: var(--comic-ink, #202722);
+  --muted: var(--comic-muted, #5d655b);
+  --line: var(--comic-ink, #202722);
+  --dashboard-card: #f5dfa0;
+  height: 100dvh;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--comic-body, "BasedSpeak Barlow", Arial, sans-serif);
+  background-color: var(--paper);
+  background-image: radial-gradient(#20272213 .7px, transparent .8px);
+  background-size: 8px 8px;
+}
+.dashboard.lesson-demo-dashboard .dashboard-header {
+  position: relative;
+  top: auto;
+  min-height: 80px;
+  flex: 0 0 80px;
+  width: min(1200px, 100%);
+  border-bottom: 2px solid var(--ink);
+  background: var(--paper);
+  font-family: inherit;
+}
+.dashboard.lesson-demo-dashboard .dashboard-header::before { width: 100%; }
+.dashboard.lesson-demo-dashboard .dashboard-header .brand { font-size: 25px; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-test { gap: 6px; padding: 0 8px; flex-shrink: 0; border: 2px solid var(--comic-ink); border-radius: 5px; background: var(--comic-yellow); color: var(--comic-ink); box-shadow: 2px 2px 0 var(--comic-ink); font-weight: 600; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-test span { font-size: 11px; }
+.dashboard.lesson-demo-dashboard .dashboard-main {
+  min-width: 0;
+  min-height: 0;
+  padding-block: clamp(24px, 4vh, 42px) 24px;
+  justify-content: flex-start;
+  gap: 0;
+}
+.dashboard.lesson-demo-dashboard .dashboard-welcome { flex-shrink: 0; margin-bottom: 24px; }
+.dashboard.lesson-demo-dashboard .dashboard-welcome h1 {
+  font-family: var(--comic-display);
+  font-size: clamp(46px, 5vw, 66px);
+  font-weight: 400;
+  letter-spacing: .025em;
+  line-height: 1.05;
+  margin-top: 8px;
+}
+.dashboard.lesson-demo-dashboard .dashboard-subtitle { color: var(--muted); font-size: 15px; margin-top: 8px !important; }
+.dashboard.lesson-demo-dashboard .dashboard-overline { color: var(--comic-teal); font-weight: 600; }
+.dashboard.lesson-demo-dashboard .dashboard-aside { color: var(--ink); background: var(--comic-yellow); border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+.dashboard.lesson-demo-dashboard :is(.student-nav, .dashboard-tabs) {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--ink);
+}
+.dashboard.lesson-demo-dashboard :is(.student-nav, .dashboard-tabs) :is(a, button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: 38px;
+  margin-left: 0;
+  padding: 7px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 5px 3px 6px 3px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.dashboard.lesson-demo-dashboard :is(.student-nav, .dashboard-tabs) :is([aria-current="page"], [aria-selected="true"], [aria-current="true"]) { background: var(--comic-yellow); }
+.dashboard.lesson-demo-dashboard .student-nav a[href="#jornada"]:not([aria-current]) { background: var(--paper); }
+.dashboard.lesson-demo-dashboard .student-nav > button:last-child { margin-left: auto; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-panel {
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.dashboard.lesson-demo-dashboard .lesson-dashboard-panel[hidden] { display: none; }
+.dashboard.lesson-demo-dashboard :is(.lesson-demo-content, .dashboard-pane) { min-width: 0; min-height: 0; flex: 1; display: flex; flex-direction: column; }
+.dashboard.lesson-demo-dashboard .lesson-account-panels { min-width: 0; min-height: 0; flex: 1; overflow: hidden; }
+.dashboard.lesson-demo-dashboard .dashboard-journey {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--ink);
+  border-radius: 9px 5px 10px 5px;
+  box-shadow: 5px 5px 0 var(--ink);
+  background-color: var(--dashboard-card);
+  background-image: radial-gradient(#20272216 .8px, transparent .9px);
+  background-size: 7px 7px;
+}
+.dashboard.lesson-demo-dashboard .dashboard-card-header { flex-shrink: 0; padding: 20px 30px; background: var(--comic-teal); color: var(--paper); border-bottom: 2px solid var(--ink); }
+.dashboard.lesson-demo-dashboard .dashboard-card-header h2 { font-family: var(--comic-display); font-size: 22px; font-weight: 400; letter-spacing: .04em; }
+.dashboard.lesson-demo-dashboard .dashboard-availability { color: var(--paper); font-weight: 600; }
+.dashboard.lesson-demo-dashboard .dashboard-card-body { flex: 1; min-height: 0; padding: 22px 38px 26px; }
+.dashboard.lesson-demo-dashboard .dashboard-access { width: fit-content; }
+.dashboard.lesson-demo-dashboard .dashboard-access-word { font-family: var(--comic-display); font-size: clamp(62px, 8.2vw, 94px); letter-spacing: .02em; font-weight: 400; overflow-wrap: normal; }
+.dashboard.lesson-demo-dashboard .dashboard-access-arrow { color: var(--ink); background: var(--comic-coral); border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+.dashboard.lesson-demo-dashboard .dashboard-access-copy { max-width: 430px; color: var(--ink); font-size: 15px; line-height: 1.55; margin-top: 16px !important; }
+.dashboard.lesson-demo-dashboard .dashboard-access-copy strong { font-weight: 600; }
+.dashboard.lesson-demo-dashboard .dashboard-path-number { font-family: var(--comic-display); color: var(--comic-coral); background: #f5dfa0; -webkit-text-stroke: 1.5px var(--ink); letter-spacing: .01em; }
+.dashboard.lesson-demo-dashboard .dashboard-card-footer { flex-shrink: 0; padding: 12px 0 14px; border-top: 2px solid var(--ink); color: var(--ink); }
+.dashboard.lesson-demo-dashboard .dashboard-card-footer > span { min-width: 0; }
+.dashboard.lesson-demo-dashboard .dashboard-card-footer > a { display: inline-flex; align-items: center; gap: 7px; min-height: 30px; }
+.dashboard.lesson-demo-dashboard .dashboard-after { flex-shrink: 0; min-width: 0; padding-top: 16px; gap: 16px; }
+.dashboard.lesson-demo-dashboard .dashboard-after button { font-weight: 600; }
+.dashboard.lesson-demo-dashboard .dashboard-storage-note { font-size: 12px; margin-top: 8px !important; }
+
+/* The opening panel shows the next action and all four account summaries. */
+.dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) { padding-block: 24px 18px; }
+.dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .dashboard-welcome { margin-bottom: 16px; }
+.dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .dashboard-welcome h1 { font-size: clamp(40px, 4.1vw, 56px); }
+.dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .student-nav { margin-bottom: 16px; padding-bottom: 12px; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-panel.is-overview {
+  display: grid;
+  grid-template-rows: minmax(170px, 1fr) clamp(230px, 30vh, 278px) auto;
+  gap: 16px;
+  padding-right: 5px;
+  padding-bottom: 4px;
+}
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-journey { min-width: 0; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-card-header { padding: 12px 24px; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-card-header h2 { line-height: 1.1; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-card-body { grid-template-columns: minmax(0, 1fr) 180px; gap: 24px; padding: 14px 28px; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-access-area { display: flex; align-items: center; gap: clamp(24px, 3vw, 44px); }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-access { flex-shrink: 0; gap: 17px; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-access-word { font-size: clamp(54px, 5.3vw, 72px); }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-access-arrow { width: 43px; height: 43px; margin-top: 4px; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-access-copy { min-width: 0; max-width: 360px; margin-top: 0 !important; font-size: 14px; line-height: 1.45; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-path { height: min(118px, 100%); min-height: 82px; margin-top: 0; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-path-number { font-size: 83px; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-path-line { top: 43px; height: 51px; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-path-line::after { left: 60px; top: -24px; width: 96px; height: 48px; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-path-dot { top: 65px; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-path-label { font-size: 9px; white-space: nowrap; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-card-footer { margin-inline: 24px; padding-block: 7px; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-after { padding-top: 0; }
+.dashboard.lesson-demo-dashboard .is-overview .dashboard-after button { min-height: 30px; padding-block: 3px; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-overview { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; min-width: 0; min-height: 0; }
+.dashboard.lesson-demo-dashboard .lesson-overview-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 9px;
+  min-width: 0;
+  min-height: 0;
+  padding: 18px;
+  border: 2px solid var(--ink);
+  border-radius: 8px 4px 9px 5px;
+  background: #fffdf5;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.dashboard.lesson-demo-dashboard .lesson-overview-card[data-overview-section="avanco"] { background: #e8eee4; }
+.dashboard.lesson-demo-dashboard .lesson-overview-card[data-overview-section="atividades"] { background: #fbefcc; }
+.dashboard.lesson-demo-dashboard .lesson-overview-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; min-width: 0; }
+.dashboard.lesson-demo-dashboard .lesson-overview-heading h2 { margin: 0; font-family: var(--comic-display); font-size: 24px; font-weight: 400; line-height: 1.12; letter-spacing: .025em; }
+.dashboard.lesson-demo-dashboard .lesson-overview-heading svg { flex-shrink: 0; margin-top: 2px; color: var(--comic-teal); }
+.dashboard.lesson-demo-dashboard .lesson-overview-value { display: block; font-family: var(--comic-display); font-size: 34px; font-weight: 400; line-height: 1.06; letter-spacing: .015em; }
+.dashboard.lesson-demo-dashboard .lesson-overview-card:is([data-overview-section="aula-ao-vivo"], [data-overview-section="contato"]) .lesson-overview-value { font-size: 29px; }
+.dashboard.lesson-demo-dashboard .lesson-overview-card progress { display: block; flex: 0 0 9px; width: 100%; min-width: 0; height: 9px; border: 1.5px solid var(--ink); border-radius: 2px; background: var(--paper); accent-color: var(--comic-teal); overflow: hidden; }
+.dashboard.lesson-demo-dashboard .lesson-overview-card progress::-webkit-progress-bar { background: var(--paper); }
+.dashboard.lesson-demo-dashboard .lesson-overview-card progress::-webkit-progress-value { background: var(--comic-teal); }
+.dashboard.lesson-demo-dashboard .lesson-overview-card progress::-moz-progress-bar { background: var(--comic-teal); }
+.dashboard.lesson-demo-dashboard .lesson-overview-detail { margin: 0; color: var(--ink); font-size: 14px; line-height: 1.35; overflow-wrap: anywhere; }
+.dashboard.lesson-demo-dashboard .lesson-overview-stage { color: var(--muted); font-size: 12px; line-height: 1.3; }
+.dashboard.lesson-demo-dashboard .lesson-overview-action { display: inline-flex; align-items: center; justify-content: space-between; gap: 7px; min-height: 30px; margin-top: auto; padding-top: 3px; color: var(--comic-teal); font-size: 13px; font-weight: 600; line-height: 1.25; }
+.dashboard.lesson-demo-dashboard .lesson-overview-action svg { flex-shrink: 0; }
+.dashboard.lesson-demo-dashboard .lesson-overview-action:hover { text-decoration: underline; text-underline-offset: 4px; }
+.dashboard.lesson-demo-dashboard .lesson-overview-activities { display: flex; align-items: center; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.dashboard.lesson-demo-dashboard .lesson-overview-activities li { display: grid; place-items: center; width: 24px; height: 24px; border: 1.5px solid var(--ink); border-radius: 50%; color: var(--muted); background: var(--paper); font-size: 12px; font-weight: 600; }
+.dashboard.lesson-demo-dashboard .lesson-overview-activities li[data-done="true"] { color: var(--paper); background: var(--comic-teal); }
+
+/* The other tabs reuse the old outlined panels, one view at a time. */
+.dashboard.lesson-demo-dashboard .student-section-heading { flex-shrink: 0; margin-bottom: 18px; }
+.dashboard.lesson-demo-dashboard .student-section-heading h2 { font-family: var(--comic-display); font-size: 32px; font-weight: 400; letter-spacing: .025em; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-progress {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+  padding: 18px 22px;
+  margin-bottom: 18px;
+  border: 2px solid var(--ink);
+  border-radius: 8px 4px 9px 5px;
+  background: #fffdf5;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.dashboard.lesson-demo-dashboard .lesson-dashboard-progress > strong { font-family: var(--comic-display); font-size: 44px; font-weight: 400; line-height: 1; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-progress :is(progress, .lesson-dashboard-progress-track) { flex: 1; min-width: 0; height: 10px; border: 1.5px solid var(--ink); background: var(--paper); accent-color: var(--comic-teal); }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-progress progress::-webkit-progress-bar { background: var(--paper); }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-progress progress::-webkit-progress-value,
+.dashboard.lesson-demo-dashboard .lesson-dashboard-progress progress::-moz-progress-bar { background: var(--comic-teal); }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; list-style: none; padding: 0; margin: 0; min-width: 0; min-height: 0; flex: 1; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-steps > li { display: flex; flex-direction: column; gap: 10px; padding: 20px 16px; border: 2px solid var(--ink); border-radius: 8px 4px 9px 5px; background: #fffdf5; box-shadow: 3px 3px 0 var(--ink); min-width: 0; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-steps > li[data-step-status="current"] { background: #f5dfa0; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-steps > li[data-step-status="done"] { background: #e2ede5; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-steps strong { font-size: 17px; font-weight: 600; line-height: 1.25; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-steps :is(span, small) { font-size: 13px; line-height: 1.4; color: var(--muted); }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-steps svg { color: var(--comic-teal); }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-activities { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 15px; min-width: 0; min-height: 0; flex: 1; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-activity { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-width: 0; min-height: 0; padding: 21px 23px; background: #fffdf5; border: 2px solid var(--ink); border-radius: 8px 4px 9px 5px; box-shadow: 3px 3px 0 var(--ink); }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-activity h3 { margin: 0; font-family: var(--comic-display); font-size: 25px; font-weight: 400; letter-spacing: .025em; line-height: 1.15; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-activity :is(p, span, small) { font-size: 13px; color: var(--muted); line-height: 1.4; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-activity :is(a, button) { margin-top: auto; font-weight: 600; color: var(--comic-teal); background: transparent; border: 0; padding: 0; min-height: 30px; display: inline-flex; align-items: center; gap: 7px; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-bridge { flex: 1; min-height: 0; align-items: flex-start; justify-content: center; gap: 13px; padding: 30px 36px; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-bridge h2 { font-family: var(--comic-display); font-size: 36px; font-weight: 400; letter-spacing: .025em; line-height: 1.1; margin: 0; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-bridge p { max-width: 56ch; font-size: 17px; line-height: 1.55; }
+.dashboard.lesson-demo-dashboard .lesson-dashboard-bridge a { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 8px 13px; border: 2px solid var(--ink); border-radius: 5px 3px 6px 3px; background: var(--comic-yellow); box-shadow: 3px 3px 0 var(--ink); font-weight: 600; }
+.dashboard.lesson-demo-dashboard .dashboard-dialog { font-family: inherit; }
+.dashboard.lesson-demo-dashboard .dashboard-dialog h2 { font-family: var(--comic-display); font-weight: 400; font-size: 30px; letter-spacing: .025em; }
+
+@media (max-height: 720px) and (min-width: 760px) {
+  .dashboard.lesson-demo-dashboard .dashboard-header { flex-basis: 64px; min-height: 64px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main { padding-block: 18px 18px; }
+  .dashboard.lesson-demo-dashboard .dashboard-welcome { margin-bottom: 14px; }
+  .dashboard.lesson-demo-dashboard .dashboard-welcome h1 { font-size: 48px; margin-top: 4px; }
+  .dashboard.lesson-demo-dashboard .dashboard-subtitle { margin-top: 4px !important; font-size: 13px; }
+  .dashboard.lesson-demo-dashboard .student-nav { margin-bottom: 14px; padding-bottom: 10px; }
+  .dashboard.lesson-demo-dashboard .student-nav :is(a, button) { min-height: 34px; font-size: 12px; padding: 5px 10px; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-header { padding: 12px 24px; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-body { padding: 14px 28px 18px; grid-template-columns: minmax(0, 1fr) 205px; gap: 22px; }
+  .dashboard.lesson-demo-dashboard .dashboard-access-word { font-size: 68px; }
+  .dashboard.lesson-demo-dashboard .dashboard-access-copy { margin-top: 10px !important; font-size: 13px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path { height: 140px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-number { font-size: 105px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-line { top: 54px; height: 65px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-line::after { top: -29px; width: 105px; height: 65px; left: 65px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-dot { top: 84px; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-footer { padding-block: 7px; margin-inline: 24px; }
+  .dashboard.lesson-demo-dashboard .dashboard-after { padding-top: 10px; font-size: 11px; }
+  .dashboard.lesson-demo-dashboard .dashboard-after button { min-height: 32px; font-size: 11px; }
+  .dashboard.lesson-demo-dashboard .student-section-heading { margin-bottom: 12px; }
+  .dashboard.lesson-demo-dashboard .student-section-heading h2 { font-size: 29px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-progress { padding: 12px 18px; margin-bottom: 12px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-progress > strong { font-size: 36px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-steps > li { padding: 15px 12px; gap: 8px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-activities { gap: 11px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-activity { padding: 15px 17px; gap: 7px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-activity h3 { font-size: 22px; }
+}
+@media (max-height: 570px) and (min-width: 760px) {
+  .dashboard.lesson-demo-dashboard .dashboard-header { flex-basis: 54px; min-height: 54px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main { padding-block: 10px 12px; }
+  .dashboard.lesson-demo-dashboard .dashboard-welcome { margin-bottom: 9px; }
+  .dashboard.lesson-demo-dashboard .dashboard-welcome h1 { font-size: 38px; margin-top: 2px; }
+  .dashboard.lesson-demo-dashboard .dashboard-overline { font-size: 10px; }
+  .dashboard.lesson-demo-dashboard .dashboard-subtitle { margin-top: 3px !important; font-size: 12px; }
+  .dashboard.lesson-demo-dashboard .student-nav { margin-bottom: 10px; padding-bottom: 8px; gap: 7px; }
+  .dashboard.lesson-demo-dashboard .student-nav :is(a, button) { min-height: 31px; font-size: 11px; padding: 4px 9px; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-header { padding: 9px 22px; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-header h2 { font-size: 21px; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-body { padding: 10px 25px 12px; grid-template-columns: minmax(0, 1fr) 190px; }
+  .dashboard.lesson-demo-dashboard .dashboard-access-word { font-size: 56px; }
+  .dashboard.lesson-demo-dashboard .dashboard-access { gap: 16px; }
+  .dashboard.lesson-demo-dashboard .dashboard-access-arrow { width: 43px; height: 43px; margin-top: 4px; }
+  .dashboard.lesson-demo-dashboard .dashboard-access-copy { margin-top: 8px !important; font-size: 12px; line-height: 1.4; }
+  .dashboard.lesson-demo-dashboard .dashboard-path { height: 106px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-number { font-size: 84px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-line { top: 39px; height: 52px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-line::after { top: -25px; height: 50px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-dot { top: 62px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-label { font-size: 9px; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-footer { padding-block: 5px; margin-inline: 22px; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-footer button { min-height: 28px; }
+  .dashboard.lesson-demo-dashboard .dashboard-after { padding-top: 8px; }
+  .dashboard.lesson-demo-dashboard .dashboard-after button { min-height: 28px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-steps > li { padding: 12px 10px; gap: 6px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-steps strong { font-size: 15px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-progress { padding: 9px 15px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-progress > strong { font-size: 31px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-activity { padding: 12px 14px; gap: 5px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-activity h3 { font-size: 20px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-activity :is(p, span, small) { font-size: 12px; }
+}
+@media (max-width: 759px) {
+  .dashboard.lesson-demo-dashboard { padding-inline: 16px; }
+  .dashboard.lesson-demo-dashboard .dashboard-header { min-height: 62px; flex-basis: 62px; gap: 12px; }
+  .dashboard.lesson-demo-dashboard .dashboard-header .brand { font-size: 21px; }
+  .dashboard.lesson-demo-dashboard .dashboard-header .app-header-panel { display: none; }
+  .dashboard.lesson-demo-dashboard .dashboard-main { padding-block: 20px 16px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-panel { overflow-y: auto; overflow-x: hidden; }
+  .dashboard.lesson-demo-dashboard .dashboard-welcome { margin-bottom: 18px; gap: 10px; }
+  .dashboard.lesson-demo-dashboard .dashboard-welcome h1 { font-size: 47px; }
+  .dashboard.lesson-demo-dashboard .dashboard-aside { display: none; }
+  .dashboard.lesson-demo-dashboard .dashboard-overline { font-size: 10px; }
+  .dashboard.lesson-demo-dashboard .dashboard-subtitle { font-size: 13px; }
+  .dashboard.lesson-demo-dashboard .student-nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin-bottom: 16px; padding-bottom: 12px; }
+  .dashboard.lesson-demo-dashboard .student-nav :is(a, button) { min-width: 0; min-height: 38px; font-size: 11px; padding: 5px 6px; white-space: normal; text-align: center; }
+  .dashboard.lesson-demo-dashboard .student-nav > button:last-child { margin-left: 0; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-header { padding: 13px 16px; gap: 8px; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-header h2 { font-size: 20px; }
+  .dashboard.lesson-demo-dashboard .dashboard-availability { font-size: 10px; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-body { grid-template-columns: minmax(0, 1fr) 95px; padding: 14px 17px; gap: 10px; }
+  .dashboard.lesson-demo-dashboard .dashboard-access-word { font-size: clamp(37px, 10vw, 55px); }
+  .dashboard.lesson-demo-dashboard .dashboard-access { gap: 9px; }
+  .dashboard.lesson-demo-dashboard .dashboard-access-arrow { width: 34px; height: 34px; margin-top: 3px; }
+  .dashboard.lesson-demo-dashboard .dashboard-access-copy { margin-top: 12px !important; font-size: 12px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path { width: 95px; height: 110px; margin-top: 0; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-number { font-size: 65px; padding: 0 4px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-line { left: 0; right: 0; top: 43px; height: 45px; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-line::after { display: none; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-dot { top: 62px; left: 0; }
+  .dashboard.lesson-demo-dashboard .dashboard-path-label { font-size: 8px; padding: 3px 4px; bottom: 0; white-space: nowrap; }
+  .dashboard.lesson-demo-dashboard .dashboard-card-footer { margin-inline: 16px; padding-block: 9px; font-size: 10px; align-items: center; }
+  .dashboard.lesson-demo-dashboard .dashboard-after { gap: 9px; padding-top: 12px; font-size: 11px; flex-wrap: wrap; }
+  .dashboard.lesson-demo-dashboard .dashboard-after button { font-size: 11px; min-height: 30px; }
+  .dashboard.lesson-demo-dashboard .student-section-heading { margin-bottom: 12px; }
+  .dashboard.lesson-demo-dashboard .student-section-heading h2 { font-size: 29px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-progress { padding: 12px 15px; margin-bottom: 12px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-progress > strong { font-size: 35px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-steps { grid-template-columns: 1fr; gap: 8px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-steps > li { flex-direction: row; align-items: center; padding: 10px 12px; gap: 10px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-steps strong { font-size: 15px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-steps :is(span, small) { font-size: 11px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-activities { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, auto); flex: 0 0 auto; align-content: start; gap: 10px; padding-right: 4px; padding-bottom: 5px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-activity { padding: 13px 12px; gap: 6px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-activity h3 { font-size: 21px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-activity :is(p, span, small, a, button) { font-size: 12px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-bridge { padding: 22px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-bridge h2 { font-size: 30px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-bridge p { font-size: 15px; }
+}
+@media (max-width: 380px) {
+  .dashboard.lesson-demo-dashboard .dashboard-card-body { grid-template-columns: minmax(0, 1fr); }
+  .dashboard.lesson-demo-dashboard .dashboard-path { display: none; }
+  .dashboard.lesson-demo-dashboard .dashboard-access-word { font-size: 45px; }
+  .dashboard.lesson-demo-dashboard .dashboard-welcome h1 { font-size: 43px; }
+}
+@media (min-width: 760px) and (max-height: 850px) {
+  .dashboard.lesson-demo-dashboard:has(.is-overview) .dashboard-header { min-height: 54px; flex-basis: 54px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) { padding-block: 10px 8px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .dashboard-welcome { margin-bottom: 10px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .dashboard-welcome h1 { font-size: 38px; margin-top: 3px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .dashboard-subtitle { margin-top: 3px !important; font-size: 13px; line-height: 1.35; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .student-nav { margin-bottom: 9px; padding-bottom: 7px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .student-nav :is(a, button) { min-height: 32px; padding-block: 4px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-panel.is-overview { grid-template-rows: minmax(150px, 1fr) 216px auto; gap: 11px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-header { padding: 7px 22px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-body { grid-template-columns: minmax(0, 1fr) 142px; gap: 20px; padding: 8px 24px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-area { gap: 25px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-word { font-size: 56px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-copy { font-size: 13px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path { min-height: 58px; height: 66px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path-number { font-size: 53px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path-line { top: 22px; height: 31px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path-line::after { left: 46px; top: -16px; width: 74px; height: 31px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path-dot { top: 35px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path-label { font-size: 8px; padding: 2px 4px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-footer { padding-block: 2px; margin-inline: 22px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-footer > a { min-height: 24px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-after { font-size: 11px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-after button { min-height: 27px; padding-block: 2px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-overview { gap: 11px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-card { gap: 6px; padding: 12px 13px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-heading h2 { font-size: 22px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-heading svg { width: 17px; height: 17px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-value { font-size: 31px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-card:is([data-overview-section="aula-ao-vivo"], [data-overview-section="contato"]) .lesson-overview-value { font-size: 26px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-detail { font-size: 13px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-stage { font-size: 11px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-action { min-height: 25px; font-size: 12px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-activities { gap: 5px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-activities li { width: 21px; height: 21px; font-size: 11px; }
+}
+@media (min-width: 1000px) and (max-height: 570px) {
+  .dashboard.lesson-demo-dashboard:has(.is-overview) .dashboard-header { min-height: 48px; flex-basis: 48px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) { padding-block: 5px 5px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .dashboard-welcome { margin-bottom: 5px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .dashboard-overline { font-size: 9px; line-height: 1.2; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .dashboard-welcome h1 { margin-top: 0; font-size: 32px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .dashboard-subtitle { font-size: 12px; line-height: 1.2; margin-top: 1px !important; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .student-nav { margin-bottom: 7px; padding-bottom: 6px; gap: 7px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .student-nav :is(a, button) { min-height: 29px; padding-block: 3px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-panel.is-overview { grid-template-rows: minmax(132px, 1fr) 190px auto; gap: 8px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-header { padding: 5px 18px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-header h2 { font-size: 20px; line-height: 1.1; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-body { grid-template-columns: minmax(0, 1fr) 125px; gap: 18px; padding: 6px 20px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-area { gap: 23px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access { gap: 12px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-word { font-size: 46px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-arrow { width: 34px; height: 34px; margin-top: 2px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-arrow svg { width: 21px; height: 21px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-copy { font-size: 12px; line-height: 1.35; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path { min-height: 52px; height: 56px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path-number { font-size: 45px; transform: translateY(-4px); }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path-line { top: 21px; height: 29px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path-line::after { height: 30px; top: -15px; width: 58px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path-dot { top: 32px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path-label { font-size: 7px; line-height: 1.2; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-footer { padding-block: 2px; margin-inline: 18px; font-size: 10px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-footer > a { min-height: 22px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-after button { min-height: 24px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-overview { gap: 10px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-card { gap: 4px; padding: 9px 11px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-heading { gap: 5px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-heading h2 { font-size: 20px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-heading svg { width: 16px; height: 16px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-value { font-size: 28px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-card:is([data-overview-section="aula-ao-vivo"], [data-overview-section="contato"]) .lesson-overview-value { font-size: 24px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-detail { font-size: 12px; line-height: 1.3; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-stage { font-size: 11px; line-height: 1.25; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-action { min-height: 24px; font-size: 12px; padding-top: 0; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-card progress { height: 7px; flex-basis: 7px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-activities { gap: 5px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-activities li { width: 19px; height: 19px; font-size: 10px; }
+}
+@media (min-width: 760px) and (max-width: 999px) {
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-panel.is-overview { grid-template-rows: minmax(135px, 1fr) minmax(0, 2fr) auto; gap: 11px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard.lesson-demo-dashboard .lesson-overview-card { gap: 5px; padding: 12px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-heading h2 { font-size: 21px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-value { font-size: 27px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-detail { font-size: 12px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-body { grid-template-columns: minmax(0, 1fr) 105px; gap: 14px; padding-inline: 18px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-area { gap: 16px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-word { font-size: 45px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-arrow { width: 34px; height: 34px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-copy { font-size: 12px; }
+}
+@media (max-width: 759px) {
+  .dashboard.lesson-demo-dashboard:has(.lesson-dashboard-panel.is-overview) { height: auto; min-height: 100dvh; overflow: visible; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) { flex: 0 0 auto; padding-block: 20px 24px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .dashboard-welcome { margin-bottom: 18px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .dashboard-welcome h1 { font-size: 43px; }
+  .dashboard.lesson-demo-dashboard .dashboard-main:has(> .is-overview) .student-nav { margin-bottom: 16px; padding-bottom: 12px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-panel.is-overview { display: flex; flex: 0 0 auto; gap: 18px; overflow: visible; padding-right: 4px; padding-bottom: 4px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-journey { flex: 0 0 auto; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-header { padding: 13px 15px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-body { grid-template-columns: minmax(0, 1fr); padding: 18px 17px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-area { display: block; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-word { font-size: 52px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-arrow { width: 38px; height: 38px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-access-copy { max-width: none; margin-top: 15px !important; font-size: 15px; line-height: 1.45; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-path { display: none; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-footer { flex-wrap: wrap; margin-inline: 16px; padding-block: 9px; font-size: 11px; gap: 3px 14px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-card-footer > a { min-height: 33px; }
+  .dashboard.lesson-demo-dashboard .lesson-dashboard-overview { grid-template-columns: minmax(0, 1fr); gap: 15px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-card { gap: 10px; padding: 20px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-heading h2 { font-size: 28px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-value { font-size: 38px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-card:is([data-overview-section="aula-ao-vivo"], [data-overview-section="contato"]) .lesson-overview-value { font-size: 32px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-detail { font-size: 16px; line-height: 1.4; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-stage { font-size: 13px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-action { min-height: 44px; margin-top: 5px; font-size: 15px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-activities { gap: 8px; }
+  .dashboard.lesson-demo-dashboard .lesson-overview-activities li { width: 28px; height: 28px; font-size: 13px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-after { font-size: 13px; gap: 6px; }
+  .dashboard.lesson-demo-dashboard .is-overview .dashboard-after button { min-height: 40px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard.lesson-demo-dashboard *, .dashboard.lesson-demo-dashboard *::before, .dashboard.lesson-demo-dashboard *::after { animation: none !important; transition: none !important; }
+}
+
+.dashboard.lesson-demo-dashboard .lesson-dashboard-account-status{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;font-size:12px;line-height:1.35;padding:6px 10px;margin:0 0 7px;border:1px solid var(--comic-ink);background:var(--comic-paper)}
+.dashboard.lesson-demo-dashboard .lesson-dashboard-account-status button{border:0;background:transparent;font-weight:600;text-decoration:underline;white-space:nowrap}
+.dashboard.lesson-demo-dashboard .dashboard-dialog .guest-progress-import{margin:14px 0;padding:12px;display:block;border-radius:5px;font-size:12px}
+.dashboard.lesson-demo-dashboard .dashboard-dialog .guest-progress-import p{font-size:12px;line-height:1.4}
+.dashboard.lesson-demo-dashboard .dashboard-dialog .guest-progress-import>div:last-child{margin-top:10px}

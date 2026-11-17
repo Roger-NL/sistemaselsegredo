@@ -1,0 +1,17 @@
+.th-overlay{position:absolute;inset:0;z-index:30;overflow:hidden;border-radius:inherit;pointer-events:none!important;user-select:none;contain:layout style;isolation:isolate}
+.th-overlay *{pointer-events:none!important;box-sizing:border-box}
+.th-hand,.th-ghost,.th-click-ring,.th-target,.th-callout{position:absolute;left:0;top:0;opacity:0;will-change:transform,opacity}
+.th-hand{z-index:5;width:88px;height:112px;transform-origin:30px 7px;filter:drop-shadow(0 3px 2px #30245025)}
+.th-hand>svg{display:block;width:100%;height:100%;overflow:visible}
+.th-fingertip{position:absolute;left:30px;top:7px;width:0;height:0}
+.th-skin{fill:#ffdfb9;stroke:#725260;stroke-width:2.2;stroke-linejoin:round}
+.th-finger-lines{fill:none;stroke:#bd8c78;stroke-width:1.6;stroke-linecap:round}
+.th-cuff{fill:#7560c2;stroke:#534186;stroke-width:2;stroke-linejoin:round}
+.th-cuff-shine{fill:none;stroke:#b6a4ec;stroke-width:2;stroke-linecap:round}
+.th-ghost{z-index:3;display:flex;align-items:center;justify-content:center;gap:9px;border:2px solid #8870c8;border-radius:14px;background:#fff9ff;box-shadow:0 10px 24px #4c34882e;color:#4e3d75;font-size:clamp(17px,2vw,23px);font-weight:590;line-height:1.2;white-space:nowrap;transform-origin:center}
+.th-example{position:absolute;right:9px;top:-19px;border:1px solid #d7cced;border-radius:6px;background:#fff;padding:2px 6px;font-size:10px;font-weight:600;line-height:1.2;color:#806aab;letter-spacing:.02em}
+.th-click-ring{z-index:4;width:37px;height:37px;border:3px solid #8564cd;border-radius:50%;background:#ad8ae926;transform-origin:center}
+.th-target{z-index:1;border:2px solid #a28acb;border-radius:14px;background:#b8a0e30c;box-shadow:0 0 0 5px #baa2e51a}
+.th-source{border-style:dashed}
+.th-callout{z-index:6;max-width:220px;width:max-content;border:1px solid #dbd0ec;border-radius:9px;padding:7px 10px;background:#fff;color:#6e529d;font-size:13px;font-weight:600;line-height:1.3;text-align:center;box-shadow:0 3px 11px #4f387814}
+@media(prefers-reduced-motion:reduce){.th-hand{filter:none}.th-hand,.th-ghost,.th-click-ring,.th-target,.th-callout{will-change:auto}}

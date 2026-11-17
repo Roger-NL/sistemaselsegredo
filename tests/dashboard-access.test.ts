@@ -7,7 +7,7 @@ vi.mock("@/server/firebase", () => ({
   getAdminDb: () => ({ collection: () => ({ doc: mocks.doc }) }),
 }));
 vi.mock("next/navigation", () => ({ redirect: (target: string) => { throw new Error(`REDIRECT:${target}`); } }));
-vi.mock("@/features/dashboard/Dashboard", () => ({ Dashboard: () => null }));
+vi.mock("@/features/first-encounters/LessonDashboard", () => ({ LessonDashboard: () => null }));
 
 import { getDashboardAccount } from "@/server/dashboard/account";
 import DashboardPage from "@/app/dashboard/page";

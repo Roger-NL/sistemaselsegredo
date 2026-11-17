@@ -5,8 +5,7 @@ import type { RequestPrincipal } from "@/server/auth/principal";
 import { RequestAuthError } from "@/server/auth/request-auth";
 import { assertOnlyKeys, RequestPayloadError } from "@/server/http/request";
 import { consumeRateLimit } from "@/server/http/rate-limit";
-import { accountStatus, savedStudyCompleted } from "@/server/workspace/validation";
-import { studySteps } from "@/features/theory/progress";
+import { accountStatus, savedStudyCompleted, LESSON_ACCOUNT_TOTAL } from "@/server/workspace/validation";
 import { monthKey, monthSlots, offsetMonth } from "@/features/live-class/calendar";
 import type { LiveClassAvailability, LiveClassBooking } from "@/contracts/live-class";
 import { writeOperationalNotifications } from "@/server/notifications/outbox";
@@ -30,7 +29,7 @@ function checkedMonth(value: string | null, timezone: string, now = new Date()) 
 export async function getLiveClass(principal: RequestPrincipal, requestedMonth: string | null): Promise<LiveClassAvailability> {
   const timezone = liveClassTimezone(), month = checkedMonth(requestedMonth, timezone);
   const [user, saved, existing] = await Promise.all([profile(principal.uid).get(), learning(principal.uid).get(), bookings().doc(principal.uid).get()]);
-  const completed = savedStudyCompleted(saved.data()), total = studySteps.length;
+  const completed = savedStudyCompleted(saved.data()), total = LESSON_ACCOUNT_TOTAL;
   const eligible = saved.data()?.testMode !== true && user.exists && ["active", "pending"].includes(accountStatus(user.data()?.accountStatus)) && completed === total;
   const booking = existing.exists ? existing.data() as LiveClassBooking : null;
   let slots = eligible && (!booking || booking.status === "cancelled") ? monthSlots(month, timezone) : [];
@@ -54,7 +53,7 @@ export async function bookLiveClass(principal: RequestPrincipal, body: Record<st
     const [user, saved, previous, held] = await Promise.all([tx.get(profile(principal.uid)), tx.get(learning(principal.uid)), tx.get(ref), tx.get(lock)]);
     active(user.exists, user.data());
     if (saved.data()?.testMode === true) throw new RequestAuthError("Progresso de teste não libera novas reservas. Reinicie como percurso normal para participar.", 403);
-    if (savedStudyCompleted(saved.data()) !== studySteps.length) throw new RequestAuthError("Conclua 100% do estudo guiado para agendar sua aula gratuita.", 403);
+    if (savedStudyCompleted(saved.data()) !== LESSON_ACCOUNT_TOTAL) throw new RequestAuthError("Conclua as 49 etapas da Aula 1, incluindo o teste, para agendar sua aula gratuita.", 403);
     const current = previous.exists ? previous.data() as LiveClassBooking : null;
     if (current && current.status !== "cancelled") {
       if (current.start === slot.start && ["pending", "confirmed"].includes(current.status)) return { booking: current, notificationIds: [] };

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import config from "../next.config";
 
 function networkSources(policy: string, directive: string) {
@@ -7,7 +7,7 @@ function networkSources(policy: string, directive: string) {
 }
 
 describe("authentication after client-side navigation", () => {
-  it("keeps Firebase and Google reachable from documents opened on the landing or story", async () => {
+  it("keeps Firebase and Google reachable from documents opened on the landing or lesson", async () => {
     const headers = await config.headers!();
     const policies = headers.flatMap(route => route.headers.filter(header => header.key === "Content-Security-Policy").map(header => ({ source: route.source, value: header.value })));
     const app = policies.find(policy => policy.source === "/:path*")!;
@@ -18,6 +18,25 @@ describe("authentication after client-side navigation", () => {
         // Soft navigation does not replace the document's security policy.
         expect(networkSources(policy.value, directive)).toEqual(expect.arrayContaining(networkSources(app.value, directive)));
       }
+    }
+  });
+
+  it("permits character WebAssembly in production without enabling JavaScript eval", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.resetModules();
+    try {
+      const { default: productionConfig } = await import("../next.config");
+      const policies = (await productionConfig.headers!()).flatMap(route =>
+        route.headers.filter(header => header.key === "Content-Security-Policy").map(header => header.value));
+      expect(policies).toHaveLength(3);
+      for (const policy of policies) {
+        const script = policy.split(";").map(value => value.trim()).find(value => value.startsWith("script-src "))!;
+        expect(script.split(/\s+/)).toContain("'wasm-unsafe-eval'");
+        expect(script.split(/\s+/)).not.toContain("'unsafe-eval'");
+      }
+    } finally {
+      vi.unstubAllEnvs();
+      vi.resetModules();
     }
   });
 

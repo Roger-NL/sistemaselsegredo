@@ -10,7 +10,7 @@ import type { NotificationSettings as Settings, OperationalNotificationKind, Ope
 import "./notifications.css";
 
 const eventLabels: Record<OperationalNotificationKind, string> = {
-  new_signup: "Novo cadastro", conversation_completed: "Conversa da cafeteria concluída", study_completed: "Estudo guiado concluído",
+  new_signup: "Novo cadastro", conversation_completed: "Atividades da Aula 1 concluídas", study_completed: "Percurso da Aula 1 concluído",
   live_class_requested: "Pedido de aula gratuita", student_message: "Mensagem de aluno",
 };
 const statusLabels: Record<OperationalNotificationStatus, string> = {

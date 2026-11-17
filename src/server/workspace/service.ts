@@ -8,10 +8,10 @@ import type { LearningProgress, StudentWorkspace, TeacherConversation, TeacherMe
 import { RequestAuthError } from "@/server/auth/request-auth";
 import { RequestPayloadError, assertOnlyKeys } from "@/server/http/request";
 import { consumeRateLimit } from "@/server/http/rate-limit";
-import { accountStatus, conversationFromData, learningFromData, parseDemoSnapshot, parseStudySnapshot, savedStudyCompleted, textField } from "./validation";
+import { accountStatus, conversationFromData, learningFromData, parseDemoSnapshot, parseStudySnapshot, parseLessonSnapshot, savedStudyCompleted, textField } from "./validation";
 import { prepareOperationalNotifications, writeOperationalNotifications, type OperationalEvent } from "@/server/notifications/outbox";
+import { completedLesson } from "@/server/notifications/events";
 import { scheduleOperationalNotifications } from "@/server/notifications/background";
-import { completedConversation } from "@/server/notifications/events";
 
 export const userRef = (uid: string) => getAdminDb().collection("users").doc(uid);
 export const studentActivityRef = (uid: string) => userRef(uid).collection("student_activity");
@@ -36,35 +36,39 @@ export async function getStudentWorkspace(principal: RequestPrincipal): Promise<
 }
 
 export async function saveLearning(principal: RequestPrincipal, body: Record<string, unknown>, options: { requireEmpty?: boolean } = {}): Promise<{ learning: LearningProgress }> {
-  assertOnlyKeys(body, ["revision", "saveVersion", "demoSnapshot", "studySnapshot"]);
-  if (!Number.isSafeInteger(body.saveVersion) || Number(body.saveVersion) < 0 || !Number.isSafeInteger(body.revision) || Number(body.revision) < 0 || !("demoSnapshot" in body || "studySnapshot" in body)) throw new RequestPayloadError("Informe uma revisão e um progresso válidos.");
+  assertOnlyKeys(body, ["revision", "saveVersion", "demoSnapshot", "studySnapshot", "lessonSnapshot"]);
+  if (!Number.isSafeInteger(body.saveVersion) || Number(body.saveVersion) < 0 || !Number.isSafeInteger(body.revision) || Number(body.revision) < 0 || !("demoSnapshot" in body || "studySnapshot" in body || "lessonSnapshot" in body)) throw new RequestPayloadError("Informe uma revisão e um progresso válidos.");
   await consumeRateLimit({ namespace: "learning-save", identifier: principal.uid, limit: 120, windowMs: 60_000 });
-  const patch: Partial<LearningProgress> = { ...("demoSnapshot" in body ? parseDemoSnapshot(body.demoSnapshot) : {}), ...("studySnapshot" in body ? parseStudySnapshot(body.studySnapshot) : {}) };
+  const patch: Partial<LearningProgress> = {
+    ...("demoSnapshot" in body ? { demoSnapshot: parseDemoSnapshot(body.demoSnapshot).demoSnapshot } : {}),
+    ...("studySnapshot" in body ? { studySnapshot: parseStudySnapshot(body.studySnapshot).studySnapshot } : {}),
+    ...("lessonSnapshot" in body ? parseLessonSnapshot(body.lessonSnapshot) : {}),
+  };
+  const samePatch = (previous: LearningProgress) => (["demoSnapshot", "studySnapshot", "lessonSnapshot"] as const).every(key => !(key in patch) || patch[key] === previous[key]);
   const result = await getAdminDb().runTransaction(async tx => {
     const [stored, profile, booking] = await Promise.all([tx.get(learningRef(principal.uid)), tx.get(userRef(principal.uid)), options.requireEmpty ? tx.get(getAdminDb().collection("demo_live_classes").doc(principal.uid)) : Promise.resolve(null)]);
     if (!profile.exists || !["active", "pending"].includes(accountStatus(profile.data()?.accountStatus))) throw new RequestAuthError("Seu acesso à prática está indisponível. Fale com o professor.", 403);
     const previous = learningFromData(stored.data());
-    if (options.requireEmpty && (previous.revision !== 0 || previous.demoSnapshot !== null || previous.studySnapshot !== null || booking?.exists)) throw new RequestAuthError("Esta conta já tem um percurso. Seu progresso atual foi preservado; o percurso deste navegador não foi importado.", 409);
+    if (options.requireEmpty && (previous.revision !== 0 || previous.lessonSnapshot != null || previous.demoSnapshot !== null || previous.studySnapshot !== null || booking?.exists)) throw new RequestAuthError("Esta conta já tem um percurso. Seu progresso atual foi preservado; o percurso deste navegador não foi importado.", 409);
     if (previous.revision !== body.revision) throw new RequestAuthError("Seu progresso foi reiniciado. Atualize o painel antes de continuar.", 409);
     if (previous.saveVersion !== body.saveVersion) {
       // A retry after a lost response is harmless only for the immediately preceding identical write.
-      if (previous.saveVersion === Number(body.saveVersion) + 1 && ((!("demoSnapshot" in patch) || patch.demoSnapshot === previous.demoSnapshot) && (!("studySnapshot" in patch) || patch.studySnapshot === previous.studySnapshot))) return { learning: previous, notificationIds: [] };
+      if (previous.saveVersion === Number(body.saveVersion) + 1 && samePatch(previous)) return { learning: previous, notificationIds: [] };
       throw new LearningConflictError();
     }
-    if ((!("demoSnapshot" in patch) || patch.demoSnapshot === previous.demoSnapshot) && (!("studySnapshot" in patch) || patch.studySnapshot === previous.studySnapshot)) return { learning: previous, notificationIds: [] };
+    if (samePatch(previous)) return { learning: previous, notificationIds: [] };
     const at = new Date().toISOString();
-    const next: LearningProgress = { ...previous, ...patch, saveVersion: previous.saveVersion + 1, updatedAt: at };
+    const next = learningFromData({ ...previous, ...patch, saveVersion: previous.saveVersion + 1, updatedAt: at });
     const notifications: OperationalEvent[] = [];
     const identity = { userId: principal.uid, userName: String(profile.data()?.name || "Aluno"), userEmail: principal.email || "", occurredAt: at };
-    const conversationCompleted = "demoSnapshot" in patch && completedConversation(next.demoSnapshot) && !completedConversation(previous.demoSnapshot);
-    if (!previous.testMode && conversationCompleted) notifications.push({ ...identity, kind: "conversation_completed" });
-    if (!previous.testMode && "studySnapshot" in patch && next.studyCompleted === next.studyTotal && savedStudyCompleted(stored.data()) < next.studyTotal) notifications.push({ ...identity, kind: "study_completed" });
+    const lessonCompleted = "lessonSnapshot" in patch && completedLesson(next.lessonSnapshot ?? null) && !completedLesson(previous.lessonSnapshot ?? null);
+    if (!previous.testMode && lessonCompleted) notifications.push({ ...identity, kind: "study_completed" });
     const enqueue = await prepareOperationalNotifications(tx, notifications);
     tx.set(learningRef(principal.uid), next);
     const events: string[] = [];
-    if (next.demoSnapshot && !previous.demoSnapshot) events.push("Conversa da cafeteria iniciada");
-    if (conversationCompleted) events.push("Atividades da conversa da cafeteria concluídas");
-    if (next.studyCompleted > previous.studyCompleted) events.push(`Estudo: ${next.studyCompleted} de ${next.studyTotal} atividades concluídas`);
+    if (next.lessonSnapshot && !previous.lessonSnapshot) events.push("Aula 1 iniciada: Eu, você, nós, eles");
+    if (next.studyCompleted > previous.studyCompleted) events.push(`Aula 1: ${next.studyCompleted} de ${next.studyTotal} etapas concluídas`);
+    if (lessonCompleted) events.push("Aula 1 concluída: Eu, você, nós, eles");
     for (const title of previous.testMode ? [] : events) tx.create(studentActivityRef(principal.uid).doc(), { kind: "learning", title, at });
     return { learning: next, notificationIds: enqueue() };
   });
@@ -74,7 +78,7 @@ export async function saveLearning(principal: RequestPrincipal, body: Record<str
 
 /** Explicit guest continuation, guarded atomically against overwriting any saved account journey. */
 export async function importGuestLearning(principal: RequestPrincipal, body: Record<string, unknown>) {
-  if (body.revision !== 0 || (!body.demoSnapshot && !body.studySnapshot)) throw new RequestPayloadError("Escolha um percurso válido deste navegador para salvar na sua conta.");
+  if (body.revision !== 0 || (!body.demoSnapshot && !body.studySnapshot && !body.lessonSnapshot)) throw new RequestPayloadError("Escolha um percurso válido deste navegador para salvar na sua conta.");
   await consumeRateLimit({ namespace: "guest-learning-import", identifier: principal.uid, limit: 5, windowMs: 3_600_000 });
   return saveLearning(principal, body, { requireEmpty: true });
 }
@@ -83,7 +87,7 @@ export async function createConversation(principal: RequestPrincipal, body: Reco
   assertOnlyKeys(body, ["subject", "body", "learningRevision"]);
   const subject = textField(body.subject, "Assunto", 160);
   const message = textField(body.body, "Mensagem", 4000);
-  const evaluation = subject === "Avaliação da conversa da cafeteria";
+  const evaluation = subject === "Avaliação da Aula 1" || subject === "Avaliação da conversa da cafeteria";
   const testOwner = isTestOwnerUid(principal.uid);
   if (testOwner) await requireTestOwner(principal);
   if ((evaluation || testOwner) && (!Number.isSafeInteger(body.learningRevision) || Number(body.learningRevision)<0)) throw new RequestPayloadError("Atualize a conversa antes de enviar.");

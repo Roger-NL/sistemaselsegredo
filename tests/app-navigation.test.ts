@@ -8,7 +8,7 @@ describe("connected learning navigation", () => {
   it("keeps the panel, story, study and account reachable from every learning screen", () => {
     for (const current of ["dashboard", "demo", "study"] as const) {
       const html = renderToStaticMarkup(createElement(AppHeader, { current }));
-      for (const path of ["/dashboard", "/demo", "/demo/estudo", "/dashboard?painel=conta", "/dashboard?painel=configuracoes"]) expect(html).toContain(`href="${path}"`);
+      for (const path of ["/dashboard", "/demo", "/demo?retomar=conclusao", "/dashboard?painel=conta", "/dashboard?painel=configuracoes"]) expect(html).toContain(`href="${path}"`);
       expect(html).toContain('aria-label="Menu de navegação"');
       expect(html).toContain('aria-label="BasedSpeak — meu painel"');
     }

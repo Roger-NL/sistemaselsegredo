@@ -1,0 +1,73 @@
+.lesson-drag-source {
+  position: relative;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: grab;
+}
+
+.lesson-drag-source:disabled {
+  cursor: default;
+}
+
+.lesson-drag-source[aria-pressed="true"] {
+  outline: 2px solid var(--lo-violet, #5755d9);
+  outline-offset: 3px;
+}
+
+.lesson-drag-source[data-lesson-dragging="true"] {
+  opacity: 0.35;
+  cursor: grabbing;
+}
+
+.lesson-drag-source:focus-visible,
+.lesson-drop-target:focus-visible {
+  outline: 3px solid var(--lo-violet, #5755d9);
+  outline-offset: 4px;
+}
+
+.lesson-drop-target {
+  position: relative;
+}
+
+.lesson-drop-target[data-drop-available="true"] {
+  cursor: pointer;
+}
+
+.lesson-drop-target[data-lesson-drop-active="true"] {
+  outline: 3px solid var(--lo-violet, #5755d9);
+  outline-offset: 4px;
+}
+
+.lesson-drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483000;
+  pointer-events: none !important;
+  user-select: none;
+  will-change: transform;
+  filter: drop-shadow(0 12px 20px rgb(26 42 28 / 18%));
+}
+
+.lesson-drag-ghost,
+.lesson-drag-ghost * {
+  pointer-events: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+.lesson-drag-ghost > * {
+  outline: none !important;
+}
+
+.lesson-drag-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  padding: 0;
+  border: 0;
+}

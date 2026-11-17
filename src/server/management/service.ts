@@ -1,7 +1,6 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
 import type { LiveClassBooking } from "@/contracts/live-class";
-import { conversationPosition } from "@/features/demo/session/position";
 import type { UserRecord } from "firebase-admin/auth";
 import { getAdminAuth, getAdminDb } from "@/server/firebase";
 import type { RequestPrincipal } from "@/server/auth/principal";
@@ -32,9 +31,9 @@ export function managementUser(identity: UserRecord, savedProfile?: Record<strin
     email: identity.email || "", role: identity.customClaims?.admin === true ? "manager" : "student",
     status,
     createdAt: iso(identity.metadata.creationTime), lastLoginAt: iso(profile.lastLoginDate) || iso(identity.metadata.lastSignInTime),
-    progress: learning.testMode ? 0 : Math.round((learning.demoPercent + (learning.studyTotal ? studyCompleted / learning.studyTotal * 100 : 0)) / 2),
+    progress: learning.testMode ? 0 : learning.demoPercent,
     testMode: learning.testMode === true, demoPercent: learning.testMode ? 0 : learning.demoPercent, studyCompleted, studyTotal: learning.studyTotal,
-    conversation: learning.testMode ? null : conversationPosition(learning.demoSnapshot), lastLearningAt: learning.updatedAt, liveClass: booking,
+    conversation: null, lastLearningAt: learning.updatedAt, liveClass: booking,
     canBookLiveClass: !learning.testMode && ["active", "pending"].includes(status) && studyCompleted === learning.studyTotal && (!booking || booking.status === "cancelled"),
     loginResetAt: iso(profile.loginResetAt), notes: typeof profile.managementNotes === "string" ? profile.managementNotes : "",
   };
@@ -91,7 +90,7 @@ export async function mutateManagement(principal: RequestPrincipal, action: Admi
         const ref = learningRef(action.userId), stored = await tx.get(ref);
         const previousLearning = learningFromData(stored.data());
         tx.set(ref, { ...learningFromData(), revision: previousLearning.revision + 1, saveVersion: previousLearning.saveVersion + 1, updatedAt: at });
-        tx.create(auditRef().doc(), audit(principal, target, "Progresso de conversa e estudo reiniciado", at));
+        tx.create(auditRef().doc(), audit(principal, target, "Progresso da Aula 1 reiniciado", at));
         tx.create(studentActivityRef(action.userId).doc(), { kind: "reset", title: "Seu progresso foi reiniciado pela gestão", at });
       });
       return { message: "Progresso reiniciado. As sessões abertas receberão o novo estado ao sincronizar." };

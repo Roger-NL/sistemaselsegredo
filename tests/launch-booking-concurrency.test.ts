@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { RequestPrincipal } from "@/server/auth/principal";
-import { studySteps } from "@/features/theory/progress";
+import { accountLesson } from "./helpers/lesson-snapshot";
 import { monthSlots } from "@/features/live-class/calendar";
 
 // Isolated optimistic-concurrency double: every read captures a version, commit
@@ -43,7 +43,7 @@ beforeEach(() => {
   memory.reset(); vi.useFakeTimers(); vi.setSystemTime(now); vi.stubEnv("LIVE_CLASS_TIMEZONE", "Europe/Lisbon");
   for (const uid of ["launch-qa-a", "launch-qa-b"]) {
     memory.docs.set(`users/${uid}`, { accountStatus: "active", name: "Synthetic QA" });
-    memory.docs.set(`learning_states/${uid}`, { studySnapshot: JSON.stringify({ version: 1, position: 0, completed: studySteps.map(item => item.step.id), supported: [] }) });
+    memory.docs.set(`learning_states/${uid}`, { lessonSnapshot: accountLesson() });
   }
 });
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); });

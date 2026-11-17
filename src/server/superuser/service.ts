@@ -6,13 +6,13 @@ import { RequestAuthError } from "@/server/auth/request-auth";
 import { RequestPayloadError, assertOnlyKeys } from "@/server/http/request";
 import { consumeRateLimit } from "@/server/http/rate-limit";
 import { learningRef, userRef, studentActivityRef } from "@/server/workspace/service";
-import { accountStatus, learningFromData, parseDemoSnapshot, parseStudySnapshot } from "@/server/workspace/validation";
+import { accountStatus, learningFromData } from "@/server/workspace/validation";
 import { requireTestOwner } from "./policy";
-import { applyTestAction, testActions, type TestAction } from "@/features/superuser/actions";
-import { catalog } from "@/features/demo/content/catalog";
-import { PROFILES, REVIEW_VIEWS } from "@/features/demo/model/types";
-import { studySteps } from "@/features/theory/progress";
+import { applyTestAction, testActions, PROFILES, REVIEW_VIEWS, type TestAction } from "@/features/superuser/actions";
+import { LESSON_SCENES } from "@/features/first-encounters/lesson-one";
 import { ownerResetFailure, prepareOwnerJourneyReset } from "./owner-reset";
+const rounds = LESSON_SCENES.flatMap((scene, sceneIndex) => scene.rounds.map((round, roundIndex) => ({ id: round.id, sceneId: scene.id, scene: sceneIndex, round: roundIndex })));
+
 export function validateTestAction(body: Record<string, unknown>): TestAction {
   assertOnlyKeys(body,["action","saveVersion","revision","profile","part","node","step","view"]);
   const action = body.action as TestAction["action"];
@@ -20,9 +20,9 @@ export function validateTestAction(body: Record<string, unknown>): TestAction {
   const fields = action === "jump-part" || action === "complete-part" ? ["part","profile"] : action === "jump-node" ? ["node","profile"] : ["start-demo","profile"].includes(action) ? ["profile"] : action.startsWith("study-") ? ["step"] : action === "review" ? ["view"] : [];
   for (const key of ["profile","part","node","step","view"]) if (key in body && !fields.includes(key)) throw new RequestPayloadError("Parâmetro incompatível com a ação.");
   if (body.profile !== undefined && !PROFILES.includes(body.profile as never)) throw new RequestPayloadError("Apoio inválido.");
-  if (fields.includes("part") && (!Number.isInteger(body.part) || Number(body.part)<1 || Number(body.part)>10)) throw new RequestPayloadError("Parte inválida.");
-  if (fields.includes("node") && (typeof body.node!=="string" || !catalog[body.node])) throw new RequestPayloadError("Momento inválido.");
-  if (fields.includes("step") && (!Number.isInteger(body.step) || Number(body.step)<0 || Number(body.step)>=studySteps.length)) throw new RequestPayloadError("Etapa inválida.");
+  if (fields.includes("part") && (!Number.isInteger(body.part) || Number(body.part)<1 || Number(body.part)>6)) throw new RequestPayloadError("Parte inválida.");
+  if (fields.includes("node") && (typeof body.node!=="string" || !rounds.some(item => item.id === body.node || item.sceneId === body.node))) throw new RequestPayloadError("Momento inválido.");
+  if (fields.includes("step") && (!Number.isInteger(body.step) || Number(body.step)<0 || Number(body.step)>=11)) throw new RequestPayloadError("Etapa inválida.");
   if (fields.includes("view") && !REVIEW_VIEWS.includes(body.view as never)) throw new RequestPayloadError("Tela de revisão inválida.");
   return body as TestAction;
 }
@@ -42,7 +42,7 @@ export async function mutateTestProgress(principal: RequestPrincipal, body: Reco
     const cleanHistory = action.action === "reset-real" ? await tx.get(studentActivityRef(principal.uid).where("kind","==","learning").limit(450)) : null;
     if (cleanHistory && cleanHistory.size >= 450) throw new RequestAuthError("O histórico é grande demais para um reset atômico. Nenhum dado foi alterado.",409);
     const changed = applyTestAction(previous,action);
-    const next = { ...changed, ...parseDemoSnapshot(changed.demoSnapshot), ...parseStudySnapshot(changed.studySnapshot), revision:previous.revision+1, saveVersion:previous.saveVersion+1, updatedAt:new Date().toISOString() };
+    const next = learningFromData({ ...changed, revision:previous.revision+1, saveVersion:previous.saveVersion+1, updatedAt:new Date().toISOString() });
     if (["reset-all","reset-real","reset-presentation","complete-presentation","complete-all"].includes(action.action)) {
       const revision=Number(profile.data()?.presentationRevision)||0;
       tx.update(userRef(principal.uid), {presentationCompletedAt:["complete-presentation","complete-all"].includes(action.action)?next.updatedAt:null,presentationRevision:revision+1});

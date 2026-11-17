@@ -1,0 +1,419 @@
+{
+  "self-and-you": {
+    "text": "Nesta aula, você vai aprender a falar de si e com outra pessoa. Primeiro, eu sou. Depois, você é. Veja quem fala e com quem fala.",
+    "duration": 9.65,
+    "words": [
+      {
+        "word": "Nesta",
+        "start": 0.0,
+        "end": 0.36
+      },
+      {
+        "word": "aula,",
+        "start": 0.36,
+        "end": 0.62
+      },
+      {
+        "word": "você",
+        "start": 0.86,
+        "end": 1.04
+      },
+      {
+        "word": "vai",
+        "start": 1.04,
+        "end": 1.18
+      },
+      {
+        "word": "aprender",
+        "start": 1.18,
+        "end": 1.52
+      },
+      {
+        "word": "a",
+        "start": 1.52,
+        "end": 1.66
+      },
+      {
+        "word": "falar",
+        "start": 1.66,
+        "end": 1.88
+      },
+      {
+        "word": "de",
+        "start": 1.88,
+        "end": 2.1
+      },
+      {
+        "word": "si",
+        "start": 2.1,
+        "end": 2.36
+      },
+      {
+        "word": "e",
+        "start": 2.36,
+        "end": 2.8
+      },
+      {
+        "word": "com",
+        "start": 2.8,
+        "end": 2.92
+      },
+      {
+        "word": "outra",
+        "start": 2.92,
+        "end": 3.22
+      },
+      {
+        "word": "pessoa.",
+        "start": 3.22,
+        "end": 3.62
+      },
+      {
+        "word": "Primeiro,",
+        "start": 4.28,
+        "end": 4.66
+      },
+      {
+        "word": "eu",
+        "start": 4.88,
+        "end": 4.98
+      },
+      {
+        "word": "sou.",
+        "start": 4.98,
+        "end": 5.22
+      },
+      {
+        "word": "Depois,",
+        "start": 5.92,
+        "end": 6.22
+      },
+      {
+        "word": "você",
+        "start": 6.56,
+        "end": 6.78
+      },
+      {
+        "word": "é.",
+        "start": 6.78,
+        "end": 6.98
+      },
+      {
+        "word": "Veja",
+        "start": 7.8,
+        "end": 8.06
+      },
+      {
+        "word": "quem",
+        "start": 8.06,
+        "end": 8.2
+      },
+      {
+        "word": "fala",
+        "start": 8.2,
+        "end": 8.52
+      },
+      {
+        "word": "e",
+        "start": 8.52,
+        "end": 8.82
+      },
+      {
+        "word": "com",
+        "start": 8.82,
+        "end": 8.94
+      },
+      {
+        "word": "quem",
+        "start": 8.94,
+        "end": 9.1
+      },
+      {
+        "word": "fala.",
+        "start": 9.1,
+        "end": 9.42
+      }
+    ],
+    "reviewFlags": [],
+    "sourceSHA256": "530d978ac37f06a37f5e8575d693b31e10db106fb8c7f4bb29eb18416998a268",
+    "timingSource": "faster-whisper base, unprompted pt, CPU int8; approximate word timing, not forced phoneme alignment"
+  },
+  "we-and-they": {
+    "text": "Ao falar da própria equipe, usamos nós somos. Ao falar de outra equipe, usamos eles ou elas são. As imagens mostram quem faz parte de cada grupo.",
+    "duration": 9.32,
+    "words": [
+      {
+        "word": "Ao",
+        "start": 0.0,
+        "end": 0.24
+      },
+      {
+        "word": "falar",
+        "start": 0.24,
+        "end": 0.5
+      },
+      {
+        "word": "da",
+        "start": 0.5,
+        "end": 0.66
+      },
+      {
+        "word": "própria",
+        "start": 0.66,
+        "end": 0.98
+      },
+      {
+        "word": "equipe,",
+        "start": 0.98,
+        "end": 1.46
+      },
+      {
+        "word": "usamos",
+        "start": 1.74,
+        "end": 2.1
+      },
+      {
+        "word": "nós",
+        "start": 2.1,
+        "end": 2.34
+      },
+      {
+        "word": "somos.",
+        "start": 2.34,
+        "end": 2.7
+      },
+      {
+        "word": "Ao",
+        "start": 3.2,
+        "end": 3.38
+      },
+      {
+        "word": "falar",
+        "start": 3.38,
+        "end": 3.64
+      },
+      {
+        "word": "de",
+        "start": 3.64,
+        "end": 3.84
+      },
+      {
+        "word": "outra",
+        "start": 3.84,
+        "end": 4.04
+      },
+      {
+        "word": "equipe,",
+        "start": 4.04,
+        "end": 4.46
+      },
+      {
+        "word": "usamos",
+        "start": 4.64,
+        "end": 4.88
+      },
+      {
+        "word": "eles",
+        "start": 4.88,
+        "end": 5.24
+      },
+      {
+        "word": "ou",
+        "start": 5.24,
+        "end": 5.56
+      },
+      {
+        "word": "elas",
+        "start": 5.56,
+        "end": 5.8
+      },
+      {
+        "word": "são.",
+        "start": 5.8,
+        "end": 6.08
+      },
+      {
+        "word": "As",
+        "start": 6.7,
+        "end": 6.84
+      },
+      {
+        "word": "imagens",
+        "start": 6.84,
+        "end": 7.26
+      },
+      {
+        "word": "mostram",
+        "start": 7.26,
+        "end": 7.68
+      },
+      {
+        "word": "quem",
+        "start": 7.68,
+        "end": 7.84
+      },
+      {
+        "word": "faz",
+        "start": 7.84,
+        "end": 8.02
+      },
+      {
+        "word": "parte",
+        "start": 8.02,
+        "end": 8.42
+      },
+      {
+        "word": "de",
+        "start": 8.42,
+        "end": 8.54
+      },
+      {
+        "word": "cada",
+        "start": 8.54,
+        "end": 8.74
+      },
+      {
+        "word": "grupo.",
+        "start": 8.74,
+        "end": 9.02
+      }
+    ],
+    "reviewFlags": [],
+    "sourceSHA256": "aa33701fbc08db5941ae44cc04fa253dad542903ca7612b2584e95b6ee34d2b0",
+    "timingSource": "faster-whisper base, unprompted pt, CPU int8; approximate word timing, not forced phoneme alignment"
+  },
+  "lesson-path": {
+    "text": "Você começa praticando em cenas curtas. Depois, entende a regra com exemplos. No fim, faz um teste curto para ver o que já consegue usar.",
+    "duration": 9.48,
+    "words": [
+      {
+        "word": "Você",
+        "start": 0.0,
+        "end": 0.34
+      },
+      {
+        "word": "começa",
+        "start": 0.34,
+        "end": 0.7
+      },
+      {
+        "word": "praticando",
+        "start": 0.7,
+        "end": 1.38
+      },
+      {
+        "word": "em",
+        "start": 1.38,
+        "end": 1.5
+      },
+      {
+        "word": "cenas",
+        "start": 1.5,
+        "end": 1.7
+      },
+      {
+        "word": "curtas.",
+        "start": 1.7,
+        "end": 2.32
+      },
+      {
+        "word": "Depois,",
+        "start": 2.9,
+        "end": 3.32
+      },
+      {
+        "word": "entende",
+        "start": 3.32,
+        "end": 4.14
+      },
+      {
+        "word": "a",
+        "start": 4.14,
+        "end": 4.28
+      },
+      {
+        "word": "regra",
+        "start": 4.28,
+        "end": 4.6
+      },
+      {
+        "word": "com",
+        "start": 4.6,
+        "end": 4.76
+      },
+      {
+        "word": "exemplos.",
+        "start": 4.76,
+        "end": 5.4
+      },
+      {
+        "word": "No",
+        "start": 5.86,
+        "end": 6.04
+      },
+      {
+        "word": "fim,",
+        "start": 6.04,
+        "end": 6.32
+      },
+      {
+        "word": "faz",
+        "start": 6.58,
+        "end": 6.88
+      },
+      {
+        "word": "um",
+        "start": 6.88,
+        "end": 7.04
+      },
+      {
+        "word": "teste",
+        "start": 7.04,
+        "end": 7.3
+      },
+      {
+        "word": "curto",
+        "start": 7.3,
+        "end": 7.74
+      },
+      {
+        "word": "para",
+        "start": 7.74,
+        "end": 7.94
+      },
+      {
+        "word": "ver",
+        "start": 7.94,
+        "end": 8.14
+      },
+      {
+        "word": "o",
+        "start": 8.14,
+        "end": 8.26
+      },
+      {
+        "word": "que",
+        "start": 8.26,
+        "end": 8.38
+      },
+      {
+        "word": "já",
+        "start": 8.38,
+        "end": 8.54
+      },
+      {
+        "word": "consegue",
+        "start": 8.54,
+        "end": 8.88
+      },
+      {
+        "word": "usar.",
+        "start": 8.88,
+        "end": 9.18
+      }
+    ],
+    "reviewFlags": [],
+    "sourceSHA256": "25376556b0e345a1d03088175cdd274a436d79f7745fe6dd7059af61ca77b76d",
+    "timingSource": "faster-whisper base, unprompted pt, CPU int8; approximate word timing, not forced phoneme alignment"
+  }
+}

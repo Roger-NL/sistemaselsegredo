@@ -1,0 +1,4 @@
+interface:
+  display_name: "Apple Web Design"
+  short_description: "UI web inspirada na Apple, com preview e revisão"
+  default_prompt: "Use $apple-web-design para criar uma UI inspirada na Apple e mostrar um preview responsivo."

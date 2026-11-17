@@ -1,0 +1,11 @@
+.lj-journey{display:inline-flex;align-items:center;gap:7px;vertical-align:middle;min-width:0;max-width:100%;width:210px;height:18px;line-height:18px;font-family:inherit;font-size:11px;font-weight:450;letter-spacing:0;color:var(--lo-muted,#747d94);flex-shrink:1}
+.lj-label{min-width:0;flex-shrink:0;white-space:nowrap;color:var(--lo-muted,#747d94)}
+.lj-track{display:flex;align-items:center;gap:3px;min-width:45px;flex:1;height:4px}
+.lj-segment{display:block;min-width:3px;flex-basis:0;height:4px;overflow:hidden;border-radius:3px;background:var(--lo-line,#e1e5f0)}
+.lj-segment>span{display:block;width:100%;height:100%;background:var(--lo-violet,#5755d9);border-radius:inherit;transform-origin:left;transition:transform 180ms var(--lo-ease,cubic-bezier(.23,1,.32,1))}
+.lj-percent{font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--lo-violet,#5755d9);min-width:26px;text-align:right}
+@media(max-width:759px){.lj-journey{width:180px;gap:6px}.lj-track{gap:2px;min-width:38px}.lj-percent{min-width:25px}}
+@media(prefers-reduced-motion:reduce){.lj-segment>span{transition:none}}
+
+/* Keep the written pages in the lesson’s existing color and control system. */
+.lo-app .lc-next{background:var(--lo-violet);border-radius:12px}.lo-app .lc-english,.lo-app .lc-forms strong{color:var(--lo-violet)}.lo-app .lc-card{border-color:var(--lo-line)}

@@ -1,8 +1,13 @@
 import type { AccountStatus, LearningProgress, TeacherConversation } from "@/contracts/workspace";
 import { RequestPayloadError } from "@/server/http/request";
-import { decodeSnapshot } from "@/features/demo/session/storage";
-import { catalog } from "@/features/demo/content/catalog";
-import { decodeProgress, studySteps } from "@/features/theory/progress";
+import { decodeLessonAccountSnapshot } from "@/features/first-encounters/lesson-account-snapshot";
+import { getLessonDashboardSnapshot } from "@/features/first-encounters/lesson-dashboard";
+
+export const LESSON_ACCOUNT_TOTAL = 49;
+export function savedLessonProgress(data: Record<string, unknown> = {}) {
+  const snapshot = decodeLessonAccountSnapshot(typeof data.lessonSnapshot === "string" ? data.lessonSnapshot : null);
+  return getLessonDashboardSnapshot(snapshot?.progress);
+}
 
 export function textField(value: unknown, label: string, max: number, min = 1) {
   if (typeof value !== "string" || value.trim().length < min || value.trim().length > max || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value)) {
@@ -19,39 +24,37 @@ export function iso(value: unknown): string | null {
   return null;
 }
 export function learningFromData(data: Record<string, unknown> = {}): LearningProgress {
+  const lesson = decodeLessonAccountSnapshot(typeof data.lessonSnapshot === "string" ? data.lessonSnapshot : null);
+  const progress = getLessonDashboardSnapshot(lesson?.progress);
   return {
-    ...(data.testMode === true ? { testMode: true } : {}),
+    ...(typeof data.testMode === "boolean" ? { testMode: data.testMode } : {}),
     saveVersion: Number.isSafeInteger(data.saveVersion) && Number(data.saveVersion) >= 0 ? Number(data.saveVersion) : 0,
     revision: Number.isSafeInteger(data.revision) && Number(data.revision) >= 0 ? Number(data.revision) : 0,
     demoSnapshot: typeof data.demoSnapshot === "string" ? data.demoSnapshot : null,
     studySnapshot: typeof data.studySnapshot === "string" ? data.studySnapshot : null,
-    demoPercent: typeof data.demoPercent === "number" && Number.isFinite(data.demoPercent) ? Math.max(0, Math.min(100, data.demoPercent)) : 0,
-    studyCompleted: typeof data.studyCompleted === "number" ? Math.max(0, Math.min(studySteps.length, data.studyCompleted)) : 0,
-    studyTotal: studySteps.length,
+    lessonSnapshot: lesson ? JSON.stringify(lesson) : null,
+    demoPercent: progress.percent,
+    studyCompleted: progress.completedUnits,
+    studyTotal: LESSON_ACCOUNT_TOTAL,
     updatedAt: iso(data.updatedAt),
   };
 }
+export function parseLessonSnapshot(value: unknown) {
+  if (value === null) return { lessonSnapshot: null };
+  if (typeof value !== "string" || Buffer.byteLength(value, "utf8") > 100_000) throw new RequestPayloadError("Progresso da aula inválido ou muito grande.");
+  const snapshot = decodeLessonAccountSnapshot(value);
+  if (!snapshot) throw new RequestPayloadError("Não foi possível validar o progresso da Aula 1.");
+  return { lessonSnapshot: JSON.stringify(snapshot) };
+}
+/** Retired write fields are accepted only when explicitly cleared. Historical
+ * values remain stored/readable, but their engines never join this curriculum. */
 export function parseDemoSnapshot(value: unknown) {
   if (value === null) return { demoSnapshot: null, demoPercent: 0 };
-  if (typeof value !== "string" || Buffer.byteLength(value, "utf8") > 750_000) throw new RequestPayloadError("Progresso da conversa inválido ou muito grande.");
-  const state = decodeSnapshot(value);
-  if (!state) throw new RequestPayloadError("Não foi possível validar o progresso da conversa.");
-  // Progress records activities actually reached through a replayable journal.
-  // Test-forward navigation never counts as completed learning.
-  const responses = Object.values(catalog).filter(node => node.kind === "response" || node.kind === "comprehension");
-  const evidenced = new Set([...state.evidence.map(item => item.nodeId), ...state.checked]);
-  const count = responses.filter(node => evidenced.has(node.id)).length;
-  return { demoSnapshot: value, demoPercent: responses.length ? Math.round(count / responses.length * 100) : 0 };
+  throw new RequestPayloadError("A conversa antiga foi substituída. Salve o progresso da Aula 1.");
 }
 export function parseStudySnapshot(value: unknown) {
   if (value === null) return { studySnapshot: null, studyCompleted: 0 };
-  if (typeof value !== "string" || Buffer.byteLength(value, "utf8") > 50_000) throw new RequestPayloadError("Progresso de estudo inválido.");
-  let raw: Record<string, unknown>;
-  try { raw = JSON.parse(value); } catch { throw new RequestPayloadError("Progresso de estudo inválido."); }
-  if (!raw || raw.version !== 1 || !Number.isInteger(raw.position) || !Array.isArray(raw.completed) || !Array.isArray(raw.supported)) throw new RequestPayloadError("Progresso de estudo inválido.");
-  const progress = decodeProgress(value);
-  if (progress.completed.length !== raw.completed.length || progress.supported.length !== raw.supported.length) throw new RequestPayloadError("O estudo contém atividades desconhecidas ou repetidas.");
-  return { studySnapshot: JSON.stringify(progress), studyCompleted: progress.completed.length };
+  throw new RequestPayloadError("O estudo antigo foi substituído. Salve o progresso da Aula 1.");
 }
 export function conversationFromData(id: string, data: Record<string, unknown>): TeacherConversation {
   return { id, userId: String(data.userId), userName: String(data.userName || ""), userEmail: String(data.userEmail || ""), subject: String(data.subject || ""), status: data.status === "closed" || data.status === "answered" ? data.status : "open", createdAt: iso(data.createdAt) || "", updatedAt: iso(data.updatedAt) || "", messages: Array.isArray(data.messages) ? data.messages : [] };
@@ -59,5 +62,5 @@ export function conversationFromData(id: string, data: Record<string, unknown>):
 
 /** Same saved-practice check for both booking eligibility and management. */
 export function savedStudyCompleted(data: Record<string, unknown> = {}): number {
-  try { return parseStudySnapshot(data.studySnapshot ?? null).studyCompleted; } catch { return 0; }
+  return savedLessonProgress(data).completedUnits;
 }

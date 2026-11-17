@@ -11,12 +11,12 @@ import { ViewportFrame } from "@/features/landing/ViewportFrame";
 import "@/features/landing/landing.css";
 
 export const metadata: Metadata = {
-  title: "BasedSpeak | Inglês é pra participar",
-  description: "Entre na história, escolha o que dizer e construa sua resposta com apoio. Experimente a demo e o estudo gratuitos, sem cadastro e sem microfone.",
+  title: "BasedSpeak | Inglês na prática",
+  description: "Aprenda inglês em cenas visuais: apresentação, guia, prática, teoria e teste. Experimente a aula gratuita, sem cadastro e sem microfone.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Inglês é pra participar. | BasedSpeak",
-    description: "Entre na história. Escolha o que dizer. Experimente a demo gratuita.",
+    title: "Inglês na prática. | BasedSpeak",
+    description: "Escute, explore as cenas e construa suas primeiras falas. Experimente a aula gratuita.",
     locale: "pt_BR", type: "website", url: "/", siteName: "BasedSpeak",
   },
 };
@@ -31,17 +31,17 @@ export default async function HomePage() {
     </header>
     <main id="conteudo" className="landing-main landing-wrap">
       <div className="landing-hero-copy">
-        <p className="landing-eyebrow"><span className="landing-small-mark" aria-hidden="true" />INGLÊS POR HISTÓRIAS</p>
-        <h1>Inglês é pra<br /><span>participar.</span></h1>
-        <p className="landing-lead">Entre na história. Escolha o que dizer.<br className="landing-desktop-break" /> Construa sua resposta, com apoio.</p>
+        <p className="landing-eyebrow"><span className="landing-small-mark" aria-hidden="true" />APRENDA FAZENDO</p>
+        <h1>Inglês na<br /><span>prática.</span></h1>
+        <p className="landing-lead">Explore as cenas. Escolha o que dizer.<br className="landing-desktop-break" /> Construa sua resposta, com apoio.</p>
         <div className="landing-hero-actions">
-          <Link href="/demo" prefetch={false} className="landing-cta">Começar a conversa<ArrowUpRight size={19} aria-hidden="true" /></Link>
+          <Link href="/demo" prefetch={false} className="landing-cta">Começar a aula<ArrowUpRight size={19} aria-hidden="true" /></Link>
           <MoreInformation />
         </div>
         <p className="landing-assurance"><span><Check size={14} aria-hidden="true" />Demo gratuita</span><span><MicOff size={14} aria-hidden="true" />Sem microfone</span></p>
       </div>
       <ConversationPreview />
     </main>
-    <footer className="landing-footer landing-wrap"><span>Um encontro de cada vez.</span><nav aria-label="Informações legais"><Link href="/privacidade">Privacidade</Link><Link href="/termos">Termos</Link></nav></footer>
+    <footer className="landing-footer landing-wrap"><span>Aprenda fazendo.</span><nav aria-label="Informações legais"><Link href="/privacidade">Privacidade</Link><Link href="/termos">Termos</Link></nav></footer>
   </ViewportFrame>;
 }

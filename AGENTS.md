@@ -22,3 +22,17 @@ These defaults are optimized for AI coding agents (and humans) working on apps t
   needed. Always curl https://ai-gateway.vercel.sh/v1/models first; never trust model IDs from memory
 - For durable agent loops or untrusted code: use Workflow (pause/resume/state) + Sandbox; use Vercel MCP for secure infra access
 <!-- VERCEL BEST PRACTICES END -->
+
+
+<!-- UI SKILLS START -->
+## Skills de UI disponíveis neste projeto
+
+Catálogo e exemplos em `Skills/README.md`. Leia o `SKILL.md` correspondente ao usar uma skill:
+
+- `Skills/apple-web-design/SKILL.md` (`$apple-web-design`): quando solicitado design Apple/HIG para web; é uma adaptação local, não oficial Apple.
+- `Skills/frontend-design/SKILL.md` (`$frontend-design`): criação ou reformulação visual de UI.
+- `Skills/web-design-guidelines/SKILL.md` (`$web-design-guidelines`): revisão de UI, UX e acessibilidade nos arquivos relevantes.
+- `Skills/vercel-react-best-practices/SKILL.md` (`$vercel-react-best-practices`): implementação e desempenho React/Next.js.
+
+Selecione as skills pertinentes à tarefa, sem carregar todas por padrão. Referências e direção explícita do usuário prevalecem sobre preferências estéticas das skills. Instalar este kit não autoriza redesenhar telas existentes. Em implementações visuais, abra e inspecione o preview quando houver ferramenta disponível e descreva com precisão o que foi verificado.
+<!-- UI SKILLS END -->

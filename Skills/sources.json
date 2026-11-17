@@ -1,0 +1,79 @@
+{
+  "installed_on": "2026-11-16",
+  "skills": [
+    {
+      "name": "apple-web-design",
+      "source": "local custom skill inspired by Apple HIG",
+      "official_apple_skill": false
+    },
+    {
+      "name": "frontend-design",
+      "repo": "anthropics/skills",
+      "path": "skills/frontend-design",
+      "commit": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+      "local_additions": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "web-design-guidelines",
+      "repo": "vercel-labs/agent-skills",
+      "path": "skills/web-design-guidelines",
+      "commit": "1a2c79d4e6c4a2283dc2c614b6538cbe1ed5ca62",
+      "local_additions": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "vercel-react-best-practices",
+      "repo": "vercel-labs/agent-skills",
+      "path": "skills/react-best-practices",
+      "commit": "1a2c79d4e6c4a2283dc2c614b6538cbe1ed5ca62",
+      "local_additions": [
+        "agents/openai.yaml"
+      ]
+    },
+    {
+      "name": "animate",
+      "repo": "emilkowalski/skills",
+      "path": "skills/animate",
+      "commit": "64eb3deb9a5fbfa041faf783e0bc3fd635872e9c"
+    },
+    {
+      "name": "gestures",
+      "repo": "emilkowalski/skills",
+      "path": "skills/gestures",
+      "commit": "64eb3deb9a5fbfa041faf783e0bc3fd635872e9c"
+    },
+    {
+      "name": "choreograph",
+      "repo": "emilkowalski/skills",
+      "path": "skills/choreograph",
+      "commit": "64eb3deb9a5fbfa041faf783e0bc3fd635872e9c"
+    },
+    {
+      "name": "review-animations",
+      "repo": "emilkowalski/skills",
+      "path": "skills/review-animations",
+      "commit": "64eb3deb9a5fbfa041faf783e0bc3fd635872e9c"
+    },
+    {
+      "name": "motion-design",
+      "repo": "LottieFiles/motion-design-skill",
+      "path": "skills/motion-design",
+      "commit": "f9a8a041b85185ee4881b3471d3415e939aac772"
+    },
+    {
+      "name": "rive-character-rigging",
+      "repo": "itxys/rive-character-rigging-skill",
+      "path": ".",
+      "commit": "fedb8464b66d0ab4d033498c7c60f894b1428601"
+    },
+    {
+      "name": "rive",
+      "repo": "rive-app/skills",
+      "path": "skills/rive",
+      "commit": "5f2a8e20c43bb63f470d4cabe259f20eee818f57"
+    }
+  ]
+}

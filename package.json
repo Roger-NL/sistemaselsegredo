@@ -22,6 +22,7 @@
     "auth:admins": "node scripts/set-admin-claims.mjs"
   },
   "dependencies": {
+    "@rive-app/react-webgl2": "4.39.0",
     "@vercel/blob": "^2.8.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -30,6 +31,7 @@
     "firebase-admin": "14.2.0",
     "googleapis": "^171.4.0",
     "lucide-react": "^0.562.0",
+    "motion": "14.14.0",
     "next": "16.2.10",
     "react": "19.2.3",
     "react-dom": "19.2.3",

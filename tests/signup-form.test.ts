@@ -9,7 +9,7 @@ describe("new student account entry", () => {
   it("explains the public demo and account benefits without an approval gate or extra required profile step", () => {
     const html = renderToStaticMarkup(createElement(SignupForm, { initialMode: "signup" }));
     expect(html).toContain("sem cadastro nem aprovação");
-    expect(html).toContain("pedir sua aula gratuita após o estudo");
+    expect(html).toContain("pedir sua aula gratuita após concluir o percurso");
     expect(html).toContain("Continuar com Google");
     expect(html).toContain("Criar conta e continuar");
     expect(html).not.toContain('name="name"');

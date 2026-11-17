@@ -20,7 +20,6 @@ vi.mock("@/components/navigation/JourneyTransition", () => ({ useJourneyTransiti
 vi.mock("@/features/local-testing/LocalTestLauncher", () => ({ LocalTestStatus: () => null, LocalTestLauncher: () => null }));
 
 import { AppHeader } from "@/components/navigation/AppHeader";
-import { Presentation } from "@/features/onboarding/Presentation";
 import { TestControlsOverlay } from "@/features/superuser/TestControls";
 
 function workspace(canTest = true, testMode = false): StudentWorkspace {
@@ -58,9 +57,9 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
-async function mount(presentation = false) {
+async function mount() {
   await act(async () => root.render(createElement(Fragment, null,
-    presentation ? createElement(Presentation, { review: true, onFinish: vi.fn() }) : createElement(AppHeader, { current: "dashboard" }),
+    createElement(AppHeader, { current: "dashboard" }),
     createElement(TestControlsOverlay),
   )));
 }
@@ -88,7 +87,7 @@ describe("the owner's test controls", () => {
     const links = [...dialog.querySelectorAll(".test-page-links a")];
     expect(links.length).toBeGreaterThan(0);
     for (const link of links) {
-      expect(link.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+      expect(link.getAttribute("href")).toMatch(/^\/(dashboard|demo|adm)(?:[?#]|$)/);
       expect(link.textContent).not.toMatch(/[↗\uFE0F]/u);
     }
   });
@@ -123,24 +122,24 @@ describe("the owner's test controls", () => {
     expect(mocks.applyTestControl).not.toHaveBeenCalled();
   });
 
-  it("opens the real controls during presentation review and closes them", async () => {
-    await mount(true);
-    expect(container.querySelector(".presentation-header")?.contains(trigger())).toBe(true);
+  it("opens the real controls from the shared header and closes them", async () => {
+    await mount();
+    expect(container.querySelector(".app-header")?.contains(trigger())).toBe(true);
     const dialog = await open();
     const close = [...dialog.querySelectorAll("button")].find(button => button.textContent?.trim() === "Fechar")!;
     await act(async () => close.click());
     expect(container.querySelector("dialog")).toBeNull();
   });
 
-  it("sends only reset-all, blocks two immediate taps, and makes a failure retryable", async () => {
+  it("sends only reset-real, blocks two immediate taps, and makes a failure retryable", async () => {
     const pending = deferred();
     mocks.applyTestControl.mockReturnValueOnce(pending.promise);
     await mount();
     const dialog = await open();
-    const reset = dialog.querySelector<HTMLButtonElement>('[data-test-action="reset-all"]')!;
-    expect(reset.textContent).toBe("Apagar tudo");
+    const reset = dialog.querySelector<HTMLButtonElement>('[data-test-action="reset-real"]')!;
+    expect(reset.textContent).toBe("Recomeçar percurso real");
     await act(async () => { reset.click(); reset.click(); });
-    expect(mocks.applyTestControl).toHaveBeenCalledExactlyOnceWith({ action: "reset-all" });
+    expect(mocks.applyTestControl).toHaveBeenCalledExactlyOnceWith({ action: "reset-real" });
     expect(dialog.querySelector("fieldset")?.disabled).toBe(true);
     expect(dialog.querySelector("footer")?.textContent).toBe("Aplicando…");
     await act(async () => pending.reject(new Error("Não foi possível apagar a conta de teste.")));

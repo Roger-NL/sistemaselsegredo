@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { RequestPrincipal } from "@/server/auth/principal";
-import { studySteps } from "@/features/theory/progress";
+import { accountLesson } from "./helpers/lesson-snapshot";
 import { monthSlots } from "@/features/live-class/calendar";
 
 type Data = Record<string, unknown>;
@@ -24,8 +24,8 @@ vi.mock("@/server/http/rate-limit", () => ({ consumeRateLimit: vi.fn(async () =>
 import { bookLiveClass, decideLiveClass, getLiveClass, listLiveClasses } from "@/server/live-class/service";
 const student: RequestPrincipal = { uid: "student", email: "student@example.com", role: "student", source: "session_cookie", subscriptionStatus: "free" };
 const manager: RequestPrincipal = { ...student, uid: "manager", role: "admin" };
-function complete(count = studySteps.length, uid = student.uid) {
-  memory.docs.set(`learning_states/${uid}`, { studySnapshot: JSON.stringify({ version: 1, position: 0, completed: studySteps.slice(0, count).map(s => s.step.id), supported: [] }) });
+function complete(count = 49, uid = student.uid) {
+  memory.docs.set(`learning_states/${uid}`, { lessonSnapshot: accountLesson(count) });
 }
 const now = new Date("2026-10-15T12:30:00Z");
 const start = monthSlots("2026-10", "Europe/Lisbon", now)[0].start;
@@ -34,9 +34,16 @@ beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(now); vi.stubEnv("LIVE_C
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); });
 
 describe("free lesson entitlement and real booking lifecycle", () => {
-  it("blocks both the agenda and direct booking at 23/24, regardless of a forged percentage", async () => {
-    complete(23); memory.docs.set("learning_states/student", { ...memory.docs.get("learning_states/student"), studyCompleted: 24, demoPercent: 100 });
-    expect(await getLiveClass(student, null)).toMatchObject({ eligible: false, completed: 23, total: 24, slots: [] });
+  it("never counts the retired curriculum or stored aggregate percentages", async () => {
+    memory.docs.set("learning_states/student", { demoPercent: 100, studyCompleted: 49, studyTotal: 49,
+      demoSnapshot: '{"percent":100}', studySnapshot: '{"version":1,"completed":["old-step"]}' });
+    expect(await getLiveClass(student, null)).toMatchObject({ eligible: false, completed: 0, total: 49, slots: [] });
+    await expect(bookLiveClass(student, { start })).rejects.toMatchObject({ status: 403 });
+  });
+
+  it("blocks both the agenda and direct booking at 48/49, regardless of a forged percentage", async () => {
+    complete(48); memory.docs.set("learning_states/student", { ...memory.docs.get("learning_states/student"), studyCompleted: 24, demoPercent: 100 });
+    expect(await getLiveClass(student, null)).toMatchObject({ eligible: false, completed: 48, total: 49, slots: [] });
     await expect(bookLiveClass(student, { start })).rejects.toMatchObject({ status: 403 });
     expect((await listLiveClasses()).bookings).toEqual([]);
   });
@@ -47,7 +54,7 @@ describe("free lesson entitlement and real booking lifecycle", () => {
     await expect(bookLiveClass(student,{start})).rejects.toMatchObject({status:403});
     expect(memory.docs.get("demo_live_classes/student")).toEqual(existing);
   });
-  it("unlocks for a free account only after all 24 saved practices, including supported practices", async () => {
+  it("unlocks for a free account only after all 49 saved stages and the final test, including supported practices", async () => {
     complete(); const result = await getLiveClass(student, null);
     expect(result.eligible).toBe(true); expect(result.slots.length).toBeGreaterThan(24);
     expect(new Set(result.slots.map(s => s.day))).toContain("2026-10-18");
@@ -78,7 +85,7 @@ describe("free lesson entitlement and real booking lifecycle", () => {
   });
   it("prevents another student from reserving a taken slot and hides it from availability", async () => {
     complete(); await bookLiveClass(student, { start });
-    memory.docs.set("users/other", { accountStatus: "active" }); complete(24, "other");
+    memory.docs.set("users/other", { accountStatus: "active" }); complete(49, "other");
     const other = { ...student, uid: "other" };
     expect((await getLiveClass(other, null)).slots.some(slot => slot.start === start)).toBe(false);
     await expect(bookLiveClass(other, { start })).rejects.toMatchObject({ status: 409 });
