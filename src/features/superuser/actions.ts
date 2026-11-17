@@ -1,7 +1,7 @@
 import type { LearningProgress } from "@/contracts/workspace";
 import { LESSON_SCENES } from "@/features/first-encounters/lesson-one";
 import { createLessonProgress, restoreLessonProgress } from "@/features/first-encounters/lesson-progress";
-import { CONCLUSION_QUESTIONS, conclusionModel, createConclusionState, restoreConclusionState, isConclusionComplete } from "@/features/first-encounters/lesson-conclusion";
+import { CONCLUSION_QUESTIONS, getConclusionQuestions, conclusionModel, createConclusionState, restoreConclusionState, isConclusionComplete } from "@/features/first-encounters/lesson-conclusion";
 import { decodeLessonAccountSnapshot, encodeLessonAccountSnapshot } from "@/features/first-encounters/lesson-account-snapshot";
 import { EMPTY_LESSON_DASHBOARD_INPUT, getLessonDashboardSnapshot } from "@/features/first-encounters/lesson-dashboard";
 
@@ -52,20 +52,20 @@ export function applyTestAction(previous: LearningProgress, input: TestAction): 
       practice(rounds.length);
       const step = input.step!;
       const index = Math.min(5, Math.max(0, step - 5));
-      conclusion = { ...conclusion, phase: step < 5 ? "theory" : "test", theoryIndex: Math.min(4, step), questionIndex: index, testStarted: step >= 5 };
+      conclusion = { ...conclusion, phase: step < 5 ? "theory" : "test", theoryIndex: Math.min(4, step), theoryBlock: 0, questionIndex: index, testStarted: step >= 5 };
       if (input.action === "study-complete" && step < 5) {
         conclusion.theoryIndex = Math.min(4, step + 1);
         if (step === 4) { conclusion.phase = "test"; conclusion.testStarted = true; }
       }
       if (input.action === "study-position" && step >= 5) {
-        for (const question of CONCLUSION_QUESTIONS.slice(0, index)) { const answer = conclusionModel(question); conclusion.attempts[question.id] = { draft: answer, firstAnswer: answer, lastAnswer: answer }; }
+        for (const question of getConclusionQuestions(conclusion).slice(0, index)) { const answer = conclusionModel(question); conclusion.attempts[question.id] = { draft: answer, firstAnswer: answer, lastAnswer: answer }; }
       }
       if (input.action === "study-complete" && step >= 5) {
-        for (const question of CONCLUSION_QUESTIONS.slice(0, index + 1)) { const answer = conclusionModel(question); conclusion.attempts[question.id] = { draft: answer, firstAnswer: answer, lastAnswer: answer }; }
+        for (const question of getConclusionQuestions(conclusion).slice(0, index + 1)) { const answer = conclusionModel(question); conclusion.attempts[question.id] = { draft: answer, firstAnswer: answer, lastAnswer: answer }; }
         if (isConclusionComplete(conclusion)) conclusion.phase = "summary";
       }
       if (input.action === "study-uncomplete") {
-        for (const question of CONCLUSION_QUESTIONS.slice(step < 5 ? 0 : index)) delete conclusion.attempts[question.id];
+        for (const question of getConclusionQuestions(conclusion).slice(step < 5 ? 0 : index)) delete conclusion.attempts[question.id];
       }
       break;
     }

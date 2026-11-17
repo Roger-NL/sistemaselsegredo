@@ -70,13 +70,20 @@ describe("the approved first lesson", () => {
     expect(LESSON_SCENES[11].rounds.map(item => item.kind)).toEqual(["speaker", "bubbles", "join", "messages"]);
   });
 
-  it("keeps the lesson to four affirmative forms and the two stated complement families", () => {
+  it("teaches readiness, location and friendship alongside introductions", () => {
     expect(PRONOUNS).toEqual(["I", "you", "we", "they"]);
     expect(VERBS).toEqual(["am", "are"]);
     for (const item of allRounds) {
       expect(item.expected.verb, item.id).toBe(item.expected.pronoun === "I" ? "am" : "are");
-      expect(item.expected.complement, item.id).toBe(item.referent === "team" ? "a team" : PERSON_NAMES[item.referent]);
+      if (item.vocabulary) expect(["ready", "here", "friends"]).toContain(item.expected.complement);
+      else expect(item.expected.complement, item.id).toBe(item.referent === "team" ? "a team" : PERSON_NAMES[item.referent]);
     }
+  });
+
+  it("distinguishes asking if someone is ready from telling them they are ready", () => {
+    const question = round("use1-listener");
+    expect(phraseText(question.expected)).toBe("Are you ready?");
+    expect(evaluatePhrase(question, { ...question.expected, question: false }).correct).toBe(false);
   });
 
   it("preserves all 29 saved round IDs, scene boundaries and existing completion prefixes", () => {
@@ -97,7 +104,7 @@ describe("the approved first lesson", () => {
 
   it("has existing audio for every correct actor, alternative valid speaker and visible phrase preview", () => {
     const catalog = lessonAudio as Record<string, string>;
-    for (const target of allRounds) {
+    for (const target of allRounds.filter(round => !round.vocabulary)) {
       const speakers = target.kind === "speaker"
         ? target.candidateSpeakers!.filter(person => evaluateSpeaker(target, person).correct)
         : [target.speaker];
@@ -131,17 +138,18 @@ describe("complete English phrases", () => {
     expect(evaluatePhrase({ ...addressed, listener: "maya" }, addressed.expected).meaningCorrect).toBe(false);
   });
 
-  it("treats am/are agreement as coaching when the intended relation is correct", () => {
+  it("requires agreement in every verb drill while keeping feedback on the understood subject", () => {
     for (const id of ["g3-i", "g3-you", "g3-we", "g3-they"]) {
       const target = round(id);
       const answer: Phrase = { ...target.expected, verb: target.expected.verb === "am" ? "are" : "am" };
       const checked = evaluatePhrase(target, answer);
-      expect(checked, id).toMatchObject({ correct: true, meaningCorrect: true });
+      expect(checked, id).toMatchObject({ correct: false, meaningCorrect: true });
       expect(checked.corrections, id).toHaveLength(1);
-      expect(checked.corrections[0], id).toContain(phraseText(target.expected));
+      expect(checked.feedback, id).toContain(`Com ${target.expected.pronoun}, use ${target.expected.verb}`);
+      expect(evaluatePhrase(target, { ...answer, verb: target.expected.verb }).correct).toBe(true);
     }
     const you = evaluatePhrase(round("g3-you"), { pronoun: "you", verb: "am", complement: "Ana" });
-    expect(you.corrections[0]).toContain("you, usamos are");
+    expect(you.corrections[0]).toContain("you, use are");
     expect(you.corrections[0]).not.toContain("plural");
   });
 

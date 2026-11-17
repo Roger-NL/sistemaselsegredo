@@ -30,7 +30,7 @@ describe("landing decorations independent of system emoji fonts", () => {
       expect(svg.querySelector("text")).toBeNull();
       expect(decoration.textContent).not.toMatch(/[✳↗↘\uFE0F]/u);
     }
-    expect(container.querySelector(".language-sticker")?.textContent).toBe("YOURTURN ");
+    expect(container.querySelector(".language-sticker")?.textContent).toBe("Sua vez ");
   });
 
   it("retains voluntary motion control, sentence assembly and restart with vector decorations", async () => {
@@ -38,8 +38,10 @@ describe("landing decorations independent of system emoji fonts", () => {
     expect(container.querySelector(".language-stage")?.getAttribute("data-motion")).toBe("off");
     await click("Retomar animações");
     expect(container.querySelector(".language-stage")?.getAttribute("data-motion")).toBe("on");
-    await click("I’m"); await click("learning"); await click("English.");
-    expect(container.querySelector(".language-answer")?.textContent).toBe("I’m learning English.");
+    await click("am");
+    expect(container.querySelector(".language-notice")?.textContent).toContain("A Ana fala de si");
+    await click("I"); await click("am"); await click("Ana.");
+    expect(container.querySelector(".language-answer")?.textContent).toBe("I am Ana.");
     expect(container.querySelector(".language-stage")?.classList.contains("is-complete")).toBe(true);
     await click("Recomeçar a amostra");
     expect(container.querySelector(".language-stage")?.classList.contains("is-complete")).toBe(false);

@@ -50,10 +50,11 @@ export function TutorialSkillPractice({ kind, words, writing, onWordsChange, onW
   function check(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); onInteraction();
     if (!writing.text.trim() || writing.result?.correct) return;
+    input.current?.blur();
     onWritingChange({ text: writing.text, result: evaluateTutorialWriting(writing.text) });
   }
   function clear() {
-    onInteraction(); onWritingChange({ text: "", result: null }); input.current?.focus();
+    onInteraction(); onWritingChange({ text: "", result: null }); input.current?.focus({ preventScroll: true });
   }
 
   return <section className="tsp-panel" data-tutorial-practice={kind} aria-label={kind === "words" ? "Treino de montar a fala" : "Treino de escrever a fala"}
@@ -82,7 +83,7 @@ export function TutorialSkillPractice({ kind, words, writing, onWordsChange, onW
           onWritingChange({ text, result: null });
           onInteraction();
         }}
-        placeholder="Escreva aqui…" autoComplete="off" autoCapitalize="off" spellCheck={false}/>
+        enterKeyHint="done" placeholder="Escreva aqui…" autoComplete="off" autoCapitalize="off" spellCheck={false}/>
       <div className="tsp-writing-actions">
         <button type="button" data-tutorial-cue="apagar" className="tsp-clear" aria-label="Apagar o que escrevi" disabled={!writing.text} onClick={clear}><Eraser size={16} aria-hidden="true"/>Apagar</button>
         <LessonButton type="submit" data-tutorial-cue="conferir" className="tsp-check" aria-label="Conferir escrita" disabled={!writing.text.trim() || Boolean(writing.result?.correct)}><Check size={17} aria-hidden="true"/>Conferir</LessonButton>

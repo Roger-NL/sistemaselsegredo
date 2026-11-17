@@ -1,6 +1,6 @@
 import { restoreConclusionState } from "./lesson-conclusion";
 import { restoreLessonProgress } from "./lesson-progress";
-import { restorePosition } from "./lesson-position";
+import { restorePosition, restoreIntroductionPosition } from "./lesson-position";
 import { LESSON_MECHANICS } from "./lesson-mechanics";
 import type { LessonDashboardInput } from "./lesson-dashboard";
 
@@ -26,7 +26,7 @@ function canonicalProgress(value: Record<string, unknown>): LessonDashboardInput
     guide: value.guide === "done" ? "done" : null,
     lesson: lesson ? JSON.stringify(lesson) : null,
     conclusion: value.conclusion == null ? null : JSON.stringify(restoreConclusionState(value.conclusion as string)),
-    introPosition: position(value.introPosition, 3), guidePosition: position(value.guidePosition, 6),
+    introPosition: value.introPosition == null ? null : JSON.stringify(restoreIntroductionPosition(value.introPosition as string)), guidePosition: position(value.guidePosition, 6),
   };
 }
 function canonicalMechanics(raw: unknown): string | null {

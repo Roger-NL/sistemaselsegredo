@@ -1,4 +1,4 @@
-import { CONCLUSION_QUESTIONS, LESSON_CONCLUSION_STORAGE, evaluateConclusionAnswer, isConclusionComplete, restoreConclusionState } from "./lesson-conclusion";
+import { getConclusionQuestions, LESSON_CONCLUSION_STORAGE, evaluateConclusionAnswer, isConclusionComplete, restoreConclusionState } from "./lesson-conclusion";
 import { LESSON_JOURNEY_STAGES, getLessonJourney } from "./lesson-journey";
 import type { LessonJourneyStage } from "./lesson-journey";
 import { LESSON_PROGRESS_STORAGE, restoreLessonProgress } from "./lesson-progress";
@@ -25,7 +25,7 @@ export function getLessonDashboardSnapshot(raw: LessonDashboardInput = EMPTY_LES
   const lesson = restoreLessonProgress(raw.lesson);
   const conclusion = restoreConclusionState(raw.conclusion);
   const lessonCompleted = lesson.completed.length;
-  const testCompleted = CONCLUSION_QUESTIONS.filter(question => {
+  const testCompleted = getConclusionQuestions(conclusion).filter(question => {
     const answer = conclusion.attempts[question.id]?.lastAnswer;
     return answer != null && evaluateConclusionAnswer(question, answer).correct;
   }).length;

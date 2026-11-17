@@ -117,12 +117,13 @@ describe("activity guidance on the actual controls", () => {
     expect(document.querySelector(".lesson-drag-ghost")).toBeNull();
   });
 
-  it.each(["g2-join", "g2-outside", "g5-messages", "g6-ensemble", "use6-i"])("queues only the given neutral English prompt after an uninterrupted guide for %s", async id => {
+  it.each(["g2-join", "g2-outside", "g5-messages", "g6-ensemble", "use6-i"])("requires a separate tap to hear the English prompt after the guide for %s", async id => {
     await mount(id); const round = rounds.find(round => round.id === id)!;
-    const expected = (round.ensemble ?? [round]).map(turn => catalog[`nina:${phraseText(turn.expected)}` as keyof typeof catalog]);
+    const prompt = round.ensemble?.[0] ?? round;
     expect(Media.calls).toHaveLength(1);
-    for (const url of expected) { await ended(); expect(Media.calls.at(-1)).toBe(url); }
-    await ended(); expect(Media.calls).toEqual([LESSON_MECHANICS[round.kind].url, ...expected]);
+    await ended(); expect(Media.calls).toEqual([LESSON_MECHANICS[round.kind].url]);
+    await press(container.querySelector<HTMLButtonElement>("[data-audio-main]")!);
+    expect(Media.calls.at(-1)).toBe(catalog[`nina:${phraseText(prompt.expected)}` as keyof typeof catalog]);
     expect(app().dataset.round).toBe(id); expect(container.querySelector(".lo-feedback.is-correct")).toBeNull(); expect(next().disabled).toBe(true);
   });
 

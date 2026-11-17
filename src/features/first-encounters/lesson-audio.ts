@@ -76,6 +76,7 @@ export function getLessonAudioRequirements(): LessonAudioRequest[] {
     requests.set(key, { person, text, key });
   }
   function visit(round: Round) {
+    if (round.vocabulary) return;
     if (round.referent !== "team") referenceNames.add(round.expected.complement);
     if (round.kind === "messages") {
       // Nina reads every anonymous message, independently of its recipient.

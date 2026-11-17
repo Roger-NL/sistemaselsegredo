@@ -6,7 +6,6 @@ import { createWorkspaceStore } from "../src/features/dashboard/workspace-store"
 import { GUEST_LEARNING_KEY } from "../src/features/dashboard/guest-learning";
 import { LessonStorageContext, createLessonStorage, type LessonStorage } from "../src/features/first-encounters/lesson-storage";
 import { LESSON_MECHANICS_STORAGE } from "../src/features/first-encounters/lesson-mechanics";
-import { REVISION_NARRATIONS } from "../src/features/first-encounters/lesson-revision-audio";
 import { decodeLessonAccountSnapshot } from "../src/features/first-encounters/lesson-account-snapshot";
 import catalog from "../src/features/first-encounters/lesson-one-audio.json";
 import { LESSON_SCENES } from "../src/features/first-encounters/lesson-one";
@@ -85,19 +84,21 @@ async function settle() {
 }
 
 describe("first contact with a word uses existing local recordings and survives guest restoration", () => {
-  it.each(["I", "you", "we", "they", "am", "are"])("explains %s once, plays PT then its English model, and remembers it without an account", async word => {
+  it.each(["I", "you", "we", "they", "am", "are"])("explains %s once, waits for a tap before its English model, and remembers it without an account", async word => {
     const first = await guestStorage();
     first.storage.setItem(LESSON_MECHANICS_STORAGE, JSON.stringify({ version: 1, seen: ["build"] }));
     await render(first.storage, word); await tap(word);
-    const meaning = WORD_MEANINGS[word], guide = meaning.family === 0 ? REVISION_NARRATIONS.self : REVISION_NARRATIONS.team;
+    const meaning = WORD_MEANINGS[word], guide = `/first-encounters/audio/revision-pt/nina-word-${word.toLowerCase()}.m4a`;
     const panel = host.querySelector<HTMLElement>(`[aria-label="Entenda ${word}"]`)!;
     expect(panel).not.toBeNull(); expect(panel.textContent).toContain(meaning.meaning);
     expect(panel.textContent).toContain(meaning.explanation); expect(panel.querySelector('[lang="en"]')?.textContent).toBe(word);
     expect(panel.querySelector(".lo-word-coach-example [lang=en]")?.textContent).toBe(meaning.example);
     expect(open).toHaveBeenCalledOnce(); expect(pieceClick).toHaveBeenCalledOnce();
-    expect(Media.calls).toEqual([guide.url]);
+    expect(Media.calls).toEqual([guide]);
     await end();
-    expect(Media.calls).toEqual([guide.url, catalog[`nina:${meaning.example}` as keyof typeof catalog]]);
+    expect(Media.calls).toEqual([guide]);
+    await act(async () => panel.querySelector<HTMLButtonElement>('[aria-label="Ouvir exemplo da palavra"]')!.click());
+    expect(Media.calls).toEqual([guide, catalog[`nina:${meaning.example}` as keyof typeof catalog]]);
     expect(Media.instances.filter(media => !media.paused)).toHaveLength(1);
     expect(JSON.parse(first.storage.getItem(LESSON_MECHANICS_STORAGE)!)).toEqual({ version: 1, seen: ["build"], words: [word] });
     const persisted = JSON.parse(localStorage.getItem(GUEST_LEARNING_KEY)!);
@@ -156,7 +157,7 @@ describe("first contact with a word uses existing local recordings and survives 
     }
     await act(async () => piece.click()); await settle();
     expect(guide.paused).toBe(true); expect(host.querySelector('[aria-label="Entenda am"]')).not.toBeNull();
-    expect(Media.calls.at(-1)).toBe(REVISION_NARRATIONS.self.url);
+    expect(Media.calls.at(-1)).toBe("/first-encounters/audio/revision-pt/nina-word-am.m4a");
     expect(piece.isConnected).toBe(true); expect(piece.getAttribute("aria-pressed")).toBe("true");
     expect(JSON.parse(localStorage.getItem(LESSON_MECHANICS_STORAGE)!).words).toEqual(["am"]);
     const count = Media.calls.length; await end(guide); expect(Media.calls).toHaveLength(count);

@@ -61,3 +61,5 @@
 .ls-stage:has(.ls-speech-anchor[data-speech-mode=anchored]) .ls-person--speaking .ls-role{visibility:hidden}
 
 @media(max-height:600px) and (min-width:760px){.ls-stage.ls-stage--speech>.ls-stage-content{padding-top:6px;gap:0}.ls-stage--speech .lo-scene-guide h2{font-size:20px;line-height:1.15}.ls-stage--speech .lo-scene-guide p{display:none}}
+/* A display-only balloon above a group must not intercept a tap on its speaker. */
+.ls-speech-anchor:has(.lo-fixed-speech) { pointer-events: none; }

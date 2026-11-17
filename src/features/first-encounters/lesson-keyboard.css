@@ -1,0 +1,156 @@
+/* SiteViewport measures the visible rectangle once for the whole document. */
+.lo-app { --lesson-visible-height: var(--visible-height, 100dvh); }
+
+@media (max-width: 759px), (pointer: coarse) and (orientation: landscape) {
+  html[data-keyboard-open="true"] {
+    overflow: clip;
+    overscroll-behavior: none;
+  }
+
+  html[data-keyboard-open="true"] .lo-app[data-lesson-theme],
+  html[data-keyboard-open="true"] .lo-app dialog.lo-tutorial[open] {
+    position: fixed;
+    left: var(--visible-left, 0px);
+    top: var(--lesson-keyboard-top, 0px);
+    right: auto;
+    bottom: auto;
+    margin: 0;
+    width: var(--visible-width, 100vw);
+    height: var(--lesson-visible-height);
+    box-sizing: border-box;
+    max-height: none;
+    max-width: none;
+    overflow: clip;
+  }
+
+  html[data-keyboard-open="true"] .lo-app[data-lesson-theme] {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  /* While composing, the essential information is the prompt, model and actions.
+     Return to the illustrated scene and explanation as soon as the keyboard closes. */
+  html[data-keyboard-open="true"] .lo-app > .lo-header,
+  html[data-keyboard-open="true"] .lo-main:has(.lo-write) :is(.lo-heading, .lo-stage-topline, .ls-world, .lo-feedback.is-empty),
+  html[data-keyboard-open="true"] .lo-tutorial:has(.tsp-writing) :is(.lo-tutorial-world, .lo-tutorial-coach, .lo-tutorial-top, .lo-tutorial-playback-status),
+  html[data-keyboard-open="true"] .lc-main:has(.lc-writing) :is(.lc-heading-topline, .lc-page-dots, .lc-feedback, .lc-writing-note),
+  html[data-keyboard-open="true"] .lo-app .lc-footer-note {
+    display: none;
+  }
+
+  html[data-keyboard-open="true"] .lo-app dialog.lo-tutorial[open] {
+    --edge: 5px;
+    left: calc(var(--visible-left, 0px) + var(--edge));
+    top: calc(var(--lesson-keyboard-top, 0px) + var(--edge));
+    width: calc(var(--visible-width, 100vw) - 2 * var(--edge));
+    height: calc(var(--lesson-visible-height) - 2 * var(--edge));
+    grid-template-rows: minmax(0, 1fr) auto;
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  html[data-keyboard-open="true"] .lo-tutorial--skill .lo-tutorial-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 3px;
+    overflow: clip;
+  }
+  html[data-keyboard-open="true"] .lo-tutorial--skill .lo-tutorial-scene {
+    display: block;
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+  }
+  html[data-keyboard-open="true"] .lo-tutorial--skill .tsp-writing {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  html[data-keyboard-open="true"] .lo-tutorial .tsp-writing > input { min-height: 43px; font-size: 19px; }
+  html[data-keyboard-open="true"] .lo-tutorial .lo-tutorial-footer { position: static; padding: 0; min-height: 0; }
+  html[data-keyboard-open="true"] .lo-app .lo-footer { padding: 5px 10px; min-height: 0; }
+  html[data-keyboard-open="true"] .lo-app .lo-main {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    padding: 6px 10px;
+    gap: 4px;
+    overflow: clip;
+  }
+  html[data-keyboard-open="true"] .lo-app .lo-learning {
+    --lesson-scene-min: 0px;
+    height: 100%;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  html[data-keyboard-open="true"] .lo-app .lo-learning :is(.ls-stage, .ls-stage-content) { min-height: 0; }
+  html[data-keyboard-open="true"] .lo-app .ls-stage-content { justify-content: center; padding: 4px 6px; }
+  html[data-keyboard-open="true"] .lo-app .lo-workbench { padding: 4px 8px; }
+  html[data-keyboard-open="true"] .lo-app .lc-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    overflow: clip;
+  }
+  html[data-keyboard-open="true"] .lo-app .lc-writing-test { min-height: 0; height: auto; padding: 8px 12px; gap: 8px; }
+}
+
+/* On iOS the previous/next/Done accessory floats over the bottom of the
+   visual viewport. Keep navigation above it while the text keyboard is open. */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 759px), (pointer: coarse) and (orientation: landscape) {
+    html[data-keyboard-open="true"] .lo-app[data-lesson-theme],
+    html[data-keyboard-open="true"] .lo-app dialog.lo-tutorial[open] {
+      padding-bottom: 52px;
+    }
+  }
+}
+
+html[data-keyboard-open="true"] .lo-app dialog.lo-tutorial[open] {
+  container: writing-dialog / size;
+}
+
+/* Container height already excludes the iOS accessory and dialog padding. */
+@container writing-dialog (max-height: 285px) {
+  html[data-keyboard-open="true"] .lo-tutorial--skill .tsp-writing {
+    grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr);
+    gap: 4px 6px;
+  }
+  html[data-keyboard-open="true"] .lo-tutorial--skill .tsp-model {
+    grid-column: 1;
+    justify-content: center;
+    padding: 3px;
+  }
+  html[data-keyboard-open="true"] .lo-tutorial--skill .tsp-model > span { display: none; }
+  html[data-keyboard-open="true"] .lo-tutorial--skill .tsp-model > strong { font-size: 19px; }
+  html[data-keyboard-open="true"] .lo-tutorial--skill .tsp-writing-actions { grid-column: 1 / -1; }
+  html[data-keyboard-open="true"] .lo-tutorial .lo-tutorial-content { gap: 2px; }
+  html[data-keyboard-open="true"] .lo-tutorial .lo-tutorial-heading h2 { font-size: 20px; }
+  html[data-keyboard-open="true"] .lo-tutorial .tsp-writing-actions > button,
+  html[data-keyboard-open="true"] .lo-tutorial .tsp-check .br-button-face { min-height: 40px; height: 40px; padding-block: 3px; }
+}
+
+@container writing-dialog (max-height: 200px) {
+  html[data-keyboard-open="true"] .lo-tutorial--skill .lo-tutorial-context-actions { display: none; }
+}
+
+html[data-keyboard-open="true"] .lo-app:has(.lc-writing-test) {
+  container: writing-test / size;
+}
+
+@container writing-test (max-height: 285px) {
+  .lc-main .lc-question-context > span { display: none; }
+  .lc-main .lc-writing > label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  html[data-keyboard-open="true"] .lo-app .lc-content { gap: 3px; padding: 0; }
+  html[data-keyboard-open="true"] .lo-app .lc-writing-test { padding: 5px 8px; gap: 3px; }
+  html[data-keyboard-open="true"] .lc-writing-test .lc-question-context p { margin: 0; font-size: 15px; line-height: 1.18; }
+  html[data-keyboard-open="true"] .lc-heading h1 { font-size: 17px; line-height: 1.15; }
+  html[data-keyboard-open="true"] .lo-app .lc-input-row > input { min-height: 39px; padding: 5px 7px; font-size: 18px; }
+}

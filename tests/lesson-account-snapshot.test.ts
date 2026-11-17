@@ -42,7 +42,7 @@ import { accountLesson } from "./helpers/lesson-snapshot";
   it("rechecks test answers and never trusts a saved summary label", () => {
     const snapshot = decodeLessonAccountSnapshot(accountLesson())!;
     const conclusion = JSON.parse(snapshot.progress.conclusion!);
-    conclusion.attempts["write-listener"].lastAnswer = "I am Leo.";
+    conclusion.attempts["write-ready"].lastAnswer = "I am Leo.";
     const altered = encodeLessonAccountSnapshot({ ...snapshot.progress, conclusion: JSON.stringify(conclusion) });
     expect(getLessonDashboardSnapshot(decodeLessonAccountSnapshot(altered)!.progress)).toMatchObject({ completedUnits: 48, status: "in-progress" });
   });

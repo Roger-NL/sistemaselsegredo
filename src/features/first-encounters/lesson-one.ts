@@ -2,7 +2,7 @@
 export type PersonId = "ana" | "leo" | "maya" | "sam" | "nina";
 export type Pronoun = "I" | "you" | "we" | "they";
 export type Verb = "am" | "are";
-export type Phrase = { pronoun: Pronoun; verb: Verb; complement: string };
+export type Phrase = { pronoun: Pronoun; verb: Verb; complement: string; question?: boolean };
 export type Round = {
   id: string;
   kind: "bubbles" | "join" | "speaker" | "verb" | "build" | "messages" | "ensemble";
@@ -16,6 +16,8 @@ export type Round = {
   bubbleChoices?: Phrase[];
   ensemble?: Round[];
   anonymous?: boolean;
+  /** New vocabulary is introduced in written exchanges, with a gloss before the learner answers. */
+  vocabulary?: { cue: string; translation: string };
 };
 export type Scene = {
   id: string;
@@ -34,9 +36,10 @@ export const PRONOUNS: Pronoun[] = ["I", "you", "we", "they"];
 export const VERBS: Verb[] = ["am", "are"];
 
 const phrase = (pronoun: Pronoun, complement: string): Phrase => ({ pronoun, verb: pronoun === "I" ? "am" : "are", complement });
-const individualChoices = (name: string): Phrase[] => [phrase("I", name), phrase("you", name)];
-const groupChoices = (): Phrase[] => [phrase("we", "a team"), phrase("they", "a team")];
-function round(id: string, kind: Round["kind"], speaker: PersonId, listener: PersonId, team: PersonId[], referent: Round["referent"], expected: Phrase, instruction: string, extra: Partial<Pick<Round, "candidateSpeakers" | "bubbleChoices" | "ensemble" | "anonymous">> = {}): Round {
+const readyQuestion: Phrase = { ...phrase("you", "ready"), question: true };
+const individualChoices = (complement: string): Phrase[] => [phrase("I", complement), phrase("you", complement)];
+const groupChoices = (complement: string): Phrase[] => [phrase("we", complement), phrase("they", complement)];
+function round(id: string, kind: Round["kind"], speaker: PersonId, listener: PersonId, team: PersonId[], referent: Round["referent"], expected: Phrase, instruction: string, extra: Partial<Pick<Round, "candidateSpeakers" | "bubbleChoices" | "ensemble" | "anonymous" | "vocabulary">> = {}): Round {
   return { id, kind, speaker, listener, team: [...team], referent, expected, instruction, ...extra };
 }
 
@@ -62,13 +65,13 @@ export const LESSON_SCENES: Scene[] = [
     ],
   },
   {
-    id: "lesson-02", game: 1, mode: "use", title: "Outra pessoa se apresenta",
-    prompt: "Use a mesma ideia na conversa de Maya e Sam.",
-    hint: "Veja de quem sai o balão e para quem ele vai. O nome permanece Maya.",
-    insight: "I e you não são nomes fixos de personagens. Eles acompanham a conversa.",
+    id: "lesson-02", game: 1, mode: "use", title: "Tudo pronto para começar?",
+    prompt: "Maya e Sam conversam antes da primeira aula.",
+    hint: "Ready indica que a pessoa está pronta. Veja quem fala e quem escuta.",
+    insight: "I am ready avisa que estou pronto. Are you ready? pergunta se você está pronto.",
     rounds: [
-      round("use1-self", "bubbles", "maya", "sam", [], "maya", phrase("I", "Maya"), "Maya se apresenta a Sam.", { bubbleChoices: individualChoices("Maya") }),
-      round("use1-listener", "bubbles", "sam", "maya", [], "maya", phrase("you", "Maya"), "Sam fala diretamente com Maya.", { bubbleChoices: individualChoices("Maya") }),
+      round("use1-self", "bubbles", "maya", "sam", [], "maya", phrase("I", "ready"), "Maya avisa que está pronta para começar.", { vocabulary: { cue: "ready = pronto ou pronta", translation: "Estou pronta." }, bubbleChoices: individualChoices("ready") }),
+      round("use1-listener", "bubbles", "maya", "sam", [], "sam", readyQuestion, "Agora Maya pergunta se Sam está pronto.", { vocabulary: { cue: "Na pergunta, are vem antes de you.", translation: "Você está pronto?" }, bubbleChoices: [phrase("you", "ready"), readyQuestion] }),
     ],
   },
   {
@@ -82,13 +85,13 @@ export const LESSON_SCENES: Scene[] = [
     ],
   },
   {
-    id: "lesson-04", game: 2, mode: "use", title: "Descrever a mesma equipe",
-    prompt: "Sam e Nina continuam juntos. Ajuste a fala de cada personagem.",
-    hint: "Compare quem fala com os integrantes; a equipe não muda para acomodar uma tentativa.",
-    insight: "Um integrante apresenta a própria equipe com We. Uma pessoa de fora pode descrevê-la com They.",
+    id: "lesson-04", game: 2, mode: "use", title: "Chegamos ao encontro",
+    prompt: "Sam e Nina chegaram. Ajude Maya a localizar a dupla.",
+    hint: "Here significa aqui. Veja quem avisa que a dupla chegou.",
+    insight: "We are here avisa que chegamos. They are here avisa que outras pessoas estão aqui.",
     rounds: [
-      round("use2-inside", "bubbles", "sam", "maya", ["sam", "nina"], "team", phrase("we", "a team"), "Sam apresenta a equipe Sam + Nina a Maya.", { bubbleChoices: groupChoices() }),
-      round("use2-outside", "bubbles", "maya", "ana", ["sam", "nina"], "team", phrase("they", "a team"), "Maya descreve a mesma equipe para Ana.", { bubbleChoices: groupChoices() }),
+      round("use2-inside", "bubbles", "sam", "maya", ["sam", "nina"], "team", phrase("we", "here"), "Sam avisa que ele e Nina já estão aqui.", { vocabulary: { cue: "here = aqui", translation: "Estamos aqui." }, bubbleChoices: groupChoices("here") }),
+      round("use2-outside", "bubbles", "maya", "ana", ["sam", "nina"], "team", phrase("they", "here"), "Maya avisa que Sam e Nina já estão aqui.", { vocabulary: { cue: "here = aqui", translation: "Eles estão aqui." }, bubbleChoices: groupChoices("here") }),
     ],
   },
   {
@@ -126,13 +129,13 @@ export const LESSON_SCENES: Scene[] = [
     ],
   },
   {
-    id: "lesson-08", game: 4, mode: "use", title: "Novas pessoas, mesma ideia",
-    prompt: "Agora a equipe é Maya + Sam. Envie a fala de cada turno.",
-    hint: "O grupo fica igual. Muda se a pessoa que fala está incluída nele.",
-    insight: "A fala acompanha a participação, mesmo quando a equipe e os lugares mudam.",
+    id: "lesson-08", game: 4, mode: "use", title: "Apresentar uma amizade",
+    prompt: "Maya e Sam se conhecem há anos.",
+    hint: "Friends significa amigos. Quem fala também faz parte da amizade?",
+    insight: "We are friends inclui quem fala. They are friends descreve a amizade de outras pessoas.",
     rounds: [
-      round("use4-inside", "bubbles", "maya", "nina", ["maya", "sam"], "team", phrase("we", "a team"), "Maya apresenta sua equipe a Nina.", { bubbleChoices: groupChoices() }),
-      round("use4-outside", "bubbles", "leo", "nina", ["maya", "sam"], "team", phrase("they", "a team"), "Leo descreve a mesma equipe para Nina.", { bubbleChoices: groupChoices() }),
+      round("use4-inside", "bubbles", "maya", "nina", ["maya", "sam"], "team", phrase("we", "friends"), "Maya conta que ela e Sam são amigos.", { vocabulary: { cue: "friends = amigos ou amigas", translation: "Somos amigos." }, bubbleChoices: groupChoices("friends") }),
+      round("use4-outside", "bubbles", "leo", "nina", ["maya", "sam"], "team", phrase("they", "friends"), "Leo conta que Maya e Sam são amigos.", { vocabulary: { cue: "friends = amigos ou amigas", translation: "Eles são amigos." }, bubbleChoices: groupChoices("friends") }),
     ],
   },
   {
@@ -152,8 +155,8 @@ export const LESSON_SCENES: Scene[] = [
     insight: "A mesma ideia funciona com uma apresentação nova e com a equipe já conhecida.",
     rounds: [
       round("use5-i", "bubbles", "sam", "maya", [], "sam", phrase("I", "Sam"), "Sam se apresenta a Maya. Escolha a fala de quem está falando.", { bubbleChoices: individualChoices("Sam") }),
-      round("use5-we", "build", "ana", "maya", ["ana", "leo"], "team", phrase("we", "a team"), "Ana apresenta a equipe Ana + Leo a Maya."),
-      round("use5-they", "build", "maya", "sam", ["ana", "leo"], "team", phrase("they", "a team"), "Maya descreve essa equipe para Sam."),
+      round("use5-we", "build", "ana", "maya", ["ana", "leo"], "team", phrase("we", "ready"), "Ana avisa que ela e Leo estão prontos.", { vocabulary: { cue: "ready = pronto ou pronta", translation: "Estamos prontos." } }),
+      round("use5-they", "build", "maya", "sam", ["ana", "leo"], "team", phrase("they", "here"), "Maya avisa que Ana e Leo estão aqui.", { vocabulary: { cue: "here = aqui", translation: "Eles estão aqui." } }),
     ],
   },
   {
@@ -195,9 +198,16 @@ function result(correct: boolean, feedback: string, corrections: string[] = []):
   return { correct, meaningCorrect: correct, feedback, corrections };
 }
 
+/** In a verb drill the subject and complement can be right while the turn is still open. */
+export function retryLessonVerb(pronoun: Pronoun): Evaluation {
+  const feedback = `Com ${pronoun}, use ${pronoun === "I" ? "am" : "are"}.`;
+  return { correct: false, meaningCorrect: true, feedback, corrections: [feedback] };
+}
+
 export function phraseText(value: Phrase): string {
   const start = value.pronoun === "I" ? "I" : value.pronoun[0].toUpperCase() + value.pronoun.slice(1);
   const complement = value.complement.trim().replace(/\s+/g, " ").replace(/[.!?]+$/, "").trim();
+  if (value.question) return `${value.verb === "am" ? "Am" : "Are"} ${value.pronoun} ${complement}?`;
   return `${start} ${value.verb} ${complement}.`;
 }
 
@@ -209,8 +219,9 @@ export function evaluatePhrase(target: Round, answer: Phrase): Evaluation {
   const expectedComplement = normalizeComplement(target.expected.complement);
   const localNameAlias = expectedComplement === "ana" && actualComplement === "anna";
   if (actualComplement !== expectedComplement && !localNameAlias) {
-    return result(false, target.referent === "team" ? "Esta fala apresenta a equipe. Preserve a team como complemento." : `A pessoa referida nesta vez é ${PERSON_NAMES[target.referent]}. Preserve essa identidade.`);
+    return result(false, target.vocabulary ? `Use ${target.expected.complement} para comunicar a ideia desta vez.` : target.referent === "team" ? "Esta fala apresenta a equipe. Preserve a team como complemento." : `A pessoa referida nesta vez é ${PERSON_NAMES[target.referent]}. Preserve essa identidade.`);
   }
+  if (Boolean(answer.question) !== Boolean(target.expected.question)) return result(false, target.expected.question ? "Para fazer a pergunta, comece com Are you…?" : "Aqui a pessoa faz uma afirmação. Coloque o pronome primeiro.");
   if (answer.pronoun !== target.expected.pronoun) {
     const feedback = target.expected.pronoun === "I" ? "Esta fala apresenta quem está falando. I se refere ao próprio falante."
       : target.expected.pronoun === "you" ? "Aqui a fala se dirige à outra pessoa. You se refere ao destinatário."
@@ -227,11 +238,12 @@ export function evaluatePhrase(target: Round, answer: Phrase): Evaluation {
   } else {
     const subject = answer.pronoun === "I" ? target.speaker : answer.pronoun === "you" ? target.listener : null;
     if (subject !== target.referent) return result(false, "Essa fala passa a identificar outra pessoa. Reveja quem fala e com quem está falando.");
-    if (normalizeComplement(PERSON_NAMES[target.referent]) !== expectedComplement) return result(false, "O nome da fala precisa combinar com a pessoa referida nesta vez.");
+    if (!target.vocabulary && normalizeComplement(PERSON_NAMES[target.referent]) !== expectedComplement) return result(false, "O nome da fala precisa combinar com a pessoa referida nesta vez.");
   }
   const corrections: string[] = [];
   const correctVerb: Verb = answer.pronoun === "I" ? "am" : "are";
   if (answer.verb !== correctVerb) {
+    if (target.kind === "verb") return retryLessonVerb(answer.pronoun);
     const model = phraseText({ ...answer, verb: correctVerb, complement: target.expected.complement });
     corrections.push(`O sentido ficou claro. Com ${answer.pronoun}, usamos ${correctVerb}: ${model}`);
   }

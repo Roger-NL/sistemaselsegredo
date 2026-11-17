@@ -129,7 +129,9 @@ describe("guided start, automatic turns and learner control",()=>{
 
   it("never reads an incorrect verb before grading, then performs the canonical accepted form",async()=>{
     await mount("g3-i");expect(Media.calls).toEqual([]);await place("are","word:verb");expect(Media.calls).toEqual([]);
-    await click(footer());expect(Media.calls).toHaveLength(1);expect(Media.calls[0]).toContain("ana-i-am-ana");expect(speaking()).toEqual(["ana"]);
+    await click(footer()); expect(Media.calls).toEqual([]); expect(speaking()).toEqual([]);
+    await place("am", "word:verb"); await click(footer());
+    expect(Media.calls).toHaveLength(1);expect(Media.calls[0]).toContain("ana-i-am-ana");expect(speaking()).toEqual(["ana"]);
     expect(container.querySelector(".ls-speech-bubble strong")?.textContent).toBe("I am Ana.");
   });
 

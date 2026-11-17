@@ -26,7 +26,8 @@ vi.mock("../src/features/first-encounters/IntroductionStage", async () => {
     return createElement("div", { ref, "data-completion-stage": modelIndex === null ? "nina" : scene.models[modelIndex].speaker });
   } };
 });
-import { LessonConclusion } from "../src/features/first-encounters/LessonConclusion";
+import { LessonConclusion, type LessonCompletionProps } from "../src/features/first-encounters/LessonConclusion";
+import type { LessonCompletionReceipt } from "../src/features/first-encounters/useLessonAccountProgress";
 
 class Media extends EventTarget {
   static all: Media[] = []; static calls: string[] = []; static current: Media; static maxActive = 0;
@@ -53,9 +54,11 @@ beforeEach(() => {
   host = document.createElement("div"); document.body.append(host); root = createRoot(host);
 });
 afterEach(async () => { await act(async () => root.unmount()); host.remove(); localStorage.clear(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
-async function mount(onComplete = vi.fn(async () => {})) {
-  await act(async () => root.render(createElement(LessonConclusion, { onReturnToPractice: vi.fn(), onComplete })));
-  return onComplete;
+function completion(overrides: Partial<LessonCompletionProps> = {}): LessonCompletionProps {
+  return { verify: vi.fn(async () => "guest-local" as const), leave: vi.fn(), version: 0, account: false, saving: false, error: "", ...overrides };
+}
+async function mount(props = completion()) {
+  await act(async () => root.render(createElement(LessonConclusion, { onReturnToPractice: vi.fn(), completion: props })));
 }
 async function click(selector: string) { const button = host.querySelector<HTMLButtonElement>(selector); expect(button).not.toBeNull(); await act(async () => button!.click()); }
 async function end() { await act(async () => Media.current.end()); }
@@ -89,24 +92,73 @@ describe("lesson completion", () => {
     expect(localStorage.getItem("basedspeak.lesson-one.v2")).toBe("practice-is-preserved");
   });
 
-  it("waits for the owning save once, cancels speech and preserves the work when saving fails", async () => {
+  it("shows completion before the CTA and checks the account again before leaving", async () => {
     let rejectSave!: (error: Error) => void;
-    const onComplete = vi.fn(() => new Promise<void>((_, reject) => { rejectSave = reject; }));
-    await mount(onComplete);
+    const verify = vi.fn<() => Promise<LessonCompletionReceipt>>().mockResolvedValue("account");
+    const props = completion({ account: true, verify });
+    await mount(props);
+    expect(host.querySelector("h1")?.textContent).toBe("Aula 1 concluída!");
+    expect(host.textContent).toContain("49 de 49 etapas salvas na sua conta.");
+    expect(host.querySelector(".lc-complete")?.textContent).toBe("Voltar ao meu painel");
+    expect(props.leave).not.toHaveBeenCalled();
+    verify.mockImplementationOnce(() => new Promise((_, reject) => { rejectSave = reject; }));
     const before = localStorage.getItem(LESSON_CONCLUSION_STORAGE);
     await end();
     await click(".lc-complete"); await click(".lc-complete");
-    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(verify).toHaveBeenCalledTimes(2);
+    expect(host.textContent).not.toContain("etapas salvas na sua conta");
     expect(host.querySelector<HTMLButtonElement>(".lc-complete")?.disabled).toBe(true);
     expect(host.textContent).toContain("Confirmando seu avanço…");
     expect(Media.all.every(audio => audio.paused)).toBe(true);
     await act(async () => rejectSave(new Error("not saved")));
     expect(host.querySelector<HTMLButtonElement>(".lc-complete")?.disabled).toBe(false);
     expect(host.querySelector('[role="alert"]')?.textContent).toContain("Não foi possível confirmar seu avanço");
+    expect(host.querySelector(".lc-complete")?.textContent).toBe("Tentar confirmar novamente");
     expect(localStorage.getItem(LESSON_CONCLUSION_STORAGE)).toBe(before);
     expect(localStorage.getItem("basedspeak.lesson-one.v2")).toBe("practice-is-preserved");
-    onComplete.mockResolvedValueOnce();
-    await click(".lc-complete"); expect(onComplete).toHaveBeenCalledTimes(2);
+    await click(".lc-complete"); expect(props.leave).not.toHaveBeenCalled();
+    await click(".lc-complete"); expect(props.leave).toHaveBeenCalledExactlyOnceWith("/dashboard");
+  });
+
+  it("warns the visitor before leaving if local persistence becomes unavailable", async () => {
+    const verify = vi.fn<() => Promise<LessonCompletionReceipt>>().mockResolvedValueOnce("guest-local").mockResolvedValue("guest-session");
+    const props = completion({ verify });
+    await mount(props);
+    expect(host.querySelector(".lc-complete")?.textContent).toBe("Entrar ou criar conta");
+    expect(host.textContent).toContain("Avanço salvo neste navegador. No painel, você pode levá-lo para uma conta sem progresso.");
+    await click(".lc-complete"); expect(props.leave).not.toHaveBeenCalled();
+    expect(host.textContent).toContain("apenas nesta sessão. Ao sair, você poderá perdê-lo.");
+    expect(host.textContent).not.toContain("salvo neste navegador");
+    await click(".lc-complete"); expect(props.leave).toHaveBeenCalledExactlyOnceWith("/comecar?modo=entrar");
+  });
+
+  it("does not claim a save or enable departure while verification is outstanding", async () => {
+    let resolve!: (receipt: LessonCompletionReceipt) => void;
+    const props = completion({ verify: vi.fn(() => new Promise<LessonCompletionReceipt>(done => { resolve = done; })) });
+    await mount(props);
+    expect(host.querySelector("h1")?.textContent).toBe("Aula 1 concluída!");
+    expect(host.querySelector<HTMLButtonElement>(".lc-complete")?.disabled).toBe(true);
+    expect(host.textContent).not.toContain("salvo neste navegador");
+    await act(async () => resolve("guest-local"));
+    expect(host.querySelector<HTMLButtonElement>(".lc-complete")?.disabled).toBe(false);
+    expect(props.leave).not.toHaveBeenCalled();
+  });
+
+  it("discards a late confirmation after a new version arrives or the summary unmounts", async () => {
+    const verify = vi.fn<() => Promise<LessonCompletionReceipt>>().mockResolvedValueOnce("account");
+    let previous!: (receipt: LessonCompletionReceipt) => void;
+    let current!: (receipt: LessonCompletionReceipt) => void;
+    verify.mockImplementationOnce(() => new Promise(done => { previous = done; }));
+    verify.mockImplementationOnce(() => new Promise(done => { current = done; }));
+    const props = completion({ account: true, verify });
+    await mount(props);
+    await click(".lc-complete");
+    await mount({ ...props, version: 1 });
+    await act(async () => previous("account"));
+    expect(host.textContent).not.toContain("etapas salvas na sua conta");
+    expect(props.leave).not.toHaveBeenCalled();
+    await act(async () => { root.unmount(); root = createRoot(host); current("account"); });
+    expect(props.leave).not.toHaveBeenCalled();
   });
 
   it("cancels the remaining recap after pause or a manual model, and stops on unmount", async () => {
@@ -117,6 +169,7 @@ describe("lesson completion", () => {
     expect(Media.calls).toHaveLength(1);
     await click('[data-recap-model="3"]'); await end();
     expect(Media.calls).toHaveLength(2); expect(Media.calls[1]).toContain("maya-they-are-a-team.m4a");
+    expect(host.querySelector('[data-recap-model="3"]')?.getAttribute("aria-current")).toBe("true");
     await click('[aria-label="Ouvir recapitulação"]');
     const last = Media.current;
     await act(async () => root.unmount()); root = createRoot(host);
@@ -125,7 +178,7 @@ describe("lesson completion", () => {
   });
 
   it("starts the real Nina clip once through the Strict Mode effect remount", async () => {
-    await act(async () => root.render(createElement(StrictMode, null, createElement(LessonConclusion, { onReturnToPractice: vi.fn(), onComplete: vi.fn() }))));
+    await act(async () => root.render(createElement(StrictMode, null, createElement(LessonConclusion, { onReturnToPractice: vi.fn(), completion: completion() }))));
     expect(Media.calls).toHaveLength(1);
     expect(Media.calls[0]).toContain("revision-pt/nina-completion-congratulations.m4a");
     expect(Media.maxActive).toBe(1);

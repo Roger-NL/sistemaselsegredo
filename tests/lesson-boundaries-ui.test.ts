@@ -86,14 +86,30 @@ describe("presentation and written conclusion boundaries", () => {
     expect(savedPractice()).toMatchObject({ scene: 0, round: 0, completed: [] }); expect(Media.maxActive).toBe(1);
   });
 
-  it("plays the four recorded actor models after their PT scene without advancing automatically", async () => {
+  it("waits for a tap between every sentence, including two speakers on the same screen", async () => {
     await mount(); await click(button("Começar com som", intro()));
-    await ended(); expect(Media.calls.at(-1)).toContain("ana-i-am-ana"); await ended(); expect(Media.calls.at(-1)).toContain("leo-you-are-ana"); await ended();
-    expect(intro().dataset.introductionStep).toBe("0"); expect(Media.calls).toHaveLength(3);
-    await click(button("Continuar", intro())); await ended(); expect(Media.calls.at(-1)).toContain("ana-we-are-a-team"); await ended(); expect(Media.calls.at(-1)).toContain("maya-they-are-a-team"); await ended();
-    expect(intro().dataset.introductionStep).toBe("1"); await click(button("Continuar", intro())); await ended(); expect(intro().dataset.introductionStep).toBe("2"); expect(Media.calls).toHaveLength(7);
+    const clips = ["self-preview", "ana-i-am-ana", "leo-you-are-ana",
+      "own-team", "ana-we-are-a-team", "other-team", "maya-they-are-a-team", "nina-practice", "nina-rule", "nina-test"];
+    for (const [index, clip] of clips.entries()) {
+      expect(Media.calls.at(-1)).toContain(clip);
+      const scene = intro().dataset.introductionStep;
+      await ended();
+      expect(Media.calls).toHaveLength(index + 1);
+      expect(intro().dataset.introductionStep).toBe(scene);
+      if (index < clips.length - 1) await click(button("Avançar", intro()));
+    }
     await click(button("Como funciona a aula", intro())); expect(intro()).toBeNull(); expect(container.querySelector(".lo-tutorial")).not.toBeNull(); expect(Media.maxActive).toBe(1);
     expect(savedPractice()).toMatchObject({ scene: 0, round: 0, completed: [] });
+  });
+
+  it("resumes the individual utterance silently, including an actor model", async () => {
+    await mount(); await click(button("Começar com som", intro())); await click(button("Avançar", intro()));
+    const calls = Media.calls.length;
+    await remount();
+    expect(intro().dataset.introductionBlock).toBe("1");
+    expect(intro().dataset.introductionLanguage).toBe("en");
+    expect(Media.calls).toHaveLength(calls);
+    await click(button("Começar com som", intro())); expect(Media.calls.at(-1)).toContain("ana-i-am-ana");
   });
 
   it("does not insert the presentation when resuming a middle or completed practice", async () => {
@@ -111,7 +127,12 @@ describe("presentation and written conclusion boundaries", () => {
     }
     await click(container.querySelector<HTMLButtonElement>(".lo-footer .lo-next")!); const voice = Media.current; await click(button("Concluir aula"));
     expect(voice.paused).toBe(true); expect(conclusion().dataset.conclusionPhase).toBe("theory"); const count = Media.calls.length;
-    for (let index = 0; index < 5; index++) { expect(conclusion().dataset.conclusionIndex).toBe(String(index)); expect(conclusion().querySelector('[lang="en"]')).not.toBeNull(); if (index < 4) await click(conclusionNext()); }
+    for (let index = 0; index < 5; index++) {
+      expect(conclusion().dataset.conclusionIndex).toBe(String(index)); expect(conclusion().dataset.theoryBlock).toBe("0");
+      expect(conclusion().querySelector('[lang="en"]')).not.toBeNull();
+      await click(conclusionNext()); expect(conclusion().dataset.theoryBlock).toBe("1"); expect(conclusion().dataset.conclusionIndex).toBe(String(index));
+      if (index < 4) await click(conclusionNext());
+    }
     expect(Media.calls).toHaveLength(count); expect(savedPractice().completed).toHaveLength(29); expect(button("Fazer teste")).toBeTruthy();
   });
 
@@ -124,11 +145,33 @@ describe("presentation and written conclusion boundaries", () => {
     expect(savedConclusion().attempts.self).toMatchObject({ firstAnswer: wrongSelf, lastAnswer: selfModel }); expect(container.querySelector(".lc-feedback.is-correct")).not.toBeNull(); expect(Media.calls).toEqual([]);
   });
 
+  it.each(["I am Ana.", "I'm Ana."])("resumes Ana's draft, gives specific guidance and advances with %s", async corrected => {
+    localStorage.setItem(TUTORIAL, "done"); seed("finished");
+    const attempts = Object.fromEntries(CONCLUSION_QUESTIONS.slice(0, 4).map(q => {
+      const value = conclusionModel(q);
+      return [q.id, { draft: value, firstAnswer: value, lastAnswer: value }];
+    }));
+    const alternative = "My name is Ana.";
+    localStorage.setItem(LESSON_CONCLUSION_STORAGE, JSON.stringify({ version: 1, phase: "test", theoryIndex: 4, questionIndex: 4, testStarted: true,
+      attempts: { ...attempts, "write-self": { draft: alternative, firstAnswer: null, lastAnswer: null } } }));
+    await mount();
+    expect(container.querySelector("#lesson-title")?.textContent).toContain("I am ou I’m");
+    expect(container.querySelector<HTMLInputElement>("#lc-written-answer")?.value).toBe(alternative);
+    await click(conclusionNext());
+    expect(container.querySelector(".lc-feedback.is-retry")?.textContent).toContain("Essa frase também apresenta Ana.");
+    expect(conclusionNext().textContent).toBe("Conferir");
+    await input(corrected);
+    expect(container.querySelector(".lc-feedback.is-retry")).toBeNull();
+    await click(conclusionNext()); await click(button("Próxima pergunta"));
+    expect(savedConclusion().questionIndex).toBe(5);
+    expect(savedConclusion().attempts["write-self"]).toEqual({ draft: corrected, firstAnswer: alternative, lastAnswer: corrected });
+  });
+
   it("accepts flexible writing and completes without rewriting first answers or resetting practice", async () => {
     localStorage.setItem(TUTORIAL, "done"); seed("finished"); const attempts = Object.fromEntries(CONCLUSION_QUESTIONS.slice(0, 4).map((question, index) => [question.id, { draft: conclusionModel(question), firstAnswer: index === 0 ? wrongSelf : conclusionModel(question), lastAnswer: conclusionModel(question) }]));
     localStorage.setItem(LESSON_CONCLUSION_STORAGE, JSON.stringify({ version: 1, phase: "test", theoryIndex: 4, questionIndex: 4, testStarted: true, attempts }));
     await mount(); await input("im ana"); await click(conclusionNext()); expect(container.querySelector(".lc-feedback.is-correct")).not.toBeNull(); expect(container.querySelector(".lc-feedback")?.textContent).toContain("apóstrofo");
-    await click(conclusionNext()); await input(`youre ${CONCLUSION_QUESTIONS[5].expected.complement.toLowerCase()}`); await click(conclusionNext()); await click(conclusionNext());
+    await click(conclusionNext()); await input("I’m ready"); await click(conclusionNext()); await click(conclusionNext());
     expect(conclusion().dataset.conclusionPhase).toBe("summary"); expect(container.querySelector(".lc-completion h2")?.textContent).toContain("Parabéns"); expect(Media.calls).toHaveLength(1); expect(Media.calls[0]).toContain("revision-pt/nina-completion-congratulations.m4a");
     expect(container.querySelector(".lc-score-details,.lc-summary-actions")).toBeNull();
     expect([...container.querySelectorAll("button")].some(button => /Refazer (teste|prática)/.test(button.textContent ?? ""))).toBe(false);
@@ -142,7 +185,7 @@ describe("presentation and written conclusion boundaries", () => {
     window.history.replaceState(null, "", "/dev/primeiros-encontros?apresentacao=1&revisao=1&keep=yes#example");
     try {
       await mount(); expect(intro()).toBeTruthy(); expect(window.location.search).toBe("?keep=yes"); expect(window.location.hash).toBe("#example");
-      await click(button("Começar com som", intro())); await click(button("Continuar", intro())); await click(button("Continuar", intro()));
+      await click(button("Começar com som", intro())); for (let block = 1; block < 10; block++) await click(button("Avançar", intro()));
       await click(button("Como funciona a aula", intro()));
       expect(intro()).toBeNull(); expect(container.querySelector(".lo-tutorial")).not.toBeNull(); expect(container.querySelector('[data-conclusion-phase]')).toBeNull();
       await click(button("Pular tutorial", container.querySelector(".lo-tutorial")!));
@@ -185,17 +228,16 @@ describe("presentation and written conclusion boundaries", () => {
     const speaking = () => [...container.querySelectorAll<HTMLElement>('[data-dummy-speaking="true"]')].map(element => element.dataset.dummyPerson);
     await mount(); expect(speaking()).toEqual([]);
     await click(button("Começar com som", intro())); expect(speaking()).toEqual(["nina"]);
-    await ended(); expect(speaking()).toEqual(["ana"]);
-    await ended(); expect(speaking()).toEqual(["leo"]);
-    await ended(); expect(speaking()).toEqual([]); expect(intro().dataset.introductionStep).toBe("0");
-    await click(button("Continuar", intro())); expect(speaking()).toEqual(["nina"]);
-    await ended(); expect(speaking()).toEqual(["ana"]);
-    await ended(); expect(speaking()).toEqual(["maya"]);
+    for (const actor of ["ana", "leo", "nina", "ana", "nina", "maya"]) {
+      await ended(); expect(speaking()).toEqual([]);
+      await click(button("Avançar", intro())); expect(speaking()).toEqual([actor]);
+    }
     const cancelled = Media.current; const count = Media.calls.length;
     await click(button("Pausar apresentação", intro())); expect(speaking()).toEqual([]); expect(cancelled.paused).toBe(true);
     await ended(cancelled); expect(Media.calls).toHaveLength(count); expect(speaking()).toEqual([]);
-    await click(button("Repetir apresentação", intro())); expect(speaking()).toEqual(["nina"]);
-    await click(button("Continuar", intro())); expect(speaking()).toEqual(["nina"]); expect(intro().dataset.introductionStep).toBe("2");
+    await click(button("Repetir apresentação", intro())); expect(speaking()).toEqual(["maya"]);
+    await click(button("Avançar", intro())); expect(speaking()).toEqual(["nina"]); expect(intro().dataset.introductionStep).toBe("2");
+    await click(button("Avançar", intro())); await click(button("Avançar", intro()));
     await click(button("Como funciona a aula", intro())); expect(speaking()).toEqual([]); expect(Media.all.every(media => media.paused)).toBe(true);
     expect(container.querySelector(".lo-tutorial")).not.toBeNull(); expect(Media.maxActive).toBe(1);
   });
@@ -204,7 +246,7 @@ describe("presentation and written conclusion boundaries", () => {
     const percent = (scope: ParentNode) => Number(scope.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow"));
     localStorage.setItem(INTRO, "done"); localStorage.setItem(TUTORIAL, "done"); seed("finished");
     await mount(); expect(savedPractice().completed).toHaveLength(29); expect(percent(conclusion())).toBe(78);
-    for (let page = 0; page < 5; page++) await click(conclusionNext());
+    for (let block = 0; block < 10; block++) await click(conclusionNext());
     expect(conclusion().dataset.conclusionPhase).toBe("test"); expect(percent(conclusion())).toBe(88);
     for (const question of CONCLUSION_QUESTIONS) {
       if (question.kind === "choice") await choose(conclusionModel(question)); else await input(conclusionModel(question));

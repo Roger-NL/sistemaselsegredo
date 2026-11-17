@@ -177,7 +177,7 @@ export function LessonStage({ round, children, speechContent, teamOverride, spea
       });
       // Mobile reserves a full bubble row before any selection; its rig never shrinks on tap.
       const mobile = window.matchMedia?.("(max-width: 759px)").matches;
-      const reserve = mobile ? 64 : requiredReserves.length ? Math.max(...requiredReserves) : Math.ceil(bubbleRect.height + 14);
+      const reserve = mobile ? Math.ceil(bubbleRect.height + 8) : requiredReserves.length ? Math.max(...requiredReserves) : Math.ceil(bubbleRect.height + 14);
       if (stage.style.getPropertyValue("--ls-speech-height") !== `${reserve}px`) stage.style.setProperty("--ls-speech-height", `${reserve}px`);
       const character = canvas?.getBoundingClientRect();
       const width = bubbleRect.width, height = bubbleRect.height;

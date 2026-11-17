@@ -9,6 +9,7 @@ export type LessonSpokenTurn = {
 
 /** Speak given information before a puzzle; perform its answer only after acceptance. */
 export function getAutomaticLessonSpeech(round: Round, accepted: boolean, chosenSpeaker?: PersonId): LessonSpokenTurn[] {
+  if (round.vocabulary) return [];
   if (accepted) {
     if (round.kind === "ensemble" || round.kind === "messages") {
       return (round.ensemble ?? []).map((turn, turnIndex) => ({ person: turn.speaker, text: phraseText(turn.expected), role: "character", turnIndex }));
@@ -28,6 +29,7 @@ export function getLessonSceneGuide(round: Round, writing = false): { title: str
   if (round.kind === "speaker") return { title: "Quem pode dizer esta frase?", action: "Clique na pessoa." };
   if (round.kind === "join") return { title: "Faça a equipe combinar com a fala.", action: "Inclua uma pessoa na equipe." };
   if (round.kind === "verb") return { title: `Complete a fala de ${who}.`, action: writing ? "Escreva a frase do seu jeito." : "Leve am ou are até o espaço vazio." };
+  if (round.vocabulary) return { title: round.instruction, action: round.vocabulary.cue };
   const title = round.expected.pronoun === "I" ? `${who} quer se apresentar.`
     : round.expected.pronoun === "you" ? `${who} fala diretamente com ${listener}.`
       : round.expected.pronoun === "we" ? `${who} apresenta a própria equipe.` : `${who} fala sobre a outra equipe.`;

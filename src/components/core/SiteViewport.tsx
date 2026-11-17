@@ -22,7 +22,7 @@ export function SiteViewport() {
       pending = requestAnimationFrame(() => {
         pending = 0;
         const focused = document.activeElement;
-        if (focused instanceof HTMLElement && focused.matches("input:not([type=radio]):not([type=checkbox]),textarea,[contenteditable=true]")) {
+        if (focused instanceof HTMLElement && !focused.closest(".lo-app[data-lesson-theme]") && focused.matches("input:not([type=radio]):not([type=checkbox]),textarea,[contenteditable=true]")) {
           focused.scrollIntoView?.({ block: "nearest", inline: "nearest", behavior: "instant" });
         }
       });

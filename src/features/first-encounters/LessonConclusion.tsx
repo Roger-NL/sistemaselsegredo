@@ -1,6 +1,7 @@
 "use client";
 
 import { useLessonStorage } from "./lesson-storage";
+import type { LessonCompletionReceipt } from "./useLessonAccountProgress";
 
 import { LessonButton } from "./LessonButton";
 
@@ -15,18 +16,19 @@ import { LESSON_INTRODUCTION_SCENES } from "./lesson-introduction";
 import { createRevisionAudioController, REVISION_NARRATIONS } from "./lesson-revision-audio";
 import { TutorialCaption } from "./TutorialCaption";
 import type { PersonId } from "./lesson-one";
-import { CONCLUSION_QUESTIONS, CONCLUSION_THEORY, LESSON_CONCLUSION_STORAGE, createConclusionState, evaluateConclusionAnswer,
+import { CONCLUSION_QUESTIONS, getConclusionQuestions, CONCLUSION_THEORY, LESSON_CONCLUSION_STORAGE, createConclusionState, evaluateConclusionAnswer,
   getConclusionAttempt, isConclusionComplete, restoreConclusionState, setConclusionDraft, submitConclusionAnswer } from "./lesson-conclusion";
 import "./lesson-conclusion.css";
 
+export type LessonCompletionProps = {
+  verify: () => Promise<LessonCompletionReceipt>; leave: (href: "/dashboard" | "/comecar?modo=entrar") => void;
+  account: boolean; version: number; saving: boolean; error: string;
+};
 export type LessonConclusionProps = {
   onReturnToPractice: () => void;
   /** Kept compatible with saved visits; the completion screen does not offer a reset. */
   onRestartPractice?: () => void;
-  /** The owning lesson confirms persistence before navigating to the dashboard. */
-  onComplete?: () => Promise<void> | void;
-  completionSaving?: boolean;
-  completionError?: string;
+  completion?: LessonCompletionProps;
 };
 
 const RECAP_MODELS = LESSON_INTRODUCTION_SCENES.flatMap(scene => scene.models.map((model, modelIndex) => ({ scene, model, modelIndex })));
@@ -82,7 +84,10 @@ function CompletionRecap({ disabled }: { disabled: boolean }) {
           if (generation.current !== ticket) return;
           if (index < 0) setNarrationComplete(true);
           if (sequence && index + 1 < RECAP_MODELS.length) next(index + 1);
-          else { setSequenceActive(false); setActiveIndex(null); }
+          else {
+            setSequenceActive(false);
+            if (sequence) setActiveIndex(null);
+          }
         } }).then(playing => { if (!playing && generation.current === ticket) { setSequenceActive(false); setNarrationComplete(true); } });
       };
       if (readyPeople.current.has(person)) begin();
@@ -111,7 +116,7 @@ function CompletionRecap({ disabled }: { disabled: boolean }) {
         <TutorialCaption speech={audio.speech} text={REVISION_NARRATIONS.completion.text} clipKey={`nina:${REVISION_NARRATIONS.completion.text}`} complete={narrationComplete || disabled}/></div>
       <div className="lc-completion-models" aria-label="O que você aprendeu">
         {RECAP_MODELS.map(({ model }, index) => <button type="button" key={`${model.speaker}:${model.text}`} data-recap-model={index}
-          aria-label={`Ouvir ${model.text}`} aria-pressed={sequenceActive && activeIndex === index} disabled={disabled} onClick={() => play(index, false)}>
+          aria-label={`Ouvir ${model.text}`} aria-current={activeIndex === index ? "true" : undefined} disabled={disabled} onClick={() => play(index, false)}>
           <strong lang="en">{model.text}</strong><span>{model.translation}</span><Volume2 size={17} aria-hidden="true"/>
         </button>)}
       </div>
@@ -127,24 +132,28 @@ function CompletionRecap({ disabled }: { disabled: boolean }) {
 }
 
 /** Written theory and checks, followed by a completion that preserves the learner's work. */
-export function LessonConclusion({ onReturnToPractice, onComplete, completionSaving = false, completionError = "" }: LessonConclusionProps) {
+export function LessonConclusion({ onReturnToPractice, completion }: LessonConclusionProps) {
   const lessonStorage = useLessonStorage();
   const [state, setState] = useState(createConclusionState);
   const [ready, setReady] = useState(false);
   const [storageUnavailable, setStorageUnavailable] = useState(false);
   const [completionPending, setCompletionPending] = useState(false);
   const [completionFailure, setCompletionFailure] = useState("");
+  const [confirmation, setConfirmation] = useState<{ receipt: LessonCompletionReceipt; version: number } | null>(null);
+  const receipt = confirmation && confirmation.version === completion?.version ? confirmation.receipt : null;
+  const verification = useRef({ attempt: 0 });
   const completionLock = useRef(false);
-  const mounted = useRef(true);
   const heading = useRef<HTMLHeadingElement>(null);
   const writing = useRef<HTMLInputElement>(null);
   const sounds = useLessonSounds();
+  const exampleBlock = state.theoryBlock === 1;
   const page = CONCLUSION_THEORY[state.theoryIndex];
-  const question = CONCLUSION_QUESTIONS[state.questionIndex];
+  const questions = getConclusionQuestions(state);
+  const question = questions[state.questionIndex];
   const attempt = getConclusionAttempt(state, question);
   const evaluation = attempt.lastAnswer === null ? null : evaluateConclusionAnswer(question, attempt.lastAnswer);
   const complete = isConclusionComplete(state);
-  const completedQuestions = CONCLUSION_QUESTIONS.filter(item => {
+  const completedQuestions = questions.filter(item => {
     const answer = state.attempts[item.id]?.lastAnswer;
     return answer != null && evaluateConclusionAnswer(item, answer).correct;
   }).length;
@@ -164,23 +173,57 @@ export function LessonConclusion({ onReturnToPractice, onComplete, completionSav
     if (!ready) return;
     try { lessonStorage.setItem(LESSON_CONCLUSION_STORAGE, JSON.stringify(state)); } catch { /* The review still works in memory. */ }
   }, [ready, state, lessonStorage]);
-  useEffect(() => { if (ready) heading.current?.focus({ preventScroll: true }); }, [ready, state.phase, state.theoryIndex, state.questionIndex]);
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  useEffect(() => { if (ready) heading.current?.focus({ preventScroll: true }); }, [ready, state.phase, state.theoryIndex, state.theoryBlock, state.questionIndex]);
+  const verify = completion?.verify, version = completion?.version;
+  useEffect(() => {
+    if (!ready || state.phase !== "summary" || !verify || version === undefined) return;
+    const tracker = verification.current;
+    const ticket = ++tracker.attempt;
+    // Run after the summary has been staged, including on a restored visit.
+    void Promise.resolve().then(async () => {
+      if (ticket !== tracker.attempt) return;
+      setConfirmation(null); setCompletionFailure(""); setCompletionPending(false); completionLock.current = false;
+      try {
+        const checked = await verify();
+        if (ticket === tracker.attempt) setConfirmation({ receipt: checked, version });
+      } catch {
+        if (ticket === tracker.attempt) setCompletionFailure("Não foi possível confirmar seu avanço. Confira a conexão e tente novamente.");
+      }
+    });
+    return () => { tracker.attempt++; };
+  }, [ready, state.phase, verify, version]);
 
   async function finishLesson() {
-    if (completionLock.current || completionSaving || !onComplete) return;
+    if (completionLock.current || completion?.saving || !completion?.verify) return;
+    const previous = completion.error || completionFailure ? null : receipt;
+    const tracker = verification.current;
+    const ticket = ++tracker.attempt;
     completionLock.current = true; setCompletionPending(true); setCompletionFailure("");
     sounds.play("advance");
-    try { await onComplete(); }
-    catch { if (mounted.current) setCompletionFailure("Não foi possível confirmar seu avanço. Tente concluir novamente."); }
-    finally { completionLock.current = false; if (mounted.current) setCompletionPending(false); }
+    try {
+      const checked = await completion.verify();
+      if (ticket !== tracker.attempt) return;
+      setConfirmation({ receipt: checked, version: completion.version });
+      if (previous === checked) completion.leave(checked === "account" ? "/dashboard" : "/comecar?modo=entrar");
+    } catch {
+      if (ticket === tracker.attempt) { setConfirmation(null); setCompletionFailure("Não foi possível confirmar seu avanço. Confira a conexão e tente novamente."); }
+    } finally {
+      if (ticket === tracker.attempt) { completionLock.current = false; setCompletionPending(false); }
+    }
   }
+  const completionError = completionFailure || completion?.error;
+  const completionBusy = completionPending || completion?.saving || (!receipt && !completionError);
+  const completionMessage = completionPending ? "Confirmando seu avanço…" : completionError || (completionBusy ? "Confirmando seu avanço…"
+    : receipt === "account" ? "49 de 49 etapas salvas na sua conta."
+    : receipt === "guest-local" ? "Avanço salvo neste navegador. No painel, você pode levá-lo para uma conta sem progresso."
+    : "Seu progresso está apenas nesta sessão. Ao sair, você poderá perdê-lo.");
 
-  function goTheory(index: number) { sounds.play("advance"); setState(current => ({ ...current, phase: "theory", theoryIndex: index })); }
+  function goTheory(index: number, theoryBlock: 0 | 1) { sounds.play("advance"); setState(current => ({ ...current, phase: "theory", theoryIndex: index, theoryBlock })); }
   function nextTheory() {
     sounds.play("advance");
+    if (!exampleBlock) { setState(current => ({ ...current, theoryBlock: 1 })); return; }
     setState(current => current.theoryIndex < CONCLUSION_THEORY.length - 1
-      ? { ...current, theoryIndex: current.theoryIndex + 1 }
+      ? { ...current, theoryIndex: current.theoryIndex + 1, theoryBlock: 0 }
       : { ...current, phase: isConclusionComplete(current) ? "summary" : "test", testStarted: true });
   }
   function nextQuestion() {
@@ -193,6 +236,7 @@ export function LessonConclusion({ onReturnToPractice, onComplete, completionSav
     event?.preventDefault();
     if (evaluation?.correct) { nextQuestion(); return; }
     if (!attempt.draft.trim()) return;
+    writing.current?.blur();
     sounds.play(evaluateConclusionAnswer(question, attempt.draft).correct ? "success" : "retry");
     setState(current => submitConclusionAnswer(current, question));
   }
@@ -202,23 +246,25 @@ export function LessonConclusion({ onReturnToPractice, onComplete, completionSav
   }
   function previous() {
     if (state.phase === "theory") {
-      if (state.theoryIndex > 0) goTheory(state.theoryIndex - 1); else onReturnToPractice();
+      if (exampleBlock) goTheory(state.theoryIndex, 0);
+      else if (state.theoryIndex > 0) goTheory(state.theoryIndex - 1, 1);
+      else onReturnToPractice();
     } else if (state.phase === "test") {
       sounds.play("advance");
       setState(current => current.questionIndex > 0 ? { ...current, questionIndex: current.questionIndex - 1 }
-        : { ...current, phase: "theory", theoryIndex: CONCLUSION_THEORY.length - 1 });
+        : { ...current, phase: "theory", theoryIndex: CONCLUSION_THEORY.length - 1, theoryBlock: 1 });
     }
   }
 
   return <>
-    <main className="lo-main lc-main" id="lesson-main" data-conclusion-phase={state.phase} data-conclusion-index={state.phase === "theory" ? state.theoryIndex : state.questionIndex} aria-busy={!ready}>
-      <LessonStepTransition stepKey={`${state.phase}:${state.phase === "theory" ? state.theoryIndex : state.questionIndex}`} className="lc-content">
+    <main className="lo-main lc-main" id="lesson-main" data-conclusion-phase={state.phase} data-theory-block={state.phase === "theory" ? Number(exampleBlock) : undefined} data-conclusion-index={state.phase === "theory" ? state.theoryIndex : state.questionIndex} aria-busy={!ready}>
+      <LessonStepTransition stepKey={state.phase === "theory" ? `theory:${state.theoryIndex}:${Number(exampleBlock)}` : `${state.phase}:${state.questionIndex}`} className="lc-content">
       <div className={`lc-heading ${state.phase === "test" ? "is-test" : ""}`}>
         <div className="lc-heading-copy"><div className="lc-heading-topline"><LessonJourney stage={state.phase === "theory" ? "theory" : "test"}
           completed={state.phase === "theory" ? state.theoryIndex : state.phase === "summary" ? 6 : completedQuestions}
           label={state.phase === "test" ? `Teste ${state.questionIndex + 1}/${CONCLUSION_QUESTIONS.length}` : undefined}/>
           {state.phase === "test" && <button type="button" className="lc-test-restart" aria-label="Recomeçar teste do zero" disabled={!ready} onClick={retake}><RotateCcw size={15} aria-hidden="true"/><span className="lc-restart-full">Recomeçar teste do zero</span><span className="lc-restart-short" aria-hidden="true">Zerar teste</span></button>}</div>
-          <h1 id="lesson-title" ref={heading} tabIndex={-1}>{state.phase === "theory" ? page.title : state.phase === "test" ? question.prompt : "Você concluiu sua primeira aula."}</h1></div>
+          <h1 id="lesson-title" ref={heading} tabIndex={-1}>{state.phase === "theory" ? page.title : state.phase === "test" ? question.prompt : "Aula 1 concluída!"}</h1></div>
         {state.phase !== "summary" && <div className="lc-page-dots" aria-hidden="true">{Array.from({ length: state.phase === "theory" ? 5 : 6 }, (_, index) =>
           <span key={index} className={state.phase === "summary" || index < (state.phase === "theory" ? state.theoryIndex : state.questionIndex) ? "is-done"
             : index === (state.phase === "theory" ? state.theoryIndex : state.questionIndex) ? "is-current" : ""} />)}</div>}
@@ -226,13 +272,12 @@ export function LessonConclusion({ onReturnToPractice, onComplete, completionSav
 
       {!ready ? <section className="lc-card lc-loading"><p>Preparando sua revisão…</p></section> : state.phase === "theory" ? <section className={`lc-card lc-theory ${page.id === "forms" ? "lc-rule-page" : ""}`} aria-label="Explicação bilíngue">
         <div className="lc-relation">
-          {page.id === "forms" ? <div className="lc-forms" aria-label="I am. You are. We are. They are.">
+          {page.id === "forms" && !exampleBlock ? <div className="lc-forms" aria-label="I am. You are. We are. They are.">
             <span lang="en">I <strong>am</strong></span><span lang="en">You <strong>are</strong></span>
             <span lang="en">We <strong>are</strong></span><span lang="en">They <strong>are</strong></span>
-          </div> : <><strong className="lc-english" lang="en">{page.english}</strong><span className="lc-portuguese">{page.portuguese}</span></>}
-          <div className="lc-example"><strong lang="en">{page.example}</strong><span>{page.translation}</span></div>
+          </div> : <><strong className="lc-english" lang="en">{exampleBlock ? page.example : page.english}</strong><span className="lc-portuguese">{exampleBlock ? page.translation : page.portuguese}</span></>}
         </div>
-        <div className="lc-explanation"><p>{page.explanationPT}</p><p className="lc-en" lang="en">{page.explanationEN}</p><p className="lc-note">{page.note}</p></div>
+        <div className="lc-explanation"><p>{exampleBlock ? page.note : page.explanationPT}</p></div>
       </section> : state.phase === "test" ? <form id="lc-answer-form" className={`lc-card lc-test ${question.kind === "writing" ? "lc-writing-test" : ""}`} onSubmit={check}>
         <div className="lc-question-context"><span>Situação</span><p>{question.context}</p></div>
         <div className="lc-answer-area">
@@ -243,34 +288,34 @@ export function LessonConclusion({ onReturnToPractice, onComplete, completionSav
               <span lang="en">{choice}</span><span className="lc-choice-check" aria-hidden="true">{attempt.draft === choice && <Check size={18} />}</span>
             </label>)}
           </fieldset> : <div className="lc-writing"><label htmlFor="lc-written-answer">Sua frase em inglês</label>
-            <div className="lc-input-row"><input ref={writing} id="lc-written-answer" type="text" value={attempt.draft} maxLength={120} autoComplete="off" autoCapitalize="off" spellCheck={false}
+            <div className="lc-input-row"><input ref={writing} enterKeyHint="done" id="lc-written-answer" type="text" value={attempt.draft} maxLength={120} autoComplete="off" autoCapitalize="off" spellCheck={false}
               placeholder="Escreva aqui…" onChange={event => { const draft = event.currentTarget.value; setState(current => setConclusionDraft(current, question, draft)); }} />
               <button type="button" className="lc-clear" disabled={!attempt.draft} aria-label="Apagar resposta" onClick={() => {
-                setState(current => setConclusionDraft(current, question, "")); writing.current?.focus();
+                setState(current => setConclusionDraft(current, question, "")); writing.current?.focus({ preventScroll: true });
               }}><Eraser size={18} aria-hidden="true"/><span>Apagar</span></button></div>
             <p className="lc-writing-note">Maiúsculas e ponto final não tiram acerto.</p>
           </div>}
         </div>
         <div className={`lc-feedback ${evaluation ? evaluation.correct ? "is-correct" : "is-retry" : ""}`} role="status" aria-live="polite" aria-atomic="true">
-          {evaluation ? <><strong>{evaluation.correct ? "Faz sentido." : evaluation.meaningCorrect ? "Ajuste am ou are." : "Observe quem está falando."}</strong>
+          {evaluation ? <><strong>{evaluation.feedbackTitle}</strong>
             <p>{evaluation.explanationPT}</p><p lang="en" className="lc-feedback-en">{evaluation.explanationEN}</p>
             {evaluation.correct && evaluation.notes.map(note => <p key={note}>{note}</p>)}
           </> : <p>Escolha ou escreva a fala e toque em <strong>Conferir</strong>. Depois da resposta, você verá a explicação.</p>}
         </div>
       </form> : <section className="lc-card lc-completion" aria-label="Aula concluída">
-        <CompletionRecap disabled={completionSaving || completionPending}/>
+        <CompletionRecap disabled={completionPending}/>
       </section>}
       </LessonStepTransition>
       {storageUnavailable && <p className="lc-storage-note" role="status">A revisão funciona aqui, mas este navegador não permitiu guardar seu progresso.</p>}
     </main>
     <footer className="lo-footer lc-footer">
-      {state.phase === "summary" ? <><p className="lc-completion-save" role={completionError || completionFailure ? "alert" : "status"}>
-          {completionError || completionFailure || (completionSaving || completionPending ? "Confirmando seu avanço…" : "Conclua para confirmar seu avanço e voltar ao painel.")}</p>
-        <LessonButton type="button" className="lc-next lc-complete" disabled={!ready || completionSaving || completionPending || !onComplete} aria-busy={completionSaving || completionPending} onClick={() => void finishLesson()}>Concluir e voltar ao painel<ArrowRight size={19} aria-hidden="true"/></LessonButton></>
+      {state.phase === "summary" ? <><p id="lc-completion-status" className="lc-completion-save" role={completionError ? "alert" : "status"}>{completionMessage}</p>
+        <LessonButton type="button" className="lc-next lc-complete" disabled={!ready || !!completionBusy || !verify} aria-busy={!!completionBusy} aria-describedby="lc-completion-status" onClick={() => void finishLesson()}>
+          {completionError ? "Tentar confirmar novamente" : completion?.account ? "Voltar ao meu painel" : "Entrar ou criar conta"}<ArrowRight size={19} aria-hidden="true"/></LessonButton></>
         : <><button type="button" className="lc-back" onClick={previous} disabled={!ready}><ArrowLeft size={19} aria-hidden="true"/>Voltar</button>
           <span className="lc-footer-note">{state.phase === "test" ? "A primeira resposta fica registrada. Você pode corrigir depois." : "Leia no seu ritmo. Esta parte é escrita."}</span>
           {state.phase === "theory" ? <LessonButton type="button" className="lc-next" disabled={!ready} onClick={nextTheory}>
-            {state.theoryIndex < 4 ? "Continuar" : complete ? "Concluir aula" : state.testStarted ? "Retomar teste" : "Fazer teste"}<ArrowRight size={19} aria-hidden="true"/></LessonButton>
+            {!exampleBlock || state.theoryIndex < CONCLUSION_THEORY.length - 1 ? "Avançar" : complete ? "Concluir aula" : state.testStarted ? "Retomar teste" : "Fazer teste"}<ArrowRight size={19} aria-hidden="true"/></LessonButton>
             : evaluation?.correct ? <LessonButton type="button" className="lc-next" onClick={nextQuestion}>{state.questionIndex === 5 ? "Concluir aula" : "Próxima pergunta"}<ArrowRight size={19} aria-hidden="true"/></LessonButton>
               : <LessonButton type="submit" form="lc-answer-form" className="lc-next" disabled={!attempt.draft.trim()}><Check size={19} aria-hidden="true"/>Conferir</LessonButton>}
         </>}

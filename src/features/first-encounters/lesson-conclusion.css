@@ -64,3 +64,18 @@
 @media(min-width:760px) and (max-height:570px){.lc-content{gap:8px}.lc-completion{padding:17px 24px;gap:22px}.lc-completion-copy{gap:12px}.lc-completion-message h2{font-size:30px}.lc-completion-message p{font-size:17px}.lc-completion-models>button{min-height:62px;padding-block:8px}.lc-completion-models strong{font-size:20px}.lc-completion-models span{font-size:14px}}
 @media(min-width:760px) and (max-height:720px){.lc-completion .lo-tutorial-caption{min-height:2.8em;font-size:18px}}
 @media(min-width:760px) and (max-height:570px){.lc-completion .lo-tutorial-caption{font-size:17px}}
+
+.lc-completion-models > button[aria-current="true"] {
+  background: #f5dfa0;
+  box-shadow: inset 3px 0 var(--comic-teal, #39776b);
+}
+
+/* On compact recap cards the selected phrase is already printed next to the
+   portrait. Give the name and the speaking character the whole frame. */
+@container (max-width: 195px) {
+  .lc-completion-stage :is(.li-guide-label, .li-stage-team, .li-stage-speech) { display: none; }
+  .lc-completion-stage .li-character-scene .li-actor:not([data-speaker=true]) { opacity: 0; visibility: hidden; }
+  .lc-completion-stage .li-character-scene .li-actor[data-speaker=true][data-introduction-person] {
+    left: 50%; top: 2px; width: 96%;
+  }
+}

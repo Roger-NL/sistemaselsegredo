@@ -59,7 +59,12 @@ describe("automatic speech keeps the lesson's hidden decisions hidden", () => {
       expect(getAutomaticLessonSpeech(round,true).every(turn=>!/\bI are\b|\b(?:You|We|They) am\b/.test(turn.text)),round.id).toBe(true);
       const guide = getLessonSceneGuide(round);
       expect(guide.title.length,round.id).toBeGreaterThan(12);
-      expect(guide.action.length,round.id).toBeGreaterThan(12);
+      if (round.vocabulary) {
+        expect(guide.action, round.id).toBe(round.vocabulary.cue);
+        expect(getAutomaticLessonSpeech(round, true), round.id).toEqual([]);
+      } else {
+        expect(guide.action.length, round.id).toBeGreaterThan(12);
+      }
       expect(guide.title+guide.action,round.id).not.toContain("undefined");
     }
   });

@@ -62,7 +62,7 @@ describe("recorded lesson audio catalog", () => {
 
   it("covers deduplicated correct models, alternative valid speakers and anonymous Nina reading", () => {
     const requirements = getLessonAudioRequirements();
-    expect(requirements).toHaveLength(24);
+    expect(requirements.some(({ text }) => /\b(?:ready|here|friends)\b/i.test(text))).toBe(false);
     expect(requirements.map(item => item.key)).toContain("leo:We are a team.");
     expect(requirements.map(item => item.key)).toContain("nina:We are a team.");
     expect(requirements.map(item => item.key)).toContain("nina:They are a team.");

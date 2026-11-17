@@ -77,6 +77,18 @@ describe("lesson audio without answer or identity shortcuts", () => {
     expect(container.querySelector("button button")).toBeNull();
   });
 
+  it("offers a written model and translation for the new question without playing an unrelated recording", async () => {
+    await mount("use1-listener");
+    expect(container.querySelector("[data-audio-main]")).toBeNull();
+    await click(container.querySelector<HTMLButtonElement>('[aria-label="Ver exemplo da relação"]')!);
+    const model = container.querySelector<HTMLDialogElement>(".lo-model-dialog")!;
+    expect(model.open).toBe(true);
+    expect(model.textContent).toContain("Are you ready?");
+    expect(model.textContent).toContain("Você está pronto?");
+    expect(model.querySelector("[data-audio-text]")).toBeNull();
+    expect(audio.play).not.toHaveBeenCalled(); noGrade();
+  });
+
   it("makes listening to a model explicit support and keeps the production answer unplayed until requested", async () => {
     await mount("use3-i");
     expect(main().getAttribute("aria-label")).toBe("Ouvir exemplo narrado"); expect(main().hasAttribute("data-audio-text")).toBe(false);
@@ -96,10 +108,13 @@ describe("lesson audio without answer or identity shortcuts", () => {
     await click(main()); expect(audio.play).toHaveBeenLastCalledWith("sam", "I am Sam.");
   });
 
-  it("never reads I are before grading and reads the corrected model after understood meaning", async () => {
+  it("keeps a wrong verb editable and plays the actor model only after correction", async () => {
     await mount("g3-i"); await place("are", "word:verb");
     expect(main().getAttribute("aria-label")).toBe("Ouvir exemplo narrado"); expect(main().hasAttribute("data-audio-text")).toBe(false);
     expect(audio.play).not.toHaveBeenCalled(); await click(footer());
+    expect(container.querySelector(".lo-feedback.is-retry")).not.toBeNull();
+    expect(audio.play).not.toHaveBeenCalled();
+    await place("am", "word:verb"); await click(footer());
     expect(container.querySelector(".lo-feedback.is-correct")).not.toBeNull(); await click(main());
     expect(audio.play).toHaveBeenLastCalledWith("ana", "I am Ana.");
     expect(audio.play.mock.calls.some(([, text]) => text === "I are Ana.")).toBe(false);

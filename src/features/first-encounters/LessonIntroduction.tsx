@@ -6,7 +6,7 @@ import { LessonButton } from "./LessonButton";
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Bell, BellOff, Pause, RotateCcw, Volume2, X } from "lucide-react";
-import { TutorialCaption, type TutorialClipTiming } from "./TutorialCaption";
+import { TutorialCaption } from "./TutorialCaption";
 import { PERSON_NAMES, type PersonId } from "./lesson-one";
 import { IntroductionStage } from "./IntroductionStage";
 import { LessonJourney } from "./LessonJourney";
@@ -14,12 +14,10 @@ import { LessonStepTransition } from "./LessonStepTransition";
 import { isLessonButtonClick } from "./lesson-sound-events";
 import { useLessonAudio } from "./useLessonAudio";
 import { useLessonSounds } from "./useLessonSounds";
-import { INTRODUCTION_POSITION_STORAGE, restorePosition } from "./lesson-position";
+import { INTRODUCTION_POSITION_STORAGE, restoreIntroductionPosition } from "./lesson-position";
 import { createIntroductionAudioController, getIntroductionClips, LESSON_INTRODUCTION_SCENES, type IntroductionSceneId, type IntroductionClip } from "./lesson-introduction";
-import timingJSON from "./lesson-introduction-timing.json";
 import "./lesson-introduction.css";
 
-const TIMING = timingJSON as Partial<Record<IntroductionSceneId, TutorialClipTiming>>;
 type Presentation = IntroductionClip & { token: number; scene: IntroductionSceneId; complete: boolean };
 function PathIllustration() {
   return <ol className="li-demo-path" aria-label="Percurso completo da demonstração">
@@ -36,6 +34,7 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
   const readyPeople = useRef(new Set<PersonId>());
   const pendingClip = useRef<{ ticket: number; person: PersonId; play: () => void } | null>(null);
   const [step, setStep] = useState(0);
+  const [block, setBlock] = useState(0);
   const [positionReady, setPositionReady] = useState(false);
   const [started, setStarted] = useState(false);
   const [sequenceActive, setSequenceActive] = useState(false);
@@ -46,22 +45,25 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
   const { play: playSound } = sounds;
   const scene = LESSON_INTRODUCTION_SCENES[step];
   const current = presentation?.scene === scene.id ? presentation : null;
-  const displayedText = current?.text ?? scene.text;
-  const displayedKey = current?.key ?? scene.key;
+  const clips = getIntroductionClips(scene);
+  const displayed = current ?? clips[block];
+  const isLast = step === LESSON_INTRODUCTION_SCENES.length - 1 && block === clips.length - 1;
 
   useEffect(() => { dialog.current?.showModal(); }, []);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      let restored = 0;
-      try { restored = restorePosition(lessonStorage.getItem(INTRODUCTION_POSITION_STORAGE), LESSON_INTRODUCTION_SCENES.length); } catch { /* The presentation also works without browser storage. */ }
-      setStep(restored); setPositionReady(true);
+      try {
+        const restored = restoreIntroductionPosition(lessonStorage.getItem(INTRODUCTION_POSITION_STORAGE));
+        setStep(restored.index); setBlock(restored.block ?? 0);
+      } catch { /* The presentation also works without browser storage. */ }
+      setPositionReady(true);
     });
     return () => cancelAnimationFrame(frame);
   }, [lessonStorage]);
   useEffect(() => {
     if (!positionReady) return;
-    try { lessonStorage.setItem(INTRODUCTION_POSITION_STORAGE, JSON.stringify({ version: 1, index: step })); } catch { /* The cursor remains available for this visit. */ }
-  }, [step, positionReady, lessonStorage]);
+    try { lessonStorage.setItem(INTRODUCTION_POSITION_STORAGE, JSON.stringify({ version: 1, index: step, ...(block ? { block } : {}) })); } catch { /* The cursor remains available for this visit. */ }
+  }, [step, block, positionReady, lessonStorage]);
   useEffect(() => {
     const invalidateSequence = () => { generation.current++; pendingClip.current = null; stopAudio(); };
     const cancelHidden = () => {
@@ -77,36 +79,26 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
     generation.current++; pendingClip.current = null; stopAudio(); setSequenceActive(false);
     setPresentation(value => value ? { ...value, complete: true } : value);
   }
-  function playScene(index: number) {
+  function playBlock(index: number, position: number) {
     stopAudio();
     const ticket = ++generation.current;
     const selected = LESSON_INTRODUCTION_SCENES[index];
-    const clips = getIntroductionClips(selected);
-    setSequenceActive(true);
-    function playClip(position: number) {
+    const clip = getIntroductionClips(selected)[position];
+    const end = () => {
       if (generation.current !== ticket) return;
-      const clip = clips[position];
-      setPresentation({ ...clip, scene: selected.id, token: ticket, complete: false });
-      function begin() {
-        if (generation.current !== ticket) return;
-        pendingClip.current = null;
-        void requestAudio(clip.person, clip.text, { role: clip.role, autoplay: position > 0, onEnded: () => {
-          if (generation.current !== ticket) return;
-          if (position + 1 < clips.length) playClip(position + 1);
-          else {
-            setSequenceActive(false);
-            setPresentation(value => value?.token === ticket ? { ...value, complete: true } : value);
-          }
-        } }).then(playing => {
-          if (playing || generation.current !== ticket) return;
-          setSequenceActive(false);
-          setPresentation(value => value?.token === ticket ? { ...value, complete: true } : value);
-        });
-      }
-      if (readyPeople.current.has(clip.person)) begin();
-      else pendingClip.current = { ticket, person: clip.person, play: begin };
+      setSequenceActive(false);
+      setPresentation(value => value?.token === ticket ? { ...value, complete: true } : value);
+    };
+    function begin() {
+      if (generation.current !== ticket) return;
+      pendingClip.current = null;
+      void requestAudio(clip.person, clip.text, { role: clip.role, onEnded: end })
+        .then(playing => { if (!playing) end(); });
     }
-    playClip(0);
+    setPresentation({ ...clip, scene: selected.id, token: ticket, complete: false });
+    setSequenceActive(true);
+    if (readyPeople.current.has(clip.person)) begin();
+    else pendingClip.current = { ticket, person: clip.person, play: begin };
   }
   function characterReady(person: PersonId) {
     readyPeople.current.add(person);
@@ -117,17 +109,20 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
     stop(); dialog.current?.close();
     if (skip && onSkip) onSkip(); else onFinish();
   }
+  function move(index: number, position: number) {
+    playSound("advance"); setStep(index); setBlock(position); playBlock(index, position);
+  }
   function advance() {
-    if (!started) {
-      playSound("advance"); setStarted(true); playScene(step); return;
-    }
-    if (step === LESSON_INTRODUCTION_SCENES.length - 1) { finish(); return; }
-    playSound("advance"); stop(); setStep(step + 1); playScene(step + 1);
+    if (!started) { setStarted(true); move(step, block); return; }
+    if (isLast) { finish(); return; }
+    if (block + 1 < clips.length) move(step, block + 1);
+    else move(step + 1, 0);
   }
   function goBack() {
-    if (!step) return;
-    playSound("advance"); stop(); setStep(step - 1);
-    if (started) playScene(step - 1);
+    const index = block > 0 ? step : Math.max(0, step - 1);
+    const position = block > 0 ? block - 1 : LESSON_INTRODUCTION_SCENES[index].blocks.length - 1;
+    if (started) move(index, position);
+    else { setStep(index); setBlock(position); }
   }
   function unlock() {
     setSequenceActive(true);
@@ -136,8 +131,8 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
   }
 
   return <dialog ref={dialog} className="li-introduction" aria-labelledby="li-title" aria-busy={!positionReady} data-ui-sound-scope="local"
-    data-introduction-step={step} data-introduction-scene={scene.id} data-introduction-started={started}
-    data-introduction-speaking={sequenceActive} data-introduction-language={current?.english ? "en" : "pt"}
+    data-introduction-step={step} data-introduction-block={block} data-introduction-scene={scene.id} data-introduction-started={started}
+    data-introduction-speaking={sequenceActive} data-introduction-language={displayed.english ? "en" : "pt"}
     onCancel={event => { event.preventDefault(); finish(true); }}
     onClickCapture={event => { if (isLessonButtonClick(event.target)) playSound("tap"); }}>
     <header className="li-header"><LessonJourney stage="introduction" completed={step} label={`Apresentação · ${step + 1}/3`}/>
@@ -146,25 +141,25 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
     <LessonStepTransition stepKey={scene.id} className="li-content">
     <div className="li-heading"><h1 id="li-title">{scene.title}</h1><p>{scene.subtitle}</p></div>
     <div className={`li-visual li-visual--${scene.id}`}>
-      <IntroductionStage scene={scene} modelIndex={current?.english ? current.modelIndex : null} speech={audio.speech} onCharacterReady={characterReady}/>
+      <IntroductionStage scene={scene} modelIndex={displayed.modelIndex} speech={audio.speech} onCharacterReady={characterReady}/>
       {scene.models.length ? <div className="li-models" aria-label="O que você vai aprender">{scene.models.map((model, index) => <div className="li-model" key={model.text}
         data-example-speaking={current?.english && current.modelIndex === index && audio.playingKey === current.key}>
         <span className="li-model-context">{scene.id === "self-and-you" ? index === 0 ? "Ana fala de si" : "Leo fala com Ana" : index === 0 ? "Ana faz parte da equipe" : "Maya fala de outra equipe"}</span>
         <strong lang="en">{model.text}</strong><span className="li-model-translation">{model.translation}</span>
       </div>)}</div> : <PathIllustration/>}
     </div>
-    <section className="li-narration" aria-label={current?.english ? "Exemplo em inglês" : "Apresentação em português"}>
-      <div className="li-narration-heading"><span><Volume2 size={16}/>{current?.english ? `${PERSON_NAMES[current.person]} fala em inglês` : "Nina apresenta a aula"}</span>
+    <section className="li-narration" aria-label={displayed.english ? "Exemplo em inglês" : "Apresentação em português"}>
+      <div className="li-narration-heading"><span><Volume2 size={16}/>{displayed.english ? `${PERSON_NAMES[displayed.person]} fala em inglês` : "Nina apresenta a aula"}</span>
         {audio.blocked ? <button type="button" className="li-audio-notice" onClick={unlock}>Som bloqueado. Ativar</button>
-          : audio.error ? <button type="button" className="li-audio-notice" onClick={() => playScene(step)}>Áudio indisponível. Tentar novamente</button>
-            : started && <button type="button" className="li-audio-button" onClick={() => sequenceActive ? stop() : playScene(step)} aria-label={sequenceActive ? "Pausar apresentação" : "Repetir apresentação"}>{sequenceActive ? <Pause size={16}/> : <RotateCcw size={16}/>}<span>{sequenceActive ? "Pausar" : "Repetir"}</span></button>}
+          : audio.error ? <button type="button" className="li-audio-notice" onClick={() => playBlock(step, block)}>Áudio indisponível. Tentar novamente</button>
+            : started && <button type="button" className="li-audio-button" onClick={() => sequenceActive ? stop() : playBlock(step, block)} aria-label={sequenceActive ? "Pausar apresentação" : "Repetir apresentação"}>{sequenceActive ? <Pause size={16}/> : <RotateCcw size={16}/>}<span>{sequenceActive ? "Pausar" : "Repetir"}</span></button>}
       </div>
-      <div className="li-caption-slot" lang={current?.english ? "en" : "pt-BR"}><TutorialCaption key={`${current?.token ?? "preview"}:${displayedKey}`} speech={audio.speech} text={displayedText} clipKey={displayedKey} timing={!current?.english ? TIMING[scene.id] : undefined} complete={!started || current?.complete === true}/></div>
+      <div className="li-caption-slot" lang={displayed.english ? "en" : "pt-BR"}><TutorialCaption key={`${current?.token ?? "preview"}:${displayed.key}`} speech={audio.speech} text={displayed.text} clipKey={displayed.key} complete={!started || current?.complete === true}/></div>
     </section>
     </LessonStepTransition>
-    <footer className="li-footer"><button type="button" className="li-back" disabled={!positionReady || step === 0} onClick={goBack}><ArrowLeft size={18}/><span>Voltar</span></button>
+    <footer className="li-footer"><button type="button" className="li-back" disabled={!positionReady || step === 0 && block === 0} onClick={goBack}><ArrowLeft size={18}/><span>Voltar</span></button>
       <button type="button" className="li-skip" onClick={() => finish(true)}>Pular apresentação</button>
-      <LessonButton type="button" className="li-primary" aria-label={!started ? "Começar com som" : step === 2 ? finishLabel : "Continuar"} disabled={!positionReady} onClick={advance}>{!started ? <Volume2 size={19}/> : null}<span>{!started ? "Começar com som" : step === 2 ? "Ver guia" : "Continuar"}</span>{started ? <ArrowRight size={19}/> : null}</LessonButton>
+      <LessonButton type="button" className="li-primary" aria-label={!started ? "Começar com som" : isLast ? finishLabel : "Avançar"} disabled={!positionReady} onClick={advance}>{!started ? <Volume2 size={19}/> : null}<span>{!started ? "Começar com som" : isLast ? "Ver guia" : "Avançar"}</span>{started ? <ArrowRight size={19}/> : null}</LessonButton>
     </footer>
   </dialog>;
 }

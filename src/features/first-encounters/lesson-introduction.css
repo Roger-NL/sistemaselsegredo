@@ -145,10 +145,10 @@
 
 /* The introduction uses the same native character rigs and voice clock as the lesson. */
 .li-visual{grid-template-columns:minmax(0,1.25fr) minmax(230px,1fr);gap:24px;align-items:stretch}
-.li-character-scene{position:relative;min-width:0;min-height:0;overflow:hidden;border:1px solid #e2def0;border-radius:22px;background:linear-gradient(180deg,#faf9ff,#f1edfc)}
-.li-stage-floor{position:absolute;inset:auto 12% 19px;height:2px;background:#e1d9f2}
+.li-character-scene{--li-floor:23px;container-type:inline-size;position:relative;min-width:0;min-height:0;overflow:hidden;border:1px solid #e2def0;border-radius:22px;background:linear-gradient(180deg,#faf9ff,#f1edfc)}
+.li-stage-floor{position:absolute;inset:auto 8% var(--li-floor);height:2px;background:#e1d9f2}
 .li-guide-label{position:absolute;top:13px;left:16px;z-index:2;color:#81749a;font-size:13px;font-weight:600}
-.li-actor{position:absolute;top:45px;bottom:24px;left:50%;width:min(40%,240px);transform:translateX(-50%);visibility:hidden;opacity:0;pointer-events:none}
+.li-actor{position:absolute;top:43px;bottom:var(--li-floor);left:50%;width:min(40%,240px);transform:translateX(-50%);visibility:hidden;opacity:0;pointer-events:none}
 .li-actor[data-visible=true]{visibility:visible;opacity:1}
 .li-character-scene[data-stage-guide=true] .li-actor{top:29px}
 .li-character-scene[data-stage-guide=false] .li-actor[data-introduction-person=ana]{left:30%}
@@ -156,10 +156,10 @@
 .li-character-scene[data-stage-group=true] .li-actor[data-introduction-person=ana]{left:25%}
 .li-character-scene[data-stage-group=true] .li-actor[data-introduction-person=leo]{left:45%}
 .li-character-scene[data-stage-group=true] .li-actor[data-introduction-person=maya]{left:80%}
-.li-actor-name{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;color:#837593;line-height:1.2;white-space:nowrap}
+.li-actor-name{position:absolute;top:calc(100% + 3px);left:50%;transform:translateX(-50%);font-size:12px;font-weight:600;color:#837593;line-height:1.2;white-space:nowrap}
 .li-actor[data-speaker=true] .li-actor-name{color:#6450ac}
-.li-stage-team{position:absolute;left:7%;right:39%;top:43px;bottom:11px;border:1.5px solid #c9bce9;border-radius:45% 45% 16px 16px;background:#eee8fb66}
-.li-stage-team>span{position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);font-size:10px;line-height:1.2;color:#8873a6;background:#f1edfc;padding:0 5px;white-space:nowrap}
+.li-stage-team{position:absolute;left:8%;right:39%;top:42px;bottom:var(--li-floor);border:1.5px solid #c9bce9;border-radius:45% 45% 2px 2px;background:#eee8fb66}
+.li-stage-team>span{position:absolute;z-index:1;bottom:0;left:50%;transform:translateX(-50%);font-size:10px;line-height:1.2;color:#8873a6;background:#f1edfc;padding:0 5px;white-space:nowrap}
 .li-stage-speech{position:absolute;z-index:3;max-width:calc(100% - 16px);padding:8px 15px;border:1px solid #d8cfee;border-radius:15px;background:white;white-space:nowrap;color:#4d466a;line-height:1.15}
 .li-stage-speech>strong{font-size:clamp(20px,2.3vw,30px);font-weight:600;letter-spacing:-.035em}
 .li-stage-speech-tail{position:absolute;left:0;top:100%;width:100%;height:16px;overflow:visible;fill:#fff;stroke:#d8cfee;stroke-width:1}
@@ -181,33 +181,121 @@
   .li-stage-speech{padding:6px 12px;border-radius:12px}.li-stage-speech>strong{font-size:24px}
   .li-visual--lesson-path .li-path-icon{width:60px}.li-visual--lesson-path .li-path strong{font-size:20px}
 }
-@media(max-width:640px){
-  .li-visual,.li-visual--lesson-path{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;gap:10px}
-  .li-models{grid-template-rows:1fr 1fr;gap:7px}
-  .li-model{display:grid;grid-template-columns:1fr auto;gap:3px 10px;padding:7px 11px;border-radius:11px}
-  .li-model-context{grid-column:1/-1;font-size:12px}.li-model>strong{font-size:23px}.li-model-translation{font-size:15px;align-self:center}
-  .li-character-scene{border-radius:16px}.li-stage-speech{padding:6px 11px;border-radius:12px}.li-stage-speech>strong{font-size:23px}
-  .li-guide-label{top:9px;left:12px;font-size:12px}.li-actor-name{font-size:11px}
-  .li-visual--lesson-path .li-path-icon{width:35px}.li-visual--lesson-path .li-path-step{display:none}
-  .li-visual--lesson-path .li-path strong{font-size:15px;min-height:0;margin-top:3px}
-  .li-visual--lesson-path .li-path p{display:none}.li-visual--lesson-path .li-path>li+li::before{top:25%;left:-13px}
-}
-@media(max-width:380px){.li-model>strong{font-size:21px}.li-model-translation{font-size:14px}}
-@media(max-width:640px){
-  .li-caption-slot{height:5.4em}
-  .li-model-context{display:none}
-  .li-model-translation{max-width:120px;font-size:14px}
-  .li-character-scene[data-stage-guide=true] .li-actor{top:12px}
-  .li-character-scene[data-stage-guide=false] .li-actor{top:35px}
-}
 .li-demo-path{display:grid;align-content:center;gap:10px;list-style:none;padding:8px 0!important;margin:0}
 .li-demo-path>li{display:flex;align-items:center;gap:12px;min-width:0;color:#9a90ac;font-size:18px;line-height:1.3}
 .li-demo-path>li>span{display:grid;place-items:center;flex-shrink:0;width:30px;height:30px;border:1px solid #dfd8ee;border-radius:50%;font-size:13px;font-weight:600}
 .li-demo-path>li>strong{font-weight:500}.li-demo-path>li[aria-current=step]{color:var(--li-accent)}
 .li-demo-path>li[aria-current=step]>span{background:#ece7fc;border-color:#c6b9ea}
-@media(max-width:640px){
- .li-demo-path{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;padding:0!important}
- .li-demo-path>li{flex-direction:column;gap:4px;text-align:center;font-size:11px;line-height:1.2}
- .li-demo-path>li>span{width:24px;height:24px;font-size:11px}.li-demo-path>li>strong{min-height:2.4em;display:grid;align-items:center;overflow-wrap:anywhere}
+
+/* Header, complete caption and navigation get their natural size first.
+   Only the stage consumes the remaining visible height. */
+@media (max-width: 759px), (orientation: landscape) and (max-height: 460px) {
+  .lo-app .li-introduction {
+    width: calc(100% - 16px);
+    height: calc(var(--lesson-visible-height, 100dvh) - 16px);
+    padding: clamp(8px, 2.4vw, 14px);
+  }
+  .li-introduction[open], .li-content { gap: clamp(5px, 1.2dvh, 10px); }
+  .li-content { grid-template-rows: auto minmax(0, 1fr) auto; }
+  .li-header { min-height: 36px; }
+  .li-header .lj-journey { width: min(46vw, 180px); }
+  .li-icon-button { width: 38px; height: 38px; }
+  .li-header-actions { gap: 6px; }
+  .li-heading h1 { font-size: clamp(23px, 6.4vw, 30px); line-height: 1.1; }
+  .li-heading > p { margin-top: 3px; font-size: 15px; line-height: 1.25; }
+  .li-visual, .li-visual--lesson-path {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: clamp(4px, 1.1dvh, 9px);
+  }
+  .li-character-scene { min-height: 0; }
+  .li-character-scene[data-stage-guide=true] .li-actor { top: 11px; width: min(58%, 250px); }
+  .li-character-scene[data-stage-guide=false] .li-actor { top: 41px; width: min(40%, 190px); }
+  .li-character-scene[data-stage-group=true] .li-actor { width: min(35%, 150px); }
+  .li-stage-team {
+    top: auto;
+    height: min(calc(100% - var(--li-floor) - 41px), 44.7cqw, 192px);
+  }
+  .li-guide-label { top: 7px; left: 9px; font-size: 12px; }
+  .li-stage-speech { padding: 4px 9px; }
+  .li-stage-speech > strong { font-size: clamp(17px, 4.8vw, 21px); }
+  .li-actor-name { font-size: 12px; }
+  .li-models { grid-template-rows: auto auto; gap: 5px; }
+  .li-model {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1px 8px;
+    padding: 5px 9px;
+  }
+  .li-model-context { display: none; }
+  .li-model > strong { white-space: nowrap; font-size: clamp(17px, 5vw, 22px); line-height: 1.15; }
+  .li-model-translation { max-width: none; white-space: nowrap; font-size: clamp(13px, 3.6vw, 15px); line-height: 1.2; }
+  .li-demo-path {
+    grid-template-columns: auto repeat(4, minmax(0, 1fr));
+    gap: 3px;
+    padding: 0 !important;
+  }
+  .li-demo-path > li { flex-direction: column; gap: 3px; text-align: center; font-size: 11px; line-height: 1.15; }
+  .li-demo-path > li > span { width: 22px; height: 22px; font-size: 11px; }
+  .li-narration { padding-top: 4px; }
+  .li-narration-heading { min-height: 25px; margin-bottom: 3px; font-size: 12px; }
+  .li-caption-slot { height: auto; min-height: 2.6em; font-size: clamp(16px, 4.2vw, 19px); line-height: 1.3; }
+  /* The accessible transcript reserves every line while the visible words appear. */
+  .li-introduction .lo-tutorial-caption { display: grid; }
+  .li-caption-slot .lo-tutorial-typed, .li-caption-slot .lo-tutorial-sr { grid-area: 1 / 1; }
+  .li-caption-slot .lo-tutorial-sr {
+    position: static; width: auto; height: auto; margin: 0;
+    clip-path: none; white-space: normal; opacity: 0; pointer-events: none;
+  }
+  .li-footer { display: grid; min-height: 0; grid-template-columns: auto minmax(0, 1fr); gap: 5px 9px; }
+  .li-back { grid-column: 1; grid-row: 1; min-height: 46px; padding: 7px 10px; }
+  .li-primary { grid-column: 2; grid-row: 1; justify-self: stretch; }
+  .li-skip { grid-column: 1 / -1; grid-row: 2; justify-self: center; margin: 0; padding: 4px; }
 }
-.li-stage-team>span{bottom:17px}
+
+/* In landscape a second reading column leaves the cast enough vertical space. */
+@media (orientation: landscape) and (max-height: 460px) {
+  .lo-app .li-introduction { padding: 7px 12px; }
+  .li-content { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto minmax(0, 1fr) auto; column-gap: 15px; }
+  .li-content .li-visual { display: contents; }
+  .li-heading { grid-column: 1; grid-row: 1; }
+  .li-heading h1 { font-size: 23px; }
+  .li-heading > p { font-size: 14px; }
+  .li-content .li-character-scene { grid-column: 1; grid-row: 2 / 4; }
+  .li-models, .li-demo-path { grid-column: 2; grid-row: 1 / 3; align-self: center; }
+  .li-narration { grid-column: 2; grid-row: 3; }
+  .li-model > strong { font-size: 18px; }
+  .li-model-translation { font-size: 13px; }
+  .li-caption-slot { font-size: 15px; }
+  .li-footer { display: flex; }
+  .li-footer .li-skip { margin-left: auto; }
+  .li-footer .li-primary { width: auto; min-width: 160px; }
+}
+
+
+/* A small phone with browser bars still needs a readable cast. Keep all
+   three navigation actions in one row and give single-line captions one line. */
+@media (max-width: 759px) and (orientation: portrait) and (max-height: 560px) {
+  .li-introduction[open], .li-content { gap: 5px; }
+  .li-visual, .li-visual--lesson-path { gap: 5px; }
+  .li-heading h1 { font-size: 23px; }
+  .li-heading > p { font-size: 14px; }
+  .li-caption-slot { min-height: 1.3em; }
+  .li-footer { grid-template-columns: 44px auto minmax(0, 1fr); gap: 6px; }
+  .li-back { width: 44px; min-height: 46px; }
+  .li-back > span { position: absolute; clip-path: inset(50%); width: 1px; height: 1px; overflow: hidden; }
+  .li-skip { grid-column: 2; grid-row: 1; max-width: 78px; min-height: 44px; padding: 2px; }
+  .li-primary { grid-column: 3; min-width: 0; }
+  .lo-app .li-introduction .li-footer .li-primary > .br-button-face { padding-inline: 8px; gap: 5px; font-size: 14px; }
+}
+@media (max-width: 349px) {
+  .li-model { gap: 1px 4px; padding: 5px 6px; }
+  .li-model > strong { font-size: 16px; }
+  .li-model-translation { font-size: 13px; }
+}
+
+@media (max-width: 349px) and (max-height: 560px) {
+  .li-introduction[data-introduction-started=false] .li-primary svg { display: none; }
+}

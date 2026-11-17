@@ -235,7 +235,7 @@ describe("the actual twelve-scene lesson UI", () => {
     expect(app().dataset.finished).toBe("true");
     expect(container.querySelector('[data-conclusion-phase="theory"]')).not.toBeNull();
     expect(saved()).toMatchObject({ version: 2, scene: 12, round: 0, completed: rounds.map(round => round.id), supported: [] });
-    expect(container.querySelector(".lc-english")?.textContent).toBe("I am");
+    expect(container.querySelector(".lc-english")?.textContent).toBe("I am ready.");
   });
 
   it("keeps a wrong I/you relation on the same round and permits a meaningful retry", async () => {
@@ -255,19 +255,48 @@ describe("the actual twelve-scene lesson UI", () => {
     expect(saved().completed).toEqual(["g1-self"]);
   });
 
-  it("accepts I are as understood meaning, records form support and continues without rewriting", async () => {
+  it("keeps the verb slot editable until replacing the wrong verb and confirming it", async () => {
     seedAt("g3-i"); await mount();
+    const completed = saved().completed;
     await place("are", "word:verb");
     await next();
     expect(currentRound()).toBe("g3-i");
-    expect(container.querySelector(".lo-feedback.is-correct")?.textContent).toContain("Você se fez entender");
-    expect(container.querySelector(".lo-feedback")?.textContent).toContain("I am Ana.");
+    expect(container.querySelector(".lo-feedback.is-retry")?.textContent).toContain("Com I, use am.");
+    expect(target("word:verb").textContent).toBe("are");
     expect(saved().supported).toContain("g3-i");
-    expect(container.querySelector("input")).toBeNull();
+    expect(footer().textContent).toContain("Conferir");
+    await next();
+    expect(saved().completed).toEqual(completed);
+    await dragInto(source("am"), target("word:verb"));
+    await next();
     expect(footer().textContent).toContain("Continuar");
     await next();
     expect(currentRound()).toBe("g3-you");
-    expect(saved().completed).toContain("g3-i");
+    expect(saved().completed).toEqual([...completed, "g3-i"]);
+  });
+
+  it.each([
+    ["g3-i", "I is Ana.", "I am Ana."],
+    ["g3-you", "You am Ana.", "You are Ana."],
+    ["g3-we", "We a team.", "We are a team."],
+    ["g3-they", "They am a team.", "They are a team."],
+  ])("lets the learner correct only the typed verb in %s", async (id, draft, corrected) => {
+    seedAt(id); await mount();
+    const completed = saved().completed;
+    await click(container.querySelector<HTMLButtonElement>(".lo-write-toggle")!);
+    const field = container.querySelector<HTMLInputElement>(".lo-write input")!;
+    async function type(value: string) {
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(field, value);
+        field.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    }
+    await type(draft); await next();
+    expect(field.value).toBe(draft); expect(field.disabled).toBe(false);
+    expect(container.querySelector(".lo-feedback.is-retry")?.textContent).toContain("Ajuste apenas o verbo.");
+    await next(); expect(currentRound()).toBe(id); expect(saved().completed).toEqual(completed);
+    await type(corrected); await next(); expect(footer().textContent).toContain("Continuar");
+    await next(); expect(saved().completed).toEqual([...completed, id]);
   });
 
   it("ignores the old course storage and resumes only contiguous v2 progress after remount", async () => {

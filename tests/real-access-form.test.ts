@@ -33,8 +33,9 @@ describe("real student account entry", () => {
     expect(html).toContain("sem cadastro");
     expect(html).toContain('href="/demo"');
     expect(html).not.toContain("O professor aprova");
-    expect(html).toContain("seis atividades");
-    expect(html).toContain("uma aula gratuita de 1 hora com professor, uma por conta");
-    expect(html).toContain("No Meu painel");
+    expect(html).toContain("progresso salvo na conta");
+    expect(html).toContain("solicitar um horário disponível");
+    expect(html).toContain("confirmação do professor");
+    expect(html).toContain("uma aula gratuita de uma hora por conta");
   });
 });

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { CONCLUSION_QUESTIONS, CONCLUSION_THEORY, createConclusionState, evaluateConclusionAnswer, conclusionModel,
-  getConclusionScore, isConclusionComplete, restoreConclusionState, setConclusionDraft, submitConclusionAnswer } from "../src/features/first-encounters/lesson-conclusion";
+  getConclusionQuestions, getConclusionScore, isConclusionComplete, restoreConclusionState, setConclusionDraft, submitConclusionAnswer } from "../src/features/first-encounters/lesson-conclusion";
 
 const self = CONCLUSION_QUESTIONS.find(question => question.id === "write-self")!;
-const listener = CONCLUSION_QUESTIONS.find(question => question.id === "write-listener")!;
+const listener = CONCLUSION_QUESTIONS.find(question => question.id === "listener")!;
 function answer(state: ReturnType<typeof createConclusionState>, question: typeof self, text: string) {
   return submitConclusionAnswer(setConclusionDraft(state, question, text), question);
 }
@@ -24,11 +24,21 @@ describe("written lesson consolidation", () => {
     expect(evaluateConclusionAnswer(self, text)).toMatchObject({ correct: true, meaningCorrect: true, formCorrect: true });
   });
 
+  it("recognizes Ana's alternative introduction in feedback while retaining the scores for the requested form", () => {
+    const result = evaluateConclusionAnswer(self, "  MY name   is Ana. ");
+    expect(result).toMatchObject({ correct: false, meaningCorrect: false, formCorrect: false,
+      feedbackTitle: "Essa frase também apresenta Ana." });
+    for (const text of ["My name is Leo.", "My name is Ana and Leo."]) {
+      expect(evaluateConclusionAnswer(self, text)).toMatchObject({ correct: false, feedbackTitle: "Observe quem está falando." });
+    }
+    expect(evaluateConclusionAnswer(listener, "My name is Ana.").feedbackTitle).toBe("Observe quem está falando.");
+  });
+
   it("recognizes a relationship without pretending the wrong or omitted verb is correct", () => {
     for (const text of ["I are Ana", "I is Ana", "I Ana"]) {
       expect(evaluateConclusionAnswer(self, text)).toMatchObject({ correct: false, meaningCorrect: true, formCorrect: false, model: "I am Ana." });
     }
-    expect(evaluateConclusionAnswer(listener, "you am leo")).toMatchObject({ correct: false, meaningCorrect: true, formCorrect: false });
+    expect(evaluateConclusionAnswer(listener, "you am maya")).toMatchObject({ correct: false, meaningCorrect: true, formCorrect: false });
   });
 
   it("does not accept the wrong perspective, the wrong name or trailing garbage", () => {
@@ -36,7 +46,7 @@ describe("written lesson consolidation", () => {
       expect(evaluateConclusionAnswer(self, text).correct).toBe(false);
     }
     expect(evaluateConclusionAnswer(listener, "I am Leo")).toMatchObject({ correct: false, meaningCorrect: false, formCorrect: true });
-    expect(evaluateConclusionAnswer(listener, "you're leo").correct).toBe(true);
+    expect(evaluateConclusionAnswer(listener, "you're maya").correct).toBe(true);
   });
 
   it("keeps the first response immutable through corrections, clearing and subsequent submissions", () => {
@@ -75,6 +85,18 @@ describe("written lesson consolidation", () => {
     expect(isConclusionComplete(state)).toBe(false);
     expect(restoreConclusionState("{broken")).toEqual(createConclusionState());
     expect(restoreConclusionState(JSON.stringify({ version: 3, phase: "summary" }))).toEqual(createConclusionState());
+  });
+
+  it("keeps previous submissions attached to the exact question they answered", () => {
+    const oldModels = {self: "I am Leo.", listener: "You are Maya.", inside: "We are a team.", outside: "They are a team.", "write-self": "I am Ana.", "write-listener": "You are Leo."};
+    const attempts = Object.fromEntries(Object.entries(oldModels).map(([id, value]) => [id, { draft: value, firstAnswer: value, lastAnswer: value }]));
+    attempts["write-self"].firstAnswer = "My name is Ana.";
+    const state = restoreConclusionState(JSON.stringify({ ...createConclusionState(), phase: "summary", testStarted: true, attempts }));
+    expect(isConclusionComplete(state)).toBe(true);
+    expect(state.phase).toBe("summary");
+    expect(getConclusionScore(state)).toEqual({ total: 6, answered: 6, correct: 5, meaning: 5, form: 5 });
+    expect(getConclusionQuestions(state).map(q => q.id)).toEqual(Object.keys(oldModels));
+    expect(state.attempts).toEqual(attempts);
   });
 
   it("allows a completed review to reopen theory without discarding its original result", () => {

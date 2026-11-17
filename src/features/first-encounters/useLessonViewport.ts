@@ -1,35 +1,46 @@
 "use client";
 
 import { useEffect } from "react";
+import "./lesson-keyboard.css";
 
-/** iOS keeps the layout viewport tall while its keyboard covers the visual viewport. */
+/** Switch to the writing layout for both overlay keyboards (iOS) and resizes-content keyboards. */
 export function useLessonViewport() {
   useEffect(() => {
-    const root = document.documentElement, viewport = window.visualViewport;
-    let frame = 0;
-    const update = () => {
-      const editing = document.activeElement?.matches("input,textarea,[contenteditable=true]") ?? false;
-      const height = Math.round(viewport?.height ?? window.innerHeight);
-      root.style.setProperty("--lesson-visible-height", `${height}px`);
-      root.style.setProperty("--lesson-visible-top", `${Math.round(viewport?.offsetTop ?? 0)}px`);
-      root.dataset.keyboardOpen = String(editing && window.innerHeight - height > 120);
-      cancelAnimationFrame(frame);
-      if (editing) frame = requestAnimationFrame(() => {
-        const field = document.activeElement;
-        if (field instanceof HTMLElement) field.scrollIntoView?.({ block: "nearest", inline: "nearest", behavior: "instant" });
-      });
-    };
+    const root = document.documentElement;
+    const viewport = window.visualViewport;
+    let width = window.innerWidth;
+    let restingHeight = viewport?.height ?? window.innerHeight;
+    let keyboardOpen = false;
+
+    function update() {
+      const height = viewport?.height ?? window.innerHeight;
+      if (window.innerWidth !== width) {
+        width = window.innerWidth;
+        restingHeight = window.innerHeight;
+      }
+      const editing = document.activeElement?.matches(".lo-app input:not([type=radio]):not([type=checkbox]), .lo-app textarea");
+      // A tap on Conferir may blur the field before the keyboard finishes closing.
+      // Keep the button under the finger until the viewport actually grows back.
+      keyboardOpen = Boolean((editing || keyboardOpen) && (viewport?.scale ?? 1) === 1 &&
+        Math.max(restingHeight, window.innerHeight) - height > 100);
+      if (!editing && !keyboardOpen) restingHeight = height;
+      // On iOS both heights can shrink together while Safari still pans its fixed
+      // containing block. The pan is real even when innerHeight === viewport.height.
+      root.style.setProperty("--lesson-keyboard-top", `${Math.max(0, viewport?.offsetTop ?? 0)}px`);
+      root.dataset.keyboardOpen = String(keyboardOpen);
+    }
     update();
     viewport?.addEventListener("resize", update);
     viewport?.addEventListener("scroll", update);
     window.addEventListener("resize", update);
     document.addEventListener("focusin", update);
-    document.addEventListener("focusout", update);
     return () => {
-      viewport?.removeEventListener("resize", update); viewport?.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update); document.removeEventListener("focusin", update); document.removeEventListener("focusout", update);
-      cancelAnimationFrame(frame);
-      root.style.removeProperty("--lesson-visible-height"); root.style.removeProperty("--lesson-visible-top"); delete root.dataset.keyboardOpen;
+      viewport?.removeEventListener("resize", update);
+      viewport?.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      document.removeEventListener("focusin", update);
+      root.style.removeProperty("--lesson-keyboard-top");
+      delete root.dataset.keyboardOpen;
     };
   }, []);
 }
