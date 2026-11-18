@@ -26,8 +26,14 @@ const CLIPS = new Map(LESSON_INTRODUCTION_SCENES.flatMap(scene => scene.blocks.m
   const { speaker, text } = scene.models[block];
   return [getLessonAudioKey(speaker, text), getLessonAudioClip(speaker, text)] as const;
 })));
+for (const scene of LESSON_INTRODUCTION_SCENES) {
+  for (const model of scene.models) {
+    CLIPS.set(getLessonAudioKey("nina", model.translation), getLessonAudioClip("nina", model.translation));
+  }
+}
+
 type ControllerOptions = Omit<NonNullable<Parameters<typeof createLessonAudioController>[0]>, "catalog" | "resolveClip">;
 
 export function createIntroductionAudioController(options: ControllerOptions = {}) {
-  return createLessonAudioController({ ...options, resolveClip: (person, text) => CLIPS.get(getLessonAudioKey(person, text)) ?? getLessonAudioClip(person, text) });
+  return createLessonAudioController({ ...options, resolveClip: (person, text) => CLIPS.get(getLessonAudioKey(person, text)) });
 }
