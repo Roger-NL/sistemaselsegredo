@@ -357,3 +357,13 @@ body:has(.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"])) .lesson-
  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-footer .lo-text-button { white-space:nowrap; flex-shrink:0; }
  .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-footer-actions .lo-next { width:min(320px,100%); flex:0 1 320px; }
 }
+
+.lo-app button.lesson-speech-text {
+  all: unset;
+  display: inline;
+  cursor: pointer;
+}
+.lo-app button.lesson-speech-text:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}

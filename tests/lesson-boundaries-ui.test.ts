@@ -139,10 +139,10 @@ describe("presentation and written conclusion boundaries", () => {
   it("preserves the first submitted answer through correction and remount", async () => {
     localStorage.setItem(TUTORIAL, "done"); seed("finished");
     localStorage.setItem(LESSON_CONCLUSION_STORAGE, JSON.stringify({ version: 1, phase: "test", theoryIndex: 4, questionIndex: 0, testStarted: true, attempts: {} }));
-    await mount(); await choose(wrongSelf); await click(conclusionNext()); expect(container.querySelector(".lc-feedback.is-retry")).not.toBeNull();
+    await mount(); await choose(wrongSelf); await ended(Media.current); await click(conclusionNext()); expect(container.querySelector(".lc-feedback.is-retry")).not.toBeNull();
     await choose(selfModel); await click(conclusionNext()); expect(container.querySelector(".lc-feedback.is-correct")).not.toBeNull();
     expect(savedConclusion().attempts.self).toMatchObject({ firstAnswer: wrongSelf, lastAnswer: selfModel }); await remount();
-    expect(savedConclusion().attempts.self).toMatchObject({ firstAnswer: wrongSelf, lastAnswer: selfModel }); expect(container.querySelector(".lc-feedback.is-correct")).not.toBeNull(); expect(Media.calls).toEqual([]);
+    expect(savedConclusion().attempts.self).toMatchObject({ firstAnswer: wrongSelf, lastAnswer: selfModel }); expect(container.querySelector(".lc-feedback.is-correct")).not.toBeNull(); expect(Media.calls).toHaveLength(2);
   });
 
   it("finishes the spoken option before the test sound and keeps the choices editable", async () => {
@@ -163,11 +163,11 @@ describe("presentation and written conclusion boundaries", () => {
     expect(nextReading.disabled).toBe(true);
     await ended(voice);
     expect(sound.play.mock.calls.map(([cue]) => cue)).toEqual(["retry"]);
-    await click(nextReading); expect(Media.calls).toHaveLength(1);
+    await click(nextReading); expect(Media.calls).toHaveLength(2);
     await choose("You are Maya."); expect(savedConclusion().attempts.listener.draft).toBe("You are Maya.");
     await act(async () => finish());
     expect(nextReading.disabled).toBe(false);
-    await click(nextReading); expect(Media.calls).toHaveLength(2);
+    expect(Media.calls).toHaveLength(3);
   });
 
   it.each(["I am Ana.", "I'm Ana."])("resumes Ana's draft, gives specific guidance and advances with %s", async corrected => {
@@ -281,6 +281,6 @@ describe("presentation and written conclusion boundaries", () => {
     expect(conclusion().dataset.conclusionPhase).toBe("summary"); expect(percent(conclusion())).toBe(100);
     await remount(); expect(percent(conclusion())).toBe(100); expect(Object.keys(savedConclusion().attempts)).toHaveLength(6); expect(savedPractice().completed).toHaveLength(29);
     await click(button("Abrir percurso da aula")); await click(button("Recomeçar aula do zero", container.querySelector(".lo-menu")!)); await click(button("Recomeçar", container.querySelector('[aria-labelledby="lo-reset-title"]')!));
-    expect(percent(intro())).toBe(0); expect(savedPractice().completed).toEqual([]); expect(localStorage.getItem(LESSON_CONCLUSION_STORAGE)).toBeNull(); expect(Media.calls.every(url => url.includes("revision-pt/nina-completion-congratulations.m4a"))).toBe(true); expect(Media.all.every(media => media.paused)).toBe(true);
+    expect(percent(intro())).toBe(0); expect(savedPractice().completed).toEqual([]); expect(localStorage.getItem(LESSON_CONCLUSION_STORAGE)).toBeNull(); expect(Media.calls.every(url => url.includes("revision-pt/nina-completion-congratulations.m4a") || url.includes("/lesson-one/nina-"))).toBe(true); expect(Media.all.every(media => media.paused)).toBe(true);
   });
 });

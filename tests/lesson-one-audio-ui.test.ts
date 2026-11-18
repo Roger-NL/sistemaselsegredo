@@ -121,9 +121,9 @@ describe("lesson audio without answer or identity shortcuts", () => {
   it("keeps a wrong verb editable and plays the actor model only after correction", async () => {
     await mount("g3-i"); await place("are", "word:verb");
     expect(main().getAttribute("aria-label")).toBe("Ouvir exemplo narrado"); expect(main().hasAttribute("data-audio-text")).toBe(false);
-    expect(audio.play).not.toHaveBeenCalled(); await click(footer());
+    expect(audio.play).toHaveBeenLastCalledWith("nina", "are"); await click(footer());
     expect(container.querySelector(".lo-feedback.is-retry")).not.toBeNull();
-    expect(audio.play).not.toHaveBeenCalled();
+    expect(audio.play).toHaveBeenLastCalledWith("nina", "are");
     await place("am", "word:verb"); await click(footer());
     expect(container.querySelector(".lo-feedback.is-correct")).not.toBeNull(); await click(main());
     expect(audio.play).toHaveBeenLastCalledWith("ana", "I am Ana.");
@@ -182,6 +182,6 @@ describe("lesson audio without answer or identity shortcuts", () => {
     expect(audio.snapshot.playingKey).toBe("nina:I am Ana.");
     await act(async () => { publish(null); finish(); });
     await click(footer()); await flush();
-    expect(audio.scope).toMatch(/:g1-listener:activity$/); expect(audio.play).toHaveBeenCalledTimes(1);
+    expect(audio.scope).toMatch(/:g1-listener:activity$/); expect(audio.play).toHaveBeenCalledTimes(2);
   });
 });

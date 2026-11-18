@@ -7,7 +7,7 @@ import type { LessonSpeechDriver } from "../src/features/first-encounters/lesson
 import type { IntroductionScene } from "../src/features/first-encounters/lesson-introduction";
 import type { PersonId } from "../src/features/first-encounters/lesson-one";
 
-const sounds = vi.hoisted(() => ({ play: vi.fn() }));
+const sounds = vi.hoisted(() => ({ play: vi.fn(), unlock: vi.fn() }));
 const characters = vi.hoisted(() => ({ readyImmediately: true, ready: null as ((person: PersonId) => void) | null }));
 vi.mock("../src/features/first-encounters/useLessonSounds", () => ({ useLessonSounds: () => sounds }));
 vi.mock("../src/features/first-encounters/IntroductionStage", async () => {

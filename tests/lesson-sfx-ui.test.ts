@@ -92,7 +92,7 @@ describe("semantic UI sound intentions", () => {
 
   it.each(["g1-self", "g2-join", "g2-outside", "g3-i", "use3-i", "g6-ensemble", "use6-i", "use6-you", "use6-we", "use6-they"])("keeps confirmation sounds tied to evaluation in %s", async id => {
     await mount(id); const round = all.find(round => round.id === id)!; sfx.play.mockClear();
-    if (round.kind === "bubbles") await place(phraseText(round.expected), "speech");
+    if (round.kind === "bubbles") { await place(phraseText(round.expected), "speech"); await ended(); }
     else if (round.kind === "join") await place(PERSON_NAMES[round.speaker], "team");
     else if (round.kind === "speaker") await click(container.querySelector<HTMLButtonElement>(`[data-person="${round.speaker}"]`)!);
     else if (round.kind === "verb" || round.kind === "build") {

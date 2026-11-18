@@ -29,5 +29,5 @@ const CLIPS = new Map(LESSON_INTRODUCTION_SCENES.flatMap(scene => scene.blocks.m
 type ControllerOptions = Omit<NonNullable<Parameters<typeof createLessonAudioController>[0]>, "catalog" | "resolveClip">;
 
 export function createIntroductionAudioController(options: ControllerOptions = {}) {
-  return createLessonAudioController({ ...options, resolveClip: (person, text) => CLIPS.get(getLessonAudioKey(person, text)) });
+  return createLessonAudioController({ ...options, resolveClip: (person, text) => CLIPS.get(getLessonAudioKey(person, text)) ?? getLessonAudioClip(person, text) });
 }

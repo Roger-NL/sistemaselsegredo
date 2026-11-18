@@ -1,5 +1,7 @@
 "use client";
 
+import { SpeechText } from "./SpeechText";
+
 import { useLessonStorage } from "./lesson-storage";
 import type { LessonCompletionReceipt } from "./useLessonAccountProgress";
 
@@ -86,8 +88,8 @@ function CompletionRecap({ disabled, onPractice }: { disabled: boolean; onPracti
       modelIndex={item?.modelIndex ?? null} speech={audio.speech} onCharacterReady={characterReady} guideLabel="Nina acompanha a conclusão da aula."/></div>
     {item && index !== null ? <div className="lc-completion-copy">
       <span className="lc-recap-position" ref={recapPosition} tabIndex={-1}>Fala {index + 1} de {RECAP_MODELS.length}</span>
-      <strong className="lc-recap-english" lang="en">{item.text}</strong>
-      <p className="lc-recap-translation">{item.translation}</p>
+      <strong className="lc-recap-english" lang="en"><SpeechText onPlay={() => void request(item.speaker, item.text, { role: "character" })}>{item.text}</SpeechText></strong>
+      <p className="lc-recap-translation"><SpeechText onPlay={() => void request("nina", item.translation, { role: "narration" })}>{item.translation}</SpeechText></p>
       <div className="lc-recap-controls">
         <RecordedSpeechButton audio={audio} person={item.speaker} text={item.text} lang="en" role="character" label="Repetir fala"/>
         <RecordedSpeechButton audio={audio} person="nina" text={item.translation} lang="pt" label="Ouvir significado"/>
@@ -145,6 +147,21 @@ export function LessonConclusion({ onReturnToPractice, completion, section, exit
     return () => { sequence.visit++; sequence.last = undefined; };
   }, [question.id, state.phase, extraOpen]);
   const allChoicesRecorded = question.choices?.every(choice => sectionAudio.has("nina", choice));
+  function spoken(text: string) {
+    return <SpeechText onPlay={() => void sectionAudio.request("nina", text, { role: "narration" })}>{text}</SpeechText>;
+  }
+  const choiceRequest = useRef(0);
+  function hearChoice(choice: string) {
+    const ticket = ++choiceRequest.current;
+    const visit = testSound.current.visit;
+    const play = () => {
+      if (ticket === choiceRequest.current && visit === testSound.current.visit) {
+        void sectionAudio.request("nina", choice, { role: "narration" });
+      }
+    };
+    if (readingLocked && readingLock) void readingLock.then(play);
+    else play();
+  }
   const attempt = getConclusionAttempt(state, question);
   const evaluation = attempt.lastAnswer === null ? null : evaluateConclusionAnswer(question, attempt.lastAnswer);
   const complete = isConclusionComplete(state);
@@ -296,20 +313,21 @@ export function LessonConclusion({ onReturnToPractice, completion, section, exit
           {page.id === "forms" && !exampleBlock ? <div className="lc-forms" aria-label="I am. You are. We are. They are.">
             {page.english.split(" · ").map(form => {
               const [pronoun, verb] = form.split(" ");
-              return <span key={form} lang="en">{pronoun} <strong>{verb}</strong>
+              return <span key={form} lang="en"><SpeechText onPlay={() => void sectionAudio.request("nina", form)}>{pronoun} <strong>{verb}</strong></SpeechText>
                 <RecordedSpeechButton audio={sectionAudio} person="nina" text={form} lang="en"/></span>;
             })}
-          </div> : <><strong className="lc-english" lang="en">{exampleBlock ? page.example : page.english}</strong><span className="lc-portuguese">{exampleBlock ? page.translation : page.portuguese}</span></>}
+          </div> : <><strong className="lc-english" lang="en">{spoken(exampleBlock ? page.example : page.english)}</strong><span className="lc-portuguese">{spoken(exampleBlock ? page.translation : page.portuguese)}</span></>}
         {(page.id !== "forms" || exampleBlock) && <RecordedSpeechButton audio={sectionAudio} person="nina" text={exampleBlock ? page.example : page.english} lang="en" disabled={readingLocked}/>}
         <RecordedSpeechButton audio={sectionAudio} person="nina" text={exampleBlock ? page.translation : page.portuguese} lang="pt" disabled={readingLocked}/>
         </div>
-        <div className="lc-explanation"><p>{exampleBlock ? page.note : page.explanationPT}</p><RecordedSpeechButton audio={sectionAudio} person="nina" text={exampleBlock ? page.note : page.explanationPT} lang="pt" disabled={readingLocked}/></div>
+        <div className="lc-explanation"><p>{spoken(exampleBlock ? page.note : page.explanationPT)}</p><RecordedSpeechButton audio={sectionAudio} person="nina" text={exampleBlock ? page.note : page.explanationPT} lang="pt" disabled={readingLocked}/></div>
       </section> : state.phase === "test" ? <form id="lc-answer-form" className={`lc-card lc-test ${question.kind === "writing" ? "lc-writing-test" : ""}`} onSubmit={check}>
         <div className="lc-question-context"><span>Situação</span><p><Highlight text={question.context}/></p></div>
         <div className="lc-answer-area">
           {question.kind === "choice" ? <fieldset className="lc-choices"><legend className="lc-visually-hidden">Escolha a fala</legend>
             {question.choices?.map(choice => <div key={choice} className="lc-choice-row"><label className={`lc-choice ${attempt.draft === choice ? "is-selected" : ""}`}>
               <input type="radio" name={question.id} value={choice} checked={attempt.draft === choice}
+                onClick={() => hearChoice(choice)}
                 onChange={() => setState(current => setConclusionDraft(current, question, choice))} />
               <span lang="en"><Highlight text={choice}/></span><span className="lc-choice-check" aria-hidden="true"/>
             </label>{(allChoicesRecorded || evaluation?.correct) && <RecordedSpeechButton audio={sectionAudio} person="nina" text={choice} lang="en" disabled={readingLocked}/>}</div>)}
@@ -324,7 +342,7 @@ export function LessonConclusion({ onReturnToPractice, completion, section, exit
         </div>
         <div className={`lc-feedback ${evaluation ? evaluation.correct ? "is-correct" : "is-retry" : ""}`} role="status" aria-live="polite" aria-atomic="true">
           {evaluation ? <><strong>{evaluation.feedbackTitle}</strong>
-            <p>{evaluation.explanationPT}</p><RecordedSpeechButton audio={sectionAudio} person="nina" text={evaluation.explanationPT} lang="pt" disabled={readingLocked}/><p lang="en" className="lc-feedback-en">{evaluation.explanationEN}</p><RecordedSpeechButton audio={sectionAudio} person="nina" text={evaluation.explanationEN} lang="en" disabled={readingLocked}/>
+            <p>{spoken(evaluation.explanationPT)}</p><RecordedSpeechButton audio={sectionAudio} person="nina" text={evaluation.explanationPT} lang="pt" disabled={readingLocked}/><p lang="en" className="lc-feedback-en">{spoken(evaluation.explanationEN)}</p><RecordedSpeechButton audio={sectionAudio} person="nina" text={evaluation.explanationEN} lang="en" disabled={readingLocked}/>
             {evaluation.correct && evaluation.notes.map(note => <p key={note}>{note}</p>)}
           </> : <p>{question.kind === "choice" ? "Escolha uma fala" : "Escreva sua resposta"} e toque em <strong>Conferir</strong>.</p>}
         </div>

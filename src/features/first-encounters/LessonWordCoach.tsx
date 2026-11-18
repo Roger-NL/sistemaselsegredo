@@ -1,5 +1,7 @@
 "use client";
 
+import { SpeechText } from "./SpeechText";
+
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { X } from "lucide-react";
 import { RecordedSpeechButton } from "./RecordedSpeechButton";
@@ -57,7 +59,15 @@ export function LessonWordCoach({ enabled, onOpen, manualReadingRef }: {
       openRef.current(); setReady(false); setWord(name);
     };
     const manual = (event: Event) => { const name = (event as CustomEvent).detail; if (typeof name === "string" && Object.hasOwn(WORD_MEANINGS, name)) { openRef.current(); played.current = null; setReady(false); setWord(name); } };
-    const cancel = () => { stop(); setWord(null); played.current = null; };
+    const cancel = (event: Event) => {
+      stop();
+      const text = (event as CustomEvent<string>).detail;
+      if (text && Object.hasOwn(WORD_MEANINGS, text)) {
+        played.current = text;
+      } else {
+        setWord(null); played.current = null;
+      }
+    };
     document.addEventListener("lesson-stop-word-coach", cancel);
     document.addEventListener("lesson-explain-word", manual);
     document.addEventListener("pointerdown", explain);
@@ -75,7 +85,7 @@ export function LessonWordCoach({ enabled, onOpen, manualReadingRef }: {
   return <>
     {word && item && <aside className="lo-word-coach" aria-label={`Entenda ${word}`}>
       <div className="lo-word-coach-avatar"><AnimatedCharacter person="nina" cue="self-point" speech={audio.speech} onReady={() => setReady(true)}/></div>
-      <div><strong><span lang="en">{word}</span> <span aria-hidden="true">→</span> {item.meaning}</strong><p>{item.explanation}</p><span className="lo-word-coach-example">Exemplo: <span lang="en">{item.example}</span></span>
+      <div><strong><span lang="en"><SpeechText onPlay={() => void request("nina", word, { role: "character" })}>{word}</SpeechText></span> <span aria-hidden="true">→</span> {item.meaning}</strong><p>{item.explanation}</p><span className="lo-word-coach-example">Exemplo: <span lang="en"><SpeechText onPlay={() => void request("nina", item.example, { role: "character" })}>{item.example}</SpeechText></span></span>
         <div className="lo-word-coach-listen">
           <RecordedSpeechButton audio={audio} person="nina" text={item.explanation} lang="pt" role="character" label="Ouvir explicação da palavra"/>
           <RecordedSpeechButton audio={audio} person="nina" text={word} lang="en" role="character" label={`Ouvir a palavra ${word} em inglês`}/>

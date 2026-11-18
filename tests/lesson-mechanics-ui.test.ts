@@ -101,8 +101,9 @@ describe("activity guidance on the actual controls", () => {
     else if (id === "verb") await place("are", "word:verb");
     else if (id === "build") await place("you", "word:pronoun");
     else if (id === "messages") await place("Ana", "message:0");
-    expect(guide.paused).toBe(true); expect(app().dataset.mechanicGuide).toBeUndefined(); expect(Media.calls).toHaveLength(1);
-    await ended(guide); expect(Media.calls).toHaveLength(1); expect(container.querySelector(".lo-feedback.is-correct")).toBeNull();
+    const expectedCalls = ["bubbles", "verb", "build"].includes(id) ? 2 : 1;
+    expect(guide.paused).toBe(true); expect(app().dataset.mechanicGuide).toBeUndefined(); expect(Media.calls).toHaveLength(expectedCalls);
+    await ended(guide); expect(Media.calls).toHaveLength(expectedCalls); expect(container.querySelector(".lo-feedback.is-correct")).toBeNull();
     expect(JSON.parse(localStorage.getItem(LESSON_MECHANICS_STORAGE)!).seen).toContain(id);
   });
 
@@ -207,9 +208,9 @@ describe("activity guidance on the actual controls", () => {
 
   it("keeps actor identity mounted while Next and Back exchange the speaker", async () => {
     await mount("g1-self", Object.keys(LESSON_MECHANICS) as LessonMechanicId[]); expect(actorMounts).toMatchObject({ ana: 1, leo: 1 });
-    await place("I am Ana.", "speech"); const anaVoice = Media.current; expect(anaVoice.src).toContain("ana-i-am-ana");
+    await place("I am Ana.", "speech"); await ended(); const anaVoice = Media.current; expect(anaVoice.src).toContain("ana-i-am-ana");
     await click(next()); expect(app().dataset.round).toBe("g1-listener"); expect(anaVoice.paused).toBe(true);
-    await place("You are Ana.", "speech"); const leoVoice = Media.current; expect(leoVoice.src).toContain("leo-you-are-ana");
+    await place("You are Ana.", "speech"); await ended(); const leoVoice = Media.current; expect(leoVoice.src).toContain("leo-you-are-ana");
     await click(button("Voltar")); expect(app().dataset.round).toBe("g1-self"); expect(leoVoice.paused).toBe(true);
     expect(actorMounts).toMatchObject({ ana: 1, leo: 1 }); expect(next().disabled).toBe(true); expect(source("I am Ana.").disabled).toBe(false);
   });

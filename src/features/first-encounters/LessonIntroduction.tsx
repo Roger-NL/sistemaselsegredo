@@ -1,5 +1,7 @@
 "use client";
 
+import { SpeechText } from "./SpeechText";
+
 import { useLessonStorage } from "./lesson-storage";
 
 import { LessonButton } from "./LessonButton";
@@ -145,7 +147,7 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
       {scene.models.length ? <div className="li-models" aria-label="O que você vai aprender">{scene.models.map((model, index) => <div className="li-model" key={model.text}
         data-example-speaking={current?.english && current.modelIndex === index && audio.playingKey === current.key}>
         <span className="li-model-context">{scene.id === "self-and-you" ? index === 0 ? "Ana fala de si" : "Leo fala com Ana" : index === 0 ? "Ana faz parte da equipe" : "Maya fala de outra equipe"}</span>
-        <strong lang="en">{model.text}</strong><span className="li-model-translation">{model.translation}</span>
+        <strong lang="en"><SpeechText onPlay={() => { stop(); void requestAudio(model.speaker, model.text, { role: "character" }); }}>{model.text}</SpeechText></strong><span className="li-model-translation"><SpeechText onPlay={() => { stop(); void requestAudio("nina", model.translation, { role: "narration" }); }}>{model.translation}</SpeechText></span>
       </div>)}</div> : <PathIllustration/>}
     </div>
     <section className="li-narration" aria-label={displayed.english ? "Exemplo em inglês" : "Apresentação em português"}>

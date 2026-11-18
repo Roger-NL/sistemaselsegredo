@@ -157,7 +157,7 @@ describe("first contact with a word uses existing local recordings and survives 
     }
     await act(async () => piece.click()); await settle();
     expect(guide.paused).toBe(true); expect(host.querySelector('[aria-label="Entenda am"]')).not.toBeNull();
-    expect(Media.calls.at(-1)).toBe("/first-encounters/audio/revision-pt/nina-word-am.m4a");
+    expect(Media.calls.at(-1)).toContain("/lesson-one/nina-en-"); await end(Media.current);
     expect(piece.isConnected).toBe(true); expect(piece.getAttribute("aria-pressed")).toBe("true");
     expect(JSON.parse(localStorage.getItem(LESSON_MECHANICS_STORAGE)!).words).toEqual(["am"]);
     const count = Media.calls.length; await end(guide); expect(Media.calls).toHaveLength(count);

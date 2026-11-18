@@ -107,15 +107,15 @@ describe("guided start, automatic turns and learner control",()=>{
     expect(container.querySelector(".lo-feedback.is-correct")).toBeNull();
   });
 
-  it("does not speak a wrong decision; speaks accepted actors once, with manual repeat and fresh retry visits",async()=>{
+  it("reads the selected option; speaks accepted actors once, with manual repeat and fresh retry visits",async()=>{
     await mount();expect(Media.calls).toEqual([]);
-    await place("You are Ana.","speech");expect(Media.calls).toEqual([]);expect(container.querySelector(".lo-feedback.is-retry")).not.toBeNull();
-    await place("I am Ana.","speech");expect(Media.calls).toHaveLength(1);expect(speaking()).toEqual(["ana"]);
-    await click(byText("Uma pista"));expect(Media.calls).toHaveLength(1);
-    await act(async()=>root.render(createElement(LessonOne)));await settle();expect(Media.calls).toHaveLength(1);
-    await click(main());expect(speaking()).toEqual([]);await click(main());expect(Media.calls).toHaveLength(2);expect(Media.instances).toHaveLength(1);
-    await click(byText("Refazer"));expect(speaking()).toEqual([]);expect(footer().disabled).toBe(true);expect(Media.calls).toHaveLength(2);
-    await place("I am Ana.","speech");expect(Media.calls).toHaveLength(3);
+    await place("You are Ana.","speech");expect(Media.calls.at(-1)).toContain("nina-you-are-ana");await ended();expect(container.querySelector(".lo-feedback.is-retry")).not.toBeNull();
+    await place("I am Ana.","speech");await ended();expect(Media.calls).toHaveLength(3);expect(speaking()).toEqual(["ana"]);
+    await click(byText("Uma pista"));expect(Media.calls).toHaveLength(3);
+    await act(async()=>root.render(createElement(LessonOne)));await settle();expect(Media.calls).toHaveLength(3);
+    await click(main());expect(speaking()).toEqual([]);await click(main());expect(Media.calls).toHaveLength(4);expect(Media.instances).toHaveLength(3);
+    await click(byText("Refazer"));expect(speaking()).toEqual([]);expect(footer().disabled).toBe(true);expect(Media.calls).toHaveLength(4);
+    await place("I am Ana.","speech");await ended();expect(Media.calls).toHaveLength(6);
   });
 
   it("uses a neutral known prompt, handles browser blocking, then performs the valid selected speaker",async()=>{
@@ -127,11 +127,11 @@ describe("guided start, automatic turns and learner control",()=>{
     expect(Media.calls[2]).toContain("leo-we-are-a-team");expect(speaking()).toEqual(["leo"]);
   });
 
-  it("never reads an incorrect verb before grading, then performs the canonical accepted form",async()=>{
-    await mount("g3-i");expect(Media.calls).toEqual([]);await place("are","word:verb");expect(Media.calls).toEqual([]);
-    await click(footer()); expect(Media.calls).toEqual([]); expect(speaking()).toEqual([]);
-    await place("am", "word:verb"); await click(footer());
-    expect(Media.calls).toHaveLength(1);expect(Media.calls[0]).toContain("ana-i-am-ana");expect(speaking()).toEqual(["ana"]);
+  it("reads each selected verb, then performs the canonical accepted form",async()=>{
+    await mount("g3-i");expect(Media.calls).toEqual([]);await place("are","word:verb");expect(Media.calls.at(-1)).toContain("nina-");await ended();
+    await click(footer()); expect(Media.calls).toHaveLength(1); expect(speaking()).toEqual([]);
+    await place("am", "word:verb");await ended(); await click(footer());
+    expect(Media.calls).toHaveLength(3);expect(Media.calls[2]).toContain("ana-i-am-ana");expect(speaking()).toEqual(["ana"]);
     expect(container.querySelector(".ls-speech-bubble strong")?.textContent).toBe("I am Ana.");
   });
 
