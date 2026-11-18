@@ -1,4 +1,5 @@
 import { createLessonAudioController, getLessonAudioClip } from "./lesson-audio";
+import type { PersonId } from "./lesson-one";
 
 export const REVISION_NARRATIONS = {
   completion: { text: "Parabéns! Você concluiu sua primeira aula. Você aprendeu a falar de si, com outra pessoa e sobre uma equipe. Vamos relembrar?", url: "/first-encounters/audio/revision-pt/nina-completion-congratulations.m4a" },
@@ -19,8 +20,12 @@ const wordRecordings = new Map(Object.entries(WORD_NARRATIONS).map(([word, text]
   [text as string, `/first-encounters/audio/revision-pt/nina-word-${word.toLowerCase()}.m4a`]));
 
 /** Exact local recordings, never browser synthesis or an online TTS request. */
+export function getRevisionAudioClip(person: PersonId, text: string) {
+  return getLessonAudioClip(person, text) ?? (person === "nina"
+    ? wordRecordings.get(text) ?? Object.values(REVISION_NARRATIONS).find(clip => clip.text === text)?.url
+    : undefined);
+}
+
 export function createRevisionAudioController() {
-  return createLessonAudioController({ resolveClip: (person, text) => getLessonAudioClip(person, text)
-    ?? (person === "nina" ? Object.values(REVISION_NARRATIONS).find(clip => clip.text === text)?.url
-      ?? wordRecordings.get(text) : undefined) });
+  return createLessonAudioController({ resolveClip: getRevisionAudioClip });
 }

@@ -2,11 +2,11 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { LESSON_SCENES } from "../src/features/first-encounters/lesson-one";
+import { LESSON_SCENES, type PersonId } from "../src/features/first-encounters/lesson-one";
 
 const audio = vi.hoisted(() => ({
   snapshot: { playingKey: null as string | null, error: null as string | null, blocked: false },
-  subscribers: new Set<() => void>(), scope: "", play: vi.fn(), request: vi.fn(), pause: vi.fn(), stop: vi.fn(), has: vi.fn(() => true),
+  subscribers: new Set<() => void>(), scope: "", whenIdle: vi.fn<() => Promise<void> | undefined>(), play: vi.fn(), request: vi.fn(), pause: vi.fn(), stop: vi.fn(), has: vi.fn<(person: PersonId, text: string) => boolean>(() => true),
 }));
 vi.mock("next/dynamic", () => ({ default: () => ({ person }: { person: string }) => createElement("span", { "data-character-dummy": person }) }));
 vi.mock("../src/features/first-encounters/useLessonAudio", async () => {
@@ -14,7 +14,7 @@ vi.mock("../src/features/first-encounters/useLessonAudio", async () => {
   return { useLessonAudio: (scope: string) => {
     const state = useSyncExternalStore(callback => { audio.subscribers.add(callback); return () => audio.subscribers.delete(callback); }, () => audio.snapshot);
     useLayoutEffect(() => { audio.scope = scope; audio.stop(); return () => audio.stop(); }, [scope]);
-    return { ...state, play: audio.play, request: audio.request, pause: audio.pause, stop: audio.stop, has: audio.has,
+    return { ...state, whenIdle: audio.whenIdle, play: audio.play, request: audio.request, pause: audio.pause, stop: audio.stop, has: audio.has,
       unlock: async()=>false, resume:async()=>false, speech:undefined };
   } };
 });
@@ -32,7 +32,7 @@ function publish(playingKey: string | null, error: string | null = null) {
   audio.snapshot = { playingKey, error, blocked:false }; for (const notify of audio.subscribers) notify();
 }
 beforeEach(() => {
-  vi.clearAllMocks(); audio.subscribers.clear(); audio.snapshot = { playingKey: null, error: null, blocked:false };
+  vi.clearAllMocks(); audio.whenIdle.mockReset(); audio.has.mockImplementation(() => true); audio.subscribers.clear(); audio.snapshot = { playingKey: null, error: null, blocked:false };
   audio.play.mockImplementation(async (person: string, text: string) => publish(`${person}:${text}`));
   audio.request.mockImplementation(async(person:string,text:string)=>{await audio.play(person,text);return true;});
   audio.pause.mockImplementation(() => publish(null)); audio.stop.mockImplementation(() => publish(null));
@@ -77,16 +77,26 @@ describe("lesson audio without answer or identity shortcuts", () => {
     expect(container.querySelector("button button")).toBeNull();
   });
 
-  it("offers a written model and translation for the new question without playing an unrelated recording", async () => {
+  it("plays an available vocabulary option with the neutral reader without scoring it", async () => {
     await mount("use1-listener");
-    expect(container.querySelector("[data-audio-main]")).toBeNull();
+    await click(preview("Are you ready?"));
+    expect(audio.play).toHaveBeenLastCalledWith("nina", "Are you ready?");
+    noGrade();
+  });
+
+  it("offers a written model and translation for the new question without playing an unrelated recording", async () => {
+    const { getGuidedLessonAudioClip } = await import("../src/features/first-encounters/lesson-mechanics-audio");
+    audio.has.mockImplementation((person, text) => Boolean(getGuidedLessonAudioClip(person, text)));
+    await mount("use1-listener");
+    expect(container.querySelector("[data-audio-main]")).toBeTruthy();
     await click(container.querySelector<HTMLButtonElement>('[aria-label="Ver exemplo da relação"]')!);
     const model = container.querySelector<HTMLDialogElement>(".lo-model-dialog")!;
     expect(model.open).toBe(true);
     expect(model.textContent).toContain("Are you ready?");
     expect(model.textContent).toContain("Você está pronto?");
-    expect(model.querySelector("[data-audio-text]")).toBeNull();
-    expect(audio.play).not.toHaveBeenCalled(); noGrade();
+    const example = model.querySelector<HTMLButtonElement>('[data-audio-text="Are you ready?"]')!;
+    await click(example);
+    expect(audio.play).toHaveBeenLastCalledWith("nina", "Are you ready?"); noGrade();
   });
 
   it("makes listening to a model explicit support and keeps the production answer unplayed until requested", async () => {
@@ -161,9 +171,17 @@ describe("lesson audio without answer or identity shortcuts", () => {
     expect(container.querySelector(".lo-app")!.getAttribute("data-round")).toBe("g1-self");
   });
 
-  it("stops preview playback before grading and changes audio scope when advancing", async () => {
-    await mount(); await click(preview("I am Ana.")); await place("I am Ana.", "speech");
-    expect(audio.snapshot.playingKey).toBeNull(); await click(footer()); await flush();
+  it("shows the grade during a requested reading and changes scope on advance", async () => {
+    await mount();
+    await click(preview("I am Ana."));
+    let finish!: () => void;
+    const reading = new Promise<void>(resolve => { finish = resolve; });
+    audio.whenIdle.mockReturnValue(reading);
+    await place("I am Ana.", "speech");
+    expect(container.querySelector(".lo-feedback.is-correct")).not.toBeNull();
+    expect(audio.snapshot.playingKey).toBe("nina:I am Ana.");
+    await act(async () => { publish(null); finish(); });
+    await click(footer()); await flush();
     expect(audio.scope).toMatch(/:g1-listener:activity$/); expect(audio.play).toHaveBeenCalledTimes(1);
   });
 });

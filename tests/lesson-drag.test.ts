@@ -63,12 +63,14 @@ describe("lesson direct manipulation", () => {
     await render();
     const outside = document.createElement("div"), field = document.createElement("input");
     document.body.append(outside, field);
-    const gesture = (element: HTMLElement) => { const event = new Event("touchmove", { bubbles: true, cancelable: true }); element.dispatchEvent(event); return event.defaultPrevented; };
+    const gesture = (element: HTMLElement, fingers = 1) => { const event = new TouchEvent("touchmove", { bubbles: true, cancelable: true, touches: Array.from({ length: fingers }, () => ({} as Touch)) }); element.dispatchEvent(event); return event.defaultPrevented; };
     expect(gesture(source())).toBe(true);
     expect(gesture(outside)).toBe(false);
     expect(gesture(field)).toBe(false);
     geometry(); await pointer(source(), "pointerdown", 25, 35);
     expect(gesture(document.body)).toBe(true);
+    expect(gesture(source(), 2)).toBe(false);
+    expect(gesture(document.body)).toBe(false);
     await pointer(document, "pointercancel", 25, 35);
     expect(gesture(document.body)).toBe(false);
     outside.remove(); field.remove();

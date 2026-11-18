@@ -73,7 +73,7 @@ const nextConfig: NextConfig = {
         }
       ]
     },
-    ...["/", "/demo"].map(source => ({ source, headers: [{ key: "Content-Security-Policy", value: publicDemoCsp }] })),
+    ...["/", "/demo", "/demo/:section(teoria|teste|extras)"].map(source => ({ source, headers: [{ key: "Content-Security-Policy", value: publicDemoCsp }] })),
   ]
 };
 

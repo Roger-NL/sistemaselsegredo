@@ -30,6 +30,6 @@ export function useLessonAudio(scopeKey: string, createController: () => LessonA
     };
   }, [controller]);
 
-  return { ...snapshot, play: controller.play, request: controller.request, unlock: controller.unlock, resume: controller.resume,
+  return { ...snapshot, play: controller.play, request: controller.request, whenIdle: controller.whenIdle, unlock: controller.unlock, resume: controller.resume,
     pause: controller.pause, stop: controller.stop, has: controller.has, speech: controller.speech };
 }

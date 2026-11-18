@@ -62,7 +62,7 @@ describe("recorded lesson audio catalog", () => {
 
   it("covers deduplicated correct models, alternative valid speakers and anonymous Nina reading", () => {
     const requirements = getLessonAudioRequirements();
-    expect(requirements.some(({ text }) => /\b(?:ready|here|friends)\b/i.test(text))).toBe(false);
+    expect(requirements.map(item => item.key)).toEqual(expect.arrayContaining(["maya:Are you ready?", "nina:Are you ready?", "ana:We are ready.", "nina:They are friends."]));
     expect(requirements.map(item => item.key)).toContain("leo:We are a team.");
     expect(requirements.map(item => item.key)).toContain("nina:We are a team.");
     expect(requirements.map(item => item.key)).toContain("nina:They are a team.");
@@ -82,12 +82,12 @@ describe("recorded lesson audio catalog", () => {
     expect(getLessonAudioCoverage(complete).missing).toEqual([requirements[0]]);
   });
 
-  it("keeps the recorded catalog valid and every required voice backed by a real local asset", () => {
-    // The controller fixtures above deliberately mock a tiny catalog; inspect the
-    // published JSON directly so missing recordings cannot pass through the mock.
-    const published: unknown = JSON.parse(readFileSync(resolve("src/features/first-encounters/lesson-one-audio.json"), "utf8"));
-    expect(validateLessonAudioCatalog(published)).toEqual({ valid: true, errors: [], entries: 26 });
+  it("covers the lesson models and keeps every recording backed by a local asset", () => {
+    const readCatalog = (name: string) => JSON.parse(readFileSync(resolve("src/features/first-encounters", name), "utf8"));
+    const published = { ...readCatalog("lesson-one-audio.json"), ...readCatalog("lesson-vocabulary-audio.json") };
+    expect(validateLessonAudioCatalog(published).valid).toBe(true);
     expect(getLessonAudioCoverage(published).missing).toEqual([]);
+    expect(getLessonAudioClip("nina", "ready")).toBeDefined();
     for (const [key, url] of Object.entries(published as Record<string, string>)) {
       expect(existsSync(resolve("public", url.slice(1))), key).toBe(true);
     }

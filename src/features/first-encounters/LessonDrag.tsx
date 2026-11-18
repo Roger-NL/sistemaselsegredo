@@ -184,7 +184,7 @@ export function LessonDragProvider({ onDrop, onSelect, children }: { onDrop: (it
   }, [cancel, setSelection, stopSettling]);
 
   const begin = useCallback((event: ReactPointerEvent<HTMLElement>, item: DragItem) => {
-    if (event.button !== 0 || event.isPrimary === false) return;
+    if (event.button !== 0 || event.isPrimary === false || (window.visualViewport?.scale ?? 1) > 1) return;
     detach(); stopSettling();
     const source = event.currentTarget;
     const rect = source.getBoundingClientRect();
@@ -279,6 +279,10 @@ export function LessonDragProvider({ onDrop, onSelect, children }: { onDrop: (it
     // iOS may start rubber-banding before PointerEvent movement is delivered.
     // Only this provider's interaction surfaces consume touch gestures.
     const protectedTouch = (event: TouchEvent) => {
+      if (event.touches.length !== 1 || (window.visualViewport?.scale ?? 1) > 1) {
+        if (session.current) cancel();
+        return;
+      }
       if (!(event.target instanceof Element) || event.target.closest("input,textarea,select,[contenteditable=true]")) return;
       const source = event.target.closest<HTMLElement>("[data-lesson-drag-source]");
       const ownsSource = source?.dataset.lessonDragProvider === providerId;

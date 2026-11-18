@@ -79,3 +79,236 @@
     left: 50%; top: 2px; width: 96%;
   }
 }
+
+/* Size the exercise against its own available paper, including after feedback appears. */
+:where(html:not([data-keyboard-open="true"])) .lc-card.lc-test {
+  container: question-paper / size;
+  display: grid;
+  align-content: stretch;
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+  grid-template-rows: minmax(min-content, 1fr) auto;
+  align-items: center;
+}
+.lc-test .lc-question-context,
+.lc-test .lc-answer-area,
+.lc-test .lc-feedback { min-width: 0; }
+.lc-test .lc-question-context > span {
+  color: var(--comic-teal);
+  font-weight: 650;
+}
+.lc-test .lc-question-context strong { font-weight: 700; }
+.lc-test .lc-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lc-test .lc-choice {
+  min-width: 0;
+  line-height: 1.22;
+  font-weight: 400;
+}
+.lc-test .lc-choice-check {
+  width: 13px;
+  height: 13px;
+  font-size: 0;
+  border: 1.5px solid var(--lo-ink);
+  border-radius: 50%;
+}
+.lc-test .lc-choice-check svg { display: none; }
+.lc-test .lc-choice.is-selected .lc-choice-check::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--lo-ink);
+}
+.lc-test .lc-feedback {
+  align-content: center;
+  align-self: end;
+  width: 100%;
+}
+.lc-test .lc-feedback.is-correct > strong,
+.lc-test .lc-feedback.is-retry > strong { color: var(--lo-ink); }
+
+@media (max-width: 759px) and (orientation: portrait) {
+  :where(html:not([data-keyboard-open="true"])) .lc-card.lc-test {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(min-content, 1fr) auto;
+    gap: clamp(8px, 1.8dvh, 16px);
+    padding: clamp(10px, 3.4vw, 21px);
+  }
+  @container question-paper (min-height: 320px) {
+    .lc-test .lc-question-context > p { font-size: clamp(18px, 5cqw, 22px); line-height: 1.32; }
+    .lc-test .lc-choices { gap: clamp(8px, 2.4cqw, 14px); }
+    .lc-test .lc-choice {
+      padding: 8px 10px;
+      min-height: clamp(52px, 14cqh, 76px);
+      font-size: clamp(17px, 4.8cqw, 21px);
+      gap: 6px;
+    }
+    .lc-test .lc-feedback { font-size: 16px; line-height: 1.32; padding: 10px 12px; }
+  }
+  @container question-paper (max-height: 319px) {
+    .lc-test .lc-choice { min-height: 44px; font-size: 16px; padding: 5px 6px; }
+    .lc-test .lc-choices { gap: 6px; }
+    .lc-test .lc-feedback { min-height: 0; gap: 2px; font-size: 14px; line-height: 1.2; padding: 6px 8px; }
+  }
+}
+@media (max-width: 759px) and (max-height: 560px) {
+  :where(html:not([data-keyboard-open="true"])) .lc-card.lc-test { padding: 4px 9px; gap: 4px; }
+}
+
+
+.lc-heading.is-test h1 strong { color: var(--comic-teal); font-weight: inherit; }
+
+/* The achievement and the learner-led review share the same printed panel. */
+.lc-card.lc-completion {
+  container: completion-paper / size;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
+}
+.lc-completion :is(.lc-achievement, .lc-recap) {
+  display: grid;
+  grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr);
+  grid-template-rows: minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(12px, 3cqw, 44px);
+}
+.lc-completion :is(.lc-achievement, .lc-recap) > .lc-completion-stage {
+  align-self: stretch;
+  grid-row: 1;
+  grid-column: 1;
+}
+.lc-completion .lc-completion-stage > .li-character-scene { min-height: 0; }
+.lc-completion .lc-completion-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(8px, 2.3cqh, 20px);
+  min-width: 0;
+  line-height: 1.35;
+}
+.lc-completion .lc-completion-copy h2 {
+  font: 400 clamp(26px, 4.3cqw, 44px)/1.07 var(--comic-display);
+  color: var(--lo-ink);
+}
+.lc-completion .lc-completion-copy > p {
+  max-width: 48ch;
+  font-size: clamp(16px, 2.1cqw, 22px);
+}
+.lc-completion .lc-recap-position { color: var(--comic-teal); font-weight: 650; }
+.lc-completion .lc-recap-english {
+  color: var(--lo-ink);
+  font-size: clamp(25px, 4.4cqw, 52px);
+  line-height: 1.14;
+}
+.lc-completion .lc-recap-translation { color: var(--lo-muted); }
+.lc-completion-actions, .lc-recap-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.lc-completion :is(.lc-completion-actions, .lc-recap-controls, .lc-completion-copy) > button,
+.lc-completion :is(.lc-achievement, .lc-recap) > button,
+.lo-app .lc-review-exit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: auto;
+  min-height: 44px;
+  padding: 6px 12px;
+  font: 600 16px/1.18 var(--comic-body);
+  color: var(--lo-ink);
+  background: var(--lo-paper);
+  border: 1.5px solid var(--lo-ink);
+  border-radius: 5px;
+}
+.lc-completion :is(.lc-completion-actions, .lc-recap-controls) > button:hover:enabled { background: var(--lesson-wash); }
+.lc-completion button:disabled { opacity: .52; }
+.lc-completion button:focus-visible, .lo-app .lc-review-exit:focus-visible { outline: 3px solid var(--comic-teal); outline-offset: 2px; }
+.lc-completion :is(.lc-achievement, .lc-recap) > :is([role=status],button) { grid-column: 1/-1; justify-self: start; }
+
+@container completion-paper (max-width: 550px) and (min-height: 385px) {
+  .lc-completion :is(.lc-achievement, .lc-recap) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+  .lc-completion .lc-completion-copy { align-self: end; padding-bottom: 2px; }
+  .lc-completion .lc-recap-english { font-size: clamp(26px, 7cqw, 40px); }
+}
+@container completion-paper (max-width: 550px) and (max-height: 384px) {
+  .lc-completion :is(.lc-achievement, .lc-recap) {
+    grid-template-columns: minmax(58px, .55fr) minmax(0, 1.45fr);
+    grid-template-rows: auto auto auto max-content;
+    align-content: center;
+    gap: 6px 10px;
+  }
+  .lc-completion :is(.lc-achievement, .lc-recap) > .lc-completion-stage { grid-row: 1 / 4; }
+  .lc-completion :is(.lc-achievement, .lc-recap) > .lc-completion-copy { display: contents; }
+  .lc-completion-copy > :is(h2,p,strong,.lc-recap-position) { grid-column: 2; }
+  .lc-completion-copy > :is(.lc-completion-actions,.lc-recap-controls) { grid-column: 1/-1; }
+  .lc-completion .lc-achievement:has(> button) > .lc-completion-stage { grid-row: 1 / 3; }
+  .lc-card.lc-completion .lc-achievement > button {
+    grid-column: 1;
+    grid-row: 3;
+    width: 100%;
+    padding-inline: 3px;
+    font-size: 14px;
+  }
+  .lc-completion .lc-completion-copy h2 { font-size: 24px; }
+  .lc-completion .lc-completion-copy > p { font-size: 15px; line-height: 1.22; }
+  .lc-completion-actions, .lc-recap-controls { gap: 5px; }
+  .lc-completion :is(.lc-completion-actions,.lc-recap-controls) > button { padding-inline: 8px; font-size: 15px; }
+}
+
+.lc-test .lc-choice-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+}
+.lc-test .lc-choice-row > .recorded-speech-button {
+  align-self: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px;
+}
+.lc-test .lc-choice-row > .recorded-speech-button > span { display: none; }
+.lc-test .lc-choice-row > .lc-choice:only-child { grid-column: 1/-1; }
+.lo-app .lc-writing .lc-clear { min-width: 44px; min-height: 44px; }
+html[data-keyboard-open="true"] .lo-app .lc-writing .lc-input-row > input { min-height: 44px; }
+
+.lc-heading-topline > button { min-height: 44px; }
+.lc-test .lc-feedback:has(.recorded-speech-button) {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 6px;
+}
+.lc-test .lc-feedback > :is(strong,p) { grid-column: 1/-1; }
+.lc-test .lc-feedback > p:has(+ .recorded-speech-button) { grid-column: 1; }
+.lc-test .lc-feedback > .recorded-speech-button { grid-column: 2; min-width: 44px; min-height: 44px; padding: 2px; }
+.lc-test .lc-feedback > .recorded-speech-button > span { display: none; }
+.lc-completion-stage .li-character-scene[data-stage-guide=true] .li-actor[data-speaker=true] { width: 84%; }
+.lc-completion .lc-recap-position:focus-visible { outline: 2px solid var(--comic-teal); outline-offset: 2px; }
+@media (max-width: 380px) and (max-height: 540px) {
+  :where(html:not([data-keyboard-open="true"])) .lc-main:has(.lc-test) .lc-heading h1 { font-size: 20px; line-height: 1.08; }
+  .lc-card.lc-test .lc-question-context { line-height: 1.16; }
+  .lc-card.lc-test .lc-question-context > span { margin-right: .45em; }
+  .lc-card.lc-test .lc-question-context > p { display: inline; font-size: 15px; line-height: 1.19; }
+  .lc-card.lc-test .lc-choice-row { gap: 2px; }
+  .lc-card.lc-test .lc-choice { padding: 4px; font-size: 16px; line-height: 1.13; }
+  .lc-card.lc-test .lc-choice-row .lc-choice-check { position: absolute; top: 2px; right: 2px; width: 7px; height: 7px; }
+  .lc-card.lc-test .lc-choice.is-selected .lc-choice-check::after { width: 5px; height: 5px; }
+  .lc-card.lc-test .lc-feedback { padding: 4px 6px; }
+}
+
+/* Let the reset target span both heading lines on very small phones. */
+@media (max-width: 380px) and (max-height: 540px) {
+  :where(html:not([data-keyboard-open="true"])) .lc-heading.is-test .lc-heading-copy:has(.lj-journey) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 6px;
+  }
+  .lc-heading.is-test .lc-heading-topline:has(.lj-journey) { display: contents; }
+  .lc-heading.is-test .lc-heading-topline > .lj-journey { grid-column: 1; grid-row: 1; margin: 0; }
+  .lc-heading.is-test .lc-heading-topline:has(.lj-journey) > .lc-test-restart { grid-column: 2; grid-row: 1/3; margin: 0; }
+  .lc-heading.is-test .lc-heading-copy:has(.lj-journey) h1 { grid-column: 1; grid-row: 2; }
+}

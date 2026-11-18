@@ -69,9 +69,10 @@ function AudioButton({ person, text, playingKey, play, pause, caption, className
   person: PersonId; text: string; playingKey: string | null; play: (person: PersonId, text: string) => void;
   pause: () => void; caption?: string; className?: string; label?: string; available: boolean;
 }) {
+  if (!available) return null;
   const playing = playingKey === getLessonAudioKey(person, text);
   return <button type="button" className={`lo-audio-button ${caption ? "lo-audio-chip" : "lo-audio-icon"} ${className}`}
-    data-audio-person={person} data-audio-text={text} data-audio-ready={available} aria-pressed={playing}
+    data-audio-person={person} data-audio-text={text} data-audio-ready={available} aria-pressed={playing} data-sound-silent="true"
     aria-label={playing ? `Pausar leitura de ${text}` : label ?? `Ouvir leitura de ${text}`}
     title={playing ? "Pausar áudio" : "Leitura narrada. Ouvir não escolhe uma resposta."}
     onPointerDown={event => event.stopPropagation()}
@@ -83,7 +84,8 @@ function AudioButton({ person, text, playingKey, play, pause, caption, className
 
 function isCanonicalPreview(phrase: Phrase) {
   return phrase.verb === (phrase.pronoun === "I" ? "am" : "are")
-    && (phrase.complement === "a team" ? ["we", "they"].includes(phrase.pronoun) : ["I", "you"].includes(phrase.pronoun));
+    && (["ready", "here"].includes(phrase.complement) || (["a team", "friends"].includes(phrase.complement)
+      ? ["we", "they"].includes(phrase.pronoun) : ["I", "you"].includes(phrase.pronoun)));
 }
 
 
@@ -177,6 +179,11 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
   const { stop: stopAudio, pause: pauseAudio, request: requestAudio } = audio;
   const lastAudio = useRef<LessonSpokenTurn | null>(null);
   const sequence = useRef(0);
+  const outcomeSound = useRef<Promise<void> | undefined>(undefined);
+  const answerVisit = useRef(0);
+  const manualWord = useRef<(() => Promise<void> | undefined) | null>(null);
+  const [confirmationPhase, setConfirmationPhase] = useState<"word" | "cue" | null>(null);
+  useEffect(() => () => { answerVisit.current++; outcomeSound.current = undefined; }, []);
   const autoPlayed = useRef(new Set<string>());
 
   const stopSpeech = useCallback(() => { document.dispatchEvent(new Event("lesson-stop-word-coach")); sequence.current++; stopAudio(); setMechanicGuide(null); }, [stopAudio, setMechanicGuide]);
@@ -200,7 +207,8 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
         playTurn(index + 1);
       } });
     }
-    playTurn(0);
+    if (outcomeSound.current) void outcomeSound.current.then(() => playTurn(0));
+    else playTurn(0);
   }, [requestAudio, stopAudio, setMechanicGuide]);
 
   useEffect(() => {
@@ -240,6 +248,7 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
   }, [progress.scene]);
 
   function clearAttempt() {
+    answerVisit.current++; outcomeSound.current = undefined; setConfirmationPhase(null);
     onDiscard?.();
     stopSpeech(); setVisit(value => value + 1);
     setMechanicGuide(null);
@@ -248,8 +257,27 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
   }
   function markSupport() { setProgress(p => ({ ...p, supported: [...new Set([...p.supported, round.id])] })); }
   function commit(evaluation: Evaluation) {
-    stopSpeech();
-    sounds.play(evaluation.correct ? "success" : "retry");
+    const word = manualWord.current?.();
+    const reading = word ?? audio.whenIdle(true);
+    // The learner's chosen reading may finish while the grade appears immediately.
+    if (reading) { sequence.current++; setMechanicGuide(null); }
+    else stopSpeech();
+    const visit = answerVisit.current;
+    const cue = evaluation.correct ? "success" : "retry";
+    const previous = outcomeSound.current ?? reading;
+    if (previous && !sounds.muted) void sounds.unlock();
+    const sound = previous ? previous.then(() => {
+      if (visit !== answerVisit.current) return;
+      setConfirmationPhase("cue");
+      return sounds.play(cue);
+    }) : sounds.play(cue);
+    outcomeSound.current = sound;
+    if (sound) {
+      setConfirmationPhase(word ? "word" : "cue");
+      void sound.then(() => {
+        if (outcomeSound.current === sound) { outcomeSound.current = undefined; setConfirmationPhase(null); }
+      });
+    }
     setResult(evaluation); setNote("");
     if (evaluation.corrections.length) markSupport();
     if (evaluation.correct && ["bubbles", "verb", "build"].includes(round.kind)) {
@@ -345,6 +373,7 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
   }
 
   const choices = round.bubbleChoices ?? [];
+  const readChoices = isComplete || choices.every(choice => audio.has("nina", phraseText(choice)));
   const assembled = round.kind === "verb" || round.kind === "build";
   const currentPronoun = round.kind === "verb" ? round.expected.pronoun : picked.pronoun;
   const models = MODELS[scene.game - 1];
@@ -352,21 +381,27 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
   const guide = getLessonSceneGuide(visualRound.kind === "speaker" && round.kind === "messages" ? round : visualRound, writing);
   const draft = !writing && picked.verb && currentPronoun
     ? { pronoun: currentPronoun, verb: picked.verb, complement: round.expected.complement } : null;
-  const mainAudio = round.vocabulary ? null : isComplete
+  const proposedAudio = isComplete
     ? round.kind === "messages" ? { person: visualRound.speaker, text: phraseText(visualRound.expected), narration: false }
       : { person: round.kind === "speaker" ? speaker ?? round.speaker : visualRound.speaker, text: phraseText(visualRound.expected), narration: false }
     : round.kind === "messages" ? { person: "nina" as PersonId, text: phraseText(round.ensemble![0].expected), narration: true }
       : round.kind === "join" || round.kind === "speaker" ? { person: "nina" as PersonId, text: phraseText(round.expected), narration: true }
         : round.kind === "ensemble" && ensemble[activeTurn] ? { person: "nina" as PersonId, text: phraseText(ensemble[activeTurn]!), narration: true }
           : draft && isCanonicalPreview(draft) ? { person: "nina" as PersonId, text: phraseText(draft), narration: true } : null;
+  const mainAudio = proposedAudio && audio.has(proposedAudio.person, proposedAudio.text) ? proposedAudio : null;
+  const exampleReader = round.vocabulary ? phraseText(round.expected) : modelAudio[0][0];
   function listenMain() {
     if (audio.blocked) { void audio.unlock(); return; }
     if (audio.playingKey) { pauseSpeech(); return; }
     if (activeGuide && !activeGuide.complete) { showMechanic(); return; }
     if (mainAudio) { perform([{ person: mainAudio.person, text: mainAudio.text, role: mainAudio.narration ? "narration" : "character" }]); return; }
-    showModel(); listen("nina", modelAudio[0][0]);
+    showModel(); listen("nina", exampleReader);
   }
-  const automaticPlan = JSON.stringify(getAutomaticLessonSpeech(round, isComplete, speaker));
+  function readPortuguese(phrase: string) {
+    return <AudioButton person="nina" text={phrase} label={`Ouvir em português: ${phrase}`} playingKey={audio.playingKey}
+      play={listen} pause={pauseSpeech} available={audio.has("nina", phrase)}/>;
+  }
+  const automaticPlan = JSON.stringify(getAutomaticLessonSpeech(round, isComplete, speaker).filter(turn => audio.has(turn.person, turn.text)));
   const speechContext = `${visit}:${round.id}:${isComplete ? "accepted" : writing ? "write" : "prompt"}`;
   const mechanic = getLessonMechanic(round, writing);
   const activeGuide = mechanicGuide?.context === speechContext && mechanicGuide.id === mechanic?.id ? mechanicGuide : null;
@@ -390,7 +425,7 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
     startMechanic(mechanic.id, speechContext, [{ person: "nina", text: mechanic.text, role: "narration" }], false);
   }
   function takeControl() {
-    if (!activeGuide) return;
+    if (!activeGuide || audio.whenIdle(true)) return;
     autoPlayed.current.add(speechContext);
     stopSpeech();
   }
@@ -405,16 +440,22 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
     if (!ready || finished || introductionOpen || tutorialOpen || modelOpen || autoPlayed.current.has(speechContext)) return;
     const turns = JSON.parse(automaticPlan) as LessonSpokenTurn[];
     if (turns.some(turn => turn.role === "character" && !readyPeople.has(turn.person))) return;
-    const frame = requestAnimationFrame(() => {
-      if (autoPlayed.current.has(speechContext)) return;
+    let cancelled = false;
+    const ticket = sequence.current;
+    const start = () => {
+      if (cancelled || document.hidden || ticket !== sequence.current || autoPlayed.current.has(speechContext)) return;
       autoPlayed.current.add(speechContext);
       if (!isComplete && mechanic && !seenMechanics.current.has(mechanic.id)) {
         seenMechanics.current.add(mechanic.id);
         try { lessonStorage.setItem(LESSON_MECHANICS_STORAGE, JSON.stringify({ ...readMechanicMetadata(lessonStorage.getItem(LESSON_MECHANICS_STORAGE)), version: 1, seen: [...seenMechanics.current] })); } catch { setStorageError(true); }
         startMechanic(mechanic.id, speechContext, [{ person: "nina", text: mechanic.text, role: "narration" }], true);
       } else if (turns.length) perform(turns, true);
+    };
+    const frame = requestAnimationFrame(() => {
+      if (isComplete && outcomeSound.current) void outcomeSound.current.then(start);
+      else start();
     });
-    return () => cancelAnimationFrame(frame);
+    return () => { cancelled = true; cancelAnimationFrame(frame); };
   }, [speechContext, automaticPlan, ready, finished, introductionOpen, tutorialOpen, modelOpen, readyPeople, perform, mechanic, isComplete, startMechanic, lessonStorage]);
 
   function finishIntroduction() {
@@ -446,6 +487,10 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
     else if (progress.scene > 0) setProgress(p => ({ ...p, scene: p.scene - 1, round: LESSON_SCENES[p.scene - 1].rounds.length - 1 }));
   }
   function clearWriting() { stopSpeech(); onDiscard?.(); setText(""); setResult(null); }
+  const sceneAction = round.kind === "ensemble" ? "Leve uma fala até o turno destacado." : guide.action;
+  const feedbackText = result ? result.corrections[0] ?? result.feedback : hint ? scene.hint : note || (round.vocabulary
+    ? writing ? "Escreva a frase em inglês." : round.kind === "build" ? "Complete a fala com as peças." : "Escolha a fala e leve até o balão."
+    : round.instruction);
   const audioError = audio.error ? <div className="lo-audio-error" role="status"><span>{audio.error}</span><button type="button" data-audio-retry="true" onClick={retryAudio}>Tentar novamente</button></div> : null;
   const speechContent = isComplete && writable ? <div className="lo-fixed-speech"><strong>{phraseText(round.expected)}</strong></div>
     : assembled && !writing ? <div className="lo-sentence-area"><span>Fala de {PERSON_NAMES[round.speaker]}</span><div className="lo-sentence">
@@ -458,7 +503,7 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
       : round.kind === "messages" && isComplete ? <div className="lo-fixed-speech"><strong>{phraseText(visualRound.expected)}</strong></div> : null;
 
   return <div ref={app} className={`lo-app ${fontClassName}`} style={COMIC_LESSON_STYLE} data-lesson-theme="comic" data-ui-sound-scope="local" data-input-active={inputActive} data-ready={ready} data-scene={scene.id} data-round={round.id} data-finished={finished} data-mechanic-guide={activeGuide?.id} data-introduction-open={introductionOpen}
-    onClickCapture={event => { if (!introductionOpen && isLessonButtonClick(event.target)) sounds.play("tap"); }}>
+    onClickCapture={event => { if (!introductionOpen && isLessonButtonClick(event.target) && !outcomeSound.current && !audio.whenIdle(true)) sounds.play("tap"); }}>
     <a className="lo-skip" href="#lesson-title">Ir para a atividade</a>
     <header className="lo-header">
       <div className="lo-brand-row"><button type="button" ref={menuButton} className="lo-icon" aria-label="Abrir percurso da aula" onClick={() => { stopSpeech(); menu.current?.showModal(); }}><MoreHorizontal size={24}/></button><div className="lo-brand-desktop"><Brand href="/dashboard"/></div><div className="lo-brand-mobile"><Brand onMenu={() => { stopSpeech(); menu.current?.showModal(); }}/></div><span className="lo-header-divider"/><span className="lo-header-name">Primeiros encontros</span></div>
@@ -476,19 +521,19 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
           onPointerDownCapture={activityInput} onClickCapture={activityInput} onKeyDownCapture={event => { if (!(event.target instanceof HTMLInputElement) && ["Enter", " "].includes(event.key)) activityInput(event); }}>
           <LessonStage round={round.kind === "ensemble" ? { ...visualRound, kind: "ensemble" } : round.kind === "messages" && isComplete ? { ...visualRound, kind: "messages" } : round} speechContent={speechContent} teamOverride={members} speakerOverride={round.kind === "speaker" && !isComplete ? undefined : speaker} cue={cue} selectedPerson={speaker} onPersonClick={choosePerson} speech={audio.speech} onCharacterReady={characterReady} allowIdleTaps={isComplete}>
             <div className="lo-stage-topline"><span className={`lo-mode ${scene.mode === "use" ? "is-use" : ""}`}>{scene.mode === "game" ? `Atividade ${scene.game}` : "Agora, na conversa"}</span>{scene.rounds.length > 1 && <span>Fala {progress.round + 1} de {scene.rounds.length}</span>}</div>
-            <div className="lo-scene-guide" aria-live="polite"><h2>{guide.title}</h2><p>{round.kind === "ensemble" ? "Leve uma fala até o turno destacado." : guide.action}</p></div>
+            <div className="lo-scene-guide" aria-live="polite"><h2>{guide.title}</h2>{readPortuguese(guide.title)}<p>{sceneAction}</p>{readPortuguese(sceneAction)}</div>
             {round.kind === "messages" ? <div className="lo-messages" data-tutorial-cue="messages">
               {(round.ensemble ?? []).map((r, i) => <div className="lo-message-card" key={r.id}><DropTarget id={`message:${i}`} accept={["person"]} label={`Remetente da mensagem ${i === 0 ? "A" : "B"}`} disabled={isComplete} className="lo-message"><span className="lo-message-letter">{i === 0 ? "A" : "B"}</span><strong>{phraseText(r.expected)}</strong><span className="lo-message-sender">{assignments[i] ? PERSON_NAMES[assignments[i]!] : "Quem enviou?"}</span></DropTarget><AudioButton person={isComplete ? r.speaker : "nina"} text={phraseText(r.expected)} playingKey={audio.playingKey} play={(person,text) => perform([{person,text,role:isComplete ? "character" : "narration",turnIndex:i}])} pause={pauseSpeech} available={audio.has(isComplete ? r.speaker : "nina", phraseText(r.expected))} className="lo-message-audio" label={`Ouvir mensagem ${i === 0 ? "A" : "B"} narrada`}/></div>)}
             </div> : round.kind === "ensemble" ? <div className="lo-context-caption">{visualRound.instruction}</div> : null}
           </LessonStage>
           <div className="lo-workbench">
-            <div className="lo-workbench-top"><div className="lo-workbench-tools">{!round.vocabulary && <button type="button" className="lo-audio-button lo-audio-main" onClick={listenMain} aria-label={audio.blocked ? "Ativar som" : audio.playingKey ? "Pausar áudio" : activeGuide && !activeGuide.complete ? "Repetir orientação" : mainAudio ? round.kind === "messages" && mainAudio.narration ? "Ouvir mensagem A narrada" : mainAudio.narration ? "Ouvir frase narrada" : `Ouvir fala de ${PERSON_NAMES[mainAudio.person]}` : "Ouvir exemplo narrado"} data-audio-main="true" data-audio-role={mainAudio ? mainAudio.narration ? "narration" : "character" : undefined} data-audio-person={mainAudio?.person} data-audio-text={mainAudio?.text}>{audio.playingKey ? <Pause size={13}/> : <Volume2 size={13}/>}<span>{audio.blocked ? "Ativar som" : audio.playingKey ? "Pausar" : activeGuide && !activeGuide.complete ? "Repetir orientação" : mainAudio ? "Ouvir de novo" : "Ouvir exemplo"}</span>{!audio.playingKey && !audio.blocked && <small>{mainAudio && !mainAudio.narration ? PERSON_NAMES[mainAudio.person] : "leitura"}</small>}</button>}{writable && <button type="button" className="lo-write-toggle" onClick={toggleWriting}><PenLine size={13}/>{writing ? "Usar peças" : "Digitar"}</button>}</div></div>
-            {writing && writable ? <form className="lo-write" onSubmit={(e: FormEvent) => { e.preventDefault(); next(); }}><input enterKeyHint="done" onFocus={() => setInputActive(true)} onBlur={() => setInputActive(false)} data-tutorial-cue="write-input" aria-label="Sua fala em inglês" maxLength={120} value={text} onChange={e => { const value = e.currentTarget.value; setText(value); setResult(null); if (value) onInteraction?.(); else onDiscard?.(); takeControl(); }} disabled={isComplete} placeholder="Escreva aqui…" autoComplete="off" autoCapitalize="off" spellCheck={false}/><button type="button" data-tutorial-cue="apagar" className="lo-clear-writing" disabled={!text} aria-label="Apagar o que escrevi" onClick={clearWriting}><Eraser size={16}/><span>Apagar</span></button><button type="submit" disabled={!text.trim() || isComplete} aria-label="Verificar fala"><ArrowRight size={20}/></button></form> : round.kind === "bubbles" ? <div className="lo-phrase-bank" data-tutorial-cue="bubble-bank">{choices.map((p, i) => <div className="lo-audio-option" key={phraseText(p)}><DragSource item={phraseItem(p, i)} disabled={isComplete} className="lo-phrase"><span className="lo-phrase-grip"><Grip size={15}/></span>{phraseText(p)}</DragSource>{!round.vocabulary && <AudioButton person="nina" text={phraseText(p)} playingKey={audio.playingKey} play={listen} pause={pauseSpeech} available={audio.has("nina", phraseText(p))}/>}</div>)}</div> : assembled ? <div className="lo-word-bank" data-tutorial-cue="word-bank">
+            <div className="lo-workbench-top"><div className="lo-workbench-tools">{(mainAudio || audio.has("nina", exampleReader) || audio.blocked || audio.playingKey) && <button type="button" className="lo-audio-button lo-audio-main" data-sound-silent="true" onClick={listenMain} aria-label={audio.blocked ? "Ativar som" : audio.playingKey ? "Pausar áudio" : activeGuide && !activeGuide.complete ? "Repetir orientação" : mainAudio ? round.kind === "messages" && mainAudio.narration ? "Ouvir mensagem A narrada" : mainAudio.narration ? "Ouvir frase narrada" : `Ouvir fala de ${PERSON_NAMES[mainAudio.person]}` : "Ouvir exemplo narrado"} data-audio-main="true" data-audio-role={mainAudio ? mainAudio.narration ? "narration" : "character" : undefined} data-audio-person={mainAudio?.person} data-audio-text={mainAudio?.text}>{audio.playingKey ? <Pause size={13}/> : <Volume2 size={13}/>}<span>{audio.blocked ? "Ativar som" : audio.playingKey ? "Pausar" : activeGuide && !activeGuide.complete ? "Repetir orientação" : mainAudio ? "Ouvir de novo" : "Ouvir exemplo"}</span>{!audio.playingKey && !audio.blocked && <small>{mainAudio && !mainAudio.narration ? PERSON_NAMES[mainAudio.person] : "leitura"}</small>}</button>}{writable && <button type="button" className="lo-write-toggle" onClick={toggleWriting}><PenLine size={13}/>{writing ? "Usar peças" : "Digitar"}</button>}</div></div>
+            {writing && writable ? <form className="lo-write" onSubmit={(e: FormEvent) => { e.preventDefault(); next(); }}><input enterKeyHint="done" onFocus={() => setInputActive(true)} onBlur={() => setInputActive(false)} data-tutorial-cue="write-input" aria-label="Sua fala em inglês" maxLength={120} value={text} onChange={e => { const value = e.currentTarget.value; setText(value); setResult(null); if (value) onInteraction?.(); else onDiscard?.(); takeControl(); }} disabled={isComplete} placeholder="Escreva aqui…" autoComplete="off" autoCapitalize="off" spellCheck={false}/><button type="button" data-tutorial-cue="apagar" className="lo-clear-writing" disabled={!text} aria-label="Apagar o que escrevi" onClick={clearWriting}><Eraser size={16}/><span>Apagar</span></button><button type="submit" disabled={!text.trim() || isComplete} data-sound-silent="true" aria-label="Verificar fala"><ArrowRight size={20}/></button></form> : round.kind === "bubbles" ? <div className="lo-phrase-bank" data-tutorial-cue="bubble-bank">{choices.map((p, i) => <div className="lo-audio-option" key={phraseText(p)}><DragSource item={phraseItem(p, i)} disabled={isComplete} className="lo-phrase"><span className="lo-phrase-grip"><Grip size={15}/></span>{phraseText(p)}</DragSource><AudioButton person="nina" text={phraseText(p)} playingKey={audio.playingKey} play={listen} pause={pauseSpeech} available={readChoices && audio.has("nina", phraseText(p))}/></div>)}</div> : assembled ? <div className="lo-word-bank" data-tutorial-cue="word-bank">
               {round.kind === "build" && <div className="lo-word-family" data-family="pronoun"><button type="button" className="lo-word-family-label" onClick={() => document.dispatchEvent(new CustomEvent("lesson-explain-word", { detail: "I" }))}>De quem falamos <HelpCircle size={12}/></button>{PRONOUNS.map(word => <DragSource key={word} item={{ id: `word:${word}`, kind:"word", value:word, label:word }} disabled={isComplete} className="lo-word">{word}</DragSource>)}</div>}
               <div className="lo-word-family" data-family="verb"><button type="button" className="lo-word-family-label" onClick={() => document.dispatchEvent(new CustomEvent("lesson-explain-word", { detail: "are" }))}>Complete a fala <HelpCircle size={12}/></button>{VERBS.map(word => <DragSource key={word} item={{ id:`word:${word}`,kind:"word",value:word,label:word }} disabled={isComplete} className="lo-word lo-verb">{word}</DragSource>)}</div><span className="lo-piece-note">Escolha e depois toque no espaço.</span>
             </div> : round.kind === "messages" ? <div className="lo-context-note"><UsersRound size={18}/><span>Quem poderia enviar cada mensagem? Use cada pessoa uma vez.</span></div> : round.kind === "ensemble" ? <>
               <div className="lo-turns" data-tutorial-cue="turns">{(round.ensemble ?? []).map((r,i) => <DropTarget key={r.id} id={`turn:${i}`} accept={["phrase"]} label={`Turno ${i+1}: ${PERSON_NAMES[r.speaker]} fala para ${PERSON_NAMES[r.listener]}, sobre ${r.referent === "team" ? "a equipe" : PERSON_NAMES[r.referent]}`} disabled={isComplete} className={`lo-turn ${activeTurn === i ? "is-active" : ""}`}><button type="button" className="lo-turn-context" onClick={() => { setActiveTurn(i); if (isComplete) perform([{ person:r.speaker,text:phraseText(r.expected),role:"character",turnIndex:i }]); }}><span>{i+1}</span>{PERSON_NAMES[r.speaker]} <ArrowRight size={11}/>{PERSON_NAMES[r.listener]}<small>· sobre {r.referent === "team" ? "a equipe" : PERSON_NAMES[r.referent]}</small></button><strong>{ensemble[i] ? phraseText(ensemble[i]!) : "Solte a fala aqui"}</strong></DropTarget>)}</div>
-              <div className="lo-phrase-bank lo-ensemble-bank" data-tutorial-cue="bubble-bank">{choices.map((p,i) => <div className="lo-audio-option" key={phraseText(p)}><DragSource item={phraseItem(p,i)} disabled={isComplete} className="lo-phrase"><Grip size={13}/>{phraseText(p)}</DragSource>{!round.vocabulary && <AudioButton person="nina" text={phraseText(p)} playingKey={audio.playingKey} play={listen} pause={pauseSpeech} available={audio.has("nina", phraseText(p))}/>}</div>)}</div>
+              <div className="lo-phrase-bank lo-ensemble-bank" data-tutorial-cue="bubble-bank">{choices.map((p,i) => <div className="lo-audio-option" key={phraseText(p)}><DragSource item={phraseItem(p,i)} disabled={isComplete} className="lo-phrase"><Grip size={13}/>{phraseText(p)}</DragSource><AudioButton person="nina" text={phraseText(p)} playingKey={audio.playingKey} play={listen} pause={pauseSpeech} available={readChoices && audio.has("nina", phraseText(p))}/></div>)}</div>
             </> : <div className="lo-context-note"><UsersRound size={18}/><span>{round.kind === "join" ? "A área da equipe mostra quem faz parte dela." : "A equipe continua a mesma. Só muda quem fala."}</span></div>}
             {!modelOpen && audioError}
           </div>
@@ -500,7 +545,7 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
         <TutorialCaption key={`${activeGuide.context}:${activeGuide.token}`} speech={audio.speech} text={mechanic.text} clipKey={mechanic.key} timing={mechanicTiming} complete={activeGuide.complete}/>
         <div className="lo-mechanic-actions"><button type="button" aria-label="Repetir orientação" onClick={showMechanic}><Volume2 size={16}/></button><button type="button" aria-label="Fechar orientação" onClick={stopSpeech}><X size={17}/></button></div>
       </aside> : <aside className={`lo-feedback ${!result && !hint && !note ? "is-empty" : ""} ${result?.correct ? "is-correct" : result ? "is-retry" : ""}`} aria-live="polite" aria-atomic="true">
-        {result?.correct ? <Check size={19}/> : <Lightbulb size={18}/>}<div>{result ? <><strong>{result.correct ? result.corrections.length ? "Você se fez entender." : "Faz sentido." : result.meaningCorrect ? "Ajuste apenas o verbo." : "Observe de outro jeito."}</strong><span>{result.corrections[0] ?? result.feedback}</span>{result.correct && result.corrections.length > 0 && <button type="button" onClick={() => { stopSpeech(); coaching.current?.showModal(); }}>Ver ajustes</button>}</> : <><strong>{hint ? "Uma pista" : note ? "Sobre o movimento" : scene.mode === "game" ? "Descubra a relação." : "Use a ideia em outra conversa."}</strong><span>{hint ? scene.hint : note || (round.vocabulary ? writing ? "Escreva a frase em inglês." : round.kind === "build" ? "Complete a fala com as peças." : "Escolha a fala e leve até o balão." : round.instruction)}</span></>}</div>
+        {result?.correct ? <Check size={19}/> : <Lightbulb size={18}/>}<div>{result ? <><strong>{result.correct ? result.corrections.length ? "Você se fez entender." : "Faz sentido." : result.meaningCorrect ? "Ajuste apenas o verbo." : "Observe de outro jeito."}</strong><span>{feedbackText}</span>{readPortuguese(feedbackText)}{result.correct && result.corrections.length > 0 && <button type="button" onClick={() => { stopSpeech(); coaching.current?.showModal(); }}>Ver ajustes</button>}</> : <><strong>{hint ? "Uma pista" : note ? "Sobre o movimento" : scene.mode === "game" ? "Descubra a relação." : "Use a ideia em outra conversa."}</strong><span>{feedbackText}</span>{readPortuguese(feedbackText)}</>}</div>
         {result?.correct && <span className="lo-accepted"><Check size={12}/> Entendido</span>}
         {!finished && !isComplete && <button type="button" className="lo-mechanic-help" onClick={showMechanic}><HelpCircle size={16}/><span>Como fazer</span></button>}
       </aside>}
@@ -520,11 +565,11 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
       </div>
       {storageError && <span className="lo-footer-note">Avanço mantido nesta sessão.</span>}
       <div className="lo-footer-actions">{!finished && <><button type="button" className="lo-text-button lo-model-trigger" aria-label="Ver exemplo da relação" onClick={showModel}><Play size={15}/><span>Ver exemplo</span></button><button type="button" className={`lo-text-button ${hint ? "is-active" : ""}`} aria-pressed={hint} onClick={() => {setHint(h=>!h);markSupport();}}><Lightbulb size={17}/>Uma pista</button></>}
-        <LessonButton type="button" className="lo-next" data-tutorial-cue="check" disabled={!ready || !finished && !canCheck} onClick={next}>{finished ? "Rever do início" : isComplete ? progress.scene===11 && progress.round===scene.rounds.length-1 ? "Concluir aula" : "Continuar" : "Conferir"}<ArrowRight size={18}/></LessonButton>
+        <LessonButton type="button" className="lo-next" data-sound-silent={!isComplete} data-tutorial-cue="check" disabled={!ready || !finished && !canCheck} onClick={next}>{finished ? "Rever do início" : isComplete ? progress.scene===11 && progress.round===scene.rounds.length-1 ? "Concluir aula" : "Continuar" : "Conferir"}<ArrowRight size={18}/></LessonButton>
       </div>
     </footer>
     </>}
-    <LessonWordCoach key={round.id} enabled={ready && !introductionOpen && !tutorialOpen && !finished && assembled && !isComplete && !writing} onOpen={stopSpeech}/>
+    <LessonWordCoach key={round.id} enabled={ready && !introductionOpen && !tutorialOpen && !finished && assembled && !writing && (confirmationPhase === "word" || !isComplete && !confirmationPhase)} onOpen={stopSpeech} manualReadingRef={manualWord}/>
     <TutorialHand scopeRef={app} speech={audio.speech} plan={mechanicHandPlan} active={Boolean(activeGuide) && !introductionOpen && !tutorialOpen && !modelOpen}/>
     {ready && introductionOpen && <LessonIntroduction onFinish={finishIntroduction} onSkip={finishIntroduction} finishLabel="Como funciona a aula"/>}
     {ready && !introductionOpen && tutorialOpen && <LessonTutorial onFinish={finishTutorial}/>}
@@ -534,14 +579,19 @@ function LessonOneContent({ fontClassName, onInteraction, onDiscard, completion 
         <button type="button" className="lo-icon" aria-label="Fechar exemplo" onClick={() => model.current?.close()}><X size={20}/></button></div>
       <h2 id="lo-model-title">{round.vocabulary ? scene.title : TITLES[scene.game-1]}</h2>
       {round.vocabulary ? <>
-        <p>{round.instruction}</p>
-        <div className="lo-example-pair"><div><strong lang="en">{phraseText(round.expected)}</strong><p>{round.vocabulary.translation}</p></div></div>
-        <p>{round.vocabulary.cue}</p>
+        <p>{round.instruction}</p>{readPortuguese(round.instruction)}
+        <div className="lo-example-pair"><div><strong lang="en">{phraseText(round.expected)}</strong><p>{round.vocabulary.translation}</p>
+          <AudioButton person="nina" text={exampleReader} playingKey={audio.playingKey} play={listen} pause={pauseSpeech} available={audio.has("nina", exampleReader)}/>
+          {readPortuguese(round.vocabulary.translation)}
+        </div></div>
+        <p>{round.vocabulary.cue}</p>{readPortuguese(round.vocabulary.cue)}
+        <AudioButton person="nina" text={round.expected.complement} caption={round.expected.complement} playingKey={audio.playingKey} play={listen} pause={pauseSpeech} available={audio.has("nina", round.expected.complement)}/>
       </> : <>
-        <div className="lo-example-pair">{([0,1] as const).map(index => <div key={index}><strong>{models[index*2]}</strong><p>{models[index*2+1]}</p>
+        <div className="lo-example-pair">{([0,1] as const).map(index => <div key={index}><strong>{models[index*2]}</strong><p>{models[index*2+1]}</p>{readPortuguese(models[index*2+1])}
           <div className="lo-model-audio">{modelAudio[index].map(phrase => <AudioButton key={phrase} person="nina" text={phrase} caption={phrase} playingKey={audio.playingKey} play={listen} pause={pauseSpeech} available={audio.has("nina", phrase)}/>)}</div>
-        </div>)}</div><p>{scene.insight}</p>{modelOpen && audioError}
+        </div>)}</div><p>{scene.insight}</p>{readPortuguese(scene.insight)}
       </>}
+      {modelOpen && audioError}
       <LessonButton type="button" className="lo-next" onClick={() => model.current?.close()}>Vamos experimentar <ArrowRight size={17}/></LessonButton>
     </dialog>
     <dialog ref={coaching} className="lo-dialog" aria-labelledby="lo-coach-title"><div className="lo-dialog-heading"><span>Um ajuste de escrita</span><button type="button" className="lo-icon" aria-label="Fechar ajustes" onClick={()=>coaching.current?.close()}><X size={20}/></button></div><h2 id="lo-coach-title">Você se fez entender.</h2><p className="lo-coach-model">{phraseText(round.expected)}</p><ul>{result?.corrections.map(c=><li key={c}>{c}</li>)}</ul><LessonButton type="button" className="lo-next" onClick={()=>coaching.current?.close()}>Entendi <Check size={17}/></LessonButton></dialog>

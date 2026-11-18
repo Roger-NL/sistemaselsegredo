@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Volume2, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { X } from "lucide-react";
+import { RecordedSpeechButton } from "./RecordedSpeechButton";
 import { AnimatedCharacter } from "./AnimatedCharacter";
 import { useLessonAudio } from "./useLessonAudio";
 import { createRevisionAudioController, WORD_NARRATIONS } from "./lesson-revision-audio";
@@ -10,21 +11,28 @@ import { LESSON_MECHANICS_STORAGE } from "./lesson-mechanics";
 import "./lesson-word-coach.css";
 
 export const WORD_MEANINGS: Record<string, { meaning: string; example: string; explanation: string; }> = {
-  I: { meaning: "eu", example: "I am Nina.", explanation: "Quem fala aponta para si. Com I, complete com am." },
-  you: { meaning: "você", example: "You are Ana.", explanation: "Quem fala se dirige à outra pessoa. Com you, complete com are." },
-  we: { meaning: "nós", example: "We are a team.", explanation: "Quem fala faz parte do grupo. Com we, complete com are." },
-  they: { meaning: "eles / elas", example: "They are a team.", explanation: "Quem fala descreve outras pessoas. Com they, complete com are." },
-  am: { meaning: "sou, em I am", example: "I am Nina.", explanation: "I am forma eu sou nesta cena. A peça am acompanha I." },
-  are: { meaning: "é / somos / são", example: "You are Ana.", explanation: "You are: você é. We are: nós somos. They are: eles ou elas são." },
+  I: { meaning: "eu", example: "I am Nina.", explanation: WORD_NARRATIONS.I },
+  you: { meaning: "você", example: "You are Ana.", explanation: WORD_NARRATIONS.you },
+  we: { meaning: "nós", example: "We are a team.", explanation: WORD_NARRATIONS.we },
+  they: { meaning: "eles / elas", example: "They are a team.", explanation: WORD_NARRATIONS.they },
+  am: { meaning: "sou, em I am", example: "I am Nina.", explanation: WORD_NARRATIONS.am },
+  are: { meaning: "é / somos / são", example: "You are Ana.", explanation: WORD_NARRATIONS.are },
 };
 
 /** First contact explains a piece without taking away the drop target or changing its geometry. */
-export function LessonWordCoach({ enabled, onOpen }: { enabled: boolean; onOpen: () => void }) {
+export function LessonWordCoach({ enabled, onOpen, manualReadingRef }: {
+  enabled: boolean; onOpen: () => void; manualReadingRef?: RefObject<(() => Promise<void> | undefined) | null>;
+}) {
   const storage = useLessonStorage();
   const [word, setWord] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const audio = useLessonAudio(word ?? "no-word", createRevisionAudioController);
-  const { request, stop } = audio;
+  const { request, stop, whenIdle } = audio;
+  useEffect(() => {
+    if (!manualReadingRef) return;
+    manualReadingRef.current = () => whenIdle(true);
+    return () => { manualReadingRef.current = null; };
+  }, [whenIdle, manualReadingRef]);
   const played = useRef<string | null>(null), openRef = useRef(onOpen);
   const cancelWordAudio = useCallback(() => { stop(); }, [stop]);
   useEffect(() => { openRef.current = onOpen; }, [onOpen]);
@@ -58,9 +66,6 @@ export function LessonWordCoach({ enabled, onOpen }: { enabled: boolean; onOpen:
   }, [enabled, storage, stop, cancelWordAudio]);
   const item = word ? WORD_MEANINGS[word] : null;
   function close() { stop(); setWord(null); played.current = null; }
-  function playExample() {
-    if (item) void request("nina", item.example, { role: "character" });
-  }
   useEffect(() => {
     if (!word || !ready || played.current === word) return;
     played.current = word;
@@ -70,7 +75,12 @@ export function LessonWordCoach({ enabled, onOpen }: { enabled: boolean; onOpen:
   return <>
     {word && item && <aside className="lo-word-coach" aria-label={`Entenda ${word}`}>
       <div className="lo-word-coach-avatar"><AnimatedCharacter person="nina" cue="self-point" speech={audio.speech} onReady={() => setReady(true)}/></div>
-      <div><strong><span lang="en">{word}</span> <span aria-hidden="true">→</span> {item.meaning}</strong><p>{item.explanation}</p><span className="lo-word-coach-example">Exemplo: <span lang="en">{item.example}</span></span><button type="button" onClick={playExample} aria-label="Ouvir exemplo da palavra"><Volume2 size={16}/>Ouvir exemplo</button></div>
+      <div><strong><span lang="en">{word}</span> <span aria-hidden="true">→</span> {item.meaning}</strong><p>{item.explanation}</p><span className="lo-word-coach-example">Exemplo: <span lang="en">{item.example}</span></span>
+        <div className="lo-word-coach-listen">
+          <RecordedSpeechButton audio={audio} person="nina" text={item.explanation} lang="pt" role="character" label="Ouvir explicação da palavra"/>
+          <RecordedSpeechButton audio={audio} person="nina" text={word} lang="en" role="character" label={`Ouvir a palavra ${word} em inglês`}/>
+          <RecordedSpeechButton audio={audio} person="nina" text={item.example} lang="en" role="character" label="Ouvir exemplo da palavra"/>
+        </div></div>
       <button type="button" className="lo-word-coach-close" onClick={close} aria-label="Fechar explicação da palavra"><X size={18}/></button>
     </aside>}
   </>;

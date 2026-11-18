@@ -1,4 +1,5 @@
-import catalogJSON from "./lesson-one-audio.json";
+import originalRecordings from "./lesson-one-audio.json";
+import vocabularyRecordings from "./lesson-vocabulary-audio.json";
 import { LESSON_SCENES, evaluateSpeaker, phraseText } from "./lesson-one";
 import type { PersonId, Round } from "./lesson-one";
 
@@ -29,6 +30,7 @@ export type LessonAudioRequestOptions = {
 };
 export type LessonSpeechEnvelope = { duration: number; binSeconds: number; levels: Float32Array };
 
+const catalogJSON = { ...originalRecordings, ...vocabularyRecordings };
 const PEOPLE: readonly PersonId[] = ["ana", "leo", "maya", "sam", "nina"];
 const AUDIO_PATH = /^\/first-encounters\/audio\/lesson-one\/(ana|leo|maya|sam|nina)-[a-z0-9][a-z0-9-]*\.(?:mp3|m4a|wav)$/;
 const RETRY_ERROR = "Não foi possível reproduzir esta fala. Tente novamente.";
@@ -76,8 +78,14 @@ export function getLessonAudioRequirements(): LessonAudioRequest[] {
     requests.set(key, { person, text, key });
   }
   function visit(round: Round) {
-    if (round.vocabulary) return;
-    if (round.referent !== "team") referenceNames.add(round.expected.complement);
+    if (!round.vocabulary && round.referent !== "team") referenceNames.add(round.expected.complement);
+    for (const choice of round.bubbleChoices ?? []) add("nina", phraseText(choice));
+    if (round.vocabulary) {
+      add("nina", phraseText(round.expected));
+      if (round.kind === "build") for (const pronoun of ["I", "you", "we", "they"] as const) {
+        add("nina", phraseText({ pronoun, verb: pronoun === "I" ? "am" : "are", complement: round.expected.complement }));
+      }
+    }
     if (round.kind === "messages") {
       // Nina reads every anonymous message, independently of its recipient.
       // The identified authors also need their own recording after acceptance.
@@ -114,6 +122,7 @@ export type LessonAudioController = {
   subscribe: (listener: () => void) => () => void;
   play: (person: PersonId, text: string) => Promise<void>;
   request: (person: PersonId, text: string, options?: LessonAudioRequestOptions) => Promise<boolean>;
+  whenIdle: (manualOnly?: boolean) => Promise<void> | undefined;
   unlock: () => Promise<boolean>;
   resume: () => Promise<boolean>;
   pause: () => void;
@@ -164,6 +173,7 @@ type ActivePlayback = PlaybackRequest & {
   ticket: number;
   running: boolean;
   envelope: LessonSpeechEnvelope | null;
+  finished: Promise<void>;
   detach: () => void;
 };
 
@@ -318,19 +328,22 @@ export function createLessonAudioController(options: {
       active?.detach(); active = null; pending = null; paused = null;
       pauseMedia(audio, true); publish(null, RETRY_ERROR); signalFrame();
     };
+    let finish!: () => void;
+    const finished = new Promise<void>(resolve => { finish = resolve; });
     const detach = () => {
       audio.removeEventListener("playing", onPlaying);
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("error", onError);
       audio.removeEventListener("waiting", onWaiting);
       audio.removeEventListener("pause", onPause);
+      finish();
     };
     audio.addEventListener("playing", onPlaying);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("error", onError);
     audio.addEventListener("waiting", onWaiting);
     audio.addEventListener("pause", onPause);
-    active = { audio, ticket, detach, person, text, options: requestOptions, position, url, key, running: false, envelope: null };
+    active = { audio, ticket, detach, finished, person, text, options: requestOptions, position, url, key, running: false, envelope: null };
     // Analysis never delays the audible play() gesture or an autoplay attempt.
     void loadEnvelope(url).then(envelope => { if (current() && active) { active.envelope = envelope; signalFrame(); } });
     try {
@@ -362,6 +375,7 @@ export function createLessonAudioController(options: {
 
   return {
     getSnapshot: () => snapshot,
+    whenIdle: manualOnly => manualOnly && active?.options.autoplay ? undefined : active?.finished,
     subscribe: listener => { listeners.add(listener); return () => { listeners.delete(listener); }; },
     play, request, unlock: resume, resume, pause, stop, speech,
     has: (person, text) => Boolean(resolveClip(person, text)),

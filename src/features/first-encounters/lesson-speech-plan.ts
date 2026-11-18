@@ -9,7 +9,6 @@ export type LessonSpokenTurn = {
 
 /** Speak given information before a puzzle; perform its answer only after acceptance. */
 export function getAutomaticLessonSpeech(round: Round, accepted: boolean, chosenSpeaker?: PersonId): LessonSpokenTurn[] {
-  if (round.vocabulary) return [];
   if (accepted) {
     if (round.kind === "ensemble" || round.kind === "messages") {
       return (round.ensemble ?? []).map((turn, turnIndex) => ({ person: turn.speaker, text: phraseText(turn.expected), role: "character", turnIndex }));

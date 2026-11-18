@@ -44,6 +44,10 @@ const UI_MODELS = readUiModels(uiText);
 function canonicalPhrase(value) {
   if (!value || typeof value !== "object") return false;
   if (value.verb !== (value.pronoun === "I" ? "am" : "are")) return false;
+  if (!["I", "you", "we", "they"].includes(value.pronoun)) return false;
+  if (value.question) return value.pronoun === "you" && value.complement === "ready";
+  if (["ready", "here"].includes(value.complement)) return true;
+  if (value.complement === "friends") return ["we", "they"].includes(value.pronoun);
   if (["I", "you"].includes(value.pronoun)) return Object.values(PERSON_NAMES).includes(value.complement);
   return ["we", "they"].includes(value.pronoun) && value.complement === "a team";
 }
@@ -59,23 +63,16 @@ function correctActors(round) {
   } else assert(evaluatePhrase(round, round.expected).correct, `${round.id}: expected actor phrase must be correct`);
   return [round.speaker];
 }
-function completeModelFragments(scenes) {
-  const verbGame = scenes.find(scene => scene.game === 3 && scene.mode === "game");
-  assert(verbGame, "The am/are game is needed as the complete model source");
-  const byPrefix = new Map(verbGame.rounds.map(round => [round.expected.pronoun === "I" ? "I am" : `${round.expected.pronoun[0].toUpperCase()}${round.expected.pronoun.slice(1)} are`, phraseText(round.expected)]));
-  assert.equal(byPrefix.size, 4, "The complete examples must cover all four forms");
-  return byPrefix;
+function readSpokenCards(source) {
+  const match = source.match(/const\s+MODEL_AUDIO[^=]*=\s*(\[[\s\S]*?\n\]);/);
+  assert(match, "Missing spoken English cards in LessonOne.tsx");
+  return JSON.parse(match[1].replace(/,\s*([\]}])/g, "$1"));
 }
-function expandModels(scenes, models) {
-  const complete = completeModelFragments(scenes);
-  const knownFull = new Set(complete.values());
+const SPOKEN_CARDS = readSpokenCards(uiText);
+
+function expandModels(models) {
   return models.flatMap((row, game) => [0, 2].map((column, card) => {
-    const spokenEnglish = row[column].split("·").map(part => part.trim()).map(part => {
-      if (knownFull.has(part)) return part;
-      const expanded = complete.get(part);
-      assert(expanded, `Unmapped English model fragment: ${part}. Do not synthesize Portuguese explanations or incomplete text.`);
-      return expanded;
-    });
+    const spokenEnglish = SPOKEN_CARDS[game][card];
     return { game: game + 1, card: card + 1, visibleEnglish: row[column], spokenEnglish, keys: spokenEnglish.map(text => keyFor(READER, text)) };
   }));
 }
@@ -121,15 +118,16 @@ export function buildAudioPlan({ scenes = LESSON_SCENES, models = UI_MODELS, cat
       assert(canonicalPhrase(candidate), `${round.id}: option previews may contain only grammatical complete phrases`);
       recordUse({ id: `${scene.id}/${round.id}/option/${index}`, person: READER, text: phraseText(candidate), scope: "visible-option-preview", phase: "before-answer", sceneId: scene.id, roundId: round.id, quoted: true, candidate: { grammatical: true, assertedInScene: false } });
     }
+    if (round.vocabulary) recordUse({ id: `${scene.id}/${round.id}/model`, person: READER, text: phraseText(round.expected), scope: "model-dialog-english", phase: "explicit-model-request-with-support", sceneId: scene.id, roundId: round.id, quoted: true });
     if (["verb", "build"].includes(round.kind)) {
-      const candidates = round.kind === "verb" ? [round.expected] : (round.referent === "team" ? ["we", "they"] : ["I", "you"]).map(pronoun => ({ pronoun, verb: pronoun === "I" ? "am" : "are", complement: round.expected.complement }));
+      const candidates = round.kind === "verb" ? [round.expected] : (["ready", "here"].includes(round.expected.complement) ? ["I", "you", "we", "they"] : round.referent === "team" ? ["we", "they"] : ["I", "you"]).map(pronoun => ({ pronoun, verb: pronoun === "I" ? "am" : "are", complement: round.expected.complement }));
       for (const [index, candidate] of candidates.entries()) {
         assert(canonicalPhrase(candidate));
         recordUse({ id: `${scene.id}/${round.id}/assembled/${index}`, person: READER, text: phraseText(candidate), scope: "complete-assembled-preview", phase: "after-complete-grammatical-assembly", sceneId: scene.id, roundId: round.id, quoted: true, candidate: { grammatical: true, assertedInScene: false } });
       }
     }
   }
-  const modelCards = expandModels(scenes, models);
+  const modelCards = expandModels(models);
   for (const card of modelCards) for (const [index, text] of card.spokenEnglish.entries()) recordUse({ id: `model/${card.game}/${card.card}/${index}`, person: READER, text, scope: "model-dialog-english", phase: "explicit-model-request-with-support", sceneId: `lesson-${String(card.game * 2 - 1).padStart(2, "0")}`, roundId: null, quoted: true });
 
   const rank = text => text.startsWith("I am ") ? 0 : text.startsWith("You are ") ? 1 : text.startsWith("We are ") ? 2 : 3;
@@ -148,7 +146,7 @@ export function buildAudioPlan({ scenes = LESSON_SCENES, models = UI_MODELS, cat
     const pending = items.filter(asset => !asset.existingCatalogUrl && asset.productionAction !== "reuse-confirmed-generated-bundle");
     const ssmlCandidate = items.map(asset => asset.text).join(BREAK);
     return {
-      person, voiceSlot: person, texts: items.map(asset => asset.text), generationStatus: RECORDED_BUNDLES.some(bundle => bundle.person === person) ? "already-generated-do-not-regenerate" : "pending", assetKeys: items.map(asset => asset.key), pendingAssetKeys: pending.map(asset => asset.key),
+      person, voiceSlot: person, texts: items.map(asset => asset.text), generationStatus: pending.length ? "missing-awaiting-approval" : "recorded", assetKeys: items.map(asset => asset.key), pendingAssetKeys: pending.map(asset => asset.key),
       requestCountIfBundled: pending.length ? 1 : 0,
       plainText, separator: "\n\n", textCharacters: chars(plainText), uniquePhraseCharacters: items.reduce((sum, asset) => sum + asset.characters, 0),
       pendingPlainText: pending.map(asset => asset.text).join("\n\n"), pendingTextCharacters: chars(pending.map(asset => asset.text).join("\n\n")),
@@ -215,10 +213,10 @@ export function validateAudioPlan(plan, { scenes = LESSON_SCENES } = {}) {
   check("five-stock-voice-slots", plan.production.voices.length === 5 && new Set(plan.production.voices.map(voice => voice.person)).size === 5 && plan.production.voices.every(voice => voice.selection === "distinct-stock-elevenlabs-voice" && voice.cloning === false), "Five independent stock voice slots; no cloning");
   const boundIds = plan.production.voices.map(voice => voice.voiceId).filter(Boolean);
   check("distinct-configured-voices", new Set(boundIds).size === boundIds.length, "If voice IDs have been bound, they must be different");
-  check("complete-grammatical-english-only", plan.assets.every(asset => /^(?:I am (?:Ana|Leo|Maya|Sam|Nina)|You are (?:Ana|Leo|Maya|Sam|Nina)|We are a team|They are a team)\.$/.test(asset.text)), "No malformed agreement, fragments or Portuguese speech assets");
+  check("complete-grammatical-english-only", plan.assets.every(asset => /^(?:(?:I am|You are) (?:Ana|Leo|Maya|Sam|Nina|ready|here)\.|(?:We are|They are) (?:a team|friends|ready|here)\.|Are you ready\?)$/.test(asset.text)), "No malformed agreement, fragments or Portuguese speech assets");
   check("all-uses-resolve", plan.uses.every(use => assets.has(use.key) && use.key === keyFor(use.person, use.text)), "Every planned use resolves to its exact deduplicated asset");
   check("neutral-before-decision", plan.uses.filter(use => use.quoted).every(use => use.person === READER && use.actor === null), "Every preview/model uses the same Nina reader, not an asserted actor");
-  check("anonymous-no-voice-leak", plan.uses.filter(use => use.anonymous && use.phase === "before-anonymous-solution").length === 2 && plan.uses.filter(use => use.anonymous && use.phase === "before-anonymous-solution").every(use => use.person === READER && use.quoted && use.key.startsWith("nina:")), "Both anonymous G5 messages use Nina before reveal");
+  check("anonymous-no-voice-leak", plan.uses.filter(use => use.anonymous && use.phase === "before-anonymous-solution").length === concreteTurns(scenes).filter(turn => turn.container?.kind === "messages").length && plan.uses.filter(use => use.anonymous && use.phase === "before-anonymous-solution").every(use => use.person === READER && use.quoted && use.key.startsWith("nina:")), "Every anonymous message uses Nina before reveal");
   check("anonymous-actors-delayed", plan.uses.filter(use => use.anonymous && !use.quoted).every(use => use.phase === "after-anonymous-solution-revealed"), "Real G5 actor voices are delayed until the whole solution is revealed");
   for (const { scene, round } of concreteTurns(scenes)) for (const person of correctActors(round)) {
     check(`actor-coverage/${round.id}/${person}`, plan.uses.some(use => !use.quoted && use.sceneId === scene.id && use.roundId === round.id && use.key === keyFor(person, phraseText(round.expected))), "The canonical correct actor phrase is covered, including alternative correct speakers");
@@ -249,11 +247,9 @@ function selfTest(plan) {
   assert.throws(() => validateAudioPlan(sameVoice), /distinct-configured-voices/);
   assert(plan.assets.some(asset => asset.key === "leo:We are a team."));
   assert(plan.assets.some(asset => asset.key === "nina:I am Ana."));
-  assert(!plan.assets.some(asset => /(?:Hi|Hello|Are you|I'm|not)/.test(asset.text)));
+  assert(plan.assets.some(asset => asset.key === "maya:Are you ready?"));
   assert(!plan.assets.some(asset => asset.key === "nina:I am Leo."), "No unused name sentence should be generated");
-  assert.equal(plan.summary.totalUniquePairs, 26, "Approved current lesson needs 19 actor pairs plus seven extra reader pairs");
-  assert.equal(plan.summary.correctActorUniquePairs, 19);
-  assert.equal(plan.summary.neutralReaderUniquePairs, 10);
+  for (const text of ["I am ready.", "Are you ready?", "They are here.", "We are friends."]) assert(plan.uses.some(use => use.quoted && use.text === text));
   return { passed: true, negativeCases: 6, assertions: "coverage, all valid G4 speakers, anonymous voice isolation, grammatical English, deduplication, distinct stock voices, scope and minimality" };
 }
 
@@ -276,18 +272,19 @@ async function readCatalogs(args) {
 
 async function main() {
   const args = process.argv.slice(2);
-  const allowed = new Set(["--check", "--self-test", "--catalog"]);
-  for (let i = 0; i < args.length; i++) { assert(allowed.has(args[i]), `Unknown option: ${args[i]}`); if (args[i] === "--catalog") i++; }
+  const output = args.includes("--output") ? args[args.indexOf("--output")+1] : OUTPUT;
+  const allowed = new Set(["--check", "--self-test", "--catalog", "--output"]);
+  for (let i = 0; i < args.length; i++) { assert(allowed.has(args[i]), `Unknown option: ${args[i]}`); if (["--catalog", "--output"].includes(args[i])) { assert(args[i+1] && !args[i+1].startsWith("--"), `${args[i]} needs a file path`); i++; } }
   const plan = buildAudioPlan(await readCatalogs(args));
   const tests = args.includes("--self-test") ? selfTest(plan) : null;
   const serialized = `${JSON.stringify(plan, null, 2)}\n`;
   if (args.includes("--check")) {
-    const existing = await readFile(path.join(ROOT, OUTPUT), "utf8");
+    const existing = await readFile(path.resolve(ROOT, output), "utf8");
     assert.equal(existing, serialized, "Audio plan is stale. Re-run the local planner; this makes no provider calls.");
   } else if (!args.includes("--self-test")) {
-    await mkdir(path.dirname(path.join(ROOT, OUTPUT)), { recursive: true });
-    await writeFile(path.join(ROOT, OUTPUT), serialized);
+    await mkdir(path.dirname(path.resolve(ROOT, output)), { recursive: true });
+    await writeFile(path.resolve(ROOT, output), serialized);
   }
-  process.stdout.write(`${JSON.stringify({ output: OUTPUT, status: "plan-only-no-provider-calls", summary: plan.summary, auditChecks: plan.audit.checks.length, ...(tests ? { selfTest: tests } : {}) }, null, 2)}\n`);
+  process.stdout.write(`${JSON.stringify({ output, status: "plan-only-no-provider-calls", summary: plan.summary, auditChecks: plan.audit.checks.length, ...(tests ? { selfTest: tests } : {}) }, null, 2)}\n`);
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();

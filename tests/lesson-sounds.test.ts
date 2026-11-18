@@ -92,6 +92,29 @@ describe("local confirmation sound channel", () => {
     f.cleanup();
   });
 
+  it("releases the next voice after the last audible note, including a generic tap coalesced into the result", async () => {
+    const f = fixture(); f.gesture();
+    const startVoice = vi.fn();
+    f.scope.play("tap");
+    f.scope.play("success")!.then(startVoice);
+    await flush();
+    expect(f.cues).toEqual(["success"]);
+    f.audio.oscillators[0].end(); await Promise.resolve();
+    expect(startVoice).not.toHaveBeenCalled();
+    f.audio.oscillators[1].end(); await Promise.resolve();
+    expect(startVoice).toHaveBeenCalledOnce(); f.cleanup();
+  });
+
+  it("keeps a stalled audio unlock from blocking speech or emitting a late result", async () => {
+    const f = fixture(); f.gesture(); f.audio.state = "suspended";
+    const resumed = deferred();
+    f.audio.resume.mockImplementation(() => resumed.promise.then(() => { f.audio.state = "running"; }));
+    const result = f.scope.play("success");
+    await vi.advanceTimersByTimeAsync(1000); await result;
+    resumed.resolve(); await flush();
+    expect(f.cues).toEqual([]); f.cleanup();
+  });
+
   it("lets retry replace a provisional placement and advance replace a generic click", async () => {
     const f = fixture(); f.gesture();
     f.scope.play("place"); f.scope.play("retry"); await flush();

@@ -5,8 +5,8 @@ import type { LessonCompletionReceipt } from "./useLessonAccountProgress";
 
 import { LessonButton } from "./LessonButton";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import { ArrowLeft, ArrowRight, Check, RotateCcw, Eraser, Pause, Volume2 } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
+import { ArrowLeft, ArrowRight, Check, RotateCcw, Eraser } from "lucide-react";
 import { useLessonSounds } from "./useLessonSounds";
 import { LessonJourney } from "./LessonJourney";
 import { LessonStepTransition } from "./LessonStepTransition";
@@ -14,9 +14,9 @@ import { IntroductionStage } from "./IntroductionStage";
 import { useLessonAudio } from "./useLessonAudio";
 import { LESSON_INTRODUCTION_SCENES } from "./lesson-introduction";
 import { createRevisionAudioController, REVISION_NARRATIONS } from "./lesson-revision-audio";
-import { TutorialCaption } from "./TutorialCaption";
+import { RecordedSpeechButton } from "./RecordedSpeechButton";
 import type { PersonId } from "./lesson-one";
-import { CONCLUSION_QUESTIONS, getConclusionQuestions, CONCLUSION_THEORY, LESSON_CONCLUSION_STORAGE, createConclusionState, evaluateConclusionAnswer,
+import { TRANSFER_QUESTIONS, getConclusionQuestions, CONCLUSION_THEORY, LESSON_CONCLUSION_STORAGE, createConclusionState, evaluateConclusionAnswer,
   getConclusionAttempt, isConclusionComplete, restoreConclusionState, setConclusionDraft, submitConclusionAnswer } from "./lesson-conclusion";
 import "./lesson-conclusion.css";
 
@@ -25,116 +25,103 @@ export type LessonCompletionProps = {
   account: boolean; version: number; saving: boolean; error: string;
 };
 export type LessonConclusionProps = {
+  section?: "teoria" | "teste" | "extras";
+  exitLabel?: string;
   onReturnToPractice: () => void;
   /** Kept compatible with saved visits; the completion screen does not offer a reset. */
   onRestartPractice?: () => void;
   completion?: LessonCompletionProps;
 };
 
-const RECAP_MODELS = LESSON_INTRODUCTION_SCENES.flatMap(scene => scene.models.map((model, modelIndex) => ({ scene, model, modelIndex })));
+const RECAP_MODELS = [
+  ...LESSON_INTRODUCTION_SCENES.flatMap(scene => scene.models.map((model, modelIndex) => ({ ...model, scene, modelIndex }))),
+  ...CONCLUSION_THEORY.flatMap(page => [
+    ...(page.id === "forms" ? [] : [{ text: page.english, translation: page.portuguese }]),
+    { text: page.example, translation: page.translation },
+  ]).map(model => ({ ...model, speaker: "nina" as const, scene: LESSON_INTRODUCTION_SCENES[2], modelIndex: null })),
+  ...[
+    ["They are friends.", "Eles são amigos."], ["We are here.", "Estamos aqui."],
+    ["You're ready.", "Você está pronto ou pronta."],
+  ].map(([text, translation]) => ({ text, translation, speaker: "nina" as const, scene: LESSON_INTRODUCTION_SCENES[2], modelIndex: null })),
+];
 
-/** One real voice clock: Nina's local congratulations, then the four recorded actor models. */
-function CompletionRecap({ disabled }: { disabled: boolean }) {
+function CompletionRecap({ disabled, onPractice }: { disabled: boolean; onPractice: () => void }) {
   const audio = useLessonAudio("lesson-completion", createRevisionAudioController);
-  const { request, stop: stopAudio } = audio;
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [sequenceActive, setSequenceActive] = useState(false);
+  const { request, stop } = audio;
+  const [index, setIndex] = useState<number | null>(null);
   const [ninaReady, setNinaReady] = useState(false);
-  const [narrationComplete, setNarrationComplete] = useState(false);
-  const generation = useRef(0);
-  const automaticStarted = useRef(false);
-  const readyPeople = useRef(new Set<PersonId>());
-  const pending = useRef<{ ticket: number; person: PersonId; begin: () => void } | null>(null);
-  const selected = activeIndex === null ? null : RECAP_MODELS[activeIndex];
-
+  const recapPosition = useRef<HTMLSpanElement>(null);
+  const reviewButton = useRef<HTMLButtonElement>(null);
+  const restoreReviewFocus = useRef(false);
   useEffect(() => {
-    const cancel = () => { generation.current++; pending.current = null; stopAudio(); };
-    const hidden = () => { if (document.hidden) { cancel(); automaticStarted.current = true; setSequenceActive(false); setNarrationComplete(true); } };
-    document.addEventListener("visibilitychange", hidden);
-    return () => { cancel(); document.removeEventListener("visibilitychange", hidden); };
-  }, [stopAudio]);
+    if (index !== null) recapPosition.current?.focus({ preventScroll: true });
+    else if (restoreReviewFocus.current) reviewButton.current?.focus({ preventScroll: true });
+  }, [index]);
+  const item = index === null ? null : RECAP_MODELS[index];
+  const characterReady = useCallback((person: PersonId) => { if (person === "nina") setNinaReady(true); }, []);
+  const touched = useRef(false);
   useEffect(() => {
-    if (!disabled) return;
-    automaticStarted.current = true;
-    const ticket = ++generation.current;
-    pending.current = null; stopAudio();
-    queueMicrotask(() => { if (generation.current === ticket) { setSequenceActive(false); setNarrationComplete(true); } });
-  }, [disabled, stopAudio]);
-
-  function stop() {
-    generation.current++; automaticStarted.current = true; pending.current = null; stopAudio(); setSequenceActive(false); setNarrationComplete(true);
-  }
-  const play = useCallback((start = -1, sequence = true, autoplay = false) => {
-    if (disabled) return;
-    automaticStarted.current = true;
-    stopAudio();
-    const ticket = ++generation.current;
-    setSequenceActive(true);
-    function next(index: number) {
-      if (generation.current !== ticket) return;
-      const item = index < 0 ? null : RECAP_MODELS[index];
-      const person = item?.model.speaker ?? "nina";
-      const text = item?.model.text ?? REVISION_NARRATIONS.completion.text;
-      setActiveIndex(index < 0 ? null : index);
-      setNarrationComplete(index >= 0);
-      const begin = () => {
-        if (generation.current !== ticket) return;
-        pending.current = null;
-        void request(person, text, { role: "character", autoplay: autoplay || index !== start, onEnded: () => {
-          if (generation.current !== ticket) return;
-          if (index < 0) setNarrationComplete(true);
-          if (sequence && index + 1 < RECAP_MODELS.length) next(index + 1);
-          else {
-            setSequenceActive(false);
-            if (sequence) setActiveIndex(null);
-          }
-        } }).then(playing => { if (!playing && generation.current === ticket) { setSequenceActive(false); setNarrationComplete(true); } });
-      };
-      if (readyPeople.current.has(person)) begin();
-      else pending.current = { ticket, person, begin };
-    }
-    next(start);
-  }, [disabled, request, stopAudio]);
-  useEffect(() => {
-    if (!ninaReady || disabled || automaticStarted.current) return;
     let live = true;
-    queueMicrotask(() => { if (live && !automaticStarted.current && !document.hidden) play(-1, true, true); });
+    if (ninaReady && !disabled && !touched.current) queueMicrotask(() => {
+      if (live && !touched.current && !document.hidden) {
+        touched.current = true;
+        void request("nina", REVISION_NARRATIONS.completion.text, { role: "character", autoplay: true });
+      }
+    });
     return () => { live = false; };
-  }, [ninaReady, disabled, play]);
-  function characterReady(person: PersonId) {
-    if (!readyPeople.current.has(person) && person === "nina") setNinaReady(true);
-    readyPeople.current.add(person);
-    if (pending.current?.person === person && pending.current.ticket === generation.current) pending.current.begin();
-  }
+  }, [ninaReady, disabled, request]);
+  useEffect(() => { if (disabled) stop(); }, [disabled, stop]);
 
-  return <>
-    <div className="lc-completion-stage" aria-label="Recapitulação com os personagens da aula">
-      <IntroductionStage scene={selected?.scene ?? LESSON_INTRODUCTION_SCENES[2]} modelIndex={selected?.modelIndex ?? null} speech={audio.speech} onCharacterReady={characterReady} guideLabel="Nina celebra a conclusão da aula."/>
-    </div>
-    <div className="lc-completion-copy">
-      <div className="lc-completion-message"><h2>Parabéns! Você chegou até aqui.</h2>
-        <TutorialCaption speech={audio.speech} text={REVISION_NARRATIONS.completion.text} clipKey={`nina:${REVISION_NARRATIONS.completion.text}`} complete={narrationComplete || disabled}/></div>
-      <div className="lc-completion-models" aria-label="O que você aprendeu">
-        {RECAP_MODELS.map(({ model }, index) => <button type="button" key={`${model.speaker}:${model.text}`} data-recap-model={index}
-          aria-label={`Ouvir ${model.text}`} aria-current={activeIndex === index ? "true" : undefined} disabled={disabled} onClick={() => play(index, false)}>
-          <strong lang="en">{model.text}</strong><span>{model.translation}</span><Volume2 size={17} aria-hidden="true"/>
-        </button>)}
+  function select(next: number | null) {
+    touched.current = true;
+    stop();
+    restoreReviewFocus.current = true;
+    setIndex(next);
+    if (next === null) return;
+    const model = RECAP_MODELS[next];
+    if (audio.has(model.speaker, model.text)) void request(model.speaker, model.text, { role: "character" });
+  }
+  return <div className={item ? "lc-recap" : "lc-achievement"}>
+    <div className="lc-completion-stage"><IntroductionStage scene={item?.scene ?? LESSON_INTRODUCTION_SCENES[2]}
+      modelIndex={item?.modelIndex ?? null} speech={audio.speech} onCharacterReady={characterReady} guideLabel="Nina acompanha a conclusão da aula."/></div>
+    {item && index !== null ? <div className="lc-completion-copy">
+      <span className="lc-recap-position" ref={recapPosition} tabIndex={-1}>Fala {index + 1} de {RECAP_MODELS.length}</span>
+      <strong className="lc-recap-english" lang="en">{item.text}</strong>
+      <p className="lc-recap-translation">{item.translation}</p>
+      <div className="lc-recap-controls">
+        <RecordedSpeechButton audio={audio} person={item.speaker} text={item.text} lang="en" role="character" label="Repetir fala"/>
+        <RecordedSpeechButton audio={audio} person="nina" text={item.translation} lang="pt" label="Ouvir significado"/>
+        <button type="button" disabled={!index} onClick={() => select(index - 1)}>Voltar</button>
+        {index + 1 < RECAP_MODELS.length && <button type="button" onClick={() => select(index + 1)}>Avançar</button>}
+        <button type="button" onClick={() => select(null)}>Encerrar revisão</button>
       </div>
-      <div className="lc-completion-audio">
-        {audio.blocked ? <button type="button" disabled={disabled} onClick={() => { const ticket = generation.current; if (activeIndex === null) setNarrationComplete(false); void audio.unlock().then(playing => { if (generation.current === ticket) { setSequenceActive(playing); if (!playing) setNarrationComplete(true); } }); }}>Ativar som<Volume2 size={17} aria-hidden="true"/></button>
-          : <button type="button" disabled={disabled} aria-label={sequenceActive ? "Pausar recapitulação" : "Ouvir recapitulação"} onClick={() => sequenceActive ? stop() : play()}>
-            {sequenceActive ? <Pause size={17} aria-hidden="true"/> : <Volume2 size={17} aria-hidden="true"/>}{sequenceActive ? "Pausar" : "Ouvir recapitulação"}
-          </button>}
-        {audio.error && <p role="status">Não foi possível ouvir a fala. Toque para tentar novamente.</p>}
-      </div>
-    </div>
-  </>;
+    </div> : <div className="lc-completion-copy">
+      <h2>Parabéns! Você chegou até aqui.</h2>
+      <p>Você praticou como se apresentar, perguntar se alguém está pronto e falar sobre uma amizade ou equipe.</p>
+      <p>Quer relembrar essas falas?</p>
+      <div className="lc-completion-actions"><button type="button" ref={reviewButton} disabled={disabled} onClick={() => select(0)}>Rever as falas</button>
+        <button type="button" disabled={disabled} onClick={onPractice}>Praticar mais</button></div>
+    </div>}
+    {audio.blocked && <button type="button" onClick={() => void audio.unlock()}>Ativar som</button>}
+    {audio.error && <p role="status">A fala não carregou. Toque para tentar novamente.</p>}
+  </div>;
+}
+
+function Highlight({ text }: { text: string }) {
+  const terms = /\b(Ana|Leo|Maya|Sam|Nina|ready|friends|here|team|pronta|pronto|equipe|amigos|aqui|vocês|nome)\b/gi;
+  return <>{text.split(terms).map((part, index) => index % 2 ? <strong key={index}>{part}</strong> : part)}</>;
 }
 
 /** Written theory and checks, followed by a completion that preserves the learner's work. */
-export function LessonConclusion({ onReturnToPractice, completion }: LessonConclusionProps) {
+export function LessonConclusion({ onReturnToPractice, completion, section, exitLabel }: LessonConclusionProps) {
   const lessonStorage = useLessonStorage();
-  const [state, setState] = useState(createConclusionState);
+  const [state, setState] = useState(() => {
+    const initial = createConclusionState();
+    if (section && section !== "teoria") initial.phase = "test";
+    return initial;
+  });
+  const [extraOpen, setExtraOpen] = useState(false);
+  const sectionAudio = useLessonAudio(`${extraOpen}:${state.phase}:${state.theoryIndex}:${state.theoryBlock}:${state.questionIndex}`, createRevisionAudioController);
   const [ready, setReady] = useState(false);
   const [storageUnavailable, setStorageUnavailable] = useState(false);
   const [completionPending, setCompletionPending] = useState(false);
@@ -148,8 +135,16 @@ export function LessonConclusion({ onReturnToPractice, completion }: LessonConcl
   const sounds = useLessonSounds();
   const exampleBlock = state.theoryBlock === 1;
   const page = CONCLUSION_THEORY[state.theoryIndex];
-  const questions = getConclusionQuestions(state);
+  const questions = section === "extras" ? TRANSFER_QUESTIONS : getConclusionQuestions(state);
   const question = questions[state.questionIndex];
+  const testSound = useRef<{ visit: number; last?: Promise<void> }>({ visit: 0 });
+  const [readingLock, setReadingLock] = useState<Promise<void>>();
+  const readingLocked = !sounds.muted && Boolean(readingLock);
+  useLayoutEffect(() => {
+    const sequence = testSound.current;
+    return () => { sequence.visit++; sequence.last = undefined; };
+  }, [question.id, state.phase, extraOpen]);
+  const allChoicesRecorded = question.choices?.every(choice => sectionAudio.has("nina", choice));
   const attempt = getConclusionAttempt(state, question);
   const evaluation = attempt.lastAnswer === null ? null : evaluateConclusionAnswer(question, attempt.lastAnswer);
   const complete = isConclusionComplete(state);
@@ -160,6 +155,10 @@ export function LessonConclusion({ onReturnToPractice, completion }: LessonConcl
 
   useEffect(() => {
     let active = true;
+    if (section) {
+      queueMicrotask(() => { if (active) setReady(true); });
+      return () => { active = false; };
+    }
     let raw: string | null = null;
     let unavailable = false;
     try { raw = lessonStorage.getItem(LESSON_CONCLUSION_STORAGE); } catch { unavailable = true; }
@@ -168,12 +167,12 @@ export function LessonConclusion({ onReturnToPractice, completion }: LessonConcl
       setState(restoreConclusionState(raw)); setStorageUnavailable(unavailable); setReady(true);
     });
     return () => { active = false; };
-  }, [lessonStorage]);
+  }, [lessonStorage, section]);
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || section) return;
     try { lessonStorage.setItem(LESSON_CONCLUSION_STORAGE, JSON.stringify(state)); } catch { /* The review still works in memory. */ }
-  }, [ready, state, lessonStorage]);
-  useEffect(() => { if (ready) heading.current?.focus({ preventScroll: true }); }, [ready, state.phase, state.theoryIndex, state.theoryBlock, state.questionIndex]);
+  }, [ready, state, lessonStorage, section]);
+  useEffect(() => { if (ready && !extraOpen) heading.current?.focus({ preventScroll: true }); }, [ready, extraOpen, state.phase, state.theoryIndex, state.theoryBlock, state.questionIndex]);
   const verify = completion?.verify, version = completion?.version;
   useEffect(() => {
     if (!ready || state.phase !== "summary" || !verify || version === undefined) return;
@@ -221,6 +220,7 @@ export function LessonConclusion({ onReturnToPractice, completion }: LessonConcl
   function goTheory(index: number, theoryBlock: 0 | 1) { sounds.play("advance"); setState(current => ({ ...current, phase: "theory", theoryIndex: index, theoryBlock })); }
   function nextTheory() {
     sounds.play("advance");
+    if (section && exampleBlock && state.theoryIndex === CONCLUSION_THEORY.length - 1) { onReturnToPractice(); return; }
     if (!exampleBlock) { setState(current => ({ ...current, theoryBlock: 1 })); return; }
     setState(current => current.theoryIndex < CONCLUSION_THEORY.length - 1
       ? { ...current, theoryIndex: current.theoryIndex + 1, theoryBlock: 0 }
@@ -229,7 +229,7 @@ export function LessonConclusion({ onReturnToPractice, completion }: LessonConcl
   function nextQuestion() {
     if (!evaluation?.correct) return;
     sounds.play("advance");
-    setState(current => current.questionIndex === CONCLUSION_QUESTIONS.length - 1
+    setState(current => current.questionIndex === questions.length - 1
       ? { ...current, phase: "summary" } : { ...current, questionIndex: current.questionIndex + 1 });
   }
   function check(event?: FormEvent<HTMLFormElement>) {
@@ -237,7 +237,23 @@ export function LessonConclusion({ onReturnToPractice, completion }: LessonConcl
     if (evaluation?.correct) { nextQuestion(); return; }
     if (!attempt.draft.trim()) return;
     writing.current?.blur();
-    sounds.play(evaluateConclusionAnswer(question, attempt.draft).correct ? "success" : "retry");
+    if (!sounds.muted) {
+      const cue = evaluateConclusionAnswer(question, attempt.draft).correct ? "success" : "retry";
+      const sequence = testSound.current;
+      const visit = sequence.visit;
+      const reading = sequence.last ?? readingLock ?? sectionAudio.whenIdle();
+      // Unlock on the submit gesture even when the spoken option has yet to finish.
+      if (reading) void sounds.unlock();
+      const until = reading ? reading.then(() => visit === sequence.visit ? sounds.play(cue) : undefined) : sounds.play(cue);
+      if (until) {
+        sequence.last = until;
+        setReadingLock(until);
+        void until.then(() => {
+          if (sequence.last === until) sequence.last = undefined;
+          setReadingLock(current => current === until ? undefined : current);
+        });
+      }
+    }
     setState(current => submitConclusionAnswer(current, question));
   }
   function retake() {
@@ -250,22 +266,27 @@ export function LessonConclusion({ onReturnToPractice, completion }: LessonConcl
       else if (state.theoryIndex > 0) goTheory(state.theoryIndex - 1, 1);
       else onReturnToPractice();
     } else if (state.phase === "test") {
+      if (section && state.questionIndex === 0) { onReturnToPractice(); return; }
       sounds.play("advance");
       setState(current => current.questionIndex > 0 ? { ...current, questionIndex: current.questionIndex - 1 }
         : { ...current, phase: "theory", theoryIndex: CONCLUSION_THEORY.length - 1, theoryBlock: 1 });
     }
   }
 
+  if (extraOpen) return <LessonConclusion section="extras" exitLabel={section ? "Voltar ao teste" : "Voltar à conquista"} onReturnToPractice={() => setExtraOpen(false)}/>;
+
   return <>
     <main className="lo-main lc-main" id="lesson-main" data-conclusion-phase={state.phase} data-theory-block={state.phase === "theory" ? Number(exampleBlock) : undefined} data-conclusion-index={state.phase === "theory" ? state.theoryIndex : state.questionIndex} aria-busy={!ready}>
       <LessonStepTransition stepKey={state.phase === "theory" ? `theory:${state.theoryIndex}:${Number(exampleBlock)}` : `${state.phase}:${state.questionIndex}`} className="lc-content">
       <div className={`lc-heading ${state.phase === "test" ? "is-test" : ""}`}>
-        <div className="lc-heading-copy"><div className="lc-heading-topline"><LessonJourney stage={state.phase === "theory" ? "theory" : "test"}
+        <div className="lc-heading-copy"><div className="lc-heading-topline">{section ? <span>{section === "teoria" ? `Teoria · ${state.theoryIndex + 1}/5` : `Treino · ${state.questionIndex + 1}/${questions.length}`}</span> : <LessonJourney stage={state.phase === "theory" ? "theory" : "test"}
           completed={state.phase === "theory" ? state.theoryIndex : state.phase === "summary" ? 6 : completedQuestions}
-          label={state.phase === "test" ? `Teste ${state.questionIndex + 1}/${CONCLUSION_QUESTIONS.length}` : undefined}/>
+          label={state.phase === "test" ? `Teste ${state.questionIndex + 1}/${questions.length}` : undefined}/>}
+          {exitLabel && <button type="button" className="lc-review-exit" onClick={onReturnToPractice}>{exitLabel}</button>}
+          {section === "teste" && state.phase === "test" && <button type="button" disabled={!ready} onClick={() => setExtraOpen(true)}>Praticar mais</button>}
           {state.phase === "test" && <button type="button" className="lc-test-restart" aria-label="Recomeçar teste do zero" disabled={!ready} onClick={retake}><RotateCcw size={15} aria-hidden="true"/><span className="lc-restart-full">Recomeçar teste do zero</span><span className="lc-restart-short" aria-hidden="true">Zerar teste</span></button>}</div>
-          <h1 id="lesson-title" ref={heading} tabIndex={-1}>{state.phase === "theory" ? page.title : state.phase === "test" ? question.prompt : "Aula 1 concluída!"}</h1></div>
-        {state.phase !== "summary" && <div className="lc-page-dots" aria-hidden="true">{Array.from({ length: state.phase === "theory" ? 5 : 6 }, (_, index) =>
+          <h1 id="lesson-title" ref={heading} tabIndex={-1}>{state.phase === "theory" ? page.title : state.phase === "test" ? <Highlight text={question.prompt}/> : section ? "Treino concluído!" : "Aula 1 concluída!"}</h1></div>
+        {state.phase !== "summary" && <div className="lc-page-dots" aria-hidden="true">{Array.from({ length: state.phase === "theory" ? 5 : questions.length }, (_, index) =>
           <span key={index} className={state.phase === "summary" || index < (state.phase === "theory" ? state.theoryIndex : state.questionIndex) ? "is-done"
             : index === (state.phase === "theory" ? state.theoryIndex : state.questionIndex) ? "is-current" : ""} />)}</div>}
       </div>
@@ -273,20 +294,25 @@ export function LessonConclusion({ onReturnToPractice, completion }: LessonConcl
       {!ready ? <section className="lc-card lc-loading"><p>Preparando sua revisão…</p></section> : state.phase === "theory" ? <section className={`lc-card lc-theory ${page.id === "forms" ? "lc-rule-page" : ""}`} aria-label="Explicação bilíngue">
         <div className="lc-relation">
           {page.id === "forms" && !exampleBlock ? <div className="lc-forms" aria-label="I am. You are. We are. They are.">
-            <span lang="en">I <strong>am</strong></span><span lang="en">You <strong>are</strong></span>
-            <span lang="en">We <strong>are</strong></span><span lang="en">They <strong>are</strong></span>
+            {page.english.split(" · ").map(form => {
+              const [pronoun, verb] = form.split(" ");
+              return <span key={form} lang="en">{pronoun} <strong>{verb}</strong>
+                <RecordedSpeechButton audio={sectionAudio} person="nina" text={form} lang="en"/></span>;
+            })}
           </div> : <><strong className="lc-english" lang="en">{exampleBlock ? page.example : page.english}</strong><span className="lc-portuguese">{exampleBlock ? page.translation : page.portuguese}</span></>}
+        {(page.id !== "forms" || exampleBlock) && <RecordedSpeechButton audio={sectionAudio} person="nina" text={exampleBlock ? page.example : page.english} lang="en" disabled={readingLocked}/>}
+        <RecordedSpeechButton audio={sectionAudio} person="nina" text={exampleBlock ? page.translation : page.portuguese} lang="pt" disabled={readingLocked}/>
         </div>
-        <div className="lc-explanation"><p>{exampleBlock ? page.note : page.explanationPT}</p></div>
+        <div className="lc-explanation"><p>{exampleBlock ? page.note : page.explanationPT}</p><RecordedSpeechButton audio={sectionAudio} person="nina" text={exampleBlock ? page.note : page.explanationPT} lang="pt" disabled={readingLocked}/></div>
       </section> : state.phase === "test" ? <form id="lc-answer-form" className={`lc-card lc-test ${question.kind === "writing" ? "lc-writing-test" : ""}`} onSubmit={check}>
-        <div className="lc-question-context"><span>Situação</span><p>{question.context}</p></div>
+        <div className="lc-question-context"><span>Situação</span><p><Highlight text={question.context}/></p></div>
         <div className="lc-answer-area">
           {question.kind === "choice" ? <fieldset className="lc-choices"><legend className="lc-visually-hidden">Escolha a fala</legend>
-            {question.choices?.map(choice => <label key={choice} className={`lc-choice ${attempt.draft === choice ? "is-selected" : ""}`}>
+            {question.choices?.map(choice => <div key={choice} className="lc-choice-row"><label className={`lc-choice ${attempt.draft === choice ? "is-selected" : ""}`}>
               <input type="radio" name={question.id} value={choice} checked={attempt.draft === choice}
                 onChange={() => setState(current => setConclusionDraft(current, question, choice))} />
-              <span lang="en">{choice}</span><span className="lc-choice-check" aria-hidden="true">{attempt.draft === choice && <Check size={18} />}</span>
-            </label>)}
+              <span lang="en"><Highlight text={choice}/></span><span className="lc-choice-check" aria-hidden="true"/>
+            </label>{(allChoicesRecorded || evaluation?.correct) && <RecordedSpeechButton audio={sectionAudio} person="nina" text={choice} lang="en" disabled={readingLocked}/>}</div>)}
           </fieldset> : <div className="lc-writing"><label htmlFor="lc-written-answer">Sua frase em inglês</label>
             <div className="lc-input-row"><input ref={writing} enterKeyHint="done" id="lc-written-answer" type="text" value={attempt.draft} maxLength={120} autoComplete="off" autoCapitalize="off" spellCheck={false}
               placeholder="Escreva aqui…" onChange={event => { const draft = event.currentTarget.value; setState(current => setConclusionDraft(current, question, draft)); }} />
@@ -298,26 +324,28 @@ export function LessonConclusion({ onReturnToPractice, completion }: LessonConcl
         </div>
         <div className={`lc-feedback ${evaluation ? evaluation.correct ? "is-correct" : "is-retry" : ""}`} role="status" aria-live="polite" aria-atomic="true">
           {evaluation ? <><strong>{evaluation.feedbackTitle}</strong>
-            <p>{evaluation.explanationPT}</p><p lang="en" className="lc-feedback-en">{evaluation.explanationEN}</p>
+            <p>{evaluation.explanationPT}</p><RecordedSpeechButton audio={sectionAudio} person="nina" text={evaluation.explanationPT} lang="pt" disabled={readingLocked}/><p lang="en" className="lc-feedback-en">{evaluation.explanationEN}</p><RecordedSpeechButton audio={sectionAudio} person="nina" text={evaluation.explanationEN} lang="en" disabled={readingLocked}/>
             {evaluation.correct && evaluation.notes.map(note => <p key={note}>{note}</p>)}
-          </> : <p>Escolha ou escreva a fala e toque em <strong>Conferir</strong>. Depois da resposta, você verá a explicação.</p>}
+          </> : <p>{question.kind === "choice" ? "Escolha uma fala" : "Escreva sua resposta"} e toque em <strong>Conferir</strong>.</p>}
         </div>
       </form> : <section className="lc-card lc-completion" aria-label="Aula concluída">
-        <CompletionRecap disabled={completionPending}/>
+        {section ? <div className="lc-completion-copy"><h2>Você terminou este treino.</h2>
+          {section !== "extras" && <button type="button" onClick={() => setExtraOpen(true)}>Praticar mais</button>}
+          </div> : <CompletionRecap disabled={completionPending} onPractice={() => setExtraOpen(true)}/>}
       </section>}
       </LessonStepTransition>
       {storageUnavailable && <p className="lc-storage-note" role="status">A revisão funciona aqui, mas este navegador não permitiu guardar seu progresso.</p>}
     </main>
     <footer className="lo-footer lc-footer">
-      {state.phase === "summary" ? <><p id="lc-completion-status" className="lc-completion-save" role={completionError ? "alert" : "status"}>{completionMessage}</p>
+      {section && state.phase === "summary" ? <LessonButton onClick={onReturnToPractice}>Sair do treino</LessonButton> : state.phase === "summary" ? <><p id="lc-completion-status" className="lc-completion-save" role={completionError ? "alert" : "status"}>{completionMessage}</p>
         <LessonButton type="button" className="lc-next lc-complete" disabled={!ready || !!completionBusy || !verify} aria-busy={!!completionBusy} aria-describedby="lc-completion-status" onClick={() => void finishLesson()}>
           {completionError ? "Tentar confirmar novamente" : completion?.account ? "Voltar ao meu painel" : "Entrar ou criar conta"}<ArrowRight size={19} aria-hidden="true"/></LessonButton></>
         : <><button type="button" className="lc-back" onClick={previous} disabled={!ready}><ArrowLeft size={19} aria-hidden="true"/>Voltar</button>
-          <span className="lc-footer-note">{state.phase === "test" ? "A primeira resposta fica registrada. Você pode corrigir depois." : "Leia no seu ritmo. Esta parte é escrita."}</span>
+          <span className="lc-footer-note">{section ? "Prática livre." : state.phase === "test" ? "A primeira resposta fica registrada. Você pode corrigir depois." : "Leia no seu ritmo."}</span>
           {state.phase === "theory" ? <LessonButton type="button" className="lc-next" disabled={!ready} onClick={nextTheory}>
-            {!exampleBlock || state.theoryIndex < CONCLUSION_THEORY.length - 1 ? "Avançar" : complete ? "Concluir aula" : state.testStarted ? "Retomar teste" : "Fazer teste"}<ArrowRight size={19} aria-hidden="true"/></LessonButton>
-            : evaluation?.correct ? <LessonButton type="button" className="lc-next" onClick={nextQuestion}>{state.questionIndex === 5 ? "Concluir aula" : "Próxima pergunta"}<ArrowRight size={19} aria-hidden="true"/></LessonButton>
-              : <LessonButton type="submit" form="lc-answer-form" className="lc-next" disabled={!attempt.draft.trim()}><Check size={19} aria-hidden="true"/>Conferir</LessonButton>}
+            {!exampleBlock || state.theoryIndex < CONCLUSION_THEORY.length - 1 ? "Avançar" : section ? "Terminar revisão" : complete ? "Concluir aula" : state.testStarted ? "Retomar teste" : "Fazer teste"}<ArrowRight size={19} aria-hidden="true"/></LessonButton>
+            : evaluation?.correct ? <LessonButton type="button" className="lc-next" onClick={nextQuestion}>{state.questionIndex === questions.length - 1 ? section ? "Terminar treino" : "Concluir aula" : "Próxima pergunta"}<ArrowRight size={19} aria-hidden="true"/></LessonButton>
+              : <LessonButton type="submit" form="lc-answer-form" className="lc-next" disabled={!attempt.draft.trim()} data-sound-silent="true"><Check size={19} aria-hidden="true"/>Conferir</LessonButton>}
         </>}
     </footer>
   </>;

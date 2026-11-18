@@ -6,17 +6,19 @@ const PRIORITY: Record<LessonSoundCue, number> = { tap: 0, place: 1, retry: 2, a
 const COALESCE_MS = 16;
 const TRAILING_CLICK_MS = 80;
 const MASTER_GAIN = 0.28;
+// A browser that never resumes Web Audio must not hold the spoken answer hostage.
+const MAX_CUE_WAIT_MS = 650;
 
 type Tone = { frequency: number; to?: number; delay: number; duration: number; gain: number };
-// Sine-only, deliberately quiet and without an alarm-like descending interval.
+// A pair of rising notes confirms the answer; one lower, falling note invites another try.
 const TONES: Record<LessonSoundCue, readonly Tone[]> = {
   tap: [{ frequency: 360, to: 320, delay: 0, duration: 0.025, gain: 0.12 }],
   place: [{ frequency: 520, to: 590, delay: 0, duration: 0.07, gain: 0.16 }],
   success: [
-    { frequency: 659.255, delay: 0, duration: 0.19, gain: 0.17 },
-    { frequency: 880, delay: 0.06, duration: 0.19, gain: 0.15 },
+    { frequency: 659.255, delay: 0, duration: 0.19, gain: 0.32 },
+    { frequency: 880, delay: 0.06, duration: 0.19, gain: 0.29 },
   ],
-  retry: [{ frequency: 294, delay: 0, duration: 0.1, gain: 0.12 }],
+  retry: [{ frequency: 392, to: 262, delay: 0, duration: 0.16, gain: 0.32 }],
   advance: [{ frequency: 470, to: 620, delay: 0, duration: 0.1, gain: 0.14 }],
 };
 
@@ -32,7 +34,7 @@ export type LessonSoundsOptions = {
 };
 export type LessonSoundScope = {
   mount: () => () => void;
-  play: (cue: LessonSoundCue) => void;
+  play: (cue: LessonSoundCue) => Promise<void> | undefined;
   unlock: () => Promise<boolean>;
 };
 
@@ -60,7 +62,7 @@ export function createLessonSoundsEngine(options: LessonSoundsOptions = {}) {
   let trustedGestureUntil = 0;
   let batchSequence = 0;
   let queueTimer: ReturnType<typeof setTimeout> | undefined;
-  let pending: { id: number; owner: symbol; cue: LessonSoundCue; ready: Promise<boolean> } | null = null;
+  let pending: { id: number; owner: symbol; cue: LessonSoundCue; ready: Promise<boolean>; finished: Promise<void>; finish: () => void } | null = null;
   let lastEmission: { cue: LessonSoundCue; time: number } | null = null;
   type ActiveSound = { owner: symbol; gain: GainNode; oscillators: OscillatorNode[]; clean: () => void };
   const active = new Set<ActiveSound>();
@@ -79,6 +81,7 @@ export function createLessonSoundsEngine(options: LessonSoundsOptions = {}) {
 
   function clearPending(owner?: symbol) {
     if (owner && pending?.owner !== owner) return;
+    pending?.finish();
     pending = null;
     if (queueTimer !== undefined) clearTimeout(queueTimer);
     queueTimer = undefined;
@@ -124,8 +127,8 @@ export function createLessonSoundsEngine(options: LessonSoundsOptions = {}) {
     } catch { return null; }
   }
 
-  function emit(owner: symbol, cue: LessonSoundCue) {
-    if (!context || !master || context.state !== "running" || muted || hidden() || !owners.has(owner)) return;
+  function emit(owner: symbol, cue: LessonSoundCue, finish: () => void) {
+    if (!context || !master || context.state !== "running" || muted || hidden() || !owners.has(owner)) { finish(); return; }
     // Bound polyphony during very fast use; each older tone fades rather than cuts.
     if (active.size >= 3) fade(active.values().next().value!);
     const group = context.createGain();
@@ -134,11 +137,14 @@ export function createLessonSoundsEngine(options: LessonSoundsOptions = {}) {
     const oscillators: OscillatorNode[] = [];
     const envelopes: GainNode[] = [];
     const sound: ActiveSound = { owner, gain: group, oscillators, clean: () => {
-      active.delete(sound);
+      if (!active.delete(sound)) return;
+      clearTimeout(watchdog);
       oscillators.forEach(oscillator => { oscillator.onended = null; oscillator.disconnect(); });
       envelopes.forEach(envelope => envelope.disconnect());
-      group.disconnect();
+      group.disconnect(); finish();
     } };
+    // A suspended device may never deliver "ended"; disconnect it before releasing speech.
+    const watchdog = setTimeout(sound.clean, MAX_CUE_WAIT_MS);
     active.add(sound);
     let remaining = TONES[cue].length;
     const start = context.currentTime + 0.002;
@@ -154,6 +160,7 @@ export function createLessonSoundsEngine(options: LessonSoundsOptions = {}) {
         if (tone.to) oscillator.frequency.exponentialRampToValueAtTime(tone.to, end);
         envelope.gain.setValueAtTime(0, from);
         envelope.gain.linearRampToValueAtTime(tone.gain, from + 0.004);
+        if (cue === "success" || cue === "retry") envelope.gain.setValueAtTime(tone.gain, from + 0.035);
         envelope.gain.exponentialRampToValueAtTime(0.0001, end - 0.004);
         envelope.gain.linearRampToValueAtTime(0, end);
         oscillator.connect(envelope); envelope.connect(group);
@@ -173,7 +180,8 @@ export function createLessonSoundsEngine(options: LessonSoundsOptions = {}) {
     if (pending?.id !== id) return;
     const latest = pending;
     pending = null;
-    if (ready) emit(latest.owner, latest.cue);
+    if (ready) emit(latest.owner, latest.cue, latest.finish);
+    else latest.finish();
   }
   function play(owner: symbol, cue: LessonSoundCue) {
     if (!owners.has(owner) || muted || hidden()) return;
@@ -186,11 +194,19 @@ export function createLessonSoundsEngine(options: LessonSoundsOptions = {}) {
       // Equal priority transfers ownership too: a parent's final advance survives
       // the tutorial owner unmounting in the same commit.
       if (PRIORITY[cue] >= PRIORITY[pending.cue]) pending = { ...pending, owner, cue, ready };
-      return;
+      return pending.finished;
     }
     const id = ++batchSequence;
-    pending = { id, owner, cue, ready };
+    let finish!: () => void;
+    const finished = new Promise<void>(resolve => {
+      const expiry = setTimeout(() => {
+        if (pending?.id === id) { pending = null; resolve(); }
+      }, MAX_CUE_WAIT_MS);
+      finish = () => { clearTimeout(expiry); resolve(); };
+    });
+    pending = { id, owner, cue, ready, finished, finish };
     queueTimer = setTimeout(() => { void flush(id); }, COALESCE_MS);
+    return finished;
   }
 
   function setMuted(value: boolean, persist: boolean) {

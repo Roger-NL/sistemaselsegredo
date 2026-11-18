@@ -27,6 +27,7 @@ vi.mock("../src/features/first-encounters/IntroductionStage", async () => {
   } };
 });
 import { LessonConclusion, type LessonCompletionProps } from "../src/features/first-encounters/LessonConclusion";
+import { LessonStorageContext } from "../src/features/first-encounters/lesson-storage";
 import type { LessonCompletionReceipt } from "../src/features/first-encounters/useLessonAccountProgress";
 
 class Media extends EventTarget {
@@ -64,32 +65,28 @@ async function click(selector: string) { const button = host.querySelector<HTMLB
 async function end() { await act(async () => Media.current.end()); }
 
 describe("lesson completion", () => {
-  it("starts only after Nina is ready, then recaps with the four actual cached character voices", async () => {
+  it("celebrates first and plays one recap example per explicit advance", async () => {
     characters.readyImmediately = false;
     await mount();
-    expect(host.textContent).toContain("Parabéns! Você chegou até aqui.");
-    expect(host.querySelector(".lc-score-details,.lc-summary-actions")).toBeNull();
-    expect(host.textContent).not.toMatch(/Refazer (teste|prática)|Na primeira resposta|Sentido da frase/);
-    expect(host.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow")).toBe("100");
-    expect(Media.calls).toHaveLength(0);
-    await act(async () => { for (const person of ["ana", "leo", "maya"] as const) characters.ready?.(person); });
+    expect(host.querySelector(".lc-achievement")?.textContent).toContain("Parabéns!");
+    expect(host.querySelector(".lc-recap")).toBeNull();
     expect(Media.calls).toHaveLength(0);
     await act(async () => characters.ready?.("nina"));
     expect(Media.calls).toHaveLength(1);
-    expect(Media.calls[0]).toContain("revision-pt/nina-completion-congratulations.m4a");
-    expect(host.querySelector("[data-completion-stage]")?.getAttribute("data-voice")).toBe("nina");
     await end();
-    expect(host.querySelector("[data-completion-stage]")?.getAttribute("data-voice")).toBe("ana");
-    expect(host.querySelector("[data-completion-stage]")?.getAttribute("data-role")).toBe("character");
-    await end(); await end(); await end(); await end();
-    expect(Media.calls.map(url => url.split("/").at(-1))).toEqual([
-      "nina-completion-congratulations.m4a", "ana-i-am-ana.m4a", "leo-you-are-ana.m4a", "ana-we-are-a-team.m4a", "maya-they-are-a-team.m4a",
-    ]);
+    expect(Media.calls).toHaveLength(1);
+    await click(".lc-completion-actions button");
+    expect(host.querySelector(".lc-recap-english")?.textContent).toBe("I am Ana.");
+    expect(Media.calls.at(-1)).toContain("ana-i-am-ana.m4a");
+    const count = Media.calls.length;
+    await end();
+    expect(Media.calls.length).toBe(count);
+    expect(host.querySelector(".lc-recap-position")?.textContent).toMatch(/^Fala 1 de/);
+    const advance = () => Array.from(host.querySelectorAll<HTMLButtonElement>(".lc-recap-controls button")).find(button => button.textContent === "Avançar");
+    await act(async () => advance()!.click());
+    expect(Media.calls.at(-1)).toContain("leo-you-are-ana.m4a");
     expect(Media.maxActive).toBe(1);
-    expect(host.querySelector("[data-completion-stage]")?.getAttribute("data-completion-stage")).toBe("nina");
-    expect(host.querySelector("[data-completion-stage]")?.getAttribute("data-speaking")).toBe("false");
     expect(fetch).not.toHaveBeenCalled();
-    expect(localStorage.getItem("basedspeak.lesson-one.v2")).toBe("practice-is-preserved");
   });
 
   it("shows completion before the CTA and checks the account again before leaving", async () => {
@@ -161,20 +158,36 @@ describe("lesson completion", () => {
     expect(props.leave).not.toHaveBeenCalled();
   });
 
-  it("cancels the remaining recap after pause or a manual model, and stops on unmount", async () => {
+  it("keeps optional practice independent of saved answers and leaves the achievement available", async () => {
     await mount();
-    const abandoned = Media.current;
-    await click('[aria-label="Pausar recapitulação"]');
-    await act(async () => abandoned.end());
-    expect(Media.calls).toHaveLength(1);
-    await click('[data-recap-model="3"]'); await end();
-    expect(Media.calls).toHaveLength(2); expect(Media.calls[1]).toContain("maya-they-are-a-team.m4a");
-    expect(host.querySelector('[data-recap-model="3"]')?.getAttribute("aria-current")).toBe("true");
-    await click('[aria-label="Ouvir recapitulação"]');
-    const last = Media.current;
-    await act(async () => root.unmount()); root = createRoot(host);
-    await act(async () => last.end());
-    expect(Media.all.every(audio => audio.paused)).toBe(true); expect(Media.calls).toHaveLength(3);
+    const before = localStorage.getItem(LESSON_CONCLUSION_STORAGE);
+    await click(".lc-completion-actions button:last-child");
+    expect(host.textContent).toContain("Como Nina pergunta");
+    await click('input[value="Are you ready?"]');
+    await click('button[form="lc-answer-form"]');
+    expect(host.textContent).toContain("Isso mesmo.");
+    expect(localStorage.getItem(LESSON_CONCLUSION_STORAGE)).toBe(before);
+    await click(".lc-back");
+    expect(host.querySelector(".lc-achievement")).not.toBeNull();
+  });
+
+  it.each(["teoria", "teste", "extras"] as const)("keeps %s isolated from new, partial and completed account records", async section => {
+    for (const saved of [null, JSON.stringify(createConclusionState()), localStorage.getItem(LESSON_CONCLUSION_STORAGE)]) {
+      const storage = { getItem: vi.fn(() => saved), setItem: vi.fn(), removeItem: vi.fn() };
+      const props = completion();
+      await act(async () => root.render(createElement(LessonStorageContext.Provider, { value: storage },
+        createElement(LessonConclusion, { key: String(saved), section, completion: props, onReturnToPractice: vi.fn() }))));
+      if (section === "teoria") await click(".lc-next");
+      else {
+        await click('input[type="radio"]');
+        await click('button[form="lc-answer-form"]');
+        await click(".lc-test-restart");
+      }
+      expect(storage.getItem).not.toHaveBeenCalled();
+      expect(storage.setItem).not.toHaveBeenCalled();
+      expect(storage.removeItem).not.toHaveBeenCalled();
+      expect(props.verify).not.toHaveBeenCalled();
+    }
   });
 
   it("starts the real Nina clip once through the Strict Mode effect remount", async () => {

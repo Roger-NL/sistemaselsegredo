@@ -154,3 +154,11 @@ html[data-keyboard-open="true"] .lo-app:has(.lc-writing-test) {
   html[data-keyboard-open="true"] .lc-heading h1 { font-size: 17px; line-height: 1.15; }
   html[data-keyboard-open="true"] .lo-app .lc-input-row > input { min-height: 39px; padding: 5px 7px; font-size: 18px; }
 }
+
+/* The viewport owns pull-to-refresh. Keep this policy on the lesson route,
+   including its top-layer dialogs, without changing scrolling on the dashboard. */
+html:has(.lo-app .lo-main), body:has(.lo-app .lo-main) { overscroll-behavior-y: none; }
+.lo-app :is(.lo-main, .li-introduction, .lo-tutorial, .lo-dialog) { overscroll-behavior-y: none; }
+.lo-app :is(.lesson-drag-source, .li-character-scene, .li-model, .lo-feedback,
+  .lc-choice, .lc-theory, .tsp-word) { touch-action: var(--lesson-card-touch, pinch-zoom); }
+html[data-lesson-zoomed] .lo-app { --lesson-card-touch: auto; }

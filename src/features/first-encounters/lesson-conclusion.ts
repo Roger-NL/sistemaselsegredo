@@ -25,7 +25,7 @@ export const CONCLUSION_THEORY: readonly ConclusionTheory[] = [
 
 export type ConclusionQuestion = {
   id: string; kind: "choice" | "writing"; context: string; prompt: string;
-  expected: { pronoun: ConclusionPronoun; complement: string };
+  expected: { pronoun: ConclusionPronoun; complement: string; question?: boolean };
   choices?: readonly string[]; relationPT: string; relationEN: string;
 };
 const ORIGINAL_QUESTIONS: readonly ConclusionQuestion[] = [
@@ -50,7 +50,7 @@ const ORIGINAL_QUESTIONS: readonly ConclusionQuestion[] = [
 // Distinct IDs let an existing attempt keep the exact prompt it answered.
 export const CONCLUSION_QUESTIONS: readonly ConclusionQuestion[] = [
   ORIGINAL_QUESTIONS[0], ORIGINAL_QUESTIONS[1],
-  { id: "inside-friends", kind: "choice", context: "Sam apresenta Maya a Leo e conta que os dois são amigos.", prompt: "Como Sam descreve a amizade?",
+  { id: "inside-friends", kind: "choice", context: "Sam e Maya são amigos. Sam conta isso a Leo.", prompt: "O que Sam diz a Leo?",
     expected: { pronoun: "we", complement: "friends" }, choices: ["They are friends.", "You are here.", "I am ready.", "We are friends."],
     relationPT: "Sam faz parte da dupla. We are friends inclui Sam e Maya.", relationEN: "Sam and Maya are friends." },
   { id: "outside-here", kind: "choice", context: "Ana vê Maya e Sam chegarem e avisa a Leo que eles estão aqui.", prompt: "Qual é o aviso de Ana?",
@@ -60,6 +60,17 @@ export const CONCLUSION_QUESTIONS: readonly ConclusionQuestion[] = [
   { id: "write-ready", kind: "writing", context: "Antes da aula, Nina pergunta a Leo “Are you ready?”. Ele responde “Estou pronto”.", prompt: "Escreva a resposta de Leo.",
     expected: { pronoun: "I", complement: "ready" },
     relationPT: "Leo fala de si. I am ready e I'm ready dizem que ele está pronto.", relationEN: "I'm ready." },
+];
+
+/** Independent transfer practice. These IDs never enter a saved attempt. */
+export const TRANSFER_QUESTIONS: readonly ConclusionQuestion[] = [
+  { id: "transfer-ask-ready", kind: "choice", context: "Nina quer saber se Maya está pronta para começar.",
+    prompt: "Como Nina pergunta isso a Maya?", expected: { pronoun: "you", complement: "ready", question: true },
+    choices: ["You are ready.", "Are you ready?", "I am ready.", "We are ready."],
+    relationPT: "Nina pergunta a Maya. Para fazer a pergunta, are vem antes de you.", relationEN: "Are you ready?" },
+  { id: "transfer-group-here", kind: "writing", context: "Você e Leo chegaram à biblioteca. Maya pergunta onde vocês estão.",
+    prompt: "Diga em inglês que vocês estão aqui.", expected: { pronoun: "we", complement: "here" },
+    relationPT: "Você faz parte da dupla. We are here e We're here dizem que vocês estão aqui.", relationEN: "We are here." },
 ];
 
 export function getConclusionQuestions(state: ConclusionState): readonly ConclusionQuestion[] {
@@ -72,11 +83,17 @@ export function getConclusionQuestions(state: ConclusionState): readonly Conclus
 export type ConclusionEvaluation = { correct: boolean; meaningCorrect: boolean; formCorrect: boolean; model: string; feedbackTitle: string; explanationPT: string; explanationEN: string; notes: string[] };
 export function conclusionModel(question: ConclusionQuestion) {
   const pronoun = question.expected.pronoun;
+  if (question.expected.question) return `${pronoun === "I" ? "Am" : "Are"} ${pronoun} ${question.expected.complement}?`;
   return `${pronoun === "I" ? "I" : pronoun[0].toUpperCase() + pronoun.slice(1)} ${pronoun === "I" ? "am" : "are"} ${question.expected.complement}.`;
 }
 export function evaluateConclusionAnswer(question: ConclusionQuestion, raw: string): ConclusionEvaluation {
   const normalized = raw.normalize("NFKC").toLowerCase().replace(/[’‘]/g, "'")
     .replace(/[.,!?;:]+/g, " ").replace(/\s+/g, " ").trim();
+  if (question.expected.question) {
+    const model = conclusionModel(question);
+    const correct = normalized === model.slice(0, -1).toLowerCase();
+    return { correct, meaningCorrect: correct, formCorrect: correct, model, feedbackTitle: correct ? "Isso mesmo." : "Observe a ordem da pergunta.", explanationPT: question.relationPT, explanationEN: question.relationEN, notes: [] };
+  }
   const expanded = normalized.replace(/^(?:i'm|im|iam|i m)\b/, "i am")
     .replace(/^(you|we|they)(?:'re|re| re)\b/, "$1 are");
   const parsed = /^(i|you|we|they)(?: (am|are|is))? (.+)$/.exec(expanded);

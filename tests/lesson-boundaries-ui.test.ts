@@ -145,6 +145,31 @@ describe("presentation and written conclusion boundaries", () => {
     expect(savedConclusion().attempts.self).toMatchObject({ firstAnswer: wrongSelf, lastAnswer: selfModel }); expect(container.querySelector(".lc-feedback.is-correct")).not.toBeNull(); expect(Media.calls).toEqual([]);
   });
 
+  it("finishes the spoken option before the test sound and keeps the choices editable", async () => {
+    localStorage.setItem(TUTORIAL, "done"); seed("finished");
+    localStorage.setItem(LESSON_CONCLUSION_STORAGE, JSON.stringify({ version: 1, phase: "test", theoryIndex: 4, questionIndex: 1, testStarted: true,
+      attempts: { self: { draft: selfModel, firstAnswer: selfModel, lastAnswer: selfModel } } }));
+    await mount();
+    const spoken = container.querySelector<HTMLButtonElement>('button[data-audio-text="I am Maya."]')!;
+    const nextReading = container.querySelector<HTMLButtonElement>('button[data-audio-text="You are Maya."]')!;
+    await click(spoken); const voice = Media.current;
+    await choose("I am Maya.");
+    let finish!: () => void;
+    sound.play.mockReturnValueOnce(new Promise<void>(resolve => { finish = resolve; }));
+    await click(conclusionNext());
+    expect(voice.paused).toBe(false);
+    expect(sound.play).not.toHaveBeenCalled();
+    expect(container.querySelector(".lc-feedback.is-retry")).not.toBeNull();
+    expect(nextReading.disabled).toBe(true);
+    await ended(voice);
+    expect(sound.play.mock.calls.map(([cue]) => cue)).toEqual(["retry"]);
+    await click(nextReading); expect(Media.calls).toHaveLength(1);
+    await choose("You are Maya."); expect(savedConclusion().attempts.listener.draft).toBe("You are Maya.");
+    await act(async () => finish());
+    expect(nextReading.disabled).toBe(false);
+    await click(nextReading); expect(Media.calls).toHaveLength(2);
+  });
+
   it.each(["I am Ana.", "I'm Ana."])("resumes Ana's draft, gives specific guidance and advances with %s", async corrected => {
     localStorage.setItem(TUTORIAL, "done"); seed("finished");
     const attempts = Object.fromEntries(CONCLUSION_QUESTIONS.slice(0, 4).map(q => {

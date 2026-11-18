@@ -148,8 +148,11 @@ describe("activity guidance on the actual controls", () => {
     expect(prompt.paused).toBe(true); expect(guides()).toEqual([LESSON_MECHANICS.speaker.url]);
     const guide = Media.current; const leo = container.querySelector<HTMLButtonElement>('[data-person="leo"]')!;
     await pointer(leo); await click(leo);
-    expect(guide.paused).toBe(true); expect(app().dataset.mechanicGuide).toBeUndefined();
-    expect(container.querySelector(".lo-feedback.is-correct")).not.toBeNull(); expect(Media.calls.at(-1)).toBe(catalog["leo:You are Nina."]);
+    expect(guide.paused).toBe(false); expect(app().dataset.mechanicGuide).toBeUndefined();
+    expect(container.querySelector(".lo-feedback.is-correct")).not.toBeNull();
+    expect(Media.current).toBe(guide);
+    await ended(guide);
+    expect(Media.calls.at(-1)).toBe(catalog["leo:You are Nina."]);
     const calls = Media.calls.length; await ended(guide); expect(Media.calls).toHaveLength(calls);
   });
 

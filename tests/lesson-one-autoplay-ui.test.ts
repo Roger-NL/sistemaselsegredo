@@ -182,6 +182,11 @@ describe("guided start, automatic turns and learner control",()=>{
     await click(container.querySelector<HTMLButtonElement>('[data-person="nina"]')!);
     expect(Media.calls).toHaveLength(prompts);expect(container.querySelector(".lo-feedback.is-retry")).not.toBeNull();expect(footer().disabled).toBe(true);
     await click(container.querySelector<HTMLButtonElement>('[data-person="leo"]')!);
+    if (repeatPrompt) {
+      expect(container.querySelector(".lo-feedback.is-correct")).not.toBeNull();
+      expect(Media.calls).toHaveLength(prompts);
+      await ended();
+    }
     const accepted=last();expect(Media.calls).toHaveLength(prompts+1);expect(Media.calls.at(-1)).toContain("leo-you-are-nina");expect(speaking()).toEqual(["leo"]);
     expect(Media.instances.filter(media=>!media.paused)).toHaveLength(1);
     await click(main());expect(speaking()).toEqual([]);await click(main());expect(Media.calls).toHaveLength(prompts+2);expect(speaking()).toEqual(["leo"]);

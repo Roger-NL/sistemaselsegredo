@@ -11,7 +11,7 @@ describe("authentication after client-side navigation", () => {
     const headers = await config.headers!();
     const policies = headers.flatMap(route => route.headers.filter(header => header.key === "Content-Security-Policy").map(header => ({ source: route.source, value: header.value })));
     const app = policies.find(policy => policy.source === "/:path*")!;
-    for (const source of ["/", "/demo"]) {
+    for (const source of ["/", "/demo", "/demo/:section(teoria|teste|extras)"]) {
       const policy = policies.find(policy => policy.source === source)!;
       expect(policy).toBeDefined();
       for (const directive of ["connect-src", "script-src", "frame-src"]) {
@@ -28,7 +28,7 @@ describe("authentication after client-side navigation", () => {
       const { default: productionConfig } = await import("../next.config");
       const policies = (await productionConfig.headers!()).flatMap(route =>
         route.headers.filter(header => header.key === "Content-Security-Policy").map(header => header.value));
-      expect(policies).toHaveLength(3);
+      expect(policies).toHaveLength(4);
       for (const policy of policies) {
         const script = policy.split(";").map(value => value.trim()).find(value => value.startsWith("script-src "))!;
         expect(script.split(/\s+/)).toContain("'wasm-unsafe-eval'");

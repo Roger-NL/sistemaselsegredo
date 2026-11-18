@@ -52,3 +52,35 @@ it("keeps Safari's pan when both viewports shrink and leaves the writing field i
     vi.unstubAllGlobals();
   }
 });
+
+it("contains single-finger pans from reading and answer cards while preserving editing and zoom gestures", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  const viewport = Object.assign(new EventTarget(), { width: 390, height: 699, scale: 1 });
+  vi.stubGlobal("visualViewport", viewport);
+  const container = document.createElement("div");
+  document.body.append(container);
+  const app = createRoot(container);
+  const pan = (origin: Element, fingers = 1) => {
+    const event = new TouchEvent("touchmove", { bubbles: true, cancelable: true, touches: Array.from({ length: fingers }, () => ({} as Touch)) });
+    origin.dispatchEvent(event);
+    return event.defaultPrevented;
+  };
+  try {
+    await act(async () => app.render(createElement(WritingSurface)));
+    const panel = document.createElement("main");
+    panel.className = "lo-main";
+    panel.innerHTML = '<section class="lc-card"><p>Texto</p><label><input type="radio">A</label><input type="text"></section>';
+    container.querySelector(".lo-app")!.append(panel);
+    expect(pan(panel.querySelector("p")!)).toBe(true);
+    expect(pan(panel.querySelector("[type=radio]")!)).toBe(true);
+    expect(pan(panel.querySelector("[type=text]")!)).toBe(false);
+    expect(pan(panel, 2)).toBe(false);
+    viewport.scale = 2;
+    viewport.dispatchEvent(new Event("resize"));
+    expect(document.documentElement.hasAttribute("data-lesson-zoomed")).toBe(true);
+    expect(pan(panel)).toBe(false);
+    expect(pan(document.body)).toBe(false);
+  } finally {
+    await act(async () => app.unmount()); container.remove(); vi.unstubAllGlobals();
+  }
+});
