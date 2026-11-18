@@ -327,7 +327,7 @@ export function useLessonDrag(): { selected: DragItem | null; cancel: () => void
 }
 
 export function DragSource({ item, children, className, disabled = false, onClick }: {
-  item: DragItem; children?: ReactNode; className?: string; disabled?: boolean; onClick?: () => void;
+  item: DragItem; children?: ReactNode; className?: string; disabled?: boolean; onClick?: (element: HTMLButtonElement) => void;
 }) {
   const { selected, providerId, instructionsId, select, begin, suppressClick, removeSource } = useDragContext();
   const ref = useRef<HTMLButtonElement>(null);
@@ -343,7 +343,7 @@ export function DragSource({ item, children, className, disabled = false, onClic
     onPointerDown={event => { if (!disabled) begin(event, item); }}
     onClick={event => {
       if (disabled || event.defaultPrevented || suppressClick(event)) return;
-      select(item, event.currentTarget); onClick?.();
+      select(item, event.currentTarget); onClick?.(event.currentTarget);
     }}>{children}</button>;
 }
 

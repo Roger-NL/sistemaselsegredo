@@ -48,6 +48,8 @@ export function LessonWordCoach({ enabled, onOpen, manualReadingRef }: {
       if (!(event.target instanceof Element)) return;
       const piece = event.target.closest<HTMLElement>('[data-drag-kind="word"]');
       if (!piece) return;
+      if (event.type === "pointerdown" && (event as PointerEvent).pointerType === "touch") return;
+      if (event.type === "pointermove" && !piece.hasAttribute("data-lesson-dragging")) return;
       const name = piece.getAttribute("aria-label") ?? "";
       if (!Object.hasOwn(WORD_MEANINGS, name)) return;
       try {
@@ -71,8 +73,10 @@ export function LessonWordCoach({ enabled, onOpen, manualReadingRef }: {
     document.addEventListener("lesson-stop-word-coach", cancel);
     document.addEventListener("lesson-explain-word", manual);
     document.addEventListener("pointerdown", explain);
+    document.addEventListener("pointermove", explain);
+    document.addEventListener("lesson-select-word", explain);
     document.addEventListener("click", explain);
-    return () => { document.removeEventListener("lesson-stop-word-coach", cancel); document.removeEventListener("lesson-explain-word", manual); document.removeEventListener("pointerdown", explain); document.removeEventListener("click", explain); cancelWordAudio(); };
+    return () => { document.removeEventListener("lesson-stop-word-coach", cancel); document.removeEventListener("lesson-explain-word", manual); document.removeEventListener("pointerdown", explain); document.removeEventListener("pointermove", explain); document.removeEventListener("lesson-select-word", explain); document.removeEventListener("click", explain); cancelWordAudio(); };
   }, [enabled, storage, stop, cancelWordAudio]);
   const item = word ? WORD_MEANINGS[word] : null;
   function close() { stop(); setWord(null); played.current = null; }

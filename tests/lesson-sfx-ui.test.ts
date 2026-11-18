@@ -85,7 +85,7 @@ describe("semantic UI sound intentions", () => {
 
   it("uses a soft retry intent for a changed relation and keeps typing silent", async () => {
     await mount("use3-i"); await place("you", "word:pronoun"); await place("am", "word:verb");
-    expect(number("place")).toBe(2); expect(number("success")).toBe(0); await click(next()); expect(number("retry")).toBe(1); expect(number("success")).toBe(0);
+    await ended(); expect(number("place")).toBe(2); expect(number("success")).toBe(0); await click(next()); expect(number("retry")).toBe(1); expect(number("success")).toBe(0);
     await click(button("Digitar")); sfx.play.mockClear(); for (const text of ["I", "I ", "I a", "I am", "I am Sam."]) await type(text);
     expect(cues()).toEqual([]); await click(next()); expect(number("success")).toBe(1); expect(number("retry")).toBe(0);
   });
@@ -96,7 +96,7 @@ describe("semantic UI sound intentions", () => {
     else if (round.kind === "join") await place(PERSON_NAMES[round.speaker], "team");
     else if (round.kind === "speaker") await click(container.querySelector<HTMLButtonElement>(`[data-person="${round.speaker}"]`)!);
     else if (round.kind === "verb" || round.kind === "build") {
-      if (round.kind === "build") await place(round.expected.pronoun, "word:pronoun"); await place(round.expected.verb, "word:verb");
+      if (round.kind === "build") await place(round.expected.pronoun, "word:pronoun"); await place(round.expected.verb, "word:verb"); await ended();
       expect(number("success")).toBe(0); await click(next());
     } else if (round.kind === "messages") {
       for (const [index, message] of round.ensemble!.entries()) await place(PERSON_NAMES[message.speaker], `message:${index}`);
