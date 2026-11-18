@@ -307,7 +307,8 @@ export function createLessonAudioController(options: {
     };
     const onWaiting = () => { if (current() && active) { active.running = false; signalFrame(); } };
     const onPause = () => {
-      if (!current()) return;
+      // A replay can receive the previous play's queued pause event on the same element.
+      if (!current() || !audio.paused) return;
       // Browsers dispatch pause immediately before ended at a natural boundary.
       // Keep that ended listener attached so a sequence advances exactly once.
       if (audio.ended || Number.isFinite(audio.duration) && audio.currentTime >= audio.duration - .001) {

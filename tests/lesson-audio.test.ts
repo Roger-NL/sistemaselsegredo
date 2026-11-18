@@ -107,6 +107,15 @@ describe("media lifecycle and races", () => {
     controller.dispose();
   });
 
+  it("keeps a replay active when its cached element receives a stale pause event", async () => {
+    const { controller, elements } = fixture();
+    await controller.play("ana", "I am Ana.");
+    await controller.play("ana", "I am Ana.");
+    elements[0].dispatchEvent(new Event("pause"));
+    expect(controller.getSnapshot().playingKey).toBe("ana:I am Ana.");
+    controller.dispose();
+  });
+
   it("reports actual playback, clears on ended, and retains pause position until a replay", async () => {
     const { controller, elements } = fixture();
     await controller.play("ana", "I am Ana.");
