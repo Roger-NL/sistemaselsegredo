@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 
-const origin = "https://ljeseaqtmyrvd1ak.private.blob.vercel-storage.com";
+const blobOrigin = "https://ljeseaqtmyrvd1ak.private.blob.vercel-storage.com";
+const publishedOrigin = "https://www.basedspeak.com";
 const mediaPath = /^(?:(?:dialogue|narration)\/)?[a-z0-9-]+\.(?:jpg|mp3|wav)$/;
 const versionedArtPath = /^art-v[0-9]+\/[a-z0-9-]+\.webp$/;
 const mediaHeaders = {
@@ -16,9 +17,14 @@ export async function GET(request: NextRequest, { params }: RouteContext<"/first
   }
 
   const token = process.env.FIRST_DAY_READ_WRITE_TOKEN;
-  if (!token) return new Response(null, { status: 503, headers: mediaHeaders });
+  if (!token && process.env.VERCEL_ENV !== "preview") {
+    return new Response(null, { status: 503, headers: mediaHeaders });
+  }
 
-  const requestHeaders = new Headers({ Authorization: `Bearer ${token}` });
+  // Previews can read the published lesson media without a production Blob credential.
+  const origin = token ? blobOrigin : publishedOrigin;
+  const requestHeaders = new Headers();
+  if (token) requestHeaders.set("Authorization", `Bearer ${token}`);
   const range = request.headers.get("range");
   if (range) requestHeaders.set("Range", range);
 
