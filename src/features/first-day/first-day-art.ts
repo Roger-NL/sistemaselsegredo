@@ -1,4 +1,4 @@
-import { art, coverSources, pages, type FirstDayPage } from "./content";
+import { art, cleanReadingArt, cleanReadingMedia, coverSources, pages, type FirstDayPage } from "./content";
 
 function sceneArt(page: FirstDayPage) {
   switch (page.kind) {
@@ -12,12 +12,13 @@ function sceneArt(page: FirstDayPage) {
 }
 
 const pageImages = pages.map(sceneArt);
-const lessonImages = [...new Set(pageImages.flat())];
+const lessonImages = [...new Set(pageImages.slice(1).flat())];
 
 export function firstDayArtFor(position: number) {
   if (position === 0) {
     return [coverSources.find(({ media }) => window.matchMedia(media).matches)?.src ?? art.cover.src];
   }
+  if (position === 1 && window.matchMedia(cleanReadingMedia).matches) return [cleanReadingArt.src];
   return pageImages[position - 1] ?? [];
 }
 
@@ -61,7 +62,7 @@ export function createFirstDayArtCache() {
   return {
     warm() {
       firstDayArtFor(0).forEach(src => load(src, "high"));
-      pageImages[0].forEach(src => load(src, "high"));
+      firstDayArtFor(1).forEach(src => load(src, "high"));
       lessonImages.forEach(src => load(src, "low"));
     },
     prepare(position: number) {

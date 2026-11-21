@@ -11,7 +11,7 @@ import { DragSource, DropTarget, LessonDragProvider } from "../first-encounters/
 import { createLessonSoundsEngine } from "../first-encounters/lesson-sounds";
 import type { LessonSoundCue } from "../first-encounters/lesson-sounds";
 import { useLessonSounds } from "../first-encounters/useLessonSounds";
-import { art, coverSources, pages } from "./content";
+import { art, cleanReadingArt, cleanReadingMedia, coverSources, pages } from "./content";
 import type { ChallengePage, CharacterReply, ExamplesPage, FirstDayArt, GuidedPage, ReactionPage, RulePage, WordSequence } from "./content";
 import { createFirstDayArtCache } from "./first-day-art";
 import { createFirstDayProgressStore, type ChallengeAttempt } from "./first-day-progress";
@@ -27,16 +27,28 @@ import "./first-day.css";
 import "./first-day-desktop.css";
 import "./first-day-spacing.css";
 import "./first-day-spread.css";
+import "./first-day-clean-reading.css";
 import "./first-day-turn.css";
 
 const previewSounds = createLessonSoundsEngine({ getStorage: () => undefined, playbackRate: FIRST_DAY_AUDIO_RATE });
 const bubbleTarget = "first-day-bubble";
 type VoicePlayer = ReturnType<typeof useFirstDayNarration>;
 
-function NarrationButton({ clips, player, language }: {
+function readCleanReadingMedia() {
+  return window.matchMedia(cleanReadingMedia).matches;
+}
+
+function subscribeToCleanReadingMedia(listener: () => void) {
+  const media = window.matchMedia(cleanReadingMedia);
+  media.addEventListener("change", listener);
+  return () => media.removeEventListener("change", listener);
+}
+
+function NarrationButton({ clips, player, language, showLabel = false }: {
   clips: readonly NarrationClip[];
   player: VoicePlayer;
   language: "en" | "pt";
+  showLabel?: boolean;
 }) {
   const playing = clips.some(clip => clip === player.playing);
   const label = playing ? "Parar narração" : `Ouvir narração em ${language === "pt" ? "português" : "inglês"}`;
@@ -44,6 +56,7 @@ function NarrationButton({ clips, player, language }: {
     title={playing ? label : clips.map(clip => narration[clip].text).join(" ")}
     onClick={() => playing ? player.stop() : player.play(clips)}>
     {playing ? <Pause size={17} aria-hidden="true" /> : <Volume2 size={17} aria-hidden="true" />}
+    {showLabel && <span>Narração</span>}
   </button>;
 }
 
@@ -168,13 +181,14 @@ function LearnerBalloon({ words, placed, translation = "", full, speech }: {
   </div>;
 }
 
-function GuidedMoment({ page, count, onPlace, cue, narrator, audioEnabled }: {
+function GuidedMoment({ page, count, onPlace, cue, narrator, audioEnabled, cleanReading }: {
   page: GuidedPage;
   count: number;
   onPlace: (count: number) => void;
   cue: (sound: LessonSoundCue) => void;
   narrator: VoicePlayer;
   audioEnabled: boolean;
+  cleanReading: boolean;
 }) {
   const [mistake, setMistake] = useState(false);
   const placed = page.words.slice(0, count).map((_, index) => index);
@@ -199,12 +213,12 @@ function GuidedMoment({ page, count, onPlace, cue, narrator, audioEnabled }: {
 
   return <LessonDragProvider onDrop={item => place(item.value)}>
     <section className="fd-story fd-action" aria-label="Montagem guiada">
-      <StoryPanel image={page.image} detail={page.detail} scene={page.scene} complete={done}
-        caption={<NarratedCaption text={page.caption} clips={clips} player={voice} />}>
+      <StoryPanel image={cleanReading ? cleanReadingArt : page.image} detail={cleanReading ? undefined : page.detail} scene={page.scene} complete={done}
+        caption={<NarratedCaption text={page.caption} clips={clips} player={cleanReading ? undefined : voice} />}>
         <LearnerBalloon words={page.words} placed={placed} translation={page.translations[count]} full={done}
           speech={done && audioEnabled ? { clip: page.voice, player: narrator } : undefined} />
       </StoryPanel>
-      <div className="fd-activity">
+      <div className="fd-activity" data-complete={done} data-first-placement={count === 0} data-mistake={mistake}>
         <WordStrip words={page.words} order={page.order} placed={placed} nextWord={done ? undefined : count} />
         <p className="fd-instruction" aria-live="polite">
           {done ? "Continue quando quiser." : mistake ? "Tente a peça destacada." : "Arraste a peça destacada ou toque nela e depois no balão."}
@@ -350,6 +364,7 @@ export function FirstDay() {
   const { position, counts, attempts, sound } = useSyncExternalStore(
     progress.subscribe, progress.getSnapshot, progress.getServerSnapshot,
   );
+  const portraitReading = useSyncExternalStore(subscribeToCleanReadingMedia, readCleanReadingMedia, () => false);
   const menu = useRef<HTMLDialogElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
   const book = useRef<HTMLElement>(null);
@@ -365,6 +380,8 @@ export function FirstDay() {
     speech.play(clips);
   } };
   const page = pages[position - 1];
+  const cleanReading = portraitReading && page?.id === "ask-to-sit";
+  const nextBlocked = cleanReading && page.kind === "Ação" && (counts[page.id] ?? 0) < page.words.length;
   const readingPage = page?.kind === "Tirinha" || page?.kind === "Explicação" ? page : undefined;
   const choosingAudio = position < 0;
   const playingCover = narrator.playing === "cover";
@@ -473,7 +490,7 @@ export function FirstDay() {
     if (!page) return null;
     switch (page.kind) {
       case "Ação":
-        return <GuidedMoment key={page.id} page={page} count={counts[page.id] ?? 0} cue={cue} narrator={narrator} audioEnabled={sound}
+        return <GuidedMoment key={page.id} page={page} count={counts[page.id] ?? 0} cue={cue} narrator={narrator} audioEnabled={sound} cleanReading={cleanReading}
           onPlace={count => {
             progress.update(previous => ({ ...previous, counts: { ...previous.counts, [page.id]: count } }));
             if (sound && count === page.words.length) {
@@ -500,6 +517,7 @@ export function FirstDay() {
   }
 
   return <main ref={book} className="lo-app fd" data-lesson-theme="comic" style={COMIC_LESSON_STYLE}
+    data-fd-clean-reading={cleanReading || undefined}
     data-ui-sound-scope="local" data-first-day-part={page?.part} data-first-day-page={choosingAudio ? "audio" : page?.id ?? "cover"}>
     <header className="lo-header fd-header">
       <div className="lo-brand-row">
@@ -556,12 +574,13 @@ export function FirstDay() {
       </div>
     </section> : <section className="fd-page" aria-labelledby="fd-page-title">
       <div className="fd-progress">
-        <span>Parte {page.part} de 4 · {page.kind === "Em preparação" ? page.moment : page.kind}</span><span>{position} / {pages.length}</span>
+        <span>Parte {page.part} de 4 · {page.kind === "Em preparação" ? page.moment : page.kind}</span><span>{position}{cleanReading ? "/" : " / "}{pages.length}</span>
         <progress aria-label="Etapa no percurso" value={position} max={pages.length} />
       </div>
       <div className="fd-page-heading">
         <div className="fd-page-title">
           <h1 id="fd-page-title" ref={title} tabIndex={-1}>{page.title}</h1>
+          {cleanReading && sound && <NarrationButton clips={arrivalNarration} player={narrator} language="en" showLabel />}
           {readingPage && sound && <NarrationButton clips={[readingPage.narration]} player={narrator} language="pt" />}
         </div>
         {readingPage && <p className="fd-reading-note fd-page-description">
@@ -571,7 +590,7 @@ export function FirstDay() {
       <div key={page.id} className="fd-workspace">{renderMoment()}</div>
       <nav className="fd-nav" aria-label="Navegação da página">
         <button type="button" className="lo-secondary" onClick={() => turnTo(position - 1)}><ArrowLeft size={19} aria-hidden="true" /> Anterior</button>
-        <LessonButton onClick={() => turnTo(position < pages.length ? position + 1 : 0)}>
+        <LessonButton disabled={nextBlocked} onClick={() => turnTo(position < pages.length ? position + 1 : 0)}>
           {page.kind === "Desafio" ? "Continuar a história" : position < pages.length ? "Próxima" : "Voltar à capa"} <ArrowRight size={19} aria-hidden="true" />
         </LessonButton>
       </nav>

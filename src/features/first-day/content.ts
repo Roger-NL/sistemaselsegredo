@@ -8,6 +8,12 @@ export type FirstDayArt = {
   alt: string;
 };
 
+export const cleanReadingMedia = "(max-width: 759px) and (orientation: portrait)";
+export const cleanReadingArt: FirstDayArt = {
+  src: "/first-day/art-v1/peca-permissao-mobile.webp", width: 960, height: 1200,
+  alt: "Na cafeteria, Ana lê um gibi ao lado de uma cadeira amarela. As mãos de Roger seguram uma bandeja.",
+};
+
 export const coverSources = [
   { media: "(min-aspect-ratio: 4/3)", src: "/first-day/art-v1/capa-gibi-desktop.webp" },
   { media: "(max-aspect-ratio: 5/8)", src: "/first-day/art-v1/capa-gibi-mobile.webp" },
