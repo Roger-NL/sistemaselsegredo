@@ -1,0 +1,118 @@
+.fd[data-fd-clean-reading] .fd-story.fd-reaction {
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.fd[data-fd-clean-reading][data-first-day-page="ana-introduces-herself"] {
+  --fd-reaction-art-x: 24%;
+  --fd-reaction-reply-top: 33%;
+  --fd-reaction-reply-width: clamp(116px, 34.5vw, 164px);
+  --fd-reaction-portrait-reply-end: 8cqw;
+  --fd-reaction-mouth-offset-x: -.166;
+  --fd-reaction-mouth-offset-y: .06;
+}
+
+.fd[data-fd-clean-reading] .fd-scene[data-scene="reaction"] .fd-room {
+  object-position: var(--fd-reaction-art-x, 32%) center;
+}
+
+.fd[data-fd-clean-reading] .fd-scene[data-scene="reaction"] .fd-reply {
+  --fd-reaction-reply-size: min(43cqw, var(--fd-reaction-reply-width, clamp(90px, 26.3vw, 126px)));
+  inset: var(--fd-reaction-reply-top, 25%) var(--fd-reading-inset) auto auto;
+  width: var(--fd-reaction-reply-size);
+  --balloon-paper: var(--fd-reading-cream);
+  --tail-width: clamp(58px, 25cqw, 115px);
+  --tail-height: clamp(25px, 9cqw, 44px);
+}
+
+.fd[data-fd-clean-reading] .fd-scene[data-scene="reaction"][data-portrait-art] .fd-reply {
+  /* Match the centered 2:3 illustration after object-fit: cover crops it. */
+  --fd-reaction-painted-width: max(100cqw, calc(100cqh * 2 / 3));
+  --fd-reaction-painted-height: max(100cqh, 150cqw);
+  --fd-reaction-mouth-x: calc(50cqw + var(--fd-reaction-painted-width) * var(--fd-reaction-mouth-offset-x, -.154));
+  --fd-reaction-mouth-y: calc(50cqh + var(--fd-reaction-painted-height) * var(--fd-reaction-mouth-offset-y, -.016));
+  --fd-reaction-reply-end: var(--fd-reaction-portrait-reply-end, 12cqw);
+  --tail-width: clamp(24px, calc(100cqw - var(--fd-reaction-reply-end) - var(--fd-reaction-reply-size) - var(--fd-reaction-mouth-x) - 6px), 42cqw);
+  top: calc(var(--fd-reaction-mouth-y) - var(--tail-height) - clamp(15px, 4.35vw, 20px));
+  right: var(--fd-reaction-reply-end);
+}
+
+.fd[data-fd-clean-reading] .fd-reply-body {
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  width: 100%;
+  min-height: clamp(49px, 14.5vw, 67px);
+  padding: 6px clamp(10px, 3vw, 16px);
+  border: 2px solid var(--fd-reading-ink);
+  border-radius: clamp(14px, 4vw, 22px);
+  color: var(--fd-reading-ink);
+  text-align: left;
+}
+
+.fd[data-fd-clean-reading] .fd-reply-body.fd-speak {
+  padding-inline-end: clamp(33px, 10vw, 50px);
+}
+
+.fd[data-fd-clean-reading] .fd-reply-body b {
+  font-size: clamp(18px, 5.1vw, 24px);
+  line-height: 1.05;
+}
+
+.fd[data-fd-clean-reading] .fd-reply-translation {
+  margin: 0;
+  color: var(--fd-reading-ink);
+  font-size: clamp(12px, 3.55vw, 18px);
+  font-weight: 400;
+}
+
+.fd[data-fd-clean-reading] .fd-reply-body::before,
+.fd[data-fd-clean-reading] .fd-reply-body::after {
+  top: 30%;
+  right: calc(100% - 2px);
+  left: auto;
+  height: var(--tail-height);
+}
+
+.fd[data-fd-clean-reading] .fd-reply-body::before {
+  clip-path: polygon(100% 0, 100% 48%, 0 100%);
+}
+
+.fd[data-fd-clean-reading] .fd-reply-body::after {
+  background: var(--fd-reading-ink);
+  clip-path: polygon(100% 0, 0 100%, 100% 50%, 100% 43%, 12% 85%, 100% 7%);
+}
+
+.fd[data-fd-clean-reading] .fd-story-tip {
+  position: absolute;
+  inset: auto 0 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 4px;
+  width: 100%;
+  min-height: var(--fd-reading-tray-height);
+  margin: 0;
+  padding: 5px var(--fd-reading-inset);
+  border: 0;
+  border-block-start: 1px solid #6a8c81;
+  background: var(--fd-reading-cream);
+  color: var(--fd-reading-ink);
+}
+
+.fd[data-fd-clean-reading] .fd-story-tip h2 {
+  margin: 0;
+  font-size: clamp(11px, 3.2vw, 15px);
+  font-weight: 700;
+}
+
+.fd[data-fd-clean-reading] .fd-story-tip ul { gap: 4px clamp(4px, 1.5vw, 8px); }
+
+.fd[data-fd-clean-reading] .fd-story-tip li {
+  padding: 3px clamp(6px, 2vw, 11px);
+  border-color: #78988d;
+  border-radius: 5px;
+  background: #fffdf6;
+  color: inherit;
+  font-size: clamp(12px, 3.5vw, 16px);
+}

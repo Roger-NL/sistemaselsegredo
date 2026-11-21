@@ -1,9 +1,13 @@
-import { art, cleanReadingArt, cleanReadingMedia, coverSources, pages, type FirstDayPage } from "./content";
+import { art, cleanReadingMedia, coverSources, pages, storyImage, usesCleanReading, type FirstDayPage } from "./content";
 
-function sceneArt(page: FirstDayPage) {
+function sceneArt(page: FirstDayPage, portrait: boolean) {
+  const cleanReading = portrait && usesCleanReading(page);
   switch (page.kind) {
-    case "Ação": return page.detail ? [page.image.src, page.detail.src] : [page.image.src];
-    case "Reação":
+    case "Ação": {
+      const image = storyImage(page, cleanReading);
+      return !cleanReading && page.detail ? [image.src, page.detail.src] : [image.src];
+    }
+    case "Reação": return [storyImage(page, cleanReading).src];
     case "Desafio": return [page.image.src];
     case "Tirinha": return page.panels.map(panel => panel.image.src);
     case "Explicação": return page.examples.map(example => example.image.src);
@@ -11,15 +15,18 @@ function sceneArt(page: FirstDayPage) {
   }
 }
 
-const pageImages = pages.map(sceneArt);
-const lessonImages = [...new Set(pageImages.slice(1).flat())];
+const pageImages = pages.map(page => sceneArt(page, false));
+const portraitImages = pages.map(page => sceneArt(page, true));
 
-export function firstDayArtFor(position: number) {
+function currentPageImages() {
+  return window.matchMedia(cleanReadingMedia).matches ? portraitImages : pageImages;
+}
+
+function firstDayArtFor(position: number) {
   if (position === 0) {
     return [coverSources.find(({ media }) => window.matchMedia(media).matches)?.src ?? art.cover.src];
   }
-  if (position === 1 && window.matchMedia(cleanReadingMedia).matches) return [cleanReadingArt.src];
-  return pageImages[position - 1] ?? [];
+  return currentPageImages()[position - 1] ?? [];
 }
 
 export function createFirstDayArtCache() {
@@ -63,7 +70,8 @@ export function createFirstDayArtCache() {
     warm() {
       firstDayArtFor(0).forEach(src => load(src, "high"));
       firstDayArtFor(1).forEach(src => load(src, "high"));
-      lessonImages.forEach(src => load(src, "low"));
+      const remaining = new Set(currentPageImages().slice(1).flat());
+      remaining.forEach(src => load(src, "low"));
     },
     prepare(position: number) {
       const targets = firstDayArtFor(position).map(src => load(src, "high"));

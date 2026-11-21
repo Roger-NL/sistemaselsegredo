@@ -1,0 +1,48 @@
+.lo-app.fd[data-fd-mobile-header][data-first-day-page="cover"][data-lesson-theme="comic"] {
+  padding-inline: 0;
+  padding-block-end: env(safe-area-inset-bottom, 0px);
+}
+
+.fd[data-fd-mobile-header] .fd-cover {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.fd[data-fd-mobile-header] .fd-cover-controls {
+  display: block;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fd[data-fd-mobile-header] .fd-cover-audio {
+  display: none;
+}
+
+.fd[data-fd-mobile-header] .fd-cover-nav {
+  display: contents;
+}
+
+.fd[data-fd-mobile-header] .fd-cover-nav > :is(.lo-secondary, [data-lesson-button="primary"]) {
+  position: absolute;
+  inset-inline: 0;
+  margin-inline: auto;
+  pointer-events: auto;
+}
+
+.fd[data-fd-mobile-header] .fd-cover-nav > [data-lesson-button="primary"] {
+  inset-block-start: calc(74% - 24px);
+  width: min(80%, 21rem);
+}
+
+.fd[data-fd-mobile-header] .fd-cover-nav > .lo-secondary {
+  inset-block-end: var(--fd-reading-inset, var(--fd-page-gutter));
+  width: max-content;
+  padding-inline: 14px;
+}
+
+@media (min-aspect-ratio: 5/8) {
+  .fd[data-fd-mobile-header] .fd-cover-nav > [data-lesson-button="primary"] {
+    inset-block-start: min(calc(83% - 24px), calc(100% - 112px));
+  }
+}

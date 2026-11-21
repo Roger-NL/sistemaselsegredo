@@ -76,24 +76,31 @@ export type CharacterReply = {
   voice: DialogueClip;
 };
 
-export type GuidedPage = PageBase & WordSequence & {
+type StoryPage = PageBase & {
+  image: FirstDayArt;
+  portraitImage?: FirstDayArt;
+};
+
+export type GuidedPage = StoryPage & WordSequence & {
   kind: "Ação";
   scene: "sit" | "intro";
   caption: string;
-  image: FirstDayArt;
   detail?: FirstDayArt;
   voice: DialogueClip;
   translations: readonly string[];
 };
 
-export type ReactionPage = PageBase & {
+export type ReactionPage = StoryPage & {
   kind: "Reação";
   caption: string;
-  image: FirstDayArt;
   narration: NarrationClip;
   reply: CharacterReply;
   tip?: { title: string; phrases: readonly string[] };
 };
+
+export function storyImage(page: GuidedPage | ReactionPage, cleanReading: boolean) {
+  return cleanReading ? page.portraitImage ?? page.image : page.image;
+}
 
 type ExamplePanel = {
   context: string;
@@ -133,6 +140,10 @@ export type ChallengePage = PageBase & WordSequence & {
 type PreviewPage = PageBase & { kind: "Em preparação"; moment: string };
 export type FirstDayPage = GuidedPage | ReactionPage | ExamplesPage | RulePage | ChallengePage | PreviewPage;
 
+export function usesCleanReading(page: FirstDayPage | undefined): page is GuidedPage | ReactionPage {
+  return page?.part === 1 && (page.kind === "Ação" || page.kind === "Reação");
+}
+
 const firstPart = { part: 1, partTitle: "Um lugar para sentar" } as const;
 
 const firstPartPages: readonly FirstDayPage[] = [
@@ -144,6 +155,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     title: "Peça permissão",
     caption: `${narration.lunchtime.translation} ${narration["empty-chair"].translation}`,
     image: art.arrival,
+    portraitImage: cleanReadingArt,
     detail: art.chair,
     voice: "learner-seat",
     words: ["Hi,", "can", "I", "sit", "here?"],
@@ -157,6 +169,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     title: "Ana abre espaço",
     caption: narration["ana-looks-up"].translation,
     image: art.anaMakesRoom,
+    portraitImage: { ...art.anaMakesRoom, src: "/first-day/art-v1/ana-abre-espaco-mobile.webp", width: 960, height: 1440 },
     narration: "ana-looks-up",
     reply: { speaker: "Ana", translation: "Claro!", voice: "ana-sure" },
     tip: { title: "Outras formas de dizer «claro»", phrases: ["Of course!", "Go ahead.", "No problem."] },
@@ -169,6 +182,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     title: "Apresente-se",
     caption: `${narration["sit-beside-ana"].translation} É hora de dizer seu nome.`,
     image: art.seated,
+    portraitImage: { ...art.seated, src: "/first-day/art-v1/apresente-se-mobile.webp", width: 960, height: 1440 },
     voice: "learner-intro",
     words: ["I’m", "Roger,", "by", "the", "way."],
     order: [2, 0, 4, 1, 3],
@@ -181,6 +195,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     title: "Ana se apresenta",
     caption: narration["ana-introduces-herself"].translation,
     image: art.anaIntroducesHerself,
+    portraitImage: { ...art.anaIntroducesHerself, src: "/first-day/art-v1/ana-se-apresenta-mobile.webp", width: 960, height: 1440 },
     narration: "ana-introduces-herself",
     reply: { speaker: "Ana", translation: "Eu sou a Ana.", voice: "ana-intro" },
     tip: { title: "Outras formas de se apresentar", phrases: ["You can call me Ana.", "I go by Ana."] },

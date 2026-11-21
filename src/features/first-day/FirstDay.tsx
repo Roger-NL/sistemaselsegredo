@@ -11,7 +11,7 @@ import { DragSource, DropTarget, LessonDragProvider } from "../first-encounters/
 import { createLessonSoundsEngine } from "../first-encounters/lesson-sounds";
 import type { LessonSoundCue } from "../first-encounters/lesson-sounds";
 import { useLessonSounds } from "../first-encounters/useLessonSounds";
-import { art, cleanReadingArt, cleanReadingMedia, coverSources, pages } from "./content";
+import { art, cleanReadingMedia, coverSources, pages, storyImage, usesCleanReading } from "./content";
 import type { ChallengePage, CharacterReply, ExamplesPage, FirstDayArt, GuidedPage, ReactionPage, RulePage, WordSequence } from "./content";
 import { createFirstDayArtCache } from "./first-day-art";
 import { createFirstDayProgressStore, type ChallengeAttempt } from "./first-day-progress";
@@ -28,6 +28,8 @@ import "./first-day-desktop.css";
 import "./first-day-spacing.css";
 import "./first-day-spread.css";
 import "./first-day-clean-reading.css";
+import "./first-day-clean-reactions.css";
+import "./first-day-mobile-cover.css";
 import "./first-day-turn.css";
 
 const previewSounds = createLessonSoundsEngine({ getStorage: () => undefined, playbackRate: FIRST_DAY_AUDIO_RATE });
@@ -104,17 +106,18 @@ function NarratedCaption({ text, clips, player }: {
   </div>;
 }
 
-function StoryPanel({ image, detail, scene, complete, caption, children }: {
+function StoryPanel({ image, detail, scene, complete, portrait, caption, children }: {
   image: FirstDayArt;
   detail?: FirstDayArt;
   scene: GuidedPage["scene"] | "reaction" | "challenge";
   complete?: boolean;
+  portrait?: boolean;
   caption: ReactNode;
   children: ReactNode;
 }) {
   return <div className="fd-comic">
     {caption}
-    <div className="fd-scene" data-scene={scene} data-complete={complete}>
+    <div className="fd-scene" data-scene={scene} data-complete={complete} data-portrait-art={portrait || undefined}>
       <ComicPanels image={image} detail={detail} />
       <div className="fd-dialogue">{children}</div>
     </div>
@@ -129,10 +132,10 @@ function ReplyBalloon({ reply, player }: { reply: CharacterReply; player?: Voice
   </div>;
 }
 
-function ReactionMoment({ page, voice }: { page: ReactionPage; voice?: VoicePlayer }) {
+function ReactionMoment({ page, voice, cleanReading }: { page: ReactionPage; voice?: VoicePlayer; cleanReading: boolean }) {
   return <section className="fd-story fd-reaction" aria-label={page.title}>
-    <StoryPanel image={page.image} scene="reaction"
-      caption={<NarratedCaption text={page.caption} clips={[page.narration]} player={voice} />}>
+    <StoryPanel image={storyImage(page, cleanReading)} scene="reaction" portrait={cleanReading && Boolean(page.portraitImage)}
+      caption={<NarratedCaption text={page.caption} clips={[page.narration]} player={cleanReading ? undefined : voice} />}>
       <ReplyBalloon reply={page.reply} player={voice} />
     </StoryPanel>
     {page.tip && <aside className="fd-story-tip">
@@ -213,7 +216,8 @@ function GuidedMoment({ page, count, onPlace, cue, narrator, audioEnabled, clean
 
   return <LessonDragProvider onDrop={item => place(item.value)}>
     <section className="fd-story fd-action" aria-label="Montagem guiada">
-      <StoryPanel image={cleanReading ? cleanReadingArt : page.image} detail={cleanReading ? undefined : page.detail} scene={page.scene} complete={done}
+      <StoryPanel image={storyImage(page, cleanReading)} detail={cleanReading ? undefined : page.detail}
+        scene={page.scene} complete={done} portrait={cleanReading && Boolean(page.portraitImage)}
         caption={<NarratedCaption text={page.caption} clips={clips} player={cleanReading ? undefined : voice} />}>
         <LearnerBalloon words={page.words} placed={placed} translation={page.translations[count]} full={done}
           speech={done && audioEnabled ? { clip: page.voice, player: narrator } : undefined} />
@@ -380,8 +384,12 @@ export function FirstDay() {
     speech.play(clips);
   } };
   const page = pages[position - 1];
-  const cleanReading = portraitReading && page?.id === "ask-to-sit";
+  const mobileHeader = portraitReading && position >= 0;
+  const cleanReading = mobileHeader && usesCleanReading(page);
   const nextBlocked = cleanReading && page.kind === "Ação" && (counts[page.id] ?? 0) < page.words.length;
+  const cleanReadingClips = cleanReading
+    ? page.kind === "Reação" ? [page.narration] : page.scene === "intro" ? seatedNarration : arrivalNarration
+    : null;
   const readingPage = page?.kind === "Tirinha" || page?.kind === "Explicação" ? page : undefined;
   const choosingAudio = position < 0;
   const playingCover = narrator.playing === "cover";
@@ -498,7 +506,7 @@ export function FirstDay() {
             }
           }} />;
       case "Reação":
-        return <ReactionMoment page={page} voice={sound ? narrator : undefined} />;
+        return <ReactionMoment page={page} voice={sound ? narrator : undefined} cleanReading={cleanReading} />;
       case "Tirinha":
         return <ExamplesMoment page={page} voice={sound ? narrator : undefined} />;
       case "Explicação":
@@ -517,7 +525,7 @@ export function FirstDay() {
   }
 
   return <main ref={book} className="lo-app fd" data-lesson-theme="comic" style={COMIC_LESSON_STYLE}
-    data-fd-clean-reading={cleanReading || undefined}
+    data-fd-clean-reading={cleanReading || undefined} data-fd-mobile-header={mobileHeader || undefined}
     data-ui-sound-scope="local" data-first-day-part={page?.part} data-first-day-page={choosingAudio ? "audio" : page?.id ?? "cover"}>
     <header className="lo-header fd-header">
       <div className="lo-brand-row">
@@ -574,13 +582,13 @@ export function FirstDay() {
       </div>
     </section> : <section className="fd-page" aria-labelledby="fd-page-title">
       <div className="fd-progress">
-        <span>Parte {page.part} de 4 · {page.kind === "Em preparação" ? page.moment : page.kind}</span><span>{position}{cleanReading ? "/" : " / "}{pages.length}</span>
+        <span>Parte {page.part} de 4 · {page.kind === "Em preparação" ? page.moment : page.kind}</span><span>{position}{mobileHeader ? "/" : " / "}{pages.length}</span>
         <progress aria-label="Etapa no percurso" value={position} max={pages.length} />
       </div>
       <div className="fd-page-heading">
         <div className="fd-page-title">
           <h1 id="fd-page-title" ref={title} tabIndex={-1}>{page.title}</h1>
-          {cleanReading && sound && <NarrationButton clips={arrivalNarration} player={narrator} language="en" showLabel />}
+          {cleanReadingClips && sound && <NarrationButton clips={cleanReadingClips} player={narrator} language="en" showLabel />}
           {readingPage && sound && <NarrationButton clips={[readingPage.narration]} player={narrator} language="pt" />}
         </div>
         {readingPage && <p className="fd-reading-note fd-page-description">
