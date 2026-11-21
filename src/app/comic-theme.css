@@ -3,6 +3,7 @@
 @font-face{font-family:"BasedSpeak Barlow";src:url("/fonts/Barlow-Regular.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
 @font-face{font-family:"BasedSpeak Barlow";src:url("/fonts/Barlow-SemiBold.ttf") format("truetype");font-style:normal;font-weight:600 900;font-display:swap}
 :root{
+  --site-bar-background:#fff;
   --comic-paper:#fff7e8;--comic-ink:#202722;--comic-yellow:#efc653;
   --comic-coral:#d9755c;--comic-teal:#39776b;--comic-blue:#8eb1c2;
   --comic-muted:#5d655b;--comic-display:"BasedSpeak Bangers",Impact,sans-serif;
@@ -22,6 +23,11 @@ html body .app-header:not([data-tone="immersive"]){
   --nav-panel:#fffdf5;--nav-muted:var(--comic-muted);--nav-hover:#f4df98;--nav-selected:var(--comic-yellow);
   --nav-button-border:var(--comic-ink);border-bottom-width:2px;
 }
+html body .app-header, html body .dashboard.lesson-demo-dashboard .app-header {
+  background-color:var(--site-bar-background);
+}
+html body .app-header[data-tone="immersive"] { color:var(--comic-ink); }
+html body .app-header[data-tone="immersive"] :is(.app-menu-panel,.app-header-menu[open]>summary) { color:var(--ink); }
 html body .app-header .app-menu-panel{border:var(--comic-border);border-radius:7px 4px 8px 5px;box-shadow:4px 4px 0 var(--comic-ink)}
 html body .app-header-menu>summary{border-width:2px;border-radius:5px;box-shadow:2px 2px 0 currentColor;font-weight:600}
 html body .app-header[data-tone="immersive"] .app-header-menu>summary{box-shadow:2px 2px 0 #797d6c}
@@ -49,10 +55,11 @@ html body :is(.dashboard,.study-shell,.demo-shell) [lang="en"]{
 /* Administrative data keeps the same ink, paper and navigation vocabulary. */
 html body .admin-shell{--admin-line:#aeb6a8;--admin-green:var(--comic-teal);--admin-muted:var(--comic-muted)}
 html body .admin-sidebar{background:#e3eadc;border-right:var(--comic-border)}
-html body .admin-topbar{background:var(--comic-paper);border-bottom:var(--comic-border)}
+html body .admin-topbar{background:var(--site-bar-background);border-bottom:var(--comic-border)}
+html body .admin-footer{background-color:var(--site-bar-background)}
 html body .admin-sidebar nav>button[aria-current]{color:var(--comic-ink);background:var(--comic-yellow);border:var(--comic-border);box-shadow:2px 2px 0 var(--comic-ink)}
 html body .admin-main h1,html body .admin-main>header h2{font-family:var(--comic-display);font-weight:400;letter-spacing:.025em}
-@media(max-width:640px){html body .admin-sidebar{border-right:0;border-bottom:var(--comic-border)}}
+@media(max-width:640px){html body .admin-sidebar{background:var(--site-bar-background);border-right:0;border-bottom:var(--comic-border)}}
 
 /* Keep the existing transition choreography, using the same chapter styling. */
 html body .journey-transition{background-color:var(--comic-ink);color:var(--comic-paper);font-family:var(--comic-body)}

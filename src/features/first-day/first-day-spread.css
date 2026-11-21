@@ -1,7 +1,6 @@
 .lo-app.fd[data-lesson-theme="comic"]:is([data-first-day-part="1"], [data-first-day-page="audio"], [data-first-day-page="cover"]) {
   --fd-book-cream: #fbf3e2;
   --fd-sheet: #fffbef;
-  --fd-sheet-activity: #f3f0e2;
   --paper: var(--fd-book-cream);
   --fd-panel: var(--fd-sheet);
   isolation: isolate;
@@ -22,16 +21,11 @@
     radial-gradient(ellipse at 100% 0, #000, transparent 52%);
 }
 
-.fd[data-first-day-part="1"] .fd-page,
 .fd .fd-audio-selection {
   background:
     radial-gradient(ellipse at 100% 0, #e6cd943d, transparent 56%),
     radial-gradient(ellipse at 0 100%, #9fb5a859, transparent 60%),
     var(--fd-sheet);
-}
-
-.lo-app.fd:is([data-first-day-part="1"], [data-first-day-page="audio"], [data-first-day-page="cover"]) .fd-header {
-  background: color-mix(in srgb, var(--fd-book-cream) 88%, transparent);
 }
 
 @media (min-width: 760px) and (any-pointer: fine) {
@@ -64,7 +58,7 @@
     grid-area: spread / scene / end / edge;
     border: 1px solid #89856d;
     border-radius: 5px 6px 7px 5px;
-    background: var(--fd-sheet);
+    background: var(--fd-page-paper);
     box-shadow: 0 3px #f1e7d0, 0 4px #aaa084, 0 7px #f7edda, 0 8px #aaa084,
       0 16px 30px -16px #263e318a;
     z-index: -2;
@@ -78,8 +72,7 @@
     border-radius: 0 5px 6px 0;
     background:
       linear-gradient(90deg, #46574b19, transparent 26px),
-      radial-gradient(ellipse at 95% 14%, #547d6f1c, transparent 70%),
-      var(--fd-sheet-activity);
+      radial-gradient(ellipse at 95% 14%, #547d6f1c, transparent 70%);
     z-index: -1;
   }
 
@@ -96,10 +89,6 @@
 
   .fd[data-first-day-part="1"] .fd-page-title {
     grid-area: spread / activity / body / edge;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: 8px;
     min-width: 0;
     margin-inline: var(--fd-activity-inset);
     padding-block: var(--fd-leaf-inset) 8px;
@@ -111,10 +100,10 @@
     font-size: clamp(27px, min(4.4vw, 7.1dvh), 62px);
     line-height: .99;
     text-wrap: balance;
-    text-align: left;
   }
 
-  .fd[data-first-day-part="1"]:is([data-first-day-page="permission-examples"], [data-first-day-page="close-the-door"]) .fd-page-title h1 {
+  .fd[data-first-day-part="1"]:is([data-first-day-page="permission-examples"], [data-first-day-page="close-the-door"]) .fd-page-title h1,
+  .fd[data-first-day-part="1"] .fd-page-title:has(> .fd-narration-control) h1 {
     font-size: clamp(25px, min(3.65vw, 6.3dvh), 50px);
   }
 
@@ -272,8 +261,9 @@
     align-content: start;
     grid-template-columns: minmax(0, .82fr) minmax(0, 1fr);
     gap: clamp(7px, 1vw, 12px);
-    margin: 0 var(--fd-activity-inset);
-    padding: clamp(12px, 2.2dvh, 20px) 0 0;
+    margin: 0 1px 1px;
+    padding: clamp(12px, 2.2dvh, 20px) var(--fd-activity-inset) 0;
+    border-end-end-radius: 6px;
     z-index: 1;
   }
   .fd[data-first-day-part="1"] .fd-nav > [data-lesson-button="primary"] > .br-button-face {

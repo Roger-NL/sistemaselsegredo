@@ -7,6 +7,19 @@ html body :is(.landing,.start-page) {
   background-image:radial-gradient(#2027220e .65px,transparent .8px);
   background-size:9px 9px;
 }
+html body :is(.landing-header,.start-header,.landing-footer,.start-footer) {
+  position:relative;
+  z-index:1;
+  background-color:var(--site-bar-background);
+}
+html body :is(.landing-header,.start-header,.landing-footer,.start-footer)::before {
+  content:"";
+  position:absolute;
+  inset:0 calc((100% - 100cqw) / 2);
+  z-index:-1;
+  pointer-events:none;
+  background-color:inherit;
+}
 /* These are page separators, not panels: keep room for the login shadow. */
 html body :is(.landing-header,.start-header) {
   border:0;

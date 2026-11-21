@@ -36,6 +36,8 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
   --gold: var(--lesson-primary);
   --teal: var(--lesson-green);
   --fd-panel: var(--lesson-panel);
+  --fd-page-paper: #faf7f0 url("./manga-paper.webp") left top / min(100%, 640px) auto repeat;
+  --fd-bar-ink: var(--ink);
   --fd-border: 2px solid var(--ink);
   --fd-corners: 6px 4px 7px 4px;
   --fd-gutter: clamp(11px, 3.6vw, 20px);
@@ -69,8 +71,7 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
   padding: var(--fd-page-gutter);
   border: var(--fd-border);
   border-radius: var(--fd-corners);
-  background: radial-gradient(color-mix(in srgb, var(--teal) 15%, transparent) .65px, transparent .8px) 0 0 / 8px 8px,
-    var(--fd-panel);
+  background: var(--fd-page-paper);
   box-shadow: var(--fd-shadow);
 }
 .fd-workspace {
@@ -87,9 +88,37 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
 .fd .fd-workspace :is(button, [role="button"]):focus-visible { outline-offset: -4px; }
 .fd h1 { margin: 9px 0 12px; font: 400 clamp(32px, 8.2vw, 46px)/1.02 var(--comic-display); letter-spacing: .015em; text-wrap: balance; }
 .fd h1[tabindex="-1"]:focus { outline: none; }
-.fd-page-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 8px; }
-.fd-page-title, .fd-activity { display: contents; }
-.fd .fd-page-heading h1 { margin: 0; }
+.fd-page-heading { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: 4px; }
+.fd-page-title { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; }
+.fd-page-title:has(> .fd-narration-control) {
+  grid-template-columns: var(--fd-title-side, 34px) minmax(0, 1fr) var(--fd-title-side, 34px);
+  column-gap: 4px;
+}
+.fd-page-title:has(> .fd-narration-control) h1 { grid-column: 2; }
+.fd-page-title > .fd-narration-control { grid-column: 3; justify-self: end; }
+.fd-activity { display: contents; }
+.fd .fd-page-heading h1 { justify-self: center; margin: 0; width: fit-content; max-width: 100%; text-align: center; }
+
+/* Feather the paper behind unboxed copy, keeping the type and illustrations sharp. */
+.fd .fd-page-title h1,
+.fd .fd-rule-plus,
+.fd .fd-placeholder,
+.fd:not([data-fd-mobile-header]) .fd-progress > span,
+.fd:not(:is([data-fd-clean-reading], [data-fd-clean-study])) :is(.fd-page-description, .fd-story-tip, .fd-instruction, .fd-feedback:not([data-result])) {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -3px -6px;
+    z-index: -1;
+    border-radius: 6px;
+    background: var(--fd-text-wash, #faf7f0);
+    filter: blur(4px);
+    pointer-events: none;
+  }
+}
+.fd:not([data-fd-mobile-header]) .fd-progress > span { width: fit-content; }
 .fd-reading-note {
   margin: 0;
   padding: 7px 10px;
@@ -104,7 +133,17 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
   .fd .fd-page-heading h1 { font-size: clamp(23px, 8.5vw, 31px); }
 }
 .fd-header, .fd-menu-heading, .fd-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.lo-app.fd .fd-header { margin: 0 calc(-1 * var(--fd-gutter)) 10px; padding: 0 var(--fd-gutter); min-height: 48px; }
+.lo-app.fd .fd-header {
+  --lo-ink: var(--fd-bar-ink);
+  --lo-muted: var(--fd-secondary-ink);
+  --lo-line: #c7cbc8;
+  --lesson-bg: #f3f4f2;
+  margin: 0 calc(-1 * var(--fd-gutter)) 10px;
+  padding: 0 var(--fd-gutter);
+  min-height: 48px;
+  color: var(--fd-bar-ink);
+}
+.lo-app.fd .fd-header, .fd-page .fd-nav { background: var(--site-bar-background, #fff); }
 .fd-header .lo-brand-row { gap: 9px; }
 .lo-app.fd[data-lesson-theme="comic"] .fd-header .brand { font-weight: 600; }
 .fd .fd-header .lo-header-name { font-size: 14px; font-weight: 600; white-space: nowrap; }
@@ -433,7 +472,7 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
 .fd .fd-word { display: grid; place-items: center; min-height: 44px; min-width: 0; padding: 3px; border: var(--fd-border); border-radius: var(--fd-corners); background: var(--fd-panel); color: var(--ink); box-shadow: 2px 2px 0 var(--ink); font-size: clamp(15px, 4.1vw, 18px); font-weight: 700; line-height: 1.15; text-align: center; }
 .fd .fd-word.fd-word-next { background: var(--gold); }
 .fd-word[aria-pressed="true"] { outline: 2px solid var(--teal); outline-offset: -3px; }
-.fd .fd-word:disabled { border-color: #b4ac99; background: transparent; color: #686352; box-shadow: none; cursor: default; }
+.fd .fd-word:disabled { border-color: #b4ac99; background: #f4f1e7; color: #686352; box-shadow: none; cursor: default; }
 .fd-instruction { margin: 8px 0 0; color: var(--fd-secondary-ink); font-size: 14px; font-weight: 500; line-height: 1.3; }
 .fd-page .fd-nav {
   display: grid;

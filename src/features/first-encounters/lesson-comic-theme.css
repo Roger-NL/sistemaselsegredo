@@ -295,6 +295,9 @@ body:has(.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"])) .lesson-
   font-family: var(--comic-display, "BasedSpeak Bangers", Impact, sans-serif); font-weight: 400; letter-spacing: .025em;
 }
 .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-header,.lo-footer) { background: var(--lo-paper); border-color:var(--lo-ink); }
+.lo-app.lesson-comic-font :is(.lo-header, .lo-footer, .li-header, .li-footer, .lo-tutorial-top, .lo-tutorial-footer) {
+  background-color: var(--site-bar-background, #fff);
+}
 .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-learning,.lo-menu,.lo-dialog,.lo-tutorial,.li-introduction,.lc-card) {
   background:#fffdf5; border:2px solid var(--lo-ink); border-radius:8px 4px 9px 5px; box-shadow:3px 3px 0 var(--lo-ink);
 }
