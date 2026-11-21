@@ -301,6 +301,7 @@ function ChallengeMoment({ page, attempt, onAttempt, cue, voice, cleanReading }:
   const [reset, setReset] = useState(0);
   const { placed, result, translated = false } = attempt;
   const full = placed.length === page.words.length;
+  const solved = result === "correct";
   const instructionLanguage = translated ? "pt" : "en";
   const instructionClip = page.instruction[instructionLanguage];
   const translationLabel = translated ? "Voltar à instrução em inglês" : "Ver tradução da instrução em português";
@@ -331,8 +332,8 @@ function ChallengeMoment({ page, attempt, onAttempt, cue, voice, cleanReading }:
   }
 
   return <LessonDragProvider key={reset} onDrop={item => place(item.value)}>
-    <section className="fd-story fd-challenge" aria-label="Pedido sem pistas">
-      <StoryPanel image={storyImage(page, cleanReading)} scene="challenge" complete={result === "correct"}
+    <section className="fd-story fd-challenge" aria-label="Pedido sem pistas" data-solved={solved || undefined}>
+      <StoryPanel image={storyImage(page, cleanReading)} scene="challenge" complete={solved}
         portrait={cleanReading && Boolean(page.portraitImage)} caption={
         <div className="fd-reading-note fd-caption fd-caption-narrated fd-challenge-caption">
           <span lang={instructionLanguage === "pt" ? "pt-BR" : "en"}>{narration[instructionClip].text}</span>
@@ -346,17 +347,19 @@ function ChallengeMoment({ page, attempt, onAttempt, cue, voice, cleanReading }:
         </div>
       }>
         <LearnerBalloon words={page.words} placed={placed} full={full}
-          translation={result === "correct" ? narration[page.translationVoice].text : undefined}
-          speech={result === "correct" && voice ? { clip: page.voice, translationClip: page.translationVoice, player: voice } : undefined} />
+          translation={solved ? narration[page.translationVoice].text : undefined}
+          speech={solved && voice ? { clip: page.voice, translationClip: page.translationVoice, player: voice } : undefined} />
       </StoryPanel>
       <div className="fd-activity">
-        <WordStrip words={page.words} order={page.order} placed={placed} />
-        <div className="fd-challenge-controls">
-          <button type="button" className="lo-secondary" onClick={clear} disabled={!placed.length}>Limpar</button>
-          <LessonButton onClick={check} disabled={!full || Boolean(result)}>Conferir <Check size={18} aria-hidden="true" /></LessonButton>
-        </div>
+        {!solved && <>
+          <WordStrip words={page.words} order={page.order} placed={placed} />
+          <div className="fd-challenge-controls">
+            <button type="button" className="lo-secondary" onClick={clear} disabled={!placed.length}>Limpar</button>
+            <LessonButton onClick={check} disabled={!full || Boolean(result)}>Conferir <Check size={18} aria-hidden="true" /></LessonButton>
+          </div>
+        </>}
         <p className="fd-feedback" role="status" data-result={result}>
-          {result === "correct" ? "Isso! Você pediu permissão em uma situação nova."
+          {solved ? <><Check aria-hidden="true" /><strong>Você acertou!</strong></>
             : result === "incorrect" ? "Comece pelo pedido, depois a ação. Limpe e tente de novo."
               : "Monte a frase e toque em Conferir."}
         </p>

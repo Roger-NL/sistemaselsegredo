@@ -1,3 +1,28 @@
+.fd .fd-challenge .fd-feedback[data-result="correct"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(7px, 2vw, 12px);
+  margin: 0;
+  padding: clamp(6px, 1.7dvh, 13px) clamp(14px, 5vw, 26px);
+  border: 2px solid var(--ink);
+  border-radius: 5px;
+  background: var(--gold);
+  color: var(--ink);
+  box-shadow: 3px 4px 0 var(--ink);
+  font-family: var(--comic-display);
+  font-size: clamp(24px, 7vw, 43px);
+  line-height: 1;
+}
+
+.fd .fd-challenge .fd-feedback[data-result="correct"] > strong { font-weight: 400; }
+.fd .fd-challenge .fd-feedback[data-result="correct"] > svg {
+  flex: none;
+  width: .82em;
+  height: .82em;
+  stroke-width: 3;
+}
+
 .fd[data-fd-clean-reading][data-first-day-page="close-the-door"] .fd-story.fd-challenge {
   grid-template-rows: minmax(0, 1fr) auto;
   row-gap: 0;
@@ -35,10 +60,20 @@
   position: relative;
   inset: auto;
   min-height: 0;
-  gap: clamp(5px, 1dvh, 8px);
-  padding-block: clamp(6px, 1.35dvh, 10px);
+  gap: clamp(6px, 1.1dvh, 9px);
+  padding-block: clamp(7px, 1.3dvh, 10px);
   border-block-start: 1px solid #618078;
   background: var(--fd-reading-cream);
+}
+
+.fd[data-fd-clean-reading] .fd-challenge[data-solved="true"] .fd-activity {
+  position: absolute;
+  inset: auto var(--fd-reading-inset) clamp(10px, 2.8dvh, 24px);
+  justify-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  pointer-events: none;
 }
 
 .fd[data-fd-clean-reading] .fd-challenge-controls {
@@ -81,24 +116,20 @@
   color: #526b64;
 }
 
-.fd[data-fd-clean-reading] .fd-challenge .fd-feedback {
-  display: grid;
-  align-content: center;
-  min-height: calc(2lh + 6px);
-  padding: 3px 8px;
-  border-inline-start: 2px solid var(--fd-reading-header);
-  border-radius: 3px;
-  background: #fffdf6;
-  color: var(--fd-reading-ink);
-  font-size: clamp(12px, 3.25vw, 15px);
-  line-height: 1.18;
+.fd[data-fd-clean-reading] .fd-challenge .fd-feedback:not([data-result]) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
 .fd[data-fd-clean-reading] .fd-challenge .fd-feedback[data-result="incorrect"] {
-  border-inline-start-color: #a44232;
+  padding: 3px 8px;
+  border-inline-start: 2px solid #a44232;
+  border-radius: 3px;
   background: #ffeadf;
-}
-
-.fd[data-fd-clean-reading] .fd-challenge .fd-feedback[data-result="correct"] {
-  background: #e2ede5;
+  color: var(--fd-reading-ink);
+  font-size: clamp(12px, 3.25vw, 15px);
+  line-height: 1.18;
 }
