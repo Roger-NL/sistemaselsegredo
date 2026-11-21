@@ -45,3 +45,5 @@ next-env.d.ts
 # Existing product materials and local verification outputs
 /tmp/
 /output/
+# First Day media is served from private storage in production.
+/public/first-day/

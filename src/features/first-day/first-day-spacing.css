@@ -1,0 +1,76 @@
+@media (max-width: 599px), (max-width: 759px) and (orientation: portrait) {
+  .fd-story {
+    /* Keep a common frame above the space reserved for practice controls. */
+    --fd-story-panel-height: clamp(178px, calc(100cqh - clamp(150px, 20dvh, 172px)), calc(110cqw + 44px));
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: var(--fd-story-panel-height);
+    gap: var(--fd-page-gap);
+    align-content: start;
+  }
+  .fd-reaction:has(> .fd-story-tip) {
+    min-height: 100cqh;
+    grid-template-rows: var(--fd-story-panel-height) minmax(auto, 1fr);
+  }
+  .fd-story-tip {
+    /* Account for the space outside the grid before the navigation buttons. */
+    margin-block-start: 9px;
+  }
+  .fd-activity > :is(.fd-words, .fd-instruction, .fd-challenge-controls, .fd-feedback) {
+    margin-block: 0;
+  }
+  .fd-story .fd-scene[data-scene="challenge"] .fd-room { object-position: 78% 40%; }
+
+  .fd-workspace > .fd-examples {
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: clamp(6px, 1.1dvh, 10px);
+    height: min(100cqh, 510px);
+    min-height: 270px;
+    margin-inline-end: 0;
+  }
+
+  .fd-workspace .fd-example {
+    grid-template-columns: minmax(78px, .72fr) minmax(0, 1.28fr);
+    grid-template-rows: minmax(0, 1fr);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .fd-example-copy { grid-template: "label audio" "line audio" "translation audio" / minmax(0, 1fr) auto; }
+  .fd-example-label { grid-area: label; }
+  .fd .fd-example-audio { grid-area: audio; }
+  .fd-example-line { grid-area: line; }
+  .fd-example-translation { grid-area: translation; }
+
+  .fd-rule {
+    grid-template-rows: auto minmax(0, 1fr);
+    height: min(100cqh, 510px);
+    min-height: 220px;
+    padding-block: 0;
+  }
+  .fd-rule-examples { grid-template-rows: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 380px) and (max-height: 620px) {
+  .fd-reading-note { padding-block: 4px; font-size: 14px; }
+  .fd-rule, .fd-rule-examples { gap: 8px; }
+  .fd-rule { padding-block: 0; }
+  .fd-rule-example { grid-template-columns: 25% minmax(0, 1fr); min-height: 72px; }
+  .fd-rule-example-copy { gap: 4px; padding: 6px 8px; }
+  .fd-rule-example-line { font-size: 15px; }
+}
+
+@media (max-width: 345px) and (max-height: 660px) {
+  .fd-story { --fd-story-caption-height: 94px; }
+  .fd-story.fd-challenge { row-gap: 3px; }
+  .fd-challenge .fd-feedback { padding-block: 3px; }
+}
+
+@media (max-width: 345px) and (max-height: 600px) {
+  .fd-story { --fd-story-caption-height: 88px; }
+  .fd-reaction .fd-scene[data-scene="reaction"] .fd-room { object-position: center 25%; }
+}
+
+@media (max-width: 599px) and (min-height: 600px) and (orientation: portrait) {
+  .fd-reaction .fd-scene[data-scene="reaction"] .fd-reply { --mouth-x: 30%; }
+  .fd[data-first-day-page="ana-introduces-herself"] .fd-scene[data-scene="reaction"] .fd-reply { --mouth-x: 23%; }
+}
