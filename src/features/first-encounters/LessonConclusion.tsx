@@ -83,12 +83,15 @@ function CompletionRecap({ disabled, onPractice }: { disabled: boolean; onPracti
     const model = RECAP_MODELS[next];
     if (audio.has(model.speaker, model.text)) void request(model.speaker, model.text, { role: "character" });
   }
+  function replayItem() {
+    if (item) void request(item.speaker, item.text, { role: "character" });
+  }
   return <div className={item ? "lc-recap" : "lc-achievement"}>
     <div className="lc-completion-stage"><IntroductionStage scene={item?.scene ?? LESSON_INTRODUCTION_SCENES[2]}
-      modelIndex={item?.modelIndex ?? null} speech={audio.speech} onCharacterReady={characterReady} guideLabel="Nina acompanha a conclusão da aula."/></div>
+      modelIndex={item?.modelIndex ?? null} speech={audio.speech} onCharacterReady={characterReady} onReplay={replayItem} guideLabel="Nina acompanha a conclusão da aula."/></div>
     {item && index !== null ? <div className="lc-completion-copy">
       <span className="lc-recap-position" ref={recapPosition} tabIndex={-1}>Fala {index + 1} de {RECAP_MODELS.length}</span>
-      <strong className="lc-recap-english" lang="en"><SpeechText onPlay={() => void request(item.speaker, item.text, { role: "character" })}>{item.text}</SpeechText></strong>
+      <strong className="lc-recap-english" lang="en"><SpeechText onPlay={replayItem}>{item.text}</SpeechText></strong>
       <p className="lc-recap-translation"><SpeechText onPlay={() => void request("nina", item.translation, { role: "narration" })}>{item.translation}</SpeechText></p>
       <div className="lc-recap-controls">
         <RecordedSpeechButton audio={audio} person={item.speaker} text={item.text} lang="en" role="character" label="Repetir fala"/>

@@ -114,6 +114,10 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
   function move(index: number, position: number) {
     playSound("advance"); setStep(index); setBlock(position); playBlock(index, position);
   }
+  function replayDisplayed() {
+    setStarted(true);
+    playBlock(step, block);
+  }
   function advance() {
     if (!started) { setStarted(true); move(step, block); return; }
     if (isLast) { finish(); return; }
@@ -143,7 +147,7 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
     <LessonStepTransition stepKey={scene.id} className="li-content">
     <div className="li-heading"><h1 id="li-title">{scene.title}</h1><p>{scene.subtitle}</p></div>
     <div className={`li-visual li-visual--${scene.id}`}>
-      <IntroductionStage scene={scene} modelIndex={displayed.modelIndex} speech={audio.speech} onCharacterReady={characterReady}/>
+      <IntroductionStage scene={scene} modelIndex={displayed.modelIndex} speech={audio.speech} onCharacterReady={characterReady} onReplay={replayDisplayed}/>
       {scene.models.length ? <div className="li-models" aria-label="O que você vai aprender">{scene.models.map((model, index) => <div className="li-model" key={model.text}
         data-example-speaking={current?.english && current.modelIndex === index && audio.playingKey === current.key}>
         <span className="li-model-context">{scene.id === "self-and-you" ? index === 0 ? "Ana fala de si" : "Leo fala com Ana" : index === 0 ? "Ana faz parte da equipe" : "Maya fala de outra equipe"}</span>
@@ -156,7 +160,7 @@ export function LessonIntroduction({ onFinish, onSkip, finishLabel = "Iniciar au
           : audio.error ? <button type="button" className="li-audio-notice" onClick={() => playBlock(step, block)}>Áudio indisponível. Tentar novamente</button>
             : started && <button type="button" className="li-audio-button" onClick={() => sequenceActive ? stop() : playBlock(step, block)} aria-label={sequenceActive ? "Pausar apresentação" : "Repetir apresentação"}>{sequenceActive ? <Pause size={16}/> : <RotateCcw size={16}/>}<span>{sequenceActive ? "Pausar" : "Repetir"}</span></button>}
       </div>
-      <div className="li-caption-slot" lang={displayed.english ? "en" : "pt-BR"}><TutorialCaption key={`${current?.token ?? "preview"}:${displayed.key}`} speech={audio.speech} text={displayed.text} clipKey={displayed.key} complete={!started || current?.complete === true}/></div>
+      <div className="li-caption-slot" lang={displayed.english ? "en" : "pt-BR"}><TutorialCaption key={displayed.key} speech={audio.speech} text={displayed.text} clipKey={displayed.key} complete={!started || current?.complete === true} onReplay={replayDisplayed}/></div>
     </section>
     </LessonStepTransition>
     <footer className="li-footer"><button type="button" className="li-back" disabled={!positionReady || step === 0 && block === 0} onClick={goBack}><ArrowLeft size={18}/><span>Voltar</span></button>

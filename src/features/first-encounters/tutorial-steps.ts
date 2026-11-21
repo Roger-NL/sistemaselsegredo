@@ -12,9 +12,13 @@ export const TUTORIAL_STEPS = [
 ] as const;
 
 export type TutorialStepId = typeof TUTORIAL_STEPS[number]["id"];
-export type TutorialAudioId = TutorialNarrationId | "ana";
+export type TutorialAudioId = TutorialNarrationId | "ana" | "word";
 export type TutorialStepAudio = { id: TutorialAudioId; person: "ana" | "nina"; text: string; key: string; role: LessonSpeechRole };
 export const TUTORIAL_ENGLISH_MODEL: TutorialStepAudio = { id: "ana", person: "ana", text: "I am Ana.", key: "ana:I am Ana.", role: "character" };
+export type TutorialWord = "I" | "am" | "Ana.";
+export function isTutorialWord(text: string): text is TutorialWord {
+  return text === "I" || text === "am" || text === "Ana.";
+}
 
 export function getTutorialStep(id: TutorialStepId | number) {
   return typeof id === "number" ? TUTORIAL_STEPS[Math.max(0, Math.min(TUTORIAL_STEPS.length - 1, id))] : TUTORIAL_STEPS.find(step => step.id === id) ?? TUTORIAL_STEPS[0];

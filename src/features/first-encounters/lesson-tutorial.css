@@ -48,3 +48,5 @@
   .lo-tutorial--skill .tsp-writing{display:flex;gap:8px}.lo-tutorial--skill .lo-tutorial-practice{padding:0 4px}
   .lo-tutorial--skill .tsp-panel{max-width:100%}.lo-tutorial-context-actions{gap:7px;min-height:25px}.lo-tutorial-context-actions>button{font-size:11px!important;padding:3px 4px}
 }
+
+.lo-tutorial button.lo-tutorial-caption { padding: 0; border: 0; background: transparent; font-family: inherit; cursor: pointer; }

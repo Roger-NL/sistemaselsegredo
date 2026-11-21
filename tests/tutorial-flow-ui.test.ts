@@ -16,6 +16,7 @@ vi.mock("../src/features/first-encounters/useLessonAccountProgress", () => ({
   useLessonAccountProgress: () => ({ ready: true, storage: window.localStorage, scopeKey: "isolated-lesson", saving: false, error: "", notice: "", refresh: () => {}, reset: async () => {} }),
 }));
 
+import { getTutorialAudioClip } from "../src/features/first-encounters/tutorial-audio";
 import { LessonOne } from "../src/features/first-encounters/LessonOne";
 import { LESSON_TUTORIAL_STORAGE } from "../src/features/first-encounters/LessonTutorial";
 
@@ -136,8 +137,11 @@ describe("six useful tutorial scenes", () => {
     expect(source("tutorial:phrase").disabled).toBe(false); await learnerClick(source("tutorial:phrase")); expect(guide.paused).toBe(true);
     await learnerClick(target("person:leo")); expect(dialog().dataset.tutorialPlaced).toBe("false"); expect(episode()).toBe("drag");
     if (source("tutorial:phrase").getAttribute("aria-pressed") !== "true") await learnerClick(source("tutorial:phrase"));
-    await learnerClick(target("person:ana")); expect(dialog().dataset.tutorialPlaced).toBe("true"); expect(episode()).toBe("drag"); expect(Media.calls).toHaveLength(before);
-    await ended(guide); expect(episode()).toBe("drag"); expect(Media.calls).toHaveLength(before);
+    expect(Media.calls.at(-1)).toBe(getTutorialAudioClip("ana", "I am Ana."));
+    const selectedCount = Media.calls.length; expect(selectedCount).toBeGreaterThan(before);
+    await learnerClick(target("person:ana")); expect(dialog().dataset.tutorialPlaced).toBe("true"); expect(episode()).toBe("drag"); expect(Media.calls).toHaveLength(selectedCount);
+    await ended(guide); expect(episode()).toBe("drag"); expect(Media.calls).toHaveLength(selectedCount);
+    await learnerClick(button("I am Ana.")); expect(Media.calls.at(-1)).toBe(getTutorialAudioClip("ana", "I am Ana."));
     await click(next()); expect(episode()).toBe("word-pieces"); expect(next().disabled).toBe(true);
     await click(button("Voltar")); expect(episode()).toBe("drag"); expect(dialog().dataset.tutorialPlaced).toBe("true");
     const count = Media.calls.length; await click(button("Refazer treino")); expect(dialog().dataset.tutorialPlaced).toBe("false"); expect(Media.calls).toHaveLength(count);
@@ -149,19 +153,21 @@ describe("six useful tutorial scenes", () => {
     expect(guide.paused).toBe(true); await click(phrase);
     const ana = target("person:ana").querySelector<HTMLButtonElement>("button")!;
     await act(async () => ana.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true }))); await click(ana);
-    expect(episode()).toBe("drag"); expect(dialog().dataset.tutorialPlaced).toBe("true"); expect(Media.calls).toHaveLength(before);
+    expect(episode()).toBe("drag"); expect(dialog().dataset.tutorialPlaced).toBe("true"); expect(Media.calls.slice(before)).toEqual([getTutorialAudioClip("ana", "I am Ana.")]);
   });
 
   it("composes, resets and writes with explicit checking, then preserves states without solving the lesson", async () => {
     await toDrag(); await placePhrase(); await click(next()); expect(episode()).toBe("word-pieces"); expect(next().disabled).toBe(true);
     const wordsGuide = Media.current, beforeWords = Media.calls.length;
     await learnerClick(source("tutorial:word:I")); await learnerClick(target("tutorial:word:pronoun")); expect(wordsGuide.paused).toBe(true); expect(next().disabled).toBe(true);
-    await learnerClick(source("tutorial:word:am")); await learnerClick(target("tutorial:word:verb")); expect(next().disabled).toBe(false); expect(Media.calls).toHaveLength(beforeWords);
+    await learnerClick(source("tutorial:word:am")); await learnerClick(target("tutorial:word:verb")); expect(next().disabled).toBe(false); expect(Media.calls.slice(beforeWords)).toEqual([getTutorialAudioClip("nina", "I"), getTutorialAudioClip("nina", "am")]);
     await learnerClick(source("tutorial:word:I")); expect(source("tutorial:word:I").getAttribute("aria-pressed")).toBe("true");
-    await click(button("Refazer montagem")); expect(next().disabled).toBe(true); expect(Media.calls).toHaveLength(beforeWords);
+    await click(button("Refazer montagem")); expect(next().disabled).toBe(true); expect(Media.calls.slice(beforeWords)).toEqual([getTutorialAudioClip("nina", "I"), getTutorialAudioClip("nina", "am"), getTutorialAudioClip("nina", "I")]);
     expect(source("tutorial:word:I").getAttribute("aria-pressed")).toBe("false"); expect(dialog().querySelector('[data-drop-available="true"]')).toBeNull(); await placeWords();
     await click(next()); expect(episode()).toBe("write-check"); expect(next().disabled).toBe(true);
-    const writingGuide = Media.current, beforeWriting = Media.calls.length; const input = await type("I am Ana."); expect(writingGuide.paused).toBe(true);
+    const writingGuide = Media.current; await learnerClick(dialog().querySelector(".tsp-model button")!);
+    expect(Media.calls.at(-1)).toBe(getTutorialAudioClip("ana", "I am Ana."));
+    const beforeWriting = Media.calls.length; const input = await type("I am Ana."); expect(writingGuide.paused).toBe(true);
     await click(button("Apagar o que escrevi")); expect(input.value).toBe(""); expect(next().disabled).toBe(true);
     await type("You are Ana."); await click(button("Conferir escrita")); expect(next().disabled).toBe(true);
     await type("im ana"); await click(button("Conferir escrita")); expect(next().disabled).toBe(false); expect(Media.calls).toHaveLength(beforeWriting);

@@ -5,6 +5,7 @@ import { useLessonStorage } from "./lesson-storage";
 import { LessonWordCoach } from "./LessonWordCoach";
 import { LessonStepTransition } from "./LessonStepTransition";
 import { LessonButton } from "./LessonButton";
+import { SpeechText } from "./SpeechText";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Bell, BellOff, Check, Grip, MousePointer2, Pause, RotateCcw, Volume2, X } from "lucide-react";
@@ -21,7 +22,7 @@ import { getTutorialNarration } from "./tutorial-script";
 import { useLessonSounds } from "./useLessonSounds";
 import { TUTORIAL_POSITION_STORAGE, restorePosition } from "./lesson-position";
 import { isLessonButtonClick } from "./lesson-sound-events";
-import { TUTORIAL_STEPS, TUTORIAL_ENGLISH_MODEL, getTutorialStep, getTutorialStepAudio, getNextTutorialStep, type TutorialAudioId, type TutorialStepId, type TutorialStepAudio } from "./tutorial-steps";
+import { TUTORIAL_STEPS, TUTORIAL_ENGLISH_MODEL, getTutorialStep, getTutorialStepAudio, getNextTutorialStep, type TutorialAudioId, type TutorialStepId, type TutorialStepAudio, type TutorialWord } from "./tutorial-steps";
 import timingJSON from "./tutorial-timing.json";
 import "./lesson-tutorial.css";
 
@@ -58,7 +59,7 @@ export function LessonTutorial({ onFinish }: { onFinish: (learned?: readonly ("b
   const activePresentation = presentation?.context === context ? presentation : null;
   const displayedClip = activePresentation?.clip ?? guideClip;
   const timing = TIMING[displayedClip.id];
-  const handPlan = useMemo(() => getTutorialHandPlan(displayedClip.id, timing), [displayedClip.id, timing]);
+  const handPlan = useMemo(() => displayedClip.id === "word" ? null : getTutorialHandPlan(displayedClip.id, timing), [displayedClip.id, timing]);
   const phraseScreen = episode.kind === "phrase";
   const skillScreen = episode.kind === "words" || episode.kind === "write";
   const listenScreen = started && (episode.kind === "listen" || episode.kind === "repeat");
@@ -67,7 +68,8 @@ export function LessonTutorial({ onFinish }: { onFinish: (learned?: readonly ("b
       : episode.kind === "write" ? Boolean(writing.result?.correct) : true;
 
   const playClip = useCallback((clip: TutorialStepAudio, source: PlaybackSource) => {
-    document.dispatchEvent(new Event("lesson-stop-word-coach"));
+    if (source !== "guide") playedContext.current = context;
+    document.dispatchEvent(new CustomEvent("lesson-stop-word-coach", { detail: clip.id === "word" ? clip.text : undefined }));
     stopAudio();
     const ticket = ++generation.current;
     setHandEnabled(source !== "model");
@@ -138,9 +140,15 @@ export function LessonTutorial({ onFinish }: { onFinish: (learned?: readonly ("b
   function replay() { playClip(displayedClip, activePresentation?.source ?? "guide"); }
   function pause() { generation.current++; pauseAudio(); }
   function listenAna() { playClip(TUTORIAL_ENGLISH_MODEL, "model"); }
+  function listenWord(word: TutorialWord, source?: HTMLButtonElement) {
+    source?.dispatchEvent(new Event("lesson-select-word", { bubbles: true }));
+    playClip({ id: "word", person: "nina", text: word, key: `nina:${word}`, role: "narration" }, "model");
+  }
   function hearGuide() { playClip(guideClip, "guide"); }
   function interact() {
-    stop(); setHandEnabled(false);
+    setHandEnabled(false);
+    if (activePresentation?.source === "model" && audio.whenIdle(true)) return;
+    stop();
     setPresentation(current => current?.context === context ? { ...current, complete: true } : current);
   }
   function receive(item: DragItem, target: string) {
@@ -177,9 +185,9 @@ export function LessonTutorial({ onFinish }: { onFinish: (learned?: readonly ("b
             onPersonClick={listenScreen ? person => { if (person === "ana") listenAna(); } : undefined}/>
         </div>
         <div className="lo-tutorial-practice" onPointerDownCapture={phraseInput} onKeyDownCapture={event => { if (event.key === "Enter" || event.key === " ") phraseInput(); }}>
-          {skillScreen ? <TutorialSkillPractice kind={episode.kind === "words" ? "words" : "write"} words={words} writing={writing} onWordsChange={setWords} onWritingChange={updateWriting} onInteraction={interact}/>
-            : phraseScreen && !placed ? <div className="lo-tutorial-phrase-anchor" data-tutorial-cue="phrase"><DragSource item={{ id: "tutorial:phrase", kind: "phrase", value: "tutorial", label: "I am Ana." }} className="lo-phrase lo-tutorial-phrase"><Grip size={20}/><span>I am Ana.</span></DragSource></div>
-              : phraseScreen && placed ? <div className="lo-tutorial-success"><Check size={21}/><strong lang="en">I am Ana.</strong><button type="button" onClick={resetPhrase}><RotateCcw size={16}/>Refazer treino</button></div>
+          {skillScreen ? <TutorialSkillPractice kind={episode.kind === "words" ? "words" : "write"} words={words} writing={writing} onWordsChange={setWords} onWritingChange={updateWriting} onInteraction={interact} onReadWord={listenWord} onReadModel={listenAna}/>
+            : phraseScreen && !placed ? <div className="lo-tutorial-phrase-anchor" data-tutorial-cue="phrase"><DragSource item={{ id: "tutorial:phrase", kind: "phrase", value: "tutorial", label: "I am Ana." }} className="lo-phrase lo-tutorial-phrase" onClick={listenAna}><Grip size={20}/><span lang="en">I am Ana.</span></DragSource></div>
+              : phraseScreen && placed ? <div className="lo-tutorial-success"><Check size={21}/><strong lang="en"><SpeechText onPlay={listenAna}>I am Ana.</SpeechText></strong><button type="button" onClick={resetPhrase}><RotateCcw size={16}/>Refazer treino</button></div>
                 : listenScreen ? <button type="button" data-tutorial-cue="listen" className="lo-secondary" onClick={listenAna}><Volume2 size={18}/>{episode.kind === "listen" && !listened ? "Ouvir Ana" : "Ouvir de novo"}</button>
                   : <span className="lo-tutorial-spacer" aria-hidden="true"/>}
         </div>
@@ -192,7 +200,7 @@ export function LessonTutorial({ onFinish }: { onFinish: (learned?: readonly ("b
     </div>}
     <div className="lo-tutorial-coach" aria-label="Fala do guia">
       <span className="lo-tutorial-coach-icon" aria-hidden="true"><Volume2 size={21}/></span>
-      {started ? <TutorialCaption key={`${context}:${activePresentation?.token ?? "pending"}`} speech={audio.speech} text={displayedClip.text} clipKey={displayedClip.key} timing={timing} complete={activePresentation?.complete ?? false}/>
+      {started ? <TutorialCaption key={`${context}:${activePresentation?.token ?? "pending"}`} speech={audio.speech} text={displayedClip.text} clipKey={displayedClip.key} timing={timing} complete={activePresentation?.complete ?? false} onReplay={activePresentation?.source === "model" ? replay : undefined}/>
         : <p className="lo-tutorial-caption lo-tutorial-ready">Clique em Começar com som. Depois, experimente cada ação.</p>}
     </div>
     {(audio.blocked || audio.error) && <div className="lo-tutorial-playback-status" role="status">{audio.blocked ? <button type="button" className="lo-secondary" onClick={() => void audio.unlock()}><Volume2 size={17}/>Ativar som</button> : <><span>{audio.error}</span><button type="button" onClick={replay}>Tentar novamente</button></>}</div>}

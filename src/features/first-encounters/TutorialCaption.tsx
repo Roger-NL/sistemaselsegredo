@@ -37,8 +37,8 @@ function subscribeReducedMotion(callback: () => void) {
 const getReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** Only this text node changes per audio frame; the scene and character do not rerender. */
-export function TutorialCaption({ speech, text, clipKey, timing, complete }: {
-  speech: LessonSpeechDriver; text: string; clipKey: string; timing?: TutorialClipTiming; complete: boolean;
+export function TutorialCaption({ speech, text, clipKey, timing, complete, onReplay }: {
+  speech: LessonSpeechDriver; text: string; clipKey: string; timing?: TutorialClipTiming; complete: boolean; onReplay?: () => void;
 }) {
   const node = useRef<HTMLSpanElement>(null);
   const previousCopy = useRef<string | null>(null);
@@ -64,5 +64,8 @@ export function TutorialCaption({ speech, text, clipKey, timing, complete }: {
     update();
     return unsubscribe;
   }, [speech, text, clipKey, timing, complete, reducedMotion]);
-  return <p className="lo-tutorial-caption" data-caption-key={clipKey}><span ref={node} className="lo-tutorial-typed" aria-hidden="true"/><span className="lo-tutorial-sr">{text}</span></p>;
+  const content = <><span ref={node} className="lo-tutorial-typed" aria-hidden="true"/><span className="lo-tutorial-sr">{text}</span></>;
+  return onReplay
+    ? <button type="button" className="lo-tutorial-caption" data-caption-key={clipKey} data-sound-silent="true" onClick={onReplay}>{content}</button>
+    : <p className="lo-tutorial-caption" data-caption-key={clipKey}>{content}</p>;
 }

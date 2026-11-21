@@ -140,6 +140,38 @@ describe("lesson audio without answer or identity shortcuts", () => {
     expect(target("message:0").getAttribute("role")).toBe("button");
   });
 
+  it("reads message text anonymously, uses it as a destination, then reads it in the author's voice", async () => {
+    await mount("g5-messages");
+    const message = target("message:0");
+    await click(message.querySelector<HTMLButtonElement>("strong button")!);
+    expect(audio.play).toHaveBeenLastCalledWith("nina", "They are a team.");
+    await click(source("Maya"));
+    expect(message.querySelector("strong button")).toBeNull();
+    await click(message.querySelector("strong")!);
+    expect(message.querySelector(".lo-message-sender")?.textContent).toBe("Maya");
+    await place("Ana", "message:1");
+    await click(footer());
+    await click(message.querySelector<HTMLButtonElement>("strong button")!);
+    expect(audio.play).toHaveBeenLastCalledWith("maya", "They are a team.");
+  });
+
+  it("reads the fixed subject, individual verbs, placed word, and accepted line directly", async () => {
+    await mount("g3-i");
+    await click(container.querySelector<HTMLButtonElement>(".lo-sentence strong button")!);
+    expect(audio.play).toHaveBeenLastCalledWith("nina", "I");
+    await click(target("word:verb").querySelectorAll<HTMLButtonElement>("button")[1]);
+    expect(audio.play).toHaveBeenLastCalledWith("nina", "are");
+    await place("am", "word:verb");
+    await click(target("word:verb").querySelector<HTMLButtonElement>("button")!);
+    expect(audio.play).toHaveBeenLastCalledWith("nina", "am");
+    await click(footer());
+    await click(container.querySelector<HTMLButtonElement>(".lo-fixed-speech strong button")!);
+    expect(audio.play).toHaveBeenLastCalledWith("ana", "I am Ana.");
+    await click(container.querySelector<HTMLButtonElement>(".lo-word-bank button[aria-label=are]")!);
+    expect(audio.play).toHaveBeenLastCalledWith("nina", "are");
+    expect(container.querySelector(".lo-feedback.is-correct")).not.toBeNull();
+  });
+
   it("does not identify a speaker by voice before choice and accepts Leo's valid alternative voice", async () => {
     await mount("g4-inside"); await click(main()); expect(audio.play).toHaveBeenLastCalledWith("nina", "We are a team.");
     await click(container.querySelector<HTMLButtonElement>('[data-person="leo"]')!);

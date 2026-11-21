@@ -10,13 +10,14 @@ const Character = dynamic(() => import("./AnimatedCharacter").then(module => mod
 const CAST: readonly PersonId[] = ["nina", "ana", "leo", "maya"];
 
 /** Keep one native rig per person loaded; only the current speaker receives the voice clock. */
-export function IntroductionStage({ scene, modelIndex, speech, onCharacterReady, guideLabel = "Nina apresenta a aula." }: {
+export function IntroductionStage({ scene, modelIndex, speech, onCharacterReady, onReplay, guideLabel = "Nina apresenta a aula." }: {
   scene: IntroductionScene; modelIndex: number | null; speech: LessonSpeechDriver;
   onCharacterReady: (person: PersonId) => void;
+  onReplay: () => void;
   guideLabel?: string;
 }) {
   const root = useRef<HTMLDivElement>(null);
-  const bubble = useRef<HTMLDivElement>(null);
+  const bubble = useRef<HTMLButtonElement>(null);
   const tail = useRef<SVGPathElement>(null);
   const model = modelIndex === null ? undefined : scene.models[modelIndex];
   const speaker = model?.speaker ?? "nina";
@@ -70,8 +71,8 @@ export function IntroductionStage({ scene, modelIndex, speech, onCharacterReady,
         <span className="li-actor-name">{PERSON_NAMES[person]}</span>
       </div>;
     })}
-    {model && <div ref={bubble} className="li-stage-speech" lang="en"><strong>{model.text}</strong>
+    {model && <button type="button" ref={bubble} className="li-stage-speech" lang="en" data-sound-silent="true" onClick={onReplay}><strong>{model.text}</strong>
       <svg aria-hidden="true" className="li-stage-speech-tail"><path ref={tail}/></svg>
-    </div>}
+    </button>}
   </div>;
 }

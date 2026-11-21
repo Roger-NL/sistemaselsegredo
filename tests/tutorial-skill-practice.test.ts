@@ -53,7 +53,7 @@ function Harness({ kind }: { kind: "words" | "write" }) {
   const [words, setWords] = useState<TutorialWordDraft>({});
   const [writing, setWriting] = useState<TutorialWritingState>({ text: "", result: null });
   return createElement(LessonDragProvider, { onDrop: (item, target) => setWords(current => applyTutorialWordDrop(current, item, target)) },
-    createElement(TutorialSkillPractice, { kind, words, writing, onWordsChange: setWords,
+    createElement(TutorialSkillPractice, { kind, words, writing, onWordsChange: setWords, onReadWord: vi.fn(), onReadModel: vi.fn(),
       onWritingChange: next => { events.push("change"); setWriting(next); }, onInteraction: () => { events.push("interaction"); interaction(); } }));
 }
 async function render(kind: "words" | "write") { await act(async () => root.render(createElement(Harness, { kind }))); }

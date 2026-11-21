@@ -5,6 +5,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent, type ReactNode,
 } from "react";
+import { SpeechText } from "./SpeechText";
 import "./lesson-drag.css";
 
 export type DragItem = { id: string; kind: "phrase" | "person" | "word"; value: string; label: string };
@@ -326,8 +327,8 @@ export function useLessonDrag(): { selected: DragItem | null; cancel: () => void
   return { selected, cancel };
 }
 
-export function DragSource({ item, children, className, disabled = false, onClick }: {
-  item: DragItem; children?: ReactNode; className?: string; disabled?: boolean; onClick?: (element: HTMLButtonElement) => void;
+export function DragSource({ item, children, className, disabled = false, readOnly = false, onClick }: {
+  item: DragItem; children?: ReactNode; className?: string; disabled?: boolean; readOnly?: boolean; onClick?: (element: HTMLButtonElement) => void;
 }) {
   const { selected, providerId, instructionsId, select, begin, suppressClick, removeSource } = useDragContext();
   const ref = useRef<HTMLButtonElement>(null);
@@ -335,7 +336,9 @@ export function DragSource({ item, children, className, disabled = false, onClic
     const element = ref.current;
     if (disabled && element) removeSource(element);
     return () => { if (element) removeSource(element); };
-  }, [item.id, item.kind, item.value, disabled, removeSource]);
+  }, [item.id, item.kind, item.value, disabled, readOnly, removeSource]);
+  if (readOnly) return <button type="button" className={className} aria-label={item.label} disabled={disabled}
+    data-sound-silent="true" onClick={event => onClick?.(event.currentTarget)}>{children}</button>;
   return <button ref={ref} type="button" className={`lesson-drag-source${className ? ` ${className}` : ""}`}
     data-lesson-drag-source={item.id} data-lesson-drag-provider={providerId} data-drag-kind={item.kind} aria-label={item.label} aria-describedby={instructionsId}
     aria-pressed={selected?.id === item.id && selected.kind === item.kind} disabled={disabled} draggable={false}
@@ -345,6 +348,12 @@ export function DragSource({ item, children, className, disabled = false, onClic
       if (disabled || event.defaultPrevented || suppressClick(event)) return;
       select(item, event.currentTarget); onClick?.(event.currentTarget);
     }}>{children}</button>;
+}
+
+/** A selected piece gets the entire drop target, including its printed text. */
+export function DropTargetSpeech({ children, onPlay }: { children: string; onPlay: () => void }) {
+  const { selected } = useLessonDrag();
+  return selected ? children : <SpeechText onPlay={onPlay}>{children}</SpeechText>;
 }
 
 export function DropTarget({ id, accept, label, children, className, disabled = false }: {

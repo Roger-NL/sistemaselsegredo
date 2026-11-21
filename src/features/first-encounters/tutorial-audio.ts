@@ -2,6 +2,7 @@ import catalogJSON from "./tutorial-audio.json";
 import { createLessonAudioController, getLessonAudioClip, getLessonAudioKey } from "./lesson-audio";
 import type { PersonId } from "./lesson-one";
 import { TUTORIAL_NARRATIONS } from "./tutorial-script";
+import { isTutorialWord } from "./tutorial-steps";
 
 const APPROVED_NARRATIONS = Object.values(TUTORIAL_NARRATIONS);
 
@@ -10,6 +11,7 @@ export const getTutorialAudioKey = getLessonAudioKey;
 /** The tutorial narrator and Ana share one channel, but separate approved files. */
 export function getTutorialAudioClip(person: PersonId, text: string, catalog: unknown = catalogJSON): string | undefined {
   if (person === "ana" && text === "I am Ana.") return getLessonAudioClip(person, text);
+  if (person === "nina" && isTutorialWord(text)) return getLessonAudioClip(person, text);
   if (person !== "nina" || !catalog || typeof catalog !== "object" || Array.isArray(catalog)) return undefined;
   const narration = APPROVED_NARRATIONS.find(clip => clip.text === text);
   if (!narration) return undefined;
