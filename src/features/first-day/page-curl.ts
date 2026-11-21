@@ -1,4 +1,5 @@
 type Point = { x: number; y: number; depth: number; reverse: boolean };
+export type PanelCapture = { canvas: HTMLCanvasElement; fillFromTop: boolean };
 
 const paperColor = "#fff7e8";
 
@@ -7,7 +8,7 @@ export function getTurnPanel(book: HTMLElement | null): HTMLElement | null {
   return panel?.getClientRects().length ? panel : panel?.querySelector(".fd-rule-examples") ?? null;
 }
 
-export function capturePanel(panel: HTMLElement | null): HTMLCanvasElement | null {
+export function capturePanel(panel: HTMLElement | null): PanelCapture | null {
   if (!panel) return null;
   const bounds = panel.getBoundingClientRect();
   const { width, height } = bounds;
@@ -51,22 +52,26 @@ export function capturePanel(panel: HTMLElement | null): HTMLCanvasElement | nul
     context.restore();
   }
 
-  return canvas;
+  return { canvas, fillFromTop: panel.closest(".fd[data-fd-mobile-header][data-first-day-page='cover']") !== null };
 }
 
-function fitFront(source: HTMLCanvasElement, width: number, height: number) {
+function fitFront({ canvas: source, fillFromTop }: PanelCapture, width: number, height: number) {
   if (width === source.width && height === source.height) return source;
   const front = document.createElement("canvas");
   front.width = width;
   front.height = height;
   const context = front.getContext("2d");
   if (!context) return source;
-  const scale = Math.min(width / source.width, height / source.height);
+  const widthScale = width / source.width;
+  const heightScale = height / source.height;
+  const scale = fillFromTop ? Math.max(widthScale, heightScale) : Math.min(widthScale, heightScale);
   const fittedWidth = source.width * scale;
   const fittedHeight = source.height * scale;
   context.fillStyle = paperColor;
   context.fillRect(0, 0, width, height);
-  context.drawImage(source, (width - fittedWidth) / 2, (height - fittedHeight) / 2, fittedWidth, fittedHeight);
+  // Keep the cover flush with the frame and crop the bottom where the page controls appear.
+  const top = fillFromTop ? 0 : (height - fittedHeight) / 2;
+  context.drawImage(source, (width - fittedWidth) / 2, top, fittedWidth, fittedHeight);
   return front;
 }
 
@@ -125,7 +130,7 @@ function printReverse(width: number, height: number, direction: number, normalX:
   return reverse;
 }
 
-export function curlPanel(canvas: HTMLCanvasElement, source: HTMLCanvasElement, direction: number) {
+export function curlPanel(canvas: HTMLCanvasElement, source: PanelCapture, direction: number) {
   const context = canvas.getContext("2d");
   if (!context) return () => {};
   const bounds = canvas.getBoundingClientRect();

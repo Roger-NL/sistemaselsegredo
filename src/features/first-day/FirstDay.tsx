@@ -15,7 +15,7 @@ import { art, cleanReadingMedia, coverSources, pages, storyImage, usesCleanReadi
 import type { ChallengePage, CharacterReply, ExamplesPage, FirstDayArt, GuidedPage, ReactionPage, RulePage, WordSequence } from "./content";
 import { createFirstDayArtCache } from "./first-day-art";
 import { createFirstDayProgressStore, type ChallengeAttempt } from "./first-day-progress";
-import { capturePanel, curlPanel, getTurnPanel } from "./page-curl";
+import { capturePanel, curlPanel, getTurnPanel, type PanelCapture } from "./page-curl";
 import { arrivalNarration, coverCopy, coverNarration, dialogue, FIRST_DAY_AUDIO_RATE, seatedNarration, narration } from "./narration";
 import type { DialogueClip, FirstDayVoiceClip, NarrationClip } from "./narration";
 import { useFirstDayNarration } from "./useFirstDayNarration";
@@ -382,7 +382,7 @@ export function FirstDay() {
   const book = useRef<HTMLElement>(null);
   const turnSheet = useRef<HTMLCanvasElement>(null);
   const cancelTurn = useRef<(() => void) | null>(null);
-  const nextTurn = useRef<{ direction: number; source: HTMLCanvasElement } | null>(null);
+  const nextTurn = useRef<{ direction: number; source: PanelCapture } | null>(null);
   const paperSound = useFirstDayPaperSound();
   useFirstDayPullToRefresh(book);
   const sounds = useLessonSounds(previewSounds);

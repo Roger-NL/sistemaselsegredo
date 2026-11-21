@@ -83,36 +83,70 @@
   clip-path: polygon(100% 0, 0 100%, 100% 50%, 100% 43%, 12% 85%, 100% 7%);
 }
 
+.fd[data-first-day-part="1"] .fd-story-tip h2 {
+  font-family: var(--comic-display);
+  font-weight: 400;
+  letter-spacing: .025em;
+}
+
 .fd[data-fd-clean-reading] .fd-story-tip {
   position: absolute;
   inset: auto 0 0;
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: 4px;
+  gap: 3px;
   width: 100%;
   min-height: var(--fd-reading-tray-height);
   margin: 0;
-  padding: 5px var(--fd-reading-inset);
+  padding: 6px var(--fd-reading-inset);
   border: 0;
-  border-block-start: 1px solid #6a8c81;
-  background: var(--fd-reading-cream);
-  color: var(--fd-reading-ink);
+  border-block-start: 1px solid #ffe9af8c;
+  background: linear-gradient(180deg, #142f2ac2, #122c26ca);
+  color: var(--fd-reading-cream);
 }
 
 .fd[data-fd-clean-reading] .fd-story-tip h2 {
   margin: 0;
-  font-size: clamp(11px, 3.2vw, 15px);
-  font-weight: 700;
+  color: var(--fd-reading-yellow);
+  font-size: clamp(15px, 4.25vw, 21px);
 }
 
-.fd[data-fd-clean-reading] .fd-story-tip ul { gap: 4px clamp(4px, 1.5vw, 8px); }
+.fd[data-fd-clean-reading] .fd-story-tip ul { gap: 3px 0; }
 
 .fd[data-fd-clean-reading] .fd-story-tip li {
-  padding: 3px clamp(6px, 2vw, 11px);
-  border-color: #78988d;
-  border-radius: 5px;
-  background: #fffdf6;
+  padding: 0 clamp(8px, 2.3vw, 14px);
+  border: 0;
+  border-radius: 0;
+  background: none;
   color: inherit;
-  font-size: clamp(12px, 3.5vw, 16px);
+  font-size: clamp(13px, 3.6vw, 17px);
+}
+
+.fd[data-fd-clean-reading] .fd-story-tip li + li {
+  border-inline-start: 1px solid #fff8e87d;
+}
+
+@media (min-width: 760px), (min-width: 600px) and (orientation: landscape) {
+  .fd[data-first-day-part="1"] .fd-story-tip {
+    padding: clamp(10px, 2.2dvh, 18px) clamp(10px, 2vw, 24px);
+    border: 0;
+    border-block: 1px solid #4e766d70;
+    border-radius: 0;
+    background: linear-gradient(90deg, #49796f1a, #49796f0a);
+    box-shadow: none;
+  }
+
+  .fd[data-first-day-part="1"] .fd-story-tip h2 {
+    margin: 0 0 5px;
+    color: #174e49;
+    font-size: clamp(18px, 2vw, 27px);
+  }
+
+  .fd[data-first-day-part="1"] .fd-story-tip ul {
+    width: auto;
+    border-block-end: 0;
+  }
+
+  .fd[data-first-day-part="1"] .fd-story-tip li:first-child { border-top: 0; }
 }
