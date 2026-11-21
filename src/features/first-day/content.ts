@@ -98,7 +98,7 @@ export type ReactionPage = StoryPage & {
   tip?: { title: string; phrases: readonly string[] };
 };
 
-export function storyImage(page: GuidedPage | ReactionPage, cleanReading: boolean) {
+export function storyImage(page: StoryPage, cleanReading: boolean) {
   return cleanReading ? page.portraitImage ?? page.image : page.image;
 }
 
@@ -129,10 +129,9 @@ export type RulePage = PageBase & {
   examples: readonly { image: FirstDayArt; tokens: readonly RuleToken[]; translation: string; voice: DialogueClip }[];
 };
 
-export type ChallengePage = PageBase & WordSequence & {
+export type ChallengePage = StoryPage & WordSequence & {
   kind: "Desafio";
   instruction: Record<"en" | "pt", NarrationClip>;
-  image: FirstDayArt;
   translationVoice: NarrationClip;
   voice: DialogueClip;
 };
@@ -140,8 +139,8 @@ export type ChallengePage = PageBase & WordSequence & {
 type PreviewPage = PageBase & { kind: "Em preparação"; moment: string };
 export type FirstDayPage = GuidedPage | ReactionPage | ExamplesPage | RulePage | ChallengePage | PreviewPage;
 
-export function usesCleanReading(page: FirstDayPage | undefined): page is GuidedPage | ReactionPage {
-  return page?.part === 1 && (page.kind === "Ação" || page.kind === "Reação");
+export function usesCleanReading(page: FirstDayPage | undefined): page is GuidedPage | ReactionPage | ChallengePage {
+  return page?.part === 1 && (page.kind === "Ação" || page.kind === "Reação" || page.kind === "Desafio");
 }
 
 const firstPart = { part: 1, partTitle: "Um lugar para sentar" } as const;
@@ -235,6 +234,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     title: "Faça um pedido novo",
     instruction: { en: "door-instruction-en", pt: "door-instruction-pt" },
     image: art.door,
+    portraitImage: { ...art.door, src: "/first-day/art-v1/faca-um-pedido-novo-mobile.webp", width: 960, height: 1440 },
     words: ["Can", "I", "close", "the", "door?"],
     order: [4, 2, 0, 3, 1],
     translationVoice: "door-answer-pt",

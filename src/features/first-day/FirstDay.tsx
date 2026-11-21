@@ -29,6 +29,9 @@ import "./first-day-spacing.css";
 import "./first-day-spread.css";
 import "./first-day-clean-reading.css";
 import "./first-day-clean-reactions.css";
+import "./first-day-clean-examples.css";
+import "./first-day-clean-rule.css";
+import "./first-day-clean-challenge.css";
 import "./first-day-mobile-cover.css";
 import "./first-day-turn.css";
 
@@ -287,12 +290,13 @@ function RuleMoment({ page, voice }: { page: RulePage; voice?: VoicePlayer }) {
 
 const emptyAttempt: ChallengeAttempt = { placed: [] };
 
-function ChallengeMoment({ page, attempt, onAttempt, cue, voice }: {
+function ChallengeMoment({ page, attempt, onAttempt, cue, voice, cleanReading }: {
   page: ChallengePage;
   attempt: ChallengeAttempt;
   onAttempt: (attempt: ChallengeAttempt) => void;
   cue: (sound: LessonSoundCue) => void;
   voice?: VoicePlayer;
+  cleanReading: boolean;
 }) {
   const [reset, setReset] = useState(0);
   const { placed, result, translated = false } = attempt;
@@ -328,7 +332,8 @@ function ChallengeMoment({ page, attempt, onAttempt, cue, voice }: {
 
   return <LessonDragProvider key={reset} onDrop={item => place(item.value)}>
     <section className="fd-story fd-challenge" aria-label="Pedido sem pistas">
-      <StoryPanel image={page.image} scene="challenge" complete={result === "correct"} caption={
+      <StoryPanel image={storyImage(page, cleanReading)} scene="challenge" complete={result === "correct"}
+        portrait={cleanReading && Boolean(page.portraitImage)} caption={
         <div className="fd-reading-note fd-caption fd-caption-narrated fd-challenge-caption">
           <span lang={instructionLanguage === "pt" ? "pt-BR" : "en"}>{narration[instructionClip].text}</span>
           <div className="fd-challenge-caption-actions">
@@ -387,10 +392,11 @@ export function FirstDay() {
   const mobileHeader = portraitReading && position >= 0;
   const cleanReading = mobileHeader && usesCleanReading(page);
   const nextBlocked = cleanReading && page.kind === "Ação" && (counts[page.id] ?? 0) < page.words.length;
-  const cleanReadingClips = cleanReading
+  const cleanReadingClips = cleanReading && page.kind !== "Desafio"
     ? page.kind === "Reação" ? [page.narration] : page.scene === "intro" ? seatedNarration : arrivalNarration
     : null;
   const readingPage = page?.kind === "Tirinha" || page?.kind === "Explicação" ? page : undefined;
+  const cleanStudy = mobileHeader && readingPage?.part === 1;
   const choosingAudio = position < 0;
   const playingCover = narrator.playing === "cover";
   const openMenu = () => menu.current?.showModal();
@@ -513,6 +519,7 @@ export function FirstDay() {
         return <RuleMoment page={page} voice={sound ? narrator : undefined} />;
       case "Desafio":
         return <ChallengeMoment key={page.id} page={page} attempt={attempts[page.id] ?? emptyAttempt} cue={cue} voice={sound ? narrator : undefined}
+          cleanReading={cleanReading}
           onAttempt={attempt => {
             progress.update(previous => ({ ...previous, attempts: { ...previous.attempts, [page.id]: attempt } }));
             if (sound && attempt.result === "correct" && attempts[page.id]?.result !== "correct") {
@@ -525,7 +532,7 @@ export function FirstDay() {
   }
 
   return <main ref={book} className="lo-app fd" data-lesson-theme="comic" style={COMIC_LESSON_STYLE}
-    data-fd-clean-reading={cleanReading || undefined} data-fd-mobile-header={mobileHeader || undefined}
+    data-fd-clean-reading={cleanReading || undefined} data-fd-clean-study={cleanStudy || undefined} data-fd-mobile-header={mobileHeader || undefined}
     data-ui-sound-scope="local" data-first-day-part={page?.part} data-first-day-page={choosingAudio ? "audio" : page?.id ?? "cover"}>
     <header className="lo-header fd-header">
       <div className="lo-brand-row">
@@ -589,7 +596,7 @@ export function FirstDay() {
         <div className="fd-page-title">
           <h1 id="fd-page-title" ref={title} tabIndex={-1}>{page.title}</h1>
           {cleanReadingClips && sound && <NarrationButton clips={cleanReadingClips} player={narrator} language="en" showLabel />}
-          {readingPage && sound && <NarrationButton clips={[readingPage.narration]} player={narrator} language="pt" />}
+          {readingPage && sound && <NarrationButton clips={[readingPage.narration]} player={narrator} language="pt" showLabel={cleanStudy} />}
         </div>
         {readingPage && <p className="fd-reading-note fd-page-description">
           {readingPage.kind === "Tirinha" ? readingPage.description : `${readingPage.lead} ${readingPage.detail}`}
@@ -599,7 +606,7 @@ export function FirstDay() {
       <nav className="fd-nav" aria-label="Navegação da página">
         <button type="button" className="lo-secondary" onClick={() => turnTo(position - 1)}><ArrowLeft size={19} aria-hidden="true" /> Anterior</button>
         <LessonButton disabled={nextBlocked} onClick={() => turnTo(position < pages.length ? position + 1 : 0)}>
-          {page.kind === "Desafio" ? "Continuar a história" : position < pages.length ? "Próxima" : "Voltar à capa"} <ArrowRight size={19} aria-hidden="true" />
+          {page.kind === "Desafio" && !cleanReading ? "Continuar a história" : position < pages.length ? "Próxima" : "Voltar à capa"} <ArrowRight size={19} aria-hidden="true" />
         </LessonButton>
       </nav>
     </section>}

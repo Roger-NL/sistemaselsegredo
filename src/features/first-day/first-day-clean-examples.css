@@ -1,0 +1,79 @@
+.fd[data-fd-clean-study][data-first-day-page="permission-examples"] .fd-workspace > .fd-examples {
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: clamp(6px, 1.2dvh, 12px);
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+}
+
+.fd[data-fd-clean-study][data-first-day-page="permission-examples"] .fd-example {
+  grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+  border: 2px solid var(--fd-reading-ink);
+  border-radius: 3px;
+  background: var(--fd-reading-cream);
+  box-shadow: none;
+}
+
+.fd[data-fd-clean-study][data-first-day-page="permission-examples"] .fd-example-art {
+  border: 0;
+  border-inline-end: 2px solid var(--fd-reading-ink);
+  border-radius: 0;
+  object-position: 55% center;
+}
+
+.fd[data-fd-clean-study][data-first-day-page="permission-examples"] .fd-example:last-child .fd-example-art {
+  object-position: 35% center;
+}
+
+.fd[data-fd-clean-study][data-first-day-page="permission-examples"] .fd-example-copy {
+  grid-template: "label audio" "line line" "translation translation" / minmax(0, 1fr) auto;
+  gap: clamp(3px, 1vw, 6px);
+  padding: 5px clamp(7px, 2.35vw, 15px);
+  color: var(--fd-reading-ink);
+}
+
+.fd[data-fd-clean-study][data-first-day-page="permission-examples"] .fd-example-label {
+  grid-area: label;
+  color: var(--fd-reading-header);
+  font-size: clamp(11px, 3.3vw, 16px);
+  font-weight: 700;
+}
+
+.fd[data-fd-clean-study][data-first-day-page="permission-examples"] .fd-example-line {
+  grid-area: line;
+  font-size: clamp(16px, 4.9vw, 24px);
+  line-height: 1.08;
+}
+
+.fd[data-fd-clean-study][data-first-day-page="permission-examples"] .fd-example-translation {
+  grid-area: translation;
+  color: #3d5d55;
+  font-size: clamp(12px, 3.65vw, 17px);
+  line-height: 1.14;
+}
+
+.fd[data-fd-clean-study][data-first-day-page="permission-examples"] .fd-example-audio {
+  grid-area: audio;
+  position: relative;
+  width: clamp(30px, 8.2vw, 38px);
+  height: clamp(30px, 8.2vw, 38px);
+  padding: 0;
+  border-color: var(--fd-reading-ink);
+  border-radius: 50%;
+  background: var(--fd-reading-paper);
+  color: var(--fd-reading-ink);
+}
+
+.fd[data-fd-clean-study][data-first-day-page="permission-examples"] .fd-example-audio::before {
+  position: absolute;
+  inset: -4px;
+  content: "";
+}
+
+.fd[data-fd-clean-study][data-first-day-page="permission-examples"] .fd-example-audio[aria-pressed="true"] {
+  background: var(--fd-reading-header);
+  color: var(--fd-reading-cream);
+}

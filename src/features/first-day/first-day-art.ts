@@ -7,8 +7,8 @@ function sceneArt(page: FirstDayPage, portrait: boolean) {
       const image = storyImage(page, cleanReading);
       return !cleanReading && page.detail ? [image.src, page.detail.src] : [image.src];
     }
-    case "Reação": return [storyImage(page, cleanReading).src];
-    case "Desafio": return [page.image.src];
+    case "Reação":
+    case "Desafio": return [storyImage(page, cleanReading).src];
     case "Tirinha": return page.panels.map(panel => panel.image.src);
     case "Explicação": return page.examples.map(example => example.image.src);
     case "Em preparação": return [];
