@@ -1,7 +1,11 @@
 @media (max-width: 599px), (max-width: 759px) and (orientation: portrait) {
   .fd-story {
     /* Keep a common frame above the space reserved for practice controls. */
-    --fd-story-panel-height: clamp(178px, calc(100cqh - clamp(150px, 20dvh, 172px)), calc(110cqw + 44px));
+    --fd-story-base-height: clamp(178px, calc(100cqh - clamp(150px, 20dvh, 172px)), calc(110cqw + 44px));
+    --fd-story-panel-height: min(
+      calc(var(--fd-story-base-height) + (var(--fd-story-base-height) - var(--fd-story-caption-height)) * .1),
+      max(178px, calc(100cqh - clamp(142px, 19dvh, 164px)))
+    );
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: var(--fd-story-panel-height);
     gap: var(--fd-page-gap);
@@ -19,6 +23,10 @@
     margin-block: 0;
   }
   .fd-story .fd-scene[data-scene="challenge"] .fd-room { object-position: 78% 40%; }
+  .fd-story .fd-scene[data-scene="sit"] .fd-room { object-position: center 41%; }
+  .fd-story .fd-caption { line-height: 1.28; }
+  .fd-story.fd-challenge { row-gap: 3px; }
+  .fd-challenge .fd-feedback { padding-block: 2px; line-height: 1.18; }
 
   .fd-workspace > .fd-examples {
     grid-template-rows: repeat(3, minmax(0, 1fr));
@@ -61,8 +69,6 @@
 
 @media (max-width: 345px) and (max-height: 660px) {
   .fd-story { --fd-story-caption-height: 94px; }
-  .fd-story.fd-challenge { row-gap: 3px; }
-  .fd-challenge .fd-feedback { padding-block: 3px; }
 }
 
 @media (max-width: 345px) and (max-height: 600px) {
@@ -73,4 +79,18 @@
 @media (max-width: 599px) and (min-height: 600px) and (orientation: portrait) {
   .fd-reaction .fd-scene[data-scene="reaction"] .fd-reply { --mouth-x: 30%; }
   .fd[data-first-day-page="ana-introduces-herself"] .fd-scene[data-scene="reaction"] .fd-reply { --mouth-x: 23%; }
+}
+
+.fd-art-status {
+  position: absolute;
+  z-index: 4;
+  inset: auto var(--fd-gutter) max(68px, 9dvh) auto;
+  max-width: calc(100% - 2 * var(--fd-gutter));
+  padding: 6px 10px;
+  border: 1px solid var(--teal);
+  border-radius: var(--fd-corners);
+  background: var(--fd-panel);
+  color: var(--ink);
+  font-size: 15px;
+  pointer-events: none;
 }

@@ -29,6 +29,7 @@ export type LessonSoundsOptions = {
   isHidden?: () => boolean;
   now?: () => number;
   getStorage?: () => SoundStorage | undefined;
+  playbackRate?: number;
   /** Observes emitted cues, not requests; useful for isolated orchestration QA. */
   onCue?: (cue: LessonSoundCue) => void;
 };
@@ -52,6 +53,7 @@ export function createLessonSoundsEngine(options: LessonSoundsOptions = {}) {
   const now = options.now ?? (() => Date.now());
   const hidden = options.isHidden ?? (() => typeof document !== "undefined" && document.hidden);
   const storage = options.getStorage ?? browserStorage;
+  const rate = options.playbackRate ?? 1;
   const owners = new Set<symbol>();
   const subscribers = new Set<() => void>();
   let context: AudioContext | null = null;
@@ -154,14 +156,14 @@ export function createLessonSoundsEngine(options: LessonSoundsOptions = {}) {
         const envelope = context!.createGain();
         oscillators.push(oscillator); envelopes.push(envelope);
         oscillator.type = "sine";
-        const from = start + tone.delay;
-        const end = from + tone.duration;
+        const from = start + tone.delay / rate;
+        const end = from + tone.duration / rate;
         oscillator.frequency.setValueAtTime(tone.frequency, from);
         if (tone.to) oscillator.frequency.exponentialRampToValueAtTime(tone.to, end);
         envelope.gain.setValueAtTime(0, from);
-        envelope.gain.linearRampToValueAtTime(tone.gain, from + 0.004);
-        if (cue === "success" || cue === "retry") envelope.gain.setValueAtTime(tone.gain, from + 0.035);
-        envelope.gain.exponentialRampToValueAtTime(0.0001, end - 0.004);
+        envelope.gain.linearRampToValueAtTime(tone.gain, from + 0.004 / rate);
+        if (cue === "success" || cue === "retry") envelope.gain.setValueAtTime(tone.gain, from + 0.035 / rate);
+        envelope.gain.exponentialRampToValueAtTime(0.0001, end - 0.004 / rate);
         envelope.gain.linearRampToValueAtTime(0, end);
         oscillator.connect(envelope); envelope.connect(group);
         oscillator.onended = () => { if (--remaining === 0) sound.clean(); };

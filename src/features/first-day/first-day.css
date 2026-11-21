@@ -23,6 +23,10 @@
   font-display: swap;
 }
 
+html:has(.lo-app.fd), body:has(.lo-app.fd) {
+  overscroll-behavior-y: none;
+}
+
 .lo-app.fd[data-lesson-theme="comic"] {
   --comic-body: "First Day Barlow", Arial, sans-serif;
   --comic-reading-ink: #46554c;

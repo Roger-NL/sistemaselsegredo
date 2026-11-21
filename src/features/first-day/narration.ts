@@ -1,3 +1,5 @@
+export const FIRST_DAY_AUDIO_RATE = 1.3;
+
 export const coverCopy = {
   title: "First Day",
   subtitle: ["Uma cadeira livre.", "Uma primeira conversa em inglês."],

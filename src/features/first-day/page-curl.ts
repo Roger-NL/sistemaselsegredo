@@ -1,23 +1,128 @@
 type Point = { x: number; y: number; depth: number; reverse: boolean };
 
-export function capturePanel(image: HTMLImageElement | null): HTMLCanvasElement | null {
-  if (!image?.naturalWidth) return null;
-  const { width, height } = image.getBoundingClientRect();
+const paperColor = "#fff7e8";
+
+export function getTurnPanel(book: HTMLElement | null): HTMLElement | null {
+  const panel = book?.querySelector<HTMLElement>(".fd-scene, .fd-examples, .fd-rule, .fd-cover .fd-panels");
+  return panel?.getClientRects().length ? panel : panel?.querySelector(".fd-rule-examples") ?? null;
+}
+
+export function capturePanel(panel: HTMLElement | null): HTMLCanvasElement | null {
+  if (!panel) return null;
+  const bounds = panel.getBoundingClientRect();
+  const { width, height } = bounds;
   if (!width || !height) return null;
+  const images = [...panel.querySelectorAll("img")].filter(image => image.complete && image.naturalWidth);
+  if (!images.length) return null;
+
   const canvas = document.createElement("canvas");
   const resolution = Math.min(1.4, 950 / Math.max(width, height));
   canvas.width = Math.round(width * resolution);
   canvas.height = Math.round(height * resolution);
   const context = canvas.getContext("2d");
   if (!context) return null;
-  const style = getComputedStyle(image);
-  const [horizontal = "50%", vertical = "50%"] = style.objectPosition.split(" ");
+
+  context.scale(resolution, resolution);
+  context.fillStyle = paperColor;
+  context.fillRect(0, 0, width, height);
   const align = (value: string) => value.endsWith("%") ? Number.parseFloat(value) / 100 : .5;
-  const scale = Math.max(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
-  const scaledWidth = image.naturalWidth * scale;
-  const scaledHeight = image.naturalHeight * scale;
-  context.drawImage(image, (canvas.width - scaledWidth) * align(horizontal), (canvas.height - scaledHeight) * align(vertical), scaledWidth, scaledHeight);
+
+  for (const image of images) {
+    const rect = image.getBoundingClientRect();
+    if (!rect.width || !rect.height) continue;
+    const x = rect.left - bounds.left;
+    const y = rect.top - bounds.top;
+    const { objectPosition, objectFit } = getComputedStyle(image);
+    const [horizontal = "50%", vertical = "50%"] = objectPosition.split(" ");
+    const scale = objectFit === "contain"
+      ? Math.min(rect.width / image.naturalWidth, rect.height / image.naturalHeight)
+      : Math.max(rect.width / image.naturalWidth, rect.height / image.naturalHeight);
+    const fittedWidth = objectFit === "fill" ? rect.width : image.naturalWidth * scale;
+    const fittedHeight = objectFit === "fill" ? rect.height : image.naturalHeight * scale;
+
+    context.save();
+    context.beginPath();
+    context.rect(x, y, rect.width, rect.height);
+    context.clip();
+    context.drawImage(image,
+      x + (rect.width - fittedWidth) * align(horizontal),
+      y + (rect.height - fittedHeight) * align(vertical),
+      fittedWidth, fittedHeight);
+    context.restore();
+  }
+
   return canvas;
+}
+
+function fitFront(source: HTMLCanvasElement, width: number, height: number) {
+  if (width === source.width && height === source.height) return source;
+  const front = document.createElement("canvas");
+  front.width = width;
+  front.height = height;
+  const context = front.getContext("2d");
+  if (!context) return source;
+  const scale = Math.min(width / source.width, height / source.height);
+  const fittedWidth = source.width * scale;
+  const fittedHeight = source.height * scale;
+  context.fillStyle = paperColor;
+  context.fillRect(0, 0, width, height);
+  context.drawImage(source, (width - fittedWidth) / 2, (height - fittedHeight) / 2, fittedWidth, fittedHeight);
+  return front;
+}
+
+function printReverse(width: number, height: number, direction: number, normalX: number, normalY: number) {
+  const reverse = document.createElement("canvas");
+  reverse.width = width;
+  reverse.height = height;
+  const ink = reverse.getContext("2d");
+  if (!ink) return reverse;
+
+  ink.fillStyle = paperColor;
+  ink.fillRect(0, 0, width, height);
+  ink.translate(width * (direction > 0 ? .70 : .30), height * .65);
+  // Compensate the mirrored coordinates of the fold so the stamp reads from its back.
+  ink.rotate(direction * (2 * Math.atan2(normalY, normalX) - .13));
+  ink.scale(-1, 1);
+
+  const stampWidth = Math.min(width * .36, height * .91);
+  const fontSize = stampWidth / 7.4;
+  const left = -stampWidth / 2;
+  const top = -fontSize * .77;
+  const font = `${fontSize}px "First Day Barlow", Arial, sans-serif`;
+  ink.lineWidth = fontSize * .04;
+  ink.strokeStyle = "#39776b";
+  ink.fillStyle = "#efc653";
+  ink.globalAlpha = .24;
+  ink.beginPath();
+  ink.roundRect(left + fontSize * .12, top + fontSize * .12, stampWidth, fontSize * 1.54, fontSize * .13);
+  ink.fill();
+  ink.globalAlpha = .66;
+  ink.beginPath();
+  ink.roundRect(left, top, stampWidth, fontSize * 1.54, fontSize * .13);
+  ink.stroke();
+
+  ink.globalAlpha = .92;
+  ink.fillStyle = "#365f56";
+  const barUnit = fontSize / 23;
+  const bars = [12, 23, 18, 9];
+  bars.forEach((length, index) => {
+    ink.save();
+    ink.translate(left + fontSize * .41 + index * 6 * barUnit, 0);
+    ink.rotate(.31);
+    ink.beginPath();
+    ink.roundRect(-1.5 * barUnit, -length * barUnit / 2, 3 * barUnit, length * barUnit, 1.5 * barUnit);
+    ink.fill();
+    ink.restore();
+  });
+
+  const textLeft = left + fontSize * 1.51;
+  ink.textBaseline = "middle";
+  ink.font = `700 ${font}`;
+  ink.fillText("based", textLeft, 0);
+  const basedWidth = ink.measureText("based").width;
+  ink.font = `400 ${font}`;
+  ink.fillText("speak.", textLeft + basedWidth, 0);
+  return reverse;
 }
 
 export function curlPanel(canvas: HTMLCanvasElement, source: HTMLCanvasElement, direction: number) {
@@ -34,6 +139,8 @@ export function curlPanel(canvas: HTMLCanvasElement, source: HTMLCanvasElement, 
   const cellHeight = height / rows;
   const normalX = .89;
   const normalY = .456;
+  const front = fitFront(source, width, height);
+  const back = printReverse(width, height, direction, normalX, normalY);
   const corner = width * normalX + height * normalY;
   const radius = Math.min(width, height) * .13;
   const sweep = corner + radius * 2;
@@ -66,22 +173,17 @@ export function curlPanel(canvas: HTMLCanvasElement, source: HTMLCanvasElement, 
     paper.lineTo(third.x, third.y);
     paper.closePath();
     paper.clip();
-    if (reverse) {
-      const tint = Math.round(254 - Math.min(32, depth * .28));
-      paper.fillStyle = `rgb(${tint} ${tint - 4} ${tint - 15})`;
-      paper.fillRect(-width, -height, width * 3, height * 3);
-    } else {
-      const denominator = (nextU - u) * (lastV - v) - (lastU - u) * (nextV - v);
-      const mapX = ((second.x - first.x) * (lastV - v) - (third.x - first.x) * (nextV - v)) / denominator;
-      const mapY = ((second.y - first.y) * (lastV - v) - (third.y - first.y) * (nextV - v)) / denominator;
-      const shearX = ((third.x - first.x) * (nextU - u) - (second.x - first.x) * (lastU - u)) / denominator;
-      const shearY = ((third.y - first.y) * (nextU - u) - (second.y - first.y) * (lastU - u)) / denominator;
-      paper.transform(mapX, mapY, shearX, shearY, first.x - mapX * u - shearX * v, first.y - mapY * u - shearY * v);
-      paper.drawImage(source, 0, 0, width, height);
-      if (depth > 0) {
-        paper.fillStyle = `rgb(48 35 18 / ${Math.min(.23, depth / radius * .18)})`;
-        paper.fillRect(0, 0, width, height);
-      }
+    const denominator = (nextU - u) * (lastV - v) - (lastU - u) * (nextV - v);
+    const mapX = ((second.x - first.x) * (lastV - v) - (third.x - first.x) * (nextV - v)) / denominator;
+    const mapY = ((second.y - first.y) * (lastV - v) - (third.y - first.y) * (nextV - v)) / denominator;
+    const shearX = ((third.x - first.x) * (nextU - u) - (second.x - first.x) * (lastU - u)) / denominator;
+    const shearY = ((third.y - first.y) * (nextU - u) - (second.y - first.y) * (lastU - u)) / denominator;
+    paper.transform(mapX, mapY, shearX, shearY, first.x - mapX * u - shearX * v, first.y - mapY * u - shearY * v);
+    paper.drawImage(reverse ? back : front, 0, 0, width, height);
+    if (depth > 0) {
+      const shade = Math.min(.23, depth / radius * (reverse ? .07 : .18));
+      paper.fillStyle = `rgb(48 35 18 / ${shade})`;
+      paper.fillRect(0, 0, width, height);
     }
     paper.restore();
   }
@@ -113,7 +215,7 @@ export function curlPanel(canvas: HTMLCanvasElement, source: HTMLCanvasElement, 
       flat.slice(1).forEach(([x, y]) => context!.lineTo(x, y));
       context!.closePath();
       context!.clip();
-      context!.drawImage(source, 0, 0, width, height);
+      context!.drawImage(front, 0, 0, width, height);
       context!.restore();
     }
     const mesh = Array.from({ length: rows + 1 }, (_, row) =>

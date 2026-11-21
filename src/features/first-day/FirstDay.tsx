@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import { ArrowLeft, ArrowRight, Check, MoreHorizontal, Pause, Volume2, VolumeX, X } from "lucide-react";
 import { Brand } from "@/components/ui/Brand";
@@ -11,12 +11,16 @@ import { DragSource, DropTarget, LessonDragProvider } from "../first-encounters/
 import { createLessonSoundsEngine } from "../first-encounters/lesson-sounds";
 import type { LessonSoundCue } from "../first-encounters/lesson-sounds";
 import { useLessonSounds } from "../first-encounters/useLessonSounds";
-import { art, pages } from "./content";
+import { art, coverSources, pages } from "./content";
 import type { ChallengePage, CharacterReply, ExamplesPage, FirstDayArt, GuidedPage, ReactionPage, RulePage, WordSequence } from "./content";
-import { capturePanel, curlPanel } from "./page-curl";
-import { arrivalNarration, coverCopy, coverNarration, dialogue, seatedNarration, narration } from "./narration";
+import { createFirstDayArtCache } from "./first-day-art";
+import { createFirstDayProgressStore, type ChallengeAttempt } from "./first-day-progress";
+import { capturePanel, curlPanel, getTurnPanel } from "./page-curl";
+import { arrivalNarration, coverCopy, coverNarration, dialogue, FIRST_DAY_AUDIO_RATE, seatedNarration, narration } from "./narration";
 import type { DialogueClip, FirstDayVoiceClip, NarrationClip } from "./narration";
 import { useFirstDayNarration } from "./useFirstDayNarration";
+import { useFirstDayPaperSound } from "./useFirstDayPaperSound";
+import { useFirstDayPullToRefresh } from "./useFirstDayPullToRefresh";
 import "../first-encounters/lesson-one.css";
 import "../first-encounters/lesson-comic-theme.css";
 import "./first-day.css";
@@ -25,7 +29,7 @@ import "./first-day-spacing.css";
 import "./first-day-spread.css";
 import "./first-day-turn.css";
 
-const previewSounds = createLessonSoundsEngine({ getStorage: () => undefined });
+const previewSounds = createLessonSoundsEngine({ getStorage: () => undefined, playbackRate: FIRST_DAY_AUDIO_RATE });
 const bubbleTarget = "first-day-bubble";
 type VoicePlayer = ReturnType<typeof useFirstDayNarration>;
 
@@ -70,9 +74,9 @@ function ComicPanels({ image, detail }: {
 }) {
   return <div className="fd-panels">
     <Image src={image.src} width={image.width} height={image.height} alt={image.alt}
-      className="fd-room" unoptimized />
+      className="fd-room" loading="eager" unoptimized />
     {detail && <Image src={detail.src} width={detail.width} height={detail.height} alt={detail.alt}
-      className="fd-detail" unoptimized />}
+      className="fd-detail" loading="eager" unoptimized />}
   </div>;
 }
 
@@ -214,7 +218,7 @@ function ExamplesMoment({ page, voice }: { page: ExamplesPage; voice?: VoicePlay
   return <section className="fd-examples" aria-label="Pedidos em três situações">
     {page.panels.map(panel => <figure className="fd-example" key={panel.line}>
       <Image src={panel.image.src} width={panel.image.width} height={panel.image.height} alt={panel.image.alt}
-        className="fd-example-art" unoptimized />
+        className="fd-example-art" loading="eager" unoptimized />
       <figcaption className="fd-example-copy">
         <span className="fd-example-label">{panel.context}</span>
         {voice && <SpeakButton className="fd-narration-control fd-example-audio" clip={panel.voice} player={voice}>
@@ -252,7 +256,7 @@ function RuleMoment({ page, voice }: { page: RulePage; voice?: VoicePlayer }) {
         </>;
         return <li className="fd-rule-example" key={example.translation}>
           <Image src={example.image.src} width={example.image.width} height={example.image.height} alt=""
-            className="fd-rule-example-art" unoptimized />
+            className="fd-rule-example-art" loading="eager" unoptimized />
           {voice ? <SpeakButton className="fd-rule-example-copy fd-spoken-rule" clip={example.voice} player={voice} descriptionId={translationId}>
             {copy}
             <VoiceIcon className="fd-rule-example-icon" size={16} aria-hidden="true" />
@@ -263,7 +267,6 @@ function RuleMoment({ page, voice }: { page: RulePage; voice?: VoicePlayer }) {
   </section>;
 }
 
-type ChallengeAttempt = { placed: readonly number[]; result?: "correct" | "incorrect" };
 const emptyAttempt: ChallengeAttempt = { placed: [] };
 
 function ChallengeMoment({ page, attempt, onAttempt, cue, voice }: {
@@ -274,35 +277,34 @@ function ChallengeMoment({ page, attempt, onAttempt, cue, voice }: {
   voice?: VoicePlayer;
 }) {
   const [reset, setReset] = useState(0);
-  const [translated, setTranslated] = useState(false);
-  const { placed, result } = attempt;
+  const { placed, result, translated = false } = attempt;
   const full = placed.length === page.words.length;
   const instructionLanguage = translated ? "pt" : "en";
   const instructionClip = page.instruction[instructionLanguage];
   const translationLabel = translated ? "Voltar à instrução em inglês" : "Ver tradução da instrução em português";
 
   function toggleTranslation() {
-    setTranslated(!translated);
+    onAttempt({ ...attempt, translated: !translated });
     voice?.play([page.instruction[translated ? "en" : "pt"]]);
   }
 
   function place(value: string) {
     const index = Number(value);
     if (full || placed.includes(index)) return;
-    onAttempt({ placed: [...placed, index] });
+    onAttempt({ placed: [...placed, index], translated });
     cue("place");
   }
 
   function check() {
     if (!full) return;
     const correct = placed.every((index, slot) => page.words[index] === page.words[slot]);
-    onAttempt({ placed, result: correct ? "correct" : "incorrect" });
+    onAttempt({ placed, result: correct ? "correct" : "incorrect", translated });
     if (!correct || !voice) cue(correct ? "success" : "retry");
   }
 
   function clear() {
     voice?.stop();
-    onAttempt(emptyAttempt);
+    onAttempt({ ...emptyAttempt, translated });
     setReset(previous => previous + 1);
   }
 
@@ -341,21 +343,25 @@ function ChallengeMoment({ page, attempt, onAttempt, cue, voice }: {
 }
 
 export function FirstDay() {
-  const [position, setPosition] = useState(-1);
-  const [counts, setCounts] = useState<Record<string, number>>({});
-  const [attempts, setAttempts] = useState<Record<string, ChallengeAttempt>>({});
-  const [sound, setSound] = useState(false);
+  const [progress] = useState(createFirstDayProgressStore);
+  const [imageCache] = useState(createFirstDayArtCache);
+  const [artStatus, setArtStatus] = useState<"loading" | "retry" | null>(null);
+  const navigationRequest = useRef({ id: 0 });
+  const { position, counts, attempts, sound } = useSyncExternalStore(
+    progress.subscribe, progress.getSnapshot, progress.getServerSnapshot,
+  );
   const menu = useRef<HTMLDialogElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
   const book = useRef<HTMLElement>(null);
   const turnSheet = useRef<HTMLCanvasElement>(null);
   const cancelTurn = useRef<(() => void) | null>(null);
   const nextTurn = useRef<{ direction: number; source: HTMLCanvasElement } | null>(null);
-  const paperSound = useRef<HTMLAudioElement | null>(null);
+  const paperSound = useFirstDayPaperSound();
+  useFirstDayPullToRefresh(book);
   const sounds = useLessonSounds(previewSounds);
   const speech = useFirstDayNarration();
   const narrator = { ...speech, play(clips: readonly FirstDayVoiceClip[]) {
-    paperSound.current?.pause();
+    paperSound.stop();
     speech.play(clips);
   } };
   const page = pages[position - 1];
@@ -364,6 +370,11 @@ export function FirstDay() {
   const playingCover = narrator.playing === "cover";
   const openMenu = () => menu.current?.showModal();
 
+  useEffect(() => {
+    const requests = navigationRequest.current;
+    imageCache.warm();
+    return () => { requests.id++; };
+  }, [imageCache]);
   useEffect(() => { title.current?.focus({ preventScroll: true }); }, [position]);
   useLayoutEffect(() => {
     const turn = nextTurn.current;
@@ -371,8 +382,7 @@ export function FirstDay() {
     const root = book.current;
     const sheet = turnSheet.current;
     if (!turn || !root || !sheet || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const frame = root.querySelector(".fd-scene, .fd-examples, .fd-rule, .fd-cover .fd-panels");
-    const panel = frame?.getClientRects().length ? frame : frame?.querySelector(".fd-rule-examples");
+    const panel = getTurnPanel(root);
     if (!panel) return;
     const bounds = panel.getBoundingClientRect();
     const origin = root.getBoundingClientRect();
@@ -386,7 +396,6 @@ export function FirstDay() {
   }, [position]);
   useEffect(() => () => {
     cancelTurn.current?.();
-    paperSound.current?.pause();
   }, []);
 
   function cue(effect: LessonSoundCue) {
@@ -397,11 +406,10 @@ export function FirstDay() {
     menu.current?.close();
     if (next === position) return;
     narrator.stop();
-    paperSound.current?.pause();
+    paperSound.stop();
     cancelTurn.current?.();
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      const image = book.current?.querySelector<HTMLImageElement>(".fd-room, .fd-example-art, .fd-rule-example-art") ?? null;
-      const source = capturePanel(image);
+      const source = capturePanel(getTurnPanel(book.current));
       if (source) nextTurn.current = { direction: next > position ? 1 : -1, source };
     }
     const nextPage = pages[next - 1];
@@ -415,27 +423,50 @@ export function FirstDay() {
     } else if (nextPage?.kind === "Tirinha" || nextPage?.kind === "Explicação") {
       clips = [nextPage.narration];
     } else if (nextPage?.kind === "Desafio") {
-      clips = [nextPage.instruction.en];
+      clips = [nextPage.instruction[attempts[nextPage.id]?.translated ? "pt" : "en"]];
     }
     if (audioEnabled && clips.length) {
       narrator.play(clips);
     }
     if (audioEnabled && position >= 0 && next >= 0 && !document.hidden) {
-      const audio = paperSound.current ??= new Audio("/first-day/page-turn.wav");
-      audio.currentTime = 0;
-      audio.volume = clips.length ? .22 : .34;
-      void audio.play().catch(() => {});
+      paperSound.play(clips.length > 0);
     }
-    setPosition(next);
+    progress.update(previous => ({
+      ...previous,
+      position: next,
+      sound: next < 0 ? previous.sound : audioEnabled,
+    }));
     window.scrollTo(0, 0);
   }
 
   function start(enabled: boolean) {
-    setCounts({});
-    setAttempts({});
-    setSound(enabled);
-    if (enabled) void sounds.unlock();
+    if (enabled) {
+      void sounds.unlock();
+      paperSound.prepare();
+    }
     go(0, enabled);
+  }
+
+  function turnTo(next: number) {
+    menu.current?.close();
+    if (sound && next >= 0) paperSound.prepare();
+    const request = ++navigationRequest.current.id;
+    const loading = imageCache.prepare(next);
+    if (!loading || next === position) {
+      setArtStatus(null);
+      go(next);
+      return;
+    }
+    setArtStatus("loading");
+    void loading.then(ready => {
+      if (request !== navigationRequest.current.id) return;
+      if (ready.every(Boolean)) {
+        setArtStatus(null);
+        go(next);
+      } else {
+        setArtStatus("retry");
+      }
+    });
   }
 
   function renderMoment() {
@@ -444,7 +475,7 @@ export function FirstDay() {
       case "Ação":
         return <GuidedMoment key={page.id} page={page} count={counts[page.id] ?? 0} cue={cue} narrator={narrator} audioEnabled={sound}
           onPlace={count => {
-            setCounts(previous => ({ ...previous, [page.id]: count }));
+            progress.update(previous => ({ ...previous, counts: { ...previous.counts, [page.id]: count } }));
             if (sound && count === page.words.length) {
               narrator.play([page.voice]);
             }
@@ -458,8 +489,10 @@ export function FirstDay() {
       case "Desafio":
         return <ChallengeMoment key={page.id} page={page} attempt={attempts[page.id] ?? emptyAttempt} cue={cue} voice={sound ? narrator : undefined}
           onAttempt={attempt => {
-            setAttempts(previous => ({ ...previous, [page.id]: attempt }));
-            if (sound && attempt.result === "correct") narrator.play([page.voice, page.translationVoice]);
+            progress.update(previous => ({ ...previous, attempts: { ...previous.attempts, [page.id]: attempt } }));
+            if (sound && attempt.result === "correct" && attempts[page.id]?.result !== "correct") {
+              narrator.play([page.voice, page.translationVoice]);
+            }
           }} />;
       case "Em preparação":
         return <section className="fd-placeholder"><p>{page.partTitle}</p><strong>Atividade em preparação.</strong></section>;
@@ -481,9 +514,9 @@ export function FirstDay() {
         <h2 id="fd-menu-title">Percurso</h2>
         <button type="button" className="lo-icon" aria-label="Fechar menu" onClick={() => menu.current?.close()}><X size={20} aria-hidden="true" /></button>
       </div>
-      <button type="button" onClick={() => go(0)} aria-current={position === 0 ? "page" : undefined}>Capa</button>
+      <button type="button" onClick={() => turnTo(0)} aria-current={position === 0 ? "page" : undefined}>Capa</button>
       <ol>{pages.map((item, index) => <li key={item.id}>
-        <button type="button" onClick={() => go(index + 1)} aria-current={position === index + 1 ? "page" : undefined}>
+        <button type="button" onClick={() => turnTo(index + 1)} aria-current={position === index + 1 ? "page" : undefined}>
           {item.kind === "Em preparação" ? item.moment : item.kind} · {item.title}
         </button>
       </li>)}</ol>
@@ -500,8 +533,7 @@ export function FirstDay() {
       </div>
     </section> : !page ? <section className="fd-cover" aria-labelledby="fd-cover-title">
       <picture className="fd-panels">
-        <source media="(min-aspect-ratio: 4/3)" srcSet="/first-day/capa-gibi-desktop.jpg" />
-        <source media="(max-aspect-ratio: 5/8)" srcSet="/first-day/capa-gibi-mobile.jpg" />
+        {coverSources.map(({ media, src }) => <source key={src} media={media} srcSet={src} />)}
         <Image src={art.cover.src} width={art.cover.width} height={art.cover.height} alt={art.cover.alt}
           className="fd-room" loading="eager" unoptimized />
       </picture>
@@ -518,8 +550,8 @@ export function FirstDay() {
           </button>
         </div>}
         <div className="fd-start fd-cover-nav">
-          <button type="button" className="lo-secondary" aria-label="Trocar modo de áudio" onClick={() => go(-1, false)}>Modo de áudio</button>
-          <LessonButton onClick={() => go(1)}>{coverCopy.start} <ArrowRight size={18} aria-hidden="true" /></LessonButton>
+          <button type="button" className="lo-secondary" aria-label="Trocar modo de áudio" onClick={() => turnTo(-1)}>Modo de áudio</button>
+          <LessonButton onClick={() => turnTo(1)}>{coverCopy.start} <ArrowRight size={18} aria-hidden="true" /></LessonButton>
         </div>
       </div>
     </section> : <section className="fd-page" aria-labelledby="fd-page-title">
@@ -538,12 +570,15 @@ export function FirstDay() {
       </div>
       <div key={page.id} className="fd-workspace">{renderMoment()}</div>
       <nav className="fd-nav" aria-label="Navegação da página">
-        <button type="button" className="lo-secondary" onClick={() => go(position - 1)}><ArrowLeft size={19} aria-hidden="true" /> Anterior</button>
-        <LessonButton onClick={() => go(position < pages.length ? position + 1 : 0)}>
+        <button type="button" className="lo-secondary" onClick={() => turnTo(position - 1)}><ArrowLeft size={19} aria-hidden="true" /> Anterior</button>
+        <LessonButton onClick={() => turnTo(position < pages.length ? position + 1 : 0)}>
           {page.kind === "Desafio" ? "Continuar a história" : position < pages.length ? "Próxima" : "Voltar à capa"} <ArrowRight size={19} aria-hidden="true" />
         </LessonButton>
       </nav>
     </section>}
+    {artStatus && <output className="fd-art-status" aria-live="polite">
+      {artStatus === "loading" ? "Carregando o quadro…" : "A imagem ainda não carregou. Tente virar de novo."}
+    </output>}
     <canvas ref={turnSheet} className="fd-turn-sheet" aria-hidden="true" />
   </main>;
 }

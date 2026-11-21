@@ -8,41 +8,46 @@ export type FirstDayArt = {
   alt: string;
 };
 
+export const coverSources = [
+  { media: "(min-aspect-ratio: 4/3)", src: "/first-day/art-v1/capa-gibi-desktop.webp" },
+  { media: "(max-aspect-ratio: 5/8)", src: "/first-day/art-v1/capa-gibi-mobile.webp" },
+] as const;
+
 export const art = {
   cover: {
-    src: "/first-day/capa-gibi-vertical.jpg", width: 1086, height: 1448,
+    src: "/first-day/art-v1/capa-gibi-vertical.webp", width: 1024, height: 1365,
     alt: "Roger, Ana e Leo se reúnem na cafeteria em volta de um gibi de aventura.",
   },
   arrival: {
-    src: "/first-day/panorama-flor.jpg", width: 640, height: 592,
+    src: "/first-day/art-v1/panorama-flor.webp", width: 640, height: 592,
     alt: "Ana lê um gibi na cafeteria. Há uma cadeira amarela livre ao lado dela.",
   },
   chair: {
-    src: "/first-day/cadeira.jpg", width: 248, height: 201,
+    src: "/first-day/art-v1/cadeira.webp", width: 248, height: 201,
     alt: "Detalhe da cadeira amarela ao lado de Ana.",
   },
   invitation: {
-    src: "/first-day/resposta.jpg", width: 1152, height: 768,
+    src: "/first-day/art-v1/resposta.webp", width: 1024, height: 683,
     alt: "Ana olha para você e indica a cadeira livre. Você ainda segura a bandeja.",
   },
   anaMakesRoom: {
-    src: "/first-day/ana-afasta-bolsa.jpg", width: 1152, height: 768,
+    src: "/first-day/art-v1/ana-afasta-bolsa.webp", width: 1024, height: 683,
     alt: "Ana ergue a bolsa pela alça e deixa a cadeira amarela livre. Você ainda segura a bandeja.",
   },
   seated: {
-    src: "/first-day/apresente-se.jpg", width: 1152, height: 768,
+    src: "/first-day/art-v1/apresente-se.webp", width: 1024, height: 683,
     alt: "Do seu lugar à mesa, você vê Ana de perto e o gibi aberto. Sua bandeja já está apoiada.",
   },
   anaIntroducesHerself: {
-    src: "/first-day/ana-se-apresenta.jpg", width: 1152, height: 768,
+    src: "/first-day/art-v1/ana-se-apresenta.webp", width: 1024, height: 683,
     alt: "Ana olha para você, sorri e leva uma mão ao peito enquanto se apresenta. O gibi continua aberto.",
   },
   window: {
-    src: "/first-day/janela.jpg", width: 1152, height: 768,
+    src: "/first-day/art-v1/janela.webp", width: 1024, height: 683,
     alt: "Na cafeteria, você aponta para o trinco da janela fechada. Ana olha para você.",
   },
   door: {
-    src: "/first-day/porta.jpg", width: 1152, height: 768,
+    src: "/first-day/art-v1/porta.webp", width: 1024, height: 683,
     alt: "Ana está ao lado da porta aberta, e sua mão se aproxima da maçaneta.",
   },
 } satisfies Record<string, FirstDayArt>;

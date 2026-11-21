@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { firstDayVoiceUrl } from "./narration";
+import { FIRST_DAY_AUDIO_RATE, firstDayVoiceUrl } from "./narration";
 import type { FirstDayVoiceClip } from "./narration";
 
 export function useFirstDayNarration() {
@@ -23,6 +23,8 @@ export function useFirstDayNarration() {
     stop();
     if (!clips.length || document.hidden) return;
     const player = audio.current ??= new Audio();
+    player.defaultPlaybackRate = FIRST_DAY_AUDIO_RATE;
+    player.preservesPitch = true;
     const sequence = generation.current;
     function finish() {
       if (generation.current !== sequence) return;
@@ -35,6 +37,7 @@ export function useFirstDayNarration() {
       const clip = clips[index];
       if (!clip || document.hidden) { finish(); return; }
       player.src = firstDayVoiceUrl(clip);
+      player.playbackRate = FIRST_DAY_AUDIO_RATE;
       player.onended = () => next(index + 1);
       player.onerror = finish;
       setPlaying(clip);
