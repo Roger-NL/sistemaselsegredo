@@ -78,12 +78,25 @@ export function createFirstDayArtCache() {
 
   return {
     warm(position: number) {
-      const upcoming = firstDayArtFor(Math.max(0, position) + 1);
+      const next = Math.max(0, position) + 1;
+      const upcoming = firstDayArtFor(next);
+      // Reaction pages can be turned immediately. Get the page beyond them
+      // ready while the reader is still on the cover or doing the exercise.
+      const followUp = pages[next - 1]?.kind === "Reação" ? firstDayArtFor(next + 1)
+        : position === 0 && pages[next]?.kind === "Reação"
+          ? [...firstDayArtFor(next + 1), ...firstDayArtFor(next + 2)]
+          : [];
       let cancelled = false;
       let cancelIdle: (() => void) | undefined;
       function queueNextPage() {
         if (cancelled || upcoming.length === 0) return;
-        cancelIdle = whenIdle(() => upcoming.forEach(src => load(src, "low")));
+        cancelIdle = whenIdle(() => {
+          const entries = upcoming.map(src => load(src, "low"));
+          if (followUp.length === 0) return;
+          void Promise.all(entries.map(entry => entry.loaded)).then(() => {
+            if (!cancelled) followUp.forEach(src => load(src, "low"));
+          });
+        });
       }
 
       if (position < 0) {
