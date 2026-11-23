@@ -37,10 +37,29 @@
 }
 
 .fd[data-fd-clean-reading] .fd-scene[data-scene="challenge"] .fd-learner {
-  inset: max(calc(var(--fd-reading-title-height) + 60px), 23cqh) auto auto 7%;
+  /* Keep the speech below the faces as the portrait crop grows after a correct answer. */
+  inset: max(calc(var(--fd-reading-title-height) + 60px), calc(35cqh + max(100cqh, 150cqw) * .174)) 12% auto auto;
   width: min(60%, 286px);
   --tail-width: clamp(19px, 6.5cqw, 28px);
   --tail-height: clamp(12px, 4.2cqw, 19px);
+}
+
+.fd[data-fd-clean-reading] .fd-scene[data-scene="challenge"] .fd-bubble::before,
+.fd[data-fd-clean-reading] .fd-scene[data-scene="challenge"] .fd-bubble::after {
+  inset-inline: auto 10%;
+  transform: scaleX(-1);
+}
+
+@media (min-width: 760px), (min-width: 600px) and (orientation: landscape) {
+  .fd[data-first-day-part="1"] .fd-scene[data-scene="challenge"] .fd-learner {
+    inset-inline: auto 5%;
+    --tail-height: 8.5cqw;
+  }
+
+  .fd[data-first-day-part="1"] .fd-scene[data-scene="challenge"] .fd-bubble::before,
+  .fd[data-first-day-part="1"] .fd-scene[data-scene="challenge"] .fd-bubble::after {
+    inset-inline-start: 8%;
+  }
 }
 
 .fd[data-fd-clean-reading] .fd-scene[data-scene="challenge"] .fd-bubble {

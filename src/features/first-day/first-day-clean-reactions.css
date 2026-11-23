@@ -7,9 +7,9 @@
   --fd-reaction-art-x: 24%;
   --fd-reaction-reply-top: 33%;
   --fd-reaction-reply-width: clamp(116px, 34.5vw, 164px);
-  --fd-reaction-portrait-reply-end: 8cqw;
-  --fd-reaction-mouth-offset-x: -.166;
-  --fd-reaction-mouth-offset-y: .06;
+  --fd-reaction-portrait-reply-end: 3cqw;
+  --fd-reaction-mouth-offset-x: .065;
+  --fd-reaction-mouth-offset-y: -.075;
 }
 
 .fd[data-fd-clean-reading] .fd-scene[data-scene="reaction"] .fd-room {
@@ -29,8 +29,8 @@
   /* Match the centered 2:3 illustration after object-fit: cover crops it. */
   --fd-reaction-painted-width: max(100cqw, calc(100cqh * 2 / 3));
   --fd-reaction-painted-height: max(100cqh, 150cqw);
-  --fd-reaction-mouth-x: calc(50cqw + var(--fd-reaction-painted-width) * var(--fd-reaction-mouth-offset-x, -.154));
-  --fd-reaction-mouth-y: calc(50cqh + var(--fd-reaction-painted-height) * var(--fd-reaction-mouth-offset-y, -.016));
+  --fd-reaction-mouth-x: calc(50cqw + var(--fd-reaction-painted-width) * var(--fd-reaction-mouth-offset-x, -.08));
+  --fd-reaction-mouth-y: calc(50cqh + var(--fd-reaction-painted-height) * var(--fd-reaction-mouth-offset-y, -.20));
   --fd-reaction-reply-end: var(--fd-reaction-portrait-reply-end, 12cqw);
   --tail-width: clamp(24px, calc(100cqw - var(--fd-reaction-reply-end) - var(--fd-reaction-reply-size) - var(--fd-reaction-mouth-x) - 6px), 42cqw);
   top: calc(var(--fd-reaction-mouth-y) - var(--tail-height) - clamp(15px, 4.35vw, 20px));
@@ -128,6 +128,17 @@
 }
 
 @media (min-width: 760px), (min-width: 600px) and (orientation: landscape) {
+  .fd[data-first-day-page="ana-makes-room"] .fd-scene[data-scene="reaction"] .fd-reply {
+    --mouth-x: 37%;
+    --mouth-y: 19.5%;
+  }
+
+  .fd[data-first-day-page="ana-introduces-herself"] .fd-scene[data-scene="reaction"] .fd-reply {
+    --mouth-x: 46%;
+    --mouth-y: 44%;
+    --tail-width: 16cqw;
+  }
+
   .fd[data-first-day-part="1"] .fd-story-tip {
     padding: clamp(10px, 2.2dvh, 18px) clamp(10px, 2vw, 24px);
     border: 0;

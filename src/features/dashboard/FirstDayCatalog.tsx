@@ -9,7 +9,7 @@ import { createFirstDayProgressStore } from "@/features/first-day/first-day-prog
 import "./first-day-catalog.css";
 
 const FIRST_DAY_HREF = "/first-day";
-const coverArt = { ...art.cover, src: "/first-day/art-v1/capa-gibi-desktop.webp", width: 1440, height: 810 };
+const coverArt = { ...art.cover, src: "/first-day/art-v2/capa-gibi-desktop.webp", width: 1440, height: 810 };
 
 const upcoming = [
   { id: "coffee", title: "Um café, por favor", accent: "#f2c76a", ink: "#272c24" },

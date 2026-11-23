@@ -21,11 +21,13 @@ import VisualStudy from "@/app/dev/estudo-visual/page";
 
 beforeEach(() => vi.clearAllMocks());
 describe("the approved lesson is the principal public experience", () => {
-  it("renders First Day and preloads its cover without looking up an account", () => {
+  it("renders First Day and preloads the revised cover and reaction without looking up an account", () => {
     const html = renderToStaticMarkup(FirstDayPage());
     expect(html).toContain('data-course="first-day"');
-    expect(html).toContain('href="/first-day/art-v1/capa-gibi-mobile.webp"');
-    expect(html).toContain('href="/first-day/art-v1/capa-gibi-desktop.webp"');
+    expect(html).toContain('href="/first-day/art-v2/capa-gibi-mobile.webp"');
+    expect(html).toContain('href="/first-day/art-v2/capa-gibi-desktop.webp"');
+    expect(html).toContain('href="/first-day/art-v2/ana-abre-espaco-mobile.webp"');
+    expect(html).toContain('href="/first-day/art-v2/ana-afasta-bolsa.webp"');
     expect(account).not.toHaveBeenCalled();
     expect(metadata.alternates).toMatchObject({ canonical: "/first-day" });
   });

@@ -10,50 +10,54 @@ export type FirstDayArt = {
 
 export const cleanReadingMedia = "(max-width: 759px) and (orientation: portrait)";
 export const cleanReadingArt: FirstDayArt = {
-  src: "/first-day/art-v1/peca-permissao-mobile.webp", width: 960, height: 1200,
+  src: "/first-day/art-v2/peca-permissao-mobile.webp", width: 960, height: 1200,
   alt: "Na cafeteria, Ana lê um gibi ao lado de uma cadeira amarela. As mãos de Roger seguram uma bandeja.",
 };
 
 export const coverSources = [
-  { media: "(min-aspect-ratio: 4/3)", src: "/first-day/art-v1/capa-gibi-desktop.webp" },
-  { media: "(max-aspect-ratio: 5/8)", src: "/first-day/art-v1/capa-gibi-mobile.webp" },
+  { media: "(min-aspect-ratio: 4/3)", src: "/first-day/art-v2/capa-gibi-desktop.webp" },
+  { media: "(max-aspect-ratio: 5/8)", src: "/first-day/art-v2/capa-gibi-mobile.webp" },
 ] as const;
 
 export const art = {
   cover: {
-    src: "/first-day/art-v1/capa-gibi-vertical.webp", width: 1024, height: 1365,
+    src: "/first-day/art-v2/capa-gibi-vertical.webp", width: 1024, height: 1365,
     alt: "Roger, Ana e Leo se reúnem na cafeteria em volta de um gibi de aventura.",
   },
   arrival: {
-    src: "/first-day/art-v1/panorama-flor.webp", width: 640, height: 592,
-    alt: "Ana lê um gibi na cafeteria. Há uma cadeira amarela livre ao lado dela.",
+    src: "/first-day/art-v2/panorama-flor.webp", width: 640, height: 592,
+    alt: "Ana lê um gibi na cafeteria. Há uma bolsa na cadeira amarela ao lado dela.",
   },
   chair: {
-    src: "/first-day/art-v1/cadeira.webp", width: 248, height: 201,
+    src: "/first-day/art-v2/cadeira.webp", width: 248, height: 201,
     alt: "Detalhe da cadeira amarela ao lado de Ana.",
   },
   invitation: {
-    src: "/first-day/art-v1/resposta.webp", width: 1024, height: 683,
+    src: "/first-day/art-v2/resposta.webp", width: 1024, height: 683,
     alt: "Ana olha para você e indica a cadeira livre. Você ainda segura a bandeja.",
   },
   anaMakesRoom: {
-    src: "/first-day/art-v1/ana-afasta-bolsa.webp", width: 1024, height: 683,
+    src: "/first-day/art-v2/ana-afasta-bolsa.webp", width: 1024, height: 683,
     alt: "Ana ergue a bolsa pela alça e deixa a cadeira amarela livre. Você ainda segura a bandeja.",
   },
   seated: {
-    src: "/first-day/art-v1/apresente-se.webp", width: 1024, height: 683,
+    src: "/first-day/art-v2/apresente-se.webp", width: 1024, height: 683,
     alt: "Do seu lugar à mesa, você vê Ana de perto e o gibi aberto. Sua bandeja já está apoiada.",
   },
   anaIntroducesHerself: {
-    src: "/first-day/art-v1/ana-se-apresenta.webp", width: 1024, height: 683,
+    src: "/first-day/art-v2/ana-se-apresenta.webp", width: 1024, height: 683,
     alt: "Ana olha para você, sorri e leva uma mão ao peito enquanto se apresenta. O gibi continua aberto.",
   },
+  comicExample: {
+    src: "/first-day/art-v2/exemplo-gibi.webp", width: 1024, height: 683,
+    alt: "Roger pede para ver o gibi aberto que Ana segura.",
+  },
   window: {
-    src: "/first-day/art-v1/janela.webp", width: 1024, height: 683,
+    src: "/first-day/art-v2/janela.webp", width: 1024, height: 683,
     alt: "Na cafeteria, você aponta para o trinco da janela fechada. Ana olha para você.",
   },
   door: {
-    src: "/first-day/art-v1/porta.webp", width: 1024, height: 683,
+    src: "/first-day/art-v2/porta.webp", width: 1024, height: 683,
     alt: "Ana está ao lado da porta aberta, e sua mão se aproxima da maçaneta.",
   },
 } satisfies Record<string, FirstDayArt>;
@@ -168,7 +172,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     title: "Ana abre espaço",
     caption: narration["ana-looks-up"].translation,
     image: art.anaMakesRoom,
-    portraitImage: { ...art.anaMakesRoom, src: "/first-day/art-v1/ana-abre-espaco-mobile.webp", width: 960, height: 1440 },
+    portraitImage: { ...art.anaMakesRoom, src: "/first-day/art-v2/ana-abre-espaco-mobile.webp", width: 960, height: 1440 },
     narration: "ana-looks-up",
     reply: { speaker: "Ana", translation: "Claro!", voice: "ana-sure" },
     tip: { title: "Outras formas de dizer «claro»", phrases: ["Of course!", "Go ahead.", "No problem."] },
@@ -181,7 +185,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     title: "Apresente-se",
     caption: `${narration["sit-beside-ana"].translation} É hora de dizer seu nome.`,
     image: art.seated,
-    portraitImage: { ...art.seated, src: "/first-day/art-v1/apresente-se-mobile.webp", width: 960, height: 1440 },
+    portraitImage: { ...art.seated, src: "/first-day/art-v2/apresente-se-mobile.webp", width: 960, height: 1440 },
     voice: "learner-intro",
     words: ["I’m", "Roger,", "by", "the", "way."],
     order: [2, 0, 4, 1, 3],
@@ -194,7 +198,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     title: "Ana se apresenta",
     caption: narration["ana-introduces-herself"].translation,
     image: art.anaIntroducesHerself,
-    portraitImage: { ...art.anaIntroducesHerself, src: "/first-day/art-v1/ana-se-apresenta-mobile.webp", width: 960, height: 1440 },
+    portraitImage: { ...art.anaIntroducesHerself, src: "/first-day/art-v2/ana-se-apresenta-mobile.webp", width: 960, height: 1440 },
     narration: "ana-introduces-herself",
     reply: { speaker: "Ana", translation: "Eu sou a Ana.", voice: "ana-intro" },
     tip: { title: "Outras formas de se apresentar", phrases: ["You can call me Ana.", "I go by Ana."] },
@@ -208,7 +212,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     panels: [
       { context: "Na janela", image: art.window, line: "Can I open it?", translation: "Posso abrir?", voice: "example-window" },
       { context: "À mesa", image: art.invitation, line: "Can I sit here?", translation: "Posso sentar aqui?", voice: "example-seat" },
-      { context: "Com o gibi", image: art.seated, line: "Can I see it?", translation: "Posso ver?", voice: "example-comic" },
+      { context: "Com o gibi", image: art.comicExample, line: "Can I see it?", translation: "Posso ver?", voice: "example-comic" },
     ],
   },
   {
@@ -234,7 +238,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     title: "Faça um pedido novo",
     instruction: { en: "door-instruction-en", pt: "door-instruction-pt" },
     image: art.door,
-    portraitImage: { ...art.door, src: "/first-day/art-v1/faca-um-pedido-novo-mobile.webp", width: 960, height: 1440 },
+    portraitImage: { ...art.door, src: "/first-day/art-v2/faca-um-pedido-novo-mobile.webp", width: 960, height: 1440 },
     words: ["Can", "I", "close", "the", "door?"],
     order: [4, 2, 0, 3, 1],
     translationVoice: "door-answer-pt",
