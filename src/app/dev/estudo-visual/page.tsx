@@ -1,3 +1,3 @@
 import { redirect } from "next/navigation";
 
-export default function VisualStudyPage() { redirect("/demo"); }
+export default function VisualStudyAlias() { redirect("/first-day"); }

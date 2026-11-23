@@ -21,7 +21,7 @@ let root: Root, container: HTMLElement;
 beforeEach(() => {
   vi.clearAllMocks(); vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   document.body.innerHTML = '<div id="root"></div><button id="outside">Fora do menu</button>';
-  window.history.replaceState(null, "", "/demo");
+  window.history.replaceState(null, "", "/first-day");
   container = document.getElementById("root")!; root = createRoot(container);
 });
 afterEach(async () => { await act(async () => root.unmount()); vi.unstubAllGlobals(); });
@@ -62,7 +62,7 @@ describe("learning menu activation", () => {
   });
   it("preserves links to the live class and account settings after the same touch sequence", async () => {
     const { menu, summary } = await mount();
-    for (const href of ["/dashboard#aula-ao-vivo", "/dashboard?painel=configuracoes", "/dashboard?painel=conta", "/demo?retomar=conclusao"]) {
+    for (const href of ["/dashboard#aula-ao-vivo", "/dashboard?painel=configuracoes", "/dashboard?painel=conta", "/first-day"]) {
       menu.open = true;
       await act(async () => blurWithoutNewFocus(summary));
       expect(menu.open).toBe(true);

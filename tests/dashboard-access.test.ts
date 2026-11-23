@@ -6,11 +6,13 @@ vi.mock("@/server/firebase", () => ({
   getAdminAuth: () => ({ verifySessionCookie: mocks.verify }),
   getAdminDb: () => ({ collection: () => ({ doc: mocks.doc }) }),
 }));
-vi.mock("next/navigation", () => ({ redirect: (target: string) => { throw new Error(`REDIRECT:${target}`); } }));
-vi.mock("@/features/first-encounters/LessonDashboard", () => ({ LessonDashboard: () => null }));
+vi.mock("@/features/dashboard/Dashboard", () => ({ Dashboard: () => null }));
+vi.mock("@/features/dashboard/PublicDashboard", () => ({ PublicDashboard: () => null }));
 
 import { getDashboardAccount } from "@/server/dashboard/account";
 import DashboardPage from "@/app/dashboard/page";
+import { Dashboard } from "@/features/dashboard/Dashboard";
+import { PublicDashboard } from "@/features/dashboard/PublicDashboard";
 
 beforeEach(() => {
   vi.clearAllMocks(); mocks.cookie = undefined;
@@ -18,18 +20,19 @@ beforeEach(() => {
 });
 
 describe("dashboard server access", () => {
-  it("never grants dashboard access through visual preview mode", async () => {
-    await expect(DashboardPage()).rejects.toThrow("REDIRECT:/comecar?modo=entrar");
-    expect(mocks.verify).not.toHaveBeenCalled();
-  });
-  it("redirects anonymous visitors to sign-in without accessing Firebase", async () => {
-    await expect(DashboardPage()).rejects.toThrow("REDIRECT:/comecar?modo=entrar");
+  it("renders the anonymous catalogue without accessing Firebase", async () => {
+    const page = await DashboardPage();
+    expect(page.type).toBe(PublicDashboard);
+    expect(page.props).toEqual({});
     expect(mocks.verify).not.toHaveBeenCalled();
     expect(mocks.doc).not.toHaveBeenCalled();
   });
-  it("rejects an expired, forged or revoked cookie before reading any profile", async () => {
-    mocks.cookie = "invalid-session"; mocks.verify.mockRejectedValueOnce(new Error("revoked"));
-    await expect(DashboardPage()).rejects.toThrow("REDIRECT:/comecar?modo=entrar");
+  it.each(["expired", "forged", "revoked"])("renders only the catalogue for a %s cookie", async reason => {
+    mocks.cookie = "invalid-session";
+    mocks.verify.mockRejectedValueOnce(new Error(reason));
+    const page = await DashboardPage();
+    expect(page.type).toBe(PublicDashboard);
+    expect(page.props).toEqual({});
     expect(mocks.verify).toHaveBeenCalledWith("invalid-session", true);
     expect(mocks.doc).not.toHaveBeenCalled();
   });
@@ -38,6 +41,7 @@ describe("dashboard server access", () => {
     mocks.verify.mockResolvedValue({ uid: "verified-user", email: "test@example.com", name: "Google name" });
     mocks.get.mockResolvedValue({ data: () => ({ name: "Saved name", subscriptionStatus: "premium", paymentId: "private-id" }) });
     const page = await DashboardPage();
+    expect(page.type).toBe(Dashboard);
     expect(page.props).toEqual({ account: { name: "Saved name", email: "test@example.com" } });
     expect(mocks.doc).toHaveBeenCalledWith("verified-user");
     expect(mocks.verify).toHaveBeenCalledWith("verified-session", true);

@@ -1,4 +1,0 @@
-name: maya
-main: Character
-output:
-  dir: build

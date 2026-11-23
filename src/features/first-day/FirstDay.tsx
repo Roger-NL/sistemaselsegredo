@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import { ArrowLeft, ArrowRight, Check, MoreHorizontal, Pause, Volume2, VolumeX, X } from "lucide-react";
@@ -550,6 +551,9 @@ export function FirstDay() {
         <h2 id="fd-menu-title">Percurso</h2>
         <button type="button" className="lo-icon" aria-label="Fechar menu" onClick={() => menu.current?.close()}><X size={20} aria-hidden="true" /></button>
       </div>
+      <Link href="/" className="lo-secondary" onClick={() => { menu.current?.close(); narrator.stop(); paperSound.stop(); }}>
+        <ArrowLeft size={16} aria-hidden="true" /> Voltar ao painel
+      </Link>
       <button type="button" onClick={() => turnTo(0)} aria-current={position === 0 ? "page" : undefined}>Capa</button>
       <ol>{pages.map((item, index) => <li key={item.id}>
         <button type="button" onClick={() => turnTo(index + 1)} aria-current={position === index + 1 ? "page" : undefined}>

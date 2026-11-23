@@ -1,4 +1,0 @@
-name: nina
-main: Character
-output:
-  dir: build

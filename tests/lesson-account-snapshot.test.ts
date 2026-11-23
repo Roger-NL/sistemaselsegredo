@@ -32,11 +32,19 @@ import { accountLesson } from "./helpers/lesson-snapshot";
     expect(JSON.parse(snapshot.progress.guidePosition!)).toEqual({ version: 1, index: 0 });
     expect(JSON.parse(snapshot.mechanics!)).toEqual({ version: 1, seen: ["bubbles"] });
   });
-  it("preserves introduced vocabulary with the account, filtering unknown words", () => {
+  it("preserves the saved mechanics and introduced vocabulary in canonical order", () => {
     const current = decodeLessonAccountSnapshot(accountLesson())!;
-    const encoded = encodeLessonAccountSnapshot(current.progress, JSON.stringify({ version: 1, seen: ["build"], words: ["I", "am", "am", "invented"] }));
+    const encoded = encodeLessonAccountSnapshot(current.progress, JSON.stringify({
+      version: 1,
+      seen: ["write", "messages", "ensemble", "build", "verb", "speaker", "join", "bubbles"],
+      words: ["I", "am", "am", "invented"],
+    }));
     const restored = decodeLessonAccountSnapshot(encoded)!;
-    expect(JSON.parse(restored.mechanics!)).toEqual({ version: 1, seen: ["build"], words: ["I", "am"] });
+    expect(JSON.parse(restored.mechanics!)).toEqual({
+      version: 1,
+      seen: ["bubbles", "join", "speaker", "verb", "build", "messages", "ensemble", "write"],
+      words: ["I", "am"],
+    });
     expect(encodeLessonAccountSnapshot(restored.progress, restored.mechanics)).toBe(encoded);
   });
   it("rechecks test answers and never trusts a saved summary label", () => {

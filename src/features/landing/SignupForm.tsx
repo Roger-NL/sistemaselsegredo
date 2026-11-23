@@ -68,8 +68,8 @@ export function SignupForm({ initialMode }: { initialMode: "signup" | "login" })
     <AutoFit className="signup-card-reading">
     <p className="landing-eyebrow">{reset ? <BrowserText>{"VAMOS RECUPERAR SEU ACESSO"}</BrowserText> : <BrowserText>{"SEU ESPAÇO NO BASEDSPEAK"}</BrowserText>}</p>
     <h1 id="signup-title">{reset ? <BrowserText>{"Esqueceu a senha?"}</BrowserText> : signup ? <BrowserText>{"Comece por aqui."}</BrowserText> : <BrowserText>{"Bom te ver de volta."}</BrowserText>}</h1>
-    <p className="signup-intro">{reset ? <BrowserText>{"Informe o e-mail usado com sua senha. Se você entra com Google, volte e use Continuar com Google."}</BrowserText> : signup ? <BrowserText>{"Crie sua conta para guardar seu avanço e pedir sua aula gratuita após concluir o percurso."}</BrowserText> : <BrowserText>{"Entre na sua conta para acessar seu painel."}</BrowserText>}</p>
-    {signup && <p className="signup-approval-note">A aula e o teste são gratuitos, sem cadastro nem aprovação. Com uma conta, seu percurso pode continuar em outros dispositivos.</p>}
+    <p className="signup-intro">{reset ? <BrowserText>{"Informe o e-mail usado com sua senha. Se você entra com Google, volte e use Continuar com Google."}</BrowserText> : signup ? <BrowserText>{"Crie sua conta para acessar os recursos do seu painel."}</BrowserText> : <BrowserText>{"Entre na sua conta para acessar seu painel."}</BrowserText>}</p>
+    {signup && <p className="signup-approval-note">Leia First Day gratuitamente, sem cadastro nem aprovação. O progresso do gibi fica neste navegador.</p>}
     {!reset && <><button className="signup-google" type="button" disabled={disabled} onClick={() => void authenticate(loginWithGoogle)}><span className="signup-google-mark" aria-hidden="true">G</span>Continuar com Google</button><div className="signup-divider"><span>ou com e-mail</span></div></>}
     <form id={formId} method="post" onSubmit={submit}>
       <fieldset disabled={disabled}>

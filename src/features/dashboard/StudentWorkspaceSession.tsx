@@ -72,5 +72,5 @@ export function StudentWorkspaceSession() {
     previous.current = pathname;
     if (learning && wasLearning) void studentWorkspace.refresh();
   }, [pathname, learning]);
-  return <><TestControlsOverlay /><LearningConflict /></>;
+  return learning ? <><TestControlsOverlay /><LearningConflict /></> : null;
 }

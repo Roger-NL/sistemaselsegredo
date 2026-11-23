@@ -3,38 +3,45 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const account = vi.hoisted(() => vi.fn());
-vi.mock("@/server/dashboard/account", () => ({ getDashboardAccount: account }));
-vi.mock("next/navigation", () => ({ redirect: (target: string) => { throw new Error(`REDIRECT:${target}`); } }));
-vi.mock("@/features/first-encounters/LessonOne", () => ({ LessonOne: () => createElement("main", { "data-course": "first-encounters" }) }));
-vi.mock("@/features/first-encounters/LessonDashboard", () => ({ LessonDashboard: () => null }));
+vi.mock("@/server/dashboard/account", () => ({ getDashboardAccount: account, getDashboardIdentity: account }));
+vi.mock("next/navigation", () => ({
+  redirect: (target: string) => { throw new Error(`REDIRECT:${target}`); },
+  notFound: () => { throw new Error("NOT_FOUND"); },
+}));
+vi.mock("@/features/first-day/FirstDay", () => ({ FirstDay: () => createElement("main", { "data-course": "first-day" }) }));
 
-import DemoPage, { metadata } from "@/app/demo/page";
-import DashboardPage from "@/app/dashboard/page";
+import FirstDayPage, { metadata } from "@/app/first-day/page";
+import DemoPage from "@/app/demo/page";
+import DemoSection from "@/app/demo/[section]/page";
 import StudyPage from "@/app/demo/estudo/page";
+import FirstDayPreview from "@/app/dev/first-day/page";
 import LocalLesson from "@/app/dev/primeiros-encontros/page";
 import LocalDashboard from "@/app/dev/primeiros-encontros/painel/page";
 import VisualStudy from "@/app/dev/estudo-visual/page";
 
 beforeEach(() => vi.clearAllMocks());
 describe("the approved lesson is the principal public experience", () => {
-  it("renders the new lesson without requiring an account or the retired host", () => {
-    expect(renderToStaticMarkup(DemoPage())).toContain('data-course="first-encounters"');
+  it("renders First Day and preloads its cover without looking up an account", () => {
+    const html = renderToStaticMarkup(FirstDayPage());
+    expect(html).toContain('data-course="first-day"');
+    expect(html).toContain('href="/first-day/art-v1/capa-gibi-mobile.webp"');
+    expect(html).toContain('href="/first-day/art-v1/capa-gibi-desktop.webp"');
     expect(account).not.toHaveBeenCalled();
-    expect(metadata.alternates).toMatchObject({ canonical: "/demo" });
-    expect(metadata.description).not.toMatch(/cafeteria/i);
+    expect(metadata.alternates).toMatchObject({ canonical: "/first-day" });
   });
-  it("retains verified dashboard access and passes the real account to the new panel", async () => {
-    account.mockResolvedValueOnce(null);
-    await expect(DashboardPage()).rejects.toThrow("REDIRECT:/comecar?modo=entrar");
-    account.mockResolvedValueOnce({ name: "Ana", email: "ana@example.test" });
-    expect((await DashboardPage()).props).toEqual({ account: { name: "Ana", email: "ana@example.test" } });
-  });
-  it("keeps the old study bookmark behind the lesson's existing order guard", () => {
-    expect(StudyPage).toThrow("REDIRECT:/demo?retomar=conclusao");
-  });
-  it("redirects former local previews to the main routes without preserving arbitrary queries", async () => {
-    await expect(LocalLesson({ searchParams: Promise.resolve({ apresentacao: "1", retomar: "conclusao", revisao: "1", token: "discard" }) })).rejects.toThrow("REDIRECT:/demo?apresentacao=1&retomar=conclusao");
+
+  it("redirects the old demo, study and preview bookmarks to the official route", () => {
+    for (const alias of [DemoPage, StudyPage, FirstDayPreview, LocalLesson, VisualStudy]) {
+      expect(alias).toThrow("REDIRECT:/first-day");
+    }
     expect(LocalDashboard).toThrow("REDIRECT:/dashboard");
-    expect(VisualStudy).toThrow("REDIRECT:/demo");
+  });
+
+  it.each(["teoria", "teste", "extras"])("redirects the former %s section to First Day", async section => {
+    await expect(DemoSection({ params: Promise.resolve({ section }) })).rejects.toThrow("REDIRECT:/first-day");
+  });
+
+  it("keeps unknown demo sections unavailable", async () => {
+    await expect(DemoSection({ params: Promise.resolve({ section: "desconhecida" }) })).rejects.toThrow("NOT_FOUND");
   });
 });

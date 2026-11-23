@@ -76,6 +76,10 @@ export function createFirstDayProgressStore() {
       subscribers.add(listener);
       return () => { subscribers.delete(listener); };
     },
+    refresh() {
+      snapshot = readProgress();
+      subscribers.forEach(listener => listener());
+    },
     update(updater: (previous: FirstDayProgress) => FirstDayProgress) {
       const next = snapshot = updater(getSnapshot());
       const { position, ...answers } = next;

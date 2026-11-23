@@ -14,7 +14,7 @@ const JourneyContext = createContext<Journey>({ start: noop, ready, cancel: noop
 export function JourneyTransitionProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const reducedMotion = useSyncExternalStore(subscribePreferences, getMotionPreference, getServerPreference);
-  const start = useCallback((options: StartOptions = {}) => { options.prepare?.(); router.push("/demo"); }, [router]);
+  const start = useCallback((options: StartOptions = {}) => { options.prepare?.(); router.push("/first-day"); }, [router]);
   const value = useMemo<Journey>(() => ({ start, ready, cancel: noop, pending: false, headerTone: "paper", reducedMotion }), [start, reducedMotion]);
   return <JourneyContext.Provider value={value}>{children}</JourneyContext.Provider>;
 }

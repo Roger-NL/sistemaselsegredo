@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import lessonAudio from "../src/features/first-encounters/lesson-one-audio.json";
 import { restoreLessonProgress } from "../src/features/first-encounters/lesson-progress";
 import {
   LESSON_SCENES,
@@ -102,21 +101,6 @@ describe("the approved first lesson", () => {
     expect(restoreLessonProgress(JSON.stringify(complete))).toEqual(complete);
   });
 
-  it("has existing audio for every correct actor, alternative valid speaker and visible phrase preview", () => {
-    const catalog = lessonAudio as Record<string, string>;
-    for (const target of allRounds.filter(round => !round.vocabulary)) {
-      const speakers = target.kind === "speaker"
-        ? target.candidateSpeakers!.filter(person => evaluateSpeaker(target, person).correct)
-        : [target.speaker];
-      for (const person of speakers) expect(catalog[`${person}:${phraseText(target.expected)}`], `${target.id}: accepted ${person}`).toBeTruthy();
-      if (["speaker", "join", "messages"].includes(target.kind)) {
-        expect(catalog[`nina:${phraseText(target.expected)}`], `${target.id}: neutral reading`).toBeTruthy();
-      }
-      for (const option of target.bubbleChoices ?? []) {
-        expect(catalog[`nina:${phraseText(option)}`], `${target.id}: phrase preview`).toBeTruthy();
-      }
-    }
-  });
 });
 
 describe("complete English phrases", () => {

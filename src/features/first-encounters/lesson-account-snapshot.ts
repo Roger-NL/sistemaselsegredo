@@ -1,7 +1,7 @@
 import { restoreConclusionState } from "./lesson-conclusion";
 import { restoreLessonProgress } from "./lesson-progress";
 import { restorePosition, restoreIntroductionPosition } from "./lesson-position";
-import { LESSON_MECHANICS } from "./lesson-mechanics";
+import { LESSON_MECHANIC_IDS } from "./lesson-mechanics";
 import type { LessonDashboardInput } from "./lesson-dashboard";
 
 export type LessonAccountSnapshot = {
@@ -37,7 +37,7 @@ function canonicalMechanics(raw: unknown): string | null {
     const seen = new Set(value.seen.filter((id): id is string => typeof id === "string"));
     const vocabulary = ["I", "you", "we", "they", "am", "are"];
     const words = vocabulary.filter(word => Array.isArray(value.words) && value.words.includes(word));
-    return JSON.stringify({ version: 1, seen: Object.keys(LESSON_MECHANICS).filter(id => seen.has(id)), ...(words.length ? { words } : {}) });
+    return JSON.stringify({ version: 1, seen: LESSON_MECHANIC_IDS.filter(id => seen.has(id)), ...(words.length ? { words } : {}) });
   } catch { return null; }
 }
 

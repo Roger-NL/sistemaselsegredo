@@ -1,4 +1,0 @@
-name: sam
-main: Character
-output:
-  dir: build

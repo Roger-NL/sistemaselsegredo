@@ -1,4 +1,0 @@
-name: leo
-main: Character
-output:
-  dir: build

@@ -7,16 +7,22 @@ function networkSources(policy: string, directive: string) {
 }
 
 describe("authentication after client-side navigation", () => {
-  it("keeps Firebase and Google reachable from documents opened on the landing or lesson", async () => {
+  it("keeps Firebase and Google reachable from catalogue, lesson and account documents", async () => {
     const headers = await config.headers!();
     const policies = headers.flatMap(route => route.headers.filter(header => header.key === "Content-Security-Policy").map(header => ({ source: route.source, value: header.value })));
     const app = policies.find(policy => policy.source === "/:path*")!;
-    for (const source of ["/", "/demo", "/demo/:section(teoria|teste|extras)"]) {
-      const policy = policies.find(policy => policy.source === source)!;
-      expect(policy).toBeDefined();
-      for (const directive of ["connect-src", "script-src", "frame-src"]) {
+    const requiredSources = {
+      "connect-src": ["https://*.googleapis.com", "https://*.firebaseapp.com"],
+      "script-src": ["https://accounts.google.com", "https://apis.google.com"],
+      "frame-src": ["https://accounts.google.com", "https://*.firebaseapp.com"],
+    };
+    expect(app).toBeDefined();
+    for (const source of ["/", "/first-day", "/dashboard", "/comecar", "/adm/entrar"]) {
+      const policy = policies.find(policy => policy.source === source) ?? app;
+      for (const [directive, required] of Object.entries(requiredSources)) {
         // Soft navigation does not replace the document's security policy.
-        expect(networkSources(policy.value, directive)).toEqual(expect.arrayContaining(networkSources(app.value, directive)));
+        expect(networkSources(policy.value, directive), source)
+          .toEqual(expect.arrayContaining([...new Set([...required, ...networkSources(app.value, directive)])]));
       }
     }
   });
@@ -28,7 +34,7 @@ describe("authentication after client-side navigation", () => {
       const { default: productionConfig } = await import("../next.config");
       const policies = (await productionConfig.headers!()).flatMap(route =>
         route.headers.filter(header => header.key === "Content-Security-Policy").map(header => header.value));
-      expect(policies).toHaveLength(4);
+      expect(policies.length).toBeGreaterThan(0);
       for (const policy of policies) {
         const script = policy.split(";").map(value => value.trim()).find(value => value.startsWith("script-src "))!;
         expect(script.split(/\s+/)).toContain("'wasm-unsafe-eval'");

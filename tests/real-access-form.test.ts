@@ -4,7 +4,6 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), refresh: vi.fn() }) }));
 vi.mock("@/client/auth/service", () => ({ login: vi.fn(), register: vi.fn(), resetPassword: vi.fn(), loginWithGoogle: vi.fn() }));
 import { SignupForm } from "@/features/landing/SignupForm";
-import { MoreInformation } from "@/features/landing/MoreInformation";
 
 describe("real student account entry", () => {
   it("requires email and password for registration while retaining the Google option", () => {
@@ -27,15 +26,5 @@ describe("real student account entry", () => {
     expect(html).toContain("Esqueci minha senha");
     expect(html).not.toContain("PRÉVIA VISUAL");
     expect(html).toContain("Continuar com Google");
-  });
-  it("offers the free demo directly without registration or approval", () => {
-    const html = renderToStaticMarkup(createElement(MoreInformation));
-    expect(html).toContain("sem cadastro");
-    expect(html).toContain('href="/demo"');
-    expect(html).not.toContain("O professor aprova");
-    expect(html).toContain("progresso salvo na conta");
-    expect(html).toContain("solicitar um horário disponível");
-    expect(html).toContain("confirmação do professor");
-    expect(html).toContain("uma aula gratuita de uma hora por conta");
   });
 });
