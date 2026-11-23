@@ -128,7 +128,7 @@
     font-size: clamp(15px, 1.45vw, 20px);
     line-height: 1.24;
   }
-  .fd[data-first-day-part="1"] .fd-scene[data-scene="sit"] .fd-room { object-position: center 46%; }
+  .fd[data-first-day-part="1"] .fd-scene[data-scene="sit"] .fd-room { object-position: center top; }
   .fd[data-first-day-part="1"] .fd-scene[data-scene="sit"] .fd-learner { right: 12%; bottom: 23%; width: 45%; }
   .fd[data-first-day-part="1"] .fd-scene[data-scene="reaction"] .fd-room { object-position: center 35%; }
 
@@ -250,7 +250,6 @@
     .fd[data-first-day-part="1"] .fd-page { grid-template-columns: [scene] minmax(0, 1.2fr) [activity] minmax(0, 1fr) [edge]; }
     .fd[data-first-day-part="1"] .fd-story { --fd-story-caption-height: clamp(68px, 12.9dvh, 74px); }
     .fd[data-first-day-part="1"] .fd-caption { font-size: clamp(14px, 1.65vw, 17px); }
-    .fd[data-first-day-part="1"] .fd-scene[data-scene="sit"] .fd-room { object-position: center 31%; }
     .fd[data-first-day-part="1"] .fd-scene[data-scene="sit"] .fd-learner { right: 6%; bottom: 10%; width: 50%; }
     .fd[data-first-day-part="1"] .fd-challenge .fd-activity > .fd-words { grid-template-columns: repeat(5, minmax(0, 1fr)); }
     .fd[data-first-day-part="1"] .fd-challenge .fd-word { grid-column: auto; }
