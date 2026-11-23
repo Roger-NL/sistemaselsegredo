@@ -79,27 +79,31 @@ export function createFirstDayArtCache() {
   return {
     warm(position: number) {
       const next = Math.max(0, position) + 1;
-      const upcoming = firstDayArtFor(next);
-      // Reaction pages can be turned immediately. Get the page beyond them
-      // ready while the reader is still on the cover or doing the exercise.
-      const followUp = pages[next - 1]?.kind === "Reação" ? firstDayArtFor(next + 1)
-        : position === 0 && pages[next]?.kind === "Reação"
-          ? [...firstDayArtFor(next + 1), ...firstDayArtFor(next + 2)]
-          : [];
+      const upcoming = [firstDayArtFor(next)];
+      if (pages[next - 1]?.kind === "Reação") {
+        upcoming.push(firstDayArtFor(next + 1));
+      } else if (position === 0 && pages[next]?.kind === "Reação") {
+        upcoming.push(firstDayArtFor(next + 1), firstDayArtFor(next + 2));
+      }
       let cancelled = false;
       let cancelIdle: (() => void) | undefined;
+      async function warmUpcoming() {
+        // A reaction can be turned immediately. Prepare the page beyond it
+        // too, with one scene at a time to keep requests from competing.
+        for (const images of upcoming) {
+          if (cancelled) return;
+          await Promise.all(images.map(src => load(src, "low").loaded));
+        }
+      }
       function queueNextPage() {
-        if (cancelled || upcoming.length === 0) return;
-        cancelIdle = whenIdle(() => {
-          const entries = upcoming.map(src => load(src, "low"));
-          if (followUp.length === 0) return;
-          void Promise.all(entries.map(entry => entry.loaded)).then(() => {
-            if (!cancelled) followUp.forEach(src => load(src, "low"));
-          });
-        });
+        if (cancelled || upcoming[0].length === 0) return;
+        // The browser already preloads the opening scene from the HTML.
+        // Decode it as soon as the cover is ready, ahead of the first turn.
+        if (position <= 0) void warmUpcoming();
+        else cancelIdle = whenIdle(() => { void warmUpcoming(); });
       }
 
-      if (position < 0) {
+      if (position <= 0) {
         const [cover] = firstDayArtFor(0);
         // Keep the first screen responsive while the cover loads. Warming
         // the next scene can wait until the cover has decoded.

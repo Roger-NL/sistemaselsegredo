@@ -6,7 +6,7 @@ type Vertex = {
   y: number;
   depth: number;
   reverse: boolean;
-  flatBack: boolean;
+  projection: number;
 };
 type Face = {
   vertices: [Vertex, Vertex, Vertex];
@@ -149,8 +149,10 @@ export function curlPanel(canvas: HTMLCanvasElement, source: PanelCapture, direc
   if (!context) return () => {};
   const bounds = canvas.getBoundingClientRect();
   const pixelRatio = Math.min(1.4, 950 / Math.max(bounds.width, bounds.height));
-  const width = canvas.width = Math.max(1, Math.round(bounds.width * pixelRatio));
-  const height = canvas.height = Math.max(1, Math.round(bounds.height * pixelRatio));
+  const width = Math.max(1, Math.round(bounds.width * pixelRatio));
+  const height = Math.max(1, Math.round(bounds.height * pixelRatio));
+  if (canvas.width !== width) canvas.width = width;
+  if (canvas.height !== height) canvas.height = height;
   const duration = 710;
   const columns = 24;
   const rows = 18;
@@ -171,7 +173,7 @@ export function curlPanel(canvas: HTMLCanvasElement, source: PanelCapture, direc
       const sourceX = column * cellWidth;
       const sourceY = row * cellHeight;
       return { sourceX, sourceY, distance: sheetX(sourceX) * normalX + sourceY * normalY,
-        x: sourceX, y: sourceY, depth: 0, reverse: false, flatBack: false };
+        x: sourceX, y: sourceY, depth: 0, reverse: false, projection: 0 };
     }));
   const face = (a: Vertex, b: Vertex, c: Vertex): Face => ({ vertices: [a, b, c], depth: 0, reverse: false });
   const cells = mesh.slice(0, rows).map((line, row) =>
@@ -179,15 +181,20 @@ export function curlPanel(canvas: HTMLCanvasElement, source: PanelCapture, direc
       const b = line[column + 1];
       const c = mesh[row + 1][column];
       const d = mesh[row + 1][column + 1];
-      return { first: face(a, b, c), second: face(b, d, c), nearest: direction > 0 ? a : b };
+      return {
+        first: face(a, b, c), second: face(b, d, c),
+        nearest: direction > 0 ? a : b, farthest: direction > 0 ? d : c,
+      };
     }));
   const curved: Face[] = [];
   const start = performance.now();
   let frame = 0;
+  let projection = 0;
 
   function project(vertex: Vertex, fold: number, lift: number) {
+    if (vertex.projection === projection) return;
+    vertex.projection = projection;
     const distance = vertex.distance - fold;
-    vertex.flatBack = distance >= bendLimit;
     if (distance <= 0) {
       vertex.x = vertex.sourceX;
       vertex.y = vertex.sourceY;
@@ -195,9 +202,10 @@ export function curlPanel(canvas: HTMLCanvasElement, source: PanelCapture, direc
       vertex.reverse = false;
       return;
     }
-    const angle = vertex.flatBack ? Math.PI : distance / radius;
-    const depth = vertex.flatBack ? radius * 2 : radius * (1 - Math.cos(angle));
-    const shift = vertex.flatBack ? bendLimit - 2 * distance : radius * Math.sin(angle) - distance;
+    const flatBack = distance >= bendLimit;
+    const angle = flatBack ? Math.PI : distance / radius;
+    const depth = flatBack ? radius * 2 : radius * (1 - Math.cos(angle));
+    const shift = flatBack ? bendLimit - 2 * distance : radius * Math.sin(angle) - distance;
     vertex.x = vertex.sourceX + direction * (normalX * shift + depth * .08);
     vertex.y = vertex.sourceY + normalY * shift - depth * lift;
     vertex.depth = depth;
@@ -260,6 +268,11 @@ export function curlPanel(canvas: HTMLCanvasElement, source: PanelCapture, direc
     const progress = Math.min(1, Math.max(0, (time - start) / duration));
     context!.clearRect(0, 0, width, height);
     if (progress === 1) return;
+    if (progress === 0) {
+      context!.drawImage(front, 0, 0, width, height);
+      frame = requestAnimationFrame(paint);
+      return;
+    }
     const ease = progress * progress * (3 - 2 * progress);
     const fold = corner - sweep * ease;
     const lift = .24 + .15 * Math.sin(Math.PI * ease);
@@ -285,7 +298,7 @@ export function curlPanel(canvas: HTMLCanvasElement, source: PanelCapture, direc
       context!.drawImage(front, 0, 0, width, height);
       context!.restore();
     }
-    for (const line of mesh) for (const vertex of line) project(vertex, fold, lift);
+    projection++;
     curved.length = 0;
     let flatBack: Path2D | undefined;
     for (let row = 0; row < rows; row++) {
@@ -293,11 +306,19 @@ export function curlPanel(canvas: HTMLCanvasElement, source: PanelCapture, direc
       let lastFlat = -1;
       for (let column = 0; column < columns; column++) {
         const cell = cells[row][column];
-        if (cell.nearest.flatBack) {
+        if (cell.farthest.distance <= fold) continue;
+        if (cell.nearest.distance - fold >= bendLimit) {
           firstFlat = Math.min(firstFlat, column);
           lastFlat = column;
           continue;
         }
+        // Only the bend needs individual projections. Adjacent triangles
+        // share vertices, while the two flat regions are each painted once.
+        const [a, b, c] = cell.first.vertices;
+        project(a, fold, lift);
+        project(b, fold, lift);
+        project(c, fold, lift);
+        project(cell.second.vertices[1], fold, lift);
         collectCurved(cell.first);
         collectCurved(cell.second);
       }

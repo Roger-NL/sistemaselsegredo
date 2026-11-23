@@ -35,8 +35,13 @@ export async function GET(request: NextRequest, { params }: RouteContext<"/first
   const responseHeaders = new Headers(mediaHeaders);
   if (versionedArt && media.status === 200) {
     responseHeaders.set("Cache-Control", "public, max-age=31536000, immutable");
+  } else if (/\.(?:mp3|wav)$/.test(pathname) && (media.status === 200 || media.status === 206)) {
+    // Let the browser reuse narration and sound effects during the lesson.
+    // These URLs are unversioned, so replacements can reach readers promptly.
+    responseHeaders.set("Cache-Control", "public, max-age=120");
+    if (media.status === 200) responseHeaders.set("Vercel-CDN-Cache-Control", "public, max-age=300");
   }
-  for (const name of ["Content-Type", "Content-Length", "Content-Range", "Accept-Ranges"]) {
+  for (const name of ["Content-Type", "Content-Length", "Content-Range", "Accept-Ranges", "ETag", "Last-Modified"]) {
     const value = media.headers.get(name);
     if (value) responseHeaders.set(name, value);
   }
