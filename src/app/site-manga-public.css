@@ -1,0 +1,73 @@
+html body :is(.start-page.public-viewport, .demo-shell:has(> :is(.legal, .ending))) {
+  background: transparent;
+}
+
+/* The account frame insets its content. The film and divider span the full frame. */
+html body .start-page > :is(.start-header, .start-footer) {
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  background: transparent;
+}
+
+html body .start-page > :is(.start-header, .start-footer)::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc((100% - 100cqw) / 2);
+  z-index: -1;
+  background: var(--site-manga-bar);
+  pointer-events: none;
+}
+
+html body .start-page > .start-header::before {
+  inset-block-start: calc(-1 * env(safe-area-inset-top, 0px));
+  border-block-end: 1px solid var(--site-manga-divider);
+}
+
+html body .start-page > .start-footer::before {
+  inset-block-end: calc(-1 * env(safe-area-inset-bottom, 0px));
+  border-block-start: 1px solid var(--site-manga-divider);
+}
+
+html body .start-page .start-story > p {
+  color: var(--comic-ink);
+}
+
+html body .start-page .start-story .start-type {
+  color: #215549;
+}
+
+html body .start-page .start-story .start-type > span:last-child {
+  color: #8b3d2d;
+}
+
+/* A feathered wash follows the intro's text while leaving the margins open. */
+html body .start-page .start-story > :is(p, h2, .start-type) {
+  position: relative;
+  isolation: isolate;
+}
+
+html body .start-page .start-story > :is(p, h2, .start-type)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -3px -6px;
+  background: rgb(255 255 255 / 30%);
+  border-radius: 8px;
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+html body .demo-shell:has(> .legal) {
+  padding-block: clamp(16px, 4vw, 48px);
+}
+
+/* Printed reading panel, with the same sheet visible behind the text and gutters. */
+html body .demo-shell > .legal {
+  background: var(--site-manga-bar);
+}
+
+html body .legal > :is(.legal-header, h1 + p:first-of-type) {
+  padding-block-end: 14px;
+  border-block-end: 1px solid var(--site-manga-divider);
+}

@@ -1,6 +1,5 @@
 .lo-app.fd[data-fd-mobile-header][data-lesson-theme="comic"] {
   --fd-reading-header: #174e49;
-  --fd-reading-footer: #153d37;
   --fd-reading-paper: #fff3d9;
   --fd-reading-cream: #fcf7e8;
   --fd-reading-ink: #163731;
@@ -10,23 +9,18 @@
 }
 
 .lo-app.fd:is([data-fd-clean-reading], [data-fd-clean-study])[data-lesson-theme="comic"] {
+  --fd-title-side: clamp(77px, 24vw, 112px);
   --fd-reading-title-height: clamp(43px, 12.4vw, 58px);
   --fd-reading-nav-height: clamp(49px, 13.4vw, 63px);
   --fd-reading-tray-height: clamp(54px, 15.5vw, 72px);
   padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
-  background: var(--fd-reading-cream);
   color: var(--fd-reading-ink);
 }
-
-.fd:is([data-fd-clean-reading], [data-fd-clean-study])::before { content: none; }
 
 .lo-app.fd[data-fd-mobile-header] .fd-header {
   min-height: var(--fd-reading-header-height);
   margin: 0 calc(-1 * var(--fd-gutter));
   padding-inline: var(--fd-reading-inset);
-  border: 0;
-  background: var(--fd-reading-header);
-  color: var(--fd-reading-cream);
 }
 
 .lo-app.fd:is([data-fd-clean-reading], [data-fd-clean-study], [data-fd-mobile-header][data-first-day-page="cover"]) .fd-header {
@@ -39,7 +33,7 @@
 
 .lo-app.fd[data-fd-mobile-header][data-lesson-theme="comic"] .fd-header .brand {
   gap: clamp(7px, 2.1vw, 12px);
-  color: var(--fd-reading-cream);
+  color: var(--fd-bar-ink);
   font-size: clamp(16px, 4.7vw, 23px);
   font-weight: 700;
   white-space: nowrap;
@@ -50,9 +44,9 @@
   height: clamp(32px, 8.8vw, 43px);
   justify-content: center;
   margin: 0;
-  border: 1px solid #fff3d947;
+  border: 1px solid #c7cbc8;
   border-radius: 8px;
-  background: #ffffff14;
+  background: #f5f5f3;
 }
 
 .fd[data-fd-mobile-header] .fd-progress {
@@ -65,7 +59,7 @@
   grid-template-columns: minmax(0, auto) clamp(14px, 7vw, 34px) auto;
   align-items: center;
   gap: clamp(5px, 1.4vw, 9px);
-  color: var(--fd-reading-cream);
+  color: var(--fd-bar-ink);
   font-size: clamp(10px, 3.25vw, 15px);
   font-weight: 700;
   white-space: nowrap;
@@ -78,9 +72,9 @@
   grid-column: auto;
   height: 3px;
   border: 0;
-  background: #ffffff55;
+  background: #d3d5d3;
 }
-.fd[data-fd-mobile-header] .fd-progress progress::-webkit-progress-bar { background: #ffffff55; }
+.fd[data-fd-mobile-header] .fd-progress progress::-webkit-progress-bar { background: #d3d5d3; }
 .fd[data-fd-mobile-header] .fd-progress progress::-webkit-progress-value { min-width: 3px; background: var(--fd-reading-yellow); }
 .fd[data-fd-mobile-header] .fd-progress progress::-moz-progress-bar { min-width: 3px; background: var(--fd-reading-yellow); }
 
@@ -93,7 +87,6 @@
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: var(--fd-reading-paper);
   box-shadow: none;
 }
 
@@ -124,6 +117,10 @@
   font-size: clamp(21px, 6.65vw, 36px);
 }
 
+.fd[data-fd-clean-study][data-first-day-page="permission-rule"] .fd-page-title:has(> .fd-narration-control) h1 {
+  font-size: clamp(24px, 7.55vw, 39px);
+}
+
 .fd[data-fd-clean-study] .fd-page-description {
   padding: clamp(5px, 1.25dvh, 10px) clamp(7px, 2.5vw, 13px);
   border-inline-start: 4px solid #287268;
@@ -151,11 +148,16 @@
 }
 
 .fd[data-fd-clean-reading] .fd-page-heading h1 {
+  --fd-text-wash: #21342ded;
   color: #fffdf5;
   font-size: clamp(29px, 8.8vw, 48px);
   line-height: 1;
   text-wrap: nowrap;
   text-shadow: 1px 2px 0 #19342b;
+}
+.fd[data-fd-clean-reading] .fd-page-title:has(> .fd-narration-control) h1 {
+  font-size: clamp(20px, 6.65vw, 45px);
+  text-wrap: balance;
 }
 
 .fd:is([data-fd-clean-reading], [data-fd-clean-study]) .fd-page-heading .fd-narration-control {
@@ -165,10 +167,10 @@
   width: auto;
   height: clamp(30px, 7.8vw, 37px);
   gap: 5px;
-  padding-inline: clamp(8px, 2.5vw, 14px);
+  padding-inline: clamp(5px, 1.65vw, 12px);
   border: 1px solid #bfcdb6;
   border-radius: 999px;
-  background: var(--fd-reading-footer);
+  background: #153d37;
   color: #fff;
   font-size: clamp(11px, 3.15vw, 16px);
   font-weight: 700;
@@ -346,8 +348,6 @@
   align-items: center;
   min-height: var(--fd-reading-nav-height);
   padding: 4px var(--fd-reading-inset);
-  border: 0;
-  background: var(--fd-reading-footer);
 }
 .fd:is([data-fd-clean-reading], [data-fd-clean-study]) .fd-page .fd-nav > .lo-secondary {
   justify-self: start;
@@ -356,7 +356,7 @@
   padding-inline: clamp(7px, 3.2vw, 15px);
   border: 0;
   background: transparent;
-  color: var(--fd-reading-cream);
+  color: var(--fd-bar-ink);
   box-shadow: none;
 }
 .fd:is([data-fd-clean-reading], [data-fd-clean-study]) .fd-nav > [data-lesson-button="primary"],

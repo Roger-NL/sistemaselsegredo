@@ -1,0 +1,20 @@
+:root {
+  --site-manga-paper: #faf7f0;
+  --site-manga-bar: rgb(255 255 255 / 75%);
+  --site-manga-divider: #777b73;
+}
+
+body {
+  min-height: 100dvh;
+  isolation: isolate;
+}
+
+/* A single viewport-sized print keeps the artwork aligned under every surface. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--site-manga-paper) url("../features/first-day/manga-paper.webp") center / cover no-repeat;
+}

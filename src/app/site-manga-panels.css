@@ -1,0 +1,118 @@
+/* Panel shells reveal the shared sheet. The bars add only a white film. */
+html body :is(.dashboard.dashboard-catalog, .admin-shell, .admin-login-shell) {
+  background: transparent;
+}
+
+html body .dashboard.dashboard-catalog-public {
+  display: flex;
+  flex-direction: column;
+}
+
+html body .dashboard-catalog :is(.catalog-header, .dashboard-header, .catalog-footer) {
+  background: var(--site-manga-bar);
+  color: var(--comic-ink);
+}
+
+html body .dashboard-catalog :is(.catalog-header, .dashboard-header) {
+  border-block-end: 1px solid var(--site-manga-divider);
+}
+
+.dashboard-catalog :is(.dashboard-header, .catalog-footer).catalog-wrap {
+  width: 100%;
+  max-width: none;
+  padding-inline: max(var(--catalog-gutter), calc((100% - 1180px) / 2));
+}
+
+/* The full-width dashboard header already paints the film once. */
+.dashboard-catalog .dashboard-header::before { content: none; }
+
+html body .dashboard-catalog .catalog-footer {
+  margin-block-start: auto;
+  border-block-start: 1px solid var(--site-manga-divider);
+}
+
+html body .dashboard-catalog .catalog-header .brand:focus-visible {
+  outline-color: var(--catalog-teal);
+}
+
+html body .dashboard.dashboard-catalog-account .catalog-account-nav {
+  padding: 8px 6px 10px;
+  background: var(--site-manga-bar);
+  border-block-end: 1px solid var(--site-manga-divider);
+}
+
+html body .admin-shell :is(.admin-sidebar, .admin-topbar, .admin-footer),
+html body .admin-login-shell .admin-login-intro {
+  background: var(--site-manga-bar);
+  color: var(--comic-ink);
+}
+
+html body .admin-shell .admin-sidebar,
+html body .admin-login-shell .admin-login-intro {
+  border-inline-end: 1px solid var(--site-manga-divider);
+}
+
+html body .admin-shell .admin-topbar {
+  border-block-end: 1px solid var(--site-manga-divider);
+}
+
+.admin-shell .admin-body {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  container-type: inline-size;
+}
+
+.admin-shell .admin-body > .admin-main {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Fill short panels above the footer while keeping the usual content gap. */
+.admin-shell .admin-body > .admin-main::after {
+  content: "";
+  flex: 1;
+}
+
+html body .admin-shell .admin-footer {
+  --admin-footer-bleed: calc((100cqi - 100%) / 2);
+  margin-inline: calc(0px - var(--admin-footer-bleed));
+  padding-inline: var(--admin-footer-bleed);
+  border-block-start: 1px solid var(--site-manga-divider);
+  order: 1;
+}
+
+.admin-shell .admin-topbar > div > :is(span, svg),
+html body .admin-shell :is(.admin-page-heading .admin-eyebrow, .admin-page-heading > div > p:last-child, .admin-nav-label, .admin-workspace small, .admin-system-status, .admin-system-status p, .admin-table-hint),
+html body .admin-shell .admin-footer-tools :is(a, button),
+html body .admin-login-shell .admin-login-intro :is(.admin-eyebrow, div > p:last-child),
+html body .admin-login-shell .admin-login-form :is(.admin-eyebrow, .admin-fields label, .admin-text-button),
+html body .admin-login-shell .admin-login-form > div > p:not(.admin-eyebrow):not(.admin-form-error):not(.admin-dialog-note),
+html body .admin-login-shell .admin-login-divider {
+  color: var(--comic-ink);
+}
+
+html body .admin-login-shell .admin-login-intro h1 {
+  color: var(--comic-ink);
+  text-shadow: none;
+}
+
+html body .admin-login-shell .admin-login-form {
+  background: transparent;
+}
+
+@media (max-width: 640px) {
+  html body .admin-shell {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .admin-shell .admin-body { flex: 1; }
+
+  html body .admin-shell .admin-sidebar,
+  html body .admin-login-shell .admin-login-intro {
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--site-manga-divider);
+  }
+}
