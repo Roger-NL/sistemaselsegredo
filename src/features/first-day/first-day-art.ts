@@ -83,8 +83,8 @@ export function createFirstDayArtCache() {
       // Reaction pages can be turned immediately. Get the page beyond them
       // ready while the reader is still on the cover or doing the exercise.
       const followUp = pages[next - 1]?.kind === "Reação" ? firstDayArtFor(next + 1)
-        : position === 0 && pages[next]?.kind === "Reação"
-          ? [...firstDayArtFor(next + 1), ...firstDayArtFor(next + 2)]
+        : position <= 0 && pages[next]?.kind === "Reação"
+          ? [...firstDayArtFor(next + 1), ...(position === 0 ? firstDayArtFor(next + 2) : [])]
           : [];
       let cancelled = false;
       let cancelIdle: (() => void) | undefined;
@@ -97,9 +97,9 @@ export function createFirstDayArtCache() {
             if (!cancelled) followUp.forEach(src => load(src, "low"));
           });
         };
-        // The browser already preloads the opening scene from the HTML.
-        // Decode it as soon as the cover is ready, ahead of the first turn.
-        if (position <= 0) warmUpcoming();
+        // Reuse the opening image requests from the HTML. Decode the next
+        // panel right away on the cover or on the first exercise (including a reload).
+        if (position <= 1) warmUpcoming();
         else cancelIdle = whenIdle(warmUpcoming);
       }
 
