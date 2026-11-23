@@ -29,6 +29,16 @@ function firstDayArtFor(position: number) {
   return currentPageImages()[position - 1] ?? [];
 }
 
+function whenIdle(task: () => void) {
+  if (typeof window.requestIdleCallback === "function") {
+    const id = window.requestIdleCallback(task, { timeout: 750 });
+    return () => window.cancelIdleCallback(id);
+  }
+
+  const id = window.setTimeout(task, 180);
+  return () => window.clearTimeout(id);
+}
+
 export function createFirstDayArtCache() {
   type Entry = { image: HTMLImageElement; loaded: Promise<boolean>; ready: boolean; failed: boolean };
   const cache = new Map<string, Entry>();
@@ -67,11 +77,30 @@ export function createFirstDayArtCache() {
   }
 
   return {
-    warm() {
-      firstDayArtFor(0).forEach(src => load(src, "high"));
-      firstDayArtFor(1).forEach(src => load(src, "high"));
-      const remaining = new Set(currentPageImages().slice(1).flat());
-      remaining.forEach(src => load(src, "low"));
+    warm(position: number) {
+      const upcoming = firstDayArtFor(Math.max(0, position) + 1);
+      let cancelled = false;
+      let cancelIdle: (() => void) | undefined;
+      function queueNextPage() {
+        if (cancelled || upcoming.length === 0) return;
+        cancelIdle = whenIdle(() => upcoming.forEach(src => load(src, "low")));
+      }
+
+      if (position < 0) {
+        const [cover] = firstDayArtFor(0);
+        // Keep the first screen responsive while the cover loads. Warming
+        // the next scene can wait until the cover has decoded.
+        const entry = load(cover, "high");
+        if (entry.ready) queueNextPage();
+        else void entry.loaded.then(queueNextPage);
+      } else {
+        queueNextPage();
+      }
+
+      return () => {
+        cancelled = true;
+        cancelIdle?.();
+      };
     },
     prepare(position: number) {
       const targets = firstDayArtFor(position).map(src => load(src, "high"));

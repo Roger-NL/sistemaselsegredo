@@ -407,9 +407,9 @@ export function FirstDay() {
 
   useEffect(() => {
     const requests = navigationRequest.current;
-    imageCache.warm();
     return () => { requests.id++; };
-  }, [imageCache]);
+  }, []);
+  useEffect(() => imageCache.warm(position), [imageCache, position, portraitReading]);
   useEffect(() => { title.current?.focus({ preventScroll: true }); }, [position]);
   useLayoutEffect(() => {
     const turn = nextTurn.current;

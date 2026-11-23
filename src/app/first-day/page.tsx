@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 export default function FirstDayPage() {
   return <>
     {coverSources.map(({ media, src }) => <link key={src} rel="preload" as="image" href={src} media={media} fetchPriority="high" />)}
-    <link rel="preload" as="image" href={cleanReadingArt.src} media={cleanReadingMedia} fetchPriority="high" />
-    <link rel="preload" as="image" href={art.arrival.src} media={`not all and ${cleanReadingMedia}`} fetchPriority="high" />
+    <link rel="preload" as="image" href={cleanReadingArt.src} media={cleanReadingMedia} fetchPriority="low" />
+    <link rel="preload" as="image" href={art.arrival.src} media={`not all and ${cleanReadingMedia}`} fetchPriority="low" />
     <FirstDay />
   </>;
 }
