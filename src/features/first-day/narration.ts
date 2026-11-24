@@ -31,10 +31,9 @@ export const narration = {
     text: "Ana looks up and moves her bag.",
     translation: "Ana levanta os olhos e afasta a bolsa.",
   },
-  "sit-beside-ana": {
-    text: "You put your tray down and sit beside her.",
-    translation: "Você põe a bandeja na mesa e se senta ao lado de Ana.",
-  },
+  "rafael-sits": { text: "Rafael puts his tray down and sits beside Ana. It’s time to introduce himself.", bundled: true },
+  "rafael-sits-pt": { text: "Rafael põe a bandeja na mesa e se senta ao lado de Ana. É hora de se apresentar.", bundled: true },
+  "rafael-intro-pt": { text: "Aliás, eu sou o Rafael.", bundled: true },
   "ana-introduces-herself": {
     text: "Ana smiles and introduces herself.",
     translation: "Ana sorri e se apresenta.",
@@ -44,6 +43,7 @@ export const narration = {
   "door-instruction-en": { text: "The door is open. Before you close it, ask Ana for permission." },
   "door-instruction-pt": { text: "A porta está aberta. Antes de fechá-la, peça permissão à Ana." },
   "door-answer-pt": { text: "Posso fechar a porta?" },
+  "ana-door-reply-pt": { text: "Claro! Está barulhento lá fora.", bundled: true },
   "comic-open": { text: "The comic is still open. A picture catches your eye." },
   "leo-arrives": { text: "Leo walks over. Ana hands him the comic." },
   "bell-rings": { text: "The bell rings. It’s time for class." },
@@ -54,21 +54,33 @@ export type NarrationClip = keyof typeof narration;
 export const dialogue = {
   "learner-seat": { text: "Hi, can I sit here?" },
   "ana-sure": { text: "Sure!" },
-  "learner-intro": { text: "I’m Roger, by the way." },
+  "rafael-intro": { text: "I’m Rafael, by the way.", bundled: true },
   "ana-intro": { text: "I’m Ana." },
   "example-window": { text: "Can I open it?" },
   "example-seat": { text: "Can I sit here?" },
   "example-comic": { text: "Can I see it?" },
   "challenge-door": { text: "Can I close the door?" },
+  "ana-door-reply": { text: "Sure! It’s noisy out there.", bundled: true },
 } as const;
 
 export type DialogueClip = keyof typeof dialogue;
-export type FirstDayVoiceClip = NarrationClip | DialogueClip;
+
+export const wordVoices = {
+  "Hi,": "word-hi", can: "word-can", Can: "word-can", I: "word-i", sit: "word-sit",
+  "here?": "word-here", "I’m": "word-im", "Rafael,": "word-rafael", by: "word-by",
+  the: "word-the", "way.": "word-way", close: "word-close", "door?": "word-door",
+} as const;
+
+export type FirstDayWord = keyof typeof wordVoices;
+type WordClip = (typeof wordVoices)[FirstDayWord];
+export type FirstDayVoiceClip = NarrationClip | DialogueClip | WordClip;
+const voiceLines: Partial<Record<FirstDayVoiceClip, { text: string; bundled?: boolean }>> = { ...narration, ...dialogue };
 
 export function firstDayVoiceUrl(clip: FirstDayVoiceClip) {
+  if (clip.startsWith("word-") || voiceLines[clip]?.bundled) return `/first-day-part-one/audio/${clip}.mp3`;
   return `/first-day/${clip in dialogue ? "dialogue" : "narration"}/${clip}.mp3`;
 }
 
 export const arrivalNarration = ["lunchtime", "empty-chair"] as const;
 export const coverNarration = ["cover"] as const;
-export const seatedNarration = ["sit-beside-ana"] as const;
+export const seatedNarration = ["rafael-sits", "rafael-sits-pt"] as const;

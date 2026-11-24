@@ -30,6 +30,7 @@ html body .lo-app.fd[data-lesson-theme][data-fd-edition][data-first-day-page="cl
   --fd1-strip-height: clamp(84px, 7.8vw, 126px);
 }
 html body .lo-app.fd[data-lesson-theme][data-fd-edition]:has(.fd1-story[data-complete="true"]) { --fd1-strip-height: clamp(62px, 5.13vw, 86px); }
+html body .lo-app.fd[data-lesson-theme][data-fd-edition][data-first-day-page="close-the-door"]:has(.fd1-door-reply) { --fd1-strip-height: clamp(92px, 7vw, 114px); }
 
 .lo-app.fd[data-fd-edition][data-lesson-theme="comic"] .fd-header {
   position: relative;

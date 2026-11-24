@@ -176,12 +176,53 @@
 .fd[data-fd-edition] .fd1-check-actions button:disabled { color: #747b6f; background: #f1efe5; border-color: #b8bcaf; cursor: default; }
 .fd1-check-actions svg { display: none; }
 .fd1-finished { left: auto; gap: .4em; font: 600 clamp(14px,1.31vw,21px)/1.15 var(--comic-body); }
-.fd1-finished.fd1-success { color: #2d594b; }
-.fd1-success > svg { width: 1.12em; height: 1.12em; }
+.fd1-story .fd1-door-reply {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 2px;
+}
+.fd1-door-reply-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font: 700 clamp(15px, 1.15vw, 20px)/1.1 var(--comic-body);
+}
+.fd1-door-reply-label > strong { color: var(--fd1-teal); }
+.fd1-door-reply-label > [role="status"] {
+  display: inline-flex; align-items: center; gap: .3em;
+  color: #2d594b; font-size: .88em; font-weight: 600;
+}
+.fd[data-fd-edition] .fd1-door-reply-line {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fd1-ink);
+  box-shadow: none;
+  text-align: start;
+  font: 500 clamp(15px, 1.18vw, 20px)/1.22 var(--comic-body);
+}
+.fd1-door-reply-line b { font-size: 1.24em; }
+.fd[data-fd-edition] button.fd1-door-reply-line { padding-inline-end: 39px; }
+.fd1-door-reply-line .fd-speak-icon {
+  inset: 50% 0 auto auto;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+}
 
 @media (max-width: 959px) and (orientation: portrait) {
   .fd1-story { grid-template-rows: minmax(0,1fr) auto; gap: 7px; }
-  .fd1-story:has(.fd1-finished:not(.fd1-success)) { grid-template-rows: minmax(0,1fr); gap: 0; }
+  .fd1-story:has(.fd1-finished) { grid-template-rows: minmax(0,1fr); gap: 0; }
   .fd[data-fd-edition] .fd1-scene { border: 2px solid #242922; border-radius: 7px; }
   .fd1-balloon-outline { fill: #fff8e8; stroke: #282b22; stroke-width:1.85px; }
   .fd[data-fd-edition] .fd1-balloon .fd1-spoken-line {
@@ -198,6 +239,7 @@
   .fd1-guided-controls { display: grid; }
   .fd1-guided-controls .fd1-guidance { border: 0; padding: 0; color: #485444; font: 600 clamp(13px,3.79vw,17px)/1.22 var(--comic-body); }
   .fd1-story .fd1-words, .fd[data-first-day-page="meet-ana"] .fd1-words { width: 100%; gap: 6px; }
+  .fd1-story .fd1-words { grid-template-columns: repeat(5, minmax(max-content, 1fr)); }
   .fd[data-fd-edition] .fd1-word { width: auto; height: 42px; box-shadow: 0 2px 0 #353c31; font-size: clamp(16px,4.88vw,23px); border-radius:6px; }
   .fd1-tip { padding: 9px 13px 10px; gap: 4px; }
   .fd1-tip h2, .fd1-tip ul { font-size: clamp(14px,4.1vw,19px); line-height:1.2; }
@@ -208,8 +250,7 @@
   .fd1-check-actions { grid-area: 2/2; gap: 5px; }
   .fd[data-fd-edition] .fd1-check-actions button { min-height: 32px; height:auto; padding:5px 7px; font-size:13px; }
   .fd1-check-actions svg { display: inline-block; }
-  .fd1-finished:not(.fd1-success) { display:none; }
-  .fd1-finished.fd1-success { font:700 16px/1.15 var(--comic-body); padding:8px 12px; }
+  .fd1-finished { display:none; }
 }
 
 @media (orientation: landscape) and (max-width: 760px) {

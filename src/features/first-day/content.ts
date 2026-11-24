@@ -1,5 +1,5 @@
 import { examplesCopy, narration, permissionRuleCopy } from "./narration";
-import type { DialogueClip, NarrationClip } from "./narration";
+import type { DialogueClip, FirstDayWord, NarrationClip } from "./narration";
 
 export type FirstDayArt = {
   src: string;
@@ -30,20 +30,20 @@ function panelArt(file: string, alt: string, pc: ImageSize, mobile: ImageSize): 
 export const art = {
   cover: {
     src: "/first-day/art-v2/capa-gibi-vertical.webp", width: 1024, height: 1365,
-    alt: "Roger, Ana e Leo se reúnem na cafeteria em volta de um gibi de aventura.",
+    alt: "Rafael, Ana e Leo se reúnem na cafeteria em volta de um gibi de aventura.",
   },
   chair: {
     src: "/first-day-part-one/detalhe/01-cadeira.webp", width: 520, height: 423,
-    alt: "A mão de Roger aponta para a cadeira amarela onde está a bolsa de Ana.",
+    alt: "A mão de Rafael aponta para a cadeira amarela onde está a bolsa de Ana.",
   },
-  arrival: panelArt("01-chegada", "Ana lê um gibi à mesa, com a bolsa na cadeira amarela ao lado. Roger se aproxima segurando a bandeja.", [1672, 941], [1000, 1250]),
-  anaMakesRoom: panelArt("02-bolsa", "Ana ergue a bolsa para liberar a cadeira amarela. Roger ainda está de pé com a bandeja.", [1456, 819], [1000, 1500]),
-  seated: panelArt("03-roger", "Sentado ao lado de Ana, Roger leva a mão ao peito. A bandeja e o gibi aberto estão sobre a mesa.", [1672, 941], [1000, 1500]),
-  anaIntroducesHerself: panelArt("04-ana", "Ana sorri para Roger e leva a mão ao peito ao se apresentar.", [1672, 941], [1000, 1500]),
-  window: panelArt("05a-06b-janela", "Sentado com Ana, Roger aponta para a janela da cafeteria.", [1128, 752], [1120, 840]),
-  invitation: panelArt("05b-06a-mesa", "Roger segura a bandeja e indica a cadeira ao lado de Ana, que segura o gibi.", [1128, 752], [1120, 840]),
-  comicExample: panelArt("05c-gibi", "Ana e Roger conversam diante do gibi aberto sobre a mesa.", [1128, 752], [1120, 840]),
-  door: panelArt("07-porta", "Ana segura a bolsa à frente do corpo enquanto Roger alcança a maçaneta da porta aberta.", [1672, 941], [1000, 1500]),
+  arrival: panelArt("01-chegada", "Ana lê um gibi à mesa, com a bolsa na cadeira amarela ao lado. Rafael se aproxima segurando a bandeja.", [1672, 941], [1000, 1250]),
+  anaMakesRoom: panelArt("02-bolsa", "Ana ergue a bolsa para liberar a cadeira amarela. Rafael ainda está de pé com a bandeja.", [1456, 819], [1000, 1500]),
+  seated: panelArt("03-rafael", "Sentado ao lado de Ana, Rafael leva a mão ao peito. A bandeja e o gibi aberto estão sobre a mesa.", [1672, 941], [1000, 1500]),
+  anaIntroducesHerself: panelArt("04-ana", "Ana sorri para Rafael e leva a mão ao peito ao se apresentar.", [1672, 941], [1000, 1500]),
+  window: panelArt("05a-06b-janela", "Sentado com Ana, Rafael aponta para a janela da cafeteria.", [1128, 752], [1120, 840]),
+  invitation: panelArt("05b-06a-mesa", "Rafael segura a bandeja e indica a cadeira ao lado de Ana, que segura o gibi.", [1128, 752], [1120, 840]),
+  comicExample: panelArt("05c-gibi", "Ana e Rafael conversam diante do gibi aberto sobre a mesa.", [1128, 752], [1120, 840]),
+  door: panelArt("07-porta", "Ana segura a bolsa à frente do corpo enquanto Rafael alcança a maçaneta da porta aberta.", [1672, 941], [1000, 1500]),
 };
 
 type PageBase = {
@@ -54,7 +54,7 @@ type PageBase = {
 };
 
 export type WordSequence = {
-  words: readonly string[];
+  words: readonly FirstDayWord[];
   order: readonly number[];
 };
 
@@ -72,6 +72,7 @@ export type GuidedPage = StoryPage & WordSequence & {
   caption: string;
   detail?: FirstDayArt;
   voice: DialogueClip;
+  translationVoice?: NarrationClip;
   translations: readonly string[];
 };
 
@@ -118,6 +119,7 @@ export type ChallengePage = StoryPage & WordSequence & {
   instruction: Record<"en" | "pt", NarrationClip>;
   translationVoice: NarrationClip;
   voice: DialogueClip;
+  reply: { speaker: string; voice: DialogueClip; translationVoice: NarrationClip };
 };
 
 type PreviewPage = PageBase & { kind: "Em preparação"; moment: string };
@@ -161,12 +163,13 @@ const firstPartPages: readonly FirstDayPage[] = [
     kind: "Ação",
     scene: "intro",
     title: "Apresente-se",
-    caption: `${narration["sit-beside-ana"].translation} É hora de dizer seu nome.`,
+    caption: narration["rafael-sits-pt"].text,
     ...art.seated,
-    voice: "learner-intro",
-    words: ["I’m", "Roger,", "by", "the", "way."],
+    voice: "rafael-intro",
+    translationVoice: "rafael-intro-pt",
+    words: ["I’m", "Rafael,", "by", "the", "way."],
     order: [2, 0, 4, 1, 3],
-    translations: ["", "Eu sou…", "Eu sou o Roger…", "Eu sou o Roger…", "Eu sou o Roger…", "Aliás, eu sou o Roger."],
+    translations: ["", "Eu sou…", "Eu sou o Rafael…", "Eu sou o Rafael…", "Eu sou o Rafael…", narration["rafael-intro-pt"].text],
   },
   {
     ...firstPart,
@@ -218,6 +221,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     order: [4, 2, 0, 3, 1],
     translationVoice: "door-answer-pt",
     voice: "challenge-door",
+    reply: { speaker: "Ana", voice: "ana-door-reply", translationVoice: "ana-door-reply-pt" },
   },
 ];
 

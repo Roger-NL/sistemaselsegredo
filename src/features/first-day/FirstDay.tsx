@@ -19,7 +19,7 @@ import { FirstDragTutorial, StoryPanel } from "./StoryPanel";
 import { createFirstDayArtCache } from "./first-day-art";
 import { createFirstDayProgressStore, type ChallengeAttempt } from "./first-day-progress";
 import { capturePanel, curlPanel, getTurnPanel, type PanelCapture } from "./page-curl";
-import { arrivalNarration, coverCopy, coverNarration, dialogue, FIRST_DAY_AUDIO_RATE, seatedNarration, narration } from "./narration";
+import { arrivalNarration, coverCopy, coverNarration, dialogue, FIRST_DAY_AUDIO_RATE, seatedNarration, narration, wordVoices } from "./narration";
 import type { DialogueClip, FirstDayVoiceClip, NarrationClip } from "./narration";
 import { useFirstDayNarration } from "./useFirstDayNarration";
 import { useFirstDayPaperSound } from "./useFirstDayPaperSound";
@@ -79,11 +79,11 @@ function subscribeToPartOnePortrait(listener: () => void) {
 function NarrationButton({ clips, player, language, showLabel = false }: {
   clips: readonly NarrationClip[];
   player: VoicePlayer;
-  language: "en" | "pt";
+  language: "inglês" | "português" | "inglês e português";
   showLabel?: boolean;
 }) {
   const playing = clips.some(clip => clip === player.playing);
-  const label = playing ? "Parar narração" : `Ouvir narração em ${language === "pt" ? "português" : "inglês"}`;
+  const label = playing ? "Parar narração" : `Ouvir narração em ${language}`;
   return <button type="button" className="fd-narration-control" aria-label={label}
     title={playing ? label : clips.map(clip => narration[clip].text).join(" ")}
     onClick={() => playing ? player.stop() : player.play(clips)}>
@@ -92,14 +92,14 @@ function NarrationButton({ clips, player, language, showLabel = false }: {
   </button>;
 }
 
-function SpeakButton({ clip, translationClip, player, className, children, descriptionId, balloon = false }: {
+function SpeakButton({ clip, translationClip, player, className, children, descriptionId, showIcon = false }: {
   clip: DialogueClip;
   translationClip?: NarrationClip;
   player: VoicePlayer;
   className: string;
   children: ReactNode;
   descriptionId?: string;
-  balloon?: boolean;
+  showIcon?: boolean;
 }) {
   const playing = player.playing === clip || player.playing === translationClip;
   const label = playing ? "Parar fala" : translationClip ? "Ouvir fala e tradução" : "Ouvir fala";
@@ -107,7 +107,7 @@ function SpeakButton({ clip, translationClip, player, className, children, descr
     aria-label={`${label}: ${dialogue[clip].text}`} aria-describedby={descriptionId}
     title={label} onClick={() => playing ? player.stop() : player.play(translationClip ? [clip, translationClip] : [clip])}>
     {children}
-    {balloon && <span className="fd-speak-icon">
+    {showIcon && <span className="fd-speak-icon" aria-hidden="true">
       {playing ? <Pause size={12} aria-hidden="true" /> : <Volume2 size={12} aria-hidden="true" />}
     </span>}
   </button>;
@@ -116,7 +116,7 @@ function SpeakButton({ clip, translationClip, player, className, children, descr
 function ReplyBalloon({ reply, player }: { reply: CharacterReply; player?: VoicePlayer }) {
   const line = <><b className="fd1-spoken-line" lang="en">{dialogue[reply.voice].text}</b>
     <span className="fd1-translation">{reply.translation}</span></>;
-  return player ? <SpeakButton clip={reply.voice} player={player} className="fd1-bubble-body" balloon>{line}</SpeakButton>
+  return player ? <SpeakButton clip={reply.voice} player={player} className="fd1-bubble-body" showIcon>{line}</SpeakButton>
     : <div className="fd1-bubble-body" role="group" aria-label={`Resposta de ${reply.speaker}`}>{line}</div>;
 }
 
@@ -155,7 +155,7 @@ function LearnerBalloon({ words, placed, translation, complete, locked = complet
   if (complete) {
     const line = <><b className="fd1-spoken-line" lang="en">{phrase}</b>
       <span className="fd1-translation">{translation}</span></>;
-    return speech ? <SpeakButton {...speech} className="fd1-bubble-body" balloon>{line}</SpeakButton>
+    return speech ? <SpeakButton {...speech} className="fd1-bubble-body" showIcon>{line}</SpeakButton>
       : <div className="fd1-bubble-body" role="status">{line}</div>;
   }
   return <DropTarget id={bubbleTarget} accept={["word"]} disabled={locked} className="fd1-bubble-body"
@@ -195,11 +195,12 @@ function GuidedMoment({ page, count, onPlace, cue, narrator, audioEnabled, clean
     }
   }
 
-  return <LessonDragProvider onDrop={item => place(item.value)}>
+  return <LessonDragProvider onDrop={item => place(item.value)}
+    onSelect={audioEnabled ? item => narrator.play([wordVoices[page.words[Number(item.value)]]]) : undefined}>
     <section className="fd1-story" data-kind="guided" data-complete={done} aria-label="Montagem guiada">
       <StoryPanel page={page} portrait={cleanReading} expanded={count > 0}>
         <LearnerBalloon words={page.words} placed={placed} translation={page.translations[count]} complete={done}
-          speech={done && audioEnabled ? { clip: page.voice, player: narrator } : undefined} />
+          speech={done && audioEnabled ? { clip: page.voice, translationClip: page.translationVoice, player: narrator } : undefined} />
       </StoryPanel>
       {done ? <div className="fd1-story-strip fd1-finished" role="status">Continue quando quiser.</div>
         : <div className="fd1-story-strip fd1-guided-controls">
@@ -273,6 +274,21 @@ function RuleMoment({ page, voice }: { page: RulePage; voice?: VoicePlayer }) {
 
 const emptyAttempt: ChallengeAttempt = { placed: [] };
 
+function ChallengeReply({ reply, player }: { reply: ChallengePage["reply"]; player?: VoicePlayer }) {
+  const line = <><b lang="en">{dialogue[reply.voice].text}</b>
+    <span id="fd-door-reply-translation">{narration[reply.translationVoice].text}</span></>;
+
+  return <section className="fd1-story-strip fd1-door-reply" aria-labelledby="fd-door-reply-speaker">
+    <div className="fd1-door-reply-label">
+      <strong id="fd-door-reply-speaker">{reply.speaker}</strong>
+      <span role="status"><Check size={15} aria-hidden="true"/> Você acertou!</span>
+    </div>
+    {player ? <SpeakButton className="fd1-door-reply-line" player={player} clip={reply.voice}
+      translationClip={reply.translationVoice} descriptionId="fd-door-reply-speaker fd-door-reply-translation" showIcon>{line}</SpeakButton>
+      : <div className="fd1-door-reply-line">{line}</div>}
+  </section>;
+}
+
 function ChallengeMoment({ page, attempt, onAttempt, cue, voice, cleanReading }: {
   page: ChallengePage;
   attempt: ChallengeAttempt;
@@ -305,14 +321,15 @@ function ChallengeMoment({ page, attempt, onAttempt, cue, voice, cleanReading }:
     setReset(previous => previous + 1);
   }
 
-  return <LessonDragProvider key={reset} onDrop={item => place(item.value)}>
+  return <LessonDragProvider key={reset} onDrop={item => place(item.value)}
+    onSelect={voice ? item => voice.play([wordVoices[page.words[Number(item.value)]]]) : undefined}>
     <section className="fd1-story" data-kind="challenge" data-complete={solved} aria-label="Pedido sem pistas">
       <StoryPanel page={page} portrait={cleanReading} expanded={placed.length > 0}>
         <LearnerBalloon words={page.words} placed={placed} complete={solved} locked={full}
           translation={solved ? narration[page.translationVoice].text : undefined}
           speech={solved && voice ? { clip: page.voice, translationClip: page.translationVoice, player: voice } : undefined} />
       </StoryPanel>
-      {solved ? <div className="fd1-story-strip fd1-finished fd1-success" role="status"><Check aria-hidden="true"/> Você acertou!</div>
+      {solved ? <ChallengeReply reply={page.reply} player={voice} />
         : <div className="fd1-story-strip fd1-challenge-controls">
           <p className="fd1-guidance" role="status" data-result={result}>{result === "incorrect"
             ? "Comece pelo pedido, depois a ação. Limpe e tente de novo." : "Monte a frase e toque em Conferir."}</p>
@@ -488,7 +505,7 @@ export function FirstDay() {
           onPlace={count => {
             progress.update(previous => ({ ...previous, counts: { ...previous.counts, [page.id]: count } }));
             if (sound && count === page.words.length) {
-              narrator.play([page.voice]);
+              narrator.play(page.translationVoice ? [page.voice, page.translationVoice] : [page.voice]);
             }
           }} />;
       case "Reação":
@@ -503,7 +520,7 @@ export function FirstDay() {
           onAttempt={attempt => {
             progress.update(previous => ({ ...previous, attempts: { ...previous.attempts, [page.id]: attempt } }));
             if (sound && attempt.result === "correct" && attempts[page.id]?.result !== "correct") {
-              narrator.play([page.voice, page.translationVoice]);
+              narrator.play([page.voice, page.translationVoice, page.reply.voice, page.reply.translationVoice]);
             }
           }} />;
       case "Em preparação":
@@ -577,7 +594,8 @@ export function FirstDay() {
         <div className="fd1-caption">
           <p lang={challenge && !translated ? "en" : undefined}>{caption}</p>
           <div className="fd1-listen">
-            {sound && captionClips.length > 0 && <NarrationButton clips={captionClips} player={narrator} language={readingPage || translated ? "pt" : "en"} />}
+            {sound && captionClips.length > 0 && <NarrationButton clips={captionClips} player={narrator}
+              language={captionClips === seatedNarration ? "inglês e português" : readingPage || translated ? "português" : "inglês"} />}
             {challenge && <button type="button" className="fd1-language" aria-label={translated ? "Voltar à instrução em inglês" : "Ver tradução da instrução em português"} onClick={changeInstructionLanguage}>{translated ? "EN" : "PT"}</button>}
           </div>
         </div>
