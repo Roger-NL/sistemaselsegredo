@@ -1,0 +1,27 @@
+html body .dashboard-catalog .catalog-masthead {
+  justify-content: space-between;
+  max-width: none;
+  min-height: 54px;
+  padding-inline: max(var(--catalog-gutter), calc((100% - 1180px) / 2));
+  background: #f7f1e8;
+  border-block-end: 1px solid #d8cfc1;
+}
+
+.catalog-masthead::before { content: none; }
+
+.catalog-masthead .app-header-menu > summary {
+  width: 44px;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  border-radius: 6px;
+}
+
+.catalog-masthead .app-header-menu[open] > summary,
+.catalog-masthead .app-header-menu > summary:hover { background: #e8e0d5; }
+
+.catalog-masthead .app-menu-panel a[aria-current="page"] { background: var(--nav-hover); }
+
+@media (min-width: 761px) {
+  html body .dashboard-catalog .catalog-masthead { min-height: 64px; }
+}

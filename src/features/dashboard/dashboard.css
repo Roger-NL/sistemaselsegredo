@@ -7,7 +7,7 @@
 }
 .dashboard * { box-sizing:border-box; }
 .dashboard h1,.dashboard h2,.dashboard p,.dashboard figure { margin:0; }
-.dashboard button,.dashboard a,.dashboard input { font:inherit; }
+.dashboard button,.dashboard a:where(:not(.brand)),.dashboard input { font:inherit; }
 .dashboard a { color:inherit; text-decoration:none; }
 .dashboard button { cursor:pointer; }
 .dashboard button:disabled { cursor:wait; opacity:.65; }

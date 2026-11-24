@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, Bell, BookOpen, CalendarDays, LoaderCircle, LogOut, Menu, MessageCircle, Settings2, UserRound, X } from "lucide-react";
-import { Brand } from "@/components/ui/Brand";
+import { ArrowUpRight, Bell, BookOpen, CalendarDays, LoaderCircle, LogOut, MessageCircle, RefreshCw, Settings2, UserRound, X } from "lucide-react";
 import { BrowserText } from "@/components/i18n/BrowserText";
 import { displayAccountName, type DashboardAccount } from "@/contracts/dashboard";
 import { LIVE_CLASS_LABELS, liveClassDate } from "@/contracts/live-class";
@@ -13,6 +12,7 @@ import { decodeLessonAccountSnapshot } from "@/features/first-encounters/lesson-
 import { getLessonDashboardSnapshot } from "@/features/first-encounters/lesson-dashboard";
 import { useLessonSounds } from "@/features/first-encounters/useLessonSounds";
 import { FirstDayCatalog, useFirstDayReading } from "./FirstDayCatalog";
+import { CatalogHeader } from "./CatalogHeader";
 import { GuestProgressImport } from "./GuestProgressImport";
 import { OPEN_TEACHER_CONVERSATION_EVENT, teacherReplies } from "./next-step";
 import { formatStudentDate } from "./TeacherContact";
@@ -44,7 +44,6 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
   const [section, setSection] = useState<Section>("jornada");
   const [notice, setNotice] = useState("");
   const [refreshNotice, setRefreshNotice] = useState("");
-  const menu = useRef<HTMLDetailsElement>(null);
   const settings = useRef<HTMLDialogElement>(null);
   const accountDialog = useRef<HTMLDialogElement>(null);
   const activePanel = useRef<HTMLDivElement>(null);
@@ -66,9 +65,6 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
       const hash = window.location.hash.slice(1);
       setSection(isSection(hash) ? hash : "jornada");
     };
-    const outside = (event: PointerEvent) => {
-      if (menu.current && !menu.current.contains(event.target as Node)) menu.current.open = false;
-    };
     queueMicrotask(() => {
       if (!mounted) return;
       readHash();
@@ -77,11 +73,9 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
       if (panel === "configuracoes") settings.current?.showModal();
     });
     window.addEventListener("hashchange", readHash);
-    document.addEventListener("pointerdown", outside);
     return () => {
       mounted = false;
       window.removeEventListener("hashchange", readHash);
-      document.removeEventListener("pointerdown", outside);
     };
   }, []);
 
@@ -99,14 +93,9 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
     return () => cancelAnimationFrame(frame);
   }, [section]);
 
-  function closeMenu() {
-    if (menu.current) menu.current.open = false;
-  }
-
   function chooseSection(event: MouseEvent<HTMLAnchorElement>, next: Section) {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    closeMenu();
     openingThread.current = next === "contato" ? event.currentTarget.dataset.conversationId ?? null : null;
     if (section !== next) {
       sounds.play("tap");
@@ -116,13 +105,11 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
   }
 
   function openSettings() {
-    closeMenu();
     setNotice("");
     settings.current?.showModal();
   }
 
   function openAccount() {
-    closeMenu();
     setProfileError("");
     setProfileNotice("");
     setDraftName(workspace?.account.name ?? name);
@@ -193,31 +180,17 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
 
   return <div className="dashboard dashboard-catalog dashboard-catalog-account" data-dashboard-section={section}>
     <a className="catalog-skip" href="#meu-painel">Pular para o conteúdo</a>
-    <header className="app-header dashboard-header catalog-wrap" data-tone="paper">
-      <Brand href="/dashboard"/>
-      <div className="app-header-tools">
-        {firstName && <span className="app-header-name">{firstName}</span>}
-        <button type="button" className="dashboard-tool" aria-label="Configurações" onClick={openSettings}><Settings2 size={17} aria-hidden="true"/><span>Configurações</span></button>
-        <details ref={menu} className="app-header-menu"
-          onBlur={event => { if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) closeMenu(); }}
-          onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); closeMenu(); menu.current?.querySelector("summary")?.focus(); } }}>
-          <summary aria-label="Menu de navegação"><Menu size={18} aria-hidden="true"/><span>Menu</span></summary>
-          <nav className="app-menu-panel" aria-label="Menu do BasedSpeak">
-            {sections.map(item => <a key={item.id} href={`#${item.id}`} onClick={event => chooseSection(event, item.id)}>{item.label}</a>)}
-            <div className="app-menu-divider"/>
-            <button type="button" className="app-menu-action" onClick={openSettings}><Settings2 size={17} aria-hidden="true"/>Configurações</button>
-            <button type="button" className="app-menu-action" onClick={openAccount}><UserRound size={17} aria-hidden="true"/>Minha conta</button>
-          </nav>
-        </details>
-      </div>
-    </header>
+    <CatalogHeader home="/dashboard">
+      {firstName && <p>{firstName}</p>}
+      {sections.map(item => <a key={item.id} href={`#${item.id}`} aria-current={section === item.id ? "page" : undefined} onClick={event => chooseSection(event, item.id)}>{item.label}</a>)}
+      <div className="app-menu-divider"/>
+      <button type="button" className="app-menu-action" disabled={workspaceState.status === "loading"} onClick={() => void refreshDashboard()}><RefreshCw size={17} aria-hidden="true"/>Atualizar painel</button>
+      <button type="button" className="app-menu-action" onClick={openSettings}><Settings2 size={17} aria-hidden="true"/>Configurações</button>
+      <button type="button" className="app-menu-action" onClick={openAccount}><UserRound size={17} aria-hidden="true"/>Minha conta</button>
+    </CatalogHeader>
 
     <main id="meu-painel" className="catalog-main catalog-wrap" aria-busy={workspaceState.status === "loading"}>
       <h1 className="dashboard-sr-only">Meu painel</h1>
-      <nav className="student-nav catalog-account-nav" aria-label="Área do aluno">
-        {sections.map(item => <a key={item.id} href={`#${item.id}`} aria-current={section === item.id ? "page" : undefined} onClick={event => chooseSection(event, item.id)}>{item.label}</a>)}
-        <button type="button" disabled={workspaceState.status === "loading"} onClick={() => void refreshDashboard()}>Atualizar painel</button>
-      </nav>
       {workspaceState.error && <div className="student-status" role="alert"><span>{workspaceState.error}</span><button type="button" onClick={() => void refreshDashboard()}>Tentar novamente</button></div>}
       {(workspaceState.saving || workspaceState.notice) && <p className="student-status" role="status">{workspaceState.saving ? "Salvando seu avanço…" : workspaceState.notice}</p>}
 

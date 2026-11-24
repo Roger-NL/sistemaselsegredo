@@ -32,16 +32,19 @@ afterEach(async () => { await act(async () => root.unmount()); host.remove(); vi
 const mount = async () => { await act(async () => root.render(createElement(Dashboard, { account: { name: "Julia", email: "julia@example.com" } }))); };
 const button = (text: string) => [...host.querySelectorAll<HTMLButtonElement>("button")].find(button => button.textContent?.trim() === text)!;
 const click = async (node: HTMLElement) => { expect(node).toBeTruthy(); await act(async () => node.click()); };
-const tab = (hash: string) => host.querySelector<HTMLAnchorElement>(`.student-nav a[href='#${hash}']`)!;
+const tab = (hash: string) => host.querySelector<HTMLAnchorElement>(`.app-menu-panel a[href='#${hash}']`)!;
 async function typeName(text: string) { const input = host.querySelector<HTMLInputElement>('input[name="name"]')!; await act(async () => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, text); input.dispatchEvent(new InputEvent("input", { bubbles: true, data: text })); }); }
 
 describe("the main account dashboard", () => {
-  it("offers the public catalog, the first book, and six future covers without an account", () => {
+  it("offers First Day and the three illustrated covers in reading order without an account", () => {
     const markup = renderToStaticMarkup(createElement(PublicDashboard));
     expect(markup).toContain('href="/first-day"');
     expect(markup).toContain("Começar a ler");
     expect(markup).toContain("Em breve");
-    expect(markup.match(/class="catalog-book"/g)).toHaveLength(6);
+    const catalog = new DOMParser().parseFromString(markup, "text/html");
+    expect(Array.from(catalog.querySelectorAll(".catalog-book"), book => book.textContent)).toEqual([
+      "Um café, por favor", "Do outro lado da rua", "Um dia de chuva",
+    ]);
     expect(markup).not.toMatch(/Minhas atividades|Minha conta|\/comecar/);
   });
   it("opens First Day at the saved point and has working account tabs", async () => {
