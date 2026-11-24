@@ -19,7 +19,7 @@ import { FirstDragTutorial, StoryPanel } from "./StoryPanel";
 import { createFirstDayArtCache } from "./first-day-art";
 import { createFirstDayProgressStore, type ChallengeAttempt } from "./first-day-progress";
 import { capturePanel, curlPanel, getTurnPanel, type PanelCapture } from "./page-curl";
-import { arrivalNarration, coverCopy, coverNarration, dialogue, FIRST_DAY_AUDIO_RATE, seatedNarration, narration, wordVoices } from "./narration";
+import { arrivalNarration, coverCopy, coverNarration, dialogue, FIRST_DAY_AUDIO_RATE, seatedNarration, narration, portugueseNarration, spokenDialogue, wordVoices } from "./narration";
 import type { DialogueClip, FirstDayVoiceClip, NarrationClip } from "./narration";
 import { useFirstDayNarration } from "./useFirstDayNarration";
 import { useFirstDayPaperSound } from "./useFirstDayPaperSound";
@@ -45,13 +45,13 @@ const previewSounds = createLessonSoundsEngine({ getStorage: () => undefined, pl
 const bubbleTarget = "first-day-bubble";
 type VoicePlayer = ReturnType<typeof useFirstDayNarration>;
 
-function pageNarration(page: (typeof pages)[number] | undefined, translated = false): readonly NarrationClip[] {
+function pageNarration(page: (typeof pages)[number] | undefined, englishVoice: boolean): readonly NarrationClip[] {
   switch (page?.kind) {
-    case "Ação": return page.scene === "intro" ? seatedNarration : arrivalNarration;
-    case "Reação":
+    case "Ação": return (page.scene === "intro" ? seatedNarration : arrivalNarration).map(clip => englishVoice ? clip : portugueseNarration[clip] ?? clip);
+    case "Reação": return [englishVoice ? page.narration : portugueseNarration[page.narration] ?? page.narration];
     case "Tirinha":
     case "Explicação": return [page.narration];
-    case "Desafio": return [page.instruction[translated ? "pt" : "en"]];
+    case "Desafio": return [page.instruction[englishVoice ? "en" : "pt"]];
     default: return [];
   }
 }
@@ -79,7 +79,7 @@ function subscribeToPartOnePortrait(listener: () => void) {
 function NarrationButton({ clips, player, language, showLabel = false }: {
   clips: readonly NarrationClip[];
   player: VoicePlayer;
-  language: "inglês" | "português" | "inglês e português";
+  language: "inglês" | "português";
   showLabel?: boolean;
 }) {
   const playing = clips.some(clip => clip === player.playing);
@@ -92,20 +92,21 @@ function NarrationButton({ clips, player, language, showLabel = false }: {
   </button>;
 }
 
-function SpeakButton({ clip, translationClip, player, className, children, descriptionId, showIcon = false }: {
+function SpeakButton({ clip, englishVoice = true, player, className, children, descriptionId, showIcon = false }: {
   clip: DialogueClip;
-  translationClip?: NarrationClip;
+  englishVoice?: boolean;
   player: VoicePlayer;
   className: string;
   children: ReactNode;
   descriptionId?: string;
   showIcon?: boolean;
 }) {
-  const playing = player.playing === clip || player.playing === translationClip;
-  const label = playing ? "Parar fala" : translationClip ? "Ouvir fala e tradução" : "Ouvir fala";
+  const spoken = spokenDialogue(clip, englishVoice);
+  const playing = player.playing === spoken;
+  const label = playing ? "Parar fala" : "Ouvir fala";
   return <button type="button" className={`${className} fd-speak`} aria-pressed={playing}
-    aria-label={`${label}: ${dialogue[clip].text}`} aria-describedby={descriptionId}
-    title={label} onClick={() => playing ? player.stop() : player.play(translationClip ? [clip, translationClip] : [clip])}>
+    aria-label={`${label}: ${spoken in narration ? narration[spoken as NarrationClip].text : dialogue[clip].text}`} aria-describedby={descriptionId}
+    title={label} onClick={() => playing ? player.stop() : player.play([spoken])}>
     {children}
     {showIcon && <span className="fd-speak-icon" aria-hidden="true">
       {playing ? <Pause size={12} aria-hidden="true" /> : <Volume2 size={12} aria-hidden="true" />}
@@ -113,16 +114,17 @@ function SpeakButton({ clip, translationClip, player, className, children, descr
   </button>;
 }
 
-function ReplyBalloon({ reply, player }: { reply: CharacterReply; player?: VoicePlayer }) {
-  const line = <><b className="fd1-spoken-line" lang="en">{dialogue[reply.voice].text}</b>
-    <span className="fd1-translation">{reply.translation}</span></>;
-  return player ? <SpeakButton clip={reply.voice} player={player} className="fd1-bubble-body" showIcon>{line}</SpeakButton>
+function ReplyBalloon({ reply, player, englishVoice }: { reply: CharacterReply; player?: VoicePlayer; englishVoice: boolean }) {
+  const line = <b className="fd1-spoken-line" lang={englishVoice ? "pt-BR" : "en"}>
+    {englishVoice ? reply.translation : dialogue[reply.voice].text}
+  </b>;
+  return player ? <SpeakButton clip={reply.voice} englishVoice={englishVoice} player={player} className="fd1-bubble-body" showIcon>{line}</SpeakButton>
     : <div className="fd1-bubble-body" role="group" aria-label={`Resposta de ${reply.speaker}`}>{line}</div>;
 }
 
-function ReactionMoment({ page, voice, cleanReading }: { page: ReactionPage; voice?: VoicePlayer; cleanReading: boolean }) {
+function ReactionMoment({ page, voice, cleanReading, englishVoice }: { page: ReactionPage; voice?: VoicePlayer; cleanReading: boolean; englishVoice: boolean }) {
   return <section className="fd1-story" data-kind="reaction" aria-label={page.title}>
-    <StoryPanel page={page} portrait={cleanReading}><ReplyBalloon reply={page.reply} player={voice} /></StoryPanel>
+    <StoryPanel page={page} portrait={cleanReading}><ReplyBalloon reply={page.reply} englishVoice={englishVoice} player={voice} /></StoryPanel>
     {page.tip && <aside className="fd1-story-strip fd1-tip">
       <h2>{page.tip.title}</h2>
       <ul lang="en">{page.tip.phrases.map(phrase => <li key={phrase}>{phrase}</li>)}</ul>
@@ -143,19 +145,19 @@ function WordStrip({ words, order, placed, nextWord }: WordSequence & {
   </div>;
 }
 
-function LearnerBalloon({ words, placed, translation, complete, locked = complete, speech }: {
+function LearnerBalloon({ words, placed, translation, complete, locked = complete, speech, englishVoice }: {
   words: readonly string[];
   placed: readonly number[];
   translation?: string;
   complete: boolean;
   locked?: boolean;
-  speech?: { clip: DialogueClip; translationClip?: NarrationClip; player: VoicePlayer };
+  speech?: { clip: DialogueClip; player: VoicePlayer };
+  englishVoice: boolean;
 }) {
   const phrase = placed.map(index => words[index]).join(" ");
   if (complete) {
-    const line = <><b className="fd1-spoken-line" lang="en">{phrase}</b>
-      <span className="fd1-translation">{translation}</span></>;
-    return speech ? <SpeakButton {...speech} className="fd1-bubble-body" showIcon>{line}</SpeakButton>
+    const line = <b className="fd1-spoken-line" lang={englishVoice ? "pt-BR" : "en"}>{englishVoice ? translation : phrase}</b>;
+    return speech ? <SpeakButton {...speech} englishVoice={englishVoice} className="fd1-bubble-body" showIcon>{line}</SpeakButton>
       : <div className="fd1-bubble-body" role="status">{line}</div>;
   }
   return <DropTarget id={bubbleTarget} accept={["word"]} disabled={locked} className="fd1-bubble-body"
@@ -166,13 +168,14 @@ function LearnerBalloon({ words, placed, translation, complete, locked = complet
   </DropTarget>;
 }
 
-function GuidedMoment({ page, count, onPlace, cue, narrator, audioEnabled, cleanReading }: {
+function GuidedMoment({ page, count, onPlace, cue, narrator, audioEnabled, cleanReading, englishVoice }: {
   page: GuidedPage;
   count: number;
   onPlace: (count: number) => void;
   cue: (sound: LessonSoundCue) => void;
   narrator: VoicePlayer;
   audioEnabled: boolean;
+  englishVoice: boolean;
   cleanReading: boolean;
 }) {
   const [mistake, setMistake] = useState(false);
@@ -199,8 +202,8 @@ function GuidedMoment({ page, count, onPlace, cue, narrator, audioEnabled, clean
     onSelect={audioEnabled ? item => narrator.play([wordVoices[page.words[Number(item.value)]]]) : undefined}>
     <section className="fd1-story" data-kind="guided" data-complete={done} aria-label="Montagem guiada">
       <StoryPanel page={page} portrait={cleanReading} expanded={count > 0}>
-        <LearnerBalloon words={page.words} placed={placed} translation={page.translations[count]} complete={done}
-          speech={done && audioEnabled ? { clip: page.voice, translationClip: page.translationVoice, player: narrator } : undefined} />
+        <LearnerBalloon englishVoice={englishVoice} words={page.words} placed={placed} translation={page.translations[count]} complete={done}
+          speech={done && audioEnabled ? { clip: page.voice, player: narrator } : undefined} />
       </StoryPanel>
       {done ? <div className="fd1-story-strip fd1-finished" role="status">Continue quando quiser.</div>
         : <div className="fd1-story-strip fd1-guided-controls">
@@ -274,9 +277,10 @@ function RuleMoment({ page, voice }: { page: RulePage; voice?: VoicePlayer }) {
 
 const emptyAttempt: ChallengeAttempt = { placed: [] };
 
-function ChallengeReply({ reply, player }: { reply: ChallengePage["reply"]; player?: VoicePlayer }) {
-  const line = <><b lang="en">{dialogue[reply.voice].text}</b>
-    <span id="fd-door-reply-translation">{narration[reply.translationVoice].text}</span></>;
+function ChallengeReply({ reply, player, englishVoice }: { reply: ChallengePage["reply"]; player?: VoicePlayer; englishVoice: boolean }) {
+  const line = <b lang={englishVoice ? "pt-BR" : "en"}>
+    {englishVoice ? narration[reply.translationVoice].text : dialogue[reply.voice].text}
+  </b>;
 
   return <section className="fd1-story-strip fd1-door-reply" aria-labelledby="fd-door-reply-speaker">
     <div className="fd1-door-reply-label">
@@ -284,14 +288,15 @@ function ChallengeReply({ reply, player }: { reply: ChallengePage["reply"]; play
       <span role="status"><Check size={15} aria-hidden="true"/> Você acertou!</span>
     </div>
     {player ? <SpeakButton className="fd1-door-reply-line" player={player} clip={reply.voice}
-      translationClip={reply.translationVoice} descriptionId="fd-door-reply-speaker fd-door-reply-translation" showIcon>{line}</SpeakButton>
+      englishVoice={englishVoice} descriptionId="fd-door-reply-speaker" showIcon>{line}</SpeakButton>
       : <div className="fd1-door-reply-line">{line}</div>}
   </section>;
 }
 
-function ChallengeMoment({ page, attempt, onAttempt, cue, voice, cleanReading }: {
+function ChallengeMoment({ page, attempt, onAttempt, cue, voice, cleanReading, englishVoice }: {
   page: ChallengePage;
   attempt: ChallengeAttempt;
+  englishVoice: boolean;
   onAttempt: (attempt: ChallengeAttempt) => void;
   cue: (sound: LessonSoundCue) => void;
   voice?: VoicePlayer;
@@ -325,11 +330,11 @@ function ChallengeMoment({ page, attempt, onAttempt, cue, voice, cleanReading }:
     onSelect={voice ? item => voice.play([wordVoices[page.words[Number(item.value)]]]) : undefined}>
     <section className="fd1-story" data-kind="challenge" data-complete={solved} aria-label="Pedido sem pistas">
       <StoryPanel page={page} portrait={cleanReading} expanded={placed.length > 0}>
-        <LearnerBalloon words={page.words} placed={placed} complete={solved} locked={full}
+        <LearnerBalloon englishVoice={englishVoice} words={page.words} placed={placed} complete={solved} locked={full}
           translation={solved ? narration[page.translationVoice].text : undefined}
-          speech={solved && voice ? { clip: page.voice, translationClip: page.translationVoice, player: voice } : undefined} />
+          speech={solved && voice ? { clip: page.voice, player: voice } : undefined} />
       </StoryPanel>
-      {solved ? <ChallengeReply reply={page.reply} player={voice} />
+      {solved ? <ChallengeReply reply={page.reply} player={voice} englishVoice={englishVoice} />
         : <div className="fd1-story-strip fd1-challenge-controls">
           <p className="fd1-guidance" role="status" data-result={result}>{result === "incorrect"
             ? "Comece pelo pedido, depois a ação. Limpe e tente de novo." : "Monte a frase e toque em Conferir."}</p>
@@ -344,6 +349,7 @@ function ChallengeMoment({ page, attempt, onAttempt, cue, voice, cleanReading }:
 }
 
 export function FirstDay() {
+  const [englishVoice, setEnglishVoice] = useState(false);
   const [progress] = useState(createFirstDayProgressStore);
   const [imageCache] = useState(createFirstDayArtCache);
   const [artStatus, setArtStatus] = useState<"loading" | "retry" | null>(null);
@@ -366,23 +372,21 @@ export function FirstDay() {
   useFirstDayPullToRefresh(book);
   const sounds = useLessonSounds(previewSounds);
   const speech = useFirstDayNarration();
-  const narrator = { ...speech, play(clips: readonly FirstDayVoiceClip[]) {
+  const narrator = { ...speech, play(clips: readonly FirstDayVoiceClip[], pauseMs?: number) {
     paperSound.stop();
-    speech.play(clips);
+    speech.play(clips, pauseMs);
   } };
   const page = pages[position - 1];
   const edition = page?.part === 1;
   const mobileHeader = edition ? editionPortrait : portraitReading;
   const cleanReading = editionPortrait && usesCleanReading(page);
   const readingPage = page?.kind === "Tirinha" || page?.kind === "Explicação" ? page : undefined;
-  const challenge = page?.kind === "Desafio" ? page : undefined;
-  const translated = Boolean(challenge && attempts[challenge.id]?.translated);
-  const instruction = challenge?.instruction[translated ? "pt" : "en"];
-  const caption = page && "caption" in page ? page.caption
+  const storyVoice = page?.kind === "Ação" || page?.kind === "Reação" || page?.kind === "Desafio";
+  const captionClips = pageNarration(page, englishVoice);
+  const caption = storyVoice ? pageNarration(page, !englishVoice).map(clip => narration[clip].text).join(" ")
     : readingPage?.kind === "Tirinha" ? readingPage.description
     : readingPage?.kind === "Explicação" ? `${readingPage.lead} ${readingPage.detail}`
-    : instruction ? narration[instruction].text : "";
-  const captionClips = pageNarration(page, translated);
+    : "";
   const chair = page?.kind === "Ação" ? page.detail : undefined;
   const playingCover = narrator.playing === "cover";
   const openMenu = () => menu.current?.showModal();
@@ -432,9 +436,9 @@ export function FirstDay() {
       if (source) nextTurn.current = { direction: next > position ? 1 : -1, source };
     }
     const nextPage = pages[next - 1];
-    const pageClips = pageNarration(nextPage, nextPage && attempts[nextPage.id]?.translated);
+    const pageClips = pageNarration(nextPage, englishVoice);
     const clips = next === 0 ? coverNarration
-      : nextPage?.kind === "Reação" ? [...pageClips, nextPage.reply.voice] : pageClips;
+      : nextPage?.kind === "Reação" ? [...pageClips, spokenDialogue(nextPage.reply.voice, englishVoice)] : pageClips;
     if (sound && clips.length) {
       narrator.play(clips);
     }
@@ -466,13 +470,10 @@ export function FirstDay() {
     setChangingAudio(false);
   }
 
-  function changeInstructionLanguage() {
-    if (!challenge) return;
-    progress.update(previous => ({
-      ...previous,
-      attempts: { ...previous.attempts, [challenge.id]: { ...emptyAttempt, ...previous.attempts[challenge.id], translated: !translated } },
-    }));
-    if (sound) narrator.play([challenge.instruction[translated ? "en" : "pt"]]);
+  function invertLanguage() {
+    narrator.stop();
+    setEnglishVoice(previous => !previous);
+    if (sound) narrator.play(pageNarration(page, !englishVoice));
   }
 
   function turnTo(next: number) {
@@ -501,26 +502,26 @@ export function FirstDay() {
     if (!page) return null;
     switch (page.kind) {
       case "Ação":
-        return <GuidedMoment key={page.id} page={page} count={counts[page.id] ?? 0} cue={cue} narrator={narrator} audioEnabled={sound} cleanReading={cleanReading}
+        return <GuidedMoment key={page.id} page={page} count={counts[page.id] ?? 0} cue={cue} narrator={narrator} audioEnabled={sound} englishVoice={englishVoice} cleanReading={cleanReading}
           onPlace={count => {
             progress.update(previous => ({ ...previous, counts: { ...previous.counts, [page.id]: count } }));
             if (sound && count === page.words.length) {
-              narrator.play(page.translationVoice ? [page.voice, page.translationVoice] : [page.voice]);
+              narrator.play([spokenDialogue(page.voice, englishVoice)]);
             }
           }} />;
       case "Reação":
-        return <ReactionMoment page={page} voice={sound ? narrator : undefined} cleanReading={cleanReading} />;
+        return <ReactionMoment page={page} englishVoice={englishVoice} voice={sound ? narrator : undefined} cleanReading={cleanReading} />;
       case "Tirinha":
         return <ExamplesMoment page={page} voice={sound ? narrator : undefined} />;
       case "Explicação":
         return <RuleMoment page={page} voice={sound ? narrator : undefined} />;
       case "Desafio":
-        return <ChallengeMoment key={page.id} page={page} attempt={attempts[page.id] ?? emptyAttempt} cue={cue} voice={sound ? narrator : undefined}
+        return <ChallengeMoment key={page.id} englishVoice={englishVoice} page={page} attempt={attempts[page.id] ?? emptyAttempt} cue={cue} voice={sound ? narrator : undefined}
           cleanReading={cleanReading}
           onAttempt={attempt => {
             progress.update(previous => ({ ...previous, attempts: { ...previous.attempts, [page.id]: attempt } }));
             if (sound && attempt.result === "correct" && attempts[page.id]?.result !== "correct") {
-              narrator.play([page.voice, page.translationVoice, page.reply.voice, page.reply.translationVoice]);
+              narrator.play([spokenDialogue(page.voice, englishVoice), spokenDialogue(page.reply.voice, englishVoice)], 350);
             }
           }} />;
       case "Em preparação":
@@ -592,11 +593,13 @@ export function FirstDay() {
           {chair && !editionPortrait && <Image src={chair.src} width={chair.width} height={chair.height} className="fd1-chair" alt={chair.alt} unoptimized />}
         </div>
         <div className="fd1-caption">
-          <p lang={challenge && !translated ? "en" : undefined}>{caption}</p>
+          <p lang={storyVoice && !englishVoice ? "en" : "pt-BR"}>{caption}</p>
           <div className="fd1-listen">
             {sound && captionClips.length > 0 && <NarrationButton clips={captionClips} player={narrator}
-              language={captionClips === seatedNarration ? "inglês e português" : readingPage || translated ? "português" : "inglês"} />}
-            {challenge && <button type="button" className="fd1-language" aria-label={translated ? "Voltar à instrução em inglês" : "Ver tradução da instrução em português"} onClick={changeInstructionLanguage}>{translated ? "EN" : "PT"}</button>}
+              language={storyVoice && englishVoice ? "inglês" : "português"} />}
+            {storyVoice && <button type="button" className="fd1-language" aria-pressed={englishVoice}
+              aria-label={englishVoice ? "Inverter para voz em português e texto em inglês" : "Inverter para voz em inglês e texto em português"}
+              onClick={invertLanguage}>Inverter</button>}
           </div>
         </div>
       </div> : <div className="fd-page-heading"><div className="fd-page-title">

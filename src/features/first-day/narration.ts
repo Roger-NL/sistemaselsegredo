@@ -18,6 +18,13 @@ export const permissionRuleCopy = {
 } as const;
 
 export const narration = {
+  "lunchtime-pt": { text: "No intervalo, você pega a bandeja e procura um lugar.", bundled: true },
+  "empty-chair-pt": { text: "Ana lê um gibi. Há uma cadeira livre ao lado dela.", bundled: true },
+  "ana-looks-up-pt": { text: "Ana levanta os olhos e afasta a bolsa.", bundled: true },
+  "ana-introduces-herself-pt": { text: "Ana sorri e se apresenta.", bundled: true },
+  "learner-seat-pt": { text: "Oi! Posso sentar aqui?", bundled: true },
+  "ana-sure-pt": { text: "Claro!", bundled: true },
+  "ana-intro-pt": { text: "Eu sou a Ana.", bundled: true },
   cover: { text: `${coverCopy.title}. ${coverCopy.subtitle.join(" ")} ${coverCopy.start}.` },
   lunchtime: {
     text: "It’s lunchtime. You pick up your tray and look for a seat.",
@@ -83,4 +90,26 @@ export function firstDayVoiceUrl(clip: FirstDayVoiceClip) {
 
 export const arrivalNarration = ["lunchtime", "empty-chair"] as const;
 export const coverNarration = ["cover"] as const;
-export const seatedNarration = ["rafael-sits", "rafael-sits-pt"] as const;
+export const seatedNarration = ["rafael-sits"] as const;
+
+export const portugueseNarration: Partial<Record<NarrationClip, NarrationClip>> = {
+  lunchtime: "lunchtime-pt",
+  "empty-chair": "empty-chair-pt",
+  "ana-looks-up": "ana-looks-up-pt",
+  "rafael-sits": "rafael-sits-pt",
+  "ana-introduces-herself": "ana-introduces-herself-pt",
+  "door-instruction-en": "door-instruction-pt",
+};
+
+export const portugueseDialogue: Partial<Record<DialogueClip, NarrationClip>> = {
+  "learner-seat": "learner-seat-pt",
+  "ana-sure": "ana-sure-pt",
+  "rafael-intro": "rafael-intro-pt",
+  "ana-intro": "ana-intro-pt",
+  "challenge-door": "door-answer-pt",
+  "ana-door-reply": "ana-door-reply-pt",
+};
+
+export function spokenDialogue(clip: DialogueClip, englishVoice: boolean): FirstDayVoiceClip {
+  return englishVoice ? clip : portugueseDialogue[clip] ?? clip;
+}

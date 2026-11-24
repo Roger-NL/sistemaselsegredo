@@ -19,7 +19,7 @@ export function useFirstDayNarration() {
     setPlaying(null);
   }
 
-  function play(clips: readonly FirstDayVoiceClip[]) {
+  function play(clips: readonly FirstDayVoiceClip[], pauseMs = 0) {
     stop();
     if (!clips.length || document.hidden) return;
     const player = audio.current ??= new Audio();
@@ -38,7 +38,10 @@ export function useFirstDayNarration() {
       if (!clip || document.hidden) { finish(); return; }
       player.src = firstDayVoiceUrl(clip);
       player.playbackRate = FIRST_DAY_AUDIO_RATE;
-      player.onended = () => next(index + 1);
+      player.onended = () => {
+        if (pauseMs && index + 1 < clips.length) window.setTimeout(() => next(index + 1), pauseMs);
+        else next(index + 1);
+      };
       player.onerror = finish;
       setPlaying(clip);
       void player.play().catch(finish);
