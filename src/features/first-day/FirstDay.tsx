@@ -400,6 +400,7 @@ export function FirstDay() {
   const chair = page?.kind === "Ação" ? page.detail : undefined;
   const playingCover = narrator.playing === "cover";
   const openMenu = () => menu.current?.showModal();
+  const leaveLesson = () => { menu.current?.close(); narrator.stop(); paperSound.stop(); };
 
   useEffect(() => {
     const requests = navigationRequest.current;
@@ -570,7 +571,7 @@ export function FirstDay() {
         <h2 id="fd-menu-title">Percurso</h2>
         <button type="button" className="lo-icon" aria-label="Fechar menu" onClick={() => menu.current?.close()}><X size={20} aria-hidden="true" /></button>
       </div>
-      <Link href="/" className="lo-secondary" onClick={() => { menu.current?.close(); narrator.stop(); paperSound.stop(); }}>
+      <Link href="/" className="lo-secondary" onClick={leaveLesson}>
         <ArrowLeft size={16} aria-hidden="true" /> Voltar ao painel
       </Link>
       <button type="button" onClick={() => turnTo(0)} aria-current={position === 0 ? "page" : undefined}>Capa</button>
@@ -611,6 +612,7 @@ export function FirstDay() {
             <button type="button" className="lo-secondary" ref={audioMode} aria-label="Trocar modo de áudio" aria-haspopup="dialog" aria-controls="fd-audio-options" onClick={openAudioOptions}>Modo de áudio</button>
             <button type="button" className="lo-secondary" aria-haspopup="dialog" aria-controls="fd-progress-reset"
               onClick={event => openResetOptions(event.currentTarget)}><RotateCcw size={16} aria-hidden="true" /> Reiniciar progresso</button>
+            <Link href="/" className="lo-secondary" onClick={leaveLesson} aria-label="Voltar ao menu principal">Menu principal</Link>
           </div>
           <LessonButton onClick={() => turnTo(1)}>{coverCopy.start} <ArrowRight size={18} aria-hidden="true" /></LessonButton>
         </div>

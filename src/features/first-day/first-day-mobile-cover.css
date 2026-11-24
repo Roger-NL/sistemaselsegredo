@@ -58,17 +58,27 @@
   position: absolute;
   inset: auto 10px 0;
   height: var(--fd-reading-nav-height);
-  justify-content: center;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  width: min(calc(100% - 20px), 430px);
+  margin-inline: auto;
 }
 
 .fd[data-fd-mobile-header] .fd-cover-tools > .lo-secondary {
   min-height: var(--fd-cover-tool-height);
   height: var(--fd-cover-tool-height);
-  gap: 6px;
-  padding-inline: clamp(8px, 3vw, 14px);
+  min-width: 0;
+  gap: 4px;
+  padding: 3px 4px;
   font-size: clamp(13px, 3.8vw, 15px) !important;
+  line-height: 1.05;
+  text-align: center;
   pointer-events: auto;
+}
+
+@media (max-width: 360px) {
+  .fd[data-fd-mobile-header] .fd-cover-tools > .lo-secondary svg { display: none; }
 }
 
 .fd[data-fd-mobile-header] .fd-cover-tools > .lo-secondary:focus-visible {
