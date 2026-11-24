@@ -17,11 +17,13 @@ export const permissionRuleCopy = {
   detail: "Depois de Can I, diga o que você quer fazer. Por exemplo, sentar ou abrir.",
 } as const;
 
+const anaIntroductionCaption = "Ana dá um sorriso e se apresenta.";
+
 export const narration = {
   "lunchtime-pt": { text: "No intervalo, você pega a bandeja e procura um lugar.", bundled: true },
   "empty-chair-pt": { text: "Ana lê um gibi. Há uma cadeira livre ao lado dela.", bundled: true },
   "ana-looks-up-pt": { text: "Ana levanta os olhos e afasta a bolsa.", bundled: true },
-  "ana-introduces-herself-pt": { text: "Ana sorri e se apresenta.", bundled: true },
+  "ana-introduces-herself-pt": { text: anaIntroductionCaption, bundled: true },
   "learner-seat-pt": { text: "Oi! Posso sentar aqui?", bundled: true },
   "ana-sure-pt": { text: "Claro!", bundled: true },
   "ana-intro-pt": { text: "Eu sou a Ana.", bundled: true },
@@ -43,7 +45,7 @@ export const narration = {
   "rafael-intro-pt": { text: "Aliás, eu sou o Rafael.", bundled: true },
   "ana-introduces-herself": {
     text: "Ana smiles and introduces herself.",
-    translation: "Ana sorri e se apresenta.",
+    translation: anaIntroductionCaption,
   },
   "three-requests": { text: `${examplesCopy.title}. ${examplesCopy.description}` },
   "permission-rule": { text: `${permissionRuleCopy.title}. ${permissionRuleCopy.lead} ${permissionRuleCopy.detail}` },

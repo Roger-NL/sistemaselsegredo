@@ -1,20 +1,23 @@
 .fd .fd-audio-choice {
-  width: min(348px, calc(100vw - 32px));
+  width: min(368px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
   box-sizing: border-box;
   margin: auto;
-  padding: 22px;
+  padding: clamp(18px, 5vw, 24px);
   border: 2px solid #20332d;
   border-radius: 11px 5px 10px 5px;
   color: #20332d;
   background: #fffcf2;
   box-shadow: 4px 4px 0 #20332d;
   font: 500 16px/1.3 var(--comic-body);
+  overscroll-behavior: contain;
 }
-.fd-audio-choice::backdrop { background: rgb(34 43 38 / 44%); }
-.fd .fd-audio-choice h2 { margin: 0 24px 7px 0; font: 400 34px/1 var(--comic-display); }
+.fd-audio-choice::backdrop { background: rgb(19 32 27 / 58%); }
+.fd .fd-audio-choice h2 { margin: 0 0 8px; font: 400 clamp(27px, 8.2vw, 36px)/1.05 var(--comic-display); }
+.fd .fd-audio-choice:has(.fd-audio-dismiss) h2 { margin-inline-end: 26px; }
 .fd .fd-audio-choice p { margin: 0 0 16px; font: inherit; }
-.fd .fd-audio-choice [data-lesson-button] { width: 100%; min-height: 46px; }
-.fd-audio-choice .lesson-button-face { justify-content: center; gap: 9px; }
+.fd .fd-audio-choice [data-lesson-button] { width: 100%; }
+.fd-audio-choice .lesson-button-face { justify-content: center; gap: 9px; min-height: 50px; }
 .fd .fd-audio-rating { display: block; margin: 6px 0 0; font-weight: 700; text-align: center; color: #24554a; }
 .fd-audio-alternative {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -26,6 +29,7 @@
   min-height: 44px; border: 0; border-radius: 4px; padding: 3px; color: inherit; background: transparent;
   font: 600 15px/1.2 var(--comic-body);
 }
+.fd-audio-secondary svg { flex: none; }
 .fd-audio-choice .fd-audio-confirm { margin: 0; }
 .fd-audio-choice[data-confirming] .fd-audio-alternative { margin-top: 12px; }
 .fd .fd-audio-dismiss { position: absolute; top: 3px; right: 3px; width: 44px; }

@@ -34,7 +34,9 @@ export function useFirstDayReading() {
   return {
     progress,
     refresh: store.refresh,
-    clear: () => store.update(current => ({ ...store.getServerSnapshot(), position: 0, sound: current.sound })),
+    clear: () => store.update(({ sound, readingLanguage }) => ({
+      ...store.getServerSnapshot(), position: 0, sound, readingLanguage,
+    })),
   };
 }
 

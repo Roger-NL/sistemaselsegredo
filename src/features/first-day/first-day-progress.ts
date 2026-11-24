@@ -11,10 +11,13 @@ type FirstDayProgress = {
   counts: Record<string, number>;
   attempts: Record<string, ChallengeAttempt>;
   sound: boolean;
+  readingLanguage: "en" | "pt-BR";
 };
 
 const storageKey = "basedspeak:first-day:v1";
-const initialProgress: FirstDayProgress = { position: -1, counts: {}, attempts: {}, sound: false };
+const initialProgress: FirstDayProgress = {
+  position: -1, counts: {}, attempts: {}, sound: false, readingLanguage: "en",
+};
 
 function readObject(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value)
@@ -58,7 +61,8 @@ function readProgress(): FirstDayProgress {
     }
 
     const position = saved.pageId === undefined ? -1 : pages.findIndex(page => page.id === saved.pageId) + 1;
-    return { position, counts, attempts, sound: saved.sound === true };
+    const readingLanguage = saved.readingLanguage === "pt-BR" ? "pt-BR" : initialProgress.readingLanguage;
+    return { position, counts, attempts, sound: saved.sound === true, readingLanguage };
   } catch {
     return initialProgress;
   }

@@ -54,8 +54,8 @@ it("reveals Ana's reply on a correct answer, plays both speakers, and restores i
   expect(play).not.toHaveBeenCalled();
   act(() => ana!.click());
   expect(play).toHaveBeenCalledExactlyOnceWith(["ana-door-reply-pt"], undefined);
-  const invert = Array.from(container.querySelectorAll("button")).find(button => button.textContent === "Inverter")!;
-  act(() => invert.click());
+  const readPortuguese = container.querySelector<HTMLButtonElement>('button[aria-label="Ler em português e ouvir em inglês"]')!;
+  act(() => readPortuguese.click());
   expect(container.textContent).toContain("Posso fechar a porta?");
   expect(container.textContent).toContain("Claro! Está barulhento lá fora.");
   act(() => ana!.click());
@@ -70,9 +70,15 @@ it("keeps the conversation readable on a silent return visit", () => {
   expect(container.textContent).toContain("Can I close the door?");
   expect(container.textContent).toContain("Sure! It’s noisy out there.");
   expect(container.textContent).not.toContain("Claro! Está barulhento lá fora.");
-  const invert = Array.from(container.querySelectorAll("button")).find(button => button.textContent === "Inverter")!;
-  act(() => invert.click());
+  const readPortuguese = container.querySelector<HTMLButtonElement>('button[aria-label="Ler em português e ouvir em inglês"]')!;
+  act(() => readPortuguese.click());
   expect(container.textContent).toContain("Claro! Está barulhento lá fora.");
   expect(container.querySelector("button[aria-label*='Sure!']")).toBeNull();
+
+  act(() => root.unmount());
+  root = createRoot(container);
+  act(() => root.render(createElement(FirstDay)));
+  expect(container.textContent).toContain("Claro! Está barulhento lá fora.");
+  expect(container.querySelector('button[aria-label="Ler em inglês e ouvir em português"]')).not.toBeNull();
   expect(play).not.toHaveBeenCalled();
 });

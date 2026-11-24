@@ -56,6 +56,11 @@ function pageNarration(page: (typeof pages)[number] | undefined, englishVoice: b
   }
 }
 
+function sceneAudio(page: (typeof pages)[number] | undefined, englishVoice: boolean): readonly FirstDayVoiceClip[] {
+  const clips = pageNarration(page, englishVoice);
+  return page?.kind === "Reação" ? [...clips, spokenDialogue(page.reply.voice, englishVoice)] : clips;
+}
+
 function readCleanReadingMedia() {
   return window.matchMedia(cleanReadingMedia).matches;
 }
@@ -349,14 +354,16 @@ function ChallengeMoment({ page, attempt, onAttempt, cue, voice, cleanReading, e
 }
 
 export function FirstDay() {
-  const [englishVoice, setEnglishVoice] = useState(false);
   const [progress] = useState(createFirstDayProgressStore);
   const [imageCache] = useState(createFirstDayArtCache);
   const [artStatus, setArtStatus] = useState<"loading" | "retry" | null>(null);
   const navigationRequest = useRef({ id: 0 });
-  const { position: savedPosition, counts, attempts, sound } = useSyncExternalStore(
+  const { position: savedPosition, counts, attempts, sound, readingLanguage } = useSyncExternalStore(
     progress.subscribe, progress.getSnapshot, progress.getServerSnapshot,
   );
+  const englishVoice = readingLanguage === "pt-BR";
+  const nextReadingLanguage = englishVoice ? "en" : "pt-BR";
+  const languageAction = englishVoice ? "Ler em inglês e ouvir em português" : "Ler em português e ouvir em inglês";
   const position = Math.max(0, savedPosition);
   const portraitReading = useSyncExternalStore(subscribeToCleanReadingMedia, readCleanReadingMedia, () => false);
   const menu = useRef<HTMLDialogElement>(null);
@@ -435,10 +442,8 @@ export function FirstDay() {
       const source = capturePanel(getTurnPanel(book.current));
       if (source) nextTurn.current = { direction: next > position ? 1 : -1, source };
     }
-    const nextPage = pages[next - 1];
-    const pageClips = pageNarration(nextPage, englishVoice);
     const clips = next === 0 ? coverNarration
-      : nextPage?.kind === "Reação" ? [...pageClips, spokenDialogue(nextPage.reply.voice, englishVoice)] : pageClips;
+      : sceneAudio(pages[next - 1], progress.getSnapshot().readingLanguage === "pt-BR");
     if (sound && clips.length) {
       narrator.play(clips);
     }
@@ -466,14 +471,14 @@ export function FirstDay() {
       narrator.stop();
       paperSound.stop();
     }
-    progress.update(previous => ({ ...previous, position: 0, sound: enabled }));
+    progress.update(previous => ({ ...previous, position: Math.max(0, previous.position), sound: enabled }));
     setChangingAudio(false);
+    if (changingAudio) audioMode.current?.focus({ preventScroll: true });
   }
 
-  function invertLanguage() {
-    narrator.stop();
-    setEnglishVoice(previous => !previous);
-    if (sound) narrator.play(pageNarration(page, !englishVoice));
+  function changeReadingLanguage() {
+    progress.update(previous => ({ ...previous, readingLanguage: nextReadingLanguage }));
+    if (sound) narrator.play(sceneAudio(page, nextReadingLanguage === "pt-BR"));
   }
 
   function turnTo(next: number) {
@@ -531,7 +536,8 @@ export function FirstDay() {
 
   return <main ref={book} className="lo-app fd" data-lesson-theme="comic" style={COMIC_LESSON_STYLE}
     data-fd-edition={edition || undefined} data-fd-study={readingPage ? "" : undefined} data-fd-mobile-header={mobileHeader || undefined}
-    data-ui-sound-scope="local" data-first-day-part={page?.part} data-first-day-page={page?.id ?? "cover"}>
+    data-ui-sound-scope="local" data-first-day-part={page?.part}
+    data-first-day-page={savedPosition < 0 ? "audio-choice" : page?.id ?? "cover"}>
     {savedPosition >= 0 && <header className="lo-header fd-header">
       <div className="lo-brand-row">
         <Brand onMenu={openMenu} />
@@ -593,13 +599,12 @@ export function FirstDay() {
           {chair && !editionPortrait && <Image src={chair.src} width={chair.width} height={chair.height} className="fd1-chair" alt={chair.alt} unoptimized />}
         </div>
         <div className="fd1-caption">
-          <p lang={storyVoice && !englishVoice ? "en" : "pt-BR"}>{caption}</p>
+          <p lang={storyVoice ? readingLanguage : "pt-BR"}>{caption}</p>
           <div className="fd1-listen">
             {sound && captionClips.length > 0 && <NarrationButton clips={captionClips} player={narrator}
               language={storyVoice && englishVoice ? "inglês" : "português"} />}
-            {storyVoice && <button type="button" className="fd1-language" aria-pressed={englishVoice}
-              aria-label={englishVoice ? "Inverter para voz em português e texto em inglês" : "Inverter para voz em inglês e texto em português"}
-              onClick={invertLanguage}>Inverter</button>}
+            {storyVoice && <button type="button" className="fd1-language" aria-label={languageAction} title={languageAction}
+              onClick={changeReadingLanguage}>{englishVoice ? "Ler em EN" : "Ler em PT"}</button>}
           </div>
         </div>
       </div> : <div className="fd-page-heading"><div className="fd-page-title">
