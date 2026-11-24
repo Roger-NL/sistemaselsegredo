@@ -374,11 +374,14 @@ export function FirstDay() {
   const [imageCache] = useState(createFirstDayArtCache);
   const [artStatus, setArtStatus] = useState<"loading" | "retry" | null>(null);
   const navigationRequest = useRef({ id: 0 });
-  const { position, counts, attempts, sound } = useSyncExternalStore(
+  const { position: savedPosition, counts, attempts, sound } = useSyncExternalStore(
     progress.subscribe, progress.getSnapshot, progress.getServerSnapshot,
   );
+  const position = Math.max(0, savedPosition);
   const portraitReading = useSyncExternalStore(subscribeToCleanReadingMedia, readCleanReadingMedia, () => false);
   const menu = useRef<HTMLDialogElement>(null);
+  const audioOptions = useRef<HTMLDialogElement>(null);
+  const audioMode = useRef<HTMLButtonElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
   const book = useRef<HTMLElement>(null);
   const turnSheet = useRef<HTMLCanvasElement>(null);
@@ -393,7 +396,7 @@ export function FirstDay() {
     speech.play(clips);
   } };
   const page = pages[position - 1];
-  const mobileHeader = portraitReading && position >= 0;
+  const mobileHeader = portraitReading;
   const cleanReading = mobileHeader && usesCleanReading(page);
   const nextBlocked = cleanReading && page.kind === "Ação" && (counts[page.id] ?? 0) < page.words.length;
   const cleanReadingClips = cleanReading && page.kind !== "Desafio"
@@ -401,7 +404,6 @@ export function FirstDay() {
     : null;
   const readingPage = page?.kind === "Tirinha" || page?.kind === "Explicação" ? page : undefined;
   const cleanStudy = mobileHeader && readingPage?.part === 1;
-  const choosingAudio = position < 0;
   const playingCover = narrator.playing === "cover";
   const openMenu = () => menu.current?.showModal();
 
@@ -409,8 +411,17 @@ export function FirstDay() {
     const requests = navigationRequest.current;
     return () => { requests.id++; };
   }, []);
-  useEffect(() => imageCache.warm(position), [imageCache, position, portraitReading]);
-  useEffect(() => { title.current?.focus({ preventScroll: true }); }, [position]);
+  useEffect(() => imageCache.warm(savedPosition), [imageCache, savedPosition, portraitReading]);
+  useEffect(() => {
+    const dialog = audioOptions.current;
+    if (progress.getSnapshot().position < 0 && dialog && !dialog.open) {
+      audioMode.current?.focus({ preventScroll: true });
+      dialog.showModal();
+    }
+  }, [progress]);
+  useEffect(() => {
+    if (!audioOptions.current?.open) title.current?.focus({ preventScroll: true });
+  }, [position]);
   useLayoutEffect(() => {
     const turn = nextTurn.current;
     nextTurn.current = null;
@@ -437,7 +448,7 @@ export function FirstDay() {
     if (sound && !narrator.playing) void sounds.play(effect);
   }
 
-  function go(next: number, audioEnabled = sound) {
+  function go(next: number) {
     menu.current?.close();
     if (next === position) return;
     narrator.stop();
@@ -460,31 +471,43 @@ export function FirstDay() {
     } else if (nextPage?.kind === "Desafio") {
       clips = [nextPage.instruction[attempts[nextPage.id]?.translated ? "pt" : "en"]];
     }
-    if (audioEnabled && clips.length) {
+    if (sound && clips.length) {
       narrator.play(clips);
     }
-    if (audioEnabled && position >= 0 && next >= 0 && !document.hidden) {
+    if (sound && !document.hidden) {
       paperSound.play(clips.length > 0);
     }
-    progress.update(previous => ({
-      ...previous,
-      position: next,
-      sound: next < 0 ? previous.sound : audioEnabled,
-    }));
+    progress.update(previous => ({ ...previous, position: next }));
     window.scrollTo(0, 0);
   }
 
-  function start(enabled: boolean) {
+  function openAudioOptions() {
+    const dialog = audioOptions.current;
+    if (!dialog || dialog.open) return;
+    navigationRequest.current.id++;
+    setArtStatus(null);
+    narrator.stop();
+    paperSound.stop();
+    audioMode.current?.focus({ preventScroll: true });
+    dialog.showModal();
+  }
+
+  function chooseAudio(enabled: boolean) {
     if (enabled) {
       void sounds.unlock();
       paperSound.prepare();
+      narrator.play(coverNarration);
+    } else {
+      narrator.stop();
+      paperSound.stop();
     }
-    go(0, enabled);
+    progress.update(previous => ({ ...previous, position: 0, sound: enabled }));
+    audioOptions.current?.close();
   }
 
   function turnTo(next: number) {
     menu.current?.close();
-    if (sound && next >= 0) paperSound.prepare();
+    if (sound) paperSound.prepare();
     const request = ++navigationRequest.current.id;
     const loading = imageCache.prepare(next);
     if (!loading || next === position) {
@@ -537,14 +560,14 @@ export function FirstDay() {
 
   return <main ref={book} className="lo-app fd" data-lesson-theme="comic" style={COMIC_LESSON_STYLE}
     data-fd-clean-reading={cleanReading || undefined} data-fd-clean-study={cleanStudy || undefined} data-fd-mobile-header={mobileHeader || undefined}
-    data-ui-sound-scope="local" data-first-day-part={page?.part} data-first-day-page={choosingAudio ? "audio" : page?.id ?? "cover"}>
+    data-ui-sound-scope="local" data-first-day-part={page?.part} data-first-day-page={page?.id ?? "cover"}>
     <header className="lo-header fd-header">
       <div className="lo-brand-row">
-        <Brand onMenu={choosingAudio ? undefined : openMenu} />
+        <Brand onMenu={openMenu} />
         <span className="lo-header-divider" aria-hidden="true" />
         <span className="lo-header-name" lang="en">First Day</span>
       </div>
-      {!choosingAudio && <button type="button" className="lo-icon" aria-label="Abrir percurso da aula" aria-haspopup="dialog" onClick={openMenu}><MoreHorizontal size={24} aria-hidden="true" /></button>}
+      <button type="button" className="lo-icon" aria-label="Abrir percurso da aula" aria-haspopup="dialog" onClick={openMenu}><MoreHorizontal size={24} aria-hidden="true" /></button>
     </header>
     <dialog className="lo-dialog fd-menu" ref={menu} aria-labelledby="fd-menu-title">
       <div className="fd-menu-heading">
@@ -561,17 +584,17 @@ export function FirstDay() {
         </button>
       </li>)}</ol>
     </dialog>
-    {choosingAudio ? <section className="fd-audio-selection" aria-labelledby="fd-audio-title">
-      <div className="fd-audio-selection-copy">
-        <span lang="en" className="fd-audio-kicker">First Day</span>
-        <h1 id="fd-audio-title" ref={title} tabIndex={-1}>Como quer começar?</h1>
-        <p>Com áudio, você escuta a narração e as falas. Se preferir, pode ler tudo na tela.</p>
-        <div className="fd-start">
-          <LessonButton onClick={() => start(true)}><Volume2 size={20} aria-hidden="true" /> Iniciar com áudio</LessonButton>
-          <button type="button" className="lo-secondary" onClick={() => start(false)}><VolumeX size={20} aria-hidden="true" /> Iniciar sem áudio</button>
-        </div>
+    <dialog id="fd-audio-options" className="fd-audio-selection" ref={audioOptions}
+      aria-labelledby="fd-audio-title" aria-describedby="fd-audio-help">
+      <h2 id="fd-audio-title">Como quer começar?</h2>
+      <p id="fd-audio-help">Ouça a narração e as falas ou acompanhe pelo texto.</p>
+      <div className="fd-start">
+        <LessonButton onClick={() => chooseAudio(true)}><Volume2 size={18} aria-hidden="true" /> Iniciar com áudio</LessonButton>
+        <button type="button" className="lo-secondary" onClick={() => chooseAudio(false)}><VolumeX size={18} aria-hidden="true" /> Iniciar sem áudio</button>
       </div>
-    </section> : !page ? <section className="fd-cover" aria-labelledby="fd-cover-title">
+      <button type="button" className="fd-audio-close" aria-label="Fechar opções de áudio" onClick={() => audioOptions.current?.close()}><X size={20} aria-hidden="true" /></button>
+    </dialog>
+    {!page ? <section className="fd-cover" aria-labelledby="fd-cover-title">
       <picture className="fd-panels">
         {coverSources.map(({ media, src }) => <source key={src} media={media} srcSet={src} />)}
         <Image src={art.cover.src} width={art.cover.width} height={art.cover.height} alt={art.cover.alt}
@@ -590,7 +613,7 @@ export function FirstDay() {
           </button>
         </div>}
         <div className="fd-start fd-cover-nav">
-          <button type="button" className="lo-secondary" aria-label="Trocar modo de áudio" onClick={() => turnTo(-1)}>Modo de áudio</button>
+          <button type="button" className="lo-secondary" ref={audioMode} aria-label="Trocar modo de áudio" aria-haspopup="dialog" aria-controls="fd-audio-options" onClick={openAudioOptions}>Modo de áudio</button>
           <LessonButton onClick={() => turnTo(1)}>{coverCopy.start} <ArrowRight size={18} aria-hidden="true" /></LessonButton>
         </div>
       </div>

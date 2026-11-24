@@ -222,35 +222,48 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
 .fd .fd-cover-nav > .lo-secondary { height: 48px; padding-inline: 5px; font-size: 13px !important; }
 .fd .fd-cover-nav > [data-lesson-button="primary"] > .br-button-face { padding-inline: 6px; }
 .fd-audio-selection {
-  grid-row: 2;
+  width: min(365px, calc(100% - 28px));
+  padding: clamp(16px, 5vw, 23px);
+  border: 1px solid #9ba79b;
+  border-radius: 12px;
+  background: #1a2c27;
+  color: #fff7e6;
+  box-shadow: 0 10px 28px #0e1817a0;
+}
+
+.fd[data-fd-mobile-header] .fd-audio-selection[open] {
+  top: auto;
+  max-height: calc(var(--visible-height, 100dvh) - 28px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  margin-block: 0 calc(14px + env(safe-area-inset-bottom, 0px));
+}
+.fd-audio-selection::backdrop { background: rgb(14 24 23 / 50%); }
+.fd-audio-selection h2 {
+  margin: 0 32px 6px 0;
+  font: 400 clamp(25px, 7.5vw, 34px)/1.05 var(--comic-display);
+}
+.fd-audio-selection > p { margin: 0 0 14px; color: #e1e8d9; font-size: 15px; line-height: 1.35; }
+.fd dialog.fd-audio-selection .lo-secondary {
+  border: 1px solid #9ba79b;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+}
+.fd .fd-audio-selection button:focus-visible { outline-color: var(--gold); }
+.fd-audio-close {
+  position: absolute;
+  inset: 6px 6px auto auto;
   display: grid;
-  justify-items: center;
-  align-items: center;
-  width: 100%;
-  min-height: 0;
-  padding: 10px max(10px, var(--fd-page-gutter));
-  border: var(--fd-border);
-  border-radius: var(--fd-corners);
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
 }
-.fd-audio-selection-copy {
-  width: min(100%, 480px);
-  padding: clamp(17px, 5vw, 34px);
-  border: var(--fd-border);
-  border-radius: var(--fd-corners);
-  background: var(--fd-panel);
-  box-shadow: var(--fd-shadow);
-}
-.fd-audio-selection h1 { margin: 8px 0 9px; }
-.fd-audio-selection-copy > p { margin: 0 0 18px; }
-.fd-audio-kicker {
-  display: inline-block;
-  padding: 3px 7px;
-  border: 1px solid var(--ink);
-  border-radius: var(--fd-corners);
-  color: var(--paper);
-  background: var(--teal);
-  font: 400 18px/1.1 var(--comic-display);
-}
+.fd .fd-audio-close:focus-visible { outline-offset: -3px; }
 .fd .lo-secondary { min-height: 44px; color: var(--ink); }
 .fd :is(.fd-nav, .fd-start, .fd-challenge-controls) > .lo-secondary {
   border: var(--fd-border);

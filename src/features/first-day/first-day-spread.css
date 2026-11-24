@@ -1,4 +1,4 @@
-.lo-app.fd[data-lesson-theme="comic"]:is([data-first-day-part="1"], [data-first-day-page="audio"], [data-first-day-page="cover"]) {
+.lo-app.fd[data-lesson-theme="comic"]:is([data-first-day-part="1"], [data-first-day-page="cover"]) {
   --fd-book-cream: #fbf3e2;
   --fd-sheet: #fffbef;
   --paper: var(--fd-book-cream);
