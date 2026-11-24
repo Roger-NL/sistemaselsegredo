@@ -4,15 +4,37 @@
 }
 
 .fd[data-fd-mobile-header] .fd-cover {
+  --fd-cover-audio-button-height: 44px;
   border: 0;
   border-radius: 0;
   box-shadow: none;
+  background: transparent;
+}
+
+.fd[data-fd-mobile-header] .fd-cover > .fd-panels,
+.fd[data-fd-mobile-header][data-first-day-page="cover"] .fd-turn-sheet {
+  /* Reveal the same paper beneath the footer without resizing the illustration. */
+  clip-path: inset(0 0 var(--fd-reading-nav-height));
+}
+
+.fd[data-fd-mobile-header] .fd-cover > .fd-panels {
+  background: #114b48;
 }
 
 .fd[data-fd-mobile-header] .fd-cover-controls {
   display: block;
   inset: 0;
   pointer-events: none;
+}
+
+.fd[data-fd-mobile-header] .fd-cover-controls::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  box-sizing: border-box;
+  height: var(--fd-reading-nav-height);
+  border-block-start: 1px solid var(--site-manga-divider, #777b73);
+  background: var(--site-manga-bar, rgb(255 255 255 / 75%));
 }
 
 .fd[data-fd-mobile-header] .fd-cover-audio {
@@ -36,9 +58,14 @@
 }
 
 .fd[data-fd-mobile-header] .fd-cover-nav > .lo-secondary {
-  inset-block-end: var(--fd-reading-inset, var(--fd-page-gutter));
+  inset-block-end: calc((var(--fd-reading-nav-height) - var(--fd-cover-audio-button-height)) / 2);
+  height: var(--fd-cover-audio-button-height);
   width: max-content;
   padding-inline: 14px;
+}
+
+.fd[data-fd-mobile-header] .fd-cover-nav > .lo-secondary:focus-visible {
+  outline-offset: -4px;
 }
 
 @media (min-aspect-ratio: 5/8) {

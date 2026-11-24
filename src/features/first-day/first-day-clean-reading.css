@@ -6,12 +6,12 @@
   --fd-reading-yellow: #ffd05a;
   --fd-reading-inset: clamp(9px, 3vw, 18px);
   --fd-reading-header-height: clamp(48px, 13vw, 64px);
+  --fd-reading-nav-height: clamp(49px, 13.4vw, 63px);
 }
 
 .lo-app.fd:is([data-fd-clean-reading], [data-fd-clean-study])[data-lesson-theme="comic"] {
   --fd-title-side: clamp(77px, 24vw, 112px);
   --fd-reading-title-height: clamp(43px, 12.4vw, 58px);
-  --fd-reading-nav-height: clamp(49px, 13.4vw, 63px);
   --fd-reading-tray-height: clamp(54px, 15.5vw, 72px);
   padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
   color: var(--fd-reading-ink);
