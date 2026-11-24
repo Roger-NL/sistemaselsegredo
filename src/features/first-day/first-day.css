@@ -218,8 +218,9 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
 }
 .fd-cover-listen:focus-visible { outline-offset: 0; }
 .fd-start { display: grid; gap: 8px; padding: 0 3px 3px 0; }
-.fd-cover-nav { grid-template-columns: var(--fd-navigation-columns); justify-content: space-between; padding-bottom: 0; }
-.fd .fd-cover-nav > .lo-secondary { height: 48px; padding-inline: 5px; font-size: 13px !important; }
+.fd-cover-nav { grid-template-columns: minmax(0, 1fr) clamp(180px, 19vw, 264px); padding-bottom: 0; }
+.fd-cover-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.fd-cover-tools > .lo-secondary svg { flex: none; }
 .fd .fd-cover-nav > [data-lesson-button="primary"] > .br-button-face { padding-inline: 6px; }
 .fd-audio-selection {
   width: min(365px, calc(100% - 28px));
@@ -265,14 +266,14 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
 }
 .fd .fd-audio-close:focus-visible { outline-offset: -3px; }
 .fd .lo-secondary { min-height: 44px; color: var(--ink); }
-.fd :is(.fd-nav, .fd-start, .fd-challenge-controls) > .lo-secondary {
+.fd :is(.fd-nav, .fd-cover-tools, .fd-challenge-controls) > .lo-secondary {
   border: var(--fd-border);
   border-radius: var(--fd-corners);
   box-shadow: 2px 2px 0 var(--ink);
   font-size: 15px!important;
   font-weight: 650;
 }
-.fd :is(.fd-nav, .fd-start, .fd-challenge-controls) > .lo-secondary:not(:disabled):active {
+.fd :is(.fd-nav, .fd-cover-tools, .fd-challenge-controls) > .lo-secondary:not(:disabled):active {
   transform: translate(2px, 2px);
   box-shadow: none;
 }

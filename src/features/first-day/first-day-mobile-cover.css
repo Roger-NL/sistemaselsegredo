@@ -4,7 +4,7 @@
 }
 
 .fd[data-fd-mobile-header] .fd-cover {
-  --fd-cover-audio-button-height: 44px;
+  --fd-cover-tool-height: 44px;
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -45,26 +45,33 @@
   display: contents;
 }
 
-.fd[data-fd-mobile-header] .fd-cover-nav > :is(.lo-secondary, [data-lesson-button="primary"]) {
+.fd[data-fd-mobile-header] .fd-cover-nav > [data-lesson-button="primary"] {
   position: absolute;
   inset-inline: 0;
   margin-inline: auto;
   pointer-events: auto;
-}
-
-.fd[data-fd-mobile-header] .fd-cover-nav > [data-lesson-button="primary"] {
   inset-block-start: calc(74% - 24px);
   width: min(80%, 21rem);
 }
 
-.fd[data-fd-mobile-header] .fd-cover-nav > .lo-secondary {
-  inset-block-end: calc((var(--fd-reading-nav-height) - var(--fd-cover-audio-button-height)) / 2);
-  height: var(--fd-cover-audio-button-height);
-  width: max-content;
-  padding-inline: 14px;
+.fd[data-fd-mobile-header] .fd-cover-tools {
+  position: absolute;
+  inset: auto 10px 0;
+  height: var(--fd-reading-nav-height);
+  justify-content: center;
+  flex-wrap: nowrap;
 }
 
-.fd[data-fd-mobile-header] .fd-cover-nav > .lo-secondary:focus-visible {
+.fd[data-fd-mobile-header] .fd-cover-tools > .lo-secondary {
+  min-height: var(--fd-cover-tool-height);
+  height: var(--fd-cover-tool-height);
+  gap: 6px;
+  padding-inline: clamp(8px, 3vw, 14px);
+  font-size: clamp(13px, 3.8vw, 15px) !important;
+  pointer-events: auto;
+}
+
+.fd[data-fd-mobile-header] .fd-cover-tools > .lo-secondary:focus-visible {
   outline-offset: -4px;
 }
 

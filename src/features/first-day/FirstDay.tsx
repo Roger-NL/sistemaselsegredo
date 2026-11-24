@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Check, MoreHorizontal, Pause, Volume2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, MoreHorizontal, Pause, RotateCcw, Volume2, X } from "lucide-react";
 import { Brand } from "@/components/ui/Brand";
 import { LessonButton } from "../first-encounters/LessonButton";
 import { COMIC_LESSON_STYLE } from "../first-encounters/lesson-comic-theme";
@@ -15,9 +15,10 @@ import { useLessonSounds } from "../first-encounters/useLessonSounds";
 import { art, cleanReadingMedia, partOnePortraitMedia, coverSources, pages, usesCleanReading } from "./content";
 import type { ChallengePage, CharacterReply, ExamplesPage, FirstDayArt, GuidedPage, ReactionPage, RulePage, WordSequence } from "./content";
 import { FirstDayAudioChoice } from "./FirstDayAudioChoice";
+import { FirstDayProgressReset } from "./FirstDayProgressReset";
 import { FirstDragTutorial, StoryPanel } from "./StoryPanel";
 import { createFirstDayArtCache } from "./first-day-art";
-import { createFirstDayProgressStore, type ChallengeAttempt } from "./first-day-progress";
+import { createFirstDayProgressStore, resetFirstDayProgress, type ChallengeAttempt, type FirstDayResetTarget } from "./first-day-progress";
 import { capturePanel, curlPanel, getTurnPanel, type PanelCapture } from "./page-curl";
 import { arrivalNarration, coverCopy, coverNarration, dialogue, FIRST_DAY_AUDIO_RATE, seatedNarration, narration, portugueseNarration, spokenDialogue, wordVoices } from "./narration";
 import type { DialogueClip, FirstDayVoiceClip, NarrationClip } from "./narration";
@@ -368,8 +369,10 @@ export function FirstDay() {
   const portraitReading = useSyncExternalStore(subscribeToCleanReadingMedia, readCleanReadingMedia, () => false);
   const menu = useRef<HTMLDialogElement>(null);
   const [changingAudio, setChangingAudio] = useState(false);
+  const [resetNotice, setResetNotice] = useState<FirstDayResetTarget | null>(null);
   const editionPortrait = useSyncExternalStore(subscribeToPartOnePortrait, readPartOnePortrait, () => false);
   const audioMode = useRef<HTMLButtonElement>(null);
+  const resetDialog = useRef<HTMLDialogElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
   const book = useRef<HTMLElement>(null);
   const turnSheet = useRef<HTMLCanvasElement>(null);
@@ -435,6 +438,7 @@ export function FirstDay() {
   function go(next: number) {
     menu.current?.close();
     if (next === position) return;
+    setResetNotice(null);
     narrator.stop();
     paperSound.stop();
     cancelTurn.current?.();
@@ -474,6 +478,21 @@ export function FirstDay() {
     progress.update(previous => ({ ...previous, position: Math.max(0, previous.position), sound: enabled }));
     setChangingAudio(false);
     if (changingAudio) audioMode.current?.focus({ preventScroll: true });
+  }
+
+  function openResetOptions(trigger: HTMLButtonElement) {
+    navigationRequest.current.id++;
+    setArtStatus(null);
+    setResetNotice(null);
+    trigger.focus({ preventScroll: true });
+    resetDialog.current?.showModal();
+  }
+
+  function resetReading(target: FirstDayResetTarget) {
+    narrator.stop();
+    paperSound.stop();
+    progress.update(previous => resetFirstDayProgress(previous, target));
+    setResetNotice(target);
   }
 
   function changeReadingLanguage() {
@@ -565,6 +584,7 @@ export function FirstDay() {
       required={savedPosition < 0} shouldOpen={() => changingAudio || progress.getSnapshot().position < 0}
       onChoose={chooseAudio} onDismiss={() => { setChangingAudio(false); audioMode.current?.focus({ preventScroll: true }); }}
     />}
+    {savedPosition === 0 && <FirstDayProgressReset dialogRef={resetDialog} onReset={resetReading} />}
     {savedPosition < 0 ? null : !page ? <section className="fd-cover" aria-labelledby="fd-cover-title">
       <picture className="fd-panels">
         {coverSources.map(({ media, src }) => <source key={src} media={media} srcSet={src} />)}
@@ -574,6 +594,9 @@ export function FirstDay() {
       <div className="fd-cover-copy">
         <h1 id="fd-cover-title" ref={title} tabIndex={-1} lang="en">{coverCopy.title}</h1>
         <p>{coverCopy.subtitle.map(line => <span key={line}>{line}</span>)}</p>
+        <output aria-live="polite">{resetNotice !== null && <span className="fd-reset-status">
+          <Check size={16} aria-hidden="true" /> {resetNotice === "all" ? "Progresso reiniciado." : `Parte ${resetNotice} reiniciada.`}
+        </span>}</output>
       </div>
       <div className="fd-cover-controls">
         {sound && <div className="fd-cover-audio">
@@ -584,7 +607,11 @@ export function FirstDay() {
           </button>
         </div>}
         <div className="fd-start fd-cover-nav">
-          <button type="button" className="lo-secondary" ref={audioMode} aria-label="Trocar modo de áudio" aria-haspopup="dialog" aria-controls="fd-audio-options" onClick={openAudioOptions}>Modo de áudio</button>
+          <div className="fd-cover-tools">
+            <button type="button" className="lo-secondary" ref={audioMode} aria-label="Trocar modo de áudio" aria-haspopup="dialog" aria-controls="fd-audio-options" onClick={openAudioOptions}>Modo de áudio</button>
+            <button type="button" className="lo-secondary" aria-haspopup="dialog" aria-controls="fd-progress-reset"
+              onClick={event => openResetOptions(event.currentTarget)}><RotateCcw size={16} aria-hidden="true" /> Reiniciar progresso</button>
+          </div>
           <LessonButton onClick={() => turnTo(1)}>{coverCopy.start} <ArrowRight size={18} aria-hidden="true" /></LessonButton>
         </div>
       </div>

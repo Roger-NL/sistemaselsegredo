@@ -1,4 +1,4 @@
-import { pages } from "./content";
+import { pages, type FirstDayPage } from "./content";
 
 export type ChallengeAttempt = {
   placed: readonly number[];
@@ -13,6 +13,8 @@ type FirstDayProgress = {
   sound: boolean;
   readingLanguage: "en" | "pt-BR";
 };
+
+export type FirstDayResetTarget = FirstDayPage["part"] | "all";
 
 const storageKey = "basedspeak:first-day:v1";
 const initialProgress: FirstDayProgress = {
@@ -66,6 +68,23 @@ function readProgress(): FirstDayProgress {
   } catch {
     return initialProgress;
   }
+}
+
+export function resetFirstDayProgress(progress: FirstDayProgress, target: FirstDayResetTarget): FirstDayProgress {
+  if (target === "all") return { ...progress, position: 0, counts: {}, attempts: {} };
+
+  const counts = { ...progress.counts };
+  const attempts = { ...progress.attempts };
+  for (const page of pages) {
+    if (page.part !== target) continue;
+    delete counts[page.id];
+    delete attempts[page.id];
+  }
+
+  const position = pages[progress.position - 1]?.part === target
+    ? pages.findIndex(page => page.part === target) + 1
+    : progress.position;
+  return { ...progress, position, counts, attempts };
 }
 
 export function createFirstDayProgressStore() {

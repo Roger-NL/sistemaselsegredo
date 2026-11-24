@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { pages } from "@/features/first-day/content";
-import { createFirstDayProgressStore } from "@/features/first-day/first-day-progress";
+import { createFirstDayProgressStore, resetFirstDayProgress } from "@/features/first-day/first-day-progress";
 import "./first-day-catalog.css";
 
 const FIRST_DAY_HREF = "/first-day";
@@ -34,9 +34,7 @@ export function useFirstDayReading() {
   return {
     progress,
     refresh: store.refresh,
-    clear: () => store.update(({ sound, readingLanguage }) => ({
-      ...store.getServerSnapshot(), position: 0, sound, readingLanguage,
-    })),
+    clear: () => store.update(current => resetFirstDayProgress(current, "all")),
   };
 }
 

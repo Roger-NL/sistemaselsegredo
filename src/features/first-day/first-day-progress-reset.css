@@ -1,0 +1,93 @@
+.fd .fd-reset-dialog {
+  box-sizing: border-box;
+  width: min(390px, calc(100% - 32px));
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: clamp(14px, 4.5vw, 23px);
+  border: 2px solid var(--ink);
+  border-radius: 9px 5px 9px 5px;
+  box-shadow: 4px 4px 0 var(--ink);
+  background: var(--fd-panel);
+  color: var(--ink);
+  font: 500 16px/1.3 var(--comic-body);
+  overscroll-behavior: contain;
+}
+
+.fd-reset-dialog::backdrop { background: rgb(19 32 27 / 58%); }
+.fd .fd-reset-dialog h2 {
+  margin: 0 0 7px;
+  font: 400 clamp(28px, 8vw, 36px)/1.05 var(--comic-display);
+}
+.fd .fd-reset-dialog > p { margin: 0 0 16px; }
+
+.fd-reset-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.fd-reset-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 58px;
+  padding: 7px 9px;
+  border: 1px solid color-mix(in srgb, var(--ink) 46%, var(--fd-panel));
+  border-radius: var(--fd-corners);
+  cursor: pointer;
+}
+.fd-reset-option :is(strong, small) { display: block; }
+.fd-reset-option small { margin-top: 2px; color: var(--fd-secondary-ink); font-size: 13px; line-height: 1.15; }
+.fd-reset-option input { flex: none; width: 16px; height: 16px; margin: 0; accent-color: var(--teal); }
+.fd .fd-reset-dialog .fd-reset-option input:focus-visible { outline: none; }
+.fd-reset-option:has(input:checked) {
+  border-color: var(--teal);
+  box-shadow: inset 0 0 0 1px var(--teal);
+  background: color-mix(in srgb, var(--teal) 12%, var(--fd-panel));
+}
+.fd-reset-option:has(input:focus-visible) { outline: 2px solid var(--teal); outline-offset: 2px; }
+.fd-reset-option-all { grid-column: 1 / -1; min-height: 44px; }
+
+.fd-reset-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 5fr);
+  gap: 10px;
+  margin: 16px 3px 3px 0;
+}
+.fd .fd-reset-actions .lo-secondary {
+  border: 1px solid color-mix(in srgb, var(--ink) 55%, var(--fd-panel));
+  border-radius: var(--fd-corners);
+  background: var(--fd-panel);
+  font: 650 15px/1 var(--comic-body);
+  font-size: 15px !important;
+}
+.fd-reset-actions .lesson-button-face { justify-content: center; }
+
+.fd-reset-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  margin-top: 9px;
+  padding: 5px 9px;
+  border: 1px solid var(--teal);
+  border-radius: var(--fd-corners);
+  background: var(--fd-panel);
+  color: var(--ink);
+  font: 650 14px/1.2 var(--comic-body);
+  text-shadow: none;
+}
+.fd-reset-status svg { flex: none; color: var(--teal); }
+
+@media (max-height: 440px) {
+  .fd .fd-reset-dialog { padding: 14px 16px; }
+  .fd .fd-reset-dialog h2 { font-size: 28px; }
+  .fd .fd-reset-dialog > p { margin-bottom: 12px; font-size: 15px; }
+  .fd-reset-options { gap: 6px; }
+  .fd-reset-option { min-height: 50px; padding-block: 5px; }
+  .fd-reset-option-all { min-height: 44px; }
+  .fd-reset-actions { margin-top: 12px; }
+}

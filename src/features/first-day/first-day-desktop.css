@@ -43,13 +43,14 @@
   .fd-workspace { align-items: start; padding-inline-start: 0; }
   .fd-page .fd-nav { padding-block-start: clamp(7px, 1.2dvh, 12px); }
   .fd-cover-controls { inset-inline: var(--fd-page-gutter); gap: 10px; }
-  .fd[data-lesson-theme="comic"] :is(.fd-nav, .fd-start, .fd-challenge-controls) > :is(.lo-secondary, [data-lesson-button="primary"]),
+  .fd-cover-nav { grid-template-columns: minmax(0, 1fr) clamp(224px, 19vw, 264px); }
+  .fd[data-lesson-theme="comic"] :is(.fd-nav, .fd-cover-tools, .fd-start, .fd-challenge-controls) > :is(.lo-secondary, [data-lesson-button="primary"]),
   .fd[data-lesson-theme="comic"] :is(.fd-nav, .fd-start, .fd-challenge-controls) > [data-lesson-button="primary"] > .br-button-face {
     min-height: var(--fd-control-height);
     height: var(--fd-control-height);
     border-radius: 7px;
   }
-  .fd[data-lesson-theme="comic"] :is(.fd-nav, .fd-start, .fd-challenge-controls) > .lo-secondary {
+  .fd[data-lesson-theme="comic"] :is(.fd-nav, .fd-cover-tools, .fd-challenge-controls) > .lo-secondary {
     gap: 10px;
     padding-inline: clamp(12px, 1.4vw, 20px);
     border: 1px solid color-mix(in srgb, var(--ink) 75%, var(--paper));
@@ -69,12 +70,12 @@
     transform: translateY(2px);
     box-shadow: 0 1px 0 var(--ink);
   }
-  .fd[data-lesson-theme="comic"] :is(.fd-nav, .fd-start, .fd-challenge-controls) > .lo-secondary:not(:disabled):active {
+  .fd[data-lesson-theme="comic"] :is(.fd-nav, .fd-cover-tools, .fd-challenge-controls) > .lo-secondary:not(:disabled):active {
     transform: translateY(1px);
     box-shadow: none;
   }
   @media (hover: hover) {
-    .fd[data-lesson-theme="comic"] :is(.fd-nav, .fd-start, .fd-challenge-controls) > .lo-secondary:not(:disabled):hover {
+    .fd[data-lesson-theme="comic"] :is(.fd-nav, .fd-cover-tools, .fd-challenge-controls) > .lo-secondary:not(:disabled):hover {
       background: color-mix(in srgb, var(--gold) 15%, var(--fd-panel));
     }
   }
