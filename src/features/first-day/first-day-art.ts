@@ -1,16 +1,15 @@
-import { art, cleanReadingMedia, coverSources, pages, storyImage, usesCleanReading, type FirstDayPage } from "./content";
+import { art, coverSources, pages, partOnePortraitMedia, storyImage, type FirstDayPage } from "./content";
 
 function sceneArt(page: FirstDayPage, portrait: boolean) {
-  const cleanReading = portrait && usesCleanReading(page);
   switch (page.kind) {
     case "Ação": {
-      const image = storyImage(page, cleanReading);
-      return !cleanReading && page.detail ? [image.src, page.detail.src] : [image.src];
+      const image = storyImage(page, portrait);
+      return !portrait && page.detail ? [image.src, page.detail.src] : [image.src];
     }
     case "Reação":
-    case "Desafio": return [storyImage(page, cleanReading).src];
-    case "Tirinha": return page.panels.map(panel => panel.image.src);
-    case "Explicação": return page.examples.map(example => example.image.src);
+    case "Desafio": return [storyImage(page, portrait).src];
+    case "Tirinha": return page.panels.map(panel => storyImage(panel, portrait).src);
+    case "Explicação": return page.examples.map(example => storyImage(example, portrait).src);
     case "Em preparação": return [];
   }
 }
@@ -19,7 +18,7 @@ const pageImages = pages.map(page => sceneArt(page, false));
 const portraitImages = pages.map(page => sceneArt(page, true));
 
 function currentPageImages() {
-  return window.matchMedia(cleanReadingMedia).matches ? portraitImages : pageImages;
+  return window.matchMedia(partOnePortraitMedia).matches ? portraitImages : pageImages;
 }
 
 function firstDayArtFor(position: number) {

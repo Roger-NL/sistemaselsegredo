@@ -1,0 +1,31 @@
+.fd .fd-audio-choice {
+  width: min(348px, calc(100vw - 32px));
+  box-sizing: border-box;
+  margin: auto;
+  padding: 22px;
+  border: 2px solid #20332d;
+  border-radius: 11px 5px 10px 5px;
+  color: #20332d;
+  background: #fffcf2;
+  box-shadow: 4px 4px 0 #20332d;
+  font: 500 16px/1.3 var(--comic-body);
+}
+.fd-audio-choice::backdrop { background: rgb(34 43 38 / 44%); }
+.fd .fd-audio-choice h2 { margin: 0 24px 7px 0; font: 400 34px/1 var(--comic-display); }
+.fd .fd-audio-choice p { margin: 0 0 16px; font: inherit; }
+.fd .fd-audio-choice [data-lesson-button] { width: 100%; min-height: 46px; }
+.fd-audio-choice .lesson-button-face { justify-content: center; gap: 9px; }
+.fd .fd-audio-rating { display: block; margin: 6px 0 0; font-weight: 700; text-align: center; color: #24554a; }
+.fd-audio-alternative {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  margin-top: 15px; padding-top: 8px; border-top: 1px solid #c9c5b8;
+}
+.fd-audio-alternative span { font-size: 13px; color: #566157; }
+.fd .fd-audio-secondary, .fd .fd-audio-dismiss {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 44px; border: 0; border-radius: 4px; padding: 3px; color: inherit; background: transparent;
+  font: 600 15px/1.2 var(--comic-body);
+}
+.fd-audio-choice .fd-audio-confirm { margin: 0; }
+.fd-audio-choice[data-confirming] .fd-audio-alternative { margin-top: 12px; }
+.fd .fd-audio-dismiss { position: absolute; top: 3px; right: 3px; width: 44px; }

@@ -1,0 +1,204 @@
+/* Strip and rule share the same illustrated panels and spoken captions. */
+.fd[data-fd-edition] .fd-workspace > :is(.fd1-strip, .fd1-rule) {
+  --study-ink: #18231f;
+  --study-paper: #fffcf5;
+  --study-can: #f5a38c;
+  --study-person: #a8d8cd;
+  --study-verb: #f3c749;
+  display: grid;
+  grid-area: auto;
+  grid-template-rows: auto;
+  grid-auto-rows: auto;
+  align-self: start;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  color: var(--study-ink);
+}
+
+.fd[data-fd-edition] .fd1-strip {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(10px, .94vw, 20px);
+}
+
+.fd1-study-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 2px solid var(--study-ink);
+  border-radius: 6px;
+  background: var(--study-paper);
+  box-shadow: 0 3px 0 var(--study-ink);
+}
+
+.fd1-study-art, .fd1-study-art img { display: block; width: 100%; }
+.fd1-study-art img {
+  height: auto;
+  aspect-ratio: 1.324;
+  object-fit: cover;
+}
+
+.fd1-study-label {
+  position: absolute;
+  top: clamp(8px, .875vw, 16px);
+  left: clamp(8px, .875vw, 16px);
+  padding: .28em .57em;
+  border: 1.5px solid var(--study-ink);
+  border-radius: 3px 8px 3px 7px;
+  background: var(--study-paper);
+  font-weight: 600;
+  font-size: clamp(15px, 1.375vw, 24px);
+  line-height: 1.15;
+}
+
+.fd1-study-panel .fd1-study-caption {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  align-items: center;
+  gap: clamp(3px, .32vw, 6px) .6em;
+  width: 100%;
+  margin: 0;
+  padding: clamp(11px, 1vw, 20px) clamp(12px, 1.25vw, 24px) clamp(12px, 1.25vw, 24px);
+  border: 0;
+  border-top: 2px solid var(--study-ink);
+  border-radius: 0;
+  background: var(--study-paper);
+  color: var(--study-ink);
+  font-family: var(--comic-body);
+  text-align: left;
+}
+
+.fd1-study-line { grid-column: 1; grid-row: 1; }
+.fd1-strip .fd1-study-line {
+  font: 400 clamp(25px, 2.75vw, 48px)/1.06 var(--comic-display);
+}
+
+.fd1-study-translation {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: clamp(16px, 1.56vw, 27px);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.fd1-study-audio {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: clamp(27px, 2.2vw, 35px);
+  aspect-ratio: 1;
+  border: 1px solid #928b76;
+  border-radius: 7px;
+  color: #315b4e;
+}
+.fd1-strip .fd1-study-audio { align-self: start; }
+.fd1-study-caption[aria-pressed="true"] .fd1-study-audio { color: #fff; background: #39776b; }
+
+.fd[data-fd-edition] .fd-workspace > .fd1-rule { grid-template-columns: minmax(0, 1fr); gap: clamp(12px, 1.85vw, 30px); padding-block-start: .25vw; }
+.fd1-rule-formula, .fd1-rule-examples { list-style: none; padding: 0; margin: 0; }
+.fd1-rule-formula {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(8px, 1vw, 17px);
+}
+
+.fd1-rule-piece {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35em;
+  min-height: 1.57em;
+  padding: .1em .62em;
+  border: 2px solid var(--study-ink);
+  border-radius: 7px;
+  font-size: clamp(24px, 2.315vw, 40px);
+  line-height: 1.12;
+  box-shadow: 0 3px 0 var(--study-ink);
+}
+.fd1-rule-piece span { font-size: .57em; font-weight: 500; }
+.fd1-rule-plus { font-size: clamp(18px, 1.94vw, 32px); font-weight: 600; }
+.fd1-rule [data-tone="can"] { background: var(--study-can); }
+.fd1-rule [data-tone="person"] { background: var(--study-person); }
+.fd1-rule [data-tone="verb"] { background: var(--study-verb); }
+
+.fd1-rule-examples {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(11px, 1.25vw, 21px);
+}
+.fd1-rule-examples .fd1-study-art img { aspect-ratio: 16 / 9; object-position: center 38%; }
+.fd1-rule-examples .fd1-study-caption {
+  position: absolute;
+  right: clamp(8px, 1vw, 16px);
+  bottom: clamp(8px, .875vw, 16px);
+  width: max-content;
+  max-width: calc(100% - 16px);
+  padding: .42em .55em;
+  border: 1.5px solid var(--study-ink);
+  border-radius: 5px 12px 5px 12px;
+  font-size: clamp(18px, 1.875vw, 32px);
+  line-height: 1.2;
+}
+.fd1-rule-examples .fd1-study-line strong {
+  display: inline-block;
+  font: inherit;
+  font-weight: 700;
+}
+.fd1-rule-examples .fd1-study-line strong:not([data-tone="context"]) {
+  padding: .16em .24em;
+  line-height: 1;
+  border: 1px solid var(--study-ink);
+  border-radius: 3px;
+}
+.fd1-rule-examples .fd1-study-translation { font-size: clamp(15px, 1.375vw, 23px); }
+
+@media (max-width: 959px) and (orientation: portrait) {
+  .fd[data-fd-edition] .fd-workspace > :is(.fd1-strip, .fd1-rule), .fd1-rule-examples {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 0;
+  }
+  .fd1-study-panel { box-shadow: none; background: #fffaed; }
+  .fd1-study-label { top: 8px; left: 8px; padding: 4px 9px 5px; border: 0; border-radius: 3px; background: #293c35; color: #fffdf4; font-size: 14px; }
+  .fd1-study-panel .fd1-study-caption {
+    position: static;
+    width: 100%;
+    max-width: none;
+    padding: 8px 12px 9px;
+    gap: 1px 8px;
+    background: #fffaed;
+    border: 0;
+    border-top: 1px solid var(--study-ink);
+    border-radius: 0;
+  }
+  .fd1-strip .fd1-study-line { font: 700 clamp(21px, 5.65vw, 29px)/1.15 var(--comic-body); letter-spacing: -.3px; }
+  .fd1-study-translation, .fd1-rule-examples .fd1-study-translation { font-size: clamp(16px, 4vw, 20px); }
+  .fd1-study-audio, .fd1-strip .fd1-study-audio { align-self: center; width: 31px; border-radius: 50%; }
+  :is(.fd1-strip, .fd1-rule-examples) .fd1-study-art img { aspect-ratio: 4 / 3; }
+  .fd1-rule-examples .fd1-study-caption { font-size: clamp(18px, 4.87vw, 26px); gap: 3px 8px; }
+  .fd1-rule-examples .fd1-study-line strong:not([data-tone="context"]) { padding: 0 .26em 1px; line-height: 1.2; }
+  .fd1-rule-formula {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: clamp(3px, 1.54vw, 8px);
+  }
+  .fd1-rule-piece {
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 5px 0 6px;
+    font-size: clamp(22px, 6.67vw, 31px);
+    line-height: 1.02;
+    box-shadow: 0 2px 0 var(--study-ink);
+  }
+  .fd1-rule-piece span { margin-top: 2px; line-height: 1.2; font-size: clamp(14px, 3.6vw, 18px); font-weight: 600; }
+}

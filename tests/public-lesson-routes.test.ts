@@ -26,8 +26,8 @@ describe("the approved lesson is the principal public experience", () => {
     expect(html).toContain('data-course="first-day"');
     expect(html).toContain('href="/first-day/art-v2/capa-gibi-mobile.webp"');
     expect(html).toContain('href="/first-day/art-v2/capa-gibi-desktop.webp"');
-    expect(html).toContain('href="/first-day/art-v2/ana-abre-espaco-mobile.webp"');
-    expect(html).toContain('href="/first-day/art-v2/ana-afasta-bolsa.webp"');
+    expect(html).toContain('href="/first-day-part-one/celular/02-bolsa.webp"');
+    expect(html).toContain('href="/first-day-part-one/pc/02-bolsa.webp"');
     expect(account).not.toHaveBeenCalled();
     expect(metadata.alternates).toMatchObject({ canonical: "/first-day" });
   });

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { FirstDay } from "@/features/first-day/FirstDay";
-import { art, cleanReadingArt, cleanReadingMedia, coverSources, pages, storyImage, usesCleanReading } from "@/features/first-day/content";
+import { coverSources, pages, partOnePortraitMedia, storyImage, usesCleanReading } from "@/features/first-day/content";
 
 export const metadata: Metadata = {
   title: "First Day",
@@ -9,16 +9,15 @@ export const metadata: Metadata = {
 };
 
 export default function FirstDayPage() {
-  const secondPage = pages[1];
-  const otherLayouts = `not all and ${cleanReadingMedia}`;
+  const openingScenes = pages.slice(0, 2).filter(usesCleanReading);
+  const desktopMedia = `not all and ${partOnePortraitMedia}`;
   return <>
     {coverSources.map(({ media, src }) => <link key={src} rel="preload" as="image" href={src} media={media} fetchPriority="high" />)}
-    <link rel="preload" as="image" href={cleanReadingArt.src} media={cleanReadingMedia} fetchPriority="high" />
-    <link rel="preload" as="image" href={art.arrival.src} media={otherLayouts} fetchPriority="high" />
-    {usesCleanReading(secondPage) && <>
-      <link rel="preload" as="image" href={storyImage(secondPage, true).src} media={cleanReadingMedia} fetchPriority="low" />
-      <link rel="preload" as="image" href={storyImage(secondPage, false).src} media={otherLayouts} fetchPriority="low" />
-    </>}
+    {openingScenes.flatMap((page, index) => [true, false].map(portrait => {
+      const image = storyImage(page, portrait);
+      return <link key={image.src} rel="preload" as="image" href={image.src}
+        media={portrait ? partOnePortraitMedia : desktopMedia} fetchPriority={index === 0 ? "high" : "low"} />;
+    }))}
     <FirstDay />
   </>;
 }
