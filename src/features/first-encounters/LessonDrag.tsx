@@ -78,7 +78,12 @@ function moveGhost(session: Session, clientX: number, clientY: number) {
   if (session.ghost) session.ghost.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 }
 
-export function LessonDragProvider({ onDrop, onSelect, children }: { onDrop: (item: DragItem, targetId: string) => void; onSelect?: (item: DragItem) => void; children?: ReactNode }) {
+export function LessonDragProvider({ onDrop, onSelect, animatePlacement = false, children }: {
+  onDrop: (item: DragItem, targetId: string) => void;
+  onSelect?: (item: DragItem) => void;
+  animatePlacement?: boolean;
+  children?: ReactNode;
+}) {
   const providerId = useId();
   const instructionsId = `${providerId}-instructions`;
   const onDropRef = useRef(onDrop);
@@ -141,13 +146,37 @@ export function LessonDragProvider({ onDrop, onSelect, children }: { onDrop: (it
   }, [providerId]);
 
   const finishDrop = useCallback((item: DragItem, target: Target) => {
-    // Clear selection and pointer state before a callback can synchronously change the round.
-    detach();
     stopSettling();
+    const source = selection.current?.source;
+    const animate = animatePlacement && source && typeof source.animate === "function"
+      && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const drag = detach(Boolean(animate));
+    if (animate) {
+      const rect = source.getBoundingClientRect();
+      const ghost = drag?.ghost ?? makeGhost(source, rect);
+      const start = drag?.ghost ? ghost.getBoundingClientRect() : rect;
+      const anchor = target.element.querySelector("[data-lesson-drop-anchor]") ?? target.element;
+      const end = anchor.getBoundingClientRect();
+      const x = end.left + (end.width - start.width) / 2;
+      const y = end.top + (end.height - start.height) / 2;
+      const arrival = ghost.animate({
+        transform: [
+          `translate3d(${start.left}px, ${start.top}px, 0)`,
+          `translate3d(${x}px, ${y}px, 0) scale(.87)`,
+        ],
+        opacity: [1, 1, 0],
+      }, { duration: drag ? 300 : 430, easing: "ease-in-out", fill: "forwards" });
+      settling.current = { ghost, frame: 0 };
+      arrival.onfinish = () => {
+        ghost.remove();
+        if (settling.current?.ghost === ghost) settling.current = null;
+      };
+    }
+    // Commit on release so busy rendering or interrupted motion never loses an answer.
     setSelection(null);
     if (mounted.current) setAnnouncement(`${item.label} colocado em ${target.label}.`);
     onDropRef.current(item, target.id);
-  }, [detach, setSelection, stopSettling]);
+  }, [animatePlacement, detach, setSelection, stopSettling]);
 
   const returnGhost = useCallback((current: Session) => {
     const ghost = current.ghost;

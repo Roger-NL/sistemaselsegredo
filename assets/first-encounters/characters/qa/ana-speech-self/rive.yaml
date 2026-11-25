@@ -1,0 +1,4 @@
+name: ana-speech-self
+main: Character
+output:
+  dir: build

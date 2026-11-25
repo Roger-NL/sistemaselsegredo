@@ -1,0 +1,4 @@
+name: nina-thinking
+main: Character
+output:
+  dir: build

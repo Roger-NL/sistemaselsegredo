@@ -1,0 +1,4 @@
+name: nina-wave
+main: Character
+output:
+  dir: build

@@ -2,6 +2,7 @@
 import { BrowserText } from "@/components/i18n/BrowserText";
 
 
+import { FirstDayLink } from "@/features/first-day/cover-entry";
 import Link from "next/link";
 import { TestControls } from "@/features/superuser/TestControls";
 import { useEffect, useRef, type ReactNode, type MouseEvent } from "react";
@@ -64,7 +65,7 @@ export function AppHeader({ current, name, tone = "paper", guest = false, onAcco
           <Link href="/dashboard#avanco" prefetch={true} onClick={navigate}><TrendingUp size={17} aria-hidden="true" />Meu avanço<ArrowUpRight size={14} aria-hidden="true" /></Link>
           <Link href="/dashboard#contato" prefetch={true} onClick={navigate}><MessageCircle size={17} aria-hidden="true" />Falar com o professor<ArrowUpRight size={14} aria-hidden="true" /></Link>
           </>}
-          <Link href="/first-day" prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />First Day<ArrowUpRight size={14} aria-hidden="true" /></Link>
+          <FirstDayLink  prefetch={true} onClick={navigate}><BookOpen size={17} aria-hidden="true" />First Day<ArrowUpRight size={14} aria-hidden="true" /></FirstDayLink>
           {!guest && <Link href="/dashboard#aula-ao-vivo" prefetch={true} onClick={navigate}><CalendarDays size={17} aria-hidden="true" /><BrowserText>{"Minha aula ao vivo"}</BrowserText><ArrowUpRight size={14} aria-hidden="true" /></Link>}
           <div className="app-menu-divider" />
           <SoundToggle />

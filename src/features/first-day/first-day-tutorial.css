@@ -1,0 +1,100 @@
+/* The tray, balloon, and continue control share the center of the printed page. */
+html body .lo-app.fd[data-first-day-page="tutorial"] {
+  --tutorial-ink: #243b32;
+  --tutorial-paper: #fffaf0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  justify-items: center;
+  align-content: start;
+  gap: clamp(4px, 1dvh, 12px);
+  height: 100dvh;
+  padding: env(safe-area-inset-top) max(12px, env(safe-area-inset-right)) max(9px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  background: linear-gradient(#f5f1e6ec, #f5f1e6ec), url("./manga-paper.webp") center / cover;
+}
+.fd[data-first-day-page="tutorial"] .fd-header {
+  width: min(100%, 42rem);
+  margin: 0;
+  align-self: start;
+}
+.fd .fd-tutorial {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  align-self: center;
+  width: min(100%, 42rem);
+  height: min(100%, 44rem, calc(73vw + 22rem));
+  min-height: 0;
+  margin: 0;
+  border: 1.5px solid var(--tutorial-ink);
+  border-radius: 5px;
+  background: var(--tutorial-paper);
+  box-shadow: 0 3px 0 #243b322c, 0 8px 26px #253b3210;
+  color: var(--tutorial-ink);
+}
+.fd-tutorial-heading { padding: clamp(9px, 1.8dvh, 17px) 5% 5px; }
+.fd-tutorial-folio { display:flex; gap:9px; align-items:center; color:#486157; font:650 .74rem/1.2 var(--comic-body); }
+.fd-tutorial-folio::after { content:""; flex:1; height:1px; background:#d3d7c7; order:1; }
+.fd-tutorial-folio span:last-child { order:2; font-variant-numeric:tabular-nums; }
+.fd-tutorial-title-row { display:flex; align-items:center; justify-content:space-between; min-height:44px; }
+.fd .fd-tutorial-heading h1 { margin:0; font:400 clamp(1.85rem,6vw,2.45rem)/1 var(--comic-display); }
+.fd-tutorial-audio { display:grid; place-items:center; width:44px; height:44px; background:transparent; border:none; color:var(--tutorial-ink); }
+.fd-tutorial-audio svg { box-sizing:content-box; padding:7px; border:1px solid #bdc8bc; border-radius:50%; }
+.fd-tutorial-panel { position:relative; display:grid; grid-template-rows:auto minmax(0, 1fr); min-height:0; margin:0 4%; }
+.fd .fd-tutorial-caption { margin:0; padding:0 1% .55rem; font:500 clamp(.93rem,3.5vw,1.07rem)/1.25 var(--comic-body); color:#37483e; }
+.fd-tutorial-art { min-height:0; padding:0; border:2px solid var(--tutorial-ink); border-radius:2px; overflow:hidden; }
+.fd-tutorial-art img { display:block; width:100%; height:100%; object-fit:cover; object-position:center 55%; }
+.fd-tutorial-sample { position:absolute; z-index:1; bottom:0; left:50%; transform:translate(-50%,44%); min-width:7.6rem; height:3.65rem;
+  padding:4px 18px; display:grid; align-content:center; justify-items:center; border:2px solid var(--tutorial-ink); border-radius:50%;
+  color:var(--tutorial-ink); background:#fffdf5; box-shadow:0 2px 0 #233d3136; }
+.fd-tutorial-sample::before { content:""; position:absolute; width:12px; height:12px; top:5px; left:9px; transform:skew(15deg,15deg) rotate(4deg);
+  background:#fffdf5; border-top:2px solid var(--tutorial-ink); border-left:2px solid var(--tutorial-ink); }
+.fd-tutorial-line { position:relative; font:700 1.15rem/1.12 var(--comic-body); }
+.fd-tutorial-lookup {
+  position:relative; display:grid; place-items:center; min-width:52px; min-height:44px;
+  padding:0; border:0; background:transparent; color:var(--tutorial-ink);
+  font:700 1.2rem/1 var(--comic-body); text-decoration:underline dotted #a4783a;
+  text-underline-offset:4px; cursor:pointer;
+}
+.fd-tutorial[data-step="intro"] .fd-tutorial-sample { height:auto; min-height:3.65rem; }
+.fd-tutorial-sample small:empty { display:none; }
+.fd-tutorial[data-step="intro"] .fd-tutorial-copy,
+.fd-tutorial[data-step="arrival"] .fd-tutorial-copy { padding-top:2.4rem; }
+.fd-tutorial-reply { width:max-content; max-width:96%; border-radius:1.3rem; }
+.fd-tutorial-reply strong { font:700 1.03rem/1.25 var(--comic-body); }
+.fd-tutorial-sample small { font:550 .84rem/1.15 var(--comic-body); color:#3b6759; }
+.fd-tutorial-slot { display:inline-block; vertical-align:middle; width:2.8rem; height:1.1em; border-bottom:2px dashed #aa8750; }
+.fd-tutorial-sample:is([data-drop-available="true"],[data-lesson-drop-active="true"]) { background:#fff3cd; outline:2px solid #d09c38; outline-offset:2px; }
+.fd-tutorial-copy { display:grid; justify-items:center; align-content:center; gap:4px; padding:27px 10px 6px; }
+.fd-tutorial-copy p { margin:3px 0 0; text-align:center; font:550 .94rem/1.2 var(--comic-body); color:#425349; min-height:1.2em; }
+.fd-tutorial-tray { display:flex; align-items:center; justify-content:center; gap:8px; }
+.fd-tutorial-arrow { color:#747e6c; }
+.fd-tutorial:has(.fd-tutorial-sample[data-drop-disabled="true"]) .fd-tutorial-arrow { visibility:hidden; }
+.fd-tutorial .fd1-word, .fd-tutorial .fd1-language { min-width:69px; min-height:44px; padding:4px 13px; display:inline-flex; align-items:center; justify-content:center; gap:5px; border:1.5px solid var(--tutorial-ink); border-radius:6px; color:var(--tutorial-ink); background:#ffe498; box-shadow:0 2px 0 var(--tutorial-ink); font:700 1.05rem var(--comic-body); }
+.fd-tutorial .fd1-word svg { color:#92773d; }
+.fd-tutorial .fd1-word:disabled { color:#60685c; background:#eeeade; border-color:#bfc3b6; box-shadow:none; }
+.fd-tutorial-footer { display:grid; justify-items:center; padding:6px 12px 12px; }
+.fd-tutorial-footer [data-lesson-button] { width:min(100%,15rem); }
+.fd-tutorial-footer [data-lesson-button]:disabled { opacity:.56; }
+.fd-tutorial[data-step="language"] .fd-tutorial-copy { padding:12px 12px 6px; gap:6px; }
+@media (orientation: landscape) and (max-height: 540px) {
+  .fd .fd-tutorial { width:min(100%, 58rem); height:100%; grid-template-columns:1.45fr 1fr; grid-template-rows:auto minmax(0,1fr) auto; }
+  .fd-tutorial-heading { grid-column:1/-1; padding-block:4px; }
+  .fd-tutorial-panel { grid-column:1; grid-row:2/4; margin:0 0 12px 4%; }
+  .fd-tutorial-sample { bottom:6%; transform:translateX(-50%); }
+  .fd-tutorial-copy, .fd-tutorial-footer { grid-column:2; padding-inline:10px; }
+  .fd-tutorial-copy { padding-top:5px; }
+  .fd-tutorial-arrow { transform:rotate(-90deg); }
+}
+@media (orientation: portrait) and (max-height: 610px) {
+  .fd-tutorial-heading { padding-block:3px; }
+  .fd-tutorial-copy { gap:2px; }
+  .fd-tutorial-footer { padding-bottom:7px; }
+}
+.fd .fd-tutorial, .fd-tutorial > * { min-width: 0; }
+.fd .fd-tutorial { grid-template-columns:minmax(0,1fr); }
+@media (orientation:landscape) and (max-height:540px) {
+  .fd .fd-tutorial { grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); }
+}
+/* The draggable copy travels in a body portal outside the comic page. */
+.lesson-drag-ghost .fd-tutorial-word { display:inline-flex; align-items:center; justify-content:center; gap:5px; }
+.lesson-drag-ghost .fd-tutorial-word svg { color:#92773d; flex-shrink:0; }

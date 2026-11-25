@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Check, MoreHorizontal, Pause, RotateCcw, Volume2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, GripVertical, ArrowUp, MoreHorizontal, Pause, RotateCcw, Volume2, X } from "lucide-react";
 import { Brand } from "@/components/ui/Brand";
 import { LessonButton } from "../first-encounters/LessonButton";
 import { COMIC_LESSON_STYLE } from "../first-encounters/lesson-comic-theme";
@@ -14,6 +14,8 @@ import type { LessonSoundCue } from "../first-encounters/lesson-sounds";
 import { useLessonSounds } from "../first-encounters/useLessonSounds";
 import { art, cleanReadingMedia, partOnePortraitMedia, coverSources, pages, usesCleanReading } from "./content";
 import type { ChallengePage, CharacterReply, ExamplesPage, FirstDayArt, GuidedPage, ReactionPage, RulePage, WordSequence } from "./content";
+import { prologue, prologueOrder, doorCaptionPt, type PrologueStep } from "./prologue";
+import { EnglishWords, MeaningContext, meaningOf } from "./WordMeaning";
 import { FirstDayAudioChoice } from "./FirstDayAudioChoice";
 import { FirstDayProgressReset } from "./FirstDayProgressReset";
 import { FirstDragTutorial, StoryPanel } from "./StoryPanel";
@@ -41,6 +43,7 @@ import "./first-day-turn.css";
 import "./first-day-part-one.css";
 import "./first-day-part-one-study.css";
 import "./first-day-part-one-story.css";
+import "./first-day-tutorial.css";
 
 const previewSounds = createLessonSoundsEngine({ getStorage: () => undefined, playbackRate: FIRST_DAY_AUDIO_RATE });
 const bubbleTarget = "first-day-bubble";
@@ -98,33 +101,31 @@ function NarrationButton({ clips, player, language, showLabel = false }: {
   </button>;
 }
 
-function SpeakButton({ clip, englishVoice = true, player, className, children, descriptionId, showIcon = false }: {
+function SpeakButton({ clip, englishVoice = true, player, className, children, descriptionId }: {
   clip: DialogueClip;
   englishVoice?: boolean;
   player: VoicePlayer;
   className: string;
   children: ReactNode;
   descriptionId?: string;
-  showIcon?: boolean;
 }) {
   const spoken = spokenDialogue(clip, englishVoice);
   const playing = player.playing === spoken;
   const label = playing ? "Parar fala" : "Ouvir fala";
-  return <button type="button" className={`${className} fd-speak`} aria-pressed={playing}
+  return <div className={className}>{children}<button type="button" className="fd-inline-listen" aria-pressed={playing}
     aria-label={`${label}: ${spoken in narration ? narration[spoken as NarrationClip].text : dialogue[clip].text}`} aria-describedby={descriptionId}
     title={label} onClick={() => playing ? player.stop() : player.play([spoken])}>
-    {children}
-    {showIcon && <span className="fd-speak-icon" aria-hidden="true">
+    <span aria-hidden="true">
       {playing ? <Pause size={12} aria-hidden="true" /> : <Volume2 size={12} aria-hidden="true" />}
-    </span>}
-  </button>;
+    </span>
+  </button></div>;
 }
 
 function ReplyBalloon({ reply, player, englishVoice }: { reply: CharacterReply; player?: VoicePlayer; englishVoice: boolean }) {
   const line = <b className="fd1-spoken-line" lang={englishVoice ? "pt-BR" : "en"}>
-    {englishVoice ? reply.translation : dialogue[reply.voice].text}
+    {englishVoice ? reply.translation : <EnglishWords text={dialogue[reply.voice].text}/>}
   </b>;
-  return player ? <SpeakButton clip={reply.voice} englishVoice={englishVoice} player={player} className="fd1-bubble-body" showIcon>{line}</SpeakButton>
+  return player ? <SpeakButton clip={reply.voice} englishVoice={englishVoice} player={player} className="fd1-bubble-body">{line}</SpeakButton>
     : <div className="fd1-bubble-body" role="group" aria-label={`Resposta de ${reply.speaker}`}>{line}</div>;
 }
 
@@ -133,7 +134,7 @@ function ReactionMoment({ page, voice, cleanReading, englishVoice }: { page: Rea
     <StoryPanel page={page} portrait={cleanReading}><ReplyBalloon reply={page.reply} englishVoice={englishVoice} player={voice} /></StoryPanel>
     {page.tip && <aside className="fd1-story-strip fd1-tip">
       <h2>{page.tip.title}</h2>
-      <ul lang="en">{page.tip.phrases.map(phrase => <li key={phrase}>{phrase}</li>)}</ul>
+      <ul lang="en">{page.tip.phrases.map(phrase => <li key={phrase}><EnglishWords text={phrase}/></li>)}</ul>
     </aside>}
   </section>;
 }
@@ -142,10 +143,11 @@ function WordStrip({ words, order, placed, nextWord }: WordSequence & {
   placed: readonly number[];
   nextWord?: number;
 }) {
+  const show = useContext(MeaningContext);
   return <div className="fd1-words" role="group" aria-label="Faixa de palavras" lang="en">
     {order.map(index => <DragSource key={index}
       item={{ id: `word-${index}`, kind: "word", value: String(index), label: words[index] }}
-      disabled={placed.includes(index)} className={index === nextWord ? "fd1-word fd1-word-next" : "fd1-word"}>
+      onClick={() => show(words[index])} disabled={placed.includes(index)} className={index === nextWord ? "fd1-word fd1-word-next" : "fd1-word"}>
       {words[index]}
     </DragSource>)}
   </div>;
@@ -162,14 +164,14 @@ function LearnerBalloon({ words, placed, translation, complete, locked = complet
 }) {
   const phrase = placed.map(index => words[index]).join(" ");
   if (complete) {
-    const line = <b className="fd1-spoken-line" lang={englishVoice ? "pt-BR" : "en"}>{englishVoice ? translation : phrase}</b>;
-    return speech ? <SpeakButton {...speech} englishVoice={englishVoice} className="fd1-bubble-body" showIcon>{line}</SpeakButton>
+    const line = <b className="fd1-spoken-line" lang={englishVoice ? "pt-BR" : "en"}>{englishVoice ? translation : <EnglishWords text={phrase}/>}</b>;
+    return speech ? <SpeakButton {...speech} englishVoice={englishVoice} className="fd1-bubble-body">{line}</SpeakButton>
       : <div className="fd1-bubble-body" role="status">{line}</div>;
   }
   return <DropTarget id={bubbleTarget} accept={["word"]} disabled={locked} className="fd1-bubble-body"
     label={phrase ? `Seu balão. Colocar palavra. Montagem até agora: ${phrase}` : "Seu balão. Colocar palavra"}>
     <span className="fd1-slots" lang="en">{words.map((word, slot) =>
-      slot < placed.length ? <b key={word}>{words[placed[slot]]}</b> : <i key={word} aria-hidden="true" />)}</span>
+      slot < placed.length ? <b key={word}><EnglishWords text={words[placed[slot]]}/></b> : <i key={word} aria-hidden="true" />)}</span>
     {translation && <span className="fd1-translation" aria-live="polite">{translation}</span>}
   </DropTarget>;
 }
@@ -233,13 +235,12 @@ function StudyCaption({ clip, translation, voice, children }: {
   clip: DialogueClip; translation: string; voice?: VoicePlayer; children: ReactNode;
 }) {
   const translationId = `fd-study-translation-${clip}`;
-  const SoundIcon = voice?.playing === clip ? Pause : Volume2;
   const copy = <>
     <span className="fd1-study-line" lang="en">{children}</span>
     <span className="fd1-study-translation" id={translationId}>{translation}</span>
   </>;
   return voice ? <SpeakButton className="fd1-study-caption" player={voice} clip={clip} descriptionId={translationId}>
-    {copy}<span className="fd1-study-audio"><SoundIcon size={17} aria-hidden="true" /></span>
+    {copy}
   </SpeakButton> : <div className="fd1-study-caption">{copy}</div>;
 }
 
@@ -250,7 +251,7 @@ function ExamplesMoment({ page, voice }: { page: ExamplesPage; voice?: VoicePlay
       <figcaption>
         <span className="fd1-study-label">{panel.context}</span>
         <StudyCaption clip={panel.voice} voice={voice} translation={panel.translation}>
-          {panel.line}
+          <EnglishWords text={panel.line}/>
         </StudyCaption>
       </figcaption>
     </figure>)}
@@ -263,7 +264,7 @@ function RuleMoment({ page, voice }: { page: RulePage; voice?: VoicePlayer }) {
       {page.pieces.map((piece, index) => <Fragment key={piece.line}>
         {index > 0 && <li className="fd1-rule-plus" aria-hidden="true">+</li>}
         <li className="fd1-rule-piece" data-tone={piece.tone}>
-          <b lang={piece.tone === "verb" ? undefined : "en"}>{piece.line}</b>
+          <b lang={piece.tone === "verb" ? undefined : "en"}>{piece.tone === "verb" ? piece.line : <EnglishWords text={piece.line}/>}</b>
           <span>{piece.meaning}</span>
         </li>
       </Fragment>)}
@@ -273,7 +274,7 @@ function RuleMoment({ page, voice }: { page: RulePage; voice?: VoicePlayer }) {
         <StudyArt image={example.image} portraitImage={example.portraitImage} />
         <StudyCaption clip={example.voice} voice={voice} translation={example.translation}>
           {example.tokens.map((token, index) => <Fragment key={token.line}>
-            {index > 0 && " "}<strong data-tone={token.tone}>{token.line}</strong>
+            {index > 0 && " "}<strong data-tone={token.tone}><EnglishWords text={token.line}/></strong>
           </Fragment>)}
         </StudyCaption>
       </li>)}
@@ -285,7 +286,7 @@ const emptyAttempt: ChallengeAttempt = { placed: [] };
 
 function ChallengeReply({ reply, player, englishVoice }: { reply: ChallengePage["reply"]; player?: VoicePlayer; englishVoice: boolean }) {
   const line = <b lang={englishVoice ? "pt-BR" : "en"}>
-    {englishVoice ? narration[reply.translationVoice].text : dialogue[reply.voice].text}
+    {englishVoice ? narration[reply.translationVoice].text : <EnglishWords text={dialogue[reply.voice].text}/>}
   </b>;
 
   return <section className="fd1-story-strip fd1-door-reply" aria-labelledby="fd-door-reply-speaker">
@@ -294,7 +295,7 @@ function ChallengeReply({ reply, player, englishVoice }: { reply: ChallengePage[
       <span role="status"><Check size={15} aria-hidden="true"/> Você acertou!</span>
     </div>
     {player ? <SpeakButton className="fd1-door-reply-line" player={player} clip={reply.voice}
-      englishVoice={englishVoice} descriptionId="fd-door-reply-speaker" showIcon>{line}</SpeakButton>
+      englishVoice={englishVoice} descriptionId="fd-door-reply-speaker">{line}</SpeakButton>
       : <div className="fd1-door-reply-line">{line}</div>}
   </section>;
 }
@@ -368,6 +369,18 @@ export function FirstDay() {
   const position = Math.max(0, savedPosition);
   const portraitReading = useSyncExternalStore(subscribeToCleanReadingMedia, readCleanReadingMedia, () => false);
   const menu = useRef<HTMLDialogElement>(null);
+  const [tutorial, setTutorial] = useState<PrologueStep | null>(null);
+  const [lookedUp, setLookedUp] = useState("");
+  const [practiceCount, setPracticeCount] = useState(0);
+  const panel = tutorial ? prologue[tutorial] : null;
+  const tutorialIndex = tutorial ? prologueOrder.indexOf(tutorial) : -1;
+  const nextTutorialStep = prologueOrder[tutorialIndex + 1];
+  const practicePieces = panel?.pieces ?? [];
+  const practiced = practiceCount === practicePieces.length;
+  const practiceMeaning = tutorial === "drag" && lookedUp === "there!" ? "Em “Hi there!”, o cumprimento inteiro quer dizer “Oi!”." : meaningOf(lookedUp);
+  const replayClip = tutorial === "language" ? (englishVoice ? "tutorial-door-en" : "tutorial-door-pt") : panel?.audio;
+  const replayLabel = tutorial === "language" ? `Ouvir exemplo em ${englishVoice ? "inglês" : "português"}`
+    : tutorial === "arrival" ? "Ouvir Rafael" : "Ouvir instrução";
   const [changingAudio, setChangingAudio] = useState(false);
   const [resetNotice, setResetNotice] = useState<FirstDayResetTarget | null>(null);
   const editionPortrait = useSyncExternalStore(subscribeToPartOnePortrait, readPartOnePortrait, () => false);
@@ -408,8 +421,12 @@ export function FirstDay() {
   }, []);
   useEffect(() => imageCache.warm(savedPosition), [imageCache, savedPosition, portraitReading, editionPortrait]);
   useEffect(() => {
-    if (savedPosition >= 0) title.current?.focus({ preventScroll: true });
-  }, [savedPosition]);
+    title.current?.focus({ preventScroll: true });
+  }, [savedPosition, tutorial]);
+  useLayoutEffect(() => {
+    for (let node = book.current; node; node = node.parentElement) node.scrollTo?.({ top: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [position, tutorial]);
   useLayoutEffect(() => {
     const turn = nextTurn.current;
     nextTurn.current = null;
@@ -438,7 +455,9 @@ export function FirstDay() {
 
   function go(next: number) {
     menu.current?.close();
-    if (next === position) return;
+    setLookedUp("");
+    setTutorial(null);
+    if (next === position) { narrator.stop(); return; }
     setResetNotice(null);
     narrator.stop();
     paperSound.stop();
@@ -456,7 +475,7 @@ export function FirstDay() {
       paperSound.play(clips.length > 0);
     }
     progress.update(previous => ({ ...previous, position: next }));
-    window.scrollTo(0, 0);
+
   }
 
   function openAudioOptions() {
@@ -498,7 +517,7 @@ export function FirstDay() {
 
   function changeReadingLanguage() {
     progress.update(previous => ({ ...previous, readingLanguage: nextReadingLanguage }));
-    if (sound) narrator.play(sceneAudio(page, nextReadingLanguage === "pt-BR"));
+    if (sound) narrator.play(tutorial ? [nextReadingLanguage === "pt-BR" ? "tutorial-door-en" : "tutorial-door-pt"] : sceneAudio(page, nextReadingLanguage === "pt-BR"));
   }
 
   function turnTo(next: number) {
@@ -521,6 +540,21 @@ export function FirstDay() {
         setArtStatus("retry");
       }
     });
+  }
+
+  const languageButton = <button type="button" className="fd1-language" aria-label={languageAction} title={languageAction}
+    onClick={changeReadingLanguage}>{englishVoice ? "Ler em EN" : "Ler em PT"}</button>;
+
+  function showTutorial(step: PrologueStep) {
+    narrator.stop();
+    paperSound.stop();
+    if (step === "intro" && !progress.getSnapshot().tutorialSeen) {
+      progress.update(previous => ({ ...previous, tutorialSeen: true }));
+    }
+    setPracticeCount(0);
+    setLookedUp("");
+    setTutorial(step);
+    if (sound) narrator.play([prologue[step].audio]);
   }
 
   function renderMoment() {
@@ -554,10 +588,10 @@ export function FirstDay() {
     }
   }
 
-  return <main ref={book} className="lo-app fd" data-lesson-theme="comic" style={COMIC_LESSON_STYLE}
+  return <MeaningContext.Provider value={setLookedUp}><main ref={book} className="lo-app fd" data-lesson-theme="comic" style={COMIC_LESSON_STYLE}
     data-fd-edition={edition || undefined} data-fd-study={readingPage ? "" : undefined} data-fd-mobile-header={mobileHeader || undefined}
     data-ui-sound-scope="local" data-first-day-part={page?.part}
-    data-first-day-page={savedPosition < 0 ? "audio-choice" : page?.id ?? "cover"}>
+    data-first-day-page={tutorial ? "tutorial" : page?.id ?? "cover"}>
     {savedPosition >= 0 && <header className="lo-header fd-header">
       <div className="lo-brand-row">
         <Brand onMenu={openMenu} />
@@ -581,12 +615,73 @@ export function FirstDay() {
         </button>
       </li>)}</ol>
     </dialog>
-    {(savedPosition < 0 || changingAudio) && <FirstDayAudioChoice
-      required={savedPosition < 0} shouldOpen={() => changingAudio || progress.getSnapshot().position < 0}
+    {changingAudio && <FirstDayAudioChoice
+      required={false} shouldOpen={() => changingAudio}
       onChoose={chooseAudio} onDismiss={() => { setChangingAudio(false); audioMode.current?.focus({ preventScroll: true }); }}
     />}
-    {savedPosition === 0 && <FirstDayProgressReset dialogRef={resetDialog} onReset={resetReading} />}
-    {savedPosition < 0 ? null : !page ? <section className="fd-cover" aria-labelledby="fd-cover-title">
+    {savedPosition === 0 && <FirstDayProgressReset dialogRef={resetDialog} onReset={resetReading}
+      onReplayTutorial={() => showTutorial("intro")} />}
+    {tutorial && panel ? <LessonDragProvider animatePlacement key={tutorial} onDrop={item => {
+      if (item.value !== String(practiceCount) || practiced) return;
+      setPracticeCount(practiceCount + 1);
+      setLookedUp("");
+      if (sound) narrator.play([practicePieces[practiceCount].voice]);
+    }}><section className="fd-tutorial" data-step={tutorial} aria-labelledby="fd-tutorial-title">
+      <header className="fd-tutorial-heading">
+        <div className="fd-tutorial-folio"><span>Prólogo · Mini tutorial</span><span>{String(tutorialIndex + 1).padStart(2, "0")} / {String(prologueOrder.length).padStart(2, "0")}</span></div>
+        <div className="fd-tutorial-title-row">
+          <h1 id="fd-tutorial-title" ref={title} tabIndex={-1}>{panel.title}</h1>
+          {sound && replayClip && <button type="button" className="fd-tutorial-audio" aria-label={replayLabel} onClick={() => narrator.play([replayClip])}><Volume2 size={18}/></button>}
+        </div>
+      </header>
+      <div className="fd-tutorial-panel">
+        <p className="fd-tutorial-caption" lang={tutorial === "language" ? readingLanguage : "pt-BR"}>
+          {tutorial === "language" && !englishVoice ? <EnglishWords text={panel.caption}/> : tutorial === "language" ? doorCaptionPt : panel.caption}
+        </p>
+        <div className="fd-tutorial-art">
+          <Image src={`/first-day-part-one/prologo/${panel.image}.webp`}
+            width={1400} height={788} alt={panel.alt} unoptimized priority />
+        </div>
+        {tutorial === "intro" && <div className="fd-tutorial-sample">
+          <button type="button" lang="en" className="fd-tutorial-lookup" onClick={() => {
+            setPracticeCount(1);
+            if (sound) narrator.play([prologue.intro.pieces[0].voice]);
+          }}>{prologue.intro.pieces[0].word}</button>
+          <small aria-live="polite">{practiced && prologue.intro.pieces[0].translation}</small>
+        </div>}
+        {tutorial === "drag" && <DropTarget id="tutorial-balloon" label="Seu balão" accept={["word"]} disabled={practiced} className="fd-tutorial-sample">
+          <span className="fd-tutorial-line" lang="en">{practicePieces.slice(0, practiceCount).map(({ word }) => <span key={word}><EnglishWords text={word}/>{" "}</span>)}
+          {!practiced && <span className="fd-tutorial-slot" data-lesson-drop-anchor aria-hidden="true"/>}</span>
+          {practiceCount > 0 && <small>{practicePieces[practiceCount - 1].translation}</small>}
+        </DropTarget>}
+        {tutorial === "arrival" && <div className="fd-tutorial-sample fd-tutorial-reply">
+          <small>Rafael</small><strong>Cheguei ao refeitório.</strong>
+        </div>}
+      </div>
+      <div className="fd-tutorial-copy">
+        {tutorial === "intro" && <p>Clique na palavra para ver a tradução.</p>}
+        {tutorial === "language" && <>
+          <div className="fd-tutorial-pointer">{languageButton}</div>
+          <p aria-live="polite">{sound
+            ? (englishVoice ? "Você lê em português e ouve em inglês." : "Você lê em inglês e ouve em português.")
+            : `Você lê em ${englishVoice ? "português" : "inglês"}. O áudio está desligado.`}</p>
+        </>}
+        {tutorial === "drag" && <>
+          <ArrowUp className="fd-tutorial-arrow" aria-hidden="true" size={21}/>
+          <div className="fd-tutorial-tray">{practicePieces.map(({ word }, index) =>
+            <DragSource key={word} item={{id: word, kind: "word", value: String(index), label: word}}
+              disabled={index !== practiceCount} onClick={() => setLookedUp(word)} className="fd1-word fd-tutorial-word"><GripVertical size={14} aria-hidden="true"/>{word}</DragSource>)}</div>
+          <p aria-live="polite">{lookedUp ? lookedUp + " · " + practiceMeaning : practiced ? "Você cumprimentou seu colega." : practiceCount ? "Agora arraste a segunda palavra." : "Clique e arraste a palavra até o balão."}</p>
+          <FirstDragTutorial prologue/>
+        </>}
+        {tutorial === "arrival" && <p>Na história, você monta as falas do Rafael.</p>}
+      </div>
+      <nav className="fd-tutorial-footer" aria-label="Passos do tutorial">
+        <LessonButton disabled={!practiced} onClick={() => nextTutorialStep ? showTutorial(nextTutorialStep) : turnTo(1)}>
+          {nextTutorialStep ? "Próximo passo" : "Começar a história"} <ArrowRight size={18}/>
+        </LessonButton>
+      </nav>
+    </section></LessonDragProvider> : !page ? <section className="fd-cover" aria-labelledby="fd-cover-title">
       <picture className="fd-panels">
         {coverSources.map(({ media, src }) => <source key={src} media={media} srcSet={src} />)}
         <Image src={art.cover.src} width={art.cover.width} height={art.cover.height} alt={art.cover.alt}
@@ -614,10 +709,10 @@ export function FirstDay() {
               onClick={event => openResetOptions(event.currentTarget)}><RotateCcw size={16} aria-hidden="true" /> Reiniciar progresso</button>
             <Link href="/" className="lo-secondary" onClick={leaveLesson} aria-label="Voltar ao menu principal">Menu principal</Link>
           </div>
-          <LessonButton onClick={() => turnTo(1)}>{coverCopy.start} <ArrowRight size={18} aria-hidden="true" /></LessonButton>
+          <LessonButton onClick={() => progress.getSnapshot().tutorialSeen ? turnTo(1) : showTutorial("intro")}>{coverCopy.start} <ArrowRight size={18} aria-hidden="true" /></LessonButton>
         </div>
       </div>
-    </section> : <section className={edition ? "fd1-page" : "fd-page"} aria-labelledby="fd-page-title">
+    </section> : <section key={page.id} className={edition ? "fd1-page" : "fd-page"} aria-labelledby="fd-page-title">
       <div className={edition ? "fd1-progress" : "fd-progress"}>
         <span>Parte {page.part} de 4 · {page.kind === "Em preparação" ? page.moment : page.kind}</span><span>{position} / {pages.length}</span>
         <progress aria-label="Etapa no percurso" value={position} max={pages.length} />
@@ -628,12 +723,11 @@ export function FirstDay() {
           {chair && !editionPortrait && <Image src={chair.src} width={chair.width} height={chair.height} className="fd1-chair" alt={chair.alt} unoptimized />}
         </div>
         <div className="fd1-caption">
-          <p lang={storyVoice ? readingLanguage : "pt-BR"}>{caption}</p>
+          <p lang={storyVoice ? readingLanguage : "pt-BR"}>{storyVoice && readingLanguage === "en" ? <EnglishWords text={caption}/> : caption}</p>
           <div className="fd1-listen">
             {sound && captionClips.length > 0 && <NarrationButton clips={captionClips} player={narrator}
               language={storyVoice && englishVoice ? "inglês" : "português"} />}
-            {storyVoice && <button type="button" className="fd1-language" aria-label={languageAction} title={languageAction}
-              onClick={changeReadingLanguage}>{englishVoice ? "Ler em EN" : "Ler em PT"}</button>}
+            {storyVoice && languageButton}
           </div>
         </div>
       </div> : <div className="fd-page-heading"><div className="fd-page-title">
@@ -650,6 +744,7 @@ export function FirstDay() {
     {artStatus && <output className="fd-art-status" aria-live="polite">
       {artStatus === "loading" ? "Carregando o quadro…" : "A imagem ainda não carregou. Tente virar de novo."}
     </output>}
+    {lookedUp && (!tutorial || tutorial === "language") && <aside className="fd-word-definition" aria-label="Tradução"><span role="status"><b lang="en">{lookedUp}</b> · {meaningOf(lookedUp)}</span><button type="button" aria-label="Fechar tradução" onClick={() => setLookedUp("")}><X size={16}/></button></aside>}
     <canvas ref={turnSheet} className="fd-turn-sheet" aria-hidden="true" />
-  </main>;
+  </main></MeaningContext.Provider>;
 }

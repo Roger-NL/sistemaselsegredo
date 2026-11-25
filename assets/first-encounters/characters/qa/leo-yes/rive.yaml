@@ -1,0 +1,4 @@
+name: leo-yes
+main: Character
+output:
+  dir: build

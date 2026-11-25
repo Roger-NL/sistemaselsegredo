@@ -1,26 +1,26 @@
 .test-controls-trigger,.app-header .test-controls-trigger,.presentation-header .test-controls-trigger { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:44px; min-height:44px; padding:0 8px; flex-shrink:0; box-sizing:border-box; border:2px solid var(--comic-ink,#202722); border-radius:5px; background:var(--comic-yellow,#efc653); color:var(--comic-ink,#202722); box-shadow:2px 2px 0 var(--comic-ink,#202722); font:inherit; font-weight:600; white-space:nowrap; cursor:pointer; }
-.test-controls-trigger span { font-size:11px; }
+.test-controls-trigger span { font-size:12px; }
 .presentation-header .test-controls-trigger:hover { color:var(--comic-ink,#202722); }
 .test-controls-trigger:focus-visible { outline:3px solid currentColor; outline-offset:3px; }
 .presentation-header:has(.test-controls-trigger) { flex-wrap:wrap; }
 .presentation-header:has(.test-controls-trigger)>button:not(.test-controls-trigger) { margin-left:auto; }
-.test-controls-dialog { width:min(1100px,calc(100vw - 24px)); max-width:none; max-height:calc(100dvh - 24px); padding:0; border:1px solid #d9d3c7; border-radius:20px; background:#f5f1e9; color:#191919; box-sizing:border-box; font:15px/1.5 Arial,sans-serif; }
+.test-controls-dialog { width:min(1100px,calc(100vw - 24px)); max-width:none; max-height:calc(100dvh - 24px); padding:0; border:1px solid #b9b6a4; border-radius:12px; background:var(--comic-paper); color:var(--comic-ink); box-sizing:border-box; font:500 15px/var(--comic-reading-line) var(--comic-body); }
 .test-controls-dialog[open] { display:flex; flex-direction:column; }
 .test-controls-dialog::backdrop { background:#151b1a99; backdrop-filter:blur(4px); }
 .test-controls-dialog > header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; border-bottom:1px solid #ddd6ca; flex-shrink:0; }
-.test-controls-dialog h2 { margin:4px 0 0; font-size:26px; letter-spacing:-.03em; }
-.test-controls-dialog small { font-size:10px; letter-spacing:.12em; }
+.test-controls-dialog h2 { margin:var(--comic-space-xs) 0 0; font-size:26px; font-weight:700; line-height:1.15; }
+.test-controls-dialog small { color:var(--comic-reading-ink); font-size:12px; font-weight:600; letter-spacing:.05em; }
 .test-controls-scroll { min-height:0; overflow:auto; overscroll-behavior:contain; padding:20px 24px; }
 .test-controls-dialog section { padding:18px; border:1px solid #ded6c9; border-radius:12px; background:#fffdf8; min-width:0; }
-.test-controls-dialog h3 { font-size:18px; margin:0 0 14px; }
+.test-controls-dialog h3 { font-size:18px; font-weight:700; line-height:1.2; margin:0 0 var(--comic-space-md); }
 .test-controls-dialog fieldset { min-width:0; padding:0; margin:0; border:0; }
-.test-controls-dialog label { display:flex; flex-direction:column; gap:6px; font-size:13px; }
+.test-controls-dialog label { display:flex; flex-direction:column; gap:var(--comic-space-xs); font-size:14px; font-weight:600; }
 .test-controls-dialog select { width:100%; min-width:0; box-sizing:border-box; padding:10px; font:inherit; border:1px solid #c8beae; border-radius:8px; background:#fff; color:#191919; }
 .test-controls-dialog button { min-height:44px; padding:10px 14px; border:1px solid #bfb5a6; border-radius:8px; font:inherit; background:#f1ece2; color:#191919; cursor:pointer; white-space:normal; }
 .test-controls-dialog button:disabled { opacity:.45; cursor:default; }
 .test-control-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:12px 0; }
 .test-controls-dialog a { color:inherit; text-underline-offset:3px; }
-.test-control-summary { display:flex; flex-wrap:wrap; gap:8px 18px; font-size:13px; color:#645e55; margin-bottom:16px; }
+.test-control-summary { display:flex; flex-wrap:wrap; gap:var(--comic-space-xs) var(--comic-space-lg); font-size:14px; color:var(--comic-reading-ink); margin-bottom:var(--comic-space-md); }
 .test-quick-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
 .test-quick-actions button { font-weight:600; background:#fffdf8; }
 .test-page-links { display:flex; flex-wrap:wrap; gap:8px; padding:18px 0; margin-bottom:6px; }

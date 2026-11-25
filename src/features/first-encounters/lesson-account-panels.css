@@ -14,3 +14,28 @@
 .lesson-demo-dashboard .lesson-account-panels .student-compose textarea{min-height:70px;max-height:120px;resize:vertical}
 .lesson-demo-dashboard .lesson-account-panels .student-compose input{min-height:38px}
 @media(max-height:650px) and (min-width:760px){.lesson-demo-dashboard .lesson-account-panels .student-contact-intro{display:none}.lesson-demo-dashboard .lesson-account-panels .student-compose{padding:12px}.lesson-demo-dashboard .lesson-account-panels.student-empty{gap:12px}.lesson-demo-dashboard .lesson-account-panels .student-compose textarea{height:66px;min-height:66px}}
+
+.lesson-demo-dashboard .lesson-account-panels {
+  --muted: var(--comic-reading-ink, #46554c);
+  font-weight: 500;
+}
+.lesson-demo-dashboard .lesson-account-panels .student-contact-intro { line-height: 1.5; }
+.lesson-demo-dashboard .lesson-account-panels .student-contact-grid { margin: 0 4px 4px 0; }
+.lesson-demo-dashboard .lesson-account-panels .student-compose h3 { line-height: 1.13; }
+.lesson-demo-dashboard .lesson-account-panels .student-compose fieldset { margin-top: 14px; gap: 10px; }
+.lesson-demo-dashboard .lesson-account-panels .student-compose label { gap: 6px; font-size: 14px; font-weight: 600; }
+.lesson-demo-dashboard .lesson-account-panels .student-compose :is(input, textarea) { font-size: 16px; line-height: 1.4; }
+.lesson-demo-dashboard .lesson-account-panels .student-compose-actions { flex-wrap: wrap; gap: 6px 10px; }
+.lesson-demo-dashboard .lesson-account-panels .student-compose-actions > span { font-size: 13px; }
+.lesson-demo-dashboard .lesson-account-panels .student-messages p { font-size: 15px; line-height: 1.5; }
+.lesson-demo-dashboard .lesson-account-panels .student-messages time { font-size: 13px; }
+.lesson-demo-dashboard .lesson-account-panels :is(.student-messages, .student-conversations) strong { font-size: 15px; font-weight: 700; }
+.lesson-demo-dashboard .lesson-account-panels .student-conversations button :is(span, time) { font-size: 13px; line-height: 1.35; }
+.lesson-demo-dashboard .lesson-account-panels .student-new-conversation { font-size: 14px; font-weight: 600; }
+.lesson-demo-dashboard .lesson-account-panels > .live-class-card { overflow: auto; justify-content: safe center; gap: 10px; padding: clamp(16px, 3vw, 24px); }
+.lesson-demo-dashboard .lesson-account-panels > .live-class-card > :is(p, a) { font-size: 16px; line-height: 1.45; }
+.lesson-demo-dashboard .lesson-account-panels > .live-class-card .live-class-title { margin-block: 5px 0; }
+.lesson-demo-dashboard .lesson-account-panels > .live-class-card > .dashboard-primary { width: auto; align-self: flex-start; margin-top: 4px; font-size: 15px !important; }
+@media (max-width: 420px) {
+  .lesson-demo-dashboard .lesson-account-panels > .live-class-card > .dashboard-primary { width: 100%; }
+}

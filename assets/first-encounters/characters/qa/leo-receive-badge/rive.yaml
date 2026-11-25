@@ -1,0 +1,4 @@
+name: leo-receive-badge
+main: Character
+output:
+  dir: build

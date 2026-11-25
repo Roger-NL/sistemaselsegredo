@@ -295,6 +295,9 @@ body:has(.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"])) .lesson-
   font-family: var(--comic-display, "BasedSpeak Bangers", Impact, sans-serif); font-weight: 400; letter-spacing: .025em;
 }
 .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-header,.lo-footer) { background: var(--lo-paper); border-color:var(--lo-ink); }
+.lo-app.lesson-comic-font :is(.lo-header, .lo-footer, .li-header, .li-footer, .lo-tutorial-top, .lo-tutorial-footer) {
+  background-color: var(--site-bar-background, #fff);
+}
 .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) :is(.lo-learning,.lo-menu,.lo-dialog,.lo-tutorial,.li-introduction,.lc-card) {
   background:#fffdf5; border:2px solid var(--lo-ink); border-radius:8px 4px 9px 5px; box-shadow:3px 3px 0 var(--lo-ink);
 }
@@ -346,7 +349,7 @@ body:has(.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"])) .lesson-
 }
 /* Brand is shared with the landing/panel; its ink must resolve in the lesson. */
 .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) { --ink:var(--comic-ink,#202722); --paper:var(--comic-paper,#fff7e8); }
-.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand { display:inline-flex; align-items:center; color:var(--lo-ink); text-decoration:none; font-weight:750; letter-spacing:-1px; }
+.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand { display:inline-flex; align-items:center; color:var(--lo-ink); text-decoration:none; font-weight:600; letter-spacing:-1px; }
 .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand-light { font-weight:400; }
 .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand-mark { display:flex; align-items:center; flex-shrink:0; gap:3px; margin-right:10px; height:24px; }
 .lo-app:is([data-lesson-theme="comic"], [data-theme="comic"]) .lo-header .brand-mark>span { width:3px; height:12px; background:currentColor; border-radius:3px; transform:rotate(18deg); }
@@ -366,4 +369,124 @@ body:has(.lo-app:is([data-lesson-theme="comic"], [data-theme="comic"])) .lesson-
 .lo-app button.lesson-speech-text:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
+}
+
+/* Keep the lesson's spoken lines, reading copy and labels distinct. */
+.lo-app.lesson-comic-font :is(
+  .lo-scene-guide p, .lo-context-caption, .lo-context-note, .lo-footer-note,
+  .lo-dialog > p, .lo-dialog li, .lo-tutorial-heading p, .lo-tutorial-caption,
+  .lo-tutorial-bubble > span, .lo-example-pair p, .lo-takeaways span,
+  .lc-explanation > p, .lc-portuguese, .lc-example > span, .lc-summary-note,
+  .lc-summary-result > p, .lc-completion-message p, .lc-completion-models span
+) {
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--comic-reading-ink, var(--lo-muted));
+}
+
+.lo-app.lesson-comic-font :is(
+  .lo-kicker, .lo-mode, .lo-level, .lo-header-name, .lo-stage-topline, .lo-dialog-heading,
+  .lo-workbench-top, .lo-tutorial-top, .lc-progress-label, .lc-question-context > span,
+  .ls-role, .ls-person-name, .ls-team-label, .lj-journey
+) {
+  font-weight: 600;
+}
+
+.lo-app.lesson-comic-font :is(
+  .lo-phrase, .lo-word, .lo-message > strong, .lo-turn > strong,
+  .lo-fixed-speech > strong, .lo-speech-target.is-filled > strong, .lo-sentence > strong,
+  .lo-tutorial-bubble strong, .lo-word-coach strong, .lo-example-pair strong, .lo-takeaways strong,
+  .lc-english, .lc-example > strong, .lc-forms strong, .lc-feedback > strong,
+  .lc-completion-models strong, .tsp-model > strong, .tsp-word
+) {
+  font-weight: 700;
+}
+
+.lo-app.lesson-comic-font .lo-scene-guide p {
+  max-width: 58ch;
+  margin-inline: auto;
+  text-wrap: pretty;
+}
+
+.lo-app.lesson-comic-font :is(.lo-feedback > div, .lc-feedback, .lo-word-coach p, .lc-question-context > p) {
+  font-weight: 500;
+}
+
+.lo-app.lesson-comic-font :is(.lo-footer .lo-back, .lo-footer .lo-text-button, .lc-footer .lc-back) {
+  font-weight: 600;
+}
+
+.lo-app.lesson-comic-font {
+  --lesson-header-track: 60px;
+  --lesson-action-height: 48px;
+  --lesson-action-width: clamp(178px, 28vw, 320px);
+  --lesson-action-inset: max(8px, env(safe-area-inset-bottom));
+  --lesson-action-track: calc(var(--lesson-action-height) + var(--lesson-action-inset) + 8px);
+  --lesson-dialog-gap: 4px;
+  outline: 2px solid var(--lo-ink);
+  outline-offset: -2px;
+}
+
+/* Give the scene and its changing feedback the middle row. Page actions
+   live in the last row, which is anchored to the visible screen. */
+html:not([data-keyboard-open="true"]) .lo-app.lesson-comic-font {
+  height: var(--lesson-visible-height, 100dvh);
+  grid-template-rows: var(--lesson-header-track) minmax(0, 1fr) var(--lesson-action-track);
+}
+html:not([data-keyboard-open="true"]) .lo-app.lesson-comic-font:has(.lc-complete) {
+  --lesson-action-track: auto;
+}
+html:not([data-keyboard-open="true"]) .lo-app.lesson-comic-font > .lo-footer {
+  align-items: flex-end;
+  align-content: end;
+  padding-block: 6px var(--lesson-action-inset);
+}
+html:not([data-keyboard-open="true"]) .lo-app.lesson-comic-font :is(
+  .lo-footer .lo-next, .lo-footer > [data-lesson-button="primary"],
+  .li-footer .li-primary, .lo-tutorial-footer .lo-next
+) {
+  height: var(--lesson-action-height);
+  min-height: var(--lesson-action-height);
+  margin-block: 0;
+}
+
+/* The open presentation and guide become the same full-screen reading frame.
+   Keep the keyboard's own compact writing layout independent. */
+html:not([data-keyboard-open="true"]) body .lo-app.lesson-comic-font :is(.li-introduction, .lo-tutorial)[open] {
+  width: min(1200px, calc(var(--visible-width, 100vw) - 2 * var(--lesson-dialog-gap)));
+  height: calc(var(--lesson-visible-height, 100dvh) - 2 * var(--lesson-dialog-gap));
+  max-width: none;
+  max-height: none;
+  padding-bottom: calc(var(--lesson-action-inset) - var(--lesson-dialog-gap) - 2px);
+  overflow: clip;
+}
+.lo-app.lesson-comic-font :is(.li-footer, .lo-tutorial-footer) {
+  border-top: 1px solid var(--lo-ink);
+  padding-top: 6px;
+}
+.lo-app.lesson-comic-font .lo-tutorial .lo-tutorial-footer { padding-bottom: 0; }
+@media (max-width: 759px) {
+  .lo-app.lesson-comic-font { --lesson-header-track: 48px; }
+  .lo-app.lesson-comic-font .lc-footer:has(.lc-back) { gap: 10px; }
+  .lo-app.lesson-comic-font .lc-footer .lc-back {
+    width: 52px;
+    min-height: var(--lesson-action-height);
+    font-size: 0;
+    gap: 0;
+  }
+}
+@media (min-width: 760px) {
+  .lo-app.lesson-comic-font :is(.lo-footer > [data-lesson-button="primary"], .lo-footer-actions .lo-next, .lo-tutorial-footer .lo-next) {
+    width: var(--lesson-action-width);
+    flex: 0 0 var(--lesson-action-width);
+  }
+}
+@media (min-width: 760px) and (max-height: 720px) {
+  .lo-app.lesson-comic-font { --lesson-header-track: 52px; }
+}
+@media (min-width: 760px) and (max-height: 570px) {
+  .lo-app.lesson-comic-font { --lesson-header-track: 46px; }
+}
+@media (orientation: landscape) and (min-width: 550px) and (max-height: 500px) {
+  .lo-app.lesson-comic-font { --lesson-header-track: 38px; }
 }

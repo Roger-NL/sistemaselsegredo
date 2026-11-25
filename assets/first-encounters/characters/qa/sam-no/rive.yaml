@@ -1,0 +1,4 @@
+name: sam-no
+main: Character
+output:
+  dir: build

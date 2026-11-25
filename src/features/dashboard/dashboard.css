@@ -323,3 +323,10 @@
 .dashboard .student-progress-link:hover { border-color:#7c7a6c; background:#fffdf8; }
 .dashboard .student-progress-link:focus-visible { outline:2px solid currentColor; outline-offset:4px; }
 .dashboard .student-progress-card .student-progress-cta { display:flex; align-items:center; gap:9px; font-size:13px; text-decoration:underline; text-underline-offset:4px; margin-top:auto; min-height:32px; }
+
+.dashboard { font-weight: 500; }
+.dashboard :is(.student-section-heading > span, .student-contact-intro) { color: var(--comic-reading-ink, #46554c); }
+.dashboard .student-section-heading > span { font-size: 13px; line-height: 1.4; }
+.dashboard :is(.student-contact-intro, .student-empty p, .student-progress-card > p) { font-size: 15px; line-height: 1.5; }
+.dashboard .student-activities strong { font-size: 15px; font-weight: 700; }
+.dashboard .student-activities time { font-size: 13px; }

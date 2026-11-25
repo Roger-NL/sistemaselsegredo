@@ -90,18 +90,18 @@ export function StoryPanel({ page, portrait, expanded = false, children }: {
   </div>;
 }
 
-export function FirstDragTutorial() {
+export function FirstDragTutorial({ prologue = false }: { prologue?: boolean }) {
   const hand = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const cursor = hand.current;
-    const story = cursor?.closest<HTMLElement>(".fd1-story");
+    const story = cursor?.closest<HTMLElement>(prologue ? ".fd-tutorial" : ".fd1-story");
     if (!cursor || !story || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const key = "basedspeak:first-day:drag-demo";
-    try { if (sessionStorage.getItem(key)) return; } catch { /* The demonstration also works without storage. */ }
+    try { if (!prologue && sessionStorage.getItem(key)) return; } catch { /* The demonstration also works without storage. */ }
     let animation: Animation | undefined;
     const timer = window.setTimeout(() => {
-      const source = story.querySelector('[data-lesson-drag-source="word-0"]')?.getBoundingClientRect();
-      const target = story.querySelector("[data-lesson-drop]")?.getBoundingClientRect();
+      const source = story.querySelector(prologue ? "[data-lesson-drag-source]" : '[data-lesson-drag-source="word-0"]')?.getBoundingClientRect();
+      const target = story.querySelector(prologue ? "[data-lesson-drop-anchor]" : "[data-lesson-drop]")?.getBoundingClientRect();
       if (!source || !target || !cursor.animate) return;
       const bounds = story.getBoundingClientRect();
       const at = (rect: DOMRect) => `translate(${rect.x + rect.width / 2 - bounds.x}px, ${rect.y + rect.height / 2 - bounds.y}px)`;
@@ -111,7 +111,7 @@ export function FirstDragTutorial() {
         { transform: at(target), opacity: 1, offset: .78 },
         { transform: at(target), opacity: 0 },
       ], { duration: 1900, easing: "ease-in-out" });
-      try { sessionStorage.setItem(key, "1"); } catch { /* Optional per-session memory. */ }
+      try { if (!prologue) sessionStorage.setItem(key, "1"); } catch { /* Optional per-session memory. */ }
     }, 950);
     const cancel = () => { window.clearTimeout(timer); animation?.cancel(); };
     story.addEventListener("pointerdown", cancel, { capture: true });
@@ -123,6 +123,6 @@ export function FirstDragTutorial() {
       story.removeEventListener("keydown", cancel, true);
       window.removeEventListener("resize", cancel);
     };
-  }, []);
+  }, [prologue]);
   return <span ref={hand} className="fd1-tutorial-hand" aria-hidden="true"><Hand size={30} /></span>;
 }

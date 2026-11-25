@@ -1,0 +1,4 @@
+name: ana-no
+main: Character
+output:
+  dir: build

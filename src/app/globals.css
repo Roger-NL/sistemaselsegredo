@@ -13,13 +13,13 @@ button, a, summary, input, textarea { -webkit-tap-highlight-color: transparent; 
 [data-ui-text] { all:unset !important; display:contents !important; }
 
 /* Shared audio menu: available before sign-in and during the presentation. */
-.public-header-actions,.presentation-header-actions { display:flex; align-items:center; gap:12px; min-width:0; }
+.public-header-actions,.presentation-header-actions { display:flex; align-items:center; gap:var(--comic-space-sm); min-width:0; }
 .sound-menu { position:relative; z-index:80; flex-shrink:0; color:#222923; }
-.sound-menu > summary { display:flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 12px; cursor:pointer; list-style:none; border:1px solid currentColor; border-radius:8px; font-size:13px; }
+.sound-menu > summary { display:flex; align-items:center; justify-content:center; gap:var(--comic-space-xs); min-height:44px; padding:0 12px; cursor:pointer; list-style:none; border:1px solid currentColor; border-radius:8px; font-size:14px; font-weight:600; }
 .sound-menu > summary::-webkit-details-marker { display:none; }
 .sound-menu > summary:focus-visible,.sound-option:focus-visible { outline:2px solid #397a6d; outline-offset:3px; }
 .sound-menu-panel { position:absolute; right:0; top:calc(100% + 8px); width:260px; max-width:calc(100vw - 34px); max-height:calc(100dvh - 100px); overflow:auto; padding:8px; border:2px solid #222923; border-radius:10px; background:#fff7ea; color:#222923; box-shadow:4px 4px 0 #222923; }
-.sound-menu-panel .sound-option { display:flex; width:100%; align-items:center; gap:10px; min-height:48px; padding:10px 8px; border:0; border-radius:5px; background:transparent; color:#222923; text-align:left; font:inherit; font-size:13px; cursor:pointer; }
+.sound-menu-panel .sound-option { display:flex; width:100%; align-items:center; gap:var(--comic-space-sm); min-height:48px; padding:var(--comic-space-xs) var(--comic-space-sm); border:0; border-radius:5px; background:transparent; color:#222923; text-align:left; font:600 14px/1.3 var(--comic-body); cursor:pointer; }
 .sound-option svg { flex-shrink:0; }
 .sound-menu-panel .sound-option:hover { background:#e8ecdf; color:#222923; }
 .presentation-header .sound-menu > summary { color:#f4f0e8; }

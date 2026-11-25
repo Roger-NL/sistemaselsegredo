@@ -1,0 +1,4 @@
+name: ana-speech-team
+main: Character
+output:
+  dir: build

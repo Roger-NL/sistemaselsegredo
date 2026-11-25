@@ -1,0 +1,4 @@
+name: maya-thinking
+main: Character
+output:
+  dir: build

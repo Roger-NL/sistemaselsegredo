@@ -1,0 +1,4 @@
+name: leo-self-point
+main: Character
+output:
+  dir: build

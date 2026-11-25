@@ -1,0 +1,4 @@
+name: sam-idle
+main: Character
+output:
+  dir: build

@@ -1,0 +1,4 @@
+name: sam-thinking
+main: Character
+output:
+  dir: build

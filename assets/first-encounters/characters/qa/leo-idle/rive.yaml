@@ -1,0 +1,4 @@
+name: leo-idle
+main: Character
+output:
+  dir: build

@@ -1,0 +1,4 @@
+name: ana
+main: Character
+output:
+  dir: build

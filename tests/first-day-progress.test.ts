@@ -23,7 +23,7 @@ it("clears the first part from the cover and persists the change", () => {
   store.update(progress => resetFirstDayProgress(progress, 1));
 
   expect(createFirstDayProgressStore().getSnapshot()).toEqual({
-    position: 0, counts: {}, attempts: {}, sound: true, readingLanguage: "pt-BR",
+    position: 0, tutorialSeen: true, counts: {}, attempts: {}, sound: true, readingLanguage: "pt-BR",
   });
 });
 
@@ -52,6 +52,19 @@ it("goes back to the cover and preserves the settings when all parts are reset",
   store.update(progress => resetFirstDayProgress(progress, "all"));
 
   expect(createFirstDayProgressStore().getSnapshot()).toEqual({
-    position: 0, counts: {}, attempts: {}, sound: true, readingLanguage: "pt-BR",
+    position: 0, tutorialSeen: false, counts: {}, attempts: {}, sound: true, readingLanguage: "pt-BR",
   });
+});
+
+
+it("remembers opening the prologue even before the first lesson page", () => {
+  const store = createFirstDayProgressStore();
+  expect(store.getSnapshot().tutorialSeen).toBe(false);
+  store.update(current => ({ ...current, tutorialSeen: true }));
+  expect(createFirstDayProgressStore().getSnapshot()).toMatchObject({ position: 0, tutorialSeen: true });
+});
+
+it("offers the prologue to an older cover-only save with just audio preferences", () => {
+  localStorage.setItem(storageKey, JSON.stringify({ pageId: null, sound: false }));
+  expect(createFirstDayProgressStore().getSnapshot()).toMatchObject({ sound: false, tutorialSeen: false });
 });

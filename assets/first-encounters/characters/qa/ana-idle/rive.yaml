@@ -1,0 +1,4 @@
+name: ana-idle
+main: Character
+output:
+  dir: build

@@ -3,7 +3,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 export const metadata: Metadata = { title: "Privacidade", description: "Conta, progresso, mensagens e privacidade no BasedSpeak." };
 export default function PrivacyPage() {
-  return <main className="demo-shell"><article className="legal"><Link href="/"><InterfaceIcon name="arrow-left" /> Voltar ao início</Link><h1>Privacidade</h1><p>Atualizado em 23 de novembro de 2026.</p>
+  return <main className="demo-shell legal-shell"><article className="legal">
+    <header className="legal-header">
+      <Link href="/" className="legal-back"><InterfaceIcon name="arrow-left" />Voltar ao início</Link>
+      <h1>Privacidade</h1>
+      <p className="legal-updated">Atualizado em <time dateTime="2026-11-23">23 de novembro de 2026</time>.</p>
+    </header>
     <h2>Sua conta</h2><p>Usamos o Firebase Authentication para autenticação por e-mail/senha ou Google. Ao continuar com Google, recebemos a identificação, o nome e o e-mail da conta escolhida. A senha é gerenciada pelo serviço de autenticação; não é salva no perfil do curso.</p><p>O servidor registra identificador, nome, e-mail, datas de criação e acesso e status da conta. A revisão cadastral de contas novas não bloqueia a prática ou o salvamento. Suspensão e rejeição podem restringir o acesso da conta. Um cookie de sessão protegido contra leitura por JavaScript mantém o acesso por até sete dias. Sair encerra a sessão; a conta e seus registros permanecem cadastrados.</p>
     <h2>Prática sem gravação de voz</h2><p>O gibi <Link href="/first-day">First Day</Link> é público e pode ser lido sem conta ou aprovação. O navegador salva o ponto de leitura, as respostas e a preferência de áudio deste gibi no próprio dispositivo. A atividade não pede telefone, dados financeiros ou acesso ao microfone. As falas em inglês pertencem a cenas fictícias de aprendizagem. Você não precisa gravar sua voz.</p>
     <h2>O que fica salvo na conta</h2><p>Registros de atividades e testes sincronizados anteriormente continuam associados à conta no Firestore e podem ser consultados no painel. A administração pode consultar o avanço, revisar o acesso e reiniciar o progresso. Resets e mudanças de acesso geram registros de atividade.</p><p>As respostas dos exercícios não são enviadas ao provedor de áudio. A porcentagem de avanço registra o percurso da atividade; não é uma nota de proficiência.</p>

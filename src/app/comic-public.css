@@ -3,11 +3,23 @@
 html body :is(.landing,.start-page) {
   --ink:var(--comic-ink); --paper:var(--comic-paper); --muted:var(--comic-muted); --line:var(--comic-ink);
   color:var(--comic-ink); background-color:var(--comic-paper);
-  font-family:var(--comic-body),Arial,sans-serif;
+  font-family:var(--comic-body,"BasedSpeak Barlow",Arial,sans-serif);
   background-image:radial-gradient(#2027220e .65px,transparent .8px);
   background-size:9px 9px;
 }
-/* These are page separators, not panels: keep room for the login shadow. */
+html body :is(.landing-header,.start-header,.landing-footer,.start-footer) {
+  position:relative;
+  z-index:1;
+  background-color:var(--site-bar-background);
+}
+html body :is(.landing-header,.start-header,.landing-footer,.start-footer)::before {
+  content:"";
+  position:absolute;
+  inset:0 calc((100% - 100cqw) / 2);
+  z-index:-1;
+  pointer-events:none;
+  background-color:inherit;
+}
 html body :is(.landing-header,.start-header) {
   border:0;
   border-bottom:2px solid var(--comic-ink);
@@ -18,15 +30,15 @@ html body :is(.landing-footer,.start-footer) {
   border-top:2px solid var(--comic-ink);
 }
 html body :is(.landing-header,.start-header) .brand { color:var(--comic-ink); }
-html body :is(.landing-eyebrow,.start-free) { color:var(--comic-teal); font-weight:700; }
+html body :is(.landing-eyebrow,.start-free) { color:var(--comic-teal); font-weight:600; }
 html body .landing-small-mark { background:var(--comic-coral); outline:1px solid var(--comic-ink); }
-html body :is(.landing-hero-copy h1,.start-story h2,.start-type,.signup-card h1,.landing-info h2,.landing-info h3) {
+html body :is(.landing-hero-copy h1,.start-story h2,.start-type,.signup-card h1,.landing-info h2) {
   font-family:var(--comic-display); font-weight:400; letter-spacing:.015em;
   color:var(--comic-ink);
 }
 html body .landing-hero-copy h1 { line-height:.99; }
 html body .landing-hero-copy h1>span { color:var(--comic-teal); font-style:normal; font-weight:400; }
-html body .landing-lead { color:var(--comic-muted); }
+html body .landing-lead { color:var(--comic-reading-ink,#46554c); }
 html body :is(.landing-login,.landing-info-header>button) {
   border:2px solid var(--comic-ink); border-radius:5px; background:var(--comic-paper);
   box-shadow:3px 3px 0 var(--comic-ink); color:var(--comic-ink);
@@ -35,14 +47,14 @@ html body :is(.landing-login:hover,.landing-info-header>button:hover) { backgrou
 html body .landing .landing-cta,html body .start-page .landing-cta {
   border:2px solid var(--comic-ink); border-radius:5px; background:var(--comic-yellow);
   color:var(--comic-ink); box-shadow:4px 4px 0 var(--comic-ink);
-  font-weight:750; letter-spacing:.01em;
+  font-weight:700; letter-spacing:.01em;
 }
 html body .landing .landing-cta:hover,html body .start-page .landing-cta:hover { background:#f6d779; }
-html body .landing-more { font-weight:700; color:var(--comic-teal); }
-html body .landing-assurance { color:var(--comic-muted); }
+html body .landing-more { font-weight:600; color:var(--comic-teal); }
+html body .landing-assurance { color:var(--comic-reading-ink,#46554c); }
 html body .landing-assurance svg { color:var(--comic-teal); }
-html body :is(.landing-footer,.start-footer) { color:var(--comic-muted); }
-html body :is(.landing-footer,.start-footer) a { color:var(--comic-ink); }
+html body :is(.landing-footer,.start-footer) { color:var(--comic-reading-ink,#46554c); }
+html body :is(.landing-footer,.start-footer) a { color:var(--comic-ink); font-weight:600; }
 
 /* The interactive sample uses the same ink panel and paper pieces as the demo. */
 html body .language-stage {
@@ -60,22 +72,22 @@ html body .language-poster {
 html body .language-poster>span:last-child { font-weight:400; }
 html body .language-sticker {
   background:var(--comic-coral); color:var(--comic-ink); border:2px solid var(--comic-ink);
-  box-shadow:3px 3px 0 var(--comic-ink); font-weight:800;
+  box-shadow:3px 3px 0 var(--comic-ink); font-weight:700;
 }
 html body .language-paper {
   background:var(--comic-paper); color:var(--comic-ink); border:2px solid var(--comic-ink);
   border-radius:6px; box-shadow:4px 4px 0 var(--comic-ink);
 }
 html body .language-stage.is-complete .language-paper { box-shadow:4px 4px 0 var(--comic-yellow); }
-html body .language-intention { font-weight:650; }
+html body .language-intention { font-weight:600; }
 html body .language-answer { border-color:var(--comic-ink); }
 html body .language-word-bank>button {
   background:#fffdf5; color:var(--comic-ink); border:2px solid var(--comic-ink);
-  border-bottom-width:3px; border-radius:4px; box-shadow:2px 2px 0 var(--comic-ink); font-weight:650;
+  border-bottom-width:3px; border-radius:4px; box-shadow:2px 2px 0 var(--comic-ink); font-weight:700;
 }
 html body .language-word-bank>button:hover:enabled { background:var(--comic-yellow); }
 html body .language-word-bank>button:disabled { color:#76796e; background:#e8e5d7; border-color:#a2a695; box-shadow:none; }
-html body :is(.language-notice,.language-placeholder,.language-reset) { color:var(--comic-muted); }
+html body :is(.language-notice,.language-placeholder,.language-reset) { color:var(--comic-reading-ink,#46554c); }
 html body .language-reset:hover:enabled { background:#efc6534d; }
 
 /* Information is a printed side panel, retaining the existing drawer behavior. */
@@ -85,13 +97,13 @@ html body .landing-info {
 html body .landing-info::backdrop { background:#2027229c; }
 html body .landing-info-header { background:var(--comic-paper); color:var(--comic-teal); }
 html body .landing-info h2 { line-height:1.03; }
-html body :is(.landing-info-lead,.landing-info-steps p,.landing-info-next>p) { color:var(--comic-muted); }
+html body :is(.landing-info-lead,.landing-info-steps p,.landing-info-next>p,.landing-support-example>p) { color:var(--comic-reading-ink,#46554c); }
 html body .landing-info-steps>li { border-color:var(--comic-ink); }
-html body .landing-info-steps>li>span { color:var(--comic-teal); font-weight:750; }
-html body .landing-info h3 { font-size:21px; }
+html body .landing-info-steps>li>span { color:var(--comic-teal); font-weight:700; }
+html body .landing-info h3 { color:var(--comic-ink); font-family:var(--comic-body); font-weight:700; letter-spacing:normal; }
 html body .landing-support-preview { border:2px solid var(--comic-ink); border-radius:6px; background:#fffdf5; box-shadow:4px 4px 0 var(--comic-ink); }
 html body .landing-support-tabs { border-color:var(--comic-ink); background:#efc65340; }
-html body .landing-support-tabs>button { color:var(--comic-ink); font-weight:650; }
+html body .landing-support-tabs>button { color:var(--comic-ink); font-weight:600; }
 html body .landing-support-tabs>button[aria-pressed=true] { background:var(--comic-teal); color:var(--comic-paper); }
 html body .landing-support-tabs>button:hover:not([aria-pressed=true]) { background:var(--comic-yellow); }
 html body .landing-support-icon { border:2px solid var(--comic-ink); color:var(--comic-ink); background:var(--comic-yellow); }
@@ -108,17 +120,17 @@ html body .signup-card {
   border:2px solid var(--comic-ink); border-radius:8px; box-shadow:5px 5px 0 var(--comic-ink);
 }
 html body .signup-card h1 { font-size:32px; line-height:1.04; }
-html body :is(.signup-intro,.signup-card small,.signup-legal,.signup-divider) { color:var(--comic-muted); }
-html body .signup-google { background:#fffdf5; color:var(--comic-ink); border:2px solid var(--comic-ink); border-radius:4px; font-weight:650; }
+html body :is(.signup-intro,.signup-card small,.signup-legal,.signup-divider) { color:var(--comic-reading-ink,#46554c); }
+html body .signup-google { background:#fffdf5; color:var(--comic-ink); border:2px solid var(--comic-ink); border-radius:4px; font-weight:600; }
 html body .signup-google:hover { background:#efc65345; }
 html body .signup-card input { background:#fffdf5; color:var(--comic-ink); border:2px solid var(--comic-ink); border-radius:4px; }
 html body .signup-card input::placeholder { color:#6d7367; }
 html body .signup-card input:focus { outline-color:var(--comic-teal); }
 html body .signup-password button { color:var(--comic-ink); }
 html body .signup-password button:hover { background:#efc65345; }
-html body .signup-card .signup-forgot,html body .signup-switch button { color:var(--comic-teal); font-weight:650; }
+html body .signup-card .signup-forgot,html body .signup-switch button { color:var(--comic-teal); font-weight:600; }
 html body .signup-divider::before,html body .signup-divider::after { background:var(--comic-ink); }
-html body .signup-approval-note { border:1px solid var(--comic-ink); border-left-width:4px; background:#efc65330; color:var(--comic-muted); }
+html body .signup-approval-note { border:1px solid var(--comic-ink); border-left-width:4px; background:#efc65330; color:var(--comic-reading-ink,#46554c); }
 html body .signup-error { background:#d9755c24; color:#702c21; border:2px solid var(--comic-coral); }
 html body .signup-message { background:#39776b17; color:#28584e; border:2px solid var(--comic-teal); }
 
@@ -177,17 +189,22 @@ html body .presentation-panel-route>div>span { background:var(--comic-yellow); b
 html body .presentation-panel-route small { color:var(--comic-muted); }
 html body .presentation-panel-contact { border-color:var(--comic-ink); color:var(--comic-ink); }
 
-/* Long-form reading is deliberately calmer, inside the same paper-and-ink frame. */
+/* Legal reading stays within a comfortable line length. */
+html body .legal-shell { padding-block:clamp(14px,4vw,48px); }
 html body .legal {
   border:2px solid var(--comic-ink); border-radius:7px; background:var(--comic-paper);
   color:var(--comic-ink); box-shadow:4px 4px 0 var(--comic-ink); padding:clamp(18px,3vw,32px);
-  font-family:var(--comic-body),Arial,sans-serif;
+  max-width:760px; margin-inline:auto; font-family:var(--comic-body,"BasedSpeak Barlow",Arial,sans-serif);
 }
-html body .legal h1,html body .legal h2 { font-family:var(--comic-display); font-weight:400; letter-spacing:.015em; line-height:1.1; }
-html body .legal h1 { color:var(--comic-teal); }
-html body .legal h2 { color:var(--comic-ink); }
-html body .legal p { line-height:1.75; }
+html body .legal-header { padding-bottom:14px; border-bottom:1px solid var(--comic-ink); }
+html body .legal h1 { color:var(--comic-teal); font-size:clamp(38px,5vw,60px); margin:10px 0 6px; }
+html body .legal h2 { font-family:inherit; font-size:clamp(21px,2.2vw,26px); font-weight:700; letter-spacing:normal; line-height:1.2; margin:20px 0 6px; }
+html body .legal p { max-width:65ch; margin:0; color:var(--comic-reading-ink,#46554c); font-size:clamp(16px,1.65vw,18px); font-weight:500; line-height:1.55; }
+html body .legal p + p { margin-top:10px; }
+html body .legal .legal-updated { font-size:14px; font-weight:600; line-height:1.4; }
 html body .legal a { color:var(--comic-teal); text-decoration-thickness:1.5px; text-underline-offset:3px; }
+html body .legal p a { text-decoration-line:underline; }
+html body .legal-back { display:inline-flex; align-items:center; gap:6px; min-height:44px; font-size:14px; font-weight:600; }
 
 @container public-viewport (max-width:760px) {
   html body .landing-hero-copy h1 { letter-spacing:.01em; }

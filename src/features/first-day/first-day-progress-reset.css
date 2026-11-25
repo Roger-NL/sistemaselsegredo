@@ -91,3 +91,15 @@
   .fd-reset-option-all { min-height: 44px; }
   .fd-reset-actions { margin-top: 12px; }
 }
+
+.fd .fd-reset-tutorial {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 22%, var(--fd-panel));
+  background: transparent;
+  color: var(--teal);
+  font: 650 15px/1.2 var(--comic-body);
+}

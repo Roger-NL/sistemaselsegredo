@@ -1,0 +1,4 @@
+name: ana-self-point
+main: Character
+output:
+  dir: build

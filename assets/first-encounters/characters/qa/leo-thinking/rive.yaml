@@ -1,0 +1,4 @@
+name: leo-thinking
+main: Character
+output:
+  dir: build

@@ -1,0 +1,4 @@
+name: sam-wave
+main: Character
+output:
+  dir: build

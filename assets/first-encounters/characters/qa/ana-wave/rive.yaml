@@ -1,0 +1,4 @@
+name: ana-wave
+main: Character
+output:
+  dir: build

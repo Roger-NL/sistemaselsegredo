@@ -1,0 +1,4 @@
+name: nina-idle
+main: Character
+output:
+  dir: build

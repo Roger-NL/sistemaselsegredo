@@ -1,14 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { FirstDayLink } from "@/features/first-day/cover-entry";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { pages } from "@/features/first-day/content";
 import { createFirstDayProgressStore, resetFirstDayProgress } from "@/features/first-day/first-day-progress";
 import "./first-day-catalog.css";
 
-const FIRST_DAY_HREF = "/first-day";
 const upcoming = [
   { art: "/dashboard/coffee.webp", title: "Um café, por favor" },
   { art: "/dashboard/city.webp", title: "Do outro lado da rua" },
@@ -57,7 +56,7 @@ export function FirstDayCatalog({ position, primary = false }: {
         <Heading id="first-day-catalog-title" lang="en" tabIndex={primary ? undefined : -1}>First Day</Heading>
         <p className="catalog-description">{scene ? `Parte ${scene.part} · ${scene.title}` : "Uma cadeira livre. Uma primeira conversa em inglês."}</p>
         {scene ? <progress className="catalog-progress" value={position} max={pages.length} aria-label="Página atual de First Day" /> : null}
-        <Link className="catalog-cta" href={FIRST_DAY_HREF} prefetch={false}>{action}<ArrowRight size={19} aria-hidden="true"/></Link>
+        <FirstDayLink className="catalog-cta"  prefetch={false}>{action}<ArrowRight size={19} aria-hidden="true"/></FirstDayLink>
       </div>
     </article>
     <section className="catalog-upcoming" aria-labelledby="catalog-upcoming-title">

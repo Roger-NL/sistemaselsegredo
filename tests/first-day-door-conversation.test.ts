@@ -50,7 +50,10 @@ it("reveals Ana's reply on a correct answer, plays both speakers, and restores i
   expect(container.textContent).toContain("Can I close the door?");
   expect(container.textContent).not.toContain("Posso fechar a porta?");
   const ana = container.querySelector<HTMLButtonElement>("button[aria-label*='Claro! Está barulhento lá fora.']");
-  expect(ana?.textContent).toContain("Sure! It’s noisy out there.");
+  expect(ana?.parentElement?.textContent).toContain("Sure! It’s noisy out there.");
+  const word = Array.from(ana!.parentElement!.querySelectorAll("button")).find(button => button.textContent === "noisy")!;
+  act(() => word.click());
+  expect(container.querySelector(".fd-word-definition")?.textContent).toContain("barulhento");
   expect(play).not.toHaveBeenCalled();
   act(() => ana!.click());
   expect(play).toHaveBeenCalledExactlyOnceWith(["ana-door-reply-pt"], undefined);

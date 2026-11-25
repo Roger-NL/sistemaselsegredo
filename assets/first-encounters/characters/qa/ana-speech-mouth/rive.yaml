@@ -1,0 +1,4 @@
+name: ana-speech-mouth
+main: Character
+output:
+  dir: build

@@ -1,0 +1,4 @@
+name: maya-self-point
+main: Character
+output:
+  dir: build

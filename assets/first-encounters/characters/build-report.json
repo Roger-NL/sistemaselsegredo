@@ -1,0 +1,312 @@
+[
+  {
+    "character": "ana",
+    "verify": {
+      "success": true,
+      "command": "verify",
+      "data": {
+        "riv": null,
+        "bytes": 0,
+        "buildMs": 97.6,
+        "problems": []
+      },
+      "errors": [],
+      "warnings": [],
+      "allowance": null,
+      "credits": null,
+      "workspace": null
+    },
+    "summary": {
+      "schema": 1,
+      "summary": true,
+      "problems": [],
+      "artboards": [
+        {
+          "name": "Character",
+          "objects": 1902,
+          "types": {
+            "AnimationState": 1,
+            "AnyState": 1,
+            "Artboard": 1,
+            "CubicDetachedVertex": 278,
+            "CubicEaseInterpolator": 167,
+            "Ellipse": 19,
+            "EntryState": 1,
+            "ExitState": 1,
+            "Fill": 60,
+            "KeyFrameDouble": 532,
+            "KeyedObject": 241,
+            "KeyedProperty": 301,
+            "LayoutComponentStyle": 1,
+            "LinearAnimation": 12,
+            "Node": 25,
+            "PointsPath": 67,
+            "Rectangle": 2,
+            "Shape": 83,
+            "SolidColor": 83,
+            "StateMachine": 1,
+            "StateMachineLayer": 1,
+            "StateTransition": 1,
+            "Stroke": 23
+          }
+        }
+      ],
+      "events": [],
+      "roots": {
+        "objects": 1,
+        "types": {
+          "Backboard": 1
+        }
+      }
+    },
+    "exported": true
+  },
+  {
+    "character": "leo",
+    "verify": {
+      "success": true,
+      "command": "verify",
+      "data": {
+        "riv": null,
+        "bytes": 0,
+        "buildMs": 106.1,
+        "problems": []
+      },
+      "errors": [],
+      "warnings": [],
+      "allowance": null,
+      "credits": null,
+      "workspace": null
+    },
+    "summary": {
+      "schema": 1,
+      "summary": true,
+      "problems": [],
+      "artboards": [
+        {
+          "name": "Character",
+          "objects": 1960,
+          "types": {
+            "AnimationState": 1,
+            "AnyState": 1,
+            "Artboard": 1,
+            "CubicDetachedVertex": 297,
+            "CubicEaseInterpolator": 167,
+            "Ellipse": 22,
+            "EntryState": 1,
+            "ExitState": 1,
+            "Fill": 64,
+            "KeyFrameDouble": 532,
+            "KeyedObject": 241,
+            "KeyedProperty": 301,
+            "LayoutComponentStyle": 1,
+            "LinearAnimation": 12,
+            "Node": 26,
+            "PointsPath": 75,
+            "Rectangle": 2,
+            "Shape": 92,
+            "SolidColor": 92,
+            "StateMachine": 1,
+            "StateMachineLayer": 1,
+            "StateTransition": 1,
+            "Stroke": 28
+          }
+        }
+      ],
+      "events": [],
+      "roots": {
+        "objects": 1,
+        "types": {
+          "Backboard": 1
+        }
+      }
+    },
+    "exported": true
+  },
+  {
+    "character": "maya",
+    "verify": {
+      "success": true,
+      "command": "verify",
+      "data": {
+        "riv": null,
+        "bytes": 0,
+        "buildMs": 100.5,
+        "problems": []
+      },
+      "errors": [],
+      "warnings": [],
+      "allowance": null,
+      "credits": null,
+      "workspace": null
+    },
+    "summary": {
+      "schema": 1,
+      "summary": true,
+      "problems": [],
+      "artboards": [
+        {
+          "name": "Character",
+          "objects": 1934,
+          "types": {
+            "AnimationState": 1,
+            "AnyState": 1,
+            "Artboard": 1,
+            "CubicDetachedVertex": 294,
+            "CubicEaseInterpolator": 167,
+            "Ellipse": 13,
+            "EntryState": 1,
+            "ExitState": 1,
+            "Fill": 52,
+            "KeyFrameDouble": 532,
+            "KeyedObject": 241,
+            "KeyedProperty": 301,
+            "LayoutComponentStyle": 1,
+            "LinearAnimation": 12,
+            "Node": 25,
+            "PointsPath": 77,
+            "Rectangle": 2,
+            "Shape": 87,
+            "SolidColor": 87,
+            "StateMachine": 1,
+            "StateMachineLayer": 1,
+            "StateTransition": 1,
+            "Stroke": 35
+          }
+        }
+      ],
+      "events": [],
+      "roots": {
+        "objects": 1,
+        "types": {
+          "Backboard": 1
+        }
+      }
+    },
+    "exported": true
+  },
+  {
+    "character": "sam",
+    "verify": {
+      "success": true,
+      "command": "verify",
+      "data": {
+        "riv": null,
+        "bytes": 0,
+        "buildMs": 85.2,
+        "problems": []
+      },
+      "errors": [],
+      "warnings": [],
+      "allowance": null,
+      "credits": null,
+      "workspace": null
+    },
+    "summary": {
+      "schema": 1,
+      "summary": true,
+      "problems": [],
+      "artboards": [
+        {
+          "name": "Character",
+          "objects": 1887,
+          "types": {
+            "AnimationState": 1,
+            "AnyState": 1,
+            "Artboard": 1,
+            "CubicDetachedVertex": 276,
+            "CubicEaseInterpolator": 167,
+            "Ellipse": 17,
+            "EntryState": 1,
+            "ExitState": 1,
+            "Fill": 56,
+            "KeyFrameDouble": 532,
+            "KeyedObject": 241,
+            "KeyedProperty": 301,
+            "LayoutComponentStyle": 1,
+            "LinearAnimation": 12,
+            "Node": 25,
+            "PointsPath": 65,
+            "Rectangle": 2,
+            "Shape": 80,
+            "SolidColor": 80,
+            "StateMachine": 1,
+            "StateMachineLayer": 1,
+            "StateTransition": 1,
+            "Stroke": 24
+          }
+        }
+      ],
+      "events": [],
+      "roots": {
+        "objects": 1,
+        "types": {
+          "Backboard": 1
+        }
+      }
+    },
+    "exported": true
+  },
+  {
+    "character": "nina",
+    "verify": {
+      "success": true,
+      "command": "verify",
+      "data": {
+        "riv": null,
+        "bytes": 0,
+        "buildMs": 85.6,
+        "problems": []
+      },
+      "errors": [],
+      "warnings": [],
+      "allowance": null,
+      "credits": null,
+      "workspace": null
+    },
+    "summary": {
+      "schema": 1,
+      "summary": true,
+      "problems": [],
+      "artboards": [
+        {
+          "name": "Character",
+          "objects": 1897,
+          "types": {
+            "AnimationState": 1,
+            "AnyState": 1,
+            "Artboard": 1,
+            "CubicDetachedVertex": 288,
+            "CubicEaseInterpolator": 167,
+            "Ellipse": 13,
+            "EntryState": 1,
+            "ExitState": 1,
+            "Fill": 54,
+            "KeyFrameDouble": 532,
+            "KeyedObject": 241,
+            "KeyedProperty": 301,
+            "LayoutComponentStyle": 1,
+            "LinearAnimation": 12,
+            "Node": 25,
+            "PointsPath": 70,
+            "Rectangle": 2,
+            "Shape": 79,
+            "SolidColor": 79,
+            "StateMachine": 1,
+            "StateMachineLayer": 1,
+            "StateTransition": 1,
+            "Stroke": 25
+          }
+        }
+      ],
+      "events": [],
+      "roots": {
+        "objects": 1,
+        "types": {
+          "Backboard": 1
+        }
+      }
+    },
+    "exported": true
+  }
+]

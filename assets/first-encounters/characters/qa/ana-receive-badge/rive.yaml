@@ -1,0 +1,4 @@
+name: ana-receive-badge
+main: Character
+output:
+  dir: build

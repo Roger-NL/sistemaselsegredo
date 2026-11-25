@@ -587,3 +587,12 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
 @media (max-height: 510px) {
   .fd-reaction .fd-reply-body { padding: 4px 11px 5px; }
 }
+
+.fd .fd-gloss-word { display: inline; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; line-height: inherit; cursor: pointer; }
+.fd .fd-gloss-word:hover, .fd .fd-gloss-word:focus-visible { text-decoration: underline dotted; }
+.fd-inline-listen { color: inherit; border: none; background: transparent; cursor: pointer; }
+.fd-word-definition { position: fixed; z-index: 50; bottom: max(4.5rem,env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: max-content; max-width: 90vw; padding: .6em .8em; display: flex; align-items: center; gap: 1em; color: white; background: #163c36; border-radius: .5rem; box-shadow: 0 2px 12px #0003; }
+.fd-word-definition button { color: inherit; background: transparent; border: none; cursor: pointer; }
+.fd .fd-inline-listen { display: inline-grid; place-items: center; border: 1px solid #8c998b; border-radius: 50%; background: #fff9ed; width: 26px; height: 26px; padding: 0; }
+.fd .fd-inline-listen span { display: contents; }
+.fd1-balloon .fd-inline-listen { position: absolute; right: 3%; bottom: 0; }

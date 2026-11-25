@@ -1,0 +1,4 @@
+name: maya-yes
+main: Character
+output:
+  dir: build

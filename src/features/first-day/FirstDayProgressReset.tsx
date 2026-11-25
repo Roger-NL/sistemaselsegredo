@@ -8,9 +8,10 @@ import "./first-day-progress-reset.css";
 
 const parts = [...new Map(pages.map(({ part, partTitle }) => [part, partTitle]))];
 
-export function FirstDayProgressReset({ dialogRef, onReset }: {
+export function FirstDayProgressReset({ dialogRef, onReset, onReplayTutorial }: {
   dialogRef: RefObject<HTMLDialogElement | null>;
   onReset: (target: FirstDayResetTarget) => void;
+  onReplayTutorial: () => void;
 }) {
   const [target, setTarget] = useState<FirstDayResetTarget | null>(null);
   const dismiss = () => dialogRef.current?.close();
@@ -33,7 +34,7 @@ export function FirstDayProgressReset({ dialogRef, onReset }: {
         </label>)}
         <label className="fd-reset-option fd-reset-option-all">
           <input type="radio" name="fd-reset-target" checked={target === "all"} onChange={() => setTarget("all")} />
-          <strong>Todas as partes</strong>
+          <span><strong>Todas as partes</strong><small>Inclui o mini tutorial</small></span>
         </label>
       </fieldset>
       <div className="fd-reset-actions">
@@ -41,5 +42,9 @@ export function FirstDayProgressReset({ dialogRef, onReset }: {
         <LessonButton type="submit" disabled={target === null}>Reiniciar</LessonButton>
       </div>
     </form>
+    <button type="button" className="fd-reset-tutorial" onClick={() => {
+      dismiss();
+      onReplayTutorial();
+    }}>Rever mini tutorial</button>
   </dialog>;
 }

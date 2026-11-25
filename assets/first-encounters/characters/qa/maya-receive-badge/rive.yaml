@@ -1,0 +1,4 @@
+name: maya-receive-badge
+main: Character
+output:
+  dir: build

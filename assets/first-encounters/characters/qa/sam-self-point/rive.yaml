@@ -1,0 +1,4 @@
+name: sam-self-point
+main: Character
+output:
+  dir: build

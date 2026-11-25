@@ -1,0 +1,4 @@
+name: nina-receive-badge
+main: Character
+output:
+  dir: build

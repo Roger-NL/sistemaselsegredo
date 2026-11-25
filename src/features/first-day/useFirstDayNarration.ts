@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { FIRST_DAY_AUDIO_RATE, firstDayVoiceUrl } from "./narration";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { firstDayVoiceRate, firstDayVoiceUrl } from "./narration";
 import type { FirstDayVoiceClip } from "./narration";
+
+import { takeCoverAudio } from "./cover-entry";
+import { createFirstDayProgressStore } from "./first-day-progress";
 
 export function useFirstDayNarration() {
   const audio = useRef<HTMLAudioElement | null>(null);
@@ -23,7 +26,6 @@ export function useFirstDayNarration() {
     stop();
     if (!clips.length || document.hidden) return;
     const player = audio.current ??= new Audio();
-    player.defaultPlaybackRate = FIRST_DAY_AUDIO_RATE;
     player.preservesPitch = true;
     const sequence = generation.current;
     function finish() {
@@ -36,20 +38,40 @@ export function useFirstDayNarration() {
       if (generation.current !== sequence) return;
       const clip = clips[index];
       if (!clip || document.hidden) { finish(); return; }
+      const rate = firstDayVoiceRate(clip);
+      player.defaultPlaybackRate = rate;
       player.src = firstDayVoiceUrl(clip);
-      player.playbackRate = FIRST_DAY_AUDIO_RATE;
+      player.playbackRate = rate;
       player.onended = () => {
         if (pauseMs && index + 1 < clips.length) window.setTimeout(() => next(index + 1), pauseMs);
         else next(index + 1);
       };
       player.onerror = finish;
       setPlaying(clip);
-      void player.play().catch(finish);
+      void player.play()?.catch(finish);
     }
     next(0);
   }
 
+  const playCover = useEffectEvent(() => play(["cover"]));
+
   useEffect(() => {
+    let mounted = true;
+    queueMicrotask(() => {
+      if (!mounted) return;
+      const player = takeCoverAudio();
+      const entry = createFirstDayProgressStore().getSnapshot();
+      if (entry.position !== 0 || !entry.sound || document.hidden) { player?.pause(); return; }
+      if (player) {
+        audio.current = player;
+        if (!player.ended && !player.paused) {
+          setPlaying("cover");
+          player.onended = player.onerror = () => setPlaying(null);
+        }
+      } else {
+        playCover();
+      }
+    });
     function cancelOnHide() {
       if (!document.hidden) return;
       generation.current += 1;
@@ -58,6 +80,7 @@ export function useFirstDayNarration() {
     }
     document.addEventListener("visibilitychange", cancelOnHide);
     return () => {
+      mounted = false;
       document.removeEventListener("visibilitychange", cancelOnHide);
       generation.current += 1;
       if (audio.current) {

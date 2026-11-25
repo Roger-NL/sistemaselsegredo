@@ -8,6 +8,7 @@ export type ChallengeAttempt = {
 
 type FirstDayProgress = {
   position: number;
+  tutorialSeen: boolean;
   counts: Record<string, number>;
   attempts: Record<string, ChallengeAttempt>;
   sound: boolean;
@@ -18,7 +19,7 @@ export type FirstDayResetTarget = FirstDayPage["part"] | "all";
 
 const storageKey = "basedspeak:first-day:v1";
 const initialProgress: FirstDayProgress = {
-  position: -1, counts: {}, attempts: {}, sound: false, readingLanguage: "en",
+  position: 0, tutorialSeen: false, counts: {}, attempts: {}, sound: true, readingLanguage: "en",
 };
 
 function readObject(value: unknown): Record<string, unknown> {
@@ -62,16 +63,19 @@ function readProgress(): FirstDayProgress {
       }
     }
 
-    const position = saved.pageId === undefined ? -1 : pages.findIndex(page => page.id === saved.pageId) + 1;
+    const position = saved.pageId === undefined ? 0 : pages.findIndex(page => page.id === saved.pageId) + 1;
     const readingLanguage = saved.readingLanguage === "pt-BR" ? "pt-BR" : initialProgress.readingLanguage;
-    return { position, counts, attempts, sound: saved.sound === true, readingLanguage };
+    // Older saves recorded the lesson but not the prologue.
+    const tutorialSeen = typeof saved.tutorialSeen === "boolean" ? saved.tutorialSeen
+      : position > 0 || Object.keys(counts).length > 0 || Object.keys(attempts).length > 0;
+    return { position, tutorialSeen, counts, attempts, sound: saved.sound !== false, readingLanguage };
   } catch {
     return initialProgress;
   }
 }
 
 export function resetFirstDayProgress(progress: FirstDayProgress, target: FirstDayResetTarget): FirstDayProgress {
-  if (target === "all") return { ...progress, position: 0, counts: {}, attempts: {} };
+  if (target === "all") return { ...progress, position: 0, tutorialSeen: false, counts: {}, attempts: {} };
 
   const counts = { ...progress.counts };
   const attempts = { ...progress.attempts };

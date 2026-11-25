@@ -1,0 +1,4 @@
+name: ana-thinking
+main: Character
+output:
+  dir: build

@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "summary": true,
+  "problems": [],
+  "artboards": [
+    {"name": "Character", "objects": 1960, "types": {"AnimationState": 1, "AnyState": 1, "Artboard": 1, "CubicDetachedVertex": 297, "CubicEaseInterpolator": 167, "Ellipse": 22, "EntryState": 1, "ExitState": 1, "Fill": 64, "KeyFrameDouble": 532, "KeyedObject": 241, "KeyedProperty": 301, "LayoutComponentStyle": 1, "LinearAnimation": 12, "Node": 26, "PointsPath": 75, "Rectangle": 2, "Shape": 92, "SolidColor": 92, "StateMachine": 1, "StateMachineLayer": 1, "StateTransition": 1, "Stroke": 28}}
+  ],
+  "events": [],
+  "roots": {"objects": 1, "types": {"Backboard": 1}}
+}

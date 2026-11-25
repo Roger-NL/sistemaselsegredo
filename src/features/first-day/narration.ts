@@ -82,10 +82,19 @@ export const wordVoices = {
 
 export type FirstDayWord = keyof typeof wordVoices;
 type WordClip = (typeof wordVoices)[FirstDayWord];
-export type FirstDayVoiceClip = NarrationClip | DialogueClip | WordClip;
+export type FirstDayVoiceClip = NarrationClip | DialogueClip | WordClip
+  | "tutorial-lookup" | "tutorial-place" | "tutorial-switch" | "tutorial-arrival"
+  | "tutorial-door-en" | "tutorial-door-pt" | "tutorial-yes" | "tutorial-there";
+
+export function firstDayVoiceRate(clip: FirstDayVoiceClip) {
+  if (clip.startsWith("word-") || clip === "tutorial-yes" || clip === "tutorial-there") return 0.85;
+  if (clip.startsWith("tutorial-")) return 1;
+  return FIRST_DAY_AUDIO_RATE;
+}
 const voiceLines: Partial<Record<FirstDayVoiceClip, { text: string; bundled?: boolean }>> = { ...narration, ...dialogue };
 
 export function firstDayVoiceUrl(clip: FirstDayVoiceClip) {
+  if (clip.startsWith("tutorial-")) return `/first-day-part-one/audio/${clip}.mp3`;
   if (clip.startsWith("word-") || voiceLines[clip]?.bundled) return `/first-day-part-one/audio/${clip}.mp3`;
   return `/first-day/${clip in dialogue ? "dialogue" : "narration"}/${clip}.mp3`;
 }

@@ -14,8 +14,8 @@ function Reader() {
   const { selected, cancel } = useLessonDrag(); reads++;
   return createElement("div", null, createElement("output", null, selected?.id ?? "none"), createElement("button", { onClick: cancel, id: "cancel" }, "Cancelar"));
 }
-function ui(options: { source?: boolean; nested?: boolean; disabled?: boolean; targetDisabled?: boolean; accept?: DragItem["kind"][]; callback?: typeof onDrop } = {}) {
-  return createElement(LessonDragProvider, { onDrop: options.callback ?? onDrop }, [
+function ui(options: { source?: boolean; animatePlacement?: boolean; nested?: boolean; disabled?: boolean; targetDisabled?: boolean; accept?: DragItem["kind"][]; callback?: typeof onDrop } = {}) {
+  return createElement(LessonDragProvider, { onDrop: options.callback ?? onDrop, animatePlacement: options.animatePlacement }, [
     options.source === false ? null : createElement(DragSource, { key: "source", item, disabled: options.disabled }, "Hello!"),
     createElement(DropTarget, { key: "target", id: "person:ana", label: "Ana", disabled: options.targetDisabled, accept: options.accept ?? ["phrase"] }, options.nested ? createElement("button", { id: "person", onClick: nestedClick }, "Ana") : "Ana"),
     createElement(Reader, { key: "reader" }),
@@ -57,6 +57,29 @@ describe("lesson direct manipulation", () => {
     await click(target());
     expect(onDrop).toHaveBeenCalledExactlyOnceWith(item, "person:ana"); expect(selected()).toBe("none");
     await click(target()); expect(onDrop).toHaveBeenCalledTimes(1);
+  });
+
+  it("settles a tutorial word exactly once and clears the visual when motion ends", async () => {
+    const original = HTMLElement.prototype.animate;
+    const arrival = { onfinish: null as (() => void) | null };
+    const animate = vi.fn(() => arrival);
+    Object.defineProperty(HTMLElement.prototype, "animate", { configurable: true, writable: true, value: animate });
+    try {
+      await render(ui({ animatePlacement: true })); geometry();
+      await click(source()); await click(target());
+      expect(animate).not.toHaveBeenCalled(); // Reduced motion.
+      window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+      await click(source()); await click(target());
+      expect(animate).toHaveBeenCalledTimes(1);
+      expect(document.querySelector(".lesson-drag-ghost")).not.toBeNull();
+      expect(onDrop).toHaveBeenCalledTimes(2);
+      arrival.onfinish!();
+      expect(document.querySelector(".lesson-drag-ghost")).toBeNull();
+      expect(onDrop).toHaveBeenCalledTimes(2);
+    } finally {
+      if (original) HTMLElement.prototype.animate = original;
+      else Reflect.deleteProperty(HTMLElement.prototype, "animate");
+    }
   });
 
   it("consumes touch travel on a draggable while leaving normal page and text-field gestures available", async () => {

@@ -1,0 +1,4 @@
+name: maya-idle
+main: Character
+output:
+  dir: build

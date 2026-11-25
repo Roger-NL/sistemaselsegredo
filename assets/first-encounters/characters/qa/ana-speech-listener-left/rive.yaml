@@ -1,0 +1,4 @@
+name: ana-speech-listener-left
+main: Character
+output:
+  dir: build
