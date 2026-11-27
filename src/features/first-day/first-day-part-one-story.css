@@ -74,6 +74,29 @@
 .fd1-translation {
   font: 500 var(--fd1-translation-size) / 1.12 var(--comic-body);
 }
+.fd[data-fd-comic] .fd1-balloon[data-balloon] .fd1-bubble-body {
+  height: auto;
+  gap: 3px;
+  padding: 8px 10px 9px;
+  border-radius: 14px;
+}
+.fd[data-fd-comic] .fd1-balloon[data-balloon="exercise"] .fd1-bubble-body {
+  min-height: var(--fd1-balloon-min-height, 0px);
+}
+.fd[data-fd-comic] .fd1-balloon[data-balloon="exercise"] .fd1-slots { line-height: 1.12; }
+.fd[data-fd-comic] .fd1-balloon[data-balloon="dialogue"] small {
+  font: 700 clamp(11px, var(--fd1-translation-size), 13px)/1.15 var(--comic-body);
+}
+.fd[data-fd-comic] .fd1-balloon[data-balloon="dialogue"] .fd1-spoken-line {
+  font: 750 clamp(16px, var(--fd1-speech-size), 24px)/1.13 var(--comic-body);
+  letter-spacing: -.015em;
+  text-wrap: balance;
+}
+.fd[data-fd-comic] .fd1-balloon[data-balloon] .fd1-translation {
+  color: #485c52;
+  font: 500 clamp(12px, var(--fd1-translation-size), 16px)/1.17 var(--comic-body);
+  text-wrap: pretty;
+}
 .fd1-balloon .fd-speak-icon {
   top: 3%;
   right: 8%;

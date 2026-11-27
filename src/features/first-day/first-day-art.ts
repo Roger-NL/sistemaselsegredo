@@ -1,6 +1,14 @@
 import { art, coverSources, pages, partOnePortraitMedia, storyImage, type FirstDayPage } from "./content";
 
 function sceneArt(page: FirstDayPage, portrait: boolean) {
+  if (page.part !== 1 && page.kind !== "Em preparação") {
+    switch (page.kind) {
+      case "Ação": return [page.before, page.after].map(art => storyImage(art, portrait).src);
+      case "Tirinha": return page.panels.map(panel => storyImage(panel.art, portrait).src);
+      case "Explicação": return page.examples.map(example => storyImage(example.art, portrait).src);
+      case "Desafio": return page.rounds.map(round => storyImage(round.art, portrait).src);
+    }
+  }
   switch (page.kind) {
     case "Ação": {
       const image = storyImage(page, portrait);
@@ -118,8 +126,12 @@ export function createFirstDayArtCache() {
         cancelIdle?.();
       };
     },
-    prepare(position: number) {
-      const targets = firstDayArtFor(position).map(src => load(src, "high"));
+    prepare(position: number, frame?: 0 | 1) {
+      const sources = firstDayArtFor(position);
+      // An action or challenge shows one frame at a time. Its later reveal can load in the background.
+      const visible = frame === undefined ? sources : sources.slice(frame, frame + 1);
+      const targets = visible.map(src => load(src, "high"));
+      if (frame === 0 && sources[1]) load(sources[1], "low");
       return targets.every(target => target.ready) ? null : Promise.all(targets.map(target => target.loaded));
     },
   };

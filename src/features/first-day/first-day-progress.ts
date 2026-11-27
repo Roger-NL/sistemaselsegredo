@@ -4,10 +4,13 @@ export type ChallengeAttempt = {
   placed: readonly number[];
   result?: "correct" | "incorrect";
   translated?: boolean;
+  round?: 0 | 1;
 };
 
 type FirstDayProgress = {
   position: number;
+  chapterOpening?: ComicChapter;
+  lessonFinished?: true;
   tutorialSeen: boolean;
   counts: Record<string, number>;
   attempts: Record<string, ChallengeAttempt>;
@@ -16,6 +19,12 @@ type FirstDayProgress = {
 };
 
 export type FirstDayResetTarget = FirstDayPage["part"] | "all";
+export type ComicChapter = Exclude<FirstDayPage["part"], 1>;
+
+export function chapterOpeningAt(position: number): ComicChapter | undefined {
+  const page = pages[position - 1];
+  if (page && page.part !== 1 && page.kind !== "Em preparação" && pages[position - 2]?.part !== page.part) return page.part;
+}
 
 const storageKey = "basedspeak:first-day:v1";
 const initialProgress: FirstDayProgress = {
@@ -49,17 +58,23 @@ function readProgress(): FirstDayProgress {
       }
       if (page.kind === "Desafio") {
         const attempt = readObject(savedAttempts[page.id]);
+        const round = attempt.round === 1 ? 1 : 0;
+        const task = page.part === 1 ? undefined : page.rounds[round];
+        const bank = page.part === 1 ? page.words : page.rounds[round].bank;
+        const count = task ? task.solution.length : bank.length;
         const savedWords: unknown = attempt.placed;
-        const placed = Array.isArray(savedWords) && savedWords.length <= page.words.length
-          && savedWords.every(word => isIntegerBetween(word, 0, page.words.length - 1))
+        const placed = Array.isArray(savedWords) && savedWords.length <= count
+          && savedWords.every(word => isIntegerBetween(word, 0, bank.length - 1))
           && new Set(savedWords).size === savedWords.length ? savedWords as number[] : [];
         const translated = attempt.translated === true;
-        const checked = placed.length === page.words.length
+        const checked = placed.length === count
           && (attempt.result === "correct" || attempt.result === "incorrect");
         const result = checked
-          ? (placed.every((index, slot) => page.words[index] === page.words[slot]) ? "correct" : "incorrect")
+          ? (placed.every((index, slot) => bank[index] === bank[task?.solution[slot] ?? slot]) ? "correct" : "incorrect")
           : undefined;
-        if (placed.length || translated) attempts[page.id] = { placed, result, translated };
+        if (placed.length || translated || (task && round === 1)) {
+          attempts[page.id] = { placed, result, translated, ...(task && { round }) };
+        }
       }
     }
 
@@ -68,14 +83,24 @@ function readProgress(): FirstDayProgress {
     // Older saves recorded the lesson but not the prologue.
     const tutorialSeen = typeof saved.tutorialSeen === "boolean" ? saved.tutorialSeen
       : position > 0 || Object.keys(counts).length > 0 || Object.keys(attempts).length > 0;
-    return { position, tutorialSeen, counts, attempts, sound: saved.sound !== false, readingLanguage };
+    const opening = chapterOpeningAt(position);
+    const savedOpening = saved.chapterOpening ?? (saved.partTwoOpening === true ? 2 : undefined);
+    const currentPage = pages[position - 1];
+    const finalAttempt = attempts[currentPage?.id];
+    const lessonFinished = currentPage?.part === 4 && position === pages.length && saved.lessonFinished === true
+      && finalAttempt?.round === 1 && finalAttempt.result === "correct";
+    return {
+      position, tutorialSeen, counts, attempts, sound: saved.sound !== false, readingLanguage,
+      ...(opening !== undefined && opening === savedOpening && { chapterOpening: opening }),
+      ...(lessonFinished && { lessonFinished: true as const }),
+    };
   } catch {
     return initialProgress;
   }
 }
 
 export function resetFirstDayProgress(progress: FirstDayProgress, target: FirstDayResetTarget): FirstDayProgress {
-  if (target === "all") return { ...progress, position: 0, tutorialSeen: false, counts: {}, attempts: {} };
+  if (target === "all") return { ...initialProgress, readingLanguage: progress.readingLanguage, sound: progress.sound };
 
   const counts = { ...progress.counts };
   const attempts = { ...progress.attempts };
@@ -88,7 +113,9 @@ export function resetFirstDayProgress(progress: FirstDayProgress, target: FirstD
   const position = pages[progress.position - 1]?.part === target
     ? pages.findIndex(page => page.part === target) + 1
     : progress.position;
-  return { ...progress, position, counts, attempts };
+  return { ...progress, position, counts, attempts,
+    chapterOpening: target === progress.chapterOpening ? undefined : progress.chapterOpening,
+    lessonFinished: target === 4 ? undefined : progress.lessonFinished };
 }
 
 export function createFirstDayProgressStore() {

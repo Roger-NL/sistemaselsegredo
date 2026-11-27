@@ -1,0 +1,468 @@
+/* Later chapters use the same reader, artwork frame and paper controls as Part 1. */
+.fd[data-fd-comic] .fd1-story .fd2-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(5px, .6vw, 10px);
+  width: auto;
+  min-width: 0;
+}
+.fd[data-fd-comic] .fd2-tray .fd1-word {
+  flex: 1 0 auto;
+  width: auto;
+  min-width: 44px;
+  min-height: 44px;
+  padding-inline: .48em;
+}
+.fd[data-fd-comic] .fd2-assembly .fd1-slots b { font-weight: 700; }
+.fd2-guided-context {
+  display: grid;
+  gap: 4px;
+  color: #294d42;
+  font: 600 clamp(13px, 1.15vw, 19px)/1.16 var(--comic-body);
+}
+.fd2-guided-context .fd1-guidance { padding: 0; border: 0; font-size: 1em; }
+.fd2-choice-preview { pointer-events: none; }
+.fd2-completed-line {
+  display: grid;
+  align-content: center;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 2px .7em;
+  font: 600 clamp(17px, 1.55vw, 26px)/1.22 var(--comic-body);
+}
+.fd2-completed-line > strong {
+  grid-area: 1 / 1 / 3 / 2;
+  align-self: center;
+  color: var(--fd1-teal);
+  font-size: .84em;
+}
+.fd2-completed-line .fd1-spoken-line { font-weight: 650; }
+.fd2-story .fd2-reply {
+  align-items: center;
+  min-height: var(--fd1-strip-height);
+}
+.fd2-story .fd2-reply-balloon { gap: .15em; }
+.fd2-reply-balloon > small {
+  color: #396958;
+  font: 700 max(12px, calc(var(--fd1-translation-size) * .78))/1 var(--comic-body);
+}
+.fd[data-fd-comic] .fd2-study .fd1-study-art img { aspect-ratio: 16 / 9; object-position: center; }
+.fd[data-fd-comic] .fd2-study .fd1-study-caption { grid-template-columns: minmax(0, 1fr); }
+.fd2-formula .fd1-rule-piece[data-tone="context"] { background: #f3ecda; }
+.fd2-formula .fd1-rule-piece { flex-direction: column; gap: 2px; text-align: center; }
+.fd2-formula .fd1-rule-piece b { font-size: .87em; }
+.fd2-completed-line > .fd1-spoken-line, .fd2-completed-line > .fd1-translation { grid-column: 2; }
+.fd2-completed-line > .fd1-translation { color: #48574c; font: 500 .88em/1.14 var(--comic-body); }
+.fd[data-fd-comic] .fd2-rule-examples .fd1-study-caption {
+  position: static;
+  width: 100%;
+  max-width: none;
+  padding: .5em .65em .12em;
+  border: 0;
+  border-top: 1.5px solid var(--study-ink);
+  border-radius: 0;
+}
+.fd2-rule-note {
+  margin: 0;
+  padding: .3em .85em .8em;
+  color: #34453c;
+  font: 500 clamp(15px, 1.35vw, 23px)/1.25 var(--comic-body);
+}
+@media (min-width: 960px) {
+  .fd[data-fd-study][data-fd-comic] .fd-workspace > .fd2-rule {
+    grid-template-columns: minmax(145px, .46fr) minmax(0, 2fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: clamp(10px, 1.3vw, 20px);
+    height: 100%;
+    padding: 0 0 4px;
+  }
+  .fd[data-fd-comic] .fd2-rule .fd2-formula {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    align-items: stretch;
+    gap: clamp(5px, .95dvh, 10px);
+    padding: 8px clamp(7px, 1.2vw, 18px);
+  }
+  .fd[data-fd-comic] .fd2-rule .fd1-rule-plus { justify-self: center; line-height: .8; }
+  .fd[data-fd-comic] .fd2-rule-examples {
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    row-gap: 0;
+  }
+  .fd[data-fd-comic] .fd2-rule-examples .fd1-study-panel {
+    display: grid;
+    grid-row: 1 / span 3;
+    grid-template-rows: subgrid;
+  }
+  .fd[data-fd-comic] .fd2-rule-examples .fd1-study-art { min-height: 0; }
+  .fd[data-fd-comic] .fd2-rule-examples .fd1-study-art img { height: 100%; aspect-ratio: auto; object-position: center 42%; }
+}
+.fd2-challenge .fd2-challenge-controls {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-content: center;
+  align-items: center;
+  gap: 7px clamp(8px,1vw,16px);
+}
+.fd2-instruction {
+  display: grid;
+  gap: 3px;
+  grid-area: 1 / 1;
+  font: 500 clamp(15px, 1.3vw, 21px)/1.23 var(--comic-body);
+}
+.fd2-instruction strong { color: #376756; font-size: .85em; }
+.fd2-instruction p { margin: 0; }
+.fd2-question { font-weight: 700; text-wrap: pretty; }
+.fd2-instruction-help { color: #48574c; font-size: .88em; }
+.fd2-instruction-help[data-result="incorrect"] { color: #883b29; }
+.fd[data-first-day-page="meet-leo-5"] .fd2-assembly .fd1-slots { width: 100%; }
+.fd[data-first-day-page="meet-leo-5"] .fd2-assembly .fd1-slots i { width: min(18%, 22px); }
+.fd2-challenge .fd2-tray { grid-area: 2 / 1 / 3 / 3; }
+.fd2-challenge .fd2-check-actions { grid-area: 1 / 2; }
+.fd[data-fd-comic] .fd2-challenge .fd2-check-actions button {
+  min-height: 36px;
+  height: auto;
+  padding: .3em .65em;
+  font-size: clamp(14px, 1.15vw, 21px);
+}
+.fd2-solved > strong { font-size: clamp(14px, 1.22vw, 20px); color: #386650; }
+.fd[data-fd-comic] .fd2-challenge .fd2-tray .fd1-word {
+  min-width: 38px;
+  height: 44px;
+  font-size: clamp(16px, 1.45vw, 25px);
+}
+.fd[data-fd-comic] .fd-word-definition { bottom: auto; top: max(.42rem, env(safe-area-inset-top)); }
+.fd[data-fd-comic] .fd1-story .fd1-guided-controls .fd2-tray { flex: 1 1 0; }
+@media (max-width:959px) and (orientation:portrait) {
+  .fd[data-fd-comic] .fd1-caption {
+    margin-block: 6px 8px;
+    padding: 7px 8px 7px 10px;
+    border-inline-start-width: 3px;
+  }
+  .fd[data-fd-comic] .fd1-caption p {
+    color: #33473d;
+    font-size: clamp(14px, 3.65vw, 17px);
+    font-weight: 500;
+    line-height: 1.3;
+    text-wrap: pretty;
+  }
+  .fd[data-fd-comic] .fd1-headline .fd1-language {
+    padding-inline: 6px;
+    background: #f5f6ee;
+  }
+  .fd[data-fd-comic] .fd2-study .fd1-study-art img { aspect-ratio: 1; object-position: center 45%; }
+  .fd[data-fd-comic] .fd1-page:has(.fd2-study.fd1-strip) {
+    grid-template-rows: auto minmax(min-content, 1fr) auto;
+  }
+  .fd[data-fd-comic] .fd1-page:has(.fd2-study.fd1-strip) > .fd-workspace { display: grid; align-items: stretch; }
+  .fd[data-fd-comic] .fd-workspace > .fd2-study.fd1-strip {
+    align-self: stretch;
+    grid-template-rows: none;
+    grid-auto-rows: minmax(min-content, 1fr);
+  }
+  .fd[data-fd-comic] .fd2-study.fd1-strip .fd1-study-panel {
+    display: grid;
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+    min-height: clamp(116px, 34vw, 176px);
+  }
+  .fd[data-fd-comic] .fd2-study.fd1-strip .fd1-study-art {
+    position: relative;
+    border-inline-end: 2px solid var(--study-ink);
+  }
+  .fd[data-fd-comic] .fd2-study.fd1-strip .fd1-study-art img {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    aspect-ratio: auto;
+    object-position: var(--fd2-strip-image-focus, center 49%);
+  }
+  .fd[data-first-day-page="meet-leo-3"] .fd1-study-panel:first-child { --fd2-strip-image-focus: center 39%; }
+  .fd[data-fd-comic] .fd2-study.fd1-strip figcaption {
+    display: grid;
+    align-content: center;
+    gap: 5px;
+    min-width: 0;
+    padding: 8px clamp(8px, 2.55vw, 15px);
+  }
+  .fd[data-fd-comic] .fd2-study.fd1-strip .fd1-study-label {
+    position: static;
+    padding: 0;
+    border: 0;
+    color: #35675a;
+    background: transparent;
+    font-size: clamp(13px, 3.75vw, 17px);
+  }
+  .fd[data-fd-comic] .fd2-study.fd1-strip .fd1-study-caption { padding: 0; border: 0; background: transparent; }
+  .fd[data-fd-comic] .fd2-study.fd1-strip .fd1-study-line { font-size: clamp(17px, 4.7vw, 22px); }
+  .fd[data-fd-comic] .fd2-study.fd1-strip .fd1-study-translation { font-size: clamp(14px, 3.8vw, 18px); }
+  .fd2-story .fd2-reply { min-height: 0; padding-block: 7px; }
+  .fd2-completed-line { gap: 2px .55em; font-size: clamp(16px, 4.18vw, 20px); }
+  .fd[data-fd-comic] .fd2-formula {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    column-gap: 4px;
+    row-gap: 6px;
+  }
+  .fd2-formula .fd1-rule-piece { flex: 1 1 0; min-width: 0; align-self: stretch; padding: 5px 3px; }
+  .fd2-formula .fd1-rule-piece > b { font-size: clamp(15px, 4.35vw, 23px); }
+  .fd2-formula .fd1-rule-piece > span { font-size: clamp(12px, 3.25vw, 16px); }
+  .fd2-formula .fd1-rule-plus { font-size: 13px; }
+  .fd2-rule-note { font-size: clamp(15px, 3.88vw, 19px); }
+  .fd[data-fd-comic] .fd2-challenge .fd2-challenge-controls {
+    grid-template-columns: minmax(0,1fr);
+    gap: 6px;
+    padding: 7px 8px;
+  }
+  .fd2-challenge .fd2-instruction { grid-area: auto; font-size: clamp(15px, 3.8vw, 17px); }
+  .fd2-challenge .fd2-tray { grid-area: auto; }
+  .fd2-challenge .fd2-check-actions { grid-area: auto; justify-content: end; gap: 6px; }
+  .fd[data-fd-comic] .fd2-challenge .fd2-tray .fd1-word { min-width: 14%; padding-inline: 4px; }
+  .fd[data-first-day-page="meet-leo-5"] .fd2-challenge .fd2-tray {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .fd[data-fd-comic] .fd2-challenge .fd2-check-actions button { min-height: 36px; padding: .3em .75em; }
+  .fd2-solved { flex-wrap: wrap; gap: 4px; justify-content: space-between; }
+}
+@media (max-width:959px) and (orientation:portrait) and (max-height:700px) {
+  html body .lo-app.fd[data-lesson-theme][data-fd-edition][data-fd-comic]:has(.fd2-story) {
+    --fd1-header-height: 48px;
+  }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-headline:has(.fd1-listen button) { padding-block: 4px 3px; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-headline:has(.fd1-listen button) h1 { font-size: clamp(26px, 7.6vw, 35px); }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-caption { margin-block: 4px 6px; padding-block: 5px; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-page > .fd-workspace { margin-block-end: 6px; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-page > .fd1-nav { padding-block: 6px max(7px, env(safe-area-inset-bottom, 0px)); }
+  .fd[data-fd-comic] .fd2-story { gap: 5px; }
+  .fd[data-fd-comic] .fd2-story > .fd1-story-strip { gap: 5px; padding: 6px 7px; }
+}
+@media (max-width:959px) and (orientation:portrait) and (max-height:700px), (orientation:landscape) and (max-height:540px) {
+  .fd[data-fd-comic] .fd2-challenge .fd2-instruction { display: block; font-size: 14px; }
+  .fd[data-fd-comic] .fd2-instruction .fd2-question { display: inline; margin-inline-start: .45em; }
+  .fd[data-fd-comic] .fd2-instruction .fd2-instruction-help { margin-block-start: .18em; }
+}
+html body .lo-app.fd[data-fd-comic] .fd1-nav > button:disabled .br-button-face {
+  background: #e3e1d5;
+  color: #657066;
+  border-color: #a6ad9f;
+  box-shadow: none;
+}
+@media (max-width:540px) and (orientation:portrait) {
+  .fd[data-fd-comic] .fd2-formula {
+    display: grid;
+    grid-template-columns: auto minmax(0,1fr) auto minmax(0,1fr);
+    gap: 8px 5px;
+  }
+  .fd2-formula > :first-child { grid-column: 1 / 3; }
+  .fd2-formula .fd1-rule-piece { font-size: 20px; padding: 5px 6px; }
+  .fd2-formula .fd1-rule-piece > b { font-size: 19px; }
+  .fd2-formula .fd1-rule-piece > span { font-size: 14px; }
+
+  .fd[data-first-day-page="meet-leo-4"] .fd2-formula {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+    column-gap: clamp(3px, 1vw, 6px);
+  }
+  .fd[data-first-day-page="meet-leo-4"] .fd2-formula > :first-child { grid-column: auto; }
+  .fd[data-first-day-page="meet-leo-4"] .fd1-rule-piece { justify-content: flex-start; padding: 6px 4px 7px; }
+  .fd[data-first-day-page="meet-leo-4"] .fd1-rule-piece > b {
+    font-size: clamp(15px, 4.25vw, 21px);
+    white-space: nowrap;
+  }
+  .fd[data-first-day-page="meet-leo-4"] .fd1-rule-piece > span {
+    font-size: clamp(12px, 3.4vw, 15px);
+    text-wrap: balance;
+  }
+}
+@media (max-width:959px) and (orientation:portrait) {
+  .fd[data-first-day-page="the-comic-4"] .fd2-formula {
+    display: grid;
+    grid-template-columns: minmax(0, .88fr) auto minmax(0, .88fr) auto minmax(0, 1.24fr) auto minmax(0, 1.12fr);
+    column-gap: clamp(3px, 1vw, 7px);
+  }
+  .fd[data-first-day-page="the-comic-4"] .fd2-formula > :first-child { grid-column: auto; }
+  .fd[data-first-day-page="the-comic-4"] .fd2-formula .fd1-rule-piece { justify-content: flex-start; padding: 6px 2px 7px; }
+  .fd[data-first-day-page="the-comic-4"] .fd2-formula .fd1-rule-piece > b { font-size: clamp(14px, 4.15vw, 21px); white-space: nowrap; }
+  .fd[data-first-day-page="the-comic-4"] .fd2-formula .fd1-rule-piece > span {
+    font-size: clamp(11px, 3.2vw, 15px);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  .fd[data-first-day-page="the-comic-4"] .fd2-formula .fd1-rule-piece > span span { font: inherit; }
+}
+/* The captions sit above the art so even the close-up of Ana stays unobstructed. */
+@media (min-width:960px), (orientation:landscape) {
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-page {
+    grid-template-rows: auto auto minmax(0,1fr);
+  }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-heading {
+    grid-area:2 / 1;
+    display:flex;
+    align-items:center;
+    align-self:stretch;
+    justify-self:stretch;
+    gap:clamp(16px,2.3vw,38px);
+    width:auto;
+    margin:0;
+    padding:clamp(7px,1.5dvh,17px) var(--fd1-frame-gutter);
+    border:0;
+    border-bottom:1px solid #abae9d;
+    border-radius:0;
+    background:#fffaf0;
+    box-shadow:none;
+  }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-headline { flex:0 1 auto; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-heading h1 {
+    font-size:clamp(24px,min(2.72vw, 5.25dvh),48px);
+    white-space:nowrap;
+  }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-caption {
+    flex:1; min-width:0; margin:0; padding:0 0 0 clamp(12px,1.9vw,31px);
+    border-top:0; border-left:1px solid #c4c2af;
+  }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-caption p { font-size:clamp(15px,1.28vw,23px); }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-page > .fd-workspace { grid-area:3 / 1; }
+  html body .lo-app.fd[data-fd-edition][data-fd-comic][data-fd-challenge] {
+    --fd1-next-width:clamp(166px,13.6vw,220px);
+    --fd1-strip-height:clamp(116px, 9.4vw, 160px);
+  }
+  .fd[data-fd-comic] .fd2-story {
+    grid-template-rows: minmax(0,1fr) auto;
+    padding: min(1.25dvh,12px) var(--fd1-strip-inset) var(--fd1-strip-gap);
+    gap: min(1.25dvh,12px);
+  }
+  .fd[data-fd-comic] .fd2-story > .fd1-scene {
+    justify-self:center;
+    width:auto;
+    max-width:100%;
+    height:100%;
+    aspect-ratio:16 / 9;
+    border:2px solid var(--fd1-ink);
+    border-radius:5px;
+    box-shadow:0 2px 0 #28372d;
+  }
+  .fd[data-fd-comic] .fd2-story > .fd1-story-strip {
+    position:static;
+    width:auto;
+    margin:0;
+    border:2px solid var(--fd1-ink);
+    border-radius:9px;
+    box-shadow:0 2px 0 #28372d;
+  }
+}
+@media (orientation:landscape) and (max-width:959px) {
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-page {
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+  }
+  .fd[data-fd-comic] .fd2-story { padding-bottom: 0; }
+  .fd[data-fd-comic] .fd2-story > .fd1-story-strip { padding-inline-end: var(--fd1-nav-pad); }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-nav {
+    grid-area: 4 / 1;
+    position: static;
+    justify-self: end;
+    margin: 8px var(--fd1-strip-inset) var(--fd1-strip-gap);
+    padding-left: 0;
+    border: 0;
+  }
+  .fd[data-fd-comic] .fd1-balloon .fd1-slots {
+    font-size: max(14px, calc(var(--fd1-speech-size) * .68));
+  }
+  .fd[data-fd-comic] .fd1-balloon .fd1-spoken-line {
+    font-size: max(18px, var(--fd1-speech-size));
+  }
+  .fd[data-fd-comic] .fd1-balloon .fd1-translation {
+    font-size: max(12px, var(--fd1-translation-size));
+  }
+}
+
+@media (orientation:landscape) and (max-height:540px) {
+  html body .lo-app.fd[data-fd-edition][data-fd-comic]:has(.fd2-story) {
+    padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+  }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-page {
+    position: static;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-progress {
+    position: absolute;
+    inset: env(safe-area-inset-top, 0px) calc(var(--fd1-frame-gutter) + 52px + env(safe-area-inset-right, 0px)) auto auto;
+    grid-template-columns: auto clamp(24px, 5vw, 64px) auto;
+    align-items: center;
+    height: var(--fd1-header-height);
+    padding: 0;
+    background: none;
+    border: 0;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-progress progress { grid-area: 1 / 2; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-progress > span:nth-child(2) { grid-area: 1 / 3; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-progress:has(> .fd1-listen button) {
+    grid-template-columns: auto clamp(24px, 5vw, 64px) auto auto;
+  }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-progress > .fd1-listen { grid-area: 1 / 4; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-heading { grid-area: 1 / 1; gap: 12px; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-headline { max-width: 38%; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-heading h1 { font-size: clamp(20px, 3.4vw, 30px); white-space: normal; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-caption { padding-inline-start: 10px; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-caption p { font-size: clamp(13px, 2.1vw, 16px); }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-page > .fd-workspace { grid-area: 2 / 1; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-page > .fd1-nav {
+    position: static;
+    grid-area: 3 / 1;
+    justify-self: stretch;
+    justify-content: end;
+    margin: 0;
+    padding: 5px var(--fd1-strip-inset) max(7px, env(safe-area-inset-bottom, 0px));
+    background: rgb(255 252 245 / 88%);
+    border: 0;
+    border-top: 1px solid #a6a99c;
+  }
+  .fd[data-fd-comic] .fd2-story {
+    grid-template: minmax(0, 1fr) / repeat(2, minmax(0, 1fr));
+    gap: clamp(9px, 1.65vw, 20px);
+    padding-block: 6px;
+  }
+  .fd[data-fd-comic] .fd2-story > .fd1-story-strip {
+    align-self: center;
+    min-height: 0;
+    padding: 6px 8px;
+  }
+  .fd[data-fd-comic] .fd2-story > .fd2-solved {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 9px;
+  }
+  .fd[data-fd-comic] .fd2-story .fd1-guided-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .fd[data-fd-comic] .fd2-story .fd1-guided-controls .fd1-guidance { border: 0; padding: 0; }
+  .fd[data-fd-comic] .fd2-challenge .fd2-challenge-controls { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .fd[data-fd-comic] .fd2-challenge .fd2-tray { grid-area: 2 / 1; }
+  .fd[data-fd-comic] .fd2-challenge .fd2-check-actions { grid-area: 3 / 1; justify-content: flex-end; }
+  .fd[data-fd-comic] .fd2-story .fd2-tray .fd1-word { height: 36px; min-height: 36px; }
+  .fd[data-first-day-page="the-comic-5"] .fd2-challenge[data-round="1"] .fd2-tray {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .fd[data-first-day-page="meet-leo-5"] .fd2-challenge .fd2-tray {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (orientation:landscape) and (max-height:360px) {
+  html body .lo-app.fd[data-fd-edition][data-fd-comic]:has(.fd2-story) {
+    --fd1-header-height: 40px;
+    --fd1-control-height: 38px;
+  }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-heading { padding-block: 5px; }
+  .fd[data-fd-comic]:not([data-fd-study]) .fd1-page > .fd1-nav { padding-block: 4px max(6px, env(safe-area-inset-bottom, 0px)); }
+  .fd[data-fd-comic] .fd2-story { grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); padding-block: 4px; }
+  .fd[data-fd-comic] .fd2-story > .fd1-story-strip { padding: 4px 6px; }
+  .fd[data-fd-comic] .fd2-challenge .fd2-instruction { font-size: 13px; }
+  .fd[data-fd-comic] .fd2-challenge .fd2-check-actions button,
+  .fd[data-fd-comic] .fd2-story .fd2-tray .fd1-word { height: 32px; min-height: 32px; }
+}

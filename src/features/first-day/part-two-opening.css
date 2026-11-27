@@ -1,0 +1,131 @@
+.fd-chapter-page {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-block-size: 0;
+}
+
+.fd-chapter-sheet {
+  display: grid;
+  place-items: center;
+  min-block-size: 0;
+  margin: clamp(11px, 2.4vmin, 32px) clamp(12px, 3.7vw, 60px);
+  padding: clamp(14px, 3vw, 42px);
+  border: 2px solid #25392b;
+  border-inline-start-width: clamp(8px, 2vw, 26px);
+  border-radius: 4px 10px 10px 4px;
+  box-shadow: 4px 4px 0 #25392b;
+  background-color: #fff7e8;
+  background-image: linear-gradient(rgb(255 247 232 / 26%), rgb(255 247 232 / 42%)), url("./manga-paper.webp");
+  background-position: center 32%;
+  background-size: cover;
+}
+
+.fd-chapter-copy {
+  position: relative;
+  inline-size: min(100%, 820px);
+  margin-block: auto;
+  padding: clamp(16px, 4vw, 62px);
+  border: 2px solid #25392b;
+  border-radius: 4px;
+  box-shadow: clamp(4px, 1vw, 10px) clamp(4px, 1vw, 10px) 0 #25392b;
+  background: #20493e;
+  color: #fff7e8;
+  font: 600 clamp(14px, 2.2vw, 26px)/1.24 var(--comic-body);
+}
+
+.fd-chapter-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+
+.fd-chapter-top > span {
+  padding: .25em .5em;
+  border: 1px solid #20372e;
+  border-radius: 2px;
+  background: #f3c749;
+  color: #17271f;
+  font: 700 clamp(14px, 2vw, 22px)/1.2 var(--comic-body);
+}
+
+.fd .fd-chapter-copy h1 {
+  margin: clamp(10px, 4vmin, 36px) 0 .25em;
+  font: 400 clamp(34px, min(10vw, 16dvh), 106px)/.99 var(--comic-display);
+  color: #ffdb6d;
+  text-shadow: 2px 3px 0 #173027;
+  text-wrap: balance;
+}
+
+.fd-chapter-copy > p { margin: 0; max-inline-size: 32ch; text-wrap: pretty; }
+
+html body .lo-app.fd[data-fd-edition] .fd-chapter-page .fd1-nav {
+  position: static;
+  grid-area: 2 / 1;
+  width: auto;
+  justify-content: end;
+  padding: 8px clamp(12px, 3.7vw, 60px) max(10px, env(safe-area-inset-bottom, 0px));
+  background: rgb(255 252 245 / 88%);
+  border-top: 1px solid #a6a99c;
+  border-inline-start: 0;
+}
+
+html body .lo-app.fd[data-fd-edition] .fd-chapter-page .fd-ending-exit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: var(--fd1-control-height);
+  padding-inline: 9px;
+  background: #f3c749;
+  color: #18231f;
+  font-family: var(--comic-body);
+  font-size: clamp(16px, 1.5vw, 25px) !important;
+  font-weight: 700;
+  line-height: 1.1;
+  text-decoration: none;
+}
+
+.fd-chapter-page .fd1-nav svg { flex-shrink: 0; }
+
+@media (min-width: 960px), (orientation: landscape) {
+  html body .lo-app.fd[data-fd-edition] .fd-chapter-page .fd1-nav > :is(.lo-secondary, [data-lesson-button]) {
+    width: auto;
+    min-width: var(--fd1-prev-width);
+  }
+
+  html body .lo-app.fd[data-fd-edition] .fd-chapter-page .fd1-nav > :is(.lo-secondary, [data-lesson-button] > .br-button-face) {
+    padding-inline: 14px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 959px) and (orientation: portrait) {
+  html body .lo-app.fd[data-fd-edition] .fd-chapter-page .fd1-nav {
+    padding-inline: var(--fd1-nav-pad);
+  }
+
+  html body .lo-app.fd[data-fd-edition] .fd-chapter-page .fd1-nav .br-button-face {
+    white-space: normal;
+  }
+}
+
+@media (max-height: 460px) {
+  .fd-chapter-sheet {
+    margin-block: clamp(6px, 2dvh, 12px);
+    padding-block: clamp(8px, 2.2dvh, 14px);
+  }
+
+  .fd-chapter-copy { padding-block: clamp(10px, 3.3dvh, 20px); }
+
+  .fd .fd-chapter-copy h1 {
+    margin-block: clamp(6px, 2dvh, 12px) .22em;
+    font-size: clamp(28px, min(9vw, 13dvh), 68px);
+  }
+
+  html body .lo-app.fd[data-fd-edition] .fd-chapter-page .fd1-nav {
+    padding-block: 5px max(8px, env(safe-area-inset-bottom, 0px));
+  }
+}

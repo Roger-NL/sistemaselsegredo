@@ -18,7 +18,7 @@ export type PanelCapture = { canvas: HTMLCanvasElement; fillFromTop: boolean };
 const paperColor = "#fff7e8";
 
 export function getTurnPanel(book: HTMLElement | null): HTMLElement | null {
-  const panel = book?.querySelector<HTMLElement>(".fd-scene, .fd-examples, .fd-rule, .fd-cover .fd-panels");
+  const panel = book?.querySelector<HTMLElement>(".fd-scene, .fd-examples, .fd-rule, .fd-cover .fd-panels, .fd-chapter-sheet");
   return panel?.getClientRects().length ? panel : panel?.querySelector(".fd-rule-examples") ?? null;
 }
 
@@ -28,7 +28,7 @@ export function capturePanel(panel: HTMLElement | null): PanelCapture | null {
   const { width, height } = bounds;
   if (!width || !height) return null;
   const images = [...panel.querySelectorAll("img")].filter(image => image.complete && image.naturalWidth);
-  if (!images.length) return null;
+  if (!images.length && !panel.classList.contains("fd-chapter-sheet")) return null;
 
   const canvas = document.createElement("canvas");
   const resolution = Math.min(1.4, 950 / Math.max(width, height));

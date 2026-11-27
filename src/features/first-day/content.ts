@@ -1,5 +1,8 @@
 import { examplesCopy, narration, permissionRuleCopy } from "./narration";
 import type { DialogueClip, FirstDayWord, NarrationClip } from "./narration";
+import { partTwoPages, type PartTwoPage } from "./part-two-content";
+import { partThreePages } from "./part-three-content";
+import { partFourPages } from "./part-four-content";
 
 export type FirstDayArt = {
   src: string;
@@ -46,10 +49,10 @@ export const art = {
   door: panelArt("07-porta", "Ana segura a bolsa à frente do corpo enquanto Rafael alcança a maçaneta da porta aberta.", [1672, 941], [1000, 1500]),
 };
 
-type PageBase = {
+type PageBase<P extends number = 1> = {
   id: string;
   title: string;
-  part: 1 | 2 | 3 | 4;
+  part: P;
   partTitle: string;
 };
 
@@ -122,8 +125,8 @@ export type ChallengePage = StoryPage & WordSequence & {
   reply: { speaker: string; voice: DialogueClip; translationVoice: NarrationClip };
 };
 
-type PreviewPage = PageBase & { kind: "Em preparação"; moment: string };
-export type FirstDayPage = GuidedPage | ReactionPage | ExamplesPage | RulePage | ChallengePage | PreviewPage;
+type PreviewPage = PageBase<3 | 4> & { kind: "Em preparação"; moment: string };
+export type FirstDayPage = GuidedPage | ReactionPage | ExamplesPage | RulePage | ChallengePage | PartTwoPage | PreviewPage;
 
 export function usesCleanReading(page: FirstDayPage | undefined): page is GuidedPage | ReactionPage | ChallengePage {
   return page?.part === 1 && (page.kind === "Ação" || page.kind === "Reação" || page.kind === "Desafio");
@@ -225,22 +228,9 @@ const firstPartPages: readonly FirstDayPage[] = [
   },
 ];
 
-const upcomingParts = [
-  { part: 2, id: "the-comic", title: "O gibi da Ana", pages: ["Peça para ver o desenho", "Reaja ao desenho", "Pedidos diferentes", "Quem faz a ação?", "Peça para ver e comente"] },
-  { part: 3, id: "meet-leo", title: "Conhecendo Leo", pages: ["Conheça Leo", "Peça para ler", "De quem é o gibi?", "Como falar de quem tem algo", "Cumprimente Leo e peça para ler"] },
-  { part: 4, id: "see-you", title: "Até a próxima", pages: ["Combine o horário", "Despeça-se", "Um novo combinado", "Como combinar e se despedir", "Combine a hora e se despeça"] },
-] as const;
-
-const moments = ["Ação", "Ação", "Tirinha", "Explicação", "Desafio"] as const;
-
 export const pages: readonly FirstDayPage[] = [
   ...firstPartPages,
-  ...upcomingParts.flatMap(part => part.pages.map((title, index): PreviewPage => ({
-    id: `${part.id}-${index + 1}`,
-    part: part.part,
-    partTitle: part.title,
-    title,
-    kind: "Em preparação",
-    moment: moments[index],
-  }))),
+  ...partTwoPages,
+  ...partThreePages,
+  ...partFourPages,
 ];

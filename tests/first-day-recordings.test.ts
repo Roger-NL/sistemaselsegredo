@@ -7,7 +7,7 @@ import { prologue } from "@/features/first-day/prologue";
 
 it("keeps the introduction pieces, spoken line and Portuguese translation in sync", () => {
   const page = pages.find(page => page.id === "meet-ana");
-  if (page?.kind !== "Ação" || !page.translationVoice) throw new Error("Missing bilingual introduction");
+  if (page?.part !== 1 || page.kind !== "Ação" || !page.translationVoice) throw new Error("Missing bilingual introduction");
   expect(page.words.join(" ")).toBe("I’m Rafael, by the way.");
   expect(dialogue[page.voice].text).toBe(page.words.join(" "));
   expect(narration[page.translationVoice].text).toBe(page.translations.at(-1));
