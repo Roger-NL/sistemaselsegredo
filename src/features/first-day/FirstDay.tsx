@@ -412,9 +412,10 @@ export function FirstDay() {
   const storyVoice = page?.kind === "Ação" || page?.kind === "Reação" || page?.kind === "Desafio";
   const captionClips = pageNarration(page, englishVoice);
   const comicAttempt = comic && attempts[comic.id];
-  const comicSolved = comic?.kind === "Desafio" && comicAttempt?.round === 1 && comicAttempt.result === "correct";
+  const comicSolved = comic?.kind === "Desafio" && comicAttempt?.result === "correct"
+    && (Boolean(comic.partialRequest) || comicAttempt.round === 1);
   const comicCaption = comic?.kind === "Ação" && counts[comic.id] === comic.words.length ? comic.replyCaption
-    : comic?.kind === "Desafio" && comicAttempt?.round === 1 ? (comicSolved && comic.completeCaption) || comic.revealCaption
+    : comic?.kind === "Desafio" && (comicSolved || comicAttempt?.round === 1) ? (comicSolved && comic.completeCaption) || comic.revealCaption
     : comic?.caption;
   const caption = comicCaption ? comicCaption[readingLanguage === "en" ? "en" : "pt"]
     : storyVoice ? pageNarration(page, !englishVoice).map(clip => narration[clip].text).join(" ")

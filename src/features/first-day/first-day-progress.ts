@@ -27,6 +27,7 @@ export function chapterOpeningAt(position: number): ComicChapter | undefined {
 }
 
 const storageKey = "basedspeak:first-day:v1";
+const partTwoRequestVersion = 3;
 const initialProgress: FirstDayProgress = {
   position: 0, tutorialSeen: false, counts: {}, attempts: {}, sound: true, readingLanguage: "en",
 };
@@ -57,10 +58,20 @@ function readProgress(): FirstDayProgress {
         if (isIntegerBetween(count, 1, page.words.length)) counts[page.id] = count;
       }
       if (page.kind === "Desafio") {
-        const attempt = readObject(savedAttempts[page.id]);
-        const round = attempt.round === 1 ? 1 : 0;
+        let attempt = readObject(savedAttempts[page.id]);
+        if (page.part === 2 && page.partialRequest && saved.partTwoRequestVersion !== partTwoRequestVersion) {
+          // Old banks used different words or indexes. Keep completed challenges and discard unfinished attempts.
+          const words = attempt.placed;
+          const wasPartialRequest = saved.partTwoRequestVersion === 2;
+          const oldSolution = wasPartialRequest ? [2, 0] : [2, 0, 3];
+          const completed = attempt.round === (wasPartialRequest ? 0 : 1) && attempt.result === "correct"
+            && Array.isArray(words) && words.length === oldSolution.length && oldSolution.every((word, slot) => words[slot] === word);
+          attempt = completed ? { round: 0, placed: page.rounds[0].solution, result: "correct" } : {};
+        }
+        const round = page.part !== 1 && page.rounds.length === 2 && attempt.round === 1 ? 1 : 0;
         const task = page.part === 1 ? undefined : page.rounds[round];
-        const bank = page.part === 1 ? page.words : page.rounds[round].bank;
+        const bank = page.part === 1 ? page.words : task?.bank;
+        if (!bank) continue;
         const count = task ? task.solution.length : bank.length;
         const savedWords: unknown = attempt.placed;
         const placed = Array.isArray(savedWords) && savedWords.length <= count
@@ -139,7 +150,7 @@ export function createFirstDayProgressStore() {
       const { position, ...answers } = next;
       const pageId = position === 0 ? null : pages[position - 1]?.id;
       try {
-        window.localStorage.setItem(storageKey, JSON.stringify({ ...answers, pageId }));
+        window.localStorage.setItem(storageKey, JSON.stringify({ ...answers, pageId, partTwoRequestVersion }));
       } catch {
         // Keep the lesson usable if storage is disabled or full.
       }

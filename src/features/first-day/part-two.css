@@ -277,7 +277,7 @@ html body .lo-app.fd[data-fd-comic] .fd1-nav > button:disabled .br-button-face {
 @media (max-width:959px) and (orientation:portrait) {
   .fd[data-first-day-page="the-comic-4"] .fd2-formula {
     display: grid;
-    grid-template-columns: minmax(0, .88fr) auto minmax(0, .88fr) auto minmax(0, 1.24fr) auto minmax(0, 1.12fr);
+    grid-template-columns: minmax(0, .88fr) auto minmax(0, .88fr) auto minmax(0, 1.24fr);
     column-gap: clamp(3px, 1vw, 7px);
   }
   .fd[data-first-day-page="the-comic-4"] .fd2-formula > :first-child { grid-column: auto; }
@@ -443,10 +443,6 @@ html body .lo-app.fd[data-fd-comic] .fd1-nav > button:disabled .br-button-face {
   .fd[data-fd-comic] .fd2-challenge .fd2-tray { grid-area: 2 / 1; }
   .fd[data-fd-comic] .fd2-challenge .fd2-check-actions { grid-area: 3 / 1; justify-content: flex-end; }
   .fd[data-fd-comic] .fd2-story .fd2-tray .fd1-word { height: 36px; min-height: 36px; }
-  .fd[data-first-day-page="the-comic-5"] .fd2-challenge[data-round="1"] .fd2-tray {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
   .fd[data-first-day-page="meet-leo-5"] .fd2-challenge .fd2-tray {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -465,4 +461,65 @@ html body .lo-app.fd[data-fd-comic] .fd1-nav > button:disabled .br-button-face {
   .fd[data-fd-comic] .fd2-challenge .fd2-instruction { font-size: 13px; }
   .fd[data-fd-comic] .fd2-challenge .fd2-check-actions button,
   .fd[data-fd-comic] .fd2-story .fd2-tray .fd1-word { height: 32px; min-height: 32px; }
+}
+
+.fd2-request-sentence {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  font: 700 clamp(15px, 3.9vw, 22px)/1.1 var(--comic-body);
+}
+.fd2-request-sentence > b { white-space: nowrap; }
+.fd2-request-slot {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px dashed #537064;
+  border-radius: 5px;
+  background: #f1ebd8;
+}
+.fd2-request-slot:not(:empty) { border-style: solid; background: #f7d673; }
+.fd2-request-slot[data-drop-available="true"] { box-shadow: inset 0 0 0 2px #39776b; }
+.fd2-request-slot[data-lesson-drop-active="true"] { background: #bde0d1; }
+.fd[data-fd-comic] .fd2-partial-request .fd2-challenge-controls {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.fd[data-fd-comic] .fd2-partial-request .fd2-instruction { grid-area: 1 / 1 / 2 / -1; }
+.fd[data-fd-comic] .fd2-partial-request .fd2-question { display: block; margin-inline-start: 0; }
+.fd[data-fd-comic] .fd2-partial-request .fd2-tray { grid-area: 2 / 1; flex-wrap: nowrap; }
+.fd[data-fd-comic] .fd2-partial-request .fd2-check-actions { grid-area: 2 / 2; }
+.fd[data-fd-comic] .fd2-partial-request .fd2-check-actions button { min-height: 44px; }
+.fd2-request-glossary { color: #35675a; font-size: .88em; }
+.fd2-request-hint {
+  justify-self: start;
+  min-height: 32px;
+  border: 0;
+  padding: 0;
+  color: #2c6355;
+  background: transparent;
+  font: 700 .88em var(--comic-body);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.fd[data-fd-comic] .fd2-story > .fd2-request-solved {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px clamp(8px, 1.4vw, 20px);
+}
+.fd2-request-solved > strong {
+  grid-column: 1 / -1;
+  color: #386650;
+  font-size: clamp(14px, 1.22vw, 20px);
+}
+@media (max-width: 540px) and (orientation: portrait) {
+  .fd[data-fd-comic] .fd2-story > .fd2-request-solved { grid-template-columns: minmax(0, 1fr) auto; }
+  .fd2-request-solved .fd2-completed-line { font-size: clamp(14px, 3.8vw, 18px); }
+  .fd2-request-solved .fd2-completed-line + .fd2-completed-line {
+    padding-inline-start: 8px;
+    border-inline-start: 1px solid #c4c2b5;
+  }
 }

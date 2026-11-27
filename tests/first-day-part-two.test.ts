@@ -16,11 +16,13 @@ it("opens all five existing Part 2 bookmarks and ships both crops of every illus
       case "Tirinha": page.panels.forEach(panel => panels.add(panel.art)); break;
       case "Explicação": page.examples.forEach(example => panels.add(example.art)); break;
       case "Desafio": {
+        expect(page.partialRequest).toBeDefined();
         for (const edition of ["image", "portraitImage"] as const) {
-          expect(page.rounds.map(round => round.art[edition].src.split("/").pop()))
-            .toEqual(["desafio.webp", "revelacao.webp"]);
+          expect(page.rounds[0].art[edition].src).toMatch(/\/desafio\.webp$/);
+          expect(page.partialRequest?.revealArt[edition].src).toMatch(/\/revelacao\.webp$/);
         }
         page.rounds.forEach(round => panels.add(round.art));
+        if (page.partialRequest) panels.add(page.partialRequest.revealArt);
         break;
       }
     }
@@ -40,12 +42,22 @@ it("pairs every assembled word with a definition and each guided drop with its t
       for (const word of page.words) expect(meaningOf(word), word).toBeTruthy();
     }
     if (page.kind === "Desafio") {
-      expect(page.rounds.map(round => round.solution.map(i => round.bank[i]).join(" "))).toEqual([
-        "Can you show me the next page?", "That’s so cool!",
-      ]);
-      for (const round of page.rounds) {
-        for (const word of round.bank) expect(meaningOf(word), word).toBeTruthy();
-      }
+      expect(page.rounds).toHaveLength(1);
+      const [round] = page.rounds;
+      expect(page.partialRequest?.fixed).toEqual(["Can", "turn", "page?"]);
+      expect(round.bank).toEqual(["you", "the"]);
+      expect(round.solution.map(i => round.bank[i])).toEqual(["you", "the"]);
+      for (const word of round.bank) expect(meaningOf(word), word).toBeTruthy();
     }
   }
+});
+
+it("uses the same natural translation for Ana's reaction and the word glossary", () => {
+  const scene = partTwoPages.find(page => page.id === "the-comic-2");
+  if (scene?.kind !== "Ação") throw new Error("Missing Part 2 reaction");
+  expect(scene.replyCaption).toEqual({ en: "Ana smiles.", pt: "Ana dá um sorriso." });
+  expect(scene.reply).toMatchObject({ en: "I know, right?", pt: "Pois é, né?" });
+  expect(meaningOf("know,")).toContain(scene.reply.pt);
+  expect(meaningOf("right?")).toContain(scene.reply.pt);
+  expect(meaningOf("right?")).toContain("right here = aqui mesmo");
 });

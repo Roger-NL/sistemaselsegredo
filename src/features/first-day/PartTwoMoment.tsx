@@ -34,8 +34,8 @@ const placements = {
     portrait: { mouth: [.735, .443], headTop: .18, oval: [.465, .145, 150, 50], completed: [.465, .145, 183, 77] },
   },
   challenge: {
-    desktop: { mouth: [.808, .450], headTop: .00, oval: [.560, .145, 322, 108], completed: [.560, .145, 407, 149] },
-    portrait: { mouth: [.828, .558], headTop: .19, oval: [.535, .248, 184, 56], completed: [.535, .248, 227, 85] },
+    desktop: { mouth: [.808, .450], headTop: .00, oval: [.545, .145, 485, 108] },
+    portrait: { mouth: [.828, .558], headTop: .19, oval: [.535, .248, 248, 62] },
   },
 } satisfies Record<string, BalloonPrint>;
 
@@ -51,12 +51,12 @@ function StudyArt({ image, portraitImage }: PartTwoArt) {
   </picture>;
 }
 
-function WordTray({ words, order, placed, next }: {
-  words: readonly string[]; order: readonly number[]; placed: readonly number[]; next?: number;
+function WordTray({ words, order, placed, next, reusable = false }: {
+  words: readonly string[]; order: readonly number[]; placed: readonly number[]; next?: number; reusable?: boolean;
 }) {
   const lookup = useContext(MeaningContext);
   return <div className="fd1-words fd2-tray" role="group" aria-label="Faixa de palavras" lang="en">
-    {order.map(index => <DragSource key={index} disabled={placed.includes(index)}
+    {order.map(index => <DragSource key={index} disabled={!reusable && placed.includes(index)}
       className={index === next ? "fd1-word fd1-word-next" : "fd1-word"}
       item={{ id: `word-${index}`, kind: "word", value: String(index), label: words[index] }}
       onClick={() => lookup(words[index])}>{words[index]}</DragSource>)}
@@ -213,12 +213,12 @@ function ComicRule({ page, readingLanguage }: Pick<Props, "readingLanguage"> & {
   </section>;
 }
 
-function ChallengeActions({ placed, full, onEdit, onCheck, choice }: {
-  placed: readonly number[]; full: boolean; onEdit: (words: readonly number[]) => void; onCheck: () => void; choice?: true;
+function ChallengeActions({ placed, full, onEdit, onCheck, showEditing = true }: {
+  placed: readonly number[]; full: boolean; onEdit: (words: readonly number[]) => void; onCheck: () => void; showEditing?: boolean;
 }) {
   const { cancel } = useLessonDrag();
   return <div className="fd1-check-actions fd2-check-actions">
-    {!choice && <>
+    {showEditing && <>
       <button type="button" onClick={() => { cancel(); onEdit(placed.slice(0, -1)); }} disabled={!placed.length}>Desfazer</button>
       <button type="button" onClick={() => { cancel(); onEdit([]); }} disabled={!placed.length}>Limpar</button>
     </>}
@@ -226,11 +226,101 @@ function ChallengeActions({ placed, full, onEdit, onCheck, choice }: {
   </div>;
 }
 
-function ComicChallenge({ page, attempt, onAttempt, cue, portrait, readingLanguage }: Omit<Props, "page" | "count" | "onPlace"> & {
-  page: Extract<PartTwoPage, { kind: "Desafio" }>;
-}) {
+type ComicChallengeProps<Page> = Omit<Props, "page" | "count" | "onPlace"> & {
+  page: Page;
+};
+type RequestPage = Extract<PartTwoPage, { kind: "Desafio"; partialRequest: object }>;
+type TwoRoundPage = Extract<PartTwoPage, { kind: "Desafio"; partialRequest?: undefined }>;
+
+function PartialRequest({ page, attempt, onAttempt, cue, portrait, readingLanguage }: ComicChallengeProps<RequestPage>) {
+  const request = page.partialRequest;
+  const round = page.rounds[0];
+  const { placed, result } = attempt;
+  const solved = result === "correct";
+  const full = placed.length === round.solution.length;
+  const [showHint, setShowHint] = useState(false);
+  const lookup = useContext(MeaningContext);
+  const art = solved ? request.revealArt : round.art;
+  const [start, verb, end] = request.fixed;
+  const [subject, article] = round.solution.map(index => round.bank[index]);
+  const line = {
+    en: `${start} ${subject} ${verb} ${article} ${end}`,
+    pt: round.translation,
+  };
+  const feedback = showHint ? request.answerHint
+    : result === "incorrect" ? round.retryHint
+    : { en: "Fill the two boxes.", pt: "Complete os dois quadradinhos." };
+
+  function edit(next: readonly number[]) {
+    lookup("");
+    setShowHint(false);
+    onAttempt({ round: 0, placed: next });
+  }
+
+  function place(index: number, slot: number) {
+    if (solved || slot > placed.length || placed[slot] === index) return;
+    const at = placed.indexOf(index);
+    if (at !== -1 && slot === placed.length) return;
+    const next = [...placed];
+    if (at !== -1) next[at] = next[slot];
+    next[slot] = index;
+    edit(next);
+    cue("place");
+  }
+
+  function check() {
+    if (!full || solved) return;
+    const correct = placed.every((index, slot) => index === round.solution[slot]);
+    onAttempt({ round: 0, placed, result: correct ? "correct" : "incorrect" });
+    cue(correct ? "success" : "retry");
+  }
+
+  return <LessonDragProvider onDrop={(item, target) => place(Number(item.value), Number(target))}>
+    <section className="fd1-story fd2-story fd2-challenge fd2-partial-request" data-kind="challenge"
+      data-complete={solved} aria-label="Pedido para virar a página">
+      <StoryPanel page={{ id: page.id, ...art }} portrait={portrait} placement={art.placement ?? (solved ? placements.reveal : placements.challenge)}
+        expanded={solved} variant={solved ? "dialogue" : "exercise"}>
+        {solved ? <div className="fd1-bubble-body fd2-reply-balloon">
+          <small>Rafael</small><SpokenLine line={request.closing} language={readingLanguage}/>
+        </div> : <div className="fd1-bubble-body fd2-request-bubble" role="group" aria-label="Balão de Rafael">
+          <div className="fd2-request-sentence" lang="en">
+            {round.solution.map((_, slot) => <Fragment key={slot}>
+              <b>{request.fixed[slot]}</b>
+              <DropTarget id={String(slot)} accept={["word"]}
+                className="fd2-request-slot" disabled={slot > placed.length}
+                label={`Quadradinho ${slot + 1}${placed[slot] === undefined ? "" : `: ${round.bank[placed[slot]]}`}`}>
+                {placed[slot] === undefined ? null : round.bank[placed[slot]]}
+              </DropTarget>
+            </Fragment>)}
+            <b>{end}</b>
+          </div>
+        </div>}
+      </StoryPanel>
+      {solved ? <div className="fd1-story-strip fd2-reply fd2-request-solved" role="status">
+        <CompletedLine line={line} language={readingLanguage}/>
+        <CompletedLine line={request.reply} language={readingLanguage} speaker="Ana"/>
+        <strong>Você completou o diálogo!</strong>
+      </div> : <div className="fd1-story-strip fd2-challenge-controls">
+        <div className="fd2-instruction">
+          <p className="fd2-question"><ReadingText text={round.instruction} language={readingLanguage}/></p>
+          <p className="fd2-request-glossary">{request.glossary[readingLanguage === "en" ? "en" : "pt"]}</p>
+          <p className="fd2-instruction-help" data-result={result} aria-live="polite" lang={readingLanguage}>
+            {readingLanguage === "en" ? feedback.en : feedback.pt}
+          </p>
+          {result === "incorrect" && !showHint && <button type="button" className="fd2-request-hint"
+            onClick={() => setShowHint(true)}>Mais uma dica</button>}
+        </div>
+        <WordTray words={round.bank} order={round.bank.map((_, index) => index)} placed={placed} reusable
+          next={showHint ? round.solution[0] : undefined}/>
+        <ChallengeActions placed={placed} full={full} onEdit={edit} onCheck={check} showEditing={false}/>
+      </div>}
+    </section>
+  </LessonDragProvider>;
+}
+
+function ComicChallenge({ page, attempt, onAttempt, cue, portrait, readingLanguage }: ComicChallengeProps<TwoRoundPage>) {
   const roundIndex = attempt.round ?? 0;
-  const round = page.rounds[roundIndex];
+  const round = page.rounds[roundIndex] ?? page.rounds[0];
   const { placed, result } = attempt;
   const full = placed.length === round.solution.length;
   const solved = result === "correct" && roundIndex === 1;
@@ -241,7 +331,7 @@ function ComicChallenge({ page, attempt, onAttempt, cue, portrait, readingLangua
     : { en: `Use ${round.solution.length} words. Select a word, then the bubble.`,
         pt: `Use ${round.solution.length} palavras. Selecione uma e depois o balão.` };
   const help = result === "incorrect" ? round.retryHint : directions;
-  const placement = round.art.placement ?? (page.part === 2 ? (roundIndex === 0 ? placements.challenge : placements.reveal) : unanchored);
+  const placement = round.art.placement ?? unanchored;
   const lookup = useContext(MeaningContext);
   function place(index: number) {
     if (full || placed.includes(index)) return;
@@ -290,7 +380,7 @@ function ComicChallenge({ page, attempt, onAttempt, cue, portrait, readingLangua
           {round.bank.map((choice, index) => <button type="button" key={choice} className="fd1-word"
             aria-pressed={placed[0] === index} onClick={() => edit([index])}>{choice}</button>)}
         </div> : <WordTray words={round.bank} order={round.bank.map((_, i) => i)} placed={placed}/>}
-        <ChallengeActions placed={placed} full={full} onCheck={check} onEdit={edit} choice={round.choice}/>
+        <ChallengeActions placed={placed} full={full} onCheck={check} onEdit={edit} showEditing={!round.choice}/>
       </div>}
     </section>
   </LessonDragProvider>;
@@ -302,6 +392,6 @@ export function PartTwoMoment(props: Props) {
     case "Ação": return <ComicActionMoment {...props} page={page}/>;
     case "Tirinha": return <ComicStrip page={page} readingLanguage={readingLanguage}/>;
     case "Explicação": return <ComicRule page={page} readingLanguage={readingLanguage}/>;
-    case "Desafio": return <ComicChallenge {...props} page={page}/>;
+    case "Desafio": return page.partialRequest ? <PartialRequest {...props} page={page}/> : <ComicChallenge {...props} page={page}/>;
   }
 }

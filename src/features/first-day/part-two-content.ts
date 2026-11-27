@@ -31,10 +31,14 @@ export type ComicRound = {
   retryHint: Bilingual;
   choice?: true;
 };
+export type PartialRequestCopy = {
+  fixed: readonly [string, string, string]; glossary: Bilingual; answerHint: Bilingual;
+  reply: Bilingual; closing: Bilingual; revealArt: PartTwoArt;
+};
 type ComicChallenge = PageInfo & {
   kind: "Desafio"; revealCaption: Bilingual; completeCaption?: Bilingual;
-  rounds: readonly [ComicRound, ComicRound];
-};
+} & ({ rounds: readonly [ComicRound]; partialRequest: PartialRequestCopy }
+  | { rounds: readonly [ComicRound, ComicRound]; partialRequest?: undefined });
 export type PartTwoPage = ComicAction | ComicExamples | ComicRule | ComicChallenge;
 
 const artDirectories = { 2: "two", 3: "three", 4: "four" } as const;
@@ -57,15 +61,15 @@ const offer = comicArt(2, "oferecer", "Rafael segura o gibi aberto e o inclina p
 const beforeTurn = comicArt(2, "desafio", "Ana pinça o canto da página que mostra a torre e as arcadas. Rafael acompanha o gesto.");
 const reveal = comicArt(2, "revelacao", "Ana vira a folha e revela a Rafael um veleiro de vela vermelha na página seguinte.");
 
-const base = { part: 2, partTitle: "O gibi da Ana" } as const;
+const base = { part: 2, partTitle: "O desenho no gibi" } as const;
 const canISee = { en: "Can I see?", pt: "Posso ver?" };
-const canYouShowMe = { en: "Can you show me?", pt: "Pode me mostrar?" };
+const canYouShowMe = { en: "Can you show me?", pt: "Você pode me mostrar?" };
 
 export const partTwoPages: readonly PartTwoPage[] = [
   {
     ...base, id: "the-comic-1", kind: "Ação", title: "Peça para ver o desenho", englishTitle: "Ask to see the picture",
-    caption: { en: "At the table, the comic is still open. A picture catches your eye.", pt: "À mesa, o gibi continua aberto. Um desenho chama sua atenção." },
-    replyCaption: { en: "Ana turns the comic toward you.", pt: "Ana vira o gibi na sua direção." },
+    caption: { en: "Rafael notices a drawing in the comic.", pt: "Rafael repara num desenho no gibi." },
+    replyCaption: { en: "Ana tilts the comic toward Rafael.", pt: "Ana inclina o gibi na direção de Rafael." },
     before: request, after: show, prefix: { en: "Wow!", pt: "Uau!" },
     words: ["Can", "you", "show", "me?"], order: [2, 0, 3, 1],
     translations: ["Uau!", "Uau!", "Uau! Pode…", "Uau! Pode mostrar…", "Uau! Pode me mostrar?"],
@@ -73,50 +77,51 @@ export const partTwoPages: readonly PartTwoPage[] = [
   },
   {
     ...base, id: "the-comic-2", kind: "Ação", title: "Reaja ao desenho", englishTitle: "React to the picture",
-    caption: { en: "Now you can see the whole picture.", pt: "Agora você consegue ver o desenho inteiro." },
-    replyCaption: { en: "Ana looks up and smiles.", pt: "Ana levanta os olhos e sorri." },
+    caption: { en: "Now Rafael can see the whole picture.", pt: "Agora Rafael consegue ver o desenho inteiro." },
+    replyCaption: { en: "Ana smiles.", pt: "Ana dá um sorriso." },
     before: reaction, after: agreement, words: ["That’s", "so", "cool!"], order: [2, 0, 1],
     translations: ["", "Isso é…", "Isso é tão…", "Que legal!"],
-    reply: { en: "I know, right?", pt: "Né?" },
+    reply: { en: "I know, right?", pt: "Pois é, né?" },
   },
   {
     ...base, id: "the-comic-3", kind: "Tirinha", title: "Pedidos diferentes", englishTitle: "Different requests",
-    caption: { en: "Watch their hands. Who looks, and who shows the comic?", pt: "Observe as mãos. Quem olha e quem mostra o gibi?" },
+    caption: { en: "Rafael speaks in all three examples. Notice who looks and who shows the comic.", pt: "Rafael fala nos três exemplos. Repare em quem olha e quem mostra o gibi." },
     panels: [
-      { context: { en: "You ask to look", pt: "Você pede para olhar" }, line: canISee, art: see },
-      { context: { en: "You ask Ana to show you", pt: "Você pede que Ana mostre" }, line: canYouShowMe, art: show },
-      { context: { en: "You offer to show Ana", pt: "Você se oferece para mostrar" }, line: { en: "Can I show you?", pt: "Posso te mostrar?" }, art: offer },
+      { context: { en: "Rafael wants to look", pt: "Rafael quer olhar" }, line: canISee, art: see },
+      { context: { en: "Ana shows Rafael", pt: "Ana mostra a Rafael" }, line: canYouShowMe, art: show },
+      { context: { en: "Rafael offers to show Ana", pt: "Rafael se oferece para mostrar" }, line: { en: "Can I show you?", pt: "Posso te mostrar?" }, art: offer },
     ],
   },
   {
     ...base, id: "the-comic-4", kind: "Explicação", title: "Quem faz a ação?", englishTitle: "Who does what?",
-    caption: { en: "After can, say who does the action. Then use the verb unchanged, like see or show.",
-      pt: "Depois de can, diga quem faz a ação. Em seguida, use o verbo sem mudar, como see (ver) ou show (mostrar)." },
+    caption: { en: "The word after can tells you who acts. Then comes the base verb, like see or show.",
+      pt: "A palavra depois de can indica quem faz a ação. Depois vem o verbo na forma básica, como see ou show." },
     pieces: [
       { token: "Can", meaning: { en: "start the question", pt: "abre a pergunta" } },
       { token: "I / you", meaning: { en: "who does it", pt: "quem faz" } },
       { token: "see / show", meaning: { en: "the action", pt: "a ação" } },
-      { token: "me", meaning: { en: "who it’s for", pt: "para quem" } },
     ],
     examples: [
-      { line: canISee, explanation: { en: "I means Rafael wants to look.", pt: "I é quem fala. Aqui, o Rafael pede permissão para olhar." }, art: see },
-      { line: canYouShowMe, explanation: { en: "You means Ana shows it. Me means she shows it to Rafael.", pt: "You é a Ana, que mostra o desenho. Como ela mostra para o Rafael, ele diz me." }, art: show },
+      { line: canISee, explanation: { en: "With Can I, the speaker acts. Here, Rafael wants to look.", pt: "Com Can I, quem age é quem fala. Aqui, Rafael quer olhar." }, art: see },
+      { line: canYouShowMe, explanation: { en: "With Can you, the listener acts. Ana shows the picture, and me refers to Rafael.", pt: "Com Can you, quem age é quem escuta. Ana mostra o desenho, e me se refere ao Rafael." }, art: show },
     ],
   },
   {
-    ...base, id: "the-comic-5", kind: "Desafio", title: "Peça para ver e comente", englishTitle: "Ask and react",
-    caption: { en: "Imagine Ana is about to turn the page.", pt: "Imagine que Ana está prestes a virar a página." },
-    revealCaption: { en: "Ana turns the page. A sailboat appears.", pt: "Ana vira a página. Aparece um veleiro." },
+    ...base, id: "the-comic-5", kind: "Desafio", title: "Vire a página", englishTitle: "Turn the page",
+    caption: { en: "Ana is holding the corner of the page.", pt: "Ana segura o canto da página." },
+    revealCaption: { en: "Ana turns the page. There’s a sailboat.", pt: "Ana vira a página. Tem um veleiro no desenho." },
+    partialRequest: {
+      fixed: ["Can", "turn", "page?"],
+      glossary: { en: "turn the page = virar a página", pt: "turn the page = virar a página" },
+      answerHint: { en: "Put you after Can and the before page.", pt: "Coloque «you» depois de «Can» e «the» antes de «page»." },
+      reply: { en: "Sure!", pt: "Claro!" }, closing: { en: "That’s so cool!", pt: "Que legal!" }, revealArt: reveal,
+    },
     rounds: [
       { label: { en: "Request", pt: "Pedido" },
-        instruction: { en: "How does Rafael ask Ana to show him the next page?", pt: "Como Rafael pede para Ana mostrar a próxima página?" },
-        retryHint: { en: "Ana will show the page. Start with ‘Can you’.", pt: "É a Ana quem vai mostrar a página. Comece com «Can you»." },
-        bank: ["next", "I", "show", "page?", "Can", "the", "you", "me", "see"], solution: [4, 6, 2, 7, 5, 0, 3],
-        translation: "Pode me mostrar a próxima página?", art: beforeTurn },
-      { label: { en: "Reaction", pt: "Reação" },
-        instruction: { en: "Rafael loves the new picture. What does he say?", pt: "Rafael adorou o desenho novo. O que ele diz?" },
-        retryHint: { en: "Rafael is reacting to the picture. Start with ‘That’s’.", pt: "Rafael está reagindo ao desenho. Comece com «That’s»." },
-        bank: ["so", "right?", "That’s", "cool!", "know"], solution: [2, 0, 3], translation: "Que legal!", art: reveal },
+        instruction: { en: "Ask Ana to turn the page.", pt: "Peça à Ana para virar a página." },
+        retryHint: { en: "After Can, say who will turn the page. Before page, use the word that points to that specific page.", pt: "Depois de «Can», indique quem vai virar a página. Antes de «page», use a palavra que indica essa página específica." },
+        bank: ["you", "the"], solution: [0, 1], speaker: "Rafael",
+        translation: "Você pode virar a página?", art: beforeTurn },
     ],
   },
 ];

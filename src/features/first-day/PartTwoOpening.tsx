@@ -7,8 +7,8 @@ import "./part-two-opening.css";
 
 const copy = {
   2: {
-    en: { title: "Ana’s comic", description: "A picture in the comic Ana is reading catches Rafael’s eye." },
-    "pt-BR": { title: "O gibi da Ana", description: "Um desenho no gibi que Ana está lendo chama a atenção de Rafael." },
+    en: { title: "The picture in the comic", description: "Ana has a comic open on the table." },
+    "pt-BR": { title: "O desenho no gibi", description: "Ana está com um gibi aberto na mesa." },
   },
   3: {
     en: { title: "Meeting Leo", description: "Leo joins Ana and Rafael at the table." },

@@ -6,7 +6,11 @@ function sceneArt(page: FirstDayPage, portrait: boolean) {
       case "Ação": return [page.before, page.after].map(art => storyImage(art, portrait).src);
       case "Tirinha": return page.panels.map(panel => storyImage(panel.art, portrait).src);
       case "Explicação": return page.examples.map(example => storyImage(example.art, portrait).src);
-      case "Desafio": return page.rounds.map(round => storyImage(round.art, portrait).src);
+      case "Desafio": {
+        const panels = page.rounds.map(round => round.art);
+        if (page.partialRequest) panels.push(page.partialRequest.revealArt);
+        return panels.map(panel => storyImage(panel, portrait).src);
+      }
     }
   }
   switch (page.kind) {
@@ -87,6 +91,9 @@ export function createFirstDayArtCache() {
     warm(position: number) {
       const next = Math.max(0, position) + 1;
       const upcoming = firstDayArtFor(next);
+      const current = pages[position - 1];
+      const reveal = current?.kind === "Desafio" && current.part !== 1 && current.partialRequest
+        ? storyImage(current.partialRequest.revealArt, window.matchMedia(partOnePortraitMedia).matches).src : undefined;
       // Reaction pages can be turned immediately. Get the page beyond them
       // ready while the reader is still on the cover or doing the exercise.
       const followUp = pages[next - 1]?.kind === "Reação" ? firstDayArtFor(next + 1)
@@ -98,6 +105,7 @@ export function createFirstDayArtCache() {
       function queueNextPage() {
         if (cancelled || upcoming.length === 0) return;
         const warmUpcoming = () => {
+          if (reveal) load(reveal, "low");
           const entries = upcoming.map(src => load(src, "low"));
           if (followUp.length === 0) return;
           void Promise.all(entries.map(entry => entry.loaded)).then(() => {

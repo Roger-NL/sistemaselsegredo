@@ -69,15 +69,15 @@ it("offers the prologue to an older cover-only save with just audio preferences"
   expect(createFirstDayProgressStore().getSnapshot()).toMatchObject({ sound: false, tutorialSeen: false });
 });
 
-it("retains the page turn between the two challenge rounds and resets Part 2 independently", () => {
+it("retains a partly filled request and resets Part 2 independently", () => {
   const store = savedReading("the-comic-5");
   store.update(previous => ({
     ...previous,
     counts: { ...previous.counts, "the-comic-1": 4 },
-    attempts: { ...previous.attempts, "the-comic-5": { round: 1, placed: [] } },
+    attempts: { ...previous.attempts, "the-comic-5": { round: 0, placed: [0] } },
   }));
   const resumed = createFirstDayProgressStore();
-  expect(resumed.getSnapshot().attempts["the-comic-5"]).toMatchObject({ round: 1, placed: [] });
+  expect(resumed.getSnapshot().attempts["the-comic-5"]).toMatchObject({ round: 0, placed: [0] });
   expect(resumed.getSnapshot().counts["the-comic-1"]).toBe(4);
   resumed.update(previous => resetFirstDayProgress(previous, 2));
   expect(createFirstDayProgressStore().getSnapshot()).toMatchObject({
@@ -87,16 +87,33 @@ it("retains the page turn between the two challenge rounds and resets Part 2 ind
   expect(resumed.getSnapshot().counts["the-comic-1"]).toBeUndefined();
 });
 
-it("checks a resumed challenge against the solution for its own word bank", () => {
+it("checks a resumed request against the solution for its own word bank", () => {
   const store = savedReading("the-comic-5");
   store.update(previous => ({ ...previous, attempts: {
-    "the-comic-5": { round: 1, placed: [2, 0, 3], result: "correct" },
+    "the-comic-5": { round: 0, placed: [0, 1], result: "correct" },
   } }));
   expect(createFirstDayProgressStore().getSnapshot().attempts["the-comic-5"].result).toBe("correct");
   store.update(previous => ({ ...previous, attempts: {
-    "the-comic-5": { round: 1, placed: [0, 1, 2], result: "correct" },
+    "the-comic-5": { round: 0, placed: [1, 0], result: "correct" },
   } }));
   expect(createFirstDayProgressStore().getSnapshot().attempts["the-comic-5"].result).toBe("incorrect");
+});
+
+it.each([
+  [undefined, { round: 1, placed: [2, 0, 3], result: "correct" }, true],
+  [undefined, { round: 1, placed: [] }, false],
+  [2, { round: 0, placed: [2, 0], result: "correct" }, true],
+  [2, { round: 0, placed: [0, 2], result: "incorrect" }, false],
+] as const)("migrates Part 2 progress from version %s with attempt %j", (partTwoRequestVersion, before, complete) => {
+  localStorage.setItem(storageKey, JSON.stringify({
+    pageId: "the-comic-5",
+    partTwoRequestVersion,
+    attempts: { "the-comic-5": before, "meet-leo-5": { round: 1, placed: [] } },
+  }));
+  const { attempts } = createFirstDayProgressStore().getSnapshot();
+  expect(attempts["the-comic-5"]).toEqual(complete
+    ? { round: 0, placed: [0, 1], result: "correct", translated: false } : undefined);
+  expect(attempts["meet-leo-5"]).toMatchObject({ round: 1, placed: [] });
 });
 
 it("restores the Part 2 opening without changing the exercise bookmark", () => {
