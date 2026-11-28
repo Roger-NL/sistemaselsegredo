@@ -53,6 +53,4 @@ it("follows the meaning across both languages without crossing narration clips",
   expect(matchingWords("empty-chair-pt", { clip: "empty-chair", index: 8 })).toEqual([6, 7]);
   expect(matchingWords("rafael-intro-pt", { clip: "rafael-intro", index: 4 })).toBe(0);
   expect(matchingWords("example-seat-pt", { clip: "example-seat", index: 2 })).toBe(1);
-  expect(matchingWords("permission-rule-en", { clip: "permission-rule", index: 22 })).toEqual([22, 23]);
-  expect(matchingWords("permission-rule-en", { clip: "permission-rule", index: 21 })).toBe(21);
 });

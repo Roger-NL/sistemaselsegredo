@@ -170,12 +170,12 @@ function ComicActionMoment({ page, count, onPlace, cue, portrait, readingLanguag
   </LessonDragProvider>;
 }
 
-export function ComicStrip({ page, readingLanguage }: Pick<Props, "readingLanguage"> & { page: Pick<Extract<PartTwoPage, { kind: "Tirinha" }>, "title" | "panels"> }) {
+export function ComicStrip({ page }: { page: Pick<Extract<PartTwoPage, { kind: "Tirinha" }>, "title" | "panels"> }) {
   return <section className="fd-examples fd1-strip fd2-study" aria-label={page.title}>
     {page.panels.map(panel => <figure key={panel.line.en} className="fd1-study-panel">
       <StudyArt {...panel.art} strip/>
       <figcaption>
-        <span className="fd1-study-label"><ReadingText text={panel.context} language={readingLanguage}/></span>
+        <span className="fd1-study-label" lang="pt-BR">{panel.context}</span>
         <StudyCaption translation={panel.line.pt}><EnglishWords text={panel.line.en}/></StudyCaption>
       </figcaption>
     </figure>)}
@@ -184,14 +184,14 @@ export function ComicStrip({ page, readingLanguage }: Pick<Props, "readingLangua
 
 const ruleTones = ["can", "person", "verb", "context"] as const;
 
-function ComicRule({ page, readingLanguage }: Pick<Props, "readingLanguage"> & { page: Extract<PartTwoPage, { kind: "Explicação" }> }) {
+function ComicRule({ page }: { page: Extract<PartTwoPage, { kind: "Explicação" }> }) {
   return <section className="fd-rule fd1-rule" aria-label={page.title}>
     <ul className="fd1-rule-formula" aria-label="Partes da frase">
       {page.pieces.map((piece, index) => <Fragment key={piece.token}>
         {index > 0 && <li className="fd1-rule-plus" aria-hidden="true">+</li>}
         <li className="fd1-rule-piece" data-tone={ruleTones[index]}>
           <b lang="en"><EnglishWords text={piece.token}/></b>
-          <span><ReadingText text={piece.meaning} language={readingLanguage}/></span>
+          <span lang="pt-BR">{piece.meaning}</span>
         </li>
       </Fragment>)}
     </ul>
@@ -207,7 +207,7 @@ function ComicRule({ page, readingLanguage }: Pick<Props, "readingLanguage"> & {
                 : <strong data-tone={ruleTones[piece]}><EnglishWords text={text}/></strong>}
             </Fragment>)}
           </StudyCaption>
-          <p className="fd1-rule-note"><ReadingText text={example.explanation} language={readingLanguage}/></p>
+          <p className="fd1-rule-note" lang="pt-BR">{example.explanation}</p>
         </li>;
       })}
     </ol>
@@ -227,13 +227,13 @@ function ChallengeActions({ placed, full, onEdit, onCheck, showEditing = true }:
   </div>;
 }
 
-type ComicChallengeProps<Page> = Omit<Props, "page" | "count" | "onPlace"> & {
+type ComicChallengeProps<Page> = Omit<Props, "page" | "count" | "onPlace" | "readingLanguage"> & {
   page: Page;
 };
 type RequestPage = Extract<PartTwoPage, { kind: "Desafio"; partialRequest: object }>;
 type TwoRoundPage = Extract<PartTwoPage, { kind: "Desafio"; partialRequest?: undefined }>;
 
-function PartialRequest({ page, attempt, onAttempt, cue, portrait, readingLanguage }: ComicChallengeProps<RequestPage>) {
+function PartialRequest({ page, attempt, onAttempt, cue, portrait }: ComicChallengeProps<RequestPage>) {
   const request = page.partialRequest;
   const round = page.rounds[0];
   const { placed, result } = attempt;
@@ -248,8 +248,8 @@ function PartialRequest({ page, attempt, onAttempt, cue, portrait, readingLangua
     en: `${start} ${subject} ${verb} ${article} ${end}`,
     pt: round.translation,
   };
-  const feedback = showHint ? request.answerHint.pt
-    : result === "incorrect" ? round.retryHint.pt : "Complete os dois quadradinhos.";
+  const feedback = showHint ? request.answerHint
+    : result === "incorrect" ? round.retryHint : "Complete os dois quadradinhos.";
 
   function edit(next: readonly number[]) {
     lookup("");
@@ -302,8 +302,8 @@ function PartialRequest({ page, attempt, onAttempt, cue, portrait, readingLangua
         <strong>Você completou o diálogo!</strong>
       </div> : <div className="fd1-story-strip fd2-challenge-controls">
         <div className="fd2-instruction" lang="pt-BR">
-          <p className="fd2-question" lang={readingLanguage}>{round.instruction[readingLanguage === "en" ? "en" : "pt"]}</p>
-          <p className="fd2-request-glossary">{request.glossary.pt}</p>
+          <p className="fd2-question">{round.instruction}</p>
+          <p className="fd2-request-glossary">{request.glossary}</p>
           <p className="fd2-instruction-help" data-result={result} aria-live="polite">
             {feedback}
           </p>
@@ -318,7 +318,7 @@ function PartialRequest({ page, attempt, onAttempt, cue, portrait, readingLangua
   </LessonDragProvider>;
 }
 
-function ComicChallenge({ page, attempt, onAttempt, cue, portrait, readingLanguage }: ComicChallengeProps<TwoRoundPage>) {
+function ComicChallenge({ page, attempt, onAttempt, cue, portrait }: ComicChallengeProps<TwoRoundPage>) {
   const roundIndex = attempt.round ?? 0;
   const round = page.rounds[roundIndex] ?? page.rounds[0];
   const { placed, result } = attempt;
@@ -328,7 +328,7 @@ function ComicChallenge({ page, attempt, onAttempt, cue, portrait, readingLangua
   const requestLine = { en: requestRound.solution.map(i => requestRound.bank[i]).join(" "), pt: requestRound.translation };
   const directions = round.choice ? "Escolha uma opção e toque em Conferir."
     : `Use ${round.solution.length} palavras. Selecione uma e depois o balão.`;
-  const help = result === "incorrect" ? round.retryHint.pt : directions;
+  const help = result === "incorrect" ? round.retryHint : directions;
   const placement = round.art.placement ?? unanchored;
   const lookup = useContext(MeaningContext);
   function place(index: number) {
@@ -368,8 +368,8 @@ function ComicChallenge({ page, attempt, onAttempt, cue, portrait, readingLangua
         <strong>{round.choice ? "Você completou o desafio!" : "Você completou o diálogo!"}</strong>
       </div> : <div className="fd1-story-strip fd2-challenge-controls">
         <div className="fd2-instruction" lang="pt-BR" aria-live="polite" aria-atomic="true">
-          <strong>{roundIndex + 1} / {page.rounds.length} · {round.label.pt}</strong>
-          <p className="fd2-question" lang={readingLanguage}>{round.instruction[readingLanguage === "en" ? "en" : "pt"]}</p>
+          <strong>{roundIndex + 1} / {page.rounds.length} · {round.label}</strong>
+          <p className="fd2-question">{round.instruction}</p>
           <p className="fd2-instruction-help" data-result={result}>
             {help}
           </p>
@@ -385,11 +385,11 @@ function ComicChallenge({ page, attempt, onAttempt, cue, portrait, readingLangua
 }
 
 export function PartTwoMoment(props: Props) {
-  const { page, readingLanguage } = props;
+  const { page } = props;
   switch (page.kind) {
     case "Ação": return <ComicActionMoment {...props} page={page}/>;
-    case "Tirinha": return <ComicStrip page={page} readingLanguage={readingLanguage}/>;
-    case "Explicação": return <ComicRule page={page} readingLanguage={readingLanguage}/>;
+    case "Tirinha": return <ComicStrip page={page}/>;
+    case "Explicação": return <ComicRule page={page}/>;
     case "Desafio": return page.partialRequest ? <PartialRequest {...props} page={page}/> : <ComicChallenge {...props} page={page}/>;
   }
 }

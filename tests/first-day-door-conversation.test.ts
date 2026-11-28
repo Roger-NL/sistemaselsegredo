@@ -64,146 +64,105 @@ it("reveals Ana's reply on a correct answer, plays both speakers, and restores i
   expect(play).not.toHaveBeenCalled();
   act(() => ana!.click());
   expect(play).toHaveBeenCalledExactlyOnceWith(["ana-door-reply-pt"], undefined);
-  const readPortuguese = container.querySelector<HTMLButtonElement>('button[aria-label="Ler em português por 5 segundos"]')!;
-  act(() => readPortuguese.click());
+  const listen = container.querySelector<HTMLButtonElement>('button[aria-label="Ouvir narração em português"]')!;
   expect(container.querySelector(".fd1-caption")?.textContent).toContain("A porta está aberta.");
   expect(container.textContent).toContain("Can I close the door?");
   expect(container.textContent).toContain("Sure! It’s noisy out there.");
+  act(() => listen.click());
   expect(play).toHaveBeenLastCalledWith(["door-instruction-pt"], undefined);
   act(() => ana!.click());
   expect(play).toHaveBeenLastCalledWith(["ana-door-reply-pt"], undefined);
 });
 
-it("translates only the English question for five seconds and leaves the answers in English", () => {
+it("temporarily translates a character’s line while the narration and title stay in Portuguese", () => {
   vi.useFakeTimers();
-  localStorage.setItem(storage, JSON.stringify({
-    pageId: door, sound: false, attempts: { [door]: { placed: [0, 1, 2, 3, 4], result: "correct" } },
-  }));
+  localStorage.setItem(storage, JSON.stringify({ pageId: "ana-makes-room", sound: true }));
   act(() => root.render(createElement(FirstDay)));
-  expect(container.textContent).toContain("Can I close the door?");
-  expect(container.textContent).toContain("Sure! It’s noisy out there.");
-  expect(container.textContent).not.toContain("Claro! Está barulhento lá fora.");
-  const englishQuestion = "The door is open. Before you close it, ask Ana for permission.";
-  const portugueseQuestion = "A porta está aberta. Antes de fechá-la, peça permissão à Ana.";
-  const question = () => container.querySelector(".fd1-caption")?.textContent;
-  expect(question()).toContain(englishQuestion);
-  const readPortuguese = container.querySelector<HTMLButtonElement>('button[aria-label="Ler em português por 5 segundos"]')!;
-  act(() => readPortuguese.click());
-  expect(container.textContent).toContain("Sure! It’s noisy out there.");
-  expect(container.textContent).not.toContain("Claro! Está barulhento lá fora.");
-  expect(container.querySelector(".fd1-language-countdown")).not.toBeNull();
-  expect(question()).toContain(portugueseQuestion);
-  act(() => vi.advanceTimersByTime(4999));
-  expect(question()).toContain(portugueseQuestion);
-  act(() => vi.advanceTimersByTime(1));
-  expect(question()).toContain(englishQuestion);
-  expect(container.textContent).toContain("Sure! It’s noisy out there.");
-  expect(container.querySelector(".fd1-language-countdown")).toBeNull();
 
-  act(() => readPortuguese.click());
-  act(() => root.unmount());
-  root = createRoot(container);
-  act(() => root.render(createElement(FirstDay)));
-  expect(question()).toContain(englishQuestion);
-  expect(container.textContent).toContain("Sure! It’s noisy out there.");
-  expect(container.querySelector('button[aria-label="Ler em português por 5 segundos"]')).not.toBeNull();
-  expect(play).not.toHaveBeenCalled();
+  const caption = () => container.querySelector(".fd1-caption p")?.textContent;
+  const speech = () => container.querySelector(".fd1-spoken-line")?.textContent;
+  const instruction = "Ana levanta os olhos e afasta a bolsa.";
+  expect(caption()).toBe(instruction);
+  expect(speech()).toBe("Sure!");
+  const toggle = container.querySelector<HTMLButtonElement>('button[aria-label="Ver fala em português por 5 segundos"]')!;
+  act(() => toggle.click());
+  expect(caption()).toBe(instruction);
+  expect(speech()).toBe("Claro!");
+  expect(container.querySelector("h1")?.textContent).toBe("Ana abre espaço");
+  expect(play).toHaveBeenLastCalledWith(["ana-sure"], undefined);
+  expect(container.querySelector(".fd1-language-countdown")).not.toBeNull();
+
+  act(() => vi.advanceTimersByTime(5000));
+  expect(caption()).toBe(instruction);
+  expect(speech()).toBe("Sure!");
+  expect(container.querySelector(".fd1-language-countdown")).toBeNull();
+  const listen = container.querySelector<HTMLButtonElement>('button[aria-label="Ouvir narração em português"]')!;
+  act(() => listen.click());
+  expect(play).toHaveBeenLastCalledWith(["ana-looks-up-pt"], undefined);
 });
 
-it("keeps every multiple-choice answer in English throughout the Portuguese preview", () => {
-  vi.useFakeTimers();
+it("keeps the question and retry feedback in Portuguese and all options in English", () => {
   localStorage.setItem(storage, JSON.stringify({ pageId: "meet-leo-v2-challenge", sound: false }));
   act(() => root.render(createElement(FirstDay)));
-  const question = () => container.querySelector(".fd-sequel-exercise legend")?.textContent;
-  const choices = () => [...container.querySelectorAll("[data-choice] button")].map(button => button.textContent);
-  const englishOptions = ["I loved it!", "Nice to meet you.", "Do you like comics too?"];
-  expect(question()).toBe("Ana has just introduced you. What do you say to Leo?");
-  expect(choices()).toEqual(englishOptions);
-  const readPortuguese = container.querySelector<HTMLButtonElement>('button[aria-label="Ler em português por 5 segundos"]')!;
-  act(() => readPortuguese.click());
-  expect(question()).toBe("Ana acabou de apresentar vocês. O que você diz ao Léo?");
-  expect(choices()).toEqual(englishOptions);
-  act(() => vi.advanceTimersByTime(5000));
-  expect(question()).toBe("Ana has just introduced you. What do you say to Leo?");
-  expect(choices()).toEqual(englishOptions);
+  const question = container.querySelector(".fd-sequel-exercise legend");
+  const choices = [...container.querySelectorAll<HTMLButtonElement>("[data-choice] button")];
+  expect(question?.textContent).toBe("Ana acabou de apresentar vocês. O que você diz ao Léo?");
+  expect(question?.getAttribute("lang")).toBe("pt-BR");
+  expect(choices.map(button => button.textContent)).toEqual(["I loved it!", "Nice to meet you.", "Do you like comics too?"]);
+  expect(container.querySelector(".fd1-language-preview")).toBeNull();
+
+  act(() => choices[0].click());
+  expect(container.textContent).toContain("Tente outra opção.");
+  expect(choices[0].closest("[lang]")?.getAttribute("lang")).toBe("en");
 });
 
 it.each([
-  ["permission-rule", "Peça permissão", "Ask for permission", "permission-rule"],
-  ["the-comic-4", "Quem faz a ação?", "Who does what?", null],
-  ["meet-leo-v2-explanation", "Quando alguém apresenta vocês", "When someone introduces you", null],
-  ["borrow-comic-v2-explanation", "Como pedir algo emprestado", "How to ask to borrow something", null],
-  ["see-you-tomorrow-v2-explanation", "Como combinar um encontro e se despedir", "How to make plans and say goodbye", null],
-])("shows %s in Portuguese, previews English for five seconds and only offers existing recordings", (pageId, portuguese, english, clip) => {
-  vi.useFakeTimers();
-  localStorage.setItem(storage, JSON.stringify({ pageId, sound: true }));
+  ["permission-rule", "Peça permissão", "Can I", "permission-rule"],
+  ["the-comic-4", "Quem faz a ação?", "A palavra depois", null],
+  ["meet-leo-v2-explanation", "Quando alguém apresenta vocês", "This is Rafael", null],
+  ["borrow-comic-v2-explanation", "Como pedir algo emprestado", "Would you lend me this comic?", null],
+  ["see-you-tomorrow-v2-explanation", "Como combinar um encontro e se despedir", "Tomorrow at lunch", null],
+])("keeps %s in Portuguese except for the English expressions being taught", (pageId, title, excerpt, clip) => {
+  localStorage.setItem(storage, JSON.stringify({ pageId, sound: true, readingLanguage: "en" }));
   act(() => root.render(createElement(FirstDay)));
 
-  const heading = () => container.querySelector("#fd-page-title")?.textContent;
-  const introLanguage = () => container.querySelector(".fd1-rule-intro")?.getAttribute("lang");
+  const heading = container.querySelector("#fd-page-title");
+  const intro = container.querySelector(".fd1-rule-intro");
   const listen = container.querySelector<HTMLButtonElement>("button.fd-narration-control");
-  expect(heading()).toBe(portuguese);
-  expect(introLanguage()).toBe("pt-BR");
+  expect(heading?.textContent).toBe(title);
+  expect(heading?.getAttribute("lang")).toBe("pt-BR");
+  expect(intro?.getAttribute("lang")).toBe("pt-BR");
+  expect(intro?.textContent).toContain(excerpt);
+  expect(container.querySelector(".fd1-rule-examples [lang='en']")).not.toBeNull();
+  expect(container.querySelector(".fd1-language-preview")).toBeNull();
+
   if (clip) {
     expect(listen?.getAttribute("aria-label")).toBe("Ouvir narração em português");
     act(() => listen!.click());
     expect(play).toHaveBeenCalledExactlyOnceWith([clip], undefined);
   } else {
     expect(listen).toBeNull();
+    expect(play).not.toHaveBeenCalled();
   }
-
-  const readEnglish = container.querySelector<HTMLButtonElement>('button[aria-label="Ler em inglês por 5 segundos"]')!;
-  act(() => readEnglish.click());
-  expect(heading()).toBe(english);
-  expect(introLanguage()).toBe("en");
-  expect(play).toHaveBeenCalledTimes(clip ? 1 : 0);
-  expect(container.querySelector(".fd1-language-countdown")).not.toBeNull();
-
-  act(() => vi.advanceTimersByTime(4999));
-  expect(heading()).toBe(english);
-  act(() => vi.advanceTimersByTime(1));
-  expect(heading()).toBe(portuguese);
-  expect(introLanguage()).toBe("pt-BR");
-  expect(container.querySelector(".fd1-language-countdown")).toBeNull();
-  expect(play).toHaveBeenCalledTimes(clip ? 1 : 0);
 });
 
 it.each([
-  door,
-  "the-comic-5",
-  "meet-leo-v2-challenge",
-  "borrow-comic-v2-challenge",
-  "see-you-tomorrow-v2-challenge",
-])("offers the delayed language cue and dismisses it after use on %s", pageId => {
-  vi.useFakeTimers();
-  localStorage.setItem(storage, JSON.stringify({ pageId, sound: false }));
+  [door, "A porta está aberta."],
+  ["the-comic-5", "Peça à Ana para virar a página."],
+  ["meet-leo-v2-challenge", "Ana acabou de apresentar vocês."],
+  ["borrow-comic-v2-challenge", "Peça ao Léo para te emprestar o gibi hoje."],
+  ["see-you-tomorrow-v2-challenge", "Confirme quando vocês vão se ver."],
+])("uses a Portuguese prompt and no translation control for %s", (pageId, prompt) => {
+  localStorage.setItem(storage, JSON.stringify({ pageId, sound: false, readingLanguage: "en" }));
   act(() => root.render(createElement(FirstDay)));
 
-  const attention = () => container.querySelector("[data-fd-language-attention]");
   expect(container.querySelector("main[data-fd-challenge-theme]")?.getAttribute("data-first-day-page")).toBe(pageId);
   expect(container.querySelector<HTMLButtonElement>(".fd1-challenge-next")?.disabled).toBe(true);
   expect(container.querySelector(".fd1-challenge-next-film")?.textContent).toBe("Acerte o desafio");
-  expect(attention()?.getAttribute("data-fd-language-attention")).toBe("challenge");
-  const readPortuguese = attention()?.querySelector<HTMLButtonElement>("button");
-  expect(readPortuguese?.textContent).toBe("Ler em PT");
-
-  act(() => readPortuguese!.click());
-  expect(attention()).toBeNull();
-  expect(container.querySelector(".fd1-language-countdown")).not.toBeNull();
-  act(() => vi.advanceTimersByTime(5000));
-  expect(attention()).toBeNull();
-  expect(readPortuguese?.textContent).toBe("Ler em PT");
-});
-
-it("dismisses the challenge cue even when the learner picks an incorrect answer", () => {
-  localStorage.setItem(storage, JSON.stringify({ pageId: "meet-leo-v2-challenge", sound: false }));
-  act(() => root.render(createElement(FirstDay)));
-  expect(container.querySelector('[data-fd-language-attention="challenge"]')).not.toBeNull();
-
-  const incorrectAnswer = container.querySelector<HTMLButtonElement>("[data-choice] button")!;
-  act(() => incorrectAnswer.click());
-  expect(container.textContent).toContain("Tente outra opção.");
-  expect(container.querySelector("[data-fd-language-attention]")).toBeNull();
+  expect(container.querySelector(".fd1-language-preview")).toBeNull();
+  const question = container.querySelector(".fd2-question, .fd-sequel-exercise legend") ?? container.querySelector(".fd1-caption p");
+  expect(question?.textContent).toContain(prompt);
+  expect(question?.closest("[lang]")?.getAttribute("lang")).toBe("pt-BR");
 });
 
 it("explains the locked Part 4 button and animates only a newly correct answer", () => {
@@ -268,10 +227,11 @@ it.each([[1, false], [2, true]])("unlocks Part 5 only after the last question on
   expect(Boolean(forward.querySelector(".fd1-challenge-next-unlock"))).toBe(ready);
 });
 
-it("dismisses the reading cue when the learner places a word in the balloon", () => {
+it("keeps guidance in Portuguese as the learner places an English word in the balloon", () => {
   localStorage.setItem(storage, JSON.stringify({ pageId: "ask-to-sit", sound: false }));
   act(() => root.render(createElement(FirstDay)));
-  expect(container.querySelector('[data-fd-language-attention="reading"]')).not.toBeNull();
+  expect(container.querySelector(".fd1-language-preview")).toBeNull();
+  expect(container.querySelector(".fd1-guidance")?.textContent).toBe("Arraste a peça destacada ou toque nela e depois no balão.");
 
   const word = container.querySelector<HTMLButtonElement>('[data-lesson-drag-source="word-0"]')!;
   const balloon = container.querySelector('[data-lesson-drop="first-day-bubble"]')!;

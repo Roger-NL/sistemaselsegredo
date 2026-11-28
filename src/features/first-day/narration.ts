@@ -17,29 +17,6 @@ export const permissionRuleCopy = {
   detail: "Depois de Can I, diga o que você quer fazer. Por exemplo, sentar ou abrir.",
 } as const;
 
-export const explanationEnglish = {
-  1: {
-    title: "Ask for permission",
-    caption: "“Can I…?” is a way to ask for permission.\nAfter “Can I”, say what you want to do, like sit down or open something.",
-  },
-  2: {
-    title: "Who does what?",
-    caption: "The word after “can” shows who does the action.\nUse the base verb next, like “see” or “show”.",
-  },
-  3: {
-    title: "When someone introduces you",
-    caption: "Ana introduces Rafael by saying “This is Rafael.”\nRafael says “Hello, Leo” and they both say “Nice to meet you.”",
-  },
-  4: {
-    title: "How to ask to borrow something",
-    caption: "To borrow the comic, ask “Would you lend me this one?”\nTo confirm you can take it today, ask “Can I take this one today?”",
-  },
-  5: {
-    title: "How to make plans and say goodbye",
-    caption: "“Tomorrow at lunch” says when and “Right here” says where.\nBefore leaving, say “Thanks, everyone!”, “I have to go” and “See you tomorrow!”",
-  },
-} as const;
-
 const anaIntroductionCaption = "Ana dá um sorriso e se apresenta.";
 
 export const narration = {
@@ -72,7 +49,6 @@ export const narration = {
   },
   "three-requests": { text: `${examplesCopy.title}. ${examplesCopy.description}` },
   "permission-rule": { text: `${permissionRuleCopy.title}. ${permissionRuleCopy.lead} ${permissionRuleCopy.detail}` },
-  "door-instruction-en": { text: "The door is open. Before you close it, ask Ana for permission." },
   "door-instruction-pt": { text: "A porta está aberta. Antes de fechá-la, peça permissão à Ana." },
   "door-answer-pt": { text: "Posso fechar a porta?" },
   "ana-door-reply-pt": { text: "Claro! Está barulhento lá fora.", bundled: true },
@@ -123,18 +99,9 @@ export function firstDayVoiceUrl(clip: FirstDayVoiceClip) {
   return `/first-day/${clip in dialogue ? "dialogue" : "narration"}/${clip}.mp3`;
 }
 
-export const arrivalNarration = ["lunchtime", "empty-chair"] as const;
+export const arrivalNarration = ["lunchtime-pt", "empty-chair-pt"] as const;
 export const coverNarration = ["cover"] as const;
-export const seatedNarration = ["rafael-sits"] as const;
-
-export const portugueseNarration: Partial<Record<NarrationClip, NarrationClip>> = {
-  lunchtime: "lunchtime-pt",
-  "empty-chair": "empty-chair-pt",
-  "ana-looks-up": "ana-looks-up-pt",
-  "rafael-sits": "rafael-sits-pt",
-  "ana-introduces-herself": "ana-introduces-herself-pt",
-  "door-instruction-en": "door-instruction-pt",
-};
+export const seatedNarration = ["rafael-sits-pt"] as const;
 
 export const portugueseDialogue: Partial<Record<DialogueClip, NarrationClip>> = {
   "learner-seat": "learner-seat-pt",

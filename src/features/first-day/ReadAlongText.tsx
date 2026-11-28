@@ -6,24 +6,18 @@ import type { FirstDayVoiceClip } from "./narration";
 import { firstDayWordTimes } from "./first-day-word-times";
 
 type WordRange = number | readonly [first: number, last: number];
-export type ReadAlongTrack = FirstDayVoiceClip | "permission-rule-en" | "example-window-pt" | "example-seat-pt" | "example-comic-pt";
+export type ReadAlongTrack = FirstDayVoiceClip | "example-window-pt" | "example-seat-pt" | "example-comic-pt";
 type ActiveWord = { clip: FirstDayVoiceClip; index: number };
-type Translation = readonly [english: ReadAlongTrack, portuguese: ReadAlongTrack, words: readonly (readonly [WordRange, WordRange])[]];
+type Translation = readonly [english: FirstDayVoiceClip, portuguese: ReadAlongTrack, words: readonly (readonly [WordRange, WordRange])[]];
 
 // Each entry ties the spoken words to the corresponding words in the other language.
 // An inclusive range keeps expressions like "pick up" and "ao lado" together.
 const translations: readonly Translation[] = [
-  ["permission-rule-en", "permission-rule", [
-    [[0, 1], 0], [2, 1], [3, 2], [4, 3], [5, 4], [6, 5], [7, 6], [8, 7], [[9, 10], 8], [11, 9],
-    [12, [10, 11]], [13, 12], [14, 13], [15, 14], [16, [15, 16]], [17, 17], [18, 18], [[19, 20], 19],
-    [21, [20, 21]], [[22, 23], 22], [24, 23], [[25, 26], 24],
-  ]],
   ["lunchtime", "lunchtime-pt", [[[0, 1], [0, 1]], [2, 2], [[3, 4], 3], [5, 4], [6, 5], [7, 6], [[8, 9], 7], [10, 8], [11, 9]]],
   ["empty-chair", "empty-chair-pt", [[0, 0], [[1, 2], 1], [3, 2], [4, 3], [5, 4], [6, 5], [[7, 8], [6, 7]], [[9, 10], [8, 9]], [11, 10]]],
   ["ana-looks-up", "ana-looks-up-pt", [[0, 0], [[1, 2], [1, 3]], [3, 4], [4, 5], [5, 6], [6, 7]]],
   ["rafael-sits", "rafael-sits-pt", [[0, 0], [1, 1], [2, 2], [3, 3], [4, [4, 5]], [5, 6], [6, [7, 8]], [7, [9, 11]], [8, 12], [9, 13], [10, 14], [11, 15], [[12, 13], [16, 17]]]],
   ["ana-introduces-herself", "ana-introduces-herself-pt", [[0, 0], [1, [1, 3]], [2, 4], [[3, 4], [5, 6]]]],
-  ["door-instruction-en", "door-instruction-pt", [[0, 0], [1, 1], [2, 2], [3, 3], [[4, 5], [4, 5]], [[6, 7], 6], [8, 7], [9, [9, 10]], [[10, 11], 8]]],
   ["learner-seat", "learner-seat-pt", [[0, 0], [[1, 2], 1], [3, 2], [4, 3]]],
   ["ana-sure", "ana-sure-pt", [[0, 0]]],
   ["rafael-intro", "rafael-intro-pt", [[0, [1, 2]], [1, [3, 4]], [[2, 4], 0]]],

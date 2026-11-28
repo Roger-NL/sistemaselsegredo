@@ -150,18 +150,8 @@ html body .lo-app.fd[data-lesson-theme][data-fd-edition][data-first-day-page="cl
 .fd1-headline .fd1-language, .fd1-progress .fd1-language { white-space: nowrap; }
 .fd1-language-preview { position: relative; display: inline-flex; flex: none; }
 /* Reserve the last 300ms of each cycle for the pulse and start it after a full interval. */
-.fd1-language-preview[data-fd-language-attention] {
-  --fd1-attention-interval: 15s;
-  --fd1-attention-pulse: fd1-language-reading-pulse;
-  --fd1-attention-glow: fd1-language-reading-glow;
-}
-.fd1-language-preview[data-fd-language-attention="challenge"] {
-  --fd1-attention-interval: 5s;
-  --fd1-attention-pulse: fd1-language-challenge-pulse;
-  --fd1-attention-glow: fd1-language-challenge-glow;
-}
 .fd1-language-preview[data-fd-language-attention] > .fd1-language {
-  animation: var(--fd1-attention-pulse) var(--fd1-attention-interval) cubic-bezier(.77, 0, .175, 1) 300ms infinite;
+  animation: fd1-language-reading-pulse 15s cubic-bezier(.77, 0, .175, 1) 300ms infinite;
 }
 .fd1-language-preview[data-fd-language-attention]::before {
   content: "";
@@ -171,15 +161,7 @@ html body .lo-app.fd[data-lesson-theme][data-fd-edition][data-first-day-page="cl
   box-shadow: 0 0 8px 3px #e4b94d;
   opacity: 0;
   pointer-events: none;
-  animation: var(--fd1-attention-glow) var(--fd1-attention-interval) cubic-bezier(.77, 0, .175, 1) 300ms infinite;
-}
-@keyframes fd1-language-challenge-pulse {
-  0%, 94%, 100% { transform: none; }
-  97% { transform: scale(1.05); }
-}
-@keyframes fd1-language-challenge-glow {
-  0%, 94%, 100% { opacity: 0; }
-  97% { opacity: .55; }
+  animation: fd1-language-reading-glow 15s cubic-bezier(.77, 0, .175, 1) 300ms infinite;
 }
 @keyframes fd1-language-reading-pulse {
   0%, 98%, 100% { transform: none; }

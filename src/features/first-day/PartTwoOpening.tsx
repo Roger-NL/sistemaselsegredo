@@ -1,50 +1,35 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode, RefObject } from "react";
+import type { RefObject } from "react";
 import { LessonButton } from "../first-encounters/LessonButton";
 import { firstDayPartCount } from "./content";
 import type { ComicChapter } from "./first-day-progress";
 import "./part-two-opening.css";
 
 const copy = {
-  2: {
-    en: { title: "The picture in the comic", description: "Ana has a comic open on the table." },
-    "pt-BR": { title: "O desenho no gibi", description: "Ana está com um gibi aberto na mesa." },
-  },
-  3: {
-    en: { title: "Meeting Leo", description: "Leo joins Ana and Rafael at the table." },
-    "pt-BR": { title: "Conhecendo Léo", description: "Léo chega à mesa de Ana e Rafael." },
-  },
-  4: {
-    en: { title: "Borrowing the comic", description: "Rafael finds out who owns the comic." },
-    "pt-BR": { title: "O gibi emprestado", description: "Rafael descobre de quem é o gibi." },
-  },
-  5: {
-    en: { title: "See you tomorrow", description: "Before they leave, the friends make a plan to meet again." },
-    "pt-BR": { title: "Até amanhã", description: "Antes de se despedir, os amigos combinam de se ver de novo." },
-  },
+  2: { title: "O desenho no gibi", description: "Ana está com um gibi aberto na mesa." },
+  3: { title: "Conhecendo Léo", description: "Léo chega à mesa de Ana e Rafael." },
+  4: { title: "O gibi emprestado", description: "Rafael descobre de quem é o gibi." },
+  5: { title: "Até amanhã", description: "Antes de se despedir, os amigos combinam de se ver de novo." },
 };
 
-type Language = "en" | "pt-BR";
-type SheetProps = { language: Language; titleRef: RefObject<HTMLHeadingElement | null> };
+type SheetProps = { titleRef: RefObject<HTMLHeadingElement | null> };
 
-export function ChapterOpening({ chapter, language, titleRef, languageButton, onBack, onOpen }: SheetProps & {
+export function ChapterOpening({ chapter, titleRef, onBack, onOpen }: SheetProps & {
   chapter: ComicChapter;
-  languageButton: ReactNode;
   onBack: () => void;
   onOpen: () => void;
 }) {
-  const { title, description } = copy[chapter][language];
+  const { title, description } = copy[chapter];
 
   return <section className="fd-chapter-page" aria-labelledby="fd-chapter-title">
     <div className="fd-chapter-sheet">
       <div className="fd-chapter-copy">
         <div className="fd-chapter-top">
           <span>Parte {chapter} de {firstDayPartCount}</span>
-          <div className="fd1-listen">{languageButton}</div>
         </div>
-        <h1 id="fd-chapter-title" ref={titleRef} tabIndex={-1} lang={language}>{title}</h1>
-        <p lang={language}>{description}</p>
+        <h1 id="fd-chapter-title" ref={titleRef} tabIndex={-1} lang="pt-BR">{title}</h1>
+        <p lang="pt-BR">{description}</p>
       </div>
     </div>
     <nav className="fd1-nav" aria-label="Navegação da página">
@@ -54,7 +39,7 @@ export function ChapterOpening({ chapter, language, titleRef, languageButton, on
   </section>;
 }
 
-export function LessonEnding({ titleRef, onBack, onLeave }: Pick<SheetProps, "titleRef"> & {
+export function LessonEnding({ titleRef, onBack, onLeave }: SheetProps & {
   onBack: () => void;
   onLeave: () => void;
 }) {

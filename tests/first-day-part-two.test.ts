@@ -55,7 +55,7 @@ it("pairs every assembled word with a definition and each guided drop with its t
 it("uses the same natural translation for Ana's reaction and the word glossary", () => {
   const scene = partTwoPages.find(page => page.id === "the-comic-2");
   if (scene?.kind !== "Ação") throw new Error("Missing Part 2 reaction");
-  expect(scene.replyCaption).toEqual({ en: "Ana smiles.", pt: "Ana dá um sorriso." });
+  expect(scene.replyCaption).toBe("Ana dá um sorriso.");
   expect(scene.reply).toMatchObject({ en: "I know, right?", pt: "Pois é, né?" });
   expect(meaningOf("know,")).toContain(scene.reply.pt);
   expect(meaningOf("right?")).toContain(scene.reply.pt);

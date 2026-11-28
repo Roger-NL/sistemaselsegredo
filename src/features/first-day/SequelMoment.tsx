@@ -62,8 +62,7 @@ function ArtOnly({ art }: { art: PartTwoArt }) {
   return <div className="fd-scene fd1-scene fd-sequel-art-only"><StudyArt {...art}/></div>;
 }
 
-function CheckActions({ lang, canUndo, ready, onUndo, onCheck }: {
-  lang: Language;
+function CheckActions({ canUndo, ready, onUndo, onCheck }: {
   canUndo: boolean;
   ready: boolean;
   onUndo: () => void;
@@ -71,20 +70,18 @@ function CheckActions({ lang, canUndo, ready, onUndo, onCheck }: {
 }) {
   const { cancel } = useLessonDrag();
   return <div className="fd1-check-actions">
-    <button type="button" disabled={!canUndo} onClick={() => { cancel(); onUndo(); }}>{lang === "pt" ? "Desfazer" : "Undo"}</button>
+    <button type="button" disabled={!canUndo} onClick={() => { cancel(); onUndo(); }}>Desfazer</button>
     <button type="button" disabled={!ready} onClick={() => { cancel(); onCheck(); }}>
-      {lang === "pt" ? "Conferir" : "Check"}
+      Conferir
     </button>
   </div>;
 }
 
-function Exercise({ panel, exercise, portrait, lang, instructionLang, controlLang, placed: savedWords, guided, onEdit, onSolve, cue }: {
+function Exercise({ panel, exercise, portrait, lang, placed: savedWords, guided, onEdit, onSolve, cue }: {
   panel: SequelPanel;
   exercise: SequelExercise;
   portrait: boolean;
   lang: Language;
-  instructionLang: Language;
-  controlLang: Language;
   placed: readonly number[];
   guided: boolean;
   onEdit: (placed: readonly number[]) => void;
@@ -97,9 +94,7 @@ function Exercise({ panel, exercise, portrait, lang, instructionLang, controlLan
     : sequelWordBank(exercise.bank[lang], exercise.solution[lang]);
   const speaker = panel.line?.speaker ?? "Rafael";
   const language = lang === "pt" ? "pt-BR" : "en";
-  const instructionLocale = instructionLang === "pt" ? "pt-BR" : "en";
-  const controlLocale = controlLang === "pt" ? "pt-BR" : "en";
-  const instruction = exercise.instruction[instructionLang];
+  const instruction = exercise.instruction;
   const translationLanguage = lang === "pt" ? "en" : "pt-BR";
   const spokenWords = answer.map(index => words[index]);
   const original = spokenWords.join(" ");
@@ -147,9 +142,7 @@ function Exercise({ panel, exercise, portrait, lang, instructionLang, controlLan
     }
   }
 
-  const guidance = wrong
-    ? controlLang === "pt" ? "Tente outra opção." : "Try another answer."
-    : choose ? "" : controlLang === "pt" ? "Arraste as palavras para o balão." : "Drag the words into the balloon.";
+  const guidance = wrong ? "Tente outra opção." : choose ? "" : "Arraste as palavras para o balão.";
 
   const scene = <section className="fd1-story fd-sequel-story" data-exercise="" aria-label={instruction}>
       {choose ? <ArtOnly art={panel.art}/> : <StoryPanel page={{ id: panel.art.image.src, ...panel.art }} portrait={portrait} placement={printFor(panel)}
@@ -180,7 +173,7 @@ function Exercise({ panel, exercise, portrait, lang, instructionLang, controlLan
         })}
       </StoryPanel>}
       <fieldset className="fd-sequel-exercise">
-        <legend lang={instructionLocale}>{instruction}</legend>
+        <legend lang="pt-BR">{instruction}</legend>
         <div className="fd1-words fd-sequel-choices" data-choice={choose || undefined} lang={language}>
           {pieces.map(({ word, index }) => choose
             ? <button key={index} className="fd1-word" type="button" onClick={() => check([index])}>{word}</button>
@@ -189,9 +182,9 @@ function Exercise({ panel, exercise, portrait, lang, instructionLang, controlLan
             item={{ id: `sequel-word-${index}`, kind: "word", value: String(index), label: word }}
             disabled={placed.includes(index) || placed.length === answer.length}>{word}</DragSource>)}
         </div>
-        <div className="fd-sequel-feedback" lang={controlLocale}>
+        <div className="fd-sequel-feedback" lang="pt-BR">
           <span role="status">{guidance}</span>
-          {!choose && !guided && <CheckActions lang={controlLang} canUndo={hasEnteredWords} ready={placed.length === answer.length}
+          {!choose && !guided && <CheckActions canUndo={hasEnteredWords} ready={placed.length === answer.length}
             onUndo={() => edit(placed.slice(0, lastEnteredSlot))} onCheck={() => check(placed)}/>}
         </div>
       </fieldset>
@@ -215,13 +208,13 @@ export function SequelMoment({ page, portrait, frame, exercise, readingLanguage,
   cue: (sound: LessonSoundCue) => void;
 }) {
   const lang = readingLanguage === "en" ? "en" : "pt";
-  if (page.kind === "Tirinha") return <ComicStrip page={page} readingLanguage={readingLanguage}/>;
+  if (page.kind === "Tirinha") return <ComicStrip page={page}/>;
   if (page.kind === "Explicação") return <section className="fd-rule fd1-rule" aria-label={page.title}>
     <div className="fd1-rule-examples" data-panel-count={page.examples.length}>
       {page.examples.map(example => <figure className="fd1-study-panel" key={example.line.en}>
         <StudyArt {...example.art} strip/>
         <figcaption className="fd1-study-caption">
-          <small className="fd1-rule-context" lang={readingLanguage}>{example.context[lang]}</small>
+          <small className="fd1-rule-context" lang="pt-BR">{example.context}</small>
           <b className="fd1-study-line" lang="en"><EnglishWords text={example.line.en}/></b>
           <span className="fd1-study-translation" lang="pt-BR">{example.line.pt}</span>
         </figcaption>
@@ -233,7 +226,7 @@ export function SequelMoment({ page, portrait, frame, exercise, readingLanguage,
   const challenge = page.kind === "Desafio";
   const bankLanguage = challenge ? "en" : exerciseLanguage;
   if (exercise) return <Exercise key={`${bankLanguage}:${count}`} panel={panel} portrait={portrait} exercise={exercise}
-    lang={bankLanguage === "en" ? "en" : "pt"} instructionLang={lang} controlLang={challenge ? "pt" : lang}
+    lang={bankLanguage === "en" ? "en" : "pt"}
     guided={page.kind === "História" || Boolean(page.closing && frame === 1)}
     placed={attempt?.language === bankLanguage ? attempt.placed : []} onEdit={onEdit} onSolve={onSolve} cue={cue}/>;
 
@@ -242,6 +235,6 @@ export function SequelMoment({ page, portrait, frame, exercise, readingLanguage,
       <SpokenLine panel={panel} lang={challenge ? "en" : lang}/>
     </StoryPanel> : <ArtOnly art={panel.art}/>}
     {page.kind === "Desafio" && (!page.closing || frame === page.closing.length - 1) &&
-      <output className="fd-sequel-confirmation" role="status" lang="pt-BR">{page.confirmation.pt}</output>}
+      <output className="fd-sequel-confirmation" role="status" lang="pt-BR">{page.confirmation}</output>}
   </section>;
 }

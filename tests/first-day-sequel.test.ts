@@ -109,7 +109,7 @@ describe("the last three parts of First Day", () => {
       "Amanhã, na hora do almoço", "Aqui mesmo", "Valeu, pessoal! Tenho que ir. Mas até amanhã, hein?", "Tchau! Até amanhã!",
     ]);
     expect(getSequelSteps(challenge(5)).map(step => step.panelIndex)).toEqual([0, 0, 0, 1]);
-    expect(sequelPages.find(page => page.part === 5 && page.kind === "Explicação")?.caption.pt).toContain("Tenho que ir");
+    expect(sequelPages.find(page => page.part === 5 && page.kind === "Explicação")?.caption).toContain("Ao sair, diga");
     expect(challenge(5).closing?.map(panel => panel.line?.pt)).toEqual([
       "Valeu, pessoal! Tenho que ir. Mas até amanhã, hein?", "Tchau! Até amanhã!", undefined,
     ]);

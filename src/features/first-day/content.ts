@@ -1,6 +1,6 @@
 import { examplesCopy, narration, permissionRuleCopy } from "./narration";
 import type { DialogueClip, FirstDayWord, NarrationClip, StudyDialogueClip } from "./narration";
-import { partTwoPages, type Bilingual, type PartTwoPage } from "./part-two-content";
+import { partTwoPages, type PartTwoPage } from "./part-two-content";
 import { sequelPages, type SequelPage } from "./sequel-content";
 
 export type FirstDayArt = {
@@ -113,13 +113,13 @@ export type RulePage = PageBase & {
   narration: NarrationClip;
   lead: string;
   detail: string;
-  pieces: readonly (RuleToken & { meaning: Bilingual })[];
+  pieces: readonly (RuleToken & { meaning: string })[];
   examples: readonly (IllustratedPanel & { tokens: readonly RuleToken[]; translation: string; voice: StudyDialogueClip })[];
 };
 
 export type ChallengePage = StoryPage & WordSequence & {
   kind: "Desafio";
-  instruction: Record<"en" | "pt", NarrationClip>;
+  instruction: "door-instruction-pt";
   translationVoice: NarrationClip;
   voice: DialogueClip;
   reply: { speaker: string; voice: DialogueClip; translationVoice: NarrationClip };
@@ -155,7 +155,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     title: "Ana abre espaço",
     caption: narration["ana-looks-up"].translation,
     ...art.anaMakesRoom,
-    narration: "ana-looks-up",
+    narration: "ana-looks-up-pt",
     reply: { speaker: "Ana", translation: "Claro!", voice: "ana-sure" },
     tip: { title: "Outras formas de dizer «claro»", phrases: ["Of course!", "Go ahead.", "No problem."] },
   },
@@ -180,7 +180,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     title: "Ana se apresenta",
     caption: narration["ana-introduces-herself"].translation,
     ...art.anaIntroducesHerself,
-    narration: "ana-introduces-herself",
+    narration: "ana-introduces-herself-pt",
     reply: { speaker: "Ana", translation: "Eu sou a Ana.", voice: "ana-intro" },
     tip: { title: "Outras formas de se apresentar", phrases: ["You can call me Ana.", "I go by Ana."] },
   },
@@ -203,9 +203,9 @@ const firstPartPages: readonly FirstDayPage[] = [
     ...permissionRuleCopy,
     narration: "permission-rule",
     pieces: [
-      { line: "Can", tone: "can", meaning: { pt: "pedido", en: "permission" } },
-      { line: "I", tone: "person", meaning: { pt: "eu", en: "the speaker" } },
-      { line: "verbo", tone: "verb", meaning: { pt: "ação", en: "action" } },
+      { line: "Can", tone: "can", meaning: "pedido" },
+      { line: "I", tone: "person", meaning: "eu" },
+      { line: "verbo", tone: "verb", meaning: "ação" },
     ],
     examples: [
       { ...art.invitation, tokens: [{ line: "Can", tone: "can" }, { line: "I", tone: "person" }, { line: "sit", tone: "verb" }, { line: "here?", tone: "context" }], translation: "Posso sentar aqui?", voice: "example-seat" },
@@ -217,7 +217,7 @@ const firstPartPages: readonly FirstDayPage[] = [
     id: "close-the-door",
     kind: "Desafio",
     title: "Faça um pedido novo",
-    instruction: { en: "door-instruction-en", pt: "door-instruction-pt" },
+    instruction: "door-instruction-pt",
     ...art.door,
     words: ["Can", "I", "close", "the", "door?"],
     order: [4, 2, 0, 3, 1],
