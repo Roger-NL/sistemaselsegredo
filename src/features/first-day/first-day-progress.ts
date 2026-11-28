@@ -1,19 +1,24 @@
 import { pages, type FirstDayPage } from "./content";
+import { getSequelSteps, type SequelPage } from "./sequel-content";
+import { sequelWordBank } from "./sequel-word-bank";
 
 export type ChallengeAttempt = {
   placed: readonly number[];
   result?: "correct" | "incorrect";
   translated?: boolean;
   round?: 0 | 1;
+  language?: "en" | "pt-BR";
 };
 
 type FirstDayProgress = {
   position: number;
   chapterOpening?: ComicChapter;
   lessonFinished?: true;
+  demoCompleted?: true;
   tutorialSeen: boolean;
   counts: Record<string, number>;
   attempts: Record<string, ChallengeAttempt>;
+  frames?: Record<string, number>;
   sound: boolean;
   readingLanguage: "en" | "pt-BR";
 };
@@ -23,11 +28,19 @@ export type ComicChapter = Exclude<FirstDayPage["part"], 1>;
 
 export function chapterOpeningAt(position: number): ComicChapter | undefined {
   const page = pages[position - 1];
-  if (page && page.part !== 1 && page.kind !== "Em preparação" && pages[position - 2]?.part !== page.part) return page.part;
+  if (page && page.part !== 1 && pages[position - 2]?.part !== page.part) return page.part;
+}
+
+function legacySequelStepCount(page: SequelPage) {
+  if (page.kind === "Desafio") return page.exercises.length;
+  return page.id === "meet-leo-v2-greetings" || page.id === "borrow-comic-v2-request" ? 1 : 0;
 }
 
 const storageKey = "basedspeak:first-day:v1";
+export const firstDayReviewHref = "/first-day?rever=1";
 const partTwoRequestVersion = 3;
+const partFourRequestVersion = 1;
+const sequelActivityVersion = 2;
 const initialProgress: FirstDayProgress = {
   position: 0, tutorialSeen: false, counts: {}, attempts: {}, sound: true, readingLanguage: "en",
 };
@@ -49,10 +62,41 @@ function readProgress(): FirstDayProgress {
     const saved = readObject(JSON.parse(raw));
     const savedCounts = readObject(saved.counts);
     const savedAttempts = readObject(saved.attempts);
+    const savedFrames = readObject(saved.frames);
     const counts: FirstDayProgress["counts"] = {};
     const attempts: FirstDayProgress["attempts"] = {};
+    const frames: Record<string, number> = {};
+    const legacySequel = saved.sequelActivityVersion !== 1 && saved.sequelActivityVersion !== sequelActivityVersion;
+    const legacyPhrases = saved.sequelActivityVersion !== sequelActivityVersion;
 
     for (const page of pages) {
+      if ("edition" in page) {
+        const steps = getSequelSteps(page);
+        const panels = page.kind === "História" ? page.panels : page.kind === "Desafio" ? page.closing : undefined;
+        const frame = savedFrames[page.id];
+        if (panels && isIntegerBetween(frame, 0, panels.length - 1)) frames[page.id] = frame;
+        // The previous edition's existing exercises are still the first steps.
+        // A save from that edition cannot include the newly interactive lines.
+        const savedStepLimit = legacySequel ? legacySequelStepCount(page) : steps.length;
+        const count = savedCounts[page.id];
+        if (isIntegerBetween(count, 1, savedStepLimit)) counts[page.id] = count;
+        if (page.id === "borrow-comic-v2-challenge" && saved.partFourRequestVersion !== partFourRequestVersion) continue;
+        const completed = counts[page.id] ?? 0;
+        const exercise = completed < savedStepLimit ? steps[completed]?.exercise : undefined;
+        const { language, placed } = readObject(savedAttempts[page.id]);
+        if (exercise?.mode === "assemble" && (language === "en" || language === "pt-BR")) {
+          const lang = language === "en" ? "en" : "pt";
+          const bank = sequelWordBank(exercise.bank[lang], exercise.solution[lang]);
+          const maxLength = legacyPhrases ? exercise.solution[lang].length : bank.order.length;
+          const maxIndex = (legacyPhrases ? exercise.bank[lang].length : bank.words.length) - 1;
+          if (Array.isArray(placed) && placed.length > 0 && placed.length <= maxLength
+            && placed.every(index => isIntegerBetween(index, 0, maxIndex))
+            && new Set(placed).size === placed.length) {
+            attempts[page.id] = { language, placed: legacyPhrases ? placed.flatMap(index => bank.groups[index]) : placed };
+          }
+        }
+        continue;
+      }
       if (page.kind === "Ação") {
         const count = savedCounts[page.id];
         if (isIntegerBetween(count, 1, page.words.length)) counts[page.id] = count;
@@ -89,21 +133,27 @@ function readProgress(): FirstDayProgress {
       }
     }
 
-    const position = saved.pageId === undefined ? 0 : pages.findIndex(page => page.id === saved.pageId) + 1;
+    // Readers who reached the old ending resume before the new borrowing scene.
+    const legacyPart = typeof saved.pageId === "string"
+      ? /^meet-leo-\d+$/.test(saved.pageId) ? 3 : /^see-you-\d+$/.test(saved.pageId) ? 4 : undefined
+      : undefined;
+    const position = pages.findIndex(page => legacyPart ? page.part === legacyPart : page.id === saved.pageId) + 1;
     const readingLanguage = saved.readingLanguage === "pt-BR" ? "pt-BR" : initialProgress.readingLanguage;
     // Older saves recorded the lesson but not the prologue.
     const tutorialSeen = typeof saved.tutorialSeen === "boolean" ? saved.tutorialSeen
       : position > 0 || Object.keys(counts).length > 0 || Object.keys(attempts).length > 0;
     const opening = chapterOpeningAt(position);
-    const savedOpening = saved.chapterOpening ?? (saved.partTwoOpening === true ? 2 : undefined);
-    const currentPage = pages[position - 1];
-    const finalAttempt = attempts[currentPage?.id];
-    const lessonFinished = currentPage?.part === 4 && position === pages.length && saved.lessonFinished === true
-      && finalAttempt?.round === 1 && finalAttempt.result === "correct";
+    const savedOpening = legacyPart ?? saved.chapterOpening ?? (saved.partTwoOpening === true ? 2 : undefined);
+    const finalPage = pages.at(-1);
+    const finishedAtEnd = position === pages.length && saved.lessonFinished === true;
+    const demoCompleted = finalPage && "edition" in finalPage && counts[finalPage.id] === getSequelSteps(finalPage).length
+      && (saved.demoCompleted === true || finishedAtEnd);
     return {
       position, tutorialSeen, counts, attempts, sound: saved.sound !== false, readingLanguage,
+      ...(Object.keys(frames).length > 0 && { frames }),
       ...(opening !== undefined && opening === savedOpening && { chapterOpening: opening }),
-      ...(lessonFinished && { lessonFinished: true as const }),
+      ...(demoCompleted && { demoCompleted: true as const }),
+      ...(demoCompleted && finishedAtEnd && { lessonFinished: true as const }),
     };
   } catch {
     return initialProgress;
@@ -113,20 +163,26 @@ function readProgress(): FirstDayProgress {
 export function resetFirstDayProgress(progress: FirstDayProgress, target: FirstDayResetTarget): FirstDayProgress {
   if (target === "all") return { ...initialProgress, readingLanguage: progress.readingLanguage, sound: progress.sound };
 
+  const { frames: previousFrames, ...state } = progress;
   const counts = { ...progress.counts };
   const attempts = { ...progress.attempts };
+  const frames = { ...previousFrames };
   for (const page of pages) {
     if (page.part !== target) continue;
     delete counts[page.id];
     delete attempts[page.id];
+    delete frames[page.id];
   }
 
   const position = pages[progress.position - 1]?.part === target
     ? pages.findIndex(page => page.part === target) + 1
     : progress.position;
-  return { ...progress, position, counts, attempts,
+  const resetEnding = target === pages.at(-1)?.part;
+  return { ...state, position, counts, attempts,
+    ...(Object.keys(frames).length > 0 && { frames }),
     chapterOpening: target === progress.chapterOpening ? undefined : progress.chapterOpening,
-    lessonFinished: target === 4 ? undefined : progress.lessonFinished };
+    lessonFinished: resetEnding ? undefined : progress.lessonFinished,
+    demoCompleted: resetEnding ? undefined : progress.demoCompleted };
 }
 
 export function createFirstDayProgressStore() {
@@ -150,7 +206,7 @@ export function createFirstDayProgressStore() {
       const { position, ...answers } = next;
       const pageId = position === 0 ? null : pages[position - 1]?.id;
       try {
-        window.localStorage.setItem(storageKey, JSON.stringify({ ...answers, pageId, partTwoRequestVersion }));
+        window.localStorage.setItem(storageKey, JSON.stringify({ ...answers, pageId, partTwoRequestVersion, partFourRequestVersion, sequelActivityVersion }));
       } catch {
         // Keep the lesson usable if storage is disabled or full.
       }

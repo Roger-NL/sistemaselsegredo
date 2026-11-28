@@ -8,7 +8,12 @@ import { type FirstDayArt, storyImage } from "./content";
 type Story = { id: string; image: FirstDayArt; portraitImage: FirstDayArt };
 type Point = readonly [x: number, y: number];
 type Oval = readonly [centerX: number, centerY: number, width: number, height: number];
-type Print = { mouth?: Point; headTop: number; oval: Oval; completed?: Oval };
+type Print = {
+  mouth?: Point; headTop: number; oval: Oval; completed?: Oval;
+  space?: readonly [left: number, top: number, right: number, bottom: number];
+  readingOrder?: "row" | "stack";
+  tailBeat?: 0 | 1;
+};
 export type BalloonPrint = { desktop: Print; portrait: Print };
 
 // Mouth, head top and oval center are fractions of the original illustration. The oval
@@ -60,6 +65,83 @@ function comicBalloonOutline(cx: number, cy: number, rx: number, ry: number, mou
     V ${top + radius} Q ${left} ${top} ${left + radius} ${top} Z`;
 }
 
+type BalloonBounds = { left: number; top: number; right: number; bottom: number };
+
+function pointedBalloon({ left, top, right, bottom }: BalloonBounds, mouth?: Point, sideBias = 0) {
+  const radius = Math.min(20, (bottom - top) * .32, (right - left) * .18);
+  const edges: readonly [Point, Point][] = [
+    [[left + radius, top], [right - radius, top]],
+    [[right, top + radius], [right, bottom - radius]],
+    [[right - radius, bottom], [left + radius, bottom]],
+    [[left, bottom - radius], [left, top + radius]],
+  ];
+  const [x, y] = mouth ?? [left, top];
+  const distances = [top - y, x - right, y - bottom, left - x];
+  const side = mouth ? distances.indexOf(Math.max(...distances)) : -1;
+  const lines = edges.map(([[ax, ay], [bx, by]], index) => {
+    const plain = `L ${bx} ${by}`;
+    if (index !== side || distances[index] < 8) return plain;
+    const length = Math.hypot(bx - ax, by - ay);
+    if (length < 15) return plain;
+    const ux = (bx - ax) / length, uy = (by - ay) / length;
+    const bias = index === 0 || index === 2 ? ux * sideBias : 0;
+    const at = Math.max(7, Math.min(length - 7, (x - ax) * ux + (y - ay) * uy + bias));
+    const cx = ax + at * ux, cy = ay + at * uy;
+    const reach = Math.hypot(x - cx, y - cy);
+    const tip = Math.min(.92, 145 / reach, (reach - 10) / reach);
+    return `L ${cx - ux * 6} ${cy - uy * 6} L ${cx + (x - cx) * tip} ${cy + (y - cy) * tip} L ${cx + ux * 6} ${cy + uy * 6} ${plain}`;
+  });
+  return `M ${left + radius} ${top} ${lines[0]} Q ${right} ${top} ${right} ${top + radius}
+    ${lines[1]} Q ${right} ${bottom} ${right - radius} ${bottom}
+    ${lines[2]} Q ${left} ${bottom} ${left} ${bottom - radius}
+    ${lines[3]} Q ${left} ${top} ${left + radius} ${top} Z`;
+}
+
+function placeLettering(panel: HTMLDivElement, copy: HTMLDivElement, path: SVGPathElement, print: Print,
+  imageW: number, imageH: number, portrait: boolean) {
+  if (!print.space) return;
+  const w = panel.clientWidth, h = panel.clientHeight;
+  const xOffset = (w - imageW) / 2;
+  const crop = Math.max(0, imageH - h);
+  const topCrop = Math.min(crop / 2, print.headTop * imageH);
+  panel.style.setProperty("--fd1-image-position-y", `${crop ? (100 * topCrop) / crop : 50}%`);
+
+  const [left, top, right, bottom] = print.space;
+  const start = Math.max(8, xOffset + left * imageW);
+  const end = Math.min(w - 8, xOffset + right * imageW);
+  const preferred = print.oval[2] * (portrait ? w / 366 : w / 1280);
+  const width = Math.min(w - 16, Math.max(112, Math.min(end - start, preferred)));
+  const x = Math.max(8, Math.min(w - width - 8, (start + end - width) / 2));
+  copy.style.width = `${width}px`;
+  copy.style.left = `${x}px`;
+  const height = copy.offsetHeight;
+  const y = Math.max(8, Math.min(top * imageH - topCrop, h - height - 8, bottom * imageH - topCrop - height));
+  copy.style.top = `${y}px`;
+
+  const beats = Array.from(copy.querySelectorAll<HTMLElement>("[data-fd-dialogue-beat]"));
+  const boxes = beats.length > 1 ? beats.map(beat => ({
+    left: x + beat.offsetLeft, top: y + beat.offsetTop,
+    right: x + beat.offsetLeft + beat.offsetWidth, bottom: y + beat.offsetTop + beat.offsetHeight,
+  })) : [{ left: x, top: y, right: x + width, bottom: y + height }];
+  const mouth = print.mouth && [xOffset + print.mouth[0] * imageW, print.mouth[1] * imageH - topCrop] as const;
+  const distanceToMouth = ({ left, top, right, bottom }: BalloonBounds) => mouth
+    ? Math.hypot(Math.max(left - mouth[0], 0, mouth[0] - right), Math.max(top - mouth[1], 0, mouth[1] - bottom))
+    : Infinity;
+  const tail = boxes[print.tailBeat ?? -1] ??
+    boxes.reduce((closest, box) => distanceToMouth(box) < distanceToMouth(closest) ? box : closest);
+  const sideBias = mouth ? Math.min(portrait ? 33 : 52, width * .23) * (mouth[0] < w / 2 ? 1 : -1) : 0;
+  const [first, second] = boxes;
+  let link = "";
+  if (second && print.readingOrder === "stack") {
+    const center = (first.left + first.right) / 2;
+    link = `M ${center - 5} ${first.bottom - 1} H ${center + 5} V ${second.top + 1} H ${center - 5} Z`;
+  } else if (second) {
+    const center = (Math.max(first.top, second.top) + Math.min(first.bottom, second.bottom)) / 2;
+    link = `M ${first.right - 1} ${center - 5} H ${second.left + 1} V ${center + 5} H ${first.right - 1} Z`;
+  }
+  path.setAttribute("d", link + " " + boxes.map(box => pointedBalloon(box, box === tail ? mouth : undefined, sideBias)).join(" "));
+}
+
 export function StoryPanel({ page, portrait, expanded = false, placement, variant, children }: {
   page: Story; portrait: boolean; expanded?: boolean; placement?: BalloonPrint; variant?: "dialogue" | "exercise"; children: ReactNode;
 }) {
@@ -80,6 +162,10 @@ export function StoryPanel({ page, portrait, expanded = false, placement, varian
       if (!w || !h) return;
       const cover = Math.max(w / image.width, h / image.height);
       const imageW = image.width * cover, imageH = image.height * cover;
+      if (print.space) {
+        placeLettering(panel, copy, path, print, imageW, imageH, portrait);
+        return;
+      }
       const scale = portrait ? Math.min(1.42, Math.max(.86, w / 366)) : Math.min(1.25, Math.max(placement ? .38 : .55, w / 1600));
       const preferredWidth = variant !== "dialogue" ? width * scale
         : portrait ? Math.max(Math.min(136, w * .435), width * Math.min(1.42, w / 366))
@@ -136,7 +222,8 @@ export function StoryPanel({ page, portrait, expanded = false, placement, varian
   return <div className="fd-scene fd1-scene" ref={frame}>
     <Image className="fd-room fd1-illustration" src={image.src} width={image.width} height={image.height} alt={image.alt} loading="eager" unoptimized />
     <svg className="fd1-balloon-outline" aria-hidden="true"><path ref={outline} /></svg>
-    <div ref={balloon} className="fd1-balloon" data-balloon={variant}>{children}</div>
+    <div ref={balloon} className="fd1-balloon" data-balloon={variant}
+      data-fd-lettering={print.space ? print.readingOrder ?? "row" : undefined}>{children}</div>
   </div>;
 }
 

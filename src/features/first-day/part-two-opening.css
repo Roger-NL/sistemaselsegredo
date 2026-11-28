@@ -6,19 +6,30 @@
 }
 
 .fd-chapter-sheet {
+  --fd-chapter-edge: clamp(16px, 5vw, 42px);
+  position: relative;
+  isolation: isolate;
   display: grid;
   place-items: center;
   min-block-size: 0;
   margin: clamp(11px, 2.4vmin, 32px) clamp(12px, 3.7vw, 60px);
   padding: clamp(14px, 3vw, 42px);
-  border: 2px solid #25392b;
-  border-inline-start-width: clamp(8px, 2vw, 26px);
-  border-radius: 4px 10px 10px 4px;
-  box-shadow: 4px 4px 0 #25392b;
+}
+
+.fd-chapter-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background-color: #fff7e8;
   background-image: linear-gradient(rgb(255 247 232 / 26%), rgb(255 247 232 / 42%)), url("./manga-paper.webp");
   background-position: center 32%;
   background-size: cover;
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 var(--fd-chapter-edge), #000 calc(100% - var(--fd-chapter-edge)), transparent),
+    linear-gradient(to right, transparent, #000 var(--fd-chapter-edge), #000 calc(100% - var(--fd-chapter-edge)), transparent);
+  mask-composite: intersect;
 }
 
 .fd-chapter-copy {

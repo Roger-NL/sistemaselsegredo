@@ -1,8 +1,7 @@
 import { examplesCopy, narration, permissionRuleCopy } from "./narration";
-import type { DialogueClip, FirstDayWord, NarrationClip } from "./narration";
-import { partTwoPages, type PartTwoPage } from "./part-two-content";
-import { partThreePages } from "./part-three-content";
-import { partFourPages } from "./part-four-content";
+import type { DialogueClip, FirstDayWord, NarrationClip, StudyDialogueClip } from "./narration";
+import { partTwoPages, type Bilingual, type PartTwoPage } from "./part-two-content";
+import { sequelPages, type SequelPage } from "./sequel-content";
 
 export type FirstDayArt = {
   src: string;
@@ -13,6 +12,7 @@ export type FirstDayArt = {
 
 export const cleanReadingMedia = "(max-width: 759px) and (orientation: portrait)";
 export const partOnePortraitMedia = "(max-width: 959px) and (orientation: portrait)";
+export const tallComicStripMedia = "(min-width: 960px) and (max-aspect-ratio: 5/3)";
 
 export const coverSources = [
   { media: "(min-aspect-ratio: 4/3)", src: "/first-day/art-v2/capa-gibi-desktop.webp" },
@@ -95,7 +95,7 @@ type ExamplePanel = IllustratedPanel & {
   context: string;
   line: string;
   translation: string;
-  voice: DialogueClip;
+  voice: StudyDialogueClip;
 };
 
 export type ExamplesPage = PageBase & {
@@ -113,8 +113,8 @@ export type RulePage = PageBase & {
   narration: NarrationClip;
   lead: string;
   detail: string;
-  pieces: readonly (RuleToken & { meaning: string })[];
-  examples: readonly (IllustratedPanel & { tokens: readonly RuleToken[]; translation: string; voice: DialogueClip })[];
+  pieces: readonly (RuleToken & { meaning: Bilingual })[];
+  examples: readonly (IllustratedPanel & { tokens: readonly RuleToken[]; translation: string; voice: StudyDialogueClip })[];
 };
 
 export type ChallengePage = StoryPage & WordSequence & {
@@ -125,8 +125,7 @@ export type ChallengePage = StoryPage & WordSequence & {
   reply: { speaker: string; voice: DialogueClip; translationVoice: NarrationClip };
 };
 
-type PreviewPage = PageBase<3 | 4> & { kind: "Em preparação"; moment: string };
-export type FirstDayPage = GuidedPage | ReactionPage | ExamplesPage | RulePage | ChallengePage | PartTwoPage | PreviewPage;
+export type FirstDayPage = GuidedPage | ReactionPage | ExamplesPage | RulePage | ChallengePage | PartTwoPage | SequelPage;
 
 export function usesCleanReading(page: FirstDayPage | undefined): page is GuidedPage | ReactionPage | ChallengePage {
   return page?.part === 1 && (page.kind === "Ação" || page.kind === "Reação" || page.kind === "Desafio");
@@ -204,9 +203,9 @@ const firstPartPages: readonly FirstDayPage[] = [
     ...permissionRuleCopy,
     narration: "permission-rule",
     pieces: [
-      { line: "Can", tone: "can", meaning: "pedido" },
-      { line: "I", tone: "person", meaning: "eu" },
-      { line: "verbo", tone: "verb", meaning: "ação" },
+      { line: "Can", tone: "can", meaning: { pt: "pedido", en: "permission" } },
+      { line: "I", tone: "person", meaning: { pt: "eu", en: "the speaker" } },
+      { line: "verbo", tone: "verb", meaning: { pt: "ação", en: "action" } },
     ],
     examples: [
       { ...art.invitation, tokens: [{ line: "Can", tone: "can" }, { line: "I", tone: "person" }, { line: "sit", tone: "verb" }, { line: "here?", tone: "context" }], translation: "Posso sentar aqui?", voice: "example-seat" },
@@ -231,6 +230,7 @@ const firstPartPages: readonly FirstDayPage[] = [
 export const pages: readonly FirstDayPage[] = [
   ...firstPartPages,
   ...partTwoPages,
-  ...partThreePages,
-  ...partFourPages,
+  ...sequelPages,
 ];
+
+export const firstDayPartCount = new Set(pages.map(page => page.part)).size;

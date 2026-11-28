@@ -17,6 +17,29 @@ export const permissionRuleCopy = {
   detail: "Depois de Can I, diga o que você quer fazer. Por exemplo, sentar ou abrir.",
 } as const;
 
+export const explanationEnglish = {
+  1: {
+    title: "Ask for permission",
+    caption: "“Can I…?” is a way to ask for permission.\nAfter “Can I”, say what you want to do, like sit down or open something.",
+  },
+  2: {
+    title: "Who does what?",
+    caption: "The word after “can” shows who does the action.\nUse the base verb next, like “see” or “show”.",
+  },
+  3: {
+    title: "When someone introduces you",
+    caption: "Ana introduces Rafael by saying “This is Rafael.”\nRafael says “Hello, Leo” and they both say “Nice to meet you.”",
+  },
+  4: {
+    title: "How to ask to borrow something",
+    caption: "To borrow the comic, ask “Would you lend me this one?”\nTo confirm you can take it today, ask “Can I take this one today?”",
+  },
+  5: {
+    title: "How to make plans and say goodbye",
+    caption: "“Tomorrow at lunch” says when and “Right here” says where.\nBefore leaving, say “Thanks, everyone!”, “I have to go” and “See you tomorrow!”",
+  },
+} as const;
+
 const anaIntroductionCaption = "Ana dá um sorriso e se apresenta.";
 
 export const narration = {
@@ -73,6 +96,7 @@ export const dialogue = {
 } as const;
 
 export type DialogueClip = keyof typeof dialogue;
+export type StudyDialogueClip = Extract<DialogueClip, `example-${string}`>;
 
 export const wordVoices = {
   "Hi,": "word-hi", can: "word-can", Can: "word-can", I: "word-i", sit: "word-sit",

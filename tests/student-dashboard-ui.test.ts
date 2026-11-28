@@ -18,6 +18,8 @@ vi.mock("@/features/first-encounters/LessonAccountPanels", () => ({ LessonAccoun
 import { Dashboard } from "@/features/dashboard/Dashboard";
 import { PublicDashboard } from "@/features/dashboard/PublicDashboard";
 import { TeacherContact, TeacherThread } from "@/features/dashboard/TeacherContact";
+import { pages } from "@/features/first-day/content";
+import { getSequelSteps } from "@/features/first-day/sequel-content";
 
 let root: Root, host: HTMLDivElement;
 beforeEach(() => {
@@ -55,11 +57,47 @@ describe("the main account dashboard", () => {
     expect(host.querySelector("details")?.open).toBe(false);
     expect(host.querySelector(".catalog-cta")?.getAttribute("href")).toBe("/first-day");
     expect(host.textContent).toContain("Continuar leitura");
-    await click(tab("avanco")); expect(host.textContent).toContain("Página 4 de 22");
+    await click(tab("avanco")); expect(host.textContent).toContain(`Página 4 de ${pages.length}`);
     expect(host.textContent).toContain("18 de 49 etapas concluídas no percurso anterior.");
     await click(tab("atividades")); expect(host.textContent).toContain("Atividade registrada");
     await click(tab("contato")); expect(host.querySelector('[data-account-section="teacher"]')).not.toBeNull();
     await click(tab("aula-ao-vivo")); expect(host.querySelector('[data-account-section="live"]')).not.toBeNull();
+  });
+  it("gives upcoming covers touch feedback and releases it when a swipe starts", async () => {
+    await act(async () => root.render(createElement(PublicDashboard)));
+    const [book, otherBook] = host.querySelectorAll(".catalog-book");
+    const cover = book.querySelector(".catalog-book-cover")!;
+    const touch = (type: string) => new PointerEvent(type, {
+      bubbles: true, cancelable: true, pointerType: "touch", isPrimary: true, button: 0,
+    });
+
+    expect(cover.dispatchEvent(touch("pointerdown"))).toBe(true);
+    expect(book.hasAttribute("data-pressed")).toBe(true);
+    expect(otherBook.hasAttribute("data-pressed")).toBe(false);
+    cover.dispatchEvent(touch("pointercancel"));
+    expect(book.hasAttribute("data-pressed")).toBe(false);
+
+    cover.dispatchEvent(touch("pointerdown"));
+    cover.dispatchEvent(touch("pointerup"));
+    expect(book.hasAttribute("data-pressed")).toBe(false);
+  });
+  it("shows completed First Day in the public and account catalogs", async () => {
+    const finalPage = pages.at(-1)!;
+    if (!("edition" in finalPage)) throw new Error("Missing final challenge");
+    const save = { pageId: finalPage.id, sequelActivityVersion: 2, counts: { [finalPage.id]: getSequelSteps(finalPage).length } };
+    localStorage.setItem("basedspeak:first-day:v1", JSON.stringify(save));
+    await act(async () => root.render(createElement(PublicDashboard)));
+    expect(host.querySelector(".catalog-feature-completed")).toBeNull();
+
+    localStorage.setItem("basedspeak:first-day:v1", JSON.stringify({ ...save, lessonFinished: true }));
+    await act(async () => window.dispatchEvent(new Event("pageshow")));
+    expect(host.querySelector(".catalog-feature-completed")?.textContent?.trim()).toBe("Demo completa");
+    expect(host.querySelector(".catalog-review")?.textContent?.trim()).toBe("Rever a aula");
+    expect(host.querySelector(".catalog-review")?.getAttribute("href")).toBe("/first-day?rever=1");
+    await mount();
+    expect(host.querySelector(".catalog-feature-completed")?.textContent?.trim()).toBe("Demo completa");
+    await click(tab("avanco"));
+    expect(host.querySelector(".student-progress-card")?.textContent).toContain("Demo completa");
   });
   it("keeps the reading action while showing an actual booking and opening the teacher reply", async () => {
     mocks.state!.workspace!.liveClass = { id: "booking", userId: "student", studentName: "Julia", studentEmail: "julia@example.com", start: "2026-12-01T14:00:00Z", end: "2026-12-01T15:00:00Z", timezone: "UTC", status: "confirmed", revision: 1, createdAt: "2026-11-17", updatedAt: "2026-11-17", reason: "", meetingUrl: "" };

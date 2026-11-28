@@ -6,7 +6,7 @@ import { DragSource, DropTarget, LessonDragProvider, useLessonDrag } from "../fi
 import type { LessonSoundCue } from "../first-encounters/lesson-sounds";
 import type { ChallengeAttempt } from "./first-day-progress";
 import type { Bilingual, PartTwoPage, PartTwoArt } from "./part-two-content";
-import { partOnePortraitMedia } from "./content";
+import { partOnePortraitMedia, tallComicStripMedia } from "./content";
 import { EnglishWords, MeaningContext } from "./WordMeaning";
 import { StoryPanel, type BalloonPrint } from "./StoryPanel";
 
@@ -44,9 +44,10 @@ const unanchored = {
   portrait: { headTop: .12, oval: [.5, .12, 248, 67], completed: [.5, .12, 285, 88] },
 } satisfies BalloonPrint;
 
-function StudyArt({ image, portraitImage }: PartTwoArt) {
+export function StudyArt({ image, portraitImage, strip = false }: PartTwoArt & { strip?: boolean }) {
   return <picture className="fd1-study-art">
-    <source media={partOnePortraitMedia} srcSet={portraitImage.src} width={portraitImage.width} height={portraitImage.height}/>
+    <source media={strip ? `${partOnePortraitMedia}, ${tallComicStripMedia}` : partOnePortraitMedia}
+      srcSet={portraitImage.src} width={portraitImage.width} height={portraitImage.height}/>
     <Image src={image.src} width={image.width} height={image.height} alt={image.alt} loading="eager" unoptimized/>
   </picture>;
 }
@@ -169,10 +170,10 @@ function ComicActionMoment({ page, count, onPlace, cue, portrait, readingLanguag
   </LessonDragProvider>;
 }
 
-function ComicStrip({ page, readingLanguage }: Pick<Props, "readingLanguage"> & { page: Extract<PartTwoPage, { kind: "Tirinha" }> }) {
+export function ComicStrip({ page, readingLanguage }: Pick<Props, "readingLanguage"> & { page: Pick<Extract<PartTwoPage, { kind: "Tirinha" }>, "title" | "panels"> }) {
   return <section className="fd-examples fd1-strip fd2-study" aria-label={page.title}>
     {page.panels.map(panel => <figure key={panel.line.en} className="fd1-study-panel">
-      <StudyArt {...panel.art}/>
+      <StudyArt {...panel.art} strip/>
       <figcaption>
         <span className="fd1-study-label"><ReadingText text={panel.context} language={readingLanguage}/></span>
         <StudyCaption translation={panel.line.pt}><EnglishWords text={panel.line.en}/></StudyCaption>
@@ -184,8 +185,8 @@ function ComicStrip({ page, readingLanguage }: Pick<Props, "readingLanguage"> & 
 const ruleTones = ["can", "person", "verb", "context"] as const;
 
 function ComicRule({ page, readingLanguage }: Pick<Props, "readingLanguage"> & { page: Extract<PartTwoPage, { kind: "Explicação" }> }) {
-  return <section className="fd-rule fd1-rule fd2-study fd2-rule" aria-label={page.title}>
-    <ul className="fd1-rule-formula fd2-formula" aria-label="Partes da frase">
+  return <section className="fd-rule fd1-rule" aria-label={page.title}>
+    <ul className="fd1-rule-formula" aria-label="Partes da frase">
       {page.pieces.map((piece, index) => <Fragment key={piece.token}>
         {index > 0 && <li className="fd1-rule-plus" aria-hidden="true">+</li>}
         <li className="fd1-rule-piece" data-tone={ruleTones[index]}>
@@ -194,7 +195,7 @@ function ComicRule({ page, readingLanguage }: Pick<Props, "readingLanguage"> & {
         </li>
       </Fragment>)}
     </ul>
-    <ol className="fd1-rule-examples fd2-rule-examples" aria-label="Exemplos da regra">
+    <ol className="fd1-rule-examples" aria-label="Exemplos da regra">
       {page.examples.map(example => {
         const tokens = example.tokens ?? example.line.en.split(" ").map((text, piece) => ({ text, piece }));
         return <li key={example.line.en} className="fd1-study-panel">
@@ -206,7 +207,7 @@ function ComicRule({ page, readingLanguage }: Pick<Props, "readingLanguage"> & {
                 : <strong data-tone={ruleTones[piece]}><EnglishWords text={text}/></strong>}
             </Fragment>)}
           </StudyCaption>
-          <p className="fd2-rule-note"><ReadingText text={example.explanation} language={readingLanguage}/></p>
+          <p className="fd1-rule-note"><ReadingText text={example.explanation} language={readingLanguage}/></p>
         </li>;
       })}
     </ol>
@@ -247,9 +248,8 @@ function PartialRequest({ page, attempt, onAttempt, cue, portrait, readingLangua
     en: `${start} ${subject} ${verb} ${article} ${end}`,
     pt: round.translation,
   };
-  const feedback = showHint ? request.answerHint
-    : result === "incorrect" ? round.retryHint
-    : { en: "Fill the two boxes.", pt: "Complete os dois quadradinhos." };
+  const feedback = showHint ? request.answerHint.pt
+    : result === "incorrect" ? round.retryHint.pt : "Complete os dois quadradinhos.";
 
   function edit(next: readonly number[]) {
     lookup("");
@@ -281,7 +281,7 @@ function PartialRequest({ page, attempt, onAttempt, cue, portrait, readingLangua
       <StoryPanel page={{ id: page.id, ...art }} portrait={portrait} placement={art.placement ?? (solved ? placements.reveal : placements.challenge)}
         expanded={solved} variant={solved ? "dialogue" : "exercise"}>
         {solved ? <div className="fd1-bubble-body fd2-reply-balloon">
-          <small>Rafael</small><SpokenLine line={request.closing} language={readingLanguage}/>
+          <small>Rafael</small><SpokenLine line={request.closing} language="en"/>
         </div> : <div className="fd1-bubble-body fd2-request-bubble" role="group" aria-label="Balão de Rafael">
           <div className="fd2-request-sentence" lang="en">
             {round.solution.map((_, slot) => <Fragment key={slot}>
@@ -297,15 +297,15 @@ function PartialRequest({ page, attempt, onAttempt, cue, portrait, readingLangua
         </div>}
       </StoryPanel>
       {solved ? <div className="fd1-story-strip fd2-reply fd2-request-solved" role="status">
-        <CompletedLine line={line} language={readingLanguage}/>
-        <CompletedLine line={request.reply} language={readingLanguage} speaker="Ana"/>
+        <CompletedLine line={line} language="en"/>
+        <CompletedLine line={request.reply} language="en" speaker="Ana"/>
         <strong>Você completou o diálogo!</strong>
       </div> : <div className="fd1-story-strip fd2-challenge-controls">
-        <div className="fd2-instruction">
-          <p className="fd2-question"><ReadingText text={round.instruction} language={readingLanguage}/></p>
-          <p className="fd2-request-glossary">{request.glossary[readingLanguage === "en" ? "en" : "pt"]}</p>
-          <p className="fd2-instruction-help" data-result={result} aria-live="polite" lang={readingLanguage}>
-            {readingLanguage === "en" ? feedback.en : feedback.pt}
+        <div className="fd2-instruction" lang="pt-BR">
+          <p className="fd2-question" lang={readingLanguage}>{round.instruction[readingLanguage === "en" ? "en" : "pt"]}</p>
+          <p className="fd2-request-glossary">{request.glossary.pt}</p>
+          <p className="fd2-instruction-help" data-result={result} aria-live="polite">
+            {feedback}
           </p>
           {result === "incorrect" && !showHint && <button type="button" className="fd2-request-hint"
             onClick={() => setShowHint(true)}>Mais uma dica</button>}
@@ -326,11 +326,9 @@ function ComicChallenge({ page, attempt, onAttempt, cue, portrait, readingLangua
   const solved = result === "correct" && roundIndex === 1;
   const requestRound = page.rounds[0];
   const requestLine = { en: requestRound.solution.map(i => requestRound.bank[i]).join(" "), pt: requestRound.translation };
-  const directions = round.choice
-    ? { en: "Choose one option, then press Conferir.", pt: "Escolha uma opção e toque em Conferir." }
-    : { en: `Use ${round.solution.length} words. Select a word, then the bubble.`,
-        pt: `Use ${round.solution.length} palavras. Selecione uma e depois o balão.` };
-  const help = result === "incorrect" ? round.retryHint : directions;
+  const directions = round.choice ? "Escolha uma opção e toque em Conferir."
+    : `Use ${round.solution.length} palavras. Selecione uma e depois o balão.`;
+  const help = result === "incorrect" ? round.retryHint.pt : directions;
   const placement = round.art.placement ?? unanchored;
   const lookup = useContext(MeaningContext);
   function place(index: number) {
@@ -360,23 +358,23 @@ function ComicChallenge({ page, attempt, onAttempt, cue, portrait, readingLangua
         expanded={placed.length > 0} variant={solved ? "dialogue" : "exercise"}>
         {solved ? <div className="fd1-bubble-body fd2-reply-balloon" role="status">
           <small>{round.speaker ?? (round.choice ? "Resposta" : "Rafael")}</small>
-          <SpokenLine line={{ en: placed.map(i => round.bank[i]).join(" "), pt: round.translation }} language={readingLanguage}/>
+          <SpokenLine line={{ en: placed.map(i => round.bank[i]).join(" "), pt: round.translation }} language="en"/>
         </div> : round.choice ? <div className="fd1-bubble-body fd2-choice-preview">
           <span className="fd1-slots" lang="en">{placed.length ? <b>{round.bank[placed[0]]}</b> : <i aria-hidden="true"/>}</span>
         </div> : <Assembly words={round.bank} placed={placed} slots={round.solution.length} speaker={round.speaker}/>}
       </StoryPanel>
       {solved ? <div className="fd1-story-strip fd2-reply fd2-solved" role="status">
-        <CompletedLine line={requestLine} language={readingLanguage} speaker={requestRound.speaker ?? (requestRound.choice ? "Resposta" : "Rafael")}/>
+        <CompletedLine line={requestLine} language="en" speaker={requestRound.speaker ?? (requestRound.choice ? "Resposta" : "Rafael")}/>
         <strong>{round.choice ? "Você completou o desafio!" : "Você completou o diálogo!"}</strong>
       </div> : <div className="fd1-story-strip fd2-challenge-controls">
-        <div className="fd2-instruction" aria-live="polite" aria-atomic="true">
-          <strong>{roundIndex + 1} / {page.rounds.length} · <ReadingText text={round.label} language={readingLanguage}/></strong>
-          <p className="fd2-question"><ReadingText text={round.instruction} language={readingLanguage}/></p>
-          <p className="fd2-instruction-help" data-result={result} lang={readingLanguage}>
-            {readingLanguage === "en" ? help.en : help.pt}
+        <div className="fd2-instruction" lang="pt-BR" aria-live="polite" aria-atomic="true">
+          <strong>{roundIndex + 1} / {page.rounds.length} · {round.label.pt}</strong>
+          <p className="fd2-question" lang={readingLanguage}>{round.instruction[readingLanguage === "en" ? "en" : "pt"]}</p>
+          <p className="fd2-instruction-help" data-result={result}>
+            {help}
           </p>
         </div>
-        {round.choice ? <div className="fd1-words fd2-tray" role="group" aria-label="Escolhas do desafio" lang="en">
+        {round.choice ? <div className="fd1-words fd2-tray" data-choice role="group" aria-label="Escolhas do desafio" lang="en">
           {round.bank.map((choice, index) => <button type="button" key={choice} className="fd1-word"
             aria-pressed={placed[0] === index} onClick={() => edit([index])}>{choice}</button>)}
         </div> : <WordTray words={round.bank} order={round.bank.map((_, i) => i)} placed={placed}/>}

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Check, GripVertical, ArrowUp, MoreHorizontal, Pause, RotateCcw, Volume2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, GripVertical, ArrowUp, Lock, LockOpen, MoreHorizontal, Pause, RotateCcw, Volume2, X } from "lucide-react";
 import { Brand } from "@/components/ui/Brand";
 import { LessonButton } from "../first-encounters/LessonButton";
 import { COMIC_LESSON_STYLE } from "../first-encounters/lesson-comic-theme";
@@ -12,20 +12,23 @@ import { DragSource, DropTarget, LessonDragProvider } from "../first-encounters/
 import { createLessonSoundsEngine } from "../first-encounters/lesson-sounds";
 import type { LessonSoundCue } from "../first-encounters/lesson-sounds";
 import { useLessonSounds } from "../first-encounters/useLessonSounds";
-import { art, cleanReadingMedia, partOnePortraitMedia, coverSources, pages, usesCleanReading } from "./content";
+import { art, cleanReadingMedia, partOnePortraitMedia, coverSources, firstDayPartCount, pages, usesCleanReading } from "./content";
 import type { ChallengePage, CharacterReply, ExamplesPage, FirstDayArt, GuidedPage, ReactionPage, RulePage, WordSequence } from "./content";
 import { prologue, prologueOrder, doorCaptionPt, type PrologueStep } from "./prologue";
 import { EnglishWords, MeaningContext, meaningOf } from "./WordMeaning";
 import { PartTwoMoment } from "./PartTwoMoment";
+import { SequelMoment } from "./SequelMoment";
+import { getSequelSteps } from "./sequel-content";
 import { ChapterOpening, LessonEnding } from "./PartTwoOpening";
 import { FirstDayAudioChoice } from "./FirstDayAudioChoice";
 import { FirstDayProgressReset } from "./FirstDayProgressReset";
 import { FirstDragTutorial, StoryPanel } from "./StoryPanel";
+import { ReadAlongContext, ReadAlongText } from "./ReadAlongText";
 import { createFirstDayArtCache } from "./first-day-art";
 import { chapterOpeningAt, createFirstDayProgressStore, resetFirstDayProgress, type ChallengeAttempt, type ComicChapter, type FirstDayResetTarget } from "./first-day-progress";
 import { capturePanel, curlPanel, getTurnPanel, type PanelCapture } from "./page-curl";
-import { arrivalNarration, coverCopy, coverNarration, dialogue, FIRST_DAY_AUDIO_RATE, seatedNarration, narration, portugueseNarration, spokenDialogue, wordVoices } from "./narration";
-import type { DialogueClip, FirstDayVoiceClip, NarrationClip } from "./narration";
+import { arrivalNarration, coverCopy, coverNarration, dialogue, explanationEnglish, FIRST_DAY_AUDIO_RATE, seatedNarration, narration, portugueseNarration, spokenDialogue, wordVoices } from "./narration";
+import type { DialogueClip, FirstDayVoiceClip, NarrationClip, StudyDialogueClip } from "./narration";
 import { useFirstDayNarration } from "./useFirstDayNarration";
 import { useFirstDayPaperSound } from "./useFirstDayPaperSound";
 import { useFirstDayPullToRefresh } from "./useFirstDayPullToRefresh";
@@ -47,10 +50,17 @@ import "./first-day-part-one-study.css";
 import "./first-day-part-one-story.css";
 import "./first-day-tutorial.css";
 import "./part-two.css";
+import "./first-day-sequel.css";
+import "./first-day-challenge-theme.css";
 
 const previewSounds = createLessonSoundsEngine({ getStorage: () => undefined, playbackRate: FIRST_DAY_AUDIO_RATE });
 const bubbleTarget = "first-day-bubble";
+const readingPreviewMs = 5000;
 type VoicePlayer = ReturnType<typeof useFirstDayNarration>;
+
+function wordCount(text: string) {
+  return text.match(/\S+/g)?.length ?? 0;
+}
 
 function pageNarration(page: (typeof pages)[number] | undefined, englishVoice: boolean): readonly NarrationClip[] {
   if (page?.part !== 1) return [];
@@ -59,7 +69,7 @@ function pageNarration(page: (typeof pages)[number] | undefined, englishVoice: b
     case "Reação": return [englishVoice ? page.narration : portugueseNarration[page.narration] ?? page.narration];
     case "Tirinha":
     case "Explicação": return [page.narration];
-    case "Desafio": return [page.instruction[englishVoice ? "en" : "pt"]];
+    case "Desafio": return [page.instruction.pt];
     default: return [];
   }
 }
@@ -127,7 +137,8 @@ function SpeakButton({ clip, englishVoice = true, player, className, children, d
 
 function ReplyBalloon({ reply, player, englishVoice }: { reply: CharacterReply; player?: VoicePlayer; englishVoice: boolean }) {
   const line = <b className="fd1-spoken-line" lang={englishVoice ? "pt-BR" : "en"}>
-    {englishVoice ? reply.translation : <EnglishWords text={dialogue[reply.voice].text}/>}
+    <ReadAlongText track={spokenDialogue(reply.voice, !englishVoice)} glossary={!englishVoice}
+      text={englishVoice ? reply.translation : dialogue[reply.voice].text}/>
   </b>;
   return player ? <SpeakButton clip={reply.voice} englishVoice={englishVoice} player={player} className="fd1-bubble-body">{line}</SpeakButton>
     : <div className="fd1-bubble-body" role="group" aria-label={`Resposta de ${reply.speaker}`}>{line}</div>;
@@ -152,7 +163,7 @@ function WordStrip({ words, order, placed, nextWord }: WordSequence & {
     {order.map(index => <DragSource key={index}
       item={{ id: `word-${index}`, kind: "word", value: String(index), label: words[index] }}
       onClick={() => show(words[index])} disabled={placed.includes(index)} className={index === nextWord ? "fd1-word fd1-word-next" : "fd1-word"}>
-      {words[index]}
+      <ReadAlongText track={wordVoices[words[index]]} text={words[index]}/>
     </DragSource>)}
   </div>;
 }
@@ -168,7 +179,10 @@ function LearnerBalloon({ words, placed, translation, complete, locked = complet
 }) {
   const phrase = placed.map(index => words[index]).join(" ");
   if (complete) {
-    const line = <b className="fd1-spoken-line" lang={englishVoice ? "pt-BR" : "en"}>{englishVoice ? translation : <EnglishWords text={phrase}/>}</b>;
+    const line = <b className="fd1-spoken-line" lang={englishVoice ? "pt-BR" : "en"}>
+      {speech ? <ReadAlongText track={spokenDialogue(speech.clip, !englishVoice)} glossary={!englishVoice}
+        text={englishVoice ? translation ?? "" : phrase}/> : englishVoice ? translation : <EnglishWords text={phrase}/>}
+    </b>;
     return speech ? <SpeakButton {...speech} englishVoice={englishVoice} className="fd1-bubble-body">{line}</SpeakButton>
       : <div className="fd1-bubble-body" role="status">{line}</div>;
   }
@@ -236,12 +250,14 @@ function StudyArt({ image, portraitImage }: { image: FirstDayArt; portraitImage:
 }
 
 function StudyCaption({ clip, translation, voice, children }: {
-  clip: DialogueClip; translation: string; voice?: VoicePlayer; children: ReactNode;
+  clip: StudyDialogueClip; translation: string; voice?: VoicePlayer; children: ReactNode;
 }) {
   const translationId = `fd-study-translation-${clip}`;
   const copy = <>
     <span className="fd1-study-line" lang="en">{children}</span>
-    <span className="fd1-study-translation" id={translationId}>{translation}</span>
+    <span className="fd1-study-translation" id={translationId} lang="pt-BR">
+      <ReadAlongText track={`${clip}-pt`} text={translation}/>
+    </span>
   </>;
   return voice ? <SpeakButton className="fd1-study-caption" player={voice} clip={clip} descriptionId={translationId}>
     {copy}
@@ -255,21 +271,22 @@ function ExamplesMoment({ page, voice }: { page: ExamplesPage; voice?: VoicePlay
       <figcaption>
         <span className="fd1-study-label">{panel.context}</span>
         <StudyCaption clip={panel.voice} voice={voice} translation={panel.translation}>
-          <EnglishWords text={panel.line}/>
+          <ReadAlongText track={panel.voice} text={panel.line} glossary/>
         </StudyCaption>
       </figcaption>
     </figure>)}
   </section>;
 }
 
-function RuleMoment({ page, voice }: { page: RulePage; voice?: VoicePlayer }) {
+function RuleMoment({ page, voice, readingLanguage }: { page: RulePage; voice?: VoicePlayer; readingLanguage: "en" | "pt-BR" }) {
   return <section className="fd-rule fd1-rule" aria-label="Estrutura do pedido de permissão">
     <ul className="fd1-rule-formula" aria-label="Partes da frase">
       {page.pieces.map((piece, index) => <Fragment key={piece.line}>
         {index > 0 && <li className="fd1-rule-plus" aria-hidden="true">+</li>}
         <li className="fd1-rule-piece" data-tone={piece.tone}>
-          <b lang={piece.tone === "verb" ? undefined : "en"}>{piece.tone === "verb" ? piece.line : <EnglishWords text={piece.line}/>}</b>
-          <span>{piece.meaning}</span>
+          {piece.tone === "verb" ? <b lang={readingLanguage}>{readingLanguage === "en" ? "verb" : piece.line}</b>
+            : <b lang="en"><EnglishWords text={piece.line}/></b>}
+          <span lang={readingLanguage}>{piece.meaning[readingLanguage === "en" ? "en" : "pt"]}</span>
         </li>
       </Fragment>)}
     </ul>
@@ -278,7 +295,9 @@ function RuleMoment({ page, voice }: { page: RulePage; voice?: VoicePlayer }) {
         <StudyArt image={example.image} portraitImage={example.portraitImage} />
         <StudyCaption clip={example.voice} voice={voice} translation={example.translation}>
           {example.tokens.map((token, index) => <Fragment key={token.line}>
-            {index > 0 && " "}<strong data-tone={token.tone}><EnglishWords text={token.line}/></strong>
+            {index > 0 && " "}<strong data-tone={token.tone}>
+              <ReadAlongText track={example.voice} text={token.line} offset={index} glossary/>
+            </strong>
           </Fragment>)}
         </StudyCaption>
       </li>)}
@@ -290,7 +309,8 @@ const emptyAttempt: ChallengeAttempt = { placed: [] };
 
 function ChallengeReply({ reply, player, englishVoice }: { reply: ChallengePage["reply"]; player?: VoicePlayer; englishVoice: boolean }) {
   const line = <b lang={englishVoice ? "pt-BR" : "en"}>
-    {englishVoice ? narration[reply.translationVoice].text : <EnglishWords text={dialogue[reply.voice].text}/>}
+    <ReadAlongText track={englishVoice ? reply.translationVoice : reply.voice} glossary={!englishVoice}
+      text={englishVoice ? narration[reply.translationVoice].text : dialogue[reply.voice].text}/>
   </b>;
 
   return <section className="fd1-story-strip fd1-door-reply" aria-labelledby="fd-door-reply-speaker">
@@ -364,12 +384,14 @@ export function FirstDay() {
   const [imageCache] = useState(createFirstDayArtCache);
   const [artStatus, setArtStatus] = useState<"loading" | "retry" | null>(null);
   const navigationRequest = useRef({ id: 0 });
-  const { position: savedPosition, chapterOpening, lessonFinished, counts, attempts, sound, readingLanguage } = useSyncExternalStore(
+  const { position: savedPosition, chapterOpening, lessonFinished, counts, attempts, frames, sound } = useSyncExternalStore(
     progress.subscribe, progress.getSnapshot, progress.getServerSnapshot,
   );
-  const englishVoice = readingLanguage === "pt-BR";
-  const nextReadingLanguage = englishVoice ? "en" : "pt-BR";
-  const languageAction = englishVoice ? "Ler em inglês e ouvir em português" : "Ler em português e ouvir em inglês";
+  const [showAlternateLanguage, setShowAlternateLanguage] = useState(false);
+  const [languageAttentionDismissed, setLanguageAttentionDismissed] = useState(false);
+  const [unlockingChallenge, setUnlockingChallenge] = useState(false);
+  const readingPreviewTimer = useRef<number | undefined>(undefined);
+  const englishVoice = showAlternateLanguage;
   const position = Math.max(0, savedPosition);
   const portraitReading = useSyncExternalStore(subscribeToCleanReadingMedia, readCleanReadingMedia, () => false);
   const menu = useRef<HTMLDialogElement>(null);
@@ -404,11 +426,31 @@ export function FirstDay() {
     speech.play(clips, pauseMs);
   } };
   const page = pages[position - 1];
-  const comic = page && page.part !== 1 && page.kind !== "Em preparação" ? page : undefined;
-  const edition = page?.part === 1 || Boolean(comic);
+  const sequel = page && "edition" in page ? page : undefined;
+  const challengePage = page?.kind === "Desafio";
+  const activeChallenge = challengePage && !chapterOpening && !lessonFinished && !tutorial;
+  const exerciseLanguage = !challengePage && sequel ? attempts[sequel.id]?.language ?? "en" : "en";
+  const comic = page && page.part !== 1 && !("edition" in page) ? page : undefined;
+  const readingComic = comic ?? sequel;
+  const sequelCount = sequel ? counts[sequel.id] ?? 0 : 0;
+  const sequelSteps = sequel ? getSequelSteps(sequel) : [];
+  const sequelStep = sequelSteps[sequelCount];
+  const sequelPanels = sequel?.kind === "História" ? sequel.panels : sequel?.kind === "Desafio" ? sequel.closing : undefined;
+  const lastSequelFrame = Math.max(0, (sequelPanels?.length ?? 1) - 1);
+  const sequelFrame = sequel ? Math.min(frames?.[sequel.id] ?? 0, sequelStep?.panelIndex ?? lastSequelFrame) : 0;
+  const visibleSequelExercise = sequelStep && (sequelStep.panelIndex ?? 0) === sequelFrame ? sequelStep.exercise : undefined;
+  const hasNextFrame = sequelFrame < lastSequelFrame;
+  const edition = Boolean(page);
   const mobileHeader = edition ? editionPortrait : portraitReading;
   const cleanReading = editionPortrait && usesCleanReading(page);
   const readingPage = page?.part === 1 && (page.kind === "Tirinha" || page.kind === "Explicação") ? page : undefined;
+  const explanation = page?.kind === "Explicação" && !chapterOpening && !tutorial && !lessonFinished;
+  const defaultReadingLanguage = explanation ? "pt-BR" : "en";
+  const alternateReadingLanguage = explanation ? "en" : "pt-BR";
+  const readingLanguage = showAlternateLanguage ? alternateReadingLanguage : defaultReadingLanguage;
+  const doorQuestion = page?.part === 1 && page.kind === "Desafio" ? page.instruction[showAlternateLanguage ? "pt" : "en"] : undefined;
+  const captionLanguage = readingComic && challengePage ? "en" : explanation || readingComic || doorQuestion || page?.kind === "Ação" || page?.kind === "Reação"
+    ? readingLanguage : "pt-BR";
   const storyVoice = page?.kind === "Ação" || page?.kind === "Reação" || page?.kind === "Desafio";
   const captionClips = pageNarration(page, englishVoice);
   const comicAttempt = comic && attempts[comic.id];
@@ -416,21 +458,37 @@ export function FirstDay() {
     && (Boolean(comic.partialRequest) || comicAttempt.round === 1);
   const comicCaption = comic?.kind === "Ação" && counts[comic.id] === comic.words.length ? comic.replyCaption
     : comic?.kind === "Desafio" && (comicSolved || comicAttempt?.round === 1) ? (comicSolved && comic.completeCaption) || comic.revealCaption
-    : comic?.caption;
-  const caption = comicCaption ? comicCaption[readingLanguage === "en" ? "en" : "pt"]
-    : storyVoice ? pageNarration(page, !englishVoice).map(clip => narration[clip].text).join(" ")
+    : readingComic?.caption;
+  const caption = comicCaption ? comicCaption[captionLanguage === "en" ? "en" : "pt"]
     : readingPage?.kind === "Tirinha" ? readingPage.description
-    : readingPage?.kind === "Explicação" ? `${readingPage.lead} ${readingPage.detail}`
     : "";
+  const explanationCopy = explanation && readingLanguage === "en" ? explanationEnglish[page.part] : undefined;
+  const explanationLines = !explanation ? [] : readingPage?.kind === "Explicação" && !explanationCopy
+    ? [readingPage.lead, readingPage.detail] : (explanationCopy?.caption ?? caption).split("\n", 2);
+  const displayedTitle = explanationCopy?.title ?? (readingComic && readingLanguage === "en" && !challengePage ? readingComic.englishTitle : page?.title);
+  const readingTrack = readingPage?.kind === "Explicação" && explanationCopy ? "permission-rule-en" : readingPage?.narration;
   const chair = page?.part === 1 && page.kind === "Ação" ? page.detail : undefined;
-  const comicPending = comic?.kind === "Ação" ? (counts[comic.id] ?? 0) < comic.words.length
+  const forwardLocked = sequel ? Boolean(visibleSequelExercise)
+    : page?.part === 1 && page.kind === "Desafio" ? attempts[page.id]?.result !== "correct"
+    : comic?.kind === "Ação" ? (counts[comic.id] ?? 0) < comic.words.length
     : comic?.kind === "Desafio" && !comicSolved;
-  const finalChallenge = comic?.part === 4 && comic.kind === "Desafio" && position === pages.length;
+  const finalChallenge = sequel?.kind === "Desafio" && position === pages.length && !hasNextFrame;
   const nextPart = pages[position]?.part !== page?.part ? pages[position]?.part : undefined;
+  const forwardLabel = hasNextFrame ? "Próxima" : finalChallenge ? "Concluir aula" : nextPart ? `Ir para a Parte ${nextPart}`
+    : challengePage && !cleanReading ? "Continuar a história" : position < pages.length ? "Próxima" : "Voltar à capa";
   const playingCover = narrator.playing === "cover";
   const openMenu = () => menu.current?.showModal();
-  const leaveLesson = () => { menu.current?.close(); narrator.stop(); paperSound.stop(); };
+  const leaveLesson = () => { menu.current?.close(); stopReadingPreview(); narrator.stop(); paperSound.stop(); };
 
+  useLayoutEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("rever") !== "1") return;
+    progress.update(current => ({ ...current, position: 0, chapterOpening: undefined, lessonFinished: undefined }));
+    url.searchParams.delete("rever");
+    window.history.replaceState(window.history.state, "", url);
+  }, [progress]);
+
+  useEffect(() => () => window.clearTimeout(readingPreviewTimer.current), []);
   useEffect(() => {
     const requests = navigationRequest.current;
     return () => { requests.id++; };
@@ -461,13 +519,27 @@ export function FirstDay() {
       height: `${bounds.height}px`,
     });
     cancelTurn.current = curlPanel(sheet, turn.source, turn.direction);
-  }, [position, chapterOpening, lessonFinished]);
+  }, [position, chapterOpening, lessonFinished, sequelFrame]);
   useEffect(() => () => {
     cancelTurn.current?.();
   }, []);
 
-  function cue(effect: LessonSoundCue) {
+  function exerciseFeedback(effect: LessonSoundCue) {
+    setLanguageAttentionDismissed(true);
     if (sound && !narrator.playing) void sounds.play(effect);
+  }
+
+  function animateChallengeUnlock() {
+    if (activeChallenge && forwardLocked && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setUnlockingChallenge(true);
+    }
+  }
+
+  function prepareTurn(direction: 1 | -1) {
+    cancelTurn.current?.();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const source = capturePanel(getTurnPanel(book.current));
+    if (source) nextTurn.current = { direction, source };
   }
 
   function go(next: number, opening?: ComicChapter, finished?: true) {
@@ -476,27 +548,29 @@ export function FirstDay() {
     menu.current?.close();
     setLookedUp("");
     setTutorial(null);
+    stopReadingPreview();
     if (next === position && opening === chapterOpening && finished === lessonFinished) { narrator.stop(); return; }
+    setLanguageAttentionDismissed(false);
+    setUnlockingChallenge(false);
     setResetNotice(null);
     narrator.stop();
     paperSound.stop();
-    cancelTurn.current?.();
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      const source = capturePanel(getTurnPanel(book.current));
-      if (source) nextTurn.current = {
-        direction: next > position || (next === position && !opening && !lessonFinished) ? 1 : -1,
-        source,
-      };
-    }
-    const clips = opening || finished ? [] : next === 0 ? coverNarration
-      : sceneAudio(pages[next - 1], progress.getSnapshot().readingLanguage === "pt-BR");
+    prepareTurn(next > position || (next === position && !opening && !lessonFinished) ? 1 : -1);
+    const clips = opening || finished ? [] : next === 0 ? coverNarration : sceneAudio(pages[next - 1], false);
     if (sound && clips.length) {
       narrator.play(clips);
     }
     if (sound && !document.hidden) {
       paperSound.play(clips.length > 0);
     }
-    progress.update(previous => ({ ...previous, position: next, chapterOpening: opening, lessonFinished: finished }));
+    const destination = pages[next - 1];
+    progress.update(previous => ({
+      ...previous, position: next, chapterOpening: opening, lessonFinished: finished,
+      ...(finished && { demoCompleted: true }),
+      ...(next > position && destination && "edition" in destination &&
+        (destination.kind === "História" || destination.kind === "Desafio" && destination.closing) &&
+        { frames: { ...previous.frames, [destination.id]: 0 } }),
+    }));
 
   }
 
@@ -531,17 +605,31 @@ export function FirstDay() {
   }
 
   function resetReading(target: FirstDayResetTarget) {
+    stopReadingPreview();
     narrator.stop();
     paperSound.stop();
     progress.update(previous => resetFirstDayProgress(previous, target));
     setResetNotice(target);
   }
 
+  function stopReadingPreview() {
+    window.clearTimeout(readingPreviewTimer.current);
+    readingPreviewTimer.current = undefined;
+    setShowAlternateLanguage(false);
+  }
+
   function changeReadingLanguage() {
-    progress.update(previous => ({ ...previous, readingLanguage: nextReadingLanguage }));
-    if (!sound) return;
-    const clips = tutorial ? [nextReadingLanguage === "pt-BR" ? "tutorial-door-en" : "tutorial-door-pt"] as const
-      : sceneAudio(page, nextReadingLanguage === "pt-BR");
+    const preview = !showAlternateLanguage;
+    setLanguageAttentionDismissed(true);
+    stopReadingPreview();
+    setLookedUp("");
+    if (preview) {
+      setShowAlternateLanguage(true);
+      readingPreviewTimer.current = window.setTimeout(stopReadingPreview, readingPreviewMs);
+    }
+    if (!sound || explanation) return;
+    const clips = tutorial ? [preview ? "tutorial-door-en" : "tutorial-door-pt"] as const
+      : sceneAudio(page, preview);
     if (clips.length) narrator.play(clips);
   }
 
@@ -552,8 +640,10 @@ export function FirstDay() {
     const request = ++navigationRequest.current.id;
     if (opening) return go(next, opening);
     const destination = pages[next - 1];
-    let frame: 0 | 1 | undefined;
-    if (destination && destination.part !== 1 && destination.kind !== "Em preparação") {
+    let frame: number | undefined;
+    if (destination && "edition" in destination && (destination.kind === "História" || destination.kind === "Desafio")) {
+      frame = next > position ? 0 : frames?.[destination.id] ?? 0;
+    } else if (destination && destination.part !== 1 && !("edition" in destination)) {
       if (destination.kind === "Ação") frame = counts[destination.id] === destination.words.length ? 1 : 0;
       if (destination.kind === "Desafio") frame = attempts[destination.id]?.round ?? 0;
     }
@@ -567,21 +657,59 @@ export function FirstDay() {
     });
   }
 
+  function turnSequelFrame(next: number) {
+    if (!sequel || !sequelPanels?.[next]) return;
+    const pageId = sequel.id;
+    if (sound) paperSound.prepare();
+    const request = ++navigationRequest.current.id;
+    function commitFrame() {
+      if (request !== navigationRequest.current.id) return;
+      setArtStatus(null);
+      setLookedUp("");
+      stopReadingPreview();
+      setLanguageAttentionDismissed(false);
+      setUnlockingChallenge(false);
+      prepareTurn(next > sequelFrame ? 1 : -1);
+      if (sound && !document.hidden) paperSound.play(false);
+      progress.update(previous => ({ ...previous, frames: { ...previous.frames, [pageId]: next } }));
+    }
+    const loading = imageCache.prepare(position, next);
+    if (!loading) return commitFrame();
+    setArtStatus("loading");
+    void loading.then(ready => {
+      if (request !== navigationRequest.current.id) return;
+      if (ready.every(Boolean)) commitFrame();
+      else setArtStatus("retry");
+    });
+  }
+
   function turnBack() {
-    if (chapterOpeningAt(position) && !chapterOpening) turnTo(position, true);
+    if (sequelFrame > 0 && !chapterOpening) turnSequelFrame(sequelFrame - 1);
+    else if (chapterOpeningAt(position) && !chapterOpening) turnTo(position, true);
     else turnTo(position - 1);
   }
 
-  const languageLabel = comic ? (englishVoice ? "Ler em inglês" : "Ler em português") : languageAction;
-  const languageButton = <button type="button" className="fd1-language" aria-label={languageLabel} title={languageLabel}
-    onClick={changeReadingLanguage}>{englishVoice ? "Ler em EN" : "Ler em PT"}</button>;
+  const targetLanguage = showAlternateLanguage ? defaultReadingLanguage : alternateReadingLanguage;
+  const targetLanguageName = targetLanguage === "en" ? "inglês" : "português";
+  const languageLabel = showAlternateLanguage ? `Voltar a ler em ${targetLanguageName}` : `Ler em ${targetLanguageName} por 5 segundos`;
+  const languageAttention = activeChallenge ? "challenge" : "reading";
+  const languageButton = <div key={sequelFrame} className="fd1-language-preview"
+    data-fd-language-attention={languageAttentionDismissed || showAlternateLanguage ? undefined : languageAttention}>
+    <button type="button" className="fd1-language" aria-label={languageLabel} title={languageLabel}
+      onClick={changeReadingLanguage}>{targetLanguage === "en" ? "Ler em EN" : "Ler em PT"}</button>
+    {showAlternateLanguage && <span className="fd1-language-countdown" aria-hidden="true">
+      <span style={{ animationDuration: `${readingPreviewMs}ms` }}/>
+    </span>}
+  </div>;
   const readingControls = <div className="fd1-listen">
     {sound && captionClips.length > 0 && <NarrationButton clips={captionClips} player={narrator}
-      language={storyVoice && englishVoice ? "inglês" : "português"} />}
-    {(comic || storyVoice) && languageButton}
+      language={storyVoice && englishVoice && !challengePage ? "inglês" : "português"} />}
+    {(explanation || readingComic || storyVoice) && languageButton}
   </div>;
 
   function showTutorial(step: PrologueStep) {
+    stopReadingPreview();
+    setLanguageAttentionDismissed(false);
     narrator.stop();
     paperSound.stop();
     if (step === "intro" && !progress.getSnapshot().tutorialSeen) {
@@ -595,14 +723,34 @@ export function FirstDay() {
 
   function renderMoment() {
     if (!page) return null;
-    if (page.part !== 1 && page.kind !== "Em preparação") return <PartTwoMoment key={page.id} page={page} portrait={editionPortrait}
-      count={counts[page.id] ?? 0} attempt={attempts[page.id] ?? emptyAttempt} readingLanguage={readingLanguage} cue={cue}
+    if ("edition" in page) return <SequelMoment key={page.id} page={page} readingLanguage={readingLanguage}
+      portrait={editionPortrait} frame={sequelFrame} exercise={visibleSequelExercise} exerciseLanguage={exerciseLanguage}
+      count={sequelCount} attempt={attempts[page.id]} cue={exerciseFeedback}
+      onEdit={placed => progress.update(previous => ({
+        ...previous,
+        attempts: { ...previous.attempts, [page.id]: { placed, language: exerciseLanguage } },
+      }))}
+      onSolve={() => {
+        const nextStep = sequelSteps[sequelCount + 1];
+        if (!nextStep || (nextStep.panelIndex ?? 0) !== sequelFrame) animateChallengeUnlock();
+        progress.update(previous => {
+          const attempts = { ...previous.attempts };
+          delete attempts[page.id];
+          return { ...previous, attempts, counts: { ...previous.counts, [page.id]: sequelCount + 1 } };
+        });
+      }}/>;
+    if (page.part !== 1) return <PartTwoMoment key={page.id} page={page} portrait={editionPortrait}
+      count={counts[page.id] ?? 0} attempt={attempts[page.id] ?? emptyAttempt} readingLanguage={readingLanguage} cue={exerciseFeedback}
       onPlace={count => progress.update(previous => ({ ...previous, counts: { ...previous.counts, [page.id]: count } }))}
-      onAttempt={attempt => progress.update(previous => ({ ...previous, attempts: { ...previous.attempts, [page.id]: attempt } }))} />;
+      onAttempt={attempt => {
+        if (attempt.result === "correct") animateChallengeUnlock();
+        progress.update(previous => ({ ...previous, attempts: { ...previous.attempts, [page.id]: attempt } }));
+      }} />;
     switch (page.kind) {
       case "Ação":
-        return <GuidedMoment key={page.id} page={page} count={counts[page.id] ?? 0} cue={cue} narrator={narrator} audioEnabled={sound} englishVoice={englishVoice} cleanReading={cleanReading}
+        return <GuidedMoment key={page.id} page={page} count={counts[page.id] ?? 0} cue={exerciseFeedback} narrator={narrator} audioEnabled={sound} englishVoice={englishVoice} cleanReading={cleanReading}
           onPlace={count => {
+            setLanguageAttentionDismissed(true);
             progress.update(previous => ({ ...previous, counts: { ...previous.counts, [page.id]: count } }));
             if (sound && count === page.words.length) {
               narrator.play([spokenDialogue(page.voice, englishVoice)]);
@@ -613,25 +761,28 @@ export function FirstDay() {
       case "Tirinha":
         return <ExamplesMoment page={page} voice={sound ? narrator : undefined} />;
       case "Explicação":
-        return <RuleMoment page={page} voice={sound ? narrator : undefined} />;
+        return <RuleMoment page={page} voice={sound ? narrator : undefined} readingLanguage={readingLanguage} />;
       case "Desafio":
-        return <ChallengeMoment key={page.id} englishVoice={englishVoice} page={page} attempt={attempts[page.id] ?? emptyAttempt} cue={cue} voice={sound ? narrator : undefined}
+        return <ChallengeMoment key={page.id} englishVoice={false} page={page} attempt={attempts[page.id] ?? emptyAttempt} cue={exerciseFeedback} voice={sound ? narrator : undefined}
           cleanReading={cleanReading}
           onAttempt={attempt => {
+            if (attempt.result === "correct") animateChallengeUnlock();
             progress.update(previous => ({ ...previous, attempts: { ...previous.attempts, [page.id]: attempt } }));
             if (sound && attempt.result === "correct" && attempts[page.id]?.result !== "correct") {
-              narrator.play([spokenDialogue(page.voice, englishVoice), spokenDialogue(page.reply.voice, englishVoice)], 350);
+              narrator.play([spokenDialogue(page.voice, false), spokenDialogue(page.reply.voice, false)], 350);
             }
           }} />;
-      case "Em preparação":
-        return <section className="fd-placeholder"><p>{page.partTitle}</p><strong>Atividade em preparação.</strong></section>;
     }
   }
 
-  return <MeaningContext.Provider value={setLookedUp}><main ref={book} className="lo-app fd" data-lesson-theme="comic" style={COMIC_LESSON_STYLE}
-    data-fd-edition={edition || undefined} data-fd-comic={Boolean(comic) || undefined}
+  return <MeaningContext.Provider value={setLookedUp}><ReadAlongContext.Provider value={speech.readAlong}>
+    <main ref={book} className="lo-app fd" data-lesson-theme="comic" style={COMIC_LESSON_STYLE}
+    data-fd-edition={edition || undefined} data-fd-comic={Boolean(comic) || sequel?.kind === "Tirinha" || undefined}
+    data-fd-sequel={sequel && !chapterOpening && !lessonFinished ? "" : undefined}
     data-fd-challenge={comic?.kind === "Desafio" && !lessonFinished || undefined}
-    data-fd-study={readingPage || comic?.kind === "Tirinha" || comic?.kind === "Explicação" ? "" : undefined} data-fd-mobile-header={mobileHeader || undefined}
+    data-fd-challenge-theme={activeChallenge ? "" : undefined}
+    data-fd-explanation={explanation ? "" : undefined}
+    data-fd-study={readingPage || readingComic?.kind === "Tirinha" || readingComic?.kind === "Explicação" ? "" : undefined} data-fd-mobile-header={mobileHeader || undefined}
     data-ui-sound-scope="local" data-first-day-part={page?.part}
     data-first-day-page={tutorial ? "tutorial" : lessonFinished ? "finished" : chapterOpening ? page?.id.replace(/-1$/, "-opening") : page?.id ?? "cover"}>
     {savedPosition >= 0 && <header className="lo-header fd-header">
@@ -653,7 +804,7 @@ export function FirstDay() {
       <button type="button" onClick={() => turnTo(0)} aria-current={position === 0 ? "page" : undefined}>Capa</button>
       <ol>{pages.map((item, index) => <li key={item.id}>
         <button type="button" onClick={() => turnTo(index + 1)} aria-current={position === index + 1 && !chapterOpening && !lessonFinished ? "page" : undefined}>
-          {item.kind === "Em preparação" ? item.moment : item.kind} · {item.title}
+          {item.kind} · {item.title}
         </button>
       </li>)}</ol>
     </dialog>
@@ -726,7 +877,7 @@ export function FirstDay() {
     </section></LessonDragProvider> : chapterOpening ? <ChapterOpening
       chapter={chapterOpening} language={readingLanguage} titleRef={title} languageButton={languageButton}
       onBack={turnBack} onOpen={() => turnTo(position, false)}/>
-    : lessonFinished ? <LessonEnding language={readingLanguage} titleRef={title}
+    : lessonFinished ? <LessonEnding titleRef={title}
       onBack={() => turnTo(1, false)} onLeave={leaveLesson}/>
     : !page ? <section className="fd-cover" aria-labelledby="fd-cover-title">
       <picture className="fd-panels">
@@ -735,8 +886,13 @@ export function FirstDay() {
           className="fd-room" loading="eager" unoptimized />
       </picture>
       <div className="fd-cover-copy">
-        <h1 id="fd-cover-title" ref={title} tabIndex={-1} lang="en">{coverCopy.title}</h1>
-        <p>{coverCopy.subtitle.map(line => <span key={line}>{line}</span>)}</p>
+        <h1 id="fd-cover-title" ref={title} tabIndex={-1} lang="en">
+          <ReadAlongText track="cover" text={coverCopy.title}/>
+        </h1>
+        <p>{coverCopy.subtitle.map((line, index) => <span key={line}>
+          <ReadAlongText track="cover" text={line}
+            offset={wordCount(coverCopy.title) + wordCount(coverCopy.subtitle.slice(0, index).join(" "))}/>
+        </span>)}</p>
         <output aria-live="polite">{resetNotice !== null && <span className="fd-reset-status">
           <Check size={16} aria-hidden="true" /> {resetNotice === "all" ? "Progresso reiniciado." : `Parte ${resetNotice} reiniciada.`}
         </span>}</output>
@@ -751,38 +907,86 @@ export function FirstDay() {
         </div>}
         <div className="fd-start fd-cover-nav">
           <div className="fd-cover-tools">
-            <button type="button" className="lo-secondary" ref={audioMode} aria-label="Trocar modo de áudio" aria-haspopup="dialog" aria-controls="fd-audio-options" onClick={openAudioOptions}>Modo de áudio</button>
-            <button type="button" className="lo-secondary" aria-haspopup="dialog" aria-controls="fd-progress-reset"
-              onClick={event => openResetOptions(event.currentTarget)}><RotateCcw size={16} aria-hidden="true" /> Reiniciar progresso</button>
-            <Link href="/" className="lo-secondary" onClick={leaveLesson} aria-label="Voltar ao menu principal">Menu principal</Link>
+            <button type="button" className="lo-secondary fd-cover-tool-audio" ref={audioMode} aria-label="Trocar modo de áudio"
+              aria-haspopup="dialog" aria-controls="fd-audio-options" onClick={openAudioOptions}>
+              <Volume2 size={16} aria-hidden="true" />
+              <span><span className="fd-cover-label-detail">Modo de </span>áudio</span>
+            </button>
+            <button type="button" className="lo-secondary fd-cover-tool-reset" aria-label="Reiniciar progresso"
+              aria-haspopup="dialog" aria-controls="fd-progress-reset" onClick={event => openResetOptions(event.currentTarget)}>
+              <RotateCcw size={16} aria-hidden="true" />
+              <span>Reiniciar<span className="fd-cover-label-detail"> progresso</span></span>
+            </button>
+            <Link href="/" className="lo-secondary fd-cover-tool-menu" onClick={leaveLesson} aria-label="Voltar ao menu principal">
+              <ArrowLeft size={16} aria-hidden="true" />
+              <span>Menu principal</span>
+            </Link>
           </div>
-          <LessonButton onClick={() => progress.getSnapshot().tutorialSeen ? turnTo(1) : showTutorial("intro")}>{coverCopy.start} <ArrowRight size={18} aria-hidden="true" /></LessonButton>
+          <LessonButton onClick={() => progress.getSnapshot().tutorialSeen ? turnTo(1) : showTutorial("intro")}>
+            <span><ReadAlongText track="cover" text={coverCopy.start}
+              offset={wordCount(coverCopy.title) + wordCount(coverCopy.subtitle.join(" "))}/></span>
+            <ArrowRight size={18} aria-hidden="true" />
+          </LessonButton>
         </div>
       </div>
     </section> : <section key={page.id} className={edition ? "fd1-page" : "fd-page"} aria-labelledby="fd-page-title">
       <div className={edition ? "fd1-progress" : "fd-progress"}>
-        <span>Parte {page.part} de 4 · {page.kind === "Em preparação" ? page.moment : page.kind}</span><span>{position} / {pages.length}</span>
+        <span>Parte {page.part} de {firstDayPartCount} · {page.kind}</span><span>{position} / {pages.length}</span>
         <progress aria-label="Etapa no percurso" value={position} max={pages.length} />
         {edition && !editionPortrait && readingControls}
       </div>
       {edition ? <div className="fd1-heading">
         <div className="fd1-headline">
-          <h1 id="fd-page-title" ref={title} tabIndex={-1} lang={comic ? readingLanguage : "pt-BR"}>{comic && readingLanguage === "en" ? comic.englishTitle : page.title}</h1>
+          <h1 id="fd-page-title" ref={title} tabIndex={-1} lang={(explanation || readingComic) && !challengePage ? readingLanguage : "pt-BR"}>
+            {readingTrack && displayedTitle ? <ReadAlongText track={readingTrack} text={displayedTitle}/> : displayedTitle}
+          </h1>
           {editionPortrait && readingControls}
           {chair && !editionPortrait && <Image src={chair.src} width={chair.width} height={chair.height} className="fd1-chair" alt={chair.alt} unoptimized />}
         </div>
-        <div className="fd1-caption">
-          <p lang={comic || storyVoice ? readingLanguage : "pt-BR"}>{(comic || storyVoice) && readingLanguage === "en" ? <EnglishWords text={caption}/> : caption}</p>
-        </div>
+        {explanation ? <div className="fd1-caption fd1-caption-paper fd1-rule-intro" lang={captionLanguage}>
+          {explanationLines.map((line, index) => line && <p key={index}>
+            {readingTrack && displayedTitle ? <ReadAlongText track={readingTrack} text={line} glossary={captionLanguage === "en"}
+              offset={wordCount(displayedTitle) + (index ? wordCount(explanationLines[0]) : 0)}/>
+              : captionLanguage === "en" ? <EnglishWords text={line}/> : line}
+          </p>)}
+        </div> : <div className="fd1-caption fd1-caption-paper">
+          <p lang={captionLanguage}>
+            {doorQuestion ? <ReadAlongText track={doorQuestion} text={narration[doorQuestion].text} glossary={!showAlternateLanguage}/>
+              : readingComic ? captionLanguage === "en" && caption ? <EnglishWords text={caption}/> : caption
+              : readingPage ? <ReadAlongText track={readingPage.narration} text={caption} offset={wordCount(readingPage.title)}/>
+              : storyVoice ? pageNarration(page, !englishVoice).map((clip, index) => <Fragment key={clip}>
+                {index > 0 && " "}
+                <ReadAlongText track={clip} text={narration[clip].text} glossary={!challengePage && !englishVoice}/>
+              </Fragment>) : caption}
+          </p>
+        </div>}
       </div> : <div className="fd-page-heading"><div className="fd-page-title">
         <h1 id="fd-page-title" ref={title} tabIndex={-1}>{page.title}</h1>
       </div></div>}
-      <div key={page.id} className="fd-workspace">{renderMoment()}</div>
+      <div key={page.id} className="fd-workspace" onClickCapture={languageAttentionDismissed ? undefined : event => {
+        if (event.target instanceof Element && event.target.closest(".fd1-bubble-body, [data-choice] button, .fd1-check-actions button")) {
+          setLanguageAttentionDismissed(true);
+        }
+      }}>{renderMoment()}</div>
       <nav className={edition ? "fd1-nav" : "fd-nav"} aria-label="Navegação da página">
         <button type="button" className="lo-secondary" onClick={turnBack}><ArrowLeft size={19} aria-hidden="true" /> Anterior</button>
-        <LessonButton disabled={comicPending} onClick={() => finalChallenge ? go(position, undefined, true) : turnTo(position < pages.length ? position + 1 : 0)}>
-          {finalChallenge ? "Concluir aula" : nextPart ? `Ir para a Parte ${nextPart}`
-            : page.kind === "Desafio" && !cleanReading ? "Continuar a história" : position < pages.length ? "Próxima" : "Voltar à capa"} <ArrowRight size={19} aria-hidden="true" />
+        <LessonButton disabled={forwardLocked} className={activeChallenge ? "fd1-challenge-next" : undefined}
+          aria-label={activeChallenge ? forwardLabel : undefined}
+          aria-describedby={activeChallenge && forwardLocked ? "fd1-challenge-next-hint" : undefined}
+          onClick={() => hasNextFrame ? turnSequelFrame(sequelFrame + 1)
+          : finalChallenge ? go(position, undefined, true) : turnTo(position < pages.length ? position + 1 : 0)}>
+          {activeChallenge ? <span className="fd1-challenge-next-copy">{forwardLabel}</span> : forwardLabel}
+          <ArrowRight size={19} aria-hidden="true" />
+          {activeChallenge && (forwardLocked || unlockingChallenge) &&
+            <span className="fd1-challenge-next-film" data-fd-unlocking={!forwardLocked || undefined}
+              onAnimationEnd={event => {
+                if (event.target === event.currentTarget) setUnlockingChallenge(false);
+              }}>
+              {forwardLocked ? <Lock strokeWidth={2.8} aria-hidden="true" />
+                : <LockOpen className="fd1-challenge-next-unlock" strokeWidth={2.8} aria-hidden="true" />}
+              <small id="fd1-challenge-next-hint" aria-hidden={!forwardLocked}>Acerte o desafio</small>
+            </span>
+          }
         </LessonButton>
       </nav>
     </section>}
@@ -791,5 +995,5 @@ export function FirstDay() {
     </output>}
     {lookedUp && (!tutorial || tutorial === "language") && <aside className="fd-word-definition" aria-label="Tradução"><span role="status"><b lang="en">{lookedUp}</b> · {meaningOf(lookedUp)}</span><button type="button" aria-label="Fechar tradução" onClick={() => setLookedUp("")}><X size={16}/></button></aside>}
     <canvas ref={turnSheet} className="fd-turn-sheet" aria-hidden="true" />
-  </main></MeaningContext.Provider>;
+  </main></ReadAlongContext.Provider></MeaningContext.Provider>;
 }

@@ -1,0 +1,127 @@
+.fd[data-fd-challenge-theme] {
+  --fd-challenge-paper: #fff1cd;
+  --fd-challenge-ink: #204b40;
+  --fd-challenge-border: #315e52;
+  --fd-challenge-shadow: #183e35;
+  --fd-challenge-word: #fffaf0;
+  --fd-challenge-mint: #cfe8db;
+  --fd-challenge-amber: #f4db9c;
+  --fd-challenge-coral: #f3d0bf;
+  --fd-challenge-retry: #883b29;
+}
+
+.fd[data-fd-challenge-theme] :is(.fd1-challenge-controls, .fd2-challenge-controls, .fd-sequel-exercise) {
+  background: var(--fd-challenge-paper);
+  border-color: var(--fd-challenge-border);
+  box-shadow: 0 3px 0 var(--fd-challenge-shadow);
+}
+
+.fd[data-fd-challenge-theme] :is(.fd1-challenge-controls .fd1-guidance, .fd2-question, .fd-sequel-exercise > legend) {
+  color: var(--fd-challenge-ink);
+}
+
+.fd[data-fd-challenge-theme] :is(.fd2-instruction > strong, .fd2-request-glossary, .fd2-request-hint, .fd-sequel-feedback) {
+  color: var(--fd-challenge-border);
+}
+
+.fd[data-fd-challenge-theme] :is(.fd1-guidance, .fd2-instruction-help)[data-result="incorrect"] {
+  color: var(--fd-challenge-retry);
+}
+
+.fd[data-fd-challenge-theme] :is(.fd1-challenge-controls, .fd2-challenge-controls, .fd-sequel-exercise)
+  .fd1-word:not(:disabled, .fd1-word-next, [aria-pressed="true"]) {
+  color: #21342b;
+  background: var(--fd-challenge-choice, var(--fd-challenge-word));
+  border-color: #3c6559;
+  box-shadow: 0 2px 0 #294b41;
+}
+
+.fd[data-fd-challenge-theme] :is(.fd2-tray, .fd-sequel-choices)[data-choice] {
+  --fd-challenge-choice: var(--fd-challenge-mint);
+}
+
+.fd[data-fd-challenge-theme] :is(.fd2-tray, .fd-sequel-choices)[data-choice] > :nth-child(3n + 2) {
+  --fd-challenge-choice: var(--fd-challenge-amber);
+}
+
+.fd[data-fd-challenge-theme] :is(.fd2-tray, .fd-sequel-choices)[data-choice] > :nth-child(3n + 3) {
+  --fd-challenge-choice: var(--fd-challenge-coral);
+}
+
+.fd[data-fd-challenge-theme] .fd1-check-actions button:not(:disabled) {
+  color: var(--fd-challenge-ink);
+  background: var(--fd-challenge-word);
+  border-color: var(--fd-challenge-border);
+}
+
+.fd[data-fd-challenge-theme] .fd1-check-actions button:not(:disabled):last-child {
+  color: #fffaf0;
+  background: var(--fd-challenge-border);
+}
+
+.fd[data-fd-challenge-theme] :is(.fd1-word, .fd1-check-actions button, .fd2-request-hint):focus-visible {
+  outline: 2px solid #1c6d5b;
+  outline-offset: 2px;
+}
+
+.fd[data-fd-challenge-theme] :is(.fd1-door-reply, .fd2-solved, .fd2-request-solved, .fd-sequel-confirmation) {
+  background: var(--fd-challenge-mint);
+  border-color: var(--fd-challenge-border);
+}
+
+html body .lo-app.fd[data-fd-challenge-theme] .fd1-nav > .fd1-challenge-next > .br-button-face { position: relative; }
+html body .lo-app.fd[data-fd-challenge-theme] .fd1-nav > .fd1-challenge-next:disabled > .br-button-face {
+  border-color: #a5a699;
+  background: var(--fd1-gold);
+  color: var(--fd1-ink);
+  box-shadow: none;
+}
+.fd1-challenge-next-copy {
+  font-size: clamp(14px, 1.36vw, 21px);
+  line-height: 1.06;
+  text-align: center;
+}
+.fd1-challenge-next-film {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 2px;
+  border-radius: inherit;
+  background: rgb(255 252 244 / 80%);
+  color: #203b31;
+  pointer-events: none;
+}
+.fd .fd1-nav .fd1-challenge-next-film > svg { width: clamp(19px, 1.55vw, 24px); }
+.fd1-challenge-next-film small {
+  font-size: clamp(11px, 1vw, 13px);
+  font-weight: 700;
+  line-height: 1.05;
+}
+.fd1-challenge-next-film[data-fd-unlocking] {
+  animation: fd1-challenge-next-release 280ms cubic-bezier(.23, 1, .32, 1) both;
+}
+.fd1-challenge-next-film[data-fd-unlocking] small { visibility: hidden; }
+.fd1-challenge-next-unlock {
+  animation: fd1-challenge-next-unlock 280ms cubic-bezier(.23, 1, .32, 1) both;
+}
+@keyframes fd1-challenge-next-release {
+  0%, 26% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes fd1-challenge-next-unlock {
+  0%, 26% { transform: translateY(0) rotate(0); }
+  100% { transform: translateY(-5px) rotate(-12deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fd1-challenge-next-film[data-fd-unlocking] { display: none; animation: none; }
+  .fd1-challenge-next-unlock { animation: none; }
+}
+
+@media (min-width: 960px), (orientation: landscape) {
+  .fd .fd1-nav > .fd1-challenge-next { min-inline-size: clamp(158px, 14vw, 216px); }
+}
+@media (max-width: 959px) and (orientation: portrait) {
+  .fd1-challenge-next-copy { font-size: clamp(13px, 4.45vw, 16px); }
+}

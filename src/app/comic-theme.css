@@ -11,6 +11,11 @@
   --comic-reading-ink:#46554c;--comic-muted:var(--comic-reading-ink);
   --comic-display:"BasedSpeak Bangers",Impact,sans-serif;
   --comic-body:"BasedSpeak Barlow",Arial,sans-serif;
+  --comic-cover-action-fill:linear-gradient(rgb(255 224 131 / 89%),rgb(240 183 62 / 84%));
+  --comic-cover-action-hover:linear-gradient(rgb(255 230 147 / 92%),rgb(248 192 72 / 87%));
+  --comic-cover-action-line:rgb(71 54 23 / 60%);
+  --comic-cover-action-shadow:inset 0 0 12px rgb(110 67 22 / 22%),0 2px 3px rgb(33 26 13 / 30%);
+  --comic-cover-action-pressed:inset 0 0 12px rgb(110 67 22 / 28%);
   --comic-reading-line:1.48;
   --comic-space-xs:6px;--comic-space-sm:10px;--comic-space-md:14px;--comic-space-lg:20px;
   --comic-shadow:3px 3px 0 var(--comic-ink);--comic-border:2px solid var(--comic-ink);

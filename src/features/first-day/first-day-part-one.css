@@ -1,9 +1,14 @@
+html body .lo-app.fd[data-lesson-theme] {
+  --fd1-ink: #18231f;
+  --fd1-gold: #f3c749;
+  --fd1-selection-paper: #c7e5d7;
+  --fd1-narration-paper: #fff0c5;
+}
+
 /* The reading surface spans the window. The header, caption and controls remain live text. */
 html body .lo-app.fd[data-lesson-theme][data-fd-edition] {
   --fd1-paper: #fffcf5;
-  --fd1-ink: #18231f;
   --fd1-teal: #39776b;
-  --fd1-gold: #f3c749;
   --fd1-strip-gap: clamp(10px, 2.4dvh, 24px);
   --fd1-strip-inset: clamp(12px, 1.95vw, 34px);
   --fd1-strip-height: clamp(64px, min(6.44vw, 12dvh), 104px);
@@ -143,6 +148,70 @@ html body .lo-app.fd[data-lesson-theme][data-fd-edition][data-first-day-page="cl
 .fd1-listen button:focus-visible { outline-offset: 2px; }
 .fd1-headline > .fd1-listen { flex: none; }
 .fd1-headline .fd1-language, .fd1-progress .fd1-language { white-space: nowrap; }
+.fd1-language-preview { position: relative; display: inline-flex; flex: none; }
+/* Reserve the last 300ms of each cycle for the pulse and start it after a full interval. */
+.fd1-language-preview[data-fd-language-attention] {
+  --fd1-attention-interval: 15s;
+  --fd1-attention-pulse: fd1-language-reading-pulse;
+  --fd1-attention-glow: fd1-language-reading-glow;
+}
+.fd1-language-preview[data-fd-language-attention="challenge"] {
+  --fd1-attention-interval: 5s;
+  --fd1-attention-pulse: fd1-language-challenge-pulse;
+  --fd1-attention-glow: fd1-language-challenge-glow;
+}
+.fd1-language-preview[data-fd-language-attention] > .fd1-language {
+  animation: var(--fd1-attention-pulse) var(--fd1-attention-interval) cubic-bezier(.77, 0, .175, 1) 300ms infinite;
+}
+.fd1-language-preview[data-fd-language-attention]::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px 3px #e4b94d;
+  opacity: 0;
+  pointer-events: none;
+  animation: var(--fd1-attention-glow) var(--fd1-attention-interval) cubic-bezier(.77, 0, .175, 1) 300ms infinite;
+}
+@keyframes fd1-language-challenge-pulse {
+  0%, 94%, 100% { transform: none; }
+  97% { transform: scale(1.05); }
+}
+@keyframes fd1-language-challenge-glow {
+  0%, 94%, 100% { opacity: 0; }
+  97% { opacity: .55; }
+}
+@keyframes fd1-language-reading-pulse {
+  0%, 98%, 100% { transform: none; }
+  99% { transform: scale(1.05); }
+}
+@keyframes fd1-language-reading-glow {
+  0%, 98%, 100% { opacity: 0; }
+  99% { opacity: .55; }
+}
+.fd1-language-countdown {
+  position: absolute;
+  inset: auto 0 -5px;
+  height: 3px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #dcd7c8;
+  pointer-events: none;
+}
+.fd1-language-countdown > span {
+  display: block;
+  height: 100%;
+  background: var(--fd1-teal, #39776b);
+  border-radius: inherit;
+  transform-origin: left center;
+  animation: fd1-language-time linear both;
+}
+@keyframes fd1-language-time { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .fd1-language-preview[data-fd-language-attention] > .fd1-language,
+  .fd1-language-preview[data-fd-language-attention]::before { animation: none; }
+  .fd1-language-countdown > span { animation-timing-function: steps(5, end); }
+}
 
 .fd1-nav {
   z-index: 2;
@@ -165,13 +234,19 @@ html body .lo-app.fd[data-fd-edition] .fd1-nav .br-button-face {
 }
 html body .lo-app.fd[data-fd-edition] .fd1-nav > .lo-secondary,
 html body .lo-app.fd[data-fd-edition] .fd1-nav .br-button-face {
-  padding:0 6px; color:var(--fd1-ink); background:#fffaf0;
+  padding:0 6px;
+}
+html body .lo-app.fd[data-fd-edition] .fd1-nav > .lo-secondary,
+html body .lo-app.fd[data-fd-edition] .fd1-nav .br-button-face,
+.fd[data-first-day-page="cover"] .fd-cover-tools > .lo-secondary {
+  color:var(--fd1-ink); background:var(--fd1-button-fill, #fffaf0);
   border:1.7px solid #222b24; border-radius:7px; box-shadow:0 3px 0 #202a23;
 }
 html body .lo-app.fd[data-fd-edition] .fd1-nav > .lo-secondary { width:var(--fd1-prev-width); }
 html body .lo-app.fd[data-fd-edition] .fd1-nav > [data-lesson-button] { width:var(--fd1-next-width); padding:0; }
+html body .lo-app.fd[data-fd-edition] .fd1-nav .br-button-face { width:100%; }
 html body .lo-app.fd[data-fd-edition] .fd1-nav .br-button-face {
-  width:100%; background:var(--fd1-gold); font-weight:700 !important; white-space:nowrap;
+  background:var(--fd1-gold); font-weight:700 !important; white-space:nowrap;
 }
 .fd .fd1-nav svg { width:clamp(18px,1.5vw,24px); height:auto; }
 

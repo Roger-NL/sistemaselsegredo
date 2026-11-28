@@ -3,6 +3,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { firstDayVoiceRate, firstDayVoiceUrl } from "./narration";
 import type { FirstDayVoiceClip } from "./narration";
+import { createReadAlong } from "./ReadAlongText";
 
 import { takeCoverAudio } from "./cover-entry";
 import { createFirstDayProgressStore } from "./first-day-progress";
@@ -10,10 +11,14 @@ import { createFirstDayProgressStore } from "./first-day-progress";
 export function useFirstDayNarration() {
   const audio = useRef<HTMLAudioElement | null>(null);
   const generation = useRef(0);
+  const [readAlong] = useState(createReadAlong);
+  const stopFollowing = useRef<(() => void) | undefined>(undefined);
   const [playing, setPlaying] = useState<FirstDayVoiceClip | null>(null);
 
   function stop() {
     generation.current += 1;
+    stopFollowing.current?.();
+    stopFollowing.current = undefined;
     if (audio.current) {
       audio.current.onended = null;
       audio.current.onerror = null;
@@ -30,6 +35,8 @@ export function useFirstDayNarration() {
     const sequence = generation.current;
     function finish() {
       if (generation.current !== sequence) return;
+      stopFollowing.current?.();
+      stopFollowing.current = undefined;
       player.onended = null;
       player.onerror = null;
       setPlaying(null);
@@ -38,6 +45,7 @@ export function useFirstDayNarration() {
       if (generation.current !== sequence) return;
       const clip = clips[index];
       if (!clip || document.hidden) { finish(); return; }
+      stopFollowing.current?.();
       const rate = firstDayVoiceRate(clip);
       player.defaultPlaybackRate = rate;
       player.src = firstDayVoiceUrl(clip);
@@ -47,6 +55,7 @@ export function useFirstDayNarration() {
         else next(index + 1);
       };
       player.onerror = finish;
+      stopFollowing.current = readAlong.follow(player, clip);
       setPlaying(clip);
       void player.play()?.catch(finish);
     }
@@ -65,6 +74,7 @@ export function useFirstDayNarration() {
       if (player) {
         audio.current = player;
         if (!player.ended && !player.paused) {
+          stopFollowing.current = readAlong.follow(player, "cover");
           setPlaying("cover");
           player.onended = player.onerror = () => setPlaying(null);
         }
@@ -75,6 +85,8 @@ export function useFirstDayNarration() {
     function cancelOnHide() {
       if (!document.hidden) return;
       generation.current += 1;
+      stopFollowing.current?.();
+      stopFollowing.current = undefined;
       audio.current?.pause();
       setPlaying(null);
     }
@@ -83,13 +95,15 @@ export function useFirstDayNarration() {
       mounted = false;
       document.removeEventListener("visibilitychange", cancelOnHide);
       generation.current += 1;
+      stopFollowing.current?.();
+      stopFollowing.current = undefined;
       if (audio.current) {
         audio.current.onended = null;
         audio.current.onerror = null;
         audio.current.pause();
       }
     };
-  }, []);
+  }, [readAlong]);
 
-  return { playing, play, stop };
+  return { playing, play, stop, readAlong };
 }

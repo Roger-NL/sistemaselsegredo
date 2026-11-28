@@ -1,5 +1,6 @@
 import type { FirstDayArt } from "./content";
 import type { BalloonPrint } from "./StoryPanel";
+import { explanationEnglish } from "./narration";
 
 export type Bilingual = { en: string; pt: string };
 export type PartTwoArt = { image: FirstDayArt; portraitImage: FirstDayArt; placement?: BalloonPrint };
@@ -93,9 +94,11 @@ export const partTwoPages: readonly PartTwoPage[] = [
     ],
   },
   {
-    ...base, id: "the-comic-4", kind: "Explicação", title: "Quem faz a ação?", englishTitle: "Who does what?",
-    caption: { en: "The word after can tells you who acts. Then comes the base verb, like see or show.",
-      pt: "A palavra depois de can indica quem faz a ação. Depois vem o verbo na forma básica, como see ou show." },
+    ...base, id: "the-comic-4", kind: "Explicação", title: "Quem faz a ação?", englishTitle: explanationEnglish[2].title,
+    caption: {
+      en: explanationEnglish[2].caption,
+      pt: "A palavra depois de “can” indica quem faz a ação.\nEm seguida, use o verbo na forma básica, como “see” ou “show”.",
+    },
     pieces: [
       { token: "Can", meaning: { en: "start the question", pt: "abre a pergunta" } },
       { token: "I / you", meaning: { en: "who does it", pt: "quem faz" } },

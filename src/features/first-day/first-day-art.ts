@@ -1,7 +1,15 @@
-import { art, coverSources, pages, partOnePortraitMedia, storyImage, type FirstDayPage } from "./content";
+import { art, coverSources, pages, partOnePortraitMedia, storyImage, tallComicStripMedia, type FirstDayPage } from "./content";
 
 function sceneArt(page: FirstDayPage, portrait: boolean) {
-  if (page.part !== 1 && page.kind !== "Em preparação") {
+  if ("edition" in page) {
+    switch (page.kind) {
+      case "História": return page.panels.map(panel => storyImage(panel.art, portrait).src);
+      case "Tirinha": return page.panels.map(panel => storyImage(panel.art, portrait).src);
+      case "Explicação": return page.examples.map(example => storyImage(example.art, portrait).src);
+      case "Desafio": return page.closing?.map(panel => storyImage(panel.art, portrait).src) ?? [storyImage(page.art, portrait).src];
+    }
+  }
+  if (page.part !== 1) {
     switch (page.kind) {
       case "Ação": return [page.before, page.after].map(art => storyImage(art, portrait).src);
       case "Tirinha": return page.panels.map(panel => storyImage(panel.art, portrait).src);
@@ -22,22 +30,22 @@ function sceneArt(page: FirstDayPage, portrait: boolean) {
     case "Desafio": return [storyImage(page, portrait).src];
     case "Tirinha": return page.panels.map(panel => storyImage(panel, portrait).src);
     case "Explicação": return page.examples.map(example => storyImage(example, portrait).src);
-    case "Em preparação": return [];
   }
 }
 
 const pageImages = pages.map(page => sceneArt(page, false));
 const portraitImages = pages.map(page => sceneArt(page, true));
 
-function currentPageImages() {
-  return window.matchMedia(partOnePortraitMedia).matches ? portraitImages : pageImages;
-}
-
 function firstDayArtFor(position: number) {
   if (position === 0) {
     return [coverSources.find(({ media }) => window.matchMedia(media).matches)?.src ?? art.cover.src];
   }
-  return currentPageImages()[position - 1] ?? [];
+  const index = position - 1;
+  const page = pages[index];
+  const portrait = window.matchMedia(partOnePortraitMedia).matches
+    || ((page?.kind === "Tirinha" && page.part !== 1 || page?.kind === "Explicação" && "edition" in page)
+      && window.matchMedia(tallComicStripMedia).matches);
+  return (portrait ? portraitImages : pageImages)[index] ?? [];
 }
 
 function whenIdle(task: () => void) {
@@ -53,10 +61,13 @@ function whenIdle(task: () => void) {
 export function createFirstDayArtCache() {
   type Entry = { image: HTMLImageElement; loaded: Promise<boolean>; ready: boolean; failed: boolean };
   const cache = new Map<string, Entry>();
+  const decodedImageLimit = 12;
 
   function load(src: string, priority: "high" | "low") {
     const existing = cache.get(src);
     if (existing && !existing.failed) {
+      cache.delete(src);
+      cache.set(src, existing);
       if (priority === "high") existing.image.fetchPriority = "high";
       return existing;
     }
@@ -83,6 +94,10 @@ export function createFirstDayArtCache() {
       };
     });
     cache.set(src, entry);
+    for (const [source, previous] of cache) {
+      if (cache.size <= decodedImageLimit) break;
+      if (previous.ready || previous.failed) cache.delete(source);
+    }
     image.src = src;
     return entry;
   }
@@ -92,8 +107,10 @@ export function createFirstDayArtCache() {
       const next = Math.max(0, position) + 1;
       const upcoming = firstDayArtFor(next);
       const current = pages[position - 1];
-      const reveal = current?.kind === "Desafio" && current.part !== 1 && current.partialRequest
-        ? storyImage(current.partialRequest.revealArt, window.matchMedia(partOnePortraitMedia).matches).src : undefined;
+      const portrait = window.matchMedia(partOnePortraitMedia).matches;
+      const reveal = current?.kind !== "Desafio" ? []
+        : "edition" in current ? current.closing?.map(panel => storyImage(panel.art, portrait).src) ?? []
+        : current.part !== 1 && current.partialRequest ? [storyImage(current.partialRequest.revealArt, portrait).src] : [];
       // Reaction pages can be turned immediately. Get the page beyond them
       // ready while the reader is still on the cover or doing the exercise.
       const followUp = pages[next - 1]?.kind === "Reação" ? firstDayArtFor(next + 1)
@@ -103,10 +120,10 @@ export function createFirstDayArtCache() {
       let cancelled = false;
       let cancelIdle: (() => void) | undefined;
       function queueNextPage() {
-        if (cancelled || upcoming.length === 0) return;
+        if (cancelled || (upcoming.length === 0 && reveal.length === 0)) return;
         const warmUpcoming = () => {
-          if (reveal) load(reveal, "low");
           const entries = upcoming.map(src => load(src, "low"));
+          for (const src of reveal) load(src, "low");
           if (followUp.length === 0) return;
           void Promise.all(entries.map(entry => entry.loaded)).then(() => {
             if (!cancelled) followUp.forEach(src => load(src, "low"));
@@ -134,12 +151,12 @@ export function createFirstDayArtCache() {
         cancelIdle?.();
       };
     },
-    prepare(position: number, frame?: 0 | 1) {
+    prepare(position: number, frame?: number) {
       const sources = firstDayArtFor(position);
       // An action or challenge shows one frame at a time. Its later reveal can load in the background.
       const visible = frame === undefined ? sources : sources.slice(frame, frame + 1);
       const targets = visible.map(src => load(src, "high"));
-      if (frame === 0 && sources[1]) load(sources[1], "low");
+      if (frame !== undefined && sources[frame + 1]) load(sources[frame + 1], "low");
       return targets.every(target => target.ready) ? null : Promise.all(targets.map(target => target.loaded));
     },
   };

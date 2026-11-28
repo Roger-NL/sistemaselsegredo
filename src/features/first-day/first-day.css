@@ -180,6 +180,17 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
 }
 .fd-cover > .fd-panels { position: absolute; inset: 0; z-index: -1; }
 .fd-cover .fd-room { display: block; width: 100%; height: 100%; object-fit: cover; }
+.fd[data-fd-edition] :is(.fd1-illustration, .fd1-study-art > img, .fd1-chair) {
+  --fd-art-fade-size: clamp(9px, 3vw, 21px);
+  --fd-art-mask: linear-gradient(var(--fd-art-fade-direction, to bottom),
+    transparent, #000 var(--fd-art-fade-size),
+    #000 calc(100% - var(--fd-art-fade-size)), transparent);
+  -webkit-mask-image: var(--fd-art-mask);
+  mask-image: var(--fd-art-mask);
+}
+.fd[data-fd-edition] :is(.fd1-study-panel .fd1-study-art > img, .fd1-chair) {
+  --fd-art-fade-size: clamp(4px, 1.7vw, 10px);
+}
 .fd-cover-copy {
   position: absolute;
   inset: 6% clamp(13px, 4.5vw, 66px) auto;
@@ -221,7 +232,23 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
 .fd-cover-nav { grid-template-columns: minmax(0, 1fr) clamp(180px, 19vw, 264px); padding-bottom: 0; }
 .fd-cover-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .fd-cover-tools > .lo-secondary svg { flex: none; }
-.fd .fd-cover-nav > [data-lesson-button="primary"] > .br-button-face { padding-inline: 6px; }
+.fd[data-first-day-page="cover"][data-lesson-theme="comic"] .fd-cover-nav > [data-lesson-button="primary"] > .br-button-face {
+  padding-inline: 6px;
+  border: 1px solid var(--comic-cover-action-line);
+  border-radius: 7px;
+  background: var(--comic-cover-action-fill);
+  color: var(--fd1-ink);
+  box-shadow: var(--comic-cover-action-shadow);
+  font: 400 clamp(22px, 5.8cqw, 26px)/1.08 var(--comic-display);
+  letter-spacing: .02em;
+}
+.fd[data-first-day-page="cover"][data-lesson-theme="comic"] .fd-cover-nav > [data-lesson-button="primary"]:hover > .br-button-face {
+  background: var(--comic-cover-action-hover);
+}
+.fd[data-first-day-page="cover"][data-lesson-theme="comic"] .fd-cover-nav > [data-lesson-button="primary"]:active > .br-button-face {
+  transform: translateY(1px);
+  box-shadow: var(--comic-cover-action-pressed);
+}
 .fd-audio-selection {
   width: min(365px, calc(100% - 28px));
   padding: clamp(16px, 5vw, 23px);
@@ -590,6 +617,16 @@ html:has(.lo-app.fd), body:has(.lo-app.fd) {
 
 .fd .fd-gloss-word { display: inline; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; line-height: inherit; cursor: pointer; }
 .fd .fd-gloss-word:hover, .fd .fd-gloss-word:focus-visible { text-decoration: underline dotted; }
+.fd [data-read-along-active] {
+  border-radius: .16em;
+  background: #f9d474;
+  color: #20291f;
+  text-shadow: none;
+}
+.fd :is(.fd-cover-nav, .fd1-words) [data-read-along-active] {
+  background: #244d42;
+  color: #fffaf0;
+}
 .fd-inline-listen { color: inherit; border: none; background: transparent; cursor: pointer; }
 .fd-word-definition { position: fixed; z-index: 50; bottom: max(4.5rem,env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: max-content; max-width: 90vw; padding: .6em .8em; display: flex; align-items: center; gap: 1em; color: white; background: #163c36; border-radius: .5rem; box-shadow: 0 2px 12px #0003; }
 .fd-word-definition button { color: inherit; background: transparent; border: none; cursor: pointer; }

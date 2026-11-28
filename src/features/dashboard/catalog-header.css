@@ -3,8 +3,8 @@ html body .dashboard-catalog .catalog-masthead {
   max-width: none;
   min-height: 54px;
   padding-inline: max(var(--catalog-gutter), calc((100% - 1180px) / 2));
-  background: #f7f1e8;
-  border-block-end: 1px solid #d8cfc1;
+  background: var(--site-manga-bar);
+  border-block-end: 1px solid transparent;
 }
 
 .catalog-masthead::before { content: none; }

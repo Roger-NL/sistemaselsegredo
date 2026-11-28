@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode, RefObject } from "react";
 import { LessonButton } from "../first-encounters/LessonButton";
+import { firstDayPartCount } from "./content";
 import type { ComicChapter } from "./first-day-progress";
 import "./part-two-opening.css";
 
@@ -12,11 +13,15 @@ const copy = {
   },
   3: {
     en: { title: "Meeting Leo", description: "Leo joins Ana and Rafael at the table." },
-    "pt-BR": { title: "Conhecendo Leo", description: "Leo chega à mesa de Ana e Rafael." },
+    "pt-BR": { title: "Conhecendo Léo", description: "Léo chega à mesa de Ana e Rafael." },
   },
   4: {
-    en: { title: "See you next time", description: "Before they leave, the friends make a plan to meet again." },
-    "pt-BR": { title: "Até a próxima", description: "Antes de se despedir, os amigos combinam de se ver de novo." },
+    en: { title: "Borrowing the comic", description: "Rafael finds out who owns the comic." },
+    "pt-BR": { title: "O gibi emprestado", description: "Rafael descobre de quem é o gibi." },
+  },
+  5: {
+    en: { title: "See you tomorrow", description: "Before they leave, the friends make a plan to meet again." },
+    "pt-BR": { title: "Até amanhã", description: "Antes de se despedir, os amigos combinam de se ver de novo." },
   },
 };
 
@@ -35,7 +40,7 @@ export function ChapterOpening({ chapter, language, titleRef, languageButton, on
     <div className="fd-chapter-sheet">
       <div className="fd-chapter-copy">
         <div className="fd-chapter-top">
-          <span>Parte {chapter} de 4</span>
+          <span>Parte {chapter} de {firstDayPartCount}</span>
           <div className="fd1-listen">{languageButton}</div>
         </div>
         <h1 id="fd-chapter-title" ref={titleRef} tabIndex={-1} lang={language}>{title}</h1>
@@ -49,20 +54,16 @@ export function ChapterOpening({ chapter, language, titleRef, languageButton, on
   </section>;
 }
 
-export function LessonEnding({ language, titleRef, onBack, onLeave }: SheetProps & {
+export function LessonEnding({ titleRef, onBack, onLeave }: Pick<SheetProps, "titleRef"> & {
   onBack: () => void;
   onLeave: () => void;
 }) {
   return <section className="fd-chapter-page" aria-labelledby="fd-chapter-title">
     <div className="fd-chapter-sheet">
       <div className="fd-chapter-copy">
-        <div className="fd-chapter-top"><span>First Day</span></div>
-        <h1 id="fd-chapter-title" ref={titleRef} tabIndex={-1} lang={language}>
-          {language === "en" ? "Lesson complete!" : "Aula concluída!"}
-        </h1>
-        <p lang={language}>{language === "en"
-          ? "You met Ana and Leo. You’ll meet them again at the same table tomorrow at lunch."
-          : "Você conheceu Ana e Leo. Amanhã, no almoço, vocês se encontram de novo na mesma mesa."}</p>
+        <div className="fd-chapter-top"><span lang="en">First Day</span></div>
+        <h1 id="fd-chapter-title" ref={titleRef} tabIndex={-1} lang="pt-BR">Aula concluída!</h1>
+        <p lang="pt-BR">Você conheceu Ana e Léo. Amanhã, no almoço, vocês se encontram de novo na mesma mesa.</p>
       </div>
     </div>
     <nav className="fd1-nav" aria-label="Navegação da página">

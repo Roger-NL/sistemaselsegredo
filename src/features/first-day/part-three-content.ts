@@ -17,7 +17,7 @@ const tomorrow = comicArt(3, "amanha", "Leo responde a Rafael e apoia a mão sob
   portrait: { mouth: [.455, .413], headTop: .270, oval: [.622, .149, 276, 104] },
 });
 const mine = comicArt(3, "meu-gibi", "Leo segura um gibi e aponta para si mesmo.", {
-  desktop: { mouth: [.415, .403], headTop: .17, oval: [.302, .093, 275, 101], completed: [.303, .10, 365, 125] },
+  desktop: { mouth: [.415, .403], headTop: .17, oval: [.385, .093, 275, 101], completed: [.385, .10, 365, 125] },
   portrait: { mouth: [.436, .300], headTop: .15, oval: [.344, .067, 160, 49], completed: [.352, .077, 220, 69] },
 });
 const yours = comicArt(3, "seu-gibi", "Leo aponta para Rafael, que tem um gibi nas mãos.");

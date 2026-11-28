@@ -196,7 +196,7 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
 
       <div ref={activePanel} id={section === "contato" || section === "aula-ao-vivo" ? `panel-${section}` : section}>
         {section === "jornada" ? <>
-          <FirstDayCatalog position={reading.progress.position}/>
+          <FirstDayCatalog position={reading.progress.position} demoCompleted={reading.progress.demoCompleted}/>
           <section className="catalog-account-overview" aria-label="Resumo da minha conta">
             <article className="student-progress-card">
               <span><CalendarDays size={17} aria-hidden="true"/> Minha aula ao vivo</span>
@@ -214,8 +214,9 @@ export function Dashboard({ account }: { account: DashboardAccount }) {
           <div className="student-section-heading"><h2 id="catalog-progress-title" tabIndex={-1}>Meu avanço</h2></div>
           <article className="student-progress-card">
             <span lang="en">First Day</span>
-            <p>{scene ? `Página ${reading.progress.position} de ${pages.length} · ${scene.title}` : "Você ainda não começou a ler."}</p>
-            <progress value={Math.max(0, reading.progress.position)} max={pages.length} aria-label="Página atual de First Day"/>
+            <p>{reading.progress.demoCompleted ? "Demo completa" : scene ? `Página ${reading.progress.position} de ${pages.length} · ${scene.title}` : "Você ainda não começou a ler."}</p>
+            <progress value={reading.progress.demoCompleted ? pages.length : Math.max(0, reading.progress.position)} max={pages.length}
+              aria-label={reading.progress.demoCompleted ? "Progresso de First Day" : "Página atual de First Day"}/>
             <p>A leitura fica salva neste navegador.</p>
           </article>
           {previousCompleted > 0 && previousTotal > 0 && <article className="student-progress-card catalog-previous-progress">
